@@ -110,24 +110,31 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 		TEXT("ui.title.wishlist"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	FAssetCompilingManager::Get().FinishAllCompilation();
 	FlushRenderingCommands();
-	FWidgetRenderer Renderer(true);
+	FWidgetRenderer Renderer(false);
+	// Render in linear space and let PNG export apply display gamma exactly once.
+	// The widget renderer's byte target otherwise advertises sRGB for linear pixels.
+	auto SaveCapture = [](UTextureRenderTarget2D* RenderTarget, const TCHAR* Name)
+	{
+		FImage Pixels;
+		if (RenderTarget && FImageUtils::GetRenderTargetImage(RenderTarget, Pixels))
+		{
+			Pixels.GammaSpace = EGammaSpace::Linear;
+			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots") / Name), Pixels);
+		}
+	};
 	UTextureRenderTarget2D* Target = Renderer.DrawWidget(Slate, FVector2D(1920, 1080));
 	FlushRenderingCommands();
 	Renderer.DrawWidget(Target, Slate, FVector2D(1920, 1080), 0.0f);
 	if (Target)
 	{
-		FImage Pixels;
-		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
-			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleSettings.png")), Pixels);
+		SaveCapture(Target, TEXT("TitleSettings.png"));
 	}
 	if (UScrollBox* Scroll = Cast<UScrollBox>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("GraphicsSettingsScroll"))))
 	{
 		Scroll->SetScrollOffset(10000.0f);
 		Renderer.DrawWidget(Target, Slate, FVector2D(1920, 1080), 0.0f);
 		FlushRenderingCommands();
-		FImage Pixels;
-		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
-			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleSettingsEffects.png")), Pixels);
+		SaveCapture(Target, TEXT("TitleSettingsEffects.png"));
 	}
 	Menu->BackFromSettingsButton->OnClicked.Broadcast();
 	TestTrue(TEXT("Back starts reverse fade"), Menu->bSettingsExiting);
@@ -142,9 +149,7 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	FlushRenderingCommands();
 	if (Target)
 	{
-		FImage Pixels;
-		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
-			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleMain.png")), Pixels);
+		SaveCapture(Target, TEXT("TitleMain.png"));
 	}
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(1.0f);

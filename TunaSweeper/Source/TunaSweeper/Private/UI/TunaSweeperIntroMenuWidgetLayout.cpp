@@ -275,7 +275,7 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	{
 		UTextBlock* Label = Button ? Cast<UTextBlock>(FindIntroWidget(FName(*(Button->GetName() + TEXT("Text"))))) : nullptr;
 		if (!Label) continue;
-		if (Button->GetContent() != Label)
+		if (Button->GetContent() != Label && !Cast<UScaleBox>(Button->GetContent()))
 		{
 			Label->RemoveFromParent();
 			Button->SetContent(Label);
@@ -369,6 +369,7 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	StyleButton(DifficultyBackButton, EButtonRole::Secondary);
 	StyleButton(DemoNoticeConfirmButton, EButtonRole::Primary);
 	StyleButton(DemoNoticeBackButton, EButtonRole::Secondary);
+	ApplyReferenceTitleStyle();
 }
 
 void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()

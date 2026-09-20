@@ -477,6 +477,9 @@ private:
 	void SetTitleLogoVisible(bool bVisible);
 	void SelectSaveSlot(int32 SaveSlotIndex);
 	void RefreshMainMenu();
+	void ApplyReferenceTitleStyle();
+	UPROPERTY(Transient)
+	TMap<FName, TObjectPtr<UTexture2D>> TitleMenuStyleTextures;
 	void RefreshDifficultySelectionPanel();
 	void RefreshSaveSlotMenu();
 	void RefreshSettingsPanel();
