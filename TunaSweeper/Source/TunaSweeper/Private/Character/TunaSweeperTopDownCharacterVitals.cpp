@@ -166,6 +166,17 @@ void ATunaSweeperTopDownCharacter::ApplyDeathRagdoll()
 		CharacterMesh->SetEnableGravity(true);
 		CharacterMesh->SetAllBodiesSimulatePhysics(true);
 		CharacterMesh->SetSimulatePhysics(true);
+		// Skeletal mesh initialization replaces the asset's iteration counts with
+		// component defaults. Apply death-only solver quality to the live bodies.
+		for (FBodyInstance* Body : CharacterMesh->Bodies)
+		{
+			if (Body)
+			{
+				Body->SetOverrideIterationCounts(true);
+				Body->SetPositionSolverIterationCount(24);
+				Body->SetVelocitySolverIterationCount(4);
+			}
+		}
 		CharacterMesh->WakeAllRigidBodies();
 		CharacterMesh->bBlendPhysics = true;
 		if (!RagdollImpulse.IsNearlyZero())
