@@ -311,3 +311,27 @@ ui.combat_lab.timeout,시간 초과 · 재시도,Time limit · Retrying,時間�
 ui.combat_lab.reset,전투 초기화,Resetting,戦闘リセット
 ui.combat_lab.stopped,전투 종료,Stopped,戦闘終了
 ui.combat_lab.error,전투 배치를 확인하세요,Check combat placement,戦闘配置を確認してください
+ui.tutorial.page.1,조작 안내  1 / 3,CONTROLS  1 / 3,操作ガイド  1 / 3
+ui.tutorial.page.2,조작 안내  2 / 3,CONTROLS  2 / 3,操作ガイド  2 / 3
+ui.tutorial.page.3,조작 안내  3 / 3,CONTROLS  3 / 3,操作ガイド  3 / 3
+ui.tutorial.basics.title,탐험의 첫걸음,Your first steps,探索の第一歩
+ui.tutorial.combat.title,전투에서 살아남기,Survive the fight,戦いを生き抜く
+ui.tutorial.items.title,챙기고 준비하고 회복하기,Loot and recover,集めて備えて回復しよう
+ui.tutorial.move.title,이동,Move,移動
+ui.tutorial.move.body,WASD 키로 주변을 탐색하세요.,Use WASD to explore your surroundings.,WASDキーで周囲を探索しましょう。
+ui.tutorial.interact.title,상호작용,Interact,インタラクト
+ui.tutorial.interact.body,대상에 가까이 다가가 F 키를 누르세요.,Approach an object and press F to interact.,対象に近づいてFキーを押しましょう。
+ui.tutorial.fire.title,발사,Fire,射撃
+ui.tutorial.fire.body,마우스로 방향을 잡고 왼쪽 버튼으로 발사하세요.,Aim with the mouse and press the left mouse button to fire.,マウスで狙いを定めて左ボタンで撃ちましょう。
+ui.tutorial.reload.title,재장전,Reload,リロード
+ui.tutorial.reload.body,R 키로 재장전하세요. 남은 탄약을 확인하세요.,Press R to reload. Keep an eye on your ammunition.,Rキーでリロード。残りの弾薬を確認しましょう。
+ui.tutorial.dodge.title,구르기,Dodge roll,回避ローリング
+ui.tutorial.dodge.body,Space 키로 굴러 적의 공격을 피하세요.,Press Space to roll away from enemy attacks.,Spaceキーで転がって敵の攻撃を避けましょう。
+ui.tutorial.sprint.title,달리기,Sprint,ダッシュ
+ui.tutorial.sprint.body,왼쪽 Shift 키를 누른 채 이동하면 달립니다.,Hold Left Shift while moving to sprint.,左Shiftキーを押しながら移動すると走ります。
+ui.tutorial.loot.title,전리품 획득,Collect loot,物資を集める
+ui.tutorial.loot.body,F 키로 상자를 열고 필요한 물품을 챙기세요.,Press F to open containers and collect useful supplies.,Fキーで箱を開けて必要な物資を集めましょう。
+ui.tutorial.inventory.title,인벤토리,Inventory,インベントリ
+ui.tutorial.inventory.body,Tab 키로 가방을 열어 가진 물품을 확인하세요.,Press Tab to open your inventory and check your supplies.,Tabキーでバッグを開いて持ち物を確認しましょう。
+ui.tutorial.heal.title,회복,Heal,回復
+ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 U 키로 사용하세요.,Hover over a healing item in your inventory and press U to use it.,バッグの回復アイテムにカーソルを合わせてUキーで使いましょう。
