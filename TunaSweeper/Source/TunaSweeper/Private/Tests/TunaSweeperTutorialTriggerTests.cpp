@@ -93,11 +93,15 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     Controller->TogglePauseMenu();
     TestNull(TEXT("Escape cannot stack a pause menu"), Controller->PauseMenuWidget.Get());
     auto* Popup = Controller->TutorialPopupWidget.Get();
+    const FGeometry KeyGeometry;
+    const auto KeyEvent=[](FKey Key,bool Repeat=false){return FKeyEvent(Key,FModifierKeysState(),0,Repeat,0,0);};
+    TestFalse(TEXT("A is not a page shortcut in automatic help"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::A)).IsEventHandled());
+    TestFalse(TEXT("D is not a page shortcut in automatic help"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::D)).IsEventHandled());
     TestEqual(TEXT("Automatic help hides paging"), Popup->GetWidgetFromName(TEXT("NextPageButton"))->GetVisibility(), ESlateVisibility::Collapsed);
     auto* Pages = Cast<UWidgetSwitcher>(Popup->WidgetTree->FindWidget(TEXT("PageSwitcher")));
     TestEqual(TEXT("Only first page is shown"), Pages->GetActiveWidgetIndex(), 0);
-    auto* Continue = Cast<UButton>(Popup->WidgetTree->FindWidget(TEXT("ContinueButton")));
-    Continue->OnClicked.Broadcast();
+    Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::F));
+    Popup->NativeOnKeyUp(KeyGeometry,KeyEvent(EKeys::F));
     TestFalse(TEXT("Continue resumes the world"), UGameplayStatics::IsGamePaused(World));
     TestFalse(TEXT("Continue restores gameplay input"), Controller->IsMoveInputIgnored() || Controller->IsLookInputIgnored());
     TestFalse(TEXT("Popup removed from viewport"), Popup->IsInViewport());
@@ -161,6 +165,15 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     auto* Previous = Cast<UButton>(Popup->GetWidgetFromName(TEXT("PreviousPageButton")));
     auto* Next = Cast<UButton>(Popup->GetWidgetFromName(TEXT("NextPageButton")));
     TestEqual(TEXT("Review starts at page one"), Pages->GetActiveWidgetIndex(),0);
+    Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::F,true));
+    Popup->NativeOnKeyUp(KeyGeometry,KeyEvent(EKeys::F));
+    TestTrue(TEXT("Opening F release and repeats cannot immediately close review"),Popup->IsInViewport());
+    TestTrue(TEXT("A is handled when review can page"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::A)).IsEventHandled());
+    TestEqual(TEXT("A wraps first to last"),Pages->GetActiveWidgetIndex(),2);
+    Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::A,true));
+    TestEqual(TEXT("Held A does not rapidly repeat pages"),Pages->GetActiveWidgetIndex(),2);
+    TestTrue(TEXT("D is handled when review can page"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::D)).IsEventHandled());
+    TestEqual(TEXT("D wraps last to first"),Pages->GetActiveWidgetIndex(),0);
     TestEqual(TEXT("Review shows left icon"),Previous->GetVisibility(),ESlateVisibility::Visible);
     TestEqual(TEXT("Review shows right icon"),Next->GetVisibility(),ESlateVisibility::Visible);
     Previous->OnClicked.Broadcast();
@@ -173,7 +186,10 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     TestEqual(TEXT("Review does not mark automatic tutorials completed"), Instance->CompletedScenarioFlags.Num(),0);
     TestFalse(TEXT("Review close resumes gameplay"), UGameplayStatics::IsGamePaused(World));
     TestTrue(TEXT("Interaction can reopen review any time"), ReviewActor->RequestInteraction(Pawn));
-    Controller->DismissTutorialPopup();
+    Popup=Controller->TutorialPopupWidget.Get();
+    TestTrue(TEXT("F press is consumed"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::F)).IsEventHandled());
+    TestTrue(TEXT("F release closes and consumes interaction input"),Popup->NativeOnKeyUp(KeyGeometry,KeyEvent(EKeys::F)).IsEventHandled());
+    TestFalse(TEXT("F closes review and resumes gameplay"),Controller->IsPauseMenuOpen() || UGameplayStatics::IsGamePaused(World));
     return true;
 }
 #endif

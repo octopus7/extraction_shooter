@@ -5,6 +5,8 @@
 #include "Components/WidgetSwitcher.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/RichTextBlock.h"
+#include "Engine/DataTable.h"
 #include "Components/Button.h"
 #include "Editor.h"
 #include "Engine/Texture2D.h"
@@ -73,12 +75,24 @@ bool FTutorialAuthoredAssetTest::RunTest(const FString& Parameters)
         for(const auto& Pair:Widget->LocalizedTextKeys)
         {
             auto* Label=Cast<UTextBlock>(Widget->WidgetTree->FindWidget(Pair.Key));
+            auto* Rich=Cast<URichTextBlock>(Widget->WidgetTree->FindWidget(Pair.Key));
             FText Expected;
             TestTrue(TEXT("CSV translation exists"),Strings->TryGetTextByKey(Pair.Value,Languages[L],Expected));
-            if(TestNotNull(TEXT("Localized designer label exists"),Label))
+            if(TestTrue(TEXT("Localized designer label exists"),Label || Rich))
             {
-                TestFalse(TEXT("Localized label is populated"),Label->GetText().IsEmpty());
-                TestEqual(TEXT("Displayed text is resolved by key"),Label->GetText().ToString(),Expected.ToString());
+                const FText Actual=Label?Label->GetText():Rich->GetText();
+                TestFalse(TEXT("Localized label is populated"),Actual.IsEmpty());
+                TestEqual(TEXT("Displayed text is resolved by key"),Actual.ToString(),Expected.ToString());
+                if(Pair.Value.ToString().EndsWith(TEXT(".body")))
+                {
+                    if(!TestNotNull(TEXT("Descriptions use authored rich text"),Rich)) return false;
+                    TestTrue(TEXT("Every localized description marks an input token"),Actual.ToString().Contains(TEXT("<key>")) && Actual.ToString().Contains(TEXT("</>")));
+                    auto* Styles=Rich->GetTextStyleSet();
+                    if(!TestNotNull(TEXT("Editable text style table"),Styles)) return false;
+                    auto* Bold=Styles->FindRow<FRichTextStyleRow>(TEXT("key"),TEXT("TutorialTest"));
+                    if(!TestNotNull(TEXT("Input emphasis style exists"),Bold)) return false;
+                    TestEqual(TEXT("Input labels use bold face"),Bold->TextStyle.Font.TypefaceFontName,FName(TEXT("Bold")));
+                }
             }
         }
         for(int32 P=0;P<3;++P)
