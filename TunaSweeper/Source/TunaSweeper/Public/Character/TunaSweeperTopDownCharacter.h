@@ -423,10 +423,10 @@ protected:
 	float MaxStamina = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float SprintStaminaDrainPerSecond = 25.0f;
+	float SprintStaminaDrainPerSecond = 6.25f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float StaminaRegenPerSecond = 18.0f;
+	float StaminaRegenPerSecond = 54.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float StaminaGaugeFadeInterpSpeed = 8.0f;
@@ -511,6 +511,9 @@ protected:
 
 private:
 	friend class UTunaSweeperCombatLabAutopilotComponent;
+	#if WITH_DEV_AUTOMATION_TESTS
+	friend class FTunaSweeperDemoStaminaTuningTest;
+	#endif
 	bool bExternalAimControl = false;
 	friend class UTunaSweeperVehicleMountComponent;
 	UPROPERTY(Transient)
