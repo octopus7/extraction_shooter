@@ -42,7 +42,8 @@ void UTunaSweeperGameInstance::InitializeGlobalLanguageSetting()
 		return;
 	}
 
-	CurrentTextLanguage = DetectDefaultLanguageFromOS();
+	// OS language auto-detection is temporarily disabled for first launch.
+	CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;
 	ApplyCurrentLanguageCulture();
 	SaveGlobalLanguageSetting();
 }
