@@ -263,6 +263,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 {
 	GENERATED_BODY()
 	friend class FTunaDemoSaveRetirementTest;
+	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 
 public:

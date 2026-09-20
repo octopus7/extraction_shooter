@@ -84,6 +84,8 @@ Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are
 
 Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
 
+The first BunkerMap controls tutorial records `tutorial.bunker.basics_seen` when Continue is pressed. It uses the existing scenario flag save/load/reset path (no save schema/version change). Completion triggers an immediate save attempt; if saving fails, the in-memory flag still prevents repetition during this session and is included in subsequent normal saves. A new slot/reset clears it. Popup visibility, pause and input focus are transient.
+
 Demo dinner ending writes `demo.ending.farewell_seen` when the farewell card is shown, then immediately deletes only the active Demo save slot, including its backups/recovery artifacts, and resets its runtime state. A transient slot retirement barrier blocks late autosaves until explicit slot activation so title return cannot recreate the deleted save. Interrupted dinner dialogue can still resume because deletion has not happened yet. Main is unlimited continued play: it never enters this automatic demo ending or deletes its save, even if a legacy demo flag exists. Temporary camera/input state and dinner actor transforms are not persisted.
 
 The food warehouse grants canned tuna (3004) through the existing inventory save path. Its collected state is transient per world visit, deliberately replenishing on a later raid visit so death or consuming the food cannot permanently block delivery. Final delivery consumes one can and advances the existing `demo.canned_tuna.deliver` objective; reward retries use RewardAvailable without consuming another can.

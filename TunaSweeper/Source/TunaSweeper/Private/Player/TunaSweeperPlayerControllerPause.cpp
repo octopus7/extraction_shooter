@@ -25,6 +25,7 @@ bool ATunaSweeperPlayerController::IsPauseMenuKey(const FKey& Key, const UWorld*
 
 void ATunaSweeperPlayerController::TogglePauseMenu()
 {
+	if (TutorialPopupWidget) return;
 	if (PauseMenuWidget)
 	{
 		ResumeFromPauseMenu();

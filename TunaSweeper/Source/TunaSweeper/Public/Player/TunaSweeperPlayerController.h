@@ -14,6 +14,7 @@ class ACameraActor;
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperPauseMenuWidget;
+class UTunaSweeperTutorialPopupWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperScenarioPresentationWidget;
 class UTunaSweeperScreenFadeWidget;
@@ -43,7 +44,13 @@ public:
 	void TogglePauseMenu();
 	void ResumeFromPauseMenu();
 	void ExitFromPauseMenu(bool bQuitGame);
-	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr; }
+	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || TutorialPopupWidget != nullptr; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Tutorial")
+	bool TryShowBunkerBasicsTutorial();
+	bool CanShowBunkerBasicsTutorial() const;
+	UFUNCTION()
+	void DismissBunkerBasicsTutorial();
 	static bool IsPauseMenuKey(const FKey& Key, const UWorld* World);
 
 	/** Device-local development preference; it is deliberately separate from save-slot data. */
@@ -151,6 +158,21 @@ public:
 	bool TryHandleHoveredItemInteract();
 
 protected:
+	friend class FTunaTutorialTriggerTest;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tutorial")
+	TSoftClassPtr<UTunaSweeperTutorialPopupWidget> TutorialPopupClass;
+
+	/** Center of the first-help passage in BunkerMap, in world centimeters. */
+	UPROPERTY(EditDefaultsOnly, Category = "Tutorial")
+	FVector BasicsTutorialCenter = FVector(-439.010357, -135.576503, 79.345408);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tutorial", meta = (ClampMin = "1.0"))
+	FVector BasicsTutorialExtent = FVector(70.0, 70.0, 100.0);
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperTutorialPopupWidget> TutorialPopupWidget;
+
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperPauseMenuWidget> PauseMenuWidget;
 

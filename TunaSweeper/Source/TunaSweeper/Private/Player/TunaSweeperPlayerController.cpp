@@ -35,6 +35,7 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperPauseMenuWidget.h"
+#include "UI/TunaSweeperTutorialPopupWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperScenarioPresentationWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
@@ -343,6 +344,7 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+	TutorialPopupClass = TSoftClassPtr<UTunaSweeperTutorialPopupWidget>(FSoftObjectPath(TEXT("/Game/UI/Tutorial/WBP_TutorialPopup.WBP_TutorialPopup_C")));
 	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
 	IntroMenuWidgetClass = TSoftClassPtr<UTunaSweeperIntroMenuWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_IntroMenu.WBP_IntroMenu_C")));
 	QuestWidgetClass = TSoftClassPtr<UTunaSweeperQuestWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_Quest.WBP_Quest_C")));
@@ -502,6 +504,12 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (TutorialPopupWidget)
+	{
+		TutorialPopupWidget->RemoveFromParent();
+		TutorialPopupWidget = nullptr;
+		SetPause(false);
+	}
 	if (PauseMenuWidget)
 	{
 		PauseMenuWidget->RemoveFromParent();
@@ -672,6 +680,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+	if (TutorialPopupWidget || TryShowBunkerBasicsTutorial()) return;
 
 	if (bEnemyCombatDebugEnabled)
 	{
@@ -2411,6 +2420,18 @@ bool ATunaSweeperPlayerController::StartHousingFacilityPlacement(FName FacilityI
 
 void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 {
+	if (TutorialPopupWidget)
+	{
+		FInputModeUIOnly TutorialInputMode;
+		if (UWidget* ContinueButton = TutorialPopupWidget->GetWidgetFromName(TEXT("ContinueButton")))
+		{
+			TutorialInputMode.SetWidgetToFocus(ContinueButton->TakeWidget());
+		}
+		TutorialInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(TutorialInputMode);
+		bShowMouseCursor = true;
+		return;
+	}
 	if (PauseMenuWidget)
 	{
 		FInputModeUIOnly PauseInputMode;
