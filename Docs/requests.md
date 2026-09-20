@@ -9308,3 +9308,10 @@
 
 - 요청: 커밋.
 - 처리: 임포트 및 읽기 검증을 마친 튜토리얼 UI 텍스처 3개와 관련 작업 기록만 커밋. WBP 제작과 아이템 텍스처 임포트는 보류 상태이며 게임 연결은 없음. 다른 작업 변경은 유지.
+
+## 2026-09-20 23:50:31 (소요시간: 00:09:19)
+
+- 요청: 타이틀에서 게임용 플레이어가 생성되지 않도록 적용하고 완료 후 커밋.
+- 처리: BP_TitleGameMode를 생성하고 Default Pawn Class와 Spectator Class를 None으로 설정. 기존 TunaSweeperPlayerController는 유지. IntroMap에 World Settings override가 없음을 확인하여 DefaultEngine.ini의 IntroMap 전용 GameModeMapPrefixes로 연결했고, 기존 미커밋 타이틀 맵·애니메이션 변경은 보존.
+- 검증: 수정 전 PIE에서 BP_TunaSweeperPlayerCharacter 생성으로 회귀 검사 실패를 확인. 수정 후 및 생성기 제거 후 PIE에서 Pawn 0개, 비빙의 컨트롤러, 타이틀 카메라·메뉴 유지, 일반 GameMode의 플레이어 클래스 유지 검사 통과. Core 항상 쿠킹 경로 포함 확인. C++ 변경이 없어 빌드는 수행하지 않았으며 패키지 실행은 미검증.
+- 커밋: b19c0a4f에 애셋·설정·일회성 생성기·검증 스크립트·문서를 함께 커밋. 다음 정리 커밋에서 생성기를 즉시 제거하고 본 기록 추가.
