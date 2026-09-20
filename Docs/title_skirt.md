@@ -17,3 +17,11 @@
 `TunaSweeper.Title.Skirt` 자동화 검사는 본 계층, 웨이트 정규화, 하단 물리 유지, 상단 기준 포즈 간격, 앞치마와 검은 치마의 삼각형 관통 및 타이틀 애니메이션의 몸체 포즈 추종을 검사한다. 렌더링 가능한 에디터 실행에서 `Saved/TitleSkirt/title_*.png`, 조명 없는 `title_basecolor_*.png`, 몸체를 숨긴 `title_garment_*.png`를 저장해 관통과 그림자를 구분한다.
 
 에셋 생성 코드는 프로젝트 규칙에 따라 생성 에셋과 함께 커밋한 뒤 다음 커밋에서 제거한다. 다시 생성해야 할 때는 해당 이력의 생성기를 참고하며 시작 시 자동 재생성 경로는 두지 않는다.
+
+## 타이틀 전용 탄성 복원
+
+2026-09-21: `PA_LunaMk2_TitleSkirt`의 관절에 TwistAndSwing 위치·속도 구동을 켜고 기준 자세를 목표로 사용한다. 가속도 구동의 spring 800, damping 50, force limit 0(무제한)을 적용했다. 관절 swing은 양축 18도, twist는 8도로 제한하고 바디 linear/angular damping을 2/6으로 설정한다. 자유롭게 접힌 상태로 남던 치마를 기본 실루엣으로 복원하면서 작은 움직임을 유지하기 위한 타이틀 전용 설정이다.
+
+`ABP_LunaMk2_TitleSkirt`의 RigidBody는 world inertia 비중 0.2, damping world 비중 0, 중력 override Z=-300cm/s²를 사용한다. CopyPose·본 계층·메시·충돌 형상은 유지하며 플레이어용 치마 에셋에는 적용하지 않는다.
+
+`TunaSweeper.Title.Skirt.ElasticRecovery`는 C를 3초 재생한 후 A 첫 포즈로 고정하여 8초간 실제 본 물리를 평가한다. 유효한 변환, 움직임 유지, 최종 1초 잔떨림과 기준 로컬 회전으로의 복원을 검사한다. 변경 전 최대 잔류 회전은 49.294도로 실패했고, 적용 후 9.086도로 감소했다. 최종 프레임 간 이동은 약 0.000003cm이며 진입 중 움직임은 유지된다. 실제 타이틀 C/A/B 재생과 조명 없는 치마 실루엣 캡처로도 확인했다.
