@@ -15,7 +15,7 @@ The range identifies the owning anchor kind for authoring and review. Runtime be
 
 ## Identity rules
 
-- A `PlacementId` must be a positive integer and unique across every raid-placement anchor kind in one logical level.
+- A `PlacementId` must be a positive integer and unique across every raid-placement anchor kind in one logical level. Enemy anchors may share an id only when every anchor in that duplicate group is `Enemy` and explicitly enables `Allow Duplicate Placement Id`; loot and memo anchors never allow duplicates.
 - The stable identity is `(LevelId, PlacementId)`. Keep the number stable when moving or rotating an existing anchor.
 - Allocate the next unused number in the kind's range. Do not fill a gap by reusing an ID that previously identified another placement.
 - Do not renumber existing placements merely to make a sequence contiguous.
@@ -38,10 +38,10 @@ An anchor-owned JSON row must use the same logical `level_name` and `placement_i
 
 1. Identify the logical level and anchor kind.
 2. Inspect the level anchors and every placement data file for that logical level.
-3. Choose the next unused ID in the kind's range. Check uniqueness across enemy, loot-container, and memo rows together.
+3. Choose the next unused ID in the kind's range. Check uniqueness across enemy, loot-container, and memo rows together. For intentionally repeated enemy locations, enable `Allow Duplicate Placement Id` on every duplicate enemy anchor.
 4. Set the level instance's `AnchorKind` and `PlacementId`.
 5. Add or update the matching runtime data row with the same `level_name` and `placement_id`.
-6. Validate that the anchor exists, its kind matches the data, and no duplicate ID exists across kinds.
+6. Validate that the anchor exists, its kind matches the data, and no duplicate ID exists across kinds. A duplicate enemy group is valid only when every member opted in.
 
 When changing an existing ID, update the map anchor and all matching JSON in the same change. If a placement changes kind, retire its old ID and allocate a new ID from the destination kind's range.
 

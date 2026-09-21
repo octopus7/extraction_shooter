@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Placement")
 	ETunaSweeperRaidPlacementAnchorKind GetAnchorKind() const { return AnchorKind; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Placement")
+	bool AllowsDuplicatePlacementId() const { return bAllowDuplicatePlacementId; }
+
 #if WITH_EDITOR
 	/** Names used by the editor details-panel combo; sourced from the BP's preview data asset. */
 	UFUNCTION()
@@ -58,13 +61,17 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
 
-	/** Stable positive number, unique with the level id across every anchor kind. */
+	/** Stable positive number, unique with the level id across every anchor kind unless opted-in enemy anchors share it. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Raid Placement", meta = (AllowPrivateAccess = "true", ClampMin = "1"))
 	int32 PlacementId = 1;
 
 	/** Structural anchor type. Runtime data must reference the matching kind. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Raid Placement", meta = (AllowPrivateAccess = "true"))
 	ETunaSweeperRaidPlacementAnchorKind AnchorKind = ETunaSweeperRaidPlacementAnchorKind::Enemy;
+
+	/** Allows this enemy anchor to share its PlacementId with other opted-in enemy anchors. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Raid Placement", meta = (AllowPrivateAccess = "true", EditCondition = "AnchorKind == ETunaSweeperRaidPlacementAnchorKind::Enemy", EditConditionHides))
+	bool bAllowDuplicatePlacementId = false;
 
 #if WITH_EDITORONLY_DATA
 	/** Set on BP_RaidPlacementAnchor, never consulted by runtime spawning. */

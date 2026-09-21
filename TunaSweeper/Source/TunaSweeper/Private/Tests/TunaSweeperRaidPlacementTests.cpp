@@ -1,6 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Subsystem/TunaSweeperRaidPlacementSubsystem.h"
+#include "Raid/TunaSweeperRaidPlacementAnchor.h"
 #include "Raid/TunaSweeperLootAnchorPreviewDataAsset.h"
 #include "Game/TunaSweeperDataValueTypes.h"
 
@@ -26,6 +27,12 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 bool FTunaSweeperAnchorPlacementSchemaTest::RunTest(const FString& Parameters)
 {
 	(void)Parameters;
+	ATunaSweeperRaidPlacementAnchor* Anchor = NewObject<ATunaSweeperRaidPlacementAnchor>();
+	TestNotNull(TEXT("Placement anchor can be constructed"), Anchor);
+	if (Anchor)
+	{
+		TestFalse(TEXT("Duplicate PlacementId is disabled by default"), Anchor->AllowsDuplicatePlacementId());
+	}
 	const auto ValidateAnchorRows = [this](const TCHAR* FileName, bool bRequireMemoId)
 	{
 		const FString JsonPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data"), FileName);

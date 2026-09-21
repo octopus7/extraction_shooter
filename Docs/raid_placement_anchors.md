@@ -12,7 +12,7 @@ A placed instance serializes its actor transform, a positive `PlacementId`, and 
 - `Loot Container`
 - `Memo`
 
-`PlacementId` must be unique across every anchor kind in one level. Its stable key is `(LevelId, PlacementId)`. Do not recycle a shipped id for another location or kind.
+`PlacementId` must be unique across every anchor kind in one level. Enemy anchors may intentionally share an id only when every member of the duplicate group is an `Enemy` anchor with `Allow Duplicate Placement Id` enabled. Loot and memo anchors never allow duplicates. Its stable key is `(LevelId, PlacementId)`. Do not recycle a shipped id for another location or kind.
 
 The Details panel exposes the kind and id. Editor-only arrows, billboards, labels, and loot preview meshes make anchors visible without owning runtime behavior. Loot preview choices come from `/Game/Raid/Placement/DA_LootAnchorPreviews`; memo anchors use the blue `MEMO` preview. Preview components have no collision or gameplay authority.
 

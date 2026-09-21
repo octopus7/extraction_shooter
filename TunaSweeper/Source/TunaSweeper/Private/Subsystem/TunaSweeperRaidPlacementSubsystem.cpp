@@ -134,7 +134,7 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 		UE_LOG(LogTunaSweeperRaidPlacement, Warning, TEXT("RaidSeed was not set before loading %s; using deterministic fallback seed 0."), *World->GetMapName());
 	}
 
-	TMap<int32, ATunaSweeperRaidPlacementAnchor*> AnchorsByPlacementId;
+	TMap<int32, TArray<ATunaSweeperRaidPlacementAnchor*>> AnchorsByPlacementId;
 	TSet<int32> InvalidPlacementIds;
 	for (TActorIterator<ATunaSweeperRaidPlacementAnchor> It(World); It; ++It)
 	{
@@ -145,22 +145,38 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Raid anchor '%s' has invalid PlacementId %d."), *Anchor->GetPathName(), PlacementId);
 			continue;
 		}
-		if (ATunaSweeperRaidPlacementAnchor** Existing = AnchorsByPlacementId.Find(PlacementId))
+		TArray<ATunaSweeperRaidPlacementAnchor*>& Anchors = AnchorsByPlacementId.FindOrAdd(PlacementId);
+		if (Anchors.Num() > 0)
 		{
-			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Duplicate raid PlacementId %d in level %s: '%s' and '%s'."), PlacementId, *World->GetMapName(), *(*Existing)->GetPathName(), *Anchor->GetPathName());
-			InvalidPlacementIds.Add(PlacementId);
-			continue;
+			const bool bAllExistingAnchorsAllowDuplicate = Anchors.ContainsByPredicate(
+				[](const ATunaSweeperRaidPlacementAnchor* ExistingAnchor)
+				{
+					return !ExistingAnchor ||
+						ExistingAnchor->GetAnchorKind() != ETunaSweeperRaidPlacementAnchorKind::Enemy ||
+						!ExistingAnchor->AllowsDuplicatePlacementId();
+				});
+			const bool bDuplicateAllowed = Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Enemy &&
+				Anchor->AllowsDuplicatePlacementId() && !bAllExistingAnchorsAllowDuplicate;
+			if (!bDuplicateAllowed)
+			{
+				UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Duplicate raid PlacementId %d in level %s: existing anchor '%s' and '%s'. All duplicate enemy anchors must opt in."), PlacementId, *World->GetMapName(), *Anchors[0]->GetPathName(), *Anchor->GetPathName());
+				InvalidPlacementIds.Add(PlacementId);
+			}
 		}
-		AnchorsByPlacementId.Add(PlacementId, Anchor);
+		Anchors.Add(Anchor);
 	}
 	for (int32 InvalidId : InvalidPlacementIds)
 	{
 		AnchorsByPlacementId.Remove(InvalidId);
 	}
 	TArray<int32> MemoPlacementIds;
-	for (const TPair<int32, ATunaSweeperRaidPlacementAnchor*>& Pair : AnchorsByPlacementId)
+	for (const TPair<int32, TArray<ATunaSweeperRaidPlacementAnchor*>>& Pair : AnchorsByPlacementId)
 	{
-		if (Pair.Value->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo)
+		if (Pair.Value.ContainsByPredicate(
+			[](const ATunaSweeperRaidPlacementAnchor* Anchor)
+			{
+				return Anchor && Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo;
+			}))
 		{
 			MemoPlacementIds.Add(Pair.Key);
 		}
@@ -189,16 +205,24 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 		}
 		DataKindsByPlacementId.Add(Placement.PlacementId, ETunaSweeperRaidPlacementAnchorKind::Enemy);
 
-		ATunaSweeperRaidPlacementAnchor* const* Anchor = AnchorsByPlacementId.Find(Placement.PlacementId);
-		if (!Anchor)
+		const TArray<ATunaSweeperRaidPlacementAnchor*>* Anchors = AnchorsByPlacementId.Find(Placement.PlacementId);
+		if (!Anchors)
 		{
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement %s/%d has no level anchor."), *Placement.LevelId.ToString(), Placement.PlacementId);
 			continue;
 		}
 		ConnectedPlacementIds.Add(Placement.PlacementId);
-		if ((*Anchor)->GetAnchorKind() != ETunaSweeperRaidPlacementAnchorKind::Enemy)
+		TArray<ATunaSweeperRaidPlacementAnchor*> EnemyAnchors;
+		for (ATunaSweeperRaidPlacementAnchor* Anchor : *Anchors)
 		{
-			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement %s/%d points to a %s anchor."), *Placement.LevelId.ToString(), Placement.PlacementId, *UEnum::GetValueAsString((*Anchor)->GetAnchorKind()));
+			if (Anchor && Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Enemy)
+			{
+				EnemyAnchors.Add(Anchor);
+			}
+		}
+		if (EnemyAnchors.Num() == 0)
+		{
+			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement %s/%d points to a non-enemy anchor."), *Placement.LevelId.ToString(), Placement.PlacementId);
 			continue;
 		}
 		const FEnemySpawnProfile* Profile = EnemyProfilesById.Find(Placement.ProfileId);
@@ -223,18 +247,21 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy ProfileId '%s' cannot load its enemy class."), *Profile->ProfileId.ToString());
 			continue;
 		}
-		const FTransform SpawnTransform = (*Anchor)->GetActorTransform();
-		ATunaSweeperEnemyCharacter* SpawnedEnemy = World->SpawnActorDeferred<ATunaSweeperEnemyCharacter>(EnemyClass, SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		if (!SpawnedEnemy)
+		for (ATunaSweeperRaidPlacementAnchor* EnemyAnchor : EnemyAnchors)
 		{
-			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Failed to spawn enemy for %s/%d."), *Placement.LevelId.ToString(), Placement.PlacementId);
-			continue;
+			const FTransform SpawnTransform = EnemyAnchor->GetActorTransform();
+			ATunaSweeperEnemyCharacter* SpawnedEnemy = World->SpawnActorDeferred<ATunaSweeperEnemyCharacter>(EnemyClass, SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (!SpawnedEnemy)
+			{
+				UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Failed to spawn enemy for %s/%d."), *Placement.LevelId.ToString(), Placement.PlacementId);
+				continue;
+			}
+			SpawnedEnemy->ConfigureCombatProfile(CombatProfile, Profile->FactionId, Profile->SquadId, Profile->SquadSlot);
+			SpawnedEnemy->ConfigureSpawnData(Profile->BodyMaterial, MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId), Profile->DropContainerDefinitionId, Profile->DropContentsId, Profile->MaxHealth, Profile->ExperienceValue, Profile->BleedingChanceBonus, Profile->BleedingDurationBonusSeconds, Profile->WeaponItemId, Profile->AmmoItemId, Profile->ReserveAmmoCount, Profile->LootLoadedAmmoDeductionRatio, Profile->LootLoadedAmmoFlatDeduction);
+			SpawnedEnemy->Tags.AddUnique(MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId));
+			UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
+			++SpawnedEnemies;
 		}
-		SpawnedEnemy->ConfigureCombatProfile(CombatProfile, Profile->FactionId, Profile->SquadId, Profile->SquadSlot);
-		SpawnedEnemy->ConfigureSpawnData(Profile->BodyMaterial, MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId), Profile->DropContainerDefinitionId, Profile->DropContentsId, Profile->MaxHealth, Profile->ExperienceValue, Profile->BleedingChanceBonus, Profile->BleedingDurationBonusSeconds, Profile->WeaponItemId, Profile->AmmoItemId, Profile->ReserveAmmoCount, Profile->LootLoadedAmmoDeductionRatio, Profile->LootLoadedAmmoFlatDeduction);
-		SpawnedEnemy->Tags.AddUnique(MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId));
-		UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
-		++SpawnedEnemies;
 	}
 
 	for (const FLootPlacementDefinition& Placement : LootPlacementDefinitions)
@@ -250,16 +277,21 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 		}
 		DataKindsByPlacementId.Add(Placement.PlacementId, ETunaSweeperRaidPlacementAnchorKind::LootContainer);
 
-		ATunaSweeperRaidPlacementAnchor* const* Anchor = AnchorsByPlacementId.Find(Placement.PlacementId);
-		if (!Anchor)
+		const TArray<ATunaSweeperRaidPlacementAnchor*>* Anchors = AnchorsByPlacementId.Find(Placement.PlacementId);
+		if (!Anchors)
 		{
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Loot placement %s/%d has no level anchor."), *Placement.LevelId.ToString(), Placement.PlacementId);
 			continue;
 		}
 		ConnectedPlacementIds.Add(Placement.PlacementId);
-		if ((*Anchor)->GetAnchorKind() != ETunaSweeperRaidPlacementAnchorKind::LootContainer)
+		ATunaSweeperRaidPlacementAnchor* const* LootAnchor = Anchors->FindByPredicate(
+			[](ATunaSweeperRaidPlacementAnchor* Anchor)
+			{
+				return Anchor && Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::LootContainer;
+			});
+		if (!LootAnchor)
 		{
-			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Loot placement %s/%d points to a %s anchor."), *Placement.LevelId.ToString(), Placement.PlacementId, *UEnum::GetValueAsString((*Anchor)->GetAnchorKind()));
+			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Loot placement %s/%d points to a non-loot anchor."), *Placement.LevelId.ToString(), Placement.PlacementId);
 			continue;
 		}
 		if (!DoesSpawnConditionPass(Placement.ConditionId, FString::Printf(TEXT("loot %s/%d"), *Placement.LevelId.ToString(), Placement.PlacementId)) || !ShouldSpawnAtPlacement(Placement.PlacementId, Placement.SpawnChance))
@@ -274,7 +306,7 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 		}
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		ATunaSweeperLootContainerActor* SpawnedContainer = World->SpawnActor<ATunaSweeperLootContainerActor>(ContainerClass, (*Anchor)->GetActorTransform(), SpawnParameters);
+		ATunaSweeperLootContainerActor* SpawnedContainer = World->SpawnActor<ATunaSweeperLootContainerActor>(ContainerClass, (*LootAnchor)->GetActorTransform(), SpawnParameters);
 		if (!SpawnedContainer)
 		{
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Failed to spawn loot container for %s/%d."), *Placement.LevelId.ToString(), Placement.PlacementId);
@@ -285,11 +317,14 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 		++SpawnedLootContainers;
 	}
 
-	for (const TPair<int32, ATunaSweeperRaidPlacementAnchor*>& Pair : AnchorsByPlacementId)
+	for (const TPair<int32, TArray<ATunaSweeperRaidPlacementAnchor*>>& Pair : AnchorsByPlacementId)
 	{
 		if (!ConnectedPlacementIds.Contains(Pair.Key))
 		{
-			UE_LOG(LogTunaSweeperRaidPlacement, Warning, TEXT("Raid anchor %s/%d (%s) has no connected external placement data."), *World->GetMapName(), Pair.Key, *UEnum::GetValueAsString(Pair.Value->GetAnchorKind()));
+			const ETunaSweeperRaidPlacementAnchorKind AnchorKind = Pair.Value.Num() > 0 && Pair.Value[0]
+				? Pair.Value[0]->GetAnchorKind()
+				: ETunaSweeperRaidPlacementAnchorKind::Enemy;
+			UE_LOG(LogTunaSweeperRaidPlacement, Warning, TEXT("Raid anchor %s/%d (%s) has no connected external placement data."), *World->GetMapName(), Pair.Key, *UEnum::GetValueAsString(AnchorKind));
 		}
 	}
 
