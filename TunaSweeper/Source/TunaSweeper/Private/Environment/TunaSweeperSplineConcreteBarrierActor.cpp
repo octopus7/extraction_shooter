@@ -84,6 +84,7 @@ void ATunaSweeperSplineConcreteBarrierActor::RebuildSplineMeshes()
 		MeshComponent->SetForwardAxis(ESplineMeshAxis::X, false);
 		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MeshComponent->SetupAttachment(Spline);
+		AddInstanceComponent(MeshComponent);
 		MeshComponent->RegisterComponent();
 
 		FVector StartLocation, StartTangent, EndLocation, EndTangent;
