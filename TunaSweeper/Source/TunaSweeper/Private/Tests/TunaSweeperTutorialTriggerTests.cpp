@@ -93,6 +93,8 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     Controller->TogglePauseMenu();
     TestNull(TEXT("Escape cannot stack a pause menu"), Controller->PauseMenuWidget.Get());
     auto* Popup = Controller->TutorialPopupWidget.Get();
+    auto* PopupContinue = Cast<UButton>(Popup->GetWidgetFromName(TEXT("ContinueButton")));
+    TestTrue(TEXT("Popup continue delegate is bound"), PopupContinue && PopupContinue->OnClicked.IsBound());
     const FGeometry KeyGeometry;
     const auto KeyEvent=[](FKey Key,bool Repeat=false){return FKeyEvent(Key,FModifierKeysState(),0,Repeat,0,0);};
     TestFalse(TEXT("A is not a page shortcut in automatic help"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::A)).IsEventHandled());
@@ -106,6 +108,7 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     TestFalse(TEXT("Continue restores gameplay input"), Controller->IsMoveInputIgnored() || Controller->IsLookInputIgnored());
     TestFalse(TEXT("Popup removed from viewport"), Popup->IsInViewport());
     TestTrue(TEXT("Completion recorded per slot even if disk save is unavailable"), Instance->IsScenarioProgressFlagSet(Flag));
+    Controller->TutorialReopenBlockedUntilSeconds = 0.0;
     TestFalse(TEXT("Standing in or reentering the passage cannot repeat"), Controller->TryShowBunkerBasicsTutorial());
     auto* Save = NewObject<UTunaSweeperSaveGame>();
     Save->CompletedScenarioFlags = Instance->CompletedScenarioFlags.Array();
@@ -142,6 +145,7 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     Instance->HandleLevelTravelPersistence(TEXT("BunkerMap"), RaidLevel);
     TestFalse(TEXT("Later raid departures do not queue completed help"), Instance->HasPendingRaidTutorial());
     TestFalse(TEXT("Second help cannot repeat"), Controller->TryShowRaidCombatTutorial());
+    Controller->TutorialReopenBlockedUntilSeconds = 0.0;
     Save->CompletedScenarioFlags = Instance->CompletedScenarioFlags.Array();
     TestTrue(TEXT("Both help flags serialize"), UGameplayStatics::SaveGameToMemory(Save, Bytes));
     Loaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
@@ -185,6 +189,7 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     Cast<UButton>(Popup->GetWidgetFromName(TEXT("ContinueButton")))->OnClicked.Broadcast();
     TestEqual(TEXT("Review does not mark automatic tutorials completed"), Instance->CompletedScenarioFlags.Num(),0);
     TestFalse(TEXT("Review close resumes gameplay"), UGameplayStatics::IsGamePaused(World));
+    Controller->TutorialReopenBlockedUntilSeconds = 0.0;
     TestTrue(TEXT("Interaction can reopen review any time"), ReviewActor->RequestInteraction(Pawn));
     Popup=Controller->TutorialPopupWidget.Get();
     TestTrue(TEXT("F press is consumed"),Popup->NativeOnPreviewKeyDown(KeyGeometry,KeyEvent(EKeys::F)).IsEventHandled());

@@ -9696,3 +9696,8 @@
 - 요청: Tuna Helper에서 STOVE·Steam Demo/Full 패키징 배치 파일을 버튼으로 연결하고 배치 파일 유효성 확인 후 Release 빌드와 커밋.
 - 완료: Helper에 Steam Demo/Full 및 STOVE Demo/Full 패키징 버튼 4개를 추가하고, 기존 배치 실행 흐름으로 연결. 새 UI 문자열은 WPF 리소스 키로 등록해 버튼·툴팁·상태 표시를 키로 해석하도록 구성. 패키징 배치 파일은 수정하지 않음.
 - 검증: 네 배치 파일의 프로젝트·RunUAT·BuildCookRun·archive·구성 가드·종료 코드 구조를 정적으로 확인. Invalid 구성 인자로 네 파일 모두 종료 코드 2를 반환. TunaBuildHelper Release 빌드 성공(경고 0, 오류 0) 후 TunaSweeper/BatchScripts/BuildHelper 배포 파일 갱신. 실제 Steam/STOVE 패키징은 실행하지 않음.
+
+## 2026-09-21 06:07:58 (소요시간: 17:23:17)
+
+- 문제 해결: F 또는 마우스로 팝업을 닫아도 즉시 다시 열리고 1프레임 떨림이 발생하는 현상을 조사했다. 닫기 이벤트 바인딩은 존재했지만 닫힌 직후 같은 상호작용/위치 검사가 재실행될 보호와 팝업 포커스 보장이 없었다. 0.35초 재열림 잠금, 명시적 팝업 포커스, 닫기 델리게이트 검사를 추가했다.
+- 검증: UE 5.7 빌드 성공. TunaSweeper.UI.Tutorial.FirstPassage 성공. F 입력, 마우스 Continue, 닫힌 직후 재열림 방지, 레이아웃 안정 경로를 검사했다.

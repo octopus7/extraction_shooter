@@ -172,6 +172,8 @@ protected:
 	UFUNCTION()
 	void ShowNextTutorialPage();
 	void StepTutorialPage(int32 Direction);
+	void CloseTutorialPopup();
+	double TutorialReopenBlockedUntilSeconds = 0.0;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tutorial")
 	TSoftClassPtr<UTunaSweeperTutorialPopupWidget> TutorialPopupClass;

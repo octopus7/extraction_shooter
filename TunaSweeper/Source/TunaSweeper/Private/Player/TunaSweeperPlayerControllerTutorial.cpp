@@ -9,6 +9,8 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperTutorialPopupWidget.h"
+#include "HAL/PlatformTime.h"
+#include "Framework/Application/SlateApplication.h"
 
 namespace
 {
@@ -21,7 +23,8 @@ bool ATunaSweeperPlayerController::IsTutorialGameplayReady() const
     const auto* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
     const auto* Instance = GetGameInstance<UTunaSweeperGameInstance>();
     const auto* Transition = Instance ? Instance->GetSubsystem<UTunaSweeperLevelTransitionSubsystem>() : nullptr;
-    return IsLocalController() && ControlledCharacter && !ControlledCharacter->IsDead() && Instance
+    return IsLocalController() && FPlatformTime::Seconds() >= TutorialReopenBlockedUntilSeconds
+        && ControlledCharacter && !ControlledCharacter->IsDead() && Instance
         && !(Transition && Transition->IsTransitionActive())
         && !IsPauseMenuOpen() && !UGameplayStatics::IsGamePaused(this)
         && !bDialogueSequenceActive && !IsHousingModeOpen()
@@ -82,6 +85,7 @@ bool ATunaSweeperPlayerController::ShowTutorialPage(int32 PageIndex, FName Compl
     auto* Next = Cast<UButton>(Popup->GetWidgetFromName(TEXT("NextPageButton")));
     // Never pause unless the authored asset provides a working way to resume.
     if (!Pages || PageIndex < 0 || PageIndex >= Pages->GetChildrenCount() || !Continue) return false;
+    Popup->SetIsFocusable(true);
     if (bReviewMode && (!Previous || !Next)) return false;
     if (Previous) Previous->SetVisibility(bReviewMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
     if (Next) Next->SetVisibility(bReviewMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
@@ -114,12 +118,21 @@ bool ATunaSweeperPlayerController::ShowTutorialPage(int32 PageIndex, FName Compl
 void ATunaSweeperPlayerController::DismissTutorialPopup()
 {
     if (!TutorialPopupWidget) return;
+    CloseTutorialPopup();
+}
+
+void ATunaSweeperPlayerController::CloseTutorialPopup()
+{
+    if (!TutorialPopupWidget) return;
+    // Block the interaction actor and automatic location check until the closing input has settled.
+    TutorialReopenBlockedUntilSeconds = FPlatformTime::Seconds() + 0.35;
     if (auto* Instance = GetGameInstance<UTunaSweeperGameInstance>())
     {
         // Existing per-slot scenario persistence also clears this on a new game.
         if (!ActiveTutorialCompletionFlag.IsNone())
             Instance->MarkScenarioProgressFlag(ActiveTutorialCompletionFlag, true);
     }
+    FSlateApplication::Get().ClearKeyboardFocus(EFocusCause::Cleared);
     TutorialPopupWidget->RemoveFromParent();
     TutorialPopupWidget = nullptr;
     ActiveTutorialCompletionFlag = NAME_None;
