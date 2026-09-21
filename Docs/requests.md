@@ -9714,3 +9714,9 @@
 - 요청: 빌드·패키징 배치가 다른 프로세스를 기다릴 때 Tuna Helper에서 강제 종료할 수 있는 버튼 추가.
 - 완료: KillTunaSweeperBuild.bat를 추가해 TunaSweeper 프로젝트 경로와 UE 빌드·패키징 명령을 함께 확인하고, 일치하는 프로세스의 자식 트리를 강제 종료하도록 구성. Helper에 빌드·패키징 강제 종료 버튼과 리소스 키 기반 툴팁·상태 메시지를 추가. Unreal Editor 종료 대상과 분리.
 - 검증: UE 5.7 Build.bat의 대기 루프와 -WaitMutex 동작을 확인. 강제 종료 배치는 관리자 권한에서 대상 없음 종료 코드 0을 확인하고 자기 자신/호출 셸 오탐을 제외하도록 수정. TunaBuildHelper Release 빌드 성공(경고 0, 오류 0) 후 BuildHelper 배포 파일 갱신.
+
+## 2026-09-22 02:08:00 (소요시간: 00:06:37)
+
+- 요청: 「취수 시설 확인」 퀘스트 설명에서 스크린 원인을 미리 서술하지 않고, 화장실을 포함한 모든 생활시설의 용수 공급 중단과 외부 취수 시설 조사 내용을 한국어·영어·일본어로 반영.
+- 완료: `quest.demo_q1.description`의 세 언어 문구를 요청한 의미에 맞게 수정.
+- 검증: `npm run quest:validate -- --flavor Demo` 성공(`ok: true`, 퀘스트 5개). `quest:status`는 Windows 보호 동기화 토큰을 읽지 못해 확인 실패. CSV diff 검사 통과.

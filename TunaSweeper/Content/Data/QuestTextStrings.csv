@@ -47,7 +47,7 @@ quest.warp_point_used_test.title,워프 포인트 사용 확인,Warp Point Use C
 quest.warp_point_used_test.description,워프 포인트 사용 목표 검증용 데이터입니다. 실제 제공자나 진행 흐름에는 연결되지 않습니다.,Validation data for the warp point objective. It is not connected to a real provider flow.,ワープポイント使用目標の検証用データです。実際の提供者や進行には接続されません
 quest.warp_point_used_test.objective.use_raid_warp_point_a,워프 포인트 사용,Use a warp point,ワープポイントを使用
 quest.demo_q1.title,취수 시설 확인,Check the Water Intake Facility,取水施設を確認
-quest.demo_q1.description,외부 취수 시설을 확인하고 막힌 스크린의 원인을 조사하세요.,Check the external water intake facility and investigate the blocked screen.,外部の取水施設を確認し、詰まったスクリーンの原因を調べましょう
+quest.demo_q1.description,화장실을 포함한 모든 생활시설의 용수 공급이 중단되었다. 외부 취수 시설을 조사해보자.,The water supply to all essential facilities including the restroom has been cut off. Let's investigate the external water intake facility.,トイレを含むすべての生活設備への給水が停止した。外部の取水施設を調べてみよう。
 quest.demo_q1.accept.line1,벙커에 물이 거의 안 나와. 취수 시설부터 살펴봐야겠어.,There's almost no water in the bunker. We should check the intake facility first.,バンカーの水がほとんど出ない。まず取水施設を見てこないと。
 quest.demo_q1.accept.line2,밖은 위험하니까 조심해. 이상한 게 보이면 바로 돌아와서 알려줘.,Be careful out there. If you find anything strange come right back and tell me.,外は危ないから気をつけて。変なものを見つけたら、すぐ戻って教えて。
 quest.demo_q1.objective.inspect,취수 시설 조사,Inspect the water intake facility,取水施設を調査
