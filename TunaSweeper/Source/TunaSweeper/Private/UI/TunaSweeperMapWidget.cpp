@@ -438,7 +438,10 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 	VioletMarkerColorButton = MakeColorButton(TEXT("VioletMarkerColorButton"));
 	WhiteMarkerColorButton = MakeColorButton(TEXT("WhiteMarkerColorButton"));
 
-	PaletteHelpText->SetText(FText::FromString(TEXT("\uC6B0\uD074\uB9AD: \uB9C8\uCEE4 \uCD94\uAC00 / \uAE30\uC874 \uB9C8\uCEE4 \uC6B0\uD074\uB9AD: \uC0AD\uC81C")));
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	PaletteHelpText->SetText(TunaGameInstance
+		? TunaGameInstance->ResolveLocalizedText(TEXT("ui.map_marker.help"), FText::GetEmpty())
+		: FText::GetEmpty());
 	PaletteHelpText->SetColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.96f, 0.98f, 0.88f)));
 	PaletteHelpText->SetShadowOffset(FVector2D(1.0f, 1.0f));
 	PaletteHelpText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.86f));

@@ -205,6 +205,7 @@ ui.interaction.mole_dialogue,대화,Dialogue,会話
 ui.quest.interaction_name,퀘스트,Quest,クエスト
 ui.map_overlay.start_location,시작 위치,Start Position,開始位置
 ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点
+ui.map_marker.help,우클릭: 마커 추가 / 기존 마커 우클릭: 삭제,Right-click: Add marker / Right-click existing marker: Delete,右クリック: マーカーを追加 / 既存マーカーを右クリック: 削除
 ui.enemy.status.reload,재장전,Reloading,リロード
 ui.common.confirm,확인,Confirm,確認
 ui.title.demo_label,데모,Demo,デモ
