@@ -22,6 +22,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Misc/FileHelper.h"
+#include "Settings/LevelEditorPlaySettings.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleStudioSeparationTest,
 	"TunaSweeper.Title.Studio.SeparationAndBackdrop",
@@ -47,6 +48,12 @@ bool FTitleStudioSeparationTest::RunTest(const FString& Parameters)
 	for (UStaticMeshComponent* Part : TInlineComponentArray<UStaticMeshComponent*>(Studio))
 	{
 		if (Part->GetFName() == TEXT("MatteBackdrop")) Backdrop = Part;
+		else if (Part->GetFName() == TEXT("IndirectBouncePlane"))
+		{
+			TestTrue(TEXT("Indirect bounce plane is available to lighting"), Part->IsVisible());
+			TestFalse(TEXT("Indirect bounce plane does not cast a direct shadow"), Part->CastShadow);
+			TestTrue(TEXT("Indirect bounce plane participates in distance field lighting"), bool(Part->bAffectDistanceFieldLighting));
+		}
 		else TestFalse(TEXT("Studio walls/floor do not occlude the lake"), Part->IsVisible());
 	}
 	if (!TestNotNull(TEXT("Matte backdrop"), Backdrop)) return false;
@@ -200,6 +207,36 @@ bool FTitleRuntimeExposureTest::RunTest(const FString& Parameters)
 	ADD_LATENT_AUTOMATION_COMMAND(FCheckTitleRuntimeExposure(this, TEXT("TitleRuntime_2s.png")));
 	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(5.f));
 	ADD_LATENT_AUTOMATION_COMMAND(FCheckTitleRuntimeExposure(this, TEXT("TitleRuntime_7s.png")));
+	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
+	return true;
+}
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FSetTitleBounceEnabled, bool, bEnabled);
+bool FSetTitleBounceEnabled::Update()
+{
+	if (UWorld* World = GEditor->PlayWorld)
+		for (TActorIterator<ATunaSweeperTitleStudioActor> It(World); It; ++It)
+			It->bEnableIndirectBouncePlane = bEnabled;
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleBounceComparisonTest,
+	"TunaSweeper.Title.Studio.BounceComparison",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTitleBounceComparisonTest::RunTest(const FString& Parameters)
+{
+	if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir() / TEXT("Maps/IntroMap.umap"), false, true)) return false;
+	FRequestPlaySessionParams Params;
+	Params.EditorPlaySettings = DuplicateObject<ULevelEditorPlaySettings>(GetDefault<ULevelEditorPlaySettings>(), GetTransientPackage());
+	Params.EditorPlaySettings->NewWindowWidth = 1280;
+	Params.EditorPlaySettings->NewWindowHeight = 720;
+	GEditor->RequestPlaySession(Params);
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(2.f));
+	ADD_LATENT_AUTOMATION_COMMAND(FSetTitleBounceEnabled(false));
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(6.f));
+	ADD_LATENT_AUTOMATION_COMMAND(FCheckTitleRuntimeExposure(this, TEXT("TitleBounce_Off.png")));
+	ADD_LATENT_AUTOMATION_COMMAND(FSetTitleBounceEnabled(true));
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(6.f));
+	ADD_LATENT_AUTOMATION_COMMAND(FCheckTitleRuntimeExposure(this, TEXT("TitleBounce_On.png")));
 	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 	return true;
 }

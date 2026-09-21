@@ -11,6 +11,8 @@ class USkyLightComponent;
 class UPointLightComponent;
 class USpotLightComponent;
 class UCameraComponent;
+class UMaterialInstanceDynamic;
+class UTunaSweeperTitleSkeletalMeshComponent;
 
 // Independently editable title set, lighting, and camera-aligned matte backdrop.
 UCLASS(BlueprintType, Blueprintable)
@@ -34,6 +36,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Backdrop", meta = (ClampMin = "1.0", ClampMax = "22.0"))
 	float BackdropFStop = 2.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Lighting")
+	FLinearColor IndirectBouncePlaneColor = FLinearColor(0.18f, 0.40f, 0.38f, 1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Lighting")
+	bool bEnableIndirectBouncePlane = true;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
@@ -61,7 +69,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
 	TObjectPtr<UPointLightComponent> EmptyWallLight;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
+	TObjectPtr<UStaticMeshComponent> IndirectBouncePlane;
+
 
 private:
 	void UpdateBackdrop();
+	void UpdateIndirectBouncePlane(const class UCameraComponent* Camera, const class UTunaSweeperTitleSkeletalMeshComponent* Body, float TanHalfVerticalFOV);
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> IndirectBouncePlaneMaterial;
 };

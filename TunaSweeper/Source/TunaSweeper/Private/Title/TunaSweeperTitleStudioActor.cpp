@@ -10,6 +10,7 @@
 #include "SceneView.h"
 #include "GameFramework/PlayerController.h"
 #include "Materials/MaterialInterface.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace TunaSweeperTitlePresentation
@@ -48,16 +49,28 @@ ATunaSweeperTitleStudioActor::ATunaSweeperTitleStudioActor()
 	RightWall->SetupAttachment(SceneRoot);
 	Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
 	Floor->SetupAttachment(SceneRoot);
+	IndirectBouncePlane = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("IndirectBouncePlane"));
+	IndirectBouncePlane->SetupAttachment(SceneRoot);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshFinder(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialFinder(
 		TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Plane(
+		TEXT("/Engine/BasicShapes/Plane.Plane"));
 	UStaticMesh* CubeMesh = CubeMeshFinder.Succeeded() ? CubeMeshFinder.Object : nullptr;
 	UMaterialInterface* WallMaterial = WallMaterialFinder.Succeeded() ? WallMaterialFinder.Object : nullptr;
 	TunaSweeperTitlePresentation::ConfigureWallComponent(BackWall, CubeMesh, WallMaterial);
 	TunaSweeperTitlePresentation::ConfigureWallComponent(LeftWall, CubeMesh, WallMaterial);
 	TunaSweeperTitlePresentation::ConfigureWallComponent(RightWall, CubeMesh, WallMaterial);
 	TunaSweeperTitlePresentation::ConfigureWallComponent(Floor, CubeMesh, WallMaterial);
+	IndirectBouncePlane->SetStaticMesh(CubeMesh);
+	IndirectBouncePlane->SetMaterial(0, WallMaterial);
+	IndirectBouncePlane->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	IndirectBouncePlane->SetGenerateOverlapEvents(false);
+	IndirectBouncePlane->SetMobility(EComponentMobility::Movable);
+	IndirectBouncePlane->CastShadow = false;
+	IndirectBouncePlane->bAffectDynamicIndirectLighting = true;
+	IndirectBouncePlane->bAffectDistanceFieldLighting = true;
 	AmbientLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("AmbientLight"));
 	AmbientLight->SetupAttachment(SceneRoot);
 	AmbientLight->SetMobility(EComponentMobility::Movable);
@@ -112,7 +125,6 @@ ATunaSweeperTitleStudioActor::ATunaSweeperTitleStudioActor()
 	}
 	MatteBackdrop = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MatteBackdrop"));
 	MatteBackdrop->SetupAttachment(SceneRoot);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Plane(TEXT("/Engine/BasicShapes/Plane.Plane"));
 	MatteBackdrop->SetStaticMesh(Plane.Object);
 	MatteBackdrop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MatteBackdrop->SetGenerateOverlapEvents(false);
@@ -125,6 +137,7 @@ ATunaSweeperTitleStudioActor::ATunaSweeperTitleStudioActor()
 		Part->SetVisibility(false);
 		Part->CastShadow = false;
 	}
+	IndirectBouncePlane->SetVisibility(true);
 }
 
 void ATunaSweeperTitleStudioActor::OnConstruction(const FTransform& Transform)
@@ -148,6 +161,15 @@ void ATunaSweeperTitleStudioActor::Tick(float DeltaSeconds)
 
 void ATunaSweeperTitleStudioActor::UpdateBackdrop()
 {
+	if (!IndirectBouncePlaneMaterial)
+	{
+		IndirectBouncePlaneMaterial = IndirectBouncePlane->CreateDynamicMaterialInstance(0);
+	}
+	if (IndirectBouncePlaneMaterial)
+	{
+		IndirectBouncePlaneMaterial->SetScalarParameterValue(TEXT("Roughness"), 1.0f);
+		IndirectBouncePlaneMaterial->SetVectorParameterValue(TEXT("Color"), IndirectBouncePlaneColor);
+	}
 	for (UStaticMeshComponent* Part : {BackWall.Get(), LeftWall.Get(), RightWall.Get(), Floor.Get()})
 	{
 		Part->SetVisibility(bShowStudioGeometry);
@@ -192,10 +214,39 @@ void ATunaSweeperTitleStudioActor::UpdateBackdrop()
 	}
 	constexpr float Distance = 3000.0f;
 	const FVector2D Size = CalculateBackdropSize(Camera, ViewportSize, AxisConstraint);
+	UpdateIndirectBouncePlane(Camera, Body, Size.Y / (6000.0f * 1.08f));
 	// Plane X/Y span camera right/down; the normal points back toward the lens.
 	MatteBackdrop->SetWorldLocation(Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance);
 	MatteBackdrop->SetWorldRotation(FRotationMatrix::MakeFromXY(Camera->GetRightVector(), -Camera->GetUpVector()).ToQuat());
 	MatteBackdrop->SetWorldScale3D(FVector(Size.X / 100.0f, Size.Y / 100.0f, FMath::Min(Size.X, Size.Y) / 100.0f));
+}
+
+void ATunaSweeperTitleStudioActor::UpdateIndirectBouncePlane(
+	const UCameraComponent* Camera,
+	const UTunaSweeperTitleSkeletalMeshComponent* Body, float TanHalfVerticalFOV)
+{
+	if (!IndirectBouncePlane || !Camera || !Body)
+	{
+		return;
+	}
+	IndirectBouncePlane->SetVisibility(bEnableIndirectBouncePlane && !bShowStudioGeometry);
+	FVector Center = Body->GetComponentLocation() - FVector(0.0f, 0.0f, 22.0f);
+	// A thin solid receiver gives Lumen a closed surface. Keep every top corner
+	// below the actual lower frustum plane, including portrait and submenu views.
+	const FVector LowerPlaneNormal = Camera->GetUpVector() + Camera->GetForwardVector() * TanHalfVerticalFOV;
+	if (LowerPlaneNormal.Z > 0.01f)
+	{
+		for (float X : {-300.0f, 300.0f})
+			for (float Y : {-300.0f, 300.0f})
+			{
+				const FVector Corner = Center + FVector(X, Y, 10.0f);
+				const float AboveEdge = FVector::DotProduct(Corner - Camera->GetComponentLocation(), LowerPlaneNormal);
+				Center.Z -= FMath::Max(0.0f, (AboveEdge + 10.0f) / LowerPlaneNormal.Z);
+			}
+	}
+	IndirectBouncePlane->SetWorldLocation(Center);
+	IndirectBouncePlane->SetWorldRotation(FRotator::ZeroRotator);
+	IndirectBouncePlane->SetWorldScale3D(FVector(6.0f, 6.0f, 0.2f));
 }
 
 FVector2D ATunaSweeperTitleStudioActor::CalculateBackdropSize(const UCameraComponent* Camera,
