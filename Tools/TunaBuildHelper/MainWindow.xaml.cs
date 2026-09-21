@@ -26,6 +26,26 @@ public partial class MainWindow : Window
         RunBatchScript("BuildAndRunTunaSweeper.bat", closeOnSuccess: true);
     }
 
+    private void BuildSteamDemoButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("PackageTunaSweeperSteamDemoWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
+    }
+
+    private void BuildSteamFullButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("PackageTunaSweeperSteamFullWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
+    }
+
+    private void BuildStoveDemoButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("PackageTunaSweeperStoveDemoWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
+    }
+
+    private void BuildStoveFullButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("PackageTunaSweeperStoveFullWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
+    }
+
     private void KillEditorButton_Click(object sender, RoutedEventArgs e)
     {
         RunBatchScript("KillTunaSweeperEditor.bat", closeAlways: true);
@@ -150,7 +170,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void RunBatchScript(string scriptName, bool closeOnSuccess = false, bool closeAlways = false)
+    private void RunBatchScript(
+        string scriptName,
+        bool closeOnSuccess = false,
+        bool closeAlways = false,
+        string? statusResourceKey = null)
     {
         string? scriptPath = FindBatchScript(scriptName);
         if (scriptPath is null)
@@ -179,9 +203,11 @@ public partial class MainWindow : Window
                 WorkingDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory,
                 UseShellExecute = true
             });
-            StatusTextBlock.Text = closeAlways
-                ? "Unreal Editor 종료를 요청했습니다."
-                : "프로젝트 빌드 및 실행을 시작했습니다.";
+            StatusTextBlock.Text = statusResourceKey is not null
+                ? (string)FindResource(statusResourceKey)
+                : closeAlways
+                    ? "Unreal Editor 종료를 요청했습니다."
+                    : "프로젝트 빌드 및 실행을 시작했습니다.";
         }
         catch (Exception exception)
         {

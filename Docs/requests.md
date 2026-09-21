@@ -9690,3 +9690,9 @@
 - 요청: 설명의 키 및 마우스 버튼 이름을 볼드로 강조.
 - 완료: CSV 설명 9개 × 3개 언어에 <key> 태그를 지정하고 WBP의 설명을 편집 가능한 RichTextBlock으로 저장했다. DT_TutorialTextStyles의 key 스타일은 Bold 글꼴 및 CJK 대체 글꼴 강조를 사용한다. 나머지 문장은 기존 스타일을 유지한다.
 - 검증: CSV 열 구조/태그 짝 확인, UE 5.7 빌드, TunaSweeper.UI.Tutorial의 두 검사 성공. 실제 3개 언어 렌더링에서 키·버튼만 강조되는 것을 확인했다. 일회성 생성기 제거 후 재빌드·재검증했으며 일본어 미리보기 하나의 덮어쓰기 실패는 백업 후 재생성하여 확인했다. 앞선 A/D·F 키 변경과 함께 한 작업 커밋으로 정리한다.
+
+## 2026-09-21 23:13:31 (소요시간: 00:08:00)
+
+- 요청: Tuna Helper에서 STOVE·Steam Demo/Full 패키징 배치 파일을 버튼으로 연결하고 배치 파일 유효성 확인 후 Release 빌드와 커밋.
+- 완료: Helper에 Steam Demo/Full 및 STOVE Demo/Full 패키징 버튼 4개를 추가하고, 기존 배치 실행 흐름으로 연결. 새 UI 문자열은 WPF 리소스 키로 등록해 버튼·툴팁·상태 표시를 키로 해석하도록 구성. 패키징 배치 파일은 수정하지 않음.
+- 검증: 네 배치 파일의 프로젝트·RunUAT·BuildCookRun·archive·구성 가드·종료 코드 구조를 정적으로 확인. Invalid 구성 인자로 네 파일 모두 종료 코드 2를 반환. TunaBuildHelper Release 빌드 성공(경고 0, 오류 0) 후 TunaSweeper/BatchScripts/BuildHelper 배포 파일 갱신. 실제 Steam/STOVE 패키징은 실행하지 않음.

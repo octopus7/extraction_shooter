@@ -1,14 +1,21 @@
 <Window x:Class="TunaBuildHelper.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Tuna Helper"
         Width="520"
-        Height="550"
+        Height="760"
         MinWidth="440"
         MinHeight="510"
         WindowStartupLocation="CenterScreen"
         Background="#171B22">
     <Window.Resources>
+        <sys:String x:Key="BuildSteamDemoLabel">Steam Demo 빌드</sys:String>
+        <sys:String x:Key="BuildSteamFullLabel">Steam Full 빌드</sys:String>
+        <sys:String x:Key="BuildStoveDemoLabel">STOVE Demo 빌드</sys:String>
+        <sys:String x:Key="BuildStoveFullLabel">STOVE Full 빌드</sys:String>
+        <sys:String x:Key="PackageBuildTooltip">Shipping 패키지를 생성하고 콘솔 창을 유지합니다.</sys:String>
+        <sys:String x:Key="PackageBuildStartedStatus">패키징을 시작했습니다. 콘솔 창에서 진행 상황을 확인하세요.</sys:String>
         <Style TargetType="Button">
             <Setter Property="Foreground" Value="#F5F7FA" />
             <Setter Property="Background" Value="#273140" />
@@ -92,6 +99,36 @@
                         ToolTip="TunaSweeper를 빌드하고 실행합니다.">
                     프로젝트 빌드 및 실행
                 </Button>
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Margin="0,0,5,0"
+                            Click="BuildSteamDemoButton_Click"
+                            Content="{DynamicResource BuildSteamDemoLabel}"
+                            ToolTip="{DynamicResource PackageBuildTooltip}" />
+                    <Button Grid.Column="1"
+                            Margin="5,0,0,0"
+                            Click="BuildSteamFullButton_Click"
+                            Content="{DynamicResource BuildSteamFullLabel}"
+                            ToolTip="{DynamicResource PackageBuildTooltip}" />
+                </Grid>
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button Margin="0,0,5,0"
+                            Click="BuildStoveDemoButton_Click"
+                            Content="{DynamicResource BuildStoveDemoLabel}"
+                            ToolTip="{DynamicResource PackageBuildTooltip}" />
+                    <Button Grid.Column="1"
+                            Margin="5,0,0,0"
+                            Click="BuildStoveFullButton_Click"
+                            Content="{DynamicResource BuildStoveFullLabel}"
+                            ToolTip="{DynamicResource PackageBuildTooltip}" />
+                </Grid>
                 <Button Margin="0,0,0,10"
                         Background="#5A2630"
                         BorderBrush="#82414D"
