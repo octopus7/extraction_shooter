@@ -139,4 +139,7 @@ void ATunaSweeperPlayerController::CloseTutorialPopup()
     bTutorialReviewMode = false;
     SetPause(false);
     ApplyDefaultGameInputMode();
+    // Removing the focused UMG button leaves Slate without a keyboard target until
+    // the next mouse click unless focus is explicitly returned to the game viewport.
+    FSlateApplication::Get().SetAllUserFocusToGameViewport();
 }
