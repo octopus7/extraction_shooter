@@ -9,6 +9,7 @@
 ATunaSweeperSplineConcreteBarrierActor::ATunaSweeperSplineConcreteBarrierActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bRunConstructionScriptOnDrag = true;
 
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	SetRootComponent(Spline);
@@ -75,10 +76,15 @@ void ATunaSweeperSplineConcreteBarrierActor::RebuildSplineMeshes()
 		return;
 	}
 
-	const int32 SegmentCount = Spline->GetNumberOfSplinePoints() - 1;
-	for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+	const float SplineLength = Spline->GetSplineLength();
+	const float MeshLength = FMath::Max(1.0f, BarrierMesh->GetBounds().BoxExtent.X * 2.0f);
+	int32 SegmentIndex = 0;
+	for (float StartDistance = 0.0f; StartDistance < SplineLength - KINDA_SMALL_NUMBER; StartDistance += MeshLength)
 	{
-		USplineMeshComponent* MeshComponent = NewObject<USplineMeshComponent>(this, *FString::Printf(TEXT("BarrierSegment_%d"), SegmentIndex));
+		const float EndDistance = FMath::Min(StartDistance + MeshLength, SplineLength);
+		USplineMeshComponent* MeshComponent = NewObject<USplineMeshComponent>(
+			this, *FString::Printf(TEXT("BarrierSegment_%d"), SegmentIndex++), RF_Transactional);
+		MeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 		MeshComponent->SetMobility(EComponentMobility::Static);
 		MeshComponent->SetStaticMesh(BarrierMesh);
 		MeshComponent->SetForwardAxis(ESplineMeshAxis::X, false);
@@ -88,8 +94,10 @@ void ATunaSweeperSplineConcreteBarrierActor::RebuildSplineMeshes()
 		MeshComponent->RegisterComponent();
 
 		FVector StartLocation, StartTangent, EndLocation, EndTangent;
-		Spline->GetLocationAndTangentAtSplinePoint(SegmentIndex, StartLocation, StartTangent, ESplineCoordinateSpace::Local);
-		Spline->GetLocationAndTangentAtSplinePoint(SegmentIndex + 1, EndLocation, EndTangent, ESplineCoordinateSpace::Local);
+		StartLocation = Spline->GetLocationAtDistanceAlongSpline(StartDistance, ESplineCoordinateSpace::Local);
+		StartTangent = Spline->GetTangentAtDistanceAlongSpline(StartDistance, ESplineCoordinateSpace::Local);
+		EndLocation = Spline->GetLocationAtDistanceAlongSpline(EndDistance, ESplineCoordinateSpace::Local);
+		EndTangent = Spline->GetTangentAtDistanceAlongSpline(EndDistance, ESplineCoordinateSpace::Local);
 		MeshComponent->SetStartAndEnd(StartLocation, StartTangent, EndLocation, EndTangent, true);
 		SplineMeshes.Add(MeshComponent);
 	}
