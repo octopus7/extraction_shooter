@@ -103,8 +103,8 @@
       { "item_id": 2004, "quantity": 1, "drop_chance": 6500 },
       { "item_id": 2006, "quantity": 1, "drop_chance": 4500 },
       { "item_id": 3003, "quantity": 1 },
-      { "item_id": 6004, "quantity": 1, "drop_chance": 2000 },
-      { "item_id": 6005, "quantity": 1, "drop_chance": 2000 }
+      { "item_id": 6004, "quantity": 1, "drop_chance": 3000 },
+      { "item_id": 6005, "quantity": 1, "drop_chance": 500 }
     ]
   },
   {
