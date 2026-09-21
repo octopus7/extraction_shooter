@@ -1,7 +1,7 @@
 #include "Environment/TunaSweeperSplineConcreteBarrierActor.h"
 
 #include "Components/SplineComponent.h"
-#include "Components/SplineMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
@@ -62,7 +62,7 @@ void ATunaSweeperSplineConcreteBarrierActor::SnapSplinePointsToLandscape()
 
 void ATunaSweeperSplineConcreteBarrierActor::RebuildSplineMeshes()
 {
-	for (USplineMeshComponent* MeshComponent : SplineMeshes)
+	for (UStaticMeshComponent* MeshComponent : SplineMeshes)
 	{
 		if (IsValid(MeshComponent))
 		{
@@ -82,23 +82,22 @@ void ATunaSweeperSplineConcreteBarrierActor::RebuildSplineMeshes()
 	for (float StartDistance = 0.0f; StartDistance < SplineLength - KINDA_SMALL_NUMBER; StartDistance += MeshLength)
 	{
 		const float EndDistance = FMath::Min(StartDistance + MeshLength, SplineLength);
-		USplineMeshComponent* MeshComponent = NewObject<USplineMeshComponent>(
+		UStaticMeshComponent* MeshComponent = NewObject<UStaticMeshComponent>(
 			this, *FString::Printf(TEXT("BarrierSegment_%d"), SegmentIndex++), RF_Transactional);
 		MeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-		MeshComponent->SetMobility(EComponentMobility::Static);
+		// Static children cannot attach to a movable spline in a placed level actor.
+		MeshComponent->SetMobility(Spline->Mobility);
 		MeshComponent->SetStaticMesh(BarrierMesh);
-		MeshComponent->SetForwardAxis(ESplineMeshAxis::X, false);
 		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MeshComponent->SetupAttachment(Spline);
 		AddInstanceComponent(MeshComponent);
 		MeshComponent->RegisterComponent();
 
-		FVector StartLocation, StartTangent, EndLocation, EndTangent;
-		StartLocation = Spline->GetLocationAtDistanceAlongSpline(StartDistance, ESplineCoordinateSpace::Local);
-		StartTangent = Spline->GetTangentAtDistanceAlongSpline(StartDistance, ESplineCoordinateSpace::Local);
-		EndLocation = Spline->GetLocationAtDistanceAlongSpline(EndDistance, ESplineCoordinateSpace::Local);
-		EndTangent = Spline->GetTangentAtDistanceAlongSpline(EndDistance, ESplineCoordinateSpace::Local);
-		MeshComponent->SetStartAndEnd(StartLocation, StartTangent, EndLocation, EndTangent, true);
+		const float CenterDistance = (StartDistance + EndDistance) * 0.5f;
+		const FVector CenterLocation = Spline->GetLocationAtDistanceAlongSpline(CenterDistance, ESplineCoordinateSpace::Local);
+		const FVector Tangent = Spline->GetTangentAtDistanceAlongSpline(CenterDistance, ESplineCoordinateSpace::Local);
+		MeshComponent->SetRelativeLocation(CenterLocation);
+		MeshComponent->SetRelativeRotation(Tangent.Rotation());
 		SplineMeshes.Add(MeshComponent);
 	}
 }

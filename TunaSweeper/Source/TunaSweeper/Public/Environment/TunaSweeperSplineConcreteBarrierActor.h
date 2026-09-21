@@ -5,7 +5,7 @@
 #include "TunaSweeperSplineConcreteBarrierActor.generated.h"
 
 class USplineComponent;
-class USplineMeshComponent;
+class UStaticMeshComponent;
 class UStaticMesh;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -35,7 +35,7 @@ public:
 
 private:
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<USplineMeshComponent>> SplineMeshes;
+	TArray<TObjectPtr<UStaticMeshComponent>> SplineMeshes;
 
 	void SnapSplinePointsToLandscape();
 	void RebuildSplineMeshes();
