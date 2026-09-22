@@ -1,12 +1,6 @@
-Tuna Sweeper 데모 텍스트 자료
-STOVE 심사용
+Tuna Sweeper 데모 텍스트 자료 (STOVE 심사용)
 
-기준
-실제 데모 런타임 데이터 기준
-원본 데이터: TunaSweeper/Content/Data
-대상 데이터: ScenarioDefinitions.json, ScenarioTextStrings.csv, UITextStrings.csv, QuestDefinitions.json, QuestTextStrings.csv
-엔딩 대화 원본: ScenarioDefinitions.json + ScenarioTextStrings.csv
-엔딩 안내 원본: UITextStrings.csv
+기준 : 실제 데모 런타임 데이터 기준
 언어: 한국어
 
 ============================================================
@@ -27,14 +21,6 @@ STOVE 심사용
 
 두더지: 취수 스크린이 쓰레기로 꽉 막혔어. 크로우바가 있으면 걷어낼 수 있을 거야.
 두더지: 공구 보관대에서 크로우바를 챙겨. 무리해서 휘두르지는 말고.
-
-[퀘스트 Q3-1: 부러진 밸브 손잡이]
-
-현재 데모 런타임 데이터에 등록된 수락 대사 없음.
-
-[퀘스트 Q3-2: 새는 벙커 배관]
-
-현재 데모 런타임 데이터에 등록된 수락 대사 없음.
 
 [퀘스트 Q4: 오늘의 보상]
 
