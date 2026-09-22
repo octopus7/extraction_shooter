@@ -9725,3 +9725,9 @@
 
 - 요청: GameUserSettings.ini 폴더를 열고 클릭 가능한 링크로 응답.
 - 처리: 파일 존재를 확인하고 Windows 탐색기에서 파일 선택 상태로 열었다.
+
+## 2026-09-22 18:59:53 (소요시간: 00:55:00)
+
+- 요청: 별도 워크트리에서 Steam 인증을 EOS Connect로 래핑하고, 호스트가 공유하는 8자리 숫자 코드로 2인 리슨 서버 코옵에 참가하는 기본 매칭 구현. WBP는 Computer Use 없이 에디터 코드로 생성.
+- 완료: EOS/Steam 온라인 설정, 초대 코드·세션 계약, EOS 세션 GameInstanceSubsystem, localized UMG 코옵 위젯 클래스, WBP_OnlineCoop 애셋, 설정·수동 검증 문서를 추가. 별도 매칭 서버는 추가하지 않음.
+- 검증: UE 5.7 TunaSweeperEditor 빌드 성공. TunaSweeper.OnlineCoop.Code 자동화 테스트 성공. WBP 생성 자동화는 에디터 코드로 실행했으며 생성기 소스는 제거함. 실제 EOS 자격증명 2클라이언트 연결 검증은 자격증명 부재로 미실행.

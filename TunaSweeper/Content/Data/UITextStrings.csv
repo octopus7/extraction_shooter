@@ -338,3 +338,16 @@ ui.tutorial.inventory.body,<key>Tab</> 키로 가방을 열어 가진 물품을 
 ui.interaction.tutorial_review,조작법,Controls,操作方法
 ui.tutorial.heal.title,회복,Heal,回復
 ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 <key>U</> 키로 사용하세요.,Hover over a healing item in your inventory and press <key>U</> to use it.,バッグの回復アイテムにカーソルを合わせて<key>U</>キーで使いましょう。
+ui.coop.host,호스트 방 만들기,Create Host Room,ホストルームを作成
+ui.coop.join_code,초대 코드,Invite Code,招待コード
+ui.coop.join,코드로 참가,Join by Code,コードで参加
+ui.coop.status.0,오프라인,Offline,オフライン
+ui.coop.status.1,초기화 중,Initializing,初期化中
+ui.coop.status.2,인증 중,Authenticating,認証中
+ui.coop.status.3,준비됨,Ready,準備完了
+ui.coop.status.4,방 생성 중,Creating room,ルーム作成中
+ui.coop.status.5,호스트 대기 중,Hosting,ホスト中
+ui.coop.status.6,세션 검색 중,Searching,検索中
+ui.coop.status.7,참가 중,Joining,参加中
+ui.coop.status.8,연결됨,Connected,接続済み
+ui.coop.code_pattern,{0},{0},{0}
