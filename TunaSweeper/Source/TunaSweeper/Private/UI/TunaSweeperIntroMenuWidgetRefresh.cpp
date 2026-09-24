@@ -5,6 +5,7 @@
 
 void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 {
+	if (OnlineCoopButtonText) OnlineCoopButtonText->SetText(ResolveUiText(TEXT("ui.coop.title"), FText::GetEmpty()));
 	const bool bIsDemo = TunaSweeperBuildFlavor::IsDemo();
 	FTunaSweeperSaveSlotSummary Summary;
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))

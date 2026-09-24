@@ -38,6 +38,14 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->AddToRoot();
 	TSharedRef<SWidget> Slate = Menu->TakeWidget();
 	Menu->BindScreenWidgets();
+	UButton* CoopEntry = Cast<UButton>(Menu->FindIntroWidget(TEXT("OnlineCoopButton")));
+	TestNotNull(TEXT("Online co-op entry is present in the composed title menu"), CoopEntry);
+	if (CoopEntry)
+	{
+		TestTrue(TEXT("Online co-op entry has a vertical menu slot"), Cast<UVerticalBoxSlot>(CoopEntry->Slot) != nullptr);
+		TestTrue(TEXT("Online co-op entry binds its open action"), CoopEntry->OnClicked.IsBound());
+		TestNotNull(TEXT("Online co-op entry has a label"), Menu->FindIntroWidget(TEXT("OnlineCoopButtonText")));
+	}
 	UTexture2D* DemoVersionRibbon = LoadObject<UTexture2D>(
 		nullptr,
 		TEXT("/Game/UI/Title/T_DemoVersionRibbon.T_DemoVersionRibbon"));
@@ -198,6 +206,12 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	if (Target)
 	{
 		SaveCapture(Target, TEXT("TitleMain.png"));
+		if (CoopEntry)
+		{
+			const FGeometry& Geometry = CoopEntry->GetCachedGeometry();
+			TestTrue(TEXT("Online co-op entry is laid out"), Geometry.GetLocalSize().X > 100.f && Geometry.GetLocalSize().Y > 10.f);
+			TestTrue(TEXT("Online co-op entry fits the title viewport"), Geometry.GetAbsolutePosition().Y >= 0.f && Geometry.GetAbsolutePosition().Y + Geometry.GetAbsoluteSize().Y <= 1080.f);
+		}
 	}
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(1.0f);

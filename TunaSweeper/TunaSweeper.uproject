@@ -122,14 +122,19 @@
 		},
 		{"Name": "OnlineSubsystemSteam",
 "Enabled": true,
-"TargetAllowList": [
+"PlatformAllowList": [
 "Win64"
 ]
 },
 {
+"Name": "SocketSubsystemEOS",
+"Enabled": true,
+"PlatformAllowList": ["Win64"]
+},
+{
 "Name": "OnlineSubsystemEOS",
 "Enabled": true,
-"TargetAllowList": [
+"PlatformAllowList": [
 "Win64"
 ]
 }

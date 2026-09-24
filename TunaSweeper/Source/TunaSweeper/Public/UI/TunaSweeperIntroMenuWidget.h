@@ -29,6 +29,14 @@ class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
 
 public:
 	void PrepareForInitialViewport();
+
+private:
+	void EnsureOnlineCoopEntry();
+	UFUNCTION() void HandleOnlineCoopClicked();
+	UPROPERTY(Transient) TObjectPtr<UButton> OnlineCoopButton;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> OnlineCoopButtonText;
+	UPROPERTY(Transient) TObjectPtr<UUserWidget> OnlineCoopPanel;
+public:
 	void PrepareForPauseSettings() { bPauseSettingsMode = true; }
 	void ClosePauseSettings();
 	FSimpleMulticastDelegate OnPauseSettingsClosed;

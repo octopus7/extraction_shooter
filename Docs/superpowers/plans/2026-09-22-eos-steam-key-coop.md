@@ -133,3 +133,11 @@
 - [ ] Append the required Korean timestamp/elapsed-time request entry to Docs/requests.md.
 - [ ] Commit all implementation, cleanup, verification, and logging together in one final task commit, then report worktree, commits, and limitations.
 
+
+## 2026-09-25 implementation adjustments
+
+The original per-task commit suggestions above are superseded by the project rule: implementation, generated-asset cleanup, validation, and request logging belong in one continuation commit. The earlier implementation commit was incomplete; the current continuation adds actual listen travel, EOS transport configuration, a separate staging game mode, validated UMG assets, and lifecycle checks.
+
+Steam ticket handling, Connect invalid-user handling, and token refresh use the installed UE 5.7 EOS identity implementation through a narrow AutoLogin adapter rather than duplicating sensitive ticket ownership in game code. The UI explicitly connects before enabling host/join. Pending EOS operations that never call back remain quarantined to prevent late global callbacks corrupting a new operation; the user can close the panel and play offline, or restart to retry online.
+
+Live verification requires two distinct Steam accounts/PCs and configured EOS artifacts. Local automation cannot substitute for that check. Exact completed verification is recorded in Docs/requests.md; full raid gameplay replication is outside this connection-foundation scope.

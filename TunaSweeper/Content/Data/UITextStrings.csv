@@ -338,16 +338,39 @@ ui.tutorial.inventory.body,<key>Tab</> 키로 가방을 열어 가진 물품을 
 ui.interaction.tutorial_review,조작법,Controls,操作方法
 ui.tutorial.heal.title,회복,Heal,回復
 ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 <key>U</> 키로 사용하세요.,Hover over a healing item in your inventory and press <key>U</> to use it.,バッグの回復アイテムにカーソルを合わせて<key>U</>キーで使いましょう。
-ui.coop.host,호스트 방 만들기,Create Host Room,ホストルームを作成
+ui.coop.title,온라인 협동,Online Co-op,オンライン協力
+ui.coop.description,2인 연결 테스트 로비입니다. 진행 상황은 저장되지 않습니다.,Two-player connection test lobby. Progress is not saved.,2人用接続テストロビーです。進行状況は保存されません。
+ui.coop.host,방 만들기,Create Room,ルームを作成
 ui.coop.join_code,초대 코드,Invite Code,招待コード
 ui.coop.join,코드로 참가,Join by Code,コードで参加
-ui.coop.status.0,오프라인,Offline,オフライン
-ui.coop.status.1,초기화 중,Initializing,初期化中
-ui.coop.status.2,인증 중,Authenticating,認証中
-ui.coop.status.3,준비됨,Ready,準備完了
-ui.coop.status.4,방 생성 중,Creating room,ルーム作成中
-ui.coop.status.5,호스트 대기 중,Hosting,ホスト中
-ui.coop.status.6,세션 검색 중,Searching,検索中
-ui.coop.status.7,참가 중,Joining,参加中
-ui.coop.status.8,연결됨,Connected,接続済み
-ui.coop.code_pattern,{0},{0},{0}
+ui.coop.leave,나가기 / 취소,Leave / Cancel,退出 / キャンセル
+ui.coop.close,닫기,Close,閉じる
+ui.coop.code_hint,8자리 코드 입력,Enter 8-digit code,8桁のコードを入力
+ui.coop.no_code,방을 만들면 초대 코드가 표시됩니다.,Create a room to get an invite code.,ルームを作成すると招待コードが表示されます。
+ui.coop.code_pattern,초대 코드: {0},Invite code: {0},招待コード: {0}
+ui.coop.status.Offline,오프라인,Offline,オフライン
+ui.coop.status.Initializing,초기화 중…,Initializing…,初期化中…
+ui.coop.status.Authenticating,인증 중…,Authenticating…,認証中…
+ui.coop.status.Ready,준비됨,Ready,準備完了
+ui.coop.status.Creating,방 생성 중…,Creating room…,ルーム作成中…
+ui.coop.status.Hosting,친구 참가 대기 중,Waiting for a friend,フレンドの参加を待っています
+ui.coop.status.Searching,세션 검색 중…,Searching…,検索中…
+ui.coop.status.Joining,참가 중…,Joining…,参加中…
+ui.coop.status.Connected,연결됨,Connected,接続済み
+ui.coop.status.Failed,연결 실패,Connection failed,接続に失敗しました
+ui.coop.status.Leaving,세션 종료 중…,Leaving session…,セッション終了中…
+ui.coop.error.SubsystemUnavailable,온라인 서비스를 사용할 수 없습니다. EOS 설정을 확인하세요.,Online service unavailable. Check EOS configuration.,オンラインサービスを利用できません。EOS設定を確認してください。
+ui.coop.error.AuthenticationFailed,인증에 실패했습니다. 다시 시도하세요.,Authentication failed. Please retry.,認証に失敗しました。再試行してください。
+ui.coop.error.InvalidInviteCode,초대 코드 8자리를 확인하세요.,Check the 8-digit invite code.,8桁の招待コードを確認してください。
+ui.coop.error.SessionCreateFailed,방을 만들지 못했습니다. 다시 시도하세요.,Could not create a room. Please retry.,ルームを作成できませんでした。再試行してください。
+ui.coop.error.SessionSearchFailed,방을 검색하지 못했습니다. 다시 시도하세요.,Could not search for rooms. Please retry.,ルームを検索できませんでした。再試行してください。
+ui.coop.error.CodeNotFound,초대 코드를 찾을 수 없습니다.,Invite code not found.,招待コードが見つかりません。
+ui.coop.error.RoomFull,방이 가득 찼습니다.,The room is full.,ルームが満員です。
+ui.coop.error.VersionMismatch,호스트와 게임 버전이 다릅니다.,Your game version differs from the host.,ホストとゲームのバージョンが異なります。
+ui.coop.error.JoinFailed,방에 참가하지 못했습니다. 다시 시도하세요.,Could not join the room. Please retry.,ルームに参加できませんでした。再試行してください。
+ui.coop.error.ResolveConnectStringFailed,호스트 연결 주소를 찾지 못했습니다.,Could not resolve the host address.,ホストの接続先を取得できませんでした。
+ui.coop.error.TravelFailed,로비로 이동하지 못했습니다. 다시 시도하세요.,Could not travel to the lobby. Please retry.,ロビーに移動できませんでした。再試行してください。
+ui.coop.error.OperationTimeout,요청 시간이 초과되었습니다. 정리를 기다리거나 게임을 재시작하세요.,Online request timed out. Wait for cleanup or restart the game before retrying.,タイムアウトしました。処理の終了を待つかゲームを再起動してください。
+ui.coop.error.CodeCollision,초대 코드를 생성하지 못했습니다. 다시 시도하세요.,Could not allocate an invite code. Please retry.,招待コードを発行できませんでした。再試行してください。
+ui.coop.error.CleanupFailed,세션을 종료하지 못했습니다. 나가기를 다시 누르세요.,Could not close the session. Try Leave again.,セッションを終了できませんでした。もう一度退出してください。
+ui.coop.connect,온라인 연결,Connect Online,オンラインに接続

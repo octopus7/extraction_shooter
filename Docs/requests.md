@@ -9731,3 +9731,11 @@
 - 요청: 별도 워크트리에서 Steam 인증을 EOS Connect로 래핑하고, 호스트가 공유하는 8자리 숫자 코드로 2인 리슨 서버 코옵에 참가하는 기본 매칭 구현. WBP는 Computer Use 없이 에디터 코드로 생성.
 - 완료: EOS/Steam 온라인 설정, 초대 코드·세션 계약, EOS 세션 GameInstanceSubsystem, localized UMG 코옵 위젯 클래스, WBP_OnlineCoop 애셋, 설정·수동 검증 문서를 추가. 별도 매칭 서버는 추가하지 않음.
 - 검증: UE 5.7 TunaSweeperEditor 빌드 성공. TunaSweeper.OnlineCoop.Code 자동화 테스트 성공. WBP 생성 자동화는 에디터 코드로 실행했으며 생성기 소스는 제거함. 실제 EOS 자격증명 2클라이언트 연결 검증은 자격증명 부재로 미실행.
+
+## 2026-09-25 05:57:00 (소요시간: 00:24:26)
+
+- 요청: 별도 EOS 코옵 워크트리의 남은 작업 진행. 분할 가능한 런타임·대기맵·UI 작업을 서브에이전트에 할당하고 WBP는 Computer Use 없이 에디터 코드로 처리.
+- 완료: Steam 기본 서비스 위의 EOS Connect 인증, 8자리 코드 로비 검색·중복/버전/빌드 구분·2인 제한, EOS P2P listen 접속, 실제 접속 상태 확인, 취소·늦은 콜백·타임아웃 격리·퇴장 처리를 보완. EOS 인증된 전송 신원과 로비 멤버십을 검사하는 독립 CoopStaging 맵/게임모드를 추가했다.
+- UI: 타이틀 진입 버튼, 온라인 연결/방 생성/코드 참가/취소/닫기, 상태·오류를 기존 문자열 키로 연결했다. 한국어·영어·일본어 36개 코옵 키의 누락·중복이 없음을 확인. 잘못된 이전 WBP를 새 커스텀 부모 WBP로 교체하고 재로딩·바인딩·720p 레이아웃·언어 전환을 검사했다. 일회성 생성기는 제거한 후 재빌드·재검증했다.
+- 검증: UE 5.7 TunaSweeperEditor Win64 Development 최종 빌드 성공. TunaSweeper.OnlineCoop 5개, UI.OnlineCoop.Presentation, UI.Title.ScreenAssetsAndTransitions 합계 7개 성공(실패 0). UI 테스트 2개에는 기존 ui.common.confirm 중복 키 및 비어 있는 테스트 워크트리의 업적 저장 파일 읽기 경고가 남아 있다. 보고서: TunaSweeper/Saved/Automation/CoopFinal/index.json. 독립 런타임 리뷰와 git diff --check 통과.
+- 범위 및 정정: 앞선 2026-09-22 완료 기록은 실제 listen 이동과 정상 WBP 검증까지 완료한 것으로 해석하면 안 된다. 이번 후속 작업에서 해당 누락을 보완했다. 실제 EOS 자격증명과 서로 다른 Steam 계정 두 대의 인터넷 연결은 미검증이며, 레이드 전투·아이템·퀘스트 리플리케이션은 이번 기본 연결 구현 범위가 아니다. 저장 데이터 형식은 추가하지 않았다. 끝나지 않는 EOS 요청은 늦은 콜백 충돌 방지를 위해 격리하며 오프라인으로 돌아가거나 게임 재시작 후 재시도할 수 있다.

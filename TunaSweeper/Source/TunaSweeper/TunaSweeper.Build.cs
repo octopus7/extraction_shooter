@@ -16,7 +16,7 @@ public class TunaSweeper : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "UMG", "Slate", "SlateCore", "MediaAssets", "Niagara", "GameplayTags", "PhysicsCore", "ProceduralMeshComponent", "Chaos", "GeometryCollectionEngine", "FieldSystemEngine", "TunaWarpTransition", "MiyakovCharacterSystem" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "DLSSBlueprint", "DeveloperSettings", "ImageWrapper", "Json", "NavigationSystem", "OnlineSubsystem", "OnlineSubsystemUtils", "RenderCore", "RHI", "HTTP" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "DLSSBlueprint", "DeveloperSettings", "ImageWrapper", "Json", "NavigationSystem", "OnlineSubsystem", "OnlineSubsystemUtils", "RenderCore", "RHI", "HTTP", "EngineSettings", "SocketSubsystemEOS", "CoreOnline" });
 
 		bool bStove = Target.Platform == UnrealTargetPlatform.Win64 && Target.Type == TargetType.Game
 			&& (Target.Name == "TunaSweeperStove" || Target.Name == "TunaSweeperStoveDemo");
@@ -101,4 +101,3 @@ public class TunaSweeper : ModuleRules
 		return Literal.Append('"').ToString();
 	}
 }
-

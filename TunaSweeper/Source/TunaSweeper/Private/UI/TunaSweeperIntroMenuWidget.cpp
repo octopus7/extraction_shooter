@@ -58,6 +58,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		AlwaysSlowPresentationToggleButton,
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
 		FName(TEXT("AlwaysSlowPresentationToggleIndicator")));
+	EnsureOnlineCoopEntry();
 	EnsureSaveDataManagementSection();
 	EnsureLanguageOptionRows();
 	ApplyUnifiedControlStyles();
@@ -398,6 +399,8 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 
 void UTunaSweeperIntroMenuWidget::NativeDestruct()
 {
+	if (OnlineCoopPanel) { OnlineCoopPanel->RemoveFromParent(); OnlineCoopPanel = nullptr; }
+	if (OnlineCoopButton) OnlineCoopButton->OnClicked.RemoveDynamic(this, &ThisClass::HandleOnlineCoopClicked);
 	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
