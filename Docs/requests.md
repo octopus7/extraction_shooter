@@ -9744,3 +9744,10 @@
 - 조치: delegate 수정이 포함된 헤더를 Saved/CoopRecovery/2026-09-25/TunaSweeperCoopSessionWidget.h에 복사하고 SHA256 일치를 확인한 뒤 원본 Source에서 제외. 코옵 구현을 main에 병합하거나 빈 함수로 덮지 않음.
 - 검증: UE 5.7 Build.bat TunaSweeperEditor Win64 Development D:/github/extraction_shooter/TunaSweeper/TunaSweeper.uproject -WaitMutex -NoHotReloadFromIDE 성공. UHT 및 DLL 링크 완료(Result: Succeeded). 기존 코드 변경과 Waterfall 애셋은 수정하지 않음.
 - 범위: 원본 빌드 복구 완료이며 코옵 기능 전체 또는 WBP 동작 검증 완료를 뜻하지 않음.
+
+## 2026-09-25 07:09:07 (소요시간: 00:00:43)
+
+- 요청: 별도 작업 트리에만 커밋되어 원본 프로젝트에 미커밋으로 남은 폭포 변경을 다른 사용자 변경과 분리하여 커밋.
+- 범위: UV 폭포 재제작, 이미지 생성 물줄기·포말 텍스처와 원본 프롬프트, 중앙 수면을 유지한 물보라·안개 강화, 검사·셰이더 소스·사용 안내 및 사용하지 않는 이전 물보라 메시 제거를 포함한다. 작업 트리의 7d4bdad0 및 9888903e 결과를 원본 main에 한 커밋으로 정리한다.
+- 검증: 원본 프로젝트의 폭포 관련 파일 20개가 작업 트리 커밋본과 SHA256으로 일치함을 재확인했다. 해당 에셋은 앞선 UE 5.7 에디터·PIE 확인과 최종 WATERFALL_ASSET_CHECKS_PASSED 검사를 마친 결과이며 이번에는 에셋을 재편집하거나 빌드를 실행하지 않았다. 일회성 생성 코드는 포함하지 않는다.
+- 제외: 기존 질문 기록, 다른 요청 기록, Intro UI 코드 변경은 보존하고 이번 커밋에서 제외한다.
