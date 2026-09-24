@@ -9736,3 +9736,11 @@
 - 요청: 현시점 코드에서 EOS 코옵 리플리케이션 구현 전에 미리 검토할 부분을 확인하고, 수정·빌드 없이 리뷰만 수행.
 - 완료: 복제 컴포넌트, RPC, 플레이어 전투·인벤토리 흐름, 투사체 생성, GameMode/맵 이동 구조를 정적 검토하고 우선순위별 위험과 선행 작업을 정리함.
 - 검증: 소스 검색 및 관련 파일 라인 검토만 수행. 코드 수정·빌드·실행 검증은 하지 않음.
+
+## 2026-09-25 05:53:00 (소요시간: 00:02:00)
+
+- 요청: 폭포 작업에서 위임한 원본 프로젝트의 코옵 위젯 UHT/링크 오류를 복구하고 빌드 검증.
+- 원인: 원본 Source에 미추적 TunaSweeperCoopSessionWidget.h만 존재하고 선언된 9개 함수의 구현이 없음. 코옵 전용 워크트리는 다른 OnlineCoopWidget 클래스를 사용하며 원본에서 해당 불완전 클래스의 코드 참조는 없음.
+- 조치: delegate 수정이 포함된 헤더를 Saved/CoopRecovery/2026-09-25/TunaSweeperCoopSessionWidget.h에 복사하고 SHA256 일치를 확인한 뒤 원본 Source에서 제외. 코옵 구현을 main에 병합하거나 빈 함수로 덮지 않음.
+- 검증: UE 5.7 Build.bat TunaSweeperEditor Win64 Development D:/github/extraction_shooter/TunaSweeper/TunaSweeper.uproject -WaitMutex -NoHotReloadFromIDE 성공. UHT 및 DLL 링크 완료(Result: Succeeded). 기존 코드 변경과 Waterfall 애셋은 수정하지 않음.
+- 범위: 원본 빌드 복구 완료이며 코옵 기능 전체 또는 WBP 동작 검증 완료를 뜻하지 않음.
