@@ -9,7 +9,6 @@
 ATunaSweeperSplineConcreteBarrierActor::ATunaSweeperSplineConcreteBarrierActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	bRunConstructionScriptOnDrag = true;
 
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	SetRootComponent(Spline);
