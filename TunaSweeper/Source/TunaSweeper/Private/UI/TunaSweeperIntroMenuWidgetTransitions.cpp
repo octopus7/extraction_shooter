@@ -39,6 +39,14 @@ void UTunaSweeperIntroMenuWidget::BindScreenWidgets()
 	if (UWidget* View = FindIntroWidget(TEXT("SettingsPanelView"))) SettingsPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("DemoNoticePanelView"))) DemoNoticePanel = View;
 	TitleGraphicsSettingsWidget = Cast<UTunaSweeperGraphicsSettingsWidget>(FindIntroWidget(TEXT("TitleGraphicsSettingsWidget")));
+#if UE_BUILD_SHIPPING
+	if (UWidget* Tab = FindIntroWidget(TEXT("DevelopmentTabButtonBox")))
+		Tab->SetVisibility(ESlateVisibility::Collapsed);
+	if (SettingsDevelopmentTabButton)
+		SettingsDevelopmentTabButton->SetVisibility(ESlateVisibility::Collapsed);
+	if (DevelopmentSettingsPanel)
+		DevelopmentSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+#endif
 }
 
 void UTunaSweeperIntroMenuWidget::BeginSettingsEntry()
@@ -65,6 +73,9 @@ void UTunaSweeperIntroMenuWidget::BeginSettingsExit()
 
 void UTunaSweeperIntroMenuWidget::RequestSettingsTab(int32 TabIndex)
 {
+#if UE_BUILD_SHIPPING
+	if (TabIndex == 2) return;
+#endif
 	if (bSettingsExiting || SettingsTransitionTime >= 0.0f) return;
 	const int32 Current = bShowingDevelopmentSettingsTab ? 2 : (bShowingInterfaceSettingsTab ? 1 : 0);
 	if (TabTransitionTime < 0.0f && TabIndex == Current) return;
@@ -100,11 +111,16 @@ void UTunaSweeperIntroMenuWidget::TickMenuTransitions(float DeltaSeconds)
 		Opacity(TEXT("BackFromSettingsButtonBox"), SettingsAlpha);
 		if (MainMenuPanel) MainMenuPanel->SetRenderOpacity(1.0f - SettingsAlpha);
 		Opacity(TEXT("LogoImage"), 1.0f - SettingsAlpha);
-		const TCHAR* Tabs[] = { TEXT("GraphicsTabButtonBox"), TEXT("InterfaceTabButtonBox"), TEXT("DevelopmentTabButtonBox") };
-		for (int32 Index = 0; Index < 3; ++Index)
+		const TCHAR* Tabs[] = { TEXT("GraphicsTabButtonBox"), TEXT("InterfaceTabButtonBox")
+#if !UE_BUILD_SHIPPING
+			, TEXT("DevelopmentTabButtonBox")
+#endif
+		};
+		const int32 TabCount = UE_ARRAY_COUNT(Tabs);
+		for (int32 Index = 0; Index < TabCount; ++Index)
 			Opacity(Tabs[Index], bSettingsExiting ? SettingsAlpha : Smooth((SettingsTransitionTime - 0.10f - Index * SettingsTabStagger) / 0.24f));
 		Opacity(TEXT("SettingsPageStack"), bSettingsExiting ? SettingsAlpha : Smooth((SettingsTransitionTime - 0.22f) / Duration));
-		const float End = bSettingsExiting ? Duration : FMath::Max(Duration + 0.22f, 0.34f + 2.0f * SettingsTabStagger);
+		const float End = bSettingsExiting ? Duration : FMath::Max(Duration + 0.22f, 0.34f + (TabCount - 1) * SettingsTabStagger);
 		if (SettingsTransitionTime >= End) {
 			SettingsTransitionTime = -1.0f;
 			if (bSettingsExiting) {
