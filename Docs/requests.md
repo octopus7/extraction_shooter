@@ -9800,3 +9800,9 @@
 - 완료: 내장 image_gen으로 아이템별 저채도 단색 배경 원본 1장씩 생성하고 프로젝트 스킬로 대응 흑백 배경 및 차분 알파를 계산. 최종 256x256 RGBA 파일 T_UIIcon_WoodenClub.png와 T_UIIcon_MeleeCrowbar.png를 GeneratedImages/ItemIcons/Split에 저장.
 - 검증: 체크 배경 시각 검사, 256x256 크기, 완전 투명·불투명 픽셀 및 모서리 알파 0 확인. 기존 재료용 T_UIIcon_Crowbar.png 보존 확인.
 - 산출물: Sources/MeleeReplacement에 원본·흑백 쌍·체크 미리보기·프롬프트 보관. 데이터·C++ 수정 및 UE 임포트 없음.
+
+## 2026-09-26 17:08:50 (소요시간: 00:00:50)
+
+- 요청: 장비 설명 문서를 만들고 먼저 총 8칸의 몸 슬롯을 기록.
+- 완료: Docs/equipment.md 생성. 총기 1, 총기 2, 근접, 머리, 신체, 얼굴, 이어폰, 가방 순서로 슬롯과 장착 대상을 표로 정리하고 신체 슬롯의 중복 장착 제한을 명시.
+- 검증: C++ 슬롯 규칙 및 UITextStrings.csv의 실제 한국어 슬롯 이름·순서와 대조. 문서 변경만 수행하여 빌드는 생략.
