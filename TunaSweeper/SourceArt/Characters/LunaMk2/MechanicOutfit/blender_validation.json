@@ -1,0 +1,4807 @@
+{
+  "source": "TunaSweeper/SourceArt/Characters/LunaMk2/MechanicOutfit/LunaMk2_MechanicOutfit.blend",
+  "source_sha256": "0122b6a060ba5f18642f2405d26a844f4d36ea5f41ebb569b46aebf932329983",
+  "blender_version": "5.2.0 LTS",
+  "errors": [],
+  "warnings": [],
+  "rig": {
+    "original": "SK_LunaMk2",
+    "preview": "SK_LunaMk2_Mechanic",
+    "bones": 130,
+    "max_rest_matrix_error": 0.0,
+    "object_matrix_error": 0.0,
+    "original_action": "AS_LunaMk2_Title_A",
+    "preview_action": null
+  },
+  "face": {
+    "original": "SKM_LunaFace",
+    "preview": "SKM_LunaFace_MechanicBase",
+    "vertices": 1020,
+    "shape_keys": [
+      "Basis",
+      "Merong",
+      "HalfClosedEye",
+      "Smile",
+      "Mouth_Wa",
+      "Mouth_O",
+      "ClosedEye"
+    ],
+    "max_coordinate_error_by_key": {
+      "Basis": 0.0,
+      "Merong": 0.0,
+      "HalfClosedEye": 0.0,
+      "Smile": 0.0,
+      "Mouth_Wa": 0.0,
+      "Mouth_O": 0.0,
+      "ClosedEye": 0.0
+    }
+  },
+  "meshes": {
+    "Mechanic_Belt_Buckle": {
+      "vertices": 30,
+      "polygons": 56,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          -0.01720000058412552,
+          -0.12091841548681259,
+          0.9088000059127808
+        ],
+        [
+          0.0164084043353796,
+          -0.11680211871862411,
+          0.9376900792121887
+        ]
+      ],
+      "maximum_weight_sum_error": 3.573950380086899E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.0957851091810753E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Bib_EdgeStitch_-1": {
+      "vertices": 42,
+      "polygons": 80,
+      "triangles": 80,
+      "bounds_m": [
+        [
+          -0.07969412207603455,
+          -0.07981138676404953,
+          0.919597327709198
+        ],
+        [
+          -0.05130000039935112,
+          -0.04328817129135132,
+          1.0931769609451294
+        ]
+      ],
+      "maximum_weight_sum_error": 3.073364496231079E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.121747685331271E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Bib_EdgeStitch_1": {
+      "vertices": 42,
+      "polygons": 80,
+      "triangles": 80,
+      "bounds_m": [
+        [
+          0.05130000039935112,
+          -0.07982003688812256,
+          0.9195980429649353
+        ],
+        [
+          0.07969412207603455,
+          -0.043292105197906494,
+          1.0931785106658936
+        ]
+      ],
+      "maximum_weight_sum_error": 3.3993273973464966E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1216946039037072E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Collar_L": {
+      "vertices": 64,
+      "polygons": 32,
+      "triangles": 64,
+      "bounds_m": [
+        [
+          0.05700000002980232,
+          -0.04500000178813934,
+          0.1850000023841858
+        ],
+        [
+          0.13899999856948853,
+          0.04899999871850014,
+          0.20399999618530273
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 64,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 7.471026017525663E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Collar_R": {
+      "vertices": 64,
+      "polygons": 32,
+      "triangles": 64,
+      "bounds_m": [
+        [
+          -0.13899999856948853,
+          -0.04500000178813934,
+          0.1850000023841858
+        ],
+        [
+          -0.05700000002980232,
+          0.04899999871850014,
+          0.20399999618530273
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 64,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 7.471026093437802E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.0723000019788742,
+          -0.08407999575138092,
+          0.1022999957203865
+        ],
+        [
+          0.07770000398159027,
+          -0.08191999793052673,
+          0.10769999772310257
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149501606653715E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.001": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.11829999834299088,
+          -0.08407999575138092,
+          0.1022999957203865
+        ],
+        [
+          0.12370000034570694,
+          -0.08191999793052673,
+          0.10769999772310257
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149501606653715E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.002": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.0723000019788742,
+          -0.07407999783754349,
+          0.12330000102519989
+        ],
+        [
+          0.07770000398159027,
+          -0.0719200000166893,
+          0.12870000302791595
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.003": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.11829999834299088,
+          -0.07407999783754349,
+          0.12330000102519989
+        ],
+        [
+          0.12370000034570694,
+          -0.0719200000166893,
+          0.12870000302791595
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.004": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.0723000019788742,
+          -0.06407999992370605,
+          0.14429999887943268
+        ],
+        [
+          0.07770000398159027,
+          -0.06192000210285187,
+          0.14970000088214874
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.005": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.11829999834299088,
+          -0.06407999992370605,
+          0.14429999887943268
+        ],
+        [
+          0.12370000034570694,
+          -0.06192000210285187,
+          0.14970000088214874
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.006": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.0723000019788742,
+          -0.05407999828457832,
+          0.16529999673366547
+        ],
+        [
+          0.07770000398159027,
+          -0.051920000463724136,
+          0.17069999873638153
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_L.007": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.11829999834299088,
+          -0.05407999828457832,
+          0.16529999673366547
+        ],
+        [
+          0.12370000034570694,
+          -0.051920000463724136,
+          0.17069999873638153
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.12370000034570694,
+          -0.08407999575138092,
+          0.1022999957203865
+        ],
+        [
+          -0.11829999834299088,
+          -0.08191999793052673,
+          0.10769999772310257
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149501606653715E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.001": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.07770000398159027,
+          -0.08407999575138092,
+          0.1022999957203865
+        ],
+        [
+          -0.0723000019788742,
+          -0.08191999793052673,
+          0.10769999772310257
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149501606653715E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.002": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.12370000034570694,
+          -0.07407999783754349,
+          0.12330000102519989
+        ],
+        [
+          -0.11829999834299088,
+          -0.0719200000166893,
+          0.12870000302791595
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.003": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.07770000398159027,
+          -0.07407999783754349,
+          0.12330000102519989
+        ],
+        [
+          -0.0723000019788742,
+          -0.0719200000166893,
+          0.12870000302791595
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.004": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.12370000034570694,
+          -0.06407999992370605,
+          0.14429999887943268
+        ],
+        [
+          -0.11829999834299088,
+          -0.06192000210285187,
+          0.14970000088214874
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.005": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.07770000398159027,
+          -0.06407999992370605,
+          0.14429999887943268
+        ],
+        [
+          -0.0723000019788742,
+          -0.06192000210285187,
+          0.14970000088214874
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.006": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.12370000034570694,
+          -0.05407999828457832,
+          0.16529999673366547
+        ],
+        [
+          -0.11829999834299088,
+          -0.051920000463724136,
+          0.17069999873638153
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Eyelet_R.007": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.07770000398159027,
+          -0.05407999828457832,
+          0.16529999673366547
+        ],
+        [
+          -0.0723000019788742,
+          -0.051920000463724136,
+          0.17069999873638153
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9149464447048057E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_L_0": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.08838246762752533,
+          0.10348210483789444
+        ],
+        [
+          0.11950596421957016,
+          -0.08261752873659134,
+          0.12051789462566376
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_L_1": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.0783824697136879,
+          0.12448211014270782
+        ],
+        [
+          0.11950596421957016,
+          -0.0726175308227539,
+          0.14151789247989655
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_L_2": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.06838247179985046,
+          0.1454821079969406
+        ],
+        [
+          0.11950596421957016,
+          -0.06261753290891647,
+          0.16251789033412933
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_L_3": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.05838247016072273,
+          0.1664821058511734
+        ],
+        [
+          0.11950596421957016,
+          -0.05261753126978874,
+          0.18351788818836212
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_R_0": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.08838246762752533,
+          0.10348210483789444
+        ],
+        [
+          -0.07649403810501099,
+          -0.08261752873659134,
+          0.12051789462566376
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_R_1": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.0783824697136879,
+          0.12448211014270782
+        ],
+        [
+          -0.07649403810501099,
+          -0.0726175308227539,
+          0.14151789247989655
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_R_2": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.06838247179985046,
+          0.1454821079969406
+        ],
+        [
+          -0.07649403810501099,
+          -0.06261753290891647,
+          0.16251789033412933
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_LaceCross_R_3": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.05838247016072273,
+          0.1664821058511734
+        ],
+        [
+          -0.07649403810501099,
+          -0.05261753126978874,
+          0.18351788818836212
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_L_0": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.08838246762752533,
+          0.10348210483789444
+        ],
+        [
+          0.11950596421957016,
+          -0.08261752873659134,
+          0.12051789462566376
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_L_1": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.0783824697136879,
+          0.12448211014270782
+        ],
+        [
+          0.11950596421957016,
+          -0.0726175308227539,
+          0.14151789247989655
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_L_2": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.06838247179985046,
+          0.1454821079969406
+        ],
+        [
+          0.11950596421957016,
+          -0.06261753290891647,
+          0.16251789033412933
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_L_3": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.07649403810501099,
+          -0.05838247016072273,
+          0.1664821058511734
+        ],
+        [
+          0.11950596421957016,
+          -0.05261753126978874,
+          0.18351788818836212
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_R_0": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.08838246762752533,
+          0.10348210483789444
+        ],
+        [
+          -0.07649403810501099,
+          -0.08261752873659134,
+          0.12051789462566376
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_R_1": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.0783824697136879,
+          0.12448211014270782
+        ],
+        [
+          -0.07649403810501099,
+          -0.0726175308227539,
+          0.14151789247989655
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_R_2": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.06838247179985046,
+          0.1454821079969406
+        ],
+        [
+          -0.07649403810501099,
+          -0.06261753290891647,
+          0.16251789033412933
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Lace_R_3": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.11950596421957016,
+          -0.05838247016072273,
+          0.1664821058511734
+        ],
+        [
+          -0.07649403810501099,
+          -0.05261753126978874,
+          0.18351788818836212
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1085109114026745E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_SoleBottom_L": {
+      "vertices": 40,
+      "polygons": 1,
+      "triangles": 38,
+      "bounds_m": [
+        [
+          0.04100000113248825,
+          -0.1770000010728836,
+          -0.007000000216066837
+        ],
+        [
+          0.1550000011920929,
+          0.06499999761581421,
+          -0.007000000216066837
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 40,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3283274903019837E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_SoleBottom_R": {
+      "vertices": 40,
+      "polygons": 1,
+      "triangles": 38,
+      "bounds_m": [
+        [
+          -0.1550000011920929,
+          -0.1770000010728836,
+          -0.007000000216066837
+        ],
+        [
+          -0.04100000113248825,
+          0.06499999761581421,
+          -0.007000000216066837
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 40,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3283274903019837E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Sole_L": {
+      "vertices": 160,
+      "polygons": 120,
+      "triangles": 240,
+      "bounds_m": [
+        [
+          0.039000000804662704,
+          -0.1770000010728836,
+          -0.007000000216066837
+        ],
+        [
+          0.15700000524520874,
+          0.06499999761581421,
+          0.029999999329447746
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 80,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.441146531799952E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Sole_R": {
+      "vertices": 160,
+      "polygons": 120,
+      "triangles": 240,
+      "bounds_m": [
+        [
+          -0.15700000524520874,
+          -0.1770000010728836,
+          -0.007000000216066837
+        ],
+        [
+          -0.039000000804662704,
+          0.06499999761581421,
+          0.029999999329447746
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 80,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.441146531799952E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Upper_L": {
+      "vertices": 280,
+      "polygons": 240,
+      "triangles": 480,
+      "bounds_m": [
+        [
+          0.04500000178813934,
+          -0.16899999976158142,
+          0.02800000086426735
+        ],
+        [
+          0.1509999930858612,
+          0.05700000002980232,
+          0.19900000095367432
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 80,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 7.840068621699529E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Upper_R": {
+      "vertices": 280,
+      "polygons": 240,
+      "triangles": 480,
+      "bounds_m": [
+        [
+          -0.1509999930858612,
+          -0.16899999976158142,
+          0.02800000086426735
+        ],
+        [
+          -0.04500000178813934,
+          0.05700000002980232,
+          0.19900000095367432
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 80,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 7.840061644946711E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Welt_L": {
+      "vertices": 80,
+      "polygons": 40,
+      "triangles": 80,
+      "bounds_m": [
+        [
+          0.0430000014603138,
+          -0.17299999296665192,
+          0.026000000536441803
+        ],
+        [
+          0.15299999713897705,
+          0.061000000685453415,
+          0.03500000014901161
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 80,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.945863898041348E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Boot_Welt_R": {
+      "vertices": 80,
+      "polygons": 40,
+      "triangles": 80,
+      "bounds_m": [
+        [
+          -0.15299999713897705,
+          -0.17299999296665192,
+          0.026000000536441803
+        ],
+        [
+          -0.0430000014603138,
+          0.061000000685453415,
+          0.03500000014901161
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 80,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.945863898041348E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Buckle_Pin": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.0013000000035390258,
+          -0.12360301613807678,
+          0.9119963049888611
+        ],
+        [
+          0.0013000000035390258,
+          -0.12127569317817688,
+          0.9350036978721619
+        ]
+      ],
+      "maximum_weight_sum_error": 2.922024577856064E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 7.317917749222475E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_ChestPocket_Lip": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.04400051012635231,
+          -0.07706139236688614,
+          1.0390000343322754
+        ],
+        [
+          0.04400051012635231,
+          -0.0744287446141243,
+          1.0420000553131104
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.74208357231567E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_ChestPocket_Stitch": {
+      "vertices": 36,
+      "polygons": 68,
+      "triangles": 68,
+      "bounds_m": [
+        [
+          -0.044698718935251236,
+          -0.07633272558450699,
+          0.9963066577911377
+        ],
+        [
+          0.044698718935251236,
+          -0.06326848268508911,
+          1.0402261018753052
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1217356613758583E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_HipPocket_-1": {
+      "vertices": 35,
+      "polygons": 48,
+      "triangles": 48,
+      "bounds_m": [
+        [
+          -0.10100000351667404,
+          -0.10106240957975388,
+          0.8460000157356262
+        ],
+        [
+          -0.054999999701976776,
+          -0.05881106108427048,
+          0.906000018119812
+        ]
+      ],
+      "maximum_weight_sum_error": 3.166496753692627E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 20,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.699444772480884E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_HipPocket_1": {
+      "vertices": 35,
+      "polygons": 48,
+      "triangles": 48,
+      "bounds_m": [
+        [
+          0.054999999701976776,
+          -0.10104867070913315,
+          0.8460000157356262
+        ],
+        [
+          0.10100000351667404,
+          -0.058828167617321014,
+          0.906000018119812
+        ]
+      ],
+      "maximum_weight_sum_error": 3.818422555923462E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 20,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.6985998464193853E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_HipPocket_Stitch_-1": {
+      "vertices": 30,
+      "polygons": 56,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          -0.10167616605758667,
+          -0.10466576367616653,
+          0.8453044891357422
+        ],
+        [
+          -0.054300662130117416,
+          -0.061235297471284866,
+          0.9060406684875488
+        ]
+      ],
+      "maximum_weight_sum_error": 4.7963112592697144E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.121754908023772E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_HipPocket_Stitch_1": {
+      "vertices": 30,
+      "polygons": 56,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          0.054300662130117416,
+          -0.1046520471572876,
+          0.8453044891357422
+        ],
+        [
+          0.10167616605758667,
+          -0.061252422630786896,
+          0.906040608882904
+        ]
+      ],
+      "maximum_weight_sum_error": 3.14321368932724E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1217541909013195E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_KneeReinforcement_-1": {
+      "vertices": 120,
+      "polygons": 196,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          -0.11999999731779099,
+          -0.10218445956707001,
+          0.4269999861717224
+        ],
+        [
+          -0.03400000184774399,
+          -0.050942614674568176,
+          0.546999990940094
+        ]
+      ],
+      "maximum_weight_sum_error": 3.8879079511389136E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 42,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.5504313019233124E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_KneeReinforcement_1": {
+      "vertices": 120,
+      "polygons": 196,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          0.03400000184774399,
+          -0.10202755033969879,
+          0.4269999861717224
+        ],
+        [
+          0.11999999731779099,
+          -0.05064369738101959,
+          0.546999990940094
+        ]
+      ],
+      "maximum_weight_sum_error": 3.3993273973464966E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 42,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.579749281379803E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Knee_Stitch_-1": {
+      "vertices": 186,
+      "polygons": 368,
+      "triangles": 368,
+      "bounds_m": [
+        [
+          -0.12069912254810333,
+          -0.10425538569688797,
+          0.4262999892234802
+        ],
+        [
+          -0.03330087661743164,
+          -0.052470553666353226,
+          0.5476999878883362
+        ]
+      ],
+      "maximum_weight_sum_error": 4.1416569729335606E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1217404913275052E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Knee_Stitch_1": {
+      "vertices": 186,
+      "polygons": 368,
+      "triangles": 368,
+      "bounds_m": [
+        [
+          0.03330087661743164,
+          -0.10411710292100906,
+          0.4262999892234802
+        ],
+        [
+          0.12069912254810333,
+          -0.05217229202389717,
+          0.5476999878883362
+        ]
+      ],
+      "maximum_weight_sum_error": 3.119930624961853E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1217465524664511E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_LargeChestPocket": {
+      "vertices": 45,
+      "polygons": 64,
+      "triangles": 64,
+      "bounds_m": [
+        [
+          -0.04399999976158142,
+          -0.08360002189874649,
+          0.996999979019165
+        ],
+        [
+          0.04399999976158142,
+          -0.06285849958658218,
+          1.0399999618530273
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 24,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.2707363466370712E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Overall_Bib": {
+      "vertices": 63,
+      "polygons": 48,
+      "triangles": 96,
+      "bounds_m": [
+        [
+          -0.0820000022649765,
+          -0.11352487653493881,
+          0.9200000166893005
+        ],
+        [
+          0.0820000022649765,
+          -0.037951890379190445,
+          1.093000054359436
+        ]
+      ],
+      "maximum_weight_sum_error": 4.866160452365875E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 28,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 0.00019062752444644072,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Overall_Strap_-1": {
+      "vertices": 183,
+      "polygons": 120,
+      "triangles": 240,
+      "bounds_m": [
+        [
+          -0.06400000303983688,
+          -0.066381074488163,
+          0.9139999747276306
+        ],
+        [
+          0.06499999761581421,
+          0.0748935118317604,
+          1.153125524520874
+        ]
+      ],
+      "maximum_weight_sum_error": 3.818422555923462E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 124,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.185224910986085E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Overall_Strap_1": {
+      "vertices": 183,
+      "polygons": 120,
+      "triangles": 240,
+      "bounds_m": [
+        [
+          -0.06499999761581421,
+          -0.06636733561754227,
+          0.9139999747276306
+        ],
+        [
+          0.06400000303983688,
+          0.0768907368183136,
+          1.1530400514602661
+        ]
+      ],
+      "maximum_weight_sum_error": 3.632158041000366E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 124,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.322878738918664E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Overall_Trousers": {
+      "vertices": 835,
+      "polygons": 1516,
+      "triangles": 1568,
+      "bounds_m": [
+        [
+          -0.14988762421067792,
+          -0.10994686214165973,
+          0.16500002033724126
+        ],
+        [
+          0.14992604868952197,
+          0.056173130597235256,
+          0.9450000066328784
+        ]
+      ],
+      "maximum_weight_sum_error": 1.4408768038265407E-05,
+      "max_deform_influences": 7,
+      "boundary_edges": 104,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.7621771788119582E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Pocket_Tab": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.0215000007301569,
+          -0.08543085306882858,
+          1.031499981880188
+        ],
+        [
+          0.032499998807907104,
+          -0.08243084698915482,
+          1.0405000448226929
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.302628709611657E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Pouch_BeltLoop": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.11600000411272049,
+          0.0015000002458691597,
+          0.8899999856948853
+        ],
+        [
+          0.12800000607967377,
+          0.010499999858438969,
+          0.937999963760376
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.210519908639631E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Pouch_BeltLoop.001": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.15299999713897705,
+          0.0015000002458691597,
+          0.8899999856948853
+        ],
+        [
+          0.16499999165534973,
+          0.010499999858438969,
+          0.937999963760376
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.210544227896409E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Pouch_Snap": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.14000000059604645,
+          -0.050599999725818634,
+          0.875
+        ],
+        [
+          0.14799998700618744,
+          -0.04739999771118164,
+          0.8830000162124634
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.2028905849000484E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_RolledSleeve_L": {
+      "vertices": 48,
+      "polygons": 24,
+      "triangles": 48,
+      "bounds_m": [
+        [
+          0.13266019523143768,
+          -0.03781311959028244,
+          0.9928689002990723
+        ],
+        [
+          0.19332638382911682,
+          0.03235602378845215,
+          1.0411946773529053
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 48,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.750757240334806E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_RolledSleeve_R": {
+      "vertices": 48,
+      "polygons": 24,
+      "triangles": 48,
+      "bounds_m": [
+        [
+          -0.19305381178855896,
+          -0.03784937784075737,
+          0.9928551912307739
+        ],
+        [
+          -0.1322517991065979,
+          0.03232019767165184,
+          1.0409833192825317
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 48,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.750779271294174E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Shirt_NeckRib": {
+      "vertices": 144,
+      "polygons": 96,
+      "triangles": 192,
+      "bounds_m": [
+        [
+          -0.03200000151991844,
+          -0.019999999552965164,
+          1.1449999809265137
+        ],
+        [
+          0.03200000151991844,
+          0.03799999877810478,
+          1.1720000505447388
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 96,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.2851843134621563E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Strap_Stitch_-1_-0.007": {
+      "vertices": 366,
+      "polygons": 728,
+      "triangles": 728,
+      "bounds_m": [
+        [
+          -0.06155000627040863,
+          -0.06354767084121704,
+          0.9137889742851257
+        ],
+        [
+          0.04854759946465492,
+          0.07714522629976273,
+          1.1547611951828003
+        ]
+      ],
+      "maximum_weight_sum_error": 4.1443854570388794E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.286515369164263E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Strap_Stitch_-1_0.007": {
+      "vertices": 366,
+      "polygons": 728,
+      "triangles": 728,
+      "bounds_m": [
+        [
+          -0.047550007700920105,
+          -0.06810151785612106,
+          0.9137657284736633
+        ],
+        [
+          0.06254759430885315,
+          0.07709213346242905,
+          1.1489394903182983
+        ]
+      ],
+      "maximum_weight_sum_error": 3.4458935260772705E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1801850716485009E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Strap_Stitch_1_-0.007": {
+      "vertices": 366,
+      "polygons": 728,
+      "triangles": 728,
+      "bounds_m": [
+        [
+          -0.06254759430885315,
+          -0.0680878534913063,
+          0.913765549659729
+        ],
+        [
+          0.047550007700920105,
+          0.07908941060304642,
+          1.1489155292510986
+        ]
+      ],
+      "maximum_weight_sum_error": 3.958120942115784E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 8.651086928679673E-08,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Strap_Stitch_1_0.007": {
+      "vertices": 366,
+      "polygons": 728,
+      "triangles": 728,
+      "bounds_m": [
+        [
+          -0.04854759946465492,
+          -0.06352310627698898,
+          0.9137887954711914
+        ],
+        [
+          0.06155000627040863,
+          0.07914791256189346,
+          1.154707908630371
+        ]
+      ],
+      "maximum_weight_sum_error": 3.818422555923462E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3098114015446904E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Suspender_Button_-1": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.048500001430511475,
+          -0.07399795204401016,
+          1.0575000047683716
+        ],
+        [
+          -0.04150000214576721,
+          -0.07119794934988022,
+          1.0644999742507935
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.217778743950597E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Suspender_Button_1": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          0.04150000214576721,
+          -0.07398051768541336,
+          1.0575000047683716
+        ],
+        [
+          0.048500001430511475,
+          -0.07118051499128342,
+          1.0644999742507935
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.217778743950597E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Suspender_Clasp_-1": {
+      "vertices": 30,
+      "polygons": 56,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          -0.056699998676776886,
+          -0.07307019084692001,
+          1.0683000087738037
+        ],
+        [
+          -0.03386275842785835,
+          -0.07012570649385452,
+          1.089263677597046
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.2513502500866025E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Suspender_Clasp_1": {
+      "vertices": 30,
+      "polygons": 56,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          0.0333000011742115,
+          -0.07305275648832321,
+          1.0683000087738037
+        ],
+        [
+          0.056137241423130035,
+          -0.07010827213525772,
+          1.089263677597046
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.2513502500866025E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_ToolPouch": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.11300000548362732,
+          -0.03750000149011612,
+          0.8125
+        ],
+        [
+          0.1730000078678131,
+          0.017500000074505806,
+          0.8975000381469727
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4737294187022558E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_ToolPouch_Flap": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.11449999362230301,
+          -0.04700000211596489,
+          0.8709999918937683
+        ],
+        [
+          0.17350000143051147,
+          -0.03500000014901161,
+          0.8989999890327454
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.684313398699062E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Tool_Screwdriver_Handle": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.15700000524520874,
+          0.0019999993965029716,
+          0.9735000133514404
+        ],
+        [
+          0.17100000381469727,
+          0.01599999889731407,
+          1.006500005722046
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.756713641767659E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Tool_Screwdriver_Shaft": {
+      "vertices": 12,
+      "polygons": 20,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.16189999878406525,
+          0.007181346416473389,
+          0.9039999842643738
+        ],
+        [
+          0.16610001027584076,
+          0.01081865280866623,
+          0.9789999723434448
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.909577530767592E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Tool_Wrench": {
+      "vertices": 24,
+      "polygons": 14,
+      "triangles": 44,
+      "bounds_m": [
+        [
+          0.11500000208616257,
+          -0.011500000022351742,
+          0.8859999775886536
+        ],
+        [
+          0.14900000393390656,
+          -0.006500000134110451,
+          1.0010000467300415
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.4999975599349078E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Trouser_Hem_L": {
+      "vertices": 64,
+      "polygons": 32,
+      "triangles": 64,
+      "bounds_m": [
+        [
+          0.05276384949684143,
+          -0.05099281296133995,
+          0.16500000655651093
+        ],
+        [
+          0.1384243369102478,
+          0.03735853359103203,
+          0.18199999630451202
+        ]
+      ],
+      "maximum_weight_sum_error": 3.003515303134918E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 64,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.274257971915986E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Trouser_Hem_R": {
+      "vertices": 64,
+      "polygons": 32,
+      "triangles": 64,
+      "bounds_m": [
+        [
+          -0.13841864466667175,
+          -0.05133189633488655,
+          0.16500000655651093
+        ],
+        [
+          -0.05276025831699371,
+          0.03703315183520317,
+          0.18199999630451202
+        ]
+      ],
+      "maximum_weight_sum_error": 2.8870999813079834E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 64,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.229426188586767E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Undershirt_Body": {
+      "vertices": 640,
+      "polygons": 576,
+      "triangles": 1152,
+      "bounds_m": [
+        [
+          -0.10300000011920929,
+          -0.07400000095367432,
+          0.9300000071525574
+        ],
+        [
+          0.10300000011920929,
+          0.07000000029802322,
+          1.1579999923706055
+        ]
+      ],
+      "maximum_weight_sum_error": 4.0978193283081055E-08,
+      "max_deform_influences": 5,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.0923151959729515E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Undershirt_Sleeve_L": {
+      "vertices": 216,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          0.04287807643413544,
+          -0.040725212544202805,
+          0.9942193627357483
+        ],
+        [
+          0.19152170419692993,
+          0.04106850549578667,
+          1.152814507484436
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 48,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.5040978503533533E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Undershirt_Sleeve_R": {
+      "vertices": 216,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          -0.19124390184879303,
+          -0.040784627199172974,
+          0.9941986203193665
+        ],
+        [
+          -0.04287807643413544,
+          0.041001126170158386,
+          1.1528441905975342
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 48,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.5041396166591074E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_UtilityBelt": {
+      "vertices": 128,
+      "polygons": 64,
+      "triangles": 128,
+      "bounds_m": [
+        [
+          -0.10050886869430542,
+          -0.1134771928191185,
+          0.9110000133514404
+        ],
+        [
+          0.10051500797271729,
+          0.05934617668390274,
+          0.9350000023841858
+        ]
+      ],
+      "maximum_weight_sum_error": 4.1211023926734924E-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 7.59641723046621E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Mechanic_Wrench_Grip": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.125,
+          -0.014499999582767487,
+          0.8960000276565552
+        ],
+        [
+          0.13899999856948853,
+          -0.005499999970197678,
+          0.9420000314712524
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.0724297397794993E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    }
+  },
+  "actions": {
+    "AS_LunaMk2_Title_A": {
+      "frames_sampled": [
+        1,
+        11,
+        21,
+        31,
+        41,
+        51,
+        61,
+        71,
+        81,
+        91,
+        101,
+        111,
+        121
+      ],
+      "max_bone_basis_rotation_radians": 1.1512305736541748,
+      "meshes": {
+        "Mechanic_Belt_Buckle": {
+          "max_vertex_displacement_m": 0.04121259831580196,
+          "min_edge_length_ratio": 0.6872021677919203,
+          "max_edge_length_ratio": 1.0008338593556623,
+          "min_triangle_area_ratio": 0.6077781737695045,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Bib_EdgeStitch_-1": {
+          "max_vertex_displacement_m": 0.0425491098681094,
+          "min_edge_length_ratio": 0.9281933723772144,
+          "max_edge_length_ratio": 1.0076147005977272,
+          "min_triangle_area_ratio": 0.9147490996763841,
+          "max_triangle_area_ratio": 1.0000877908543515,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Bib_EdgeStitch_1": {
+          "max_vertex_displacement_m": 0.04249604320792191,
+          "min_edge_length_ratio": 0.9246651879691419,
+          "max_edge_length_ratio": 1.007673133913635,
+          "min_triangle_area_ratio": 0.9111299531883686,
+          "max_triangle_area_ratio": 1.0000694943997601,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Collar_L": {
+          "max_vertex_displacement_m": 0.03043962072396093,
+          "min_edge_length_ratio": 0.9887426468622453,
+          "max_edge_length_ratio": 1.0118749479648306,
+          "min_triangle_area_ratio": 0.9887407667160453,
+          "max_triangle_area_ratio": 1.0118639966258764,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Collar_R": {
+          "max_vertex_displacement_m": 0.03023606486559332,
+          "min_edge_length_ratio": 0.988772025821922,
+          "max_edge_length_ratio": 1.012016985220801,
+          "min_triangle_area_ratio": 0.9887689112946129,
+          "max_triangle_area_ratio": 1.0120070868663615,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L": {
+          "max_vertex_displacement_m": 0.029595338736926796,
+          "min_edge_length_ratio": 0.9418669080343914,
+          "max_edge_length_ratio": 1.000002375463858,
+          "min_triangle_area_ratio": 0.9411536562984343,
+          "max_triangle_area_ratio": 1.0002867576745698,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.001": {
+          "max_vertex_displacement_m": 0.02963062726392294,
+          "min_edge_length_ratio": 0.9290854693251065,
+          "max_edge_length_ratio": 1.0000087592717546,
+          "min_triangle_area_ratio": 0.92841544732153,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.002": {
+          "max_vertex_displacement_m": 0.02954880992229501,
+          "min_edge_length_ratio": 0.9431158892879243,
+          "max_edge_length_ratio": 1.004869663211335,
+          "min_triangle_area_ratio": 0.9423618879851178,
+          "max_triangle_area_ratio": 1.0074781841710914,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.003": {
+          "max_vertex_displacement_m": 0.029634438263341868,
+          "min_edge_length_ratio": 0.9313794653001078,
+          "max_edge_length_ratio": 1.0033712855136767,
+          "min_triangle_area_ratio": 0.9306122668227083,
+          "max_triangle_area_ratio": 1.0056950823339053,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.004": {
+          "max_vertex_displacement_m": 0.029508069003122427,
+          "min_edge_length_ratio": 0.9449835121962151,
+          "max_edge_length_ratio": 1.0142579705835812,
+          "min_triangle_area_ratio": 0.9425038911927774,
+          "max_triangle_area_ratio": 1.015994218684354,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.005": {
+          "max_vertex_displacement_m": 0.029666718991879316,
+          "min_edge_length_ratio": 0.933187451521306,
+          "max_edge_length_ratio": 1.0116999878337491,
+          "min_triangle_area_ratio": 0.9314560132172507,
+          "max_triangle_area_ratio": 1.0143204947834974,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.006": {
+          "max_vertex_displacement_m": 0.02960892156105556,
+          "min_edge_length_ratio": 0.9479385672752126,
+          "max_edge_length_ratio": 1.024034699150345,
+          "min_triangle_area_ratio": 0.9432765906576432,
+          "max_triangle_area_ratio": 1.0249639301433906,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.007": {
+          "max_vertex_displacement_m": 0.029846655161739434,
+          "min_edge_length_ratio": 0.9360785396316857,
+          "max_edge_length_ratio": 1.021547792142114,
+          "min_triangle_area_ratio": 0.9321311534515405,
+          "max_triangle_area_ratio": 1.0231754458704088,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R": {
+          "max_vertex_displacement_m": 0.029546459312705182,
+          "min_edge_length_ratio": 0.9290151303326362,
+          "max_edge_length_ratio": 1.0000008511197913,
+          "min_triangle_area_ratio": 0.9283412290492175,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.001": {
+          "max_vertex_displacement_m": 0.029513982868741382,
+          "min_edge_length_ratio": 0.941842497283748,
+          "max_edge_length_ratio": 1.0000000889550529,
+          "min_triangle_area_ratio": 0.9411201190232695,
+          "max_triangle_area_ratio": 1.0003529573772505,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.002": {
+          "max_vertex_displacement_m": 0.02953164936561828,
+          "min_edge_length_ratio": 0.9312960774758282,
+          "max_edge_length_ratio": 1.0034750175216074,
+          "min_triangle_area_ratio": 0.9306161819984999,
+          "max_triangle_area_ratio": 1.005808975010312,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.003": {
+          "max_vertex_displacement_m": 0.029449964120582105,
+          "min_edge_length_ratio": 0.9430726493143513,
+          "max_edge_length_ratio": 1.0049974432007787,
+          "min_triangle_area_ratio": 0.9423844897291316,
+          "max_triangle_area_ratio": 1.007628616284644,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.004": {
+          "max_vertex_displacement_m": 0.029536078371761056,
+          "min_edge_length_ratio": 0.9331146034507208,
+          "max_edge_length_ratio": 1.0118280670781905,
+          "min_triangle_area_ratio": 0.931331222368665,
+          "max_triangle_area_ratio": 1.0144439880927485,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.005": {
+          "max_vertex_displacement_m": 0.029380294703689816,
+          "min_edge_length_ratio": 0.9449513086005181,
+          "max_edge_length_ratio": 1.0144473469197985,
+          "min_triangle_area_ratio": 0.9424212771454933,
+          "max_triangle_area_ratio": 1.0161609133598906,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.006": {
+          "max_vertex_displacement_m": 0.029684134799958538,
+          "min_edge_length_ratio": 0.9360313981939964,
+          "max_edge_length_ratio": 1.0217453476145701,
+          "min_triangle_area_ratio": 0.9320505007465615,
+          "max_triangle_area_ratio": 1.0233460318490748,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.007": {
+          "max_vertex_displacement_m": 0.029448362002767327,
+          "min_edge_length_ratio": 0.947920656326681,
+          "max_edge_length_ratio": 1.0242607791659364,
+          "min_triangle_area_ratio": 0.9432235049574028,
+          "max_triangle_area_ratio": 1.0251928748506927,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_0": {
+          "max_vertex_displacement_m": 0.029630334459750756,
+          "min_edge_length_ratio": 0.9399815521690728,
+          "max_edge_length_ratio": 1.0029695605173947,
+          "min_triangle_area_ratio": 0.9317343186978452,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_1": {
+          "max_vertex_displacement_m": 0.029635973507544464,
+          "min_edge_length_ratio": 0.9460570948546028,
+          "max_edge_length_ratio": 1.0111378003876754,
+          "min_triangle_area_ratio": 0.9395541741727266,
+          "max_triangle_area_ratio": 1.0020822878930653,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_2": {
+          "max_vertex_displacement_m": 0.029663190582668877,
+          "min_edge_length_ratio": 0.9471778407181463,
+          "max_edge_length_ratio": 1.019548046825205,
+          "min_triangle_area_ratio": 0.9484056473457049,
+          "max_triangle_area_ratio": 1.0096063771454038,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_3": {
+          "max_vertex_displacement_m": 0.029960308758999032,
+          "min_edge_length_ratio": 0.9445576777695213,
+          "max_edge_length_ratio": 1.0282119883592107,
+          "min_triangle_area_ratio": 0.9465767684300092,
+          "max_triangle_area_ratio": 1.0174763598376653,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_0": {
+          "max_vertex_displacement_m": 0.029584577049207132,
+          "min_edge_length_ratio": 0.9325666393931391,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9297693936637635,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_1": {
+          "max_vertex_displacement_m": 0.029605991770178516,
+          "min_edge_length_ratio": 0.929777297416698,
+          "max_edge_length_ratio": 1.0068496109775378,
+          "min_triangle_area_ratio": 0.9343235803008177,
+          "max_triangle_area_ratio": 1.0068534023165239,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_2": {
+          "max_vertex_displacement_m": 0.02971574956180433,
+          "min_edge_length_ratio": 0.9279608893160991,
+          "max_edge_length_ratio": 1.0141078032633843,
+          "min_triangle_area_ratio": 0.939454782591906,
+          "max_triangle_area_ratio": 1.0172539966624043,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_3": {
+          "max_vertex_displacement_m": 0.030060633311136748,
+          "min_edge_length_ratio": 0.9271239711026685,
+          "max_edge_length_ratio": 1.021577889143205,
+          "min_triangle_area_ratio": 0.9455817607438234,
+          "max_triangle_area_ratio": 1.0279212680247292,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_0": {
+          "max_vertex_displacement_m": 0.029679291523154152,
+          "min_edge_length_ratio": 0.9334161625583469,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9299809928648943,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_1": {
+          "max_vertex_displacement_m": 0.029724485132944352,
+          "min_edge_length_ratio": 0.9307724530116724,
+          "max_edge_length_ratio": 1.0067887932131019,
+          "min_triangle_area_ratio": 0.9343716366053818,
+          "max_triangle_area_ratio": 1.0067344469940742,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_2": {
+          "max_vertex_displacement_m": 0.029863985446130965,
+          "min_edge_length_ratio": 0.9289323931945621,
+          "max_edge_length_ratio": 1.0140067992535475,
+          "min_triangle_area_ratio": 0.9394220221848268,
+          "max_triangle_area_ratio": 1.0170651461573068,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_3": {
+          "max_vertex_displacement_m": 0.0302431736336687,
+          "min_edge_length_ratio": 0.9280739197347949,
+          "max_edge_length_ratio": 1.0214266283768212,
+          "min_triangle_area_ratio": 0.9454624419985197,
+          "max_triangle_area_ratio": 1.0276771649377365,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_0": {
+          "max_vertex_displacement_m": 0.029547356623130384,
+          "min_edge_length_ratio": 0.9399747468122286,
+          "max_edge_length_ratio": 1.0030564201999101,
+          "min_triangle_area_ratio": 0.9315733755735669,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_1": {
+          "max_vertex_displacement_m": 0.029533936770405667,
+          "min_edge_length_ratio": 0.9416651648508109,
+          "max_edge_length_ratio": 1.011258111941858,
+          "min_triangle_area_ratio": 0.9394374789093284,
+          "max_triangle_area_ratio": 1.0021516322155457,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_2": {
+          "max_vertex_displacement_m": 0.029534917105427414,
+          "min_edge_length_ratio": 0.9421898668064492,
+          "max_edge_length_ratio": 1.019718529092903,
+          "min_triangle_area_ratio": 0.9483517730970532,
+          "max_triangle_area_ratio": 1.009727431426108,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_3": {
+          "max_vertex_displacement_m": 0.02977941376282196,
+          "min_edge_length_ratio": 0.9436333411806931,
+          "max_edge_length_ratio": 1.0284217795033193,
+          "min_triangle_area_ratio": 0.9463879796247167,
+          "max_triangle_area_ratio": 1.0176398221946492,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_SoleBottom_L": {
+          "max_vertex_displacement_m": 0.029568434325545914,
+          "min_edge_length_ratio": 0.9999994915143406,
+          "max_edge_length_ratio": 1.0000010886428348,
+          "min_triangle_area_ratio": 0.9999911045806934,
+          "max_triangle_area_ratio": 1.0000053084974183,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_SoleBottom_R": {
+          "max_vertex_displacement_m": 0.02949763016908144,
+          "min_edge_length_ratio": 0.9999992372715002,
+          "max_edge_length_ratio": 1.0000005604673818,
+          "min_triangle_area_ratio": 0.9999948077593377,
+          "max_triangle_area_ratio": 1.0000165424493543,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Sole_L": {
+          "max_vertex_displacement_m": 0.029568434325563678,
+          "min_edge_length_ratio": 0.9999987001194093,
+          "max_edge_length_ratio": 1.0000036977420652,
+          "min_triangle_area_ratio": 0.999998852261978,
+          "max_triangle_area_ratio": 1.0000037385765403,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Sole_R": {
+          "max_vertex_displacement_m": 0.02949763016908144,
+          "min_edge_length_ratio": 0.9999988962160365,
+          "max_edge_length_ratio": 1.0000036569531046,
+          "min_triangle_area_ratio": 0.9999986423067647,
+          "max_triangle_area_ratio": 1.0000042886898661,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Upper_L": {
+          "max_vertex_displacement_m": 0.03031811827389717,
+          "min_edge_length_ratio": 0.9454618741266527,
+          "max_edge_length_ratio": 1.0379824931226718,
+          "min_triangle_area_ratio": 0.9431018814530288,
+          "max_triangle_area_ratio": 1.037967931585412,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Upper_R": {
+          "max_vertex_displacement_m": 0.03011790921428584,
+          "min_edge_length_ratio": 0.9454659636866515,
+          "max_edge_length_ratio": 1.0384511088669226,
+          "min_triangle_area_ratio": 0.9451124673026103,
+          "max_triangle_area_ratio": 1.0383810988259319,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Welt_L": {
+          "max_vertex_displacement_m": 0.029568434325569014,
+          "min_edge_length_ratio": 0.9999987887904791,
+          "max_edge_length_ratio": 1.0000037025061814,
+          "min_triangle_area_ratio": 0.9999979854002474,
+          "max_triangle_area_ratio": 1.0000037026286979,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Welt_R": {
+          "max_vertex_displacement_m": 0.02949763016905997,
+          "min_edge_length_ratio": 0.9999975775872524,
+          "max_edge_length_ratio": 1.0000037025061814,
+          "min_triangle_area_ratio": 0.9999972429096752,
+          "max_triangle_area_ratio": 1.000004513452865,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Buckle_Pin": {
+          "max_vertex_displacement_m": 0.041616882599069725,
+          "min_edge_length_ratio": 0.8282422110552539,
+          "max_edge_length_ratio": 1.0010826322918447,
+          "min_triangle_area_ratio": 0.8254019809311421,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ChestPocket_Lip": {
+          "max_vertex_displacement_m": 0.03835241399404223,
+          "min_edge_length_ratio": 0.9999275123252243,
+          "max_edge_length_ratio": 1.0000628761563168,
+          "min_triangle_area_ratio": 0.9999022201061818,
+          "max_triangle_area_ratio": 1.0001799216270335,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ChestPocket_Stitch": {
+          "max_vertex_displacement_m": 0.03799753655524959,
+          "min_edge_length_ratio": 0.9998590486634653,
+          "max_edge_length_ratio": 1.0001137418714108,
+          "min_triangle_area_ratio": 0.999787733191169,
+          "max_triangle_area_ratio": 1.0001894052132503,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_-1": {
+          "max_vertex_displacement_m": 0.036826863599842836,
+          "min_edge_length_ratio": 0.8558352082746767,
+          "max_edge_length_ratio": 1.0056315028031242,
+          "min_triangle_area_ratio": 0.8102462726038631,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_1": {
+          "max_vertex_displacement_m": 0.03678077971795357,
+          "min_edge_length_ratio": 0.8736241151069606,
+          "max_edge_length_ratio": 1.018349664456664,
+          "min_triangle_area_ratio": 0.8130991225241255,
+          "max_triangle_area_ratio": 1.012901399705011,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_Stitch_-1": {
+          "max_vertex_displacement_m": 0.03694586756467741,
+          "min_edge_length_ratio": 0.8176352304536079,
+          "max_edge_length_ratio": 1.0637737868420767,
+          "min_triangle_area_ratio": 0.8145610698135114,
+          "max_triangle_area_ratio": 1.1021863012487532,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_Stitch_1": {
+          "max_vertex_displacement_m": 0.03689601791826125,
+          "min_edge_length_ratio": 0.8173490630643954,
+          "max_edge_length_ratio": 1.0806103301343615,
+          "min_triangle_area_ratio": 0.818391106330318,
+          "max_triangle_area_ratio": 1.0449166241157108,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_KneeReinforcement_-1": {
+          "max_vertex_displacement_m": 0.04726253382561219,
+          "min_edge_length_ratio": 0.9285239911604278,
+          "max_edge_length_ratio": 1.539065271222204,
+          "min_triangle_area_ratio": 0.9059009926912946,
+          "max_triangle_area_ratio": 1.6048937275416004,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_KneeReinforcement_1": {
+          "max_vertex_displacement_m": 0.046969101294428,
+          "min_edge_length_ratio": 0.9453100530391481,
+          "max_edge_length_ratio": 1.529794897681594,
+          "min_triangle_area_ratio": 0.9594362337328448,
+          "max_triangle_area_ratio": 1.611701767911916,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Knee_Stitch_-1": {
+          "max_vertex_displacement_m": 0.04721318491603585,
+          "min_edge_length_ratio": 0.9239473881498474,
+          "max_edge_length_ratio": 1.2455368337748167,
+          "min_triangle_area_ratio": 0.8488306063832063,
+          "max_triangle_area_ratio": 1.3808399419776978,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Knee_Stitch_1": {
+          "max_vertex_displacement_m": 0.046961525816624036,
+          "min_edge_length_ratio": 0.9467713406861673,
+          "max_edge_length_ratio": 1.3656785674680523,
+          "min_triangle_area_ratio": 0.661338605506451,
+          "max_triangle_area_ratio": 1.3717112160543048,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_LargeChestPocket": {
+          "max_vertex_displacement_m": 0.04018439920704579,
+          "min_edge_length_ratio": 0.9999583583087321,
+          "max_edge_length_ratio": 1.0000425435789373,
+          "min_triangle_area_ratio": 0.9999426257827594,
+          "max_triangle_area_ratio": 1.0000586249515753,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Bib": {
+          "max_vertex_displacement_m": 0.04413009821323393,
+          "min_edge_length_ratio": 0.8884492804180922,
+          "max_edge_length_ratio": 1.000720421085749,
+          "min_triangle_area_ratio": 0.8869759926538466,
+          "max_triangle_area_ratio": 1.0000237805404613,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Strap_-1": {
+          "max_vertex_displacement_m": 0.052058857847052116,
+          "min_edge_length_ratio": 0.9750488391806785,
+          "max_edge_length_ratio": 1.1524090482071243,
+          "min_triangle_area_ratio": 0.972853226523206,
+          "max_triangle_area_ratio": 1.1951620269047027,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Strap_1": {
+          "max_vertex_displacement_m": 0.052045271226860174,
+          "min_edge_length_ratio": 0.9749458306222771,
+          "max_edge_length_ratio": 1.249626503519912,
+          "min_triangle_area_ratio": 0.9727081228308745,
+          "max_triangle_area_ratio": 1.251622028553333,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Trousers": {
+          "max_vertex_displacement_m": 0.048377425394199175,
+          "min_edge_length_ratio": 0.6083674600032047,
+          "max_edge_length_ratio": 1.4118756327229083,
+          "min_triangle_area_ratio": 0.6090094993362343,
+          "max_triangle_area_ratio": 1.4627768607935736,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pocket_Tab": {
+          "max_vertex_displacement_m": 0.04039417916696518,
+          "min_edge_length_ratio": 0.9997675992989483,
+          "max_edge_length_ratio": 1.0002513042768404,
+          "min_triangle_area_ratio": 0.9997536379813176,
+          "max_triangle_area_ratio": 1.0002640043100954,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_BeltLoop": {
+          "max_vertex_displacement_m": 0.027092821557554405,
+          "min_edge_length_ratio": 0.9999736498626411,
+          "max_edge_length_ratio": 1.0000256254653601,
+          "min_triangle_area_ratio": 0.9999715519567213,
+          "max_triangle_area_ratio": 1.0000265568116478,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_BeltLoop.001": {
+          "max_vertex_displacement_m": 0.027092821557554405,
+          "min_edge_length_ratio": 0.9999736498626411,
+          "max_edge_length_ratio": 1.0000256254653601,
+          "min_triangle_area_ratio": 0.9999715519816449,
+          "max_triangle_area_ratio": 1.0000262761183656,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_Snap": {
+          "max_vertex_displacement_m": 0.03160808822387156,
+          "min_edge_length_ratio": 0.9999670816619606,
+          "max_edge_length_ratio": 1.0000242311958392,
+          "min_triangle_area_ratio": 0.999949897134679,
+          "max_triangle_area_ratio": 1.000055243891044,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_RolledSleeve_L": {
+          "max_vertex_displacement_m": 0.09848792338846225,
+          "min_edge_length_ratio": 0.9999535234695845,
+          "max_edge_length_ratio": 1.0000430678792955,
+          "min_triangle_area_ratio": 0.9999512384389933,
+          "max_triangle_area_ratio": 1.000053274302135,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_RolledSleeve_R": {
+          "max_vertex_displacement_m": 0.10046452330167212,
+          "min_edge_length_ratio": 0.9999487517294341,
+          "max_edge_length_ratio": 1.0000440027045923,
+          "min_triangle_area_ratio": 0.9999427128857082,
+          "max_triangle_area_ratio": 1.0000504286740821,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Shirt_NeckRib": {
+          "max_vertex_displacement_m": 0.05756732188452185,
+          "min_edge_length_ratio": 0.9948057998933454,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9896861892090684,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_-1_-0.007": {
+          "max_vertex_displacement_m": 0.05208592544164521,
+          "min_edge_length_ratio": 0.9743221631867006,
+          "max_edge_length_ratio": 1.1640798382982465,
+          "min_triangle_area_ratio": 0.7771832572542755,
+          "max_triangle_area_ratio": 1.2483174187600077,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_-1_0.007": {
+          "max_vertex_displacement_m": 0.0498099056309399,
+          "min_edge_length_ratio": 0.9527005388712813,
+          "max_edge_length_ratio": 1.140660612100715,
+          "min_triangle_area_ratio": 0.8008687172878638,
+          "max_triangle_area_ratio": 1.191420335250721,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_1_-0.007": {
+          "max_vertex_displacement_m": 0.049865252414343524,
+          "min_edge_length_ratio": 0.9510299208213543,
+          "max_edge_length_ratio": 1.7847858531213627,
+          "min_triangle_area_ratio": 0.8974999412090086,
+          "max_triangle_area_ratio": 1.787911087899331,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_1_0.007": {
+          "max_vertex_displacement_m": 0.052070554830177335,
+          "min_edge_length_ratio": 0.9746809935525147,
+          "max_edge_length_ratio": 1.1672175286574846,
+          "min_triangle_area_ratio": 0.898718606304989,
+          "max_triangle_area_ratio": 1.257875631910782,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Button_-1": {
+          "max_vertex_displacement_m": 0.04046774654711593,
+          "min_edge_length_ratio": 0.9998640015158812,
+          "max_edge_length_ratio": 1.0001774266503396,
+          "min_triangle_area_ratio": 0.9997373227534643,
+          "max_triangle_area_ratio": 1.0002698641512178,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Button_1": {
+          "max_vertex_displacement_m": 0.040463592191162814,
+          "min_edge_length_ratio": 0.999727684506565,
+          "max_edge_length_ratio": 1.000136827165861,
+          "min_triangle_area_ratio": 0.9997307225571659,
+          "max_triangle_area_ratio": 1.0002598152732753,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Clasp_-1": {
+          "max_vertex_displacement_m": 0.04519960060383693,
+          "min_edge_length_ratio": 0.9603282453855648,
+          "max_edge_length_ratio": 1.0000052011885225,
+          "min_triangle_area_ratio": 0.955771084260535,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Clasp_1": {
+          "max_vertex_displacement_m": 0.045195615541606664,
+          "min_edge_length_ratio": 0.9603349464840425,
+          "max_edge_length_ratio": 1.0000050008266819,
+          "min_triangle_area_ratio": 0.9557652628296293,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ToolPouch": {
+          "max_vertex_displacement_m": 0.035875504375142864,
+          "min_edge_length_ratio": 0.9999879042543927,
+          "max_edge_length_ratio": 1.0000071465820395,
+          "min_triangle_area_ratio": 0.9999878299823854,
+          "max_triangle_area_ratio": 1.0000076045011586,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ToolPouch_Flap": {
+          "max_vertex_displacement_m": 0.03161519063248121,
+          "min_edge_length_ratio": 0.9999769598116056,
+          "max_edge_length_ratio": 1.0000112880818923,
+          "min_triangle_area_ratio": 0.9999741455507383,
+          "max_triangle_area_ratio": 1.000011908571005,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Screwdriver_Handle": {
+          "max_vertex_displacement_m": 0.020198281555861928,
+          "min_edge_length_ratio": 0.9999846912786268,
+          "max_edge_length_ratio": 1.0000104787019608,
+          "min_triangle_area_ratio": 0.9999809761394725,
+          "max_triangle_area_ratio": 1.000010823683961,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Screwdriver_Shaft": {
+          "max_vertex_displacement_m": 0.025628791749546815,
+          "min_edge_length_ratio": 0.9999978920690674,
+          "max_edge_length_ratio": 1.0000037092830287,
+          "min_triangle_area_ratio": 0.9999971894108615,
+          "max_triangle_area_ratio": 1.0000037609507277,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Wrench": {
+          "max_vertex_displacement_m": 0.028290608358243458,
+          "min_edge_length_ratio": 0.9999985553187514,
+          "max_edge_length_ratio": 1.0000004454195726,
+          "min_triangle_area_ratio": 0.9999986156634231,
+          "max_triangle_area_ratio": 1.0000021644694483,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Trouser_Hem_L": {
+          "max_vertex_displacement_m": 0.030644922734500306,
+          "min_edge_length_ratio": 0.9969508222860471,
+          "max_edge_length_ratio": 1.0001396155162074,
+          "min_triangle_area_ratio": 0.9968619750026352,
+          "max_triangle_area_ratio": 1.0002274331604402,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Trouser_Hem_R": {
+          "max_vertex_displacement_m": 0.03045515562594686,
+          "min_edge_length_ratio": 0.9968376807207784,
+          "max_edge_length_ratio": 1.0001808372144925,
+          "min_triangle_area_ratio": 0.9967959134584694,
+          "max_triangle_area_ratio": 1.0003151023978851,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Body": {
+          "max_vertex_displacement_m": 0.05466955387091169,
+          "min_edge_length_ratio": 0.9084022437482332,
+          "max_edge_length_ratio": 1.1506892032109899,
+          "min_triangle_area_ratio": 0.9054799832145779,
+          "max_triangle_area_ratio": 1.1518751367667872,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Sleeve_L": {
+          "max_vertex_displacement_m": 0.0974662206522305,
+          "min_edge_length_ratio": 0.5026099230879705,
+          "max_edge_length_ratio": 1.3326391843166845,
+          "min_triangle_area_ratio": 0.3415000074370438,
+          "max_triangle_area_ratio": 1.4269833510051657,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Sleeve_R": {
+          "max_vertex_displacement_m": 0.09939420401902281,
+          "min_edge_length_ratio": 0.49157440780550676,
+          "max_edge_length_ratio": 1.3407398840458091,
+          "min_triangle_area_ratio": 0.33336628572192173,
+          "max_triangle_area_ratio": 1.4232678528991833,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_UtilityBelt": {
+          "max_vertex_displacement_m": 0.03989489014971456,
+          "min_edge_length_ratio": 0.8093713375949239,
+          "max_edge_length_ratio": 1.134117663648528,
+          "min_triangle_area_ratio": 0.8074374613429589,
+          "max_triangle_area_ratio": 1.1372643757127672,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Wrench_Grip": {
+          "max_vertex_displacement_m": 0.0275011565401462,
+          "min_edge_length_ratio": 0.9999923231815049,
+          "max_edge_length_ratio": 1.0000192244452049,
+          "min_triangle_area_ratio": 0.9999937199591603,
+          "max_triangle_area_ratio": 1.00001922444923,
+          "collapsed_triangles": 0
+        }
+      }
+    },
+    "AS_LunaMk2_Title_B": {
+      "frames_sampled": [
+        1,
+        11,
+        21,
+        31,
+        41,
+        51,
+        61,
+        71,
+        81,
+        91,
+        101,
+        111,
+        121
+      ],
+      "max_bone_basis_rotation_radians": 1.2144842147827148,
+      "meshes": {
+        "Mechanic_Belt_Buckle": {
+          "max_vertex_displacement_m": 0.052765096760128576,
+          "min_edge_length_ratio": 0.6903076119058078,
+          "max_edge_length_ratio": 1.0000873017621206,
+          "min_triangle_area_ratio": 0.6074247791780316,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Bib_EdgeStitch_-1": {
+          "max_vertex_displacement_m": 0.052360862831580014,
+          "min_edge_length_ratio": 0.9298047586256026,
+          "max_edge_length_ratio": 1.007668470065373,
+          "min_triangle_area_ratio": 0.9160857427623371,
+          "max_triangle_area_ratio": 1.0000852305709576,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Bib_EdgeStitch_1": {
+          "max_vertex_displacement_m": 0.049843283929948745,
+          "min_edge_length_ratio": 0.9230800366174438,
+          "max_edge_length_ratio": 1.0075937713190883,
+          "min_triangle_area_ratio": 0.9098718215543503,
+          "max_triangle_area_ratio": 1.0000710279694338,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Collar_L": {
+          "max_vertex_displacement_m": 0.02926569467514615,
+          "min_edge_length_ratio": 0.9856042783822806,
+          "max_edge_length_ratio": 1.0150212200210915,
+          "min_triangle_area_ratio": 0.9855724468173416,
+          "max_triangle_area_ratio": 1.0149887212092816,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Collar_R": {
+          "max_vertex_displacement_m": 0.07531451271099829,
+          "min_edge_length_ratio": 0.9909691859762668,
+          "max_edge_length_ratio": 1.013069473479137,
+          "min_triangle_area_ratio": 0.9909431069024286,
+          "max_triangle_area_ratio": 1.013062942851841,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L": {
+          "max_vertex_displacement_m": 0.02958332512247394,
+          "min_edge_length_ratio": 0.9348700334687284,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9337519405772953,
+          "max_triangle_area_ratio": 1.0004876398798817,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.001": {
+          "max_vertex_displacement_m": 0.029662305299703574,
+          "min_edge_length_ratio": 0.9104114895512293,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9090226799154858,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.002": {
+          "max_vertex_displacement_m": 0.029307987713010054,
+          "min_edge_length_ratio": 0.9365173879268323,
+          "max_edge_length_ratio": 1.007532397655613,
+          "min_triangle_area_ratio": 0.9341898798196203,
+          "max_triangle_area_ratio": 1.0095795311490456,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.003": {
+          "max_vertex_displacement_m": 0.029510754748429728,
+          "min_edge_length_ratio": 0.9133342196543403,
+          "max_edge_length_ratio": 1.0050140919416428,
+          "min_triangle_area_ratio": 0.9115135606358573,
+          "max_triangle_area_ratio": 1.0068354981037793,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.004": {
+          "max_vertex_displacement_m": 0.02885554306008782,
+          "min_edge_length_ratio": 0.9371895674857168,
+          "max_edge_length_ratio": 1.017134768611867,
+          "min_triangle_area_ratio": 0.9334884577458566,
+          "max_triangle_area_ratio": 1.0204076493024727,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.005": {
+          "max_vertex_displacement_m": 0.029239437912947704,
+          "min_edge_length_ratio": 0.9159793109789836,
+          "max_edge_length_ratio": 1.0143999523553808,
+          "min_triangle_area_ratio": 0.9115655917095005,
+          "max_triangle_area_ratio": 1.0178932291417297,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.006": {
+          "max_vertex_displacement_m": 0.02843112974323736,
+          "min_edge_length_ratio": 0.9367316137067236,
+          "max_edge_length_ratio": 1.0287943173995626,
+          "min_triangle_area_ratio": 0.934553485276728,
+          "max_triangle_area_ratio": 1.0316716565247102,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.007": {
+          "max_vertex_displacement_m": 0.029067261558380336,
+          "min_edge_length_ratio": 0.917044786117304,
+          "max_edge_length_ratio": 1.024974293042633,
+          "min_triangle_area_ratio": 0.9124419191475829,
+          "max_triangle_area_ratio": 1.0293995758412355,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R": {
+          "max_vertex_displacement_m": 0.07940455852918125,
+          "min_edge_length_ratio": 0.9940364777678105,
+          "max_edge_length_ratio": 1.0340417994530906,
+          "min_triangle_area_ratio": 0.9943946719051405,
+          "max_triangle_area_ratio": 1.033268496170805,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.001": {
+          "max_vertex_displacement_m": 0.07951403962338663,
+          "min_edge_length_ratio": 0.9819400661072768,
+          "max_edge_length_ratio": 1.0083982955541402,
+          "min_triangle_area_ratio": 0.9831243977624445,
+          "max_triangle_area_ratio": 1.0057287089121623,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.002": {
+          "max_vertex_displacement_m": 0.07868482220291793,
+          "min_edge_length_ratio": 0.9889326358492172,
+          "max_edge_length_ratio": 1.0377689224909812,
+          "min_triangle_area_ratio": 0.9896961177162423,
+          "max_triangle_area_ratio": 1.0357570458755974,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.003": {
+          "max_vertex_displacement_m": 0.07889485592521499,
+          "min_edge_length_ratio": 0.9726169278175879,
+          "max_edge_length_ratio": 1.0167928951463878,
+          "min_triangle_area_ratio": 0.974834849594453,
+          "max_triangle_area_ratio": 1.0127780952350218,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.004": {
+          "max_vertex_displacement_m": 0.07760558615167684,
+          "min_edge_length_ratio": 0.982820293101782,
+          "max_edge_length_ratio": 1.0453120242451195,
+          "min_triangle_area_ratio": 0.9851481664778194,
+          "max_triangle_area_ratio": 1.043021575020329,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.005": {
+          "max_vertex_displacement_m": 0.07791577531863804,
+          "min_edge_length_ratio": 0.9638752035314948,
+          "max_edge_length_ratio": 1.0258373727284307,
+          "min_triangle_area_ratio": 0.9672138756362506,
+          "max_triangle_area_ratio": 1.0207050596945553,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.006": {
+          "max_vertex_displacement_m": 0.07620851488823492,
+          "min_edge_length_ratio": 0.9751989099452149,
+          "max_edge_length_ratio": 1.0545331023271318,
+          "min_triangle_area_ratio": 0.980992399039526,
+          "max_triangle_area_ratio": 1.0512371650323857,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.007": {
+          "max_vertex_displacement_m": 0.07662029869497398,
+          "min_edge_length_ratio": 0.955778007256706,
+          "max_edge_length_ratio": 1.0355222100888226,
+          "min_triangle_area_ratio": 0.9603471453662249,
+          "max_triangle_area_ratio": 1.0293778500734658,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_0": {
+          "max_vertex_displacement_m": 0.02966313730192953,
+          "min_edge_length_ratio": 0.9246626141643252,
+          "max_edge_length_ratio": 1.003722178726446,
+          "min_triangle_area_ratio": 0.9140057459564034,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_1": {
+          "max_vertex_displacement_m": 0.02950659505167457,
+          "min_edge_length_ratio": 0.9368742565599222,
+          "max_edge_length_ratio": 1.0138336734602587,
+          "min_triangle_area_ratio": 0.9231940700068562,
+          "max_triangle_area_ratio": 1.0002132097923833,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_2": {
+          "max_vertex_displacement_m": 0.029230553798623375,
+          "min_edge_length_ratio": 0.9445517079690862,
+          "max_edge_length_ratio": 1.0243382016592533,
+          "min_triangle_area_ratio": 0.9341386941791696,
+          "max_triangle_area_ratio": 1.0079794683373762,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_3": {
+          "max_vertex_displacement_m": 0.029051212644681388,
+          "min_edge_length_ratio": 0.9351630435838107,
+          "max_edge_length_ratio": 1.0352409052766691,
+          "min_triangle_area_ratio": 0.9304110697029978,
+          "max_triangle_area_ratio": 1.0163383169934623,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_0": {
+          "max_vertex_displacement_m": 0.07948429648541563,
+          "min_edge_length_ratio": 0.9906202519097899,
+          "max_edge_length_ratio": 1.034196934704345,
+          "min_triangle_area_ratio": 0.9911010157739533,
+          "max_triangle_area_ratio": 1.0342908893129346,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_1": {
+          "max_vertex_displacement_m": 0.07883920122321905,
+          "min_edge_length_ratio": 0.9845681965969771,
+          "max_edge_length_ratio": 1.039403243084175,
+          "min_triangle_area_ratio": 0.9867160991863959,
+          "max_triangle_area_ratio": 1.0394975996611673,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_2": {
+          "max_vertex_displacement_m": 0.07783559718641984,
+          "min_edge_length_ratio": 0.9789620631180478,
+          "max_edge_length_ratio": 1.0456325494017806,
+          "min_triangle_area_ratio": 0.9824490755557533,
+          "max_triangle_area_ratio": 1.0457581177649131,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_3": {
+          "max_vertex_displacement_m": 0.07651786490497801,
+          "min_edge_length_ratio": 0.9736079421478289,
+          "max_edge_length_ratio": 1.0528782333518325,
+          "min_triangle_area_ratio": 0.978808792662942,
+          "max_triangle_area_ratio": 1.0530133280896203,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_0": {
+          "max_vertex_displacement_m": 0.029666088585202366,
+          "min_edge_length_ratio": 0.9155665475016543,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9116169794427179,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_1": {
+          "max_vertex_displacement_m": 0.02948005329851018,
+          "min_edge_length_ratio": 0.911763312274766,
+          "max_edge_length_ratio": 1.006808397304357,
+          "min_triangle_area_ratio": 0.9147382912858316,
+          "max_triangle_area_ratio": 1.008681479787223,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_2": {
+          "max_vertex_displacement_m": 0.029300805748862874,
+          "min_edge_length_ratio": 0.9089540564899724,
+          "max_edge_length_ratio": 1.0149254837104058,
+          "min_triangle_area_ratio": 0.9196013242299597,
+          "max_triangle_area_ratio": 1.0221103858721976,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_3": {
+          "max_vertex_displacement_m": 0.02940538762110809,
+          "min_edge_length_ratio": 0.9078289435240022,
+          "max_edge_length_ratio": 1.0233477793137697,
+          "min_triangle_area_ratio": 0.9262564934728492,
+          "max_triangle_area_ratio": 1.0360309482342203,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_0": {
+          "max_vertex_displacement_m": 0.07938169051392963,
+          "min_edge_length_ratio": 0.9834684893046273,
+          "max_edge_length_ratio": 1.0168675835458199,
+          "min_triangle_area_ratio": 0.9835064260311701,
+          "max_triangle_area_ratio": 1.0255696987446166,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_1": {
+          "max_vertex_displacement_m": 0.07864713356673833,
+          "min_edge_length_ratio": 0.9783279075563504,
+          "max_edge_length_ratio": 1.0150657706144348,
+          "min_triangle_area_ratio": 0.9782094925653113,
+          "max_triangle_area_ratio": 1.0245038478606205,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_2": {
+          "max_vertex_displacement_m": 0.07755438490779853,
+          "min_edge_length_ratio": 0.9742873726212131,
+          "max_edge_length_ratio": 1.020675444117203,
+          "min_triangle_area_ratio": 0.9741951462523317,
+          "max_triangle_area_ratio": 1.0261517387856844,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_3": {
+          "max_vertex_displacement_m": 0.07614615855853511,
+          "min_edge_length_ratio": 0.9713370868536302,
+          "max_edge_length_ratio": 1.0259683733152702,
+          "min_triangle_area_ratio": 0.9713034525210522,
+          "max_triangle_area_ratio": 1.0317880058781246,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_SoleBottom_L": {
+          "max_vertex_displacement_m": 0.02956846592375112,
+          "min_edge_length_ratio": 0.9999995908450057,
+          "max_edge_length_ratio": 1.0000008128809816,
+          "min_triangle_area_ratio": 0.9999947657924171,
+          "max_triangle_area_ratio": 1.0000154672649957,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_SoleBottom_R": {
+          "max_vertex_displacement_m": 0.07974897219248328,
+          "min_edge_length_ratio": 0.9999986268169022,
+          "max_edge_length_ratio": 1.0000018973765248,
+          "min_triangle_area_ratio": 0.9999806214659791,
+          "max_triangle_area_ratio": 1.0000108919419892,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Sole_L": {
+          "max_vertex_displacement_m": 0.02956846592375112,
+          "min_edge_length_ratio": 0.9999988686167647,
+          "max_edge_length_ratio": 1.0000036977399926,
+          "min_triangle_area_ratio": 0.9999984767600657,
+          "max_triangle_area_ratio": 1.0000040478938939,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Sole_R": {
+          "max_vertex_displacement_m": 0.07974897879051178,
+          "min_edge_length_ratio": 0.9999963754756058,
+          "max_edge_length_ratio": 1.00000536764158,
+          "min_triangle_area_ratio": 0.9999959843544766,
+          "max_triangle_area_ratio": 1.0000051113136585,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Upper_L": {
+          "max_vertex_displacement_m": 0.029664973907146456,
+          "min_edge_length_ratio": 0.9315650098332684,
+          "max_edge_length_ratio": 1.047010315160498,
+          "min_triangle_area_ratio": 0.9252449129943913,
+          "max_triangle_area_ratio": 1.0469641962021317,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Upper_R": {
+          "max_vertex_displacement_m": 0.07974897879051106,
+          "min_edge_length_ratio": 0.9699508328197569,
+          "max_edge_length_ratio": 1.0432155314530995,
+          "min_triangle_area_ratio": 0.9634833034608689,
+          "max_triangle_area_ratio": 1.0453274315824383,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Welt_L": {
+          "max_vertex_displacement_m": 0.02956846592373906,
+          "min_edge_length_ratio": 0.9999987561439623,
+          "max_edge_length_ratio": 1.0000037025061814,
+          "min_triangle_area_ratio": 0.9999983476274368,
+          "max_triangle_area_ratio": 1.000005549693938,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Welt_R": {
+          "max_vertex_displacement_m": 0.0797489787905115,
+          "min_edge_length_ratio": 0.9999959275591007,
+          "max_edge_length_ratio": 1.0000059136116706,
+          "min_triangle_area_ratio": 0.9999953261778685,
+          "max_triangle_area_ratio": 1.0000065389923831,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Buckle_Pin": {
+          "max_vertex_displacement_m": 0.05291591049295219,
+          "min_edge_length_ratio": 0.8283630460403444,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.8252445270462037,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ChestPocket_Lip": {
+          "max_vertex_displacement_m": 0.050063698735005886,
+          "min_edge_length_ratio": 0.9999452092048046,
+          "max_edge_length_ratio": 1.0000678465314277,
+          "min_triangle_area_ratio": 0.9999247994906443,
+          "max_triangle_area_ratio": 1.0001978958818203,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ChestPocket_Stitch": {
+          "max_vertex_displacement_m": 0.04977922842364195,
+          "min_edge_length_ratio": 0.9998510589246865,
+          "max_edge_length_ratio": 1.000112162334093,
+          "min_triangle_area_ratio": 0.9997783782347129,
+          "max_triangle_area_ratio": 1.000193488788491,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_-1": {
+          "max_vertex_displacement_m": 0.050689458506900535,
+          "min_edge_length_ratio": 0.8517669537423818,
+          "max_edge_length_ratio": 1.0037570189003577,
+          "min_triangle_area_ratio": 0.7633048552558639,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_1": {
+          "max_vertex_displacement_m": 0.04776345321487352,
+          "min_edge_length_ratio": 0.8740136030696278,
+          "max_edge_length_ratio": 1.0258276514209996,
+          "min_triangle_area_ratio": 0.8118053164814091,
+          "max_triangle_area_ratio": 1.013547759459298,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_Stitch_-1": {
+          "max_vertex_displacement_m": 0.05078874033313981,
+          "min_edge_length_ratio": 0.7808599608911455,
+          "max_edge_length_ratio": 1.0442330343040755,
+          "min_triangle_area_ratio": 0.7833130628015609,
+          "max_triangle_area_ratio": 1.0835242395893665,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_Stitch_1": {
+          "max_vertex_displacement_m": 0.04794058403242444,
+          "min_edge_length_ratio": 0.8162177904099799,
+          "max_edge_length_ratio": 1.091081882759525,
+          "min_triangle_area_ratio": 0.8154645116973215,
+          "max_triangle_area_ratio": 1.0599345201775594,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_KneeReinforcement_-1": {
+          "max_vertex_displacement_m": 0.0696355770913845,
+          "min_edge_length_ratio": 0.9262926460256838,
+          "max_edge_length_ratio": 1.519848098920293,
+          "min_triangle_area_ratio": 0.9063617429412005,
+          "max_triangle_area_ratio": 1.5813046284242007,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_KneeReinforcement_1": {
+          "max_vertex_displacement_m": 0.05165531323385783,
+          "min_edge_length_ratio": 0.9387516069005768,
+          "max_edge_length_ratio": 1.5802701144621951,
+          "min_triangle_area_ratio": 0.9520800681573016,
+          "max_triangle_area_ratio": 1.67096053794591,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Knee_Stitch_-1": {
+          "max_vertex_displacement_m": 0.06947125994644132,
+          "min_edge_length_ratio": 0.927758865830046,
+          "max_edge_length_ratio": 1.2414574678731158,
+          "min_triangle_area_ratio": 0.8780377573207806,
+          "max_triangle_area_ratio": 1.3782621171570482,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Knee_Stitch_1": {
+          "max_vertex_displacement_m": 0.05163149653745472,
+          "min_edge_length_ratio": 0.940141742255396,
+          "max_edge_length_ratio": 1.536274866497438,
+          "min_triangle_area_ratio": 0.6471921112557996,
+          "max_triangle_area_ratio": 1.4163785545284513,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_LargeChestPocket": {
+          "max_vertex_displacement_m": 0.050617431351264466,
+          "min_edge_length_ratio": 0.9999672294854723,
+          "max_edge_length_ratio": 1.0000395910429645,
+          "min_triangle_area_ratio": 0.9999517726215712,
+          "max_triangle_area_ratio": 1.0000469755179555,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Bib": {
+          "max_vertex_displacement_m": 0.052884808512596464,
+          "min_edge_length_ratio": 0.8885272751842291,
+          "max_edge_length_ratio": 1.0010005440945418,
+          "min_triangle_area_ratio": 0.8862629604319324,
+          "max_triangle_area_ratio": 1.0000200203477725,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Strap_-1": {
+          "max_vertex_displacement_m": 0.05816220237608903,
+          "min_edge_length_ratio": 0.975514018491189,
+          "max_edge_length_ratio": 1.15022917208428,
+          "min_triangle_area_ratio": 0.9729844949303945,
+          "max_triangle_area_ratio": 1.195225784119017,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Strap_1": {
+          "max_vertex_displacement_m": 0.05665004893774455,
+          "min_edge_length_ratio": 0.9745512622791294,
+          "max_edge_length_ratio": 1.2475631872579214,
+          "min_triangle_area_ratio": 0.9726310524976646,
+          "max_triangle_area_ratio": 1.2510247883340593,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Trousers": {
+          "max_vertex_displacement_m": 0.07544336393752078,
+          "min_edge_length_ratio": 0.6088728025815365,
+          "max_edge_length_ratio": 1.5420068448642072,
+          "min_triangle_area_ratio": 0.5836588709650437,
+          "max_triangle_area_ratio": 1.607628449305466,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pocket_Tab": {
+          "max_vertex_displacement_m": 0.05003331990100005,
+          "min_edge_length_ratio": 0.9998813035065912,
+          "max_edge_length_ratio": 1.0000936483901235,
+          "min_triangle_area_ratio": 0.9998732706104747,
+          "max_triangle_area_ratio": 1.0001288954906393,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_BeltLoop": {
+          "max_vertex_displacement_m": 0.037829623570561306,
+          "min_edge_length_ratio": 0.9999560227292763,
+          "max_edge_length_ratio": 1.0000325293464427,
+          "min_triangle_area_ratio": 0.99994480421473,
+          "max_triangle_area_ratio": 1.0000330795240502,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_BeltLoop.001": {
+          "max_vertex_displacement_m": 0.037301061680196944,
+          "min_edge_length_ratio": 0.9999547056088646,
+          "max_edge_length_ratio": 1.0000312121252581,
+          "min_triangle_area_ratio": 0.9999526197091958,
+          "max_triangle_area_ratio": 1.0000432826604002,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_Snap": {
+          "max_vertex_displacement_m": 0.04141703341116034,
+          "min_edge_length_ratio": 0.9999618735699759,
+          "max_edge_length_ratio": 1.0000329022095542,
+          "min_triangle_area_ratio": 0.9999335888995872,
+          "max_triangle_area_ratio": 1.0000573734134777,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_RolledSleeve_L": {
+          "max_vertex_displacement_m": 0.08793861545224625,
+          "min_edge_length_ratio": 0.9999549110379661,
+          "max_edge_length_ratio": 1.00004066508218,
+          "min_triangle_area_ratio": 0.9999498459198737,
+          "max_triangle_area_ratio": 1.0000440862512197,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_RolledSleeve_R": {
+          "max_vertex_displacement_m": 0.1163078108260722,
+          "min_edge_length_ratio": 0.9999659734018865,
+          "max_edge_length_ratio": 1.0000377216706717,
+          "min_triangle_area_ratio": 0.9999597028770896,
+          "max_triangle_area_ratio": 1.0000424264096823,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Shirt_NeckRib": {
+          "max_vertex_displacement_m": 0.06239216119433133,
+          "min_edge_length_ratio": 0.9953767920141979,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9908384282579596,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_-1_-0.007": {
+          "max_vertex_displacement_m": 0.05805651791175619,
+          "min_edge_length_ratio": 0.9747580202817437,
+          "max_edge_length_ratio": 1.1620935516167394,
+          "min_triangle_area_ratio": 0.7713357020109616,
+          "max_triangle_area_ratio": 1.2495556170662379,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_-1_0.007": {
+          "max_vertex_displacement_m": 0.05584997461739676,
+          "min_edge_length_ratio": 0.9594384359498896,
+          "max_edge_length_ratio": 1.1386357201349067,
+          "min_triangle_area_ratio": 0.8109930152235438,
+          "max_triangle_area_ratio": 1.1914644520265376,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_1_-0.007": {
+          "max_vertex_displacement_m": 0.054826595439135296,
+          "min_edge_length_ratio": 0.9443734057225419,
+          "max_edge_length_ratio": 1.7924781317542924,
+          "min_triangle_area_ratio": 0.8966604490753285,
+          "max_triangle_area_ratio": 1.7950827454149116,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_1_0.007": {
+          "max_vertex_displacement_m": 0.05667521223642885,
+          "min_edge_length_ratio": 0.9742380017168296,
+          "max_edge_length_ratio": 1.1690656086347966,
+          "min_triangle_area_ratio": 0.9060642935040849,
+          "max_triangle_area_ratio": 1.2697977681382102,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Button_-1": {
+          "max_vertex_displacement_m": 0.0513732961829613,
+          "min_edge_length_ratio": 0.9998702000832171,
+          "max_edge_length_ratio": 1.0001267622512051,
+          "min_triangle_area_ratio": 0.9998187149082969,
+          "max_triangle_area_ratio": 1.0002440829296548,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Button_1": {
+          "max_vertex_displacement_m": 0.048887411302610095,
+          "min_edge_length_ratio": 0.9998852536296761,
+          "max_edge_length_ratio": 1.000142951005136,
+          "min_triangle_area_ratio": 0.9997509770467916,
+          "max_triangle_area_ratio": 1.000242193031097,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Clasp_-1": {
+          "max_vertex_displacement_m": 0.0553694938138982,
+          "min_edge_length_ratio": 0.9602254269109896,
+          "max_edge_length_ratio": 1.0001605902043091,
+          "min_triangle_area_ratio": 0.955720491246745,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Clasp_1": {
+          "max_vertex_displacement_m": 0.053043396152799294,
+          "min_edge_length_ratio": 0.9604063454982097,
+          "max_edge_length_ratio": 1.0000100342022007,
+          "min_triangle_area_ratio": 0.9559065264731077,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ToolPouch": {
+          "max_vertex_displacement_m": 0.046250160895745435,
+          "min_edge_length_ratio": 0.9999953025905012,
+          "max_edge_length_ratio": 1.0000157621088546,
+          "min_triangle_area_ratio": 0.9999940895708703,
+          "max_triangle_area_ratio": 1.0000164246033623,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ToolPouch_Flap": {
+          "max_vertex_displacement_m": 0.041901521213573024,
+          "min_edge_length_ratio": 0.9999752376303548,
+          "max_edge_length_ratio": 1.0000092914751366,
+          "min_triangle_area_ratio": 0.9999749498649453,
+          "max_triangle_area_ratio": 1.0000130778021628,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Screwdriver_Handle": {
+          "max_vertex_displacement_m": 0.030331776169510105,
+          "min_edge_length_ratio": 0.9999763073453032,
+          "max_edge_length_ratio": 1.0000284464687668,
+          "min_triangle_area_ratio": 0.9999732680515215,
+          "max_triangle_area_ratio": 1.000031426816738,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Screwdriver_Shaft": {
+          "max_vertex_displacement_m": 0.0358015156116181,
+          "min_edge_length_ratio": 0.9999953671826359,
+          "max_edge_length_ratio": 1.0000052775512396,
+          "min_triangle_area_ratio": 0.9999908131113587,
+          "max_triangle_area_ratio": 1.0000133984071282,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Wrench": {
+          "max_vertex_displacement_m": 0.038760172083112075,
+          "min_edge_length_ratio": 0.9999963460793191,
+          "max_edge_length_ratio": 1.0000021528301855,
+          "min_triangle_area_ratio": 0.9999933101500069,
+          "max_triangle_area_ratio": 1.0000033626453595,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Trouser_Hem_L": {
+          "max_vertex_displacement_m": 0.029691518491190484,
+          "min_edge_length_ratio": 0.9959212880789483,
+          "max_edge_length_ratio": 1.0004896785910977,
+          "min_triangle_area_ratio": 0.9958672981542499,
+          "max_triangle_area_ratio": 1.0005883927718395,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Trouser_Hem_R": {
+          "max_vertex_displacement_m": 0.07545796155432623,
+          "min_edge_length_ratio": 0.9982630043660982,
+          "max_edge_length_ratio": 1.0015652447377594,
+          "min_triangle_area_ratio": 0.9982032550743982,
+          "max_triangle_area_ratio": 1.0015737255584294,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Body": {
+          "max_vertex_displacement_m": 0.06007405621146103,
+          "min_edge_length_ratio": 0.9083961102100401,
+          "max_edge_length_ratio": 1.1507999504899604,
+          "min_triangle_area_ratio": 0.9072348043947676,
+          "max_triangle_area_ratio": 1.1521452711306681,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Sleeve_L": {
+          "max_vertex_displacement_m": 0.08661544327244362,
+          "min_edge_length_ratio": 0.517416352570125,
+          "max_edge_length_ratio": 1.3257284180458675,
+          "min_triangle_area_ratio": 0.3554782179873074,
+          "max_triangle_area_ratio": 1.4275430931740483,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Sleeve_R": {
+          "max_vertex_displacement_m": 0.11530654045725175,
+          "min_edge_length_ratio": 0.49799092475729767,
+          "max_edge_length_ratio": 1.3398681555446843,
+          "min_triangle_area_ratio": 0.328613223613848,
+          "max_triangle_area_ratio": 1.4303871861571287,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_UtilityBelt": {
+          "max_vertex_displacement_m": 0.05187086284334882,
+          "min_edge_length_ratio": 0.8097149129809206,
+          "max_edge_length_ratio": 1.1340499366312722,
+          "min_triangle_area_ratio": 0.8042921634866527,
+          "max_triangle_area_ratio": 1.134197758626402,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Wrench_Grip": {
+          "max_vertex_displacement_m": 0.03794003157955719,
+          "min_edge_length_ratio": 0.9999748883287344,
+          "max_edge_length_ratio": 1.000047322628787,
+          "min_triangle_area_ratio": 0.999969491536944,
+          "max_triangle_area_ratio": 1.0000463226236427,
+          "collapsed_triangles": 0
+        }
+      }
+    },
+    "AS_LunaMk2_Title_C": {
+      "frames_sampled": [
+        1,
+        8,
+        16,
+        24,
+        31,
+        38,
+        46,
+        54,
+        61,
+        68,
+        76,
+        84,
+        91
+      ],
+      "max_bone_basis_rotation_radians": 1.5707964897155762,
+      "meshes": {
+        "Mechanic_Belt_Buckle": {
+          "max_vertex_displacement_m": 0.1651904184195021,
+          "min_edge_length_ratio": 0.6971377919019771,
+          "max_edge_length_ratio": 1.0007865907275826,
+          "min_triangle_area_ratio": 0.6265318139964703,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Bib_EdgeStitch_-1": {
+          "max_vertex_displacement_m": 0.16242999459034618,
+          "min_edge_length_ratio": 0.9314411966513586,
+          "max_edge_length_ratio": 1.007179036411255,
+          "min_triangle_area_ratio": 0.9187502658056729,
+          "max_triangle_area_ratio": 1.0000765421290407,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Bib_EdgeStitch_1": {
+          "max_vertex_displacement_m": 0.14062088595864733,
+          "min_edge_length_ratio": 0.928068081514011,
+          "max_edge_length_ratio": 1.007241927318411,
+          "min_triangle_area_ratio": 0.9152753775524696,
+          "max_triangle_area_ratio": 1.000076238061128,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Collar_L": {
+          "max_vertex_displacement_m": 0.1939567564392606,
+          "min_edge_length_ratio": 0.9836733739633333,
+          "max_edge_length_ratio": 1.0190310624755,
+          "min_triangle_area_ratio": 0.9685983292388636,
+          "max_triangle_area_ratio": 1.0125475484243922,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Collar_R": {
+          "max_vertex_displacement_m": 0.1701304737094663,
+          "min_edge_length_ratio": 0.976942375219701,
+          "max_edge_length_ratio": 1.0290219178263036,
+          "min_triangle_area_ratio": 0.9767322765874807,
+          "max_triangle_area_ratio": 1.0288730205538974,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L": {
+          "max_vertex_displacement_m": 0.1711377461420038,
+          "min_edge_length_ratio": 0.8123592664899847,
+          "max_edge_length_ratio": 1.1359086626137898,
+          "min_triangle_area_ratio": 0.8067343131088758,
+          "max_triangle_area_ratio": 1.1000567184102754,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.001": {
+          "max_vertex_displacement_m": 0.21384516853638155,
+          "min_edge_length_ratio": 0.7934689321074615,
+          "max_edge_length_ratio": 1.1240235670031813,
+          "min_triangle_area_ratio": 0.7851382053310999,
+          "max_triangle_area_ratio": 1.1086116998930449,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.002": {
+          "max_vertex_displacement_m": 0.16062927022636128,
+          "min_edge_length_ratio": 0.825963368475645,
+          "max_edge_length_ratio": 1.1292763324010109,
+          "min_triangle_area_ratio": 0.8168590245401519,
+          "max_triangle_area_ratio": 1.0958474831798486,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.003": {
+          "max_vertex_displacement_m": 0.2059318847747543,
+          "min_edge_length_ratio": 0.8102107440446769,
+          "max_edge_length_ratio": 1.1131035621760816,
+          "min_triangle_area_ratio": 0.785256836350077,
+          "max_triangle_area_ratio": 1.0882601370606977,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.004": {
+          "max_vertex_displacement_m": 0.15122306909160205,
+          "min_edge_length_ratio": 0.8406469502036952,
+          "max_edge_length_ratio": 1.1235308866006575,
+          "min_triangle_area_ratio": 0.8237095009303511,
+          "max_triangle_area_ratio": 1.0969998394225902,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.005": {
+          "max_vertex_displacement_m": 0.19930105500441525,
+          "min_edge_length_ratio": 0.8294004965278085,
+          "max_edge_length_ratio": 1.102860909416411,
+          "min_triangle_area_ratio": 0.7960579041188885,
+          "max_triangle_area_ratio": 1.077714625774853,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.006": {
+          "max_vertex_displacement_m": 0.1430853274225156,
+          "min_edge_length_ratio": 0.8609892296297853,
+          "max_edge_length_ratio": 1.1182474664304973,
+          "min_triangle_area_ratio": 0.8388791341350673,
+          "max_triangle_area_ratio": 1.1032948947781285,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_L.007": {
+          "max_vertex_displacement_m": 0.19407643756957776,
+          "min_edge_length_ratio": 0.8455701306448677,
+          "max_edge_length_ratio": 1.09585979358754,
+          "min_triangle_area_ratio": 0.8183108774551703,
+          "max_triangle_area_ratio": 1.07662817698401,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R": {
+          "max_vertex_displacement_m": 0.18119592763488107,
+          "min_edge_length_ratio": 0.8379962353521484,
+          "max_edge_length_ratio": 1.0739785636233945,
+          "min_triangle_area_ratio": 0.8311817720489433,
+          "max_triangle_area_ratio": 1.061590220824374,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.001": {
+          "max_vertex_displacement_m": 0.13265938126022034,
+          "min_edge_length_ratio": 0.8503420996812626,
+          "max_edge_length_ratio": 1.0678914380659559,
+          "min_triangle_area_ratio": 0.8474021962719305,
+          "max_triangle_area_ratio": 1.0447100246837169,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.002": {
+          "max_vertex_displacement_m": 0.17376655244179415,
+          "min_edge_length_ratio": 0.8478259794241977,
+          "max_edge_length_ratio": 1.066109540092859,
+          "min_triangle_area_ratio": 0.8346444973400309,
+          "max_triangle_area_ratio": 1.0574546042648676,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.003": {
+          "max_vertex_displacement_m": 0.12255840048889274,
+          "min_edge_length_ratio": 0.8560712384083284,
+          "max_edge_length_ratio": 1.05612470624966,
+          "min_triangle_area_ratio": 0.8521069303230383,
+          "max_triangle_area_ratio": 1.024928926223098,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.004": {
+          "max_vertex_displacement_m": 0.1670843783478662,
+          "min_edge_length_ratio": 0.8544821607081915,
+          "max_edge_length_ratio": 1.0584753143001626,
+          "min_triangle_area_ratio": 0.8429579607337716,
+          "max_triangle_area_ratio": 1.0554334947174269,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.005": {
+          "max_vertex_displacement_m": 0.11329269969773233,
+          "min_edge_length_ratio": 0.8636483496279994,
+          "max_edge_length_ratio": 1.0447935555842411,
+          "min_triangle_area_ratio": 0.8558911897029557,
+          "max_triangle_area_ratio": 1.038499781511552,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.006": {
+          "max_vertex_displacement_m": 0.16108977327859783,
+          "min_edge_length_ratio": 0.8666705611713091,
+          "max_edge_length_ratio": 1.0669644930401363,
+          "min_triangle_area_ratio": 0.8551217541317074,
+          "max_triangle_area_ratio": 1.0660919188467033,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Eyelet_R.007": {
+          "max_vertex_displacement_m": 0.10486004064262876,
+          "min_edge_length_ratio": 0.8769099307141696,
+          "max_edge_length_ratio": 1.0610464196158058,
+          "min_triangle_area_ratio": 0.8653656260187581,
+          "max_triangle_area_ratio": 1.062583863004951,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_0": {
+          "max_vertex_displacement_m": 0.21149913036293902,
+          "min_edge_length_ratio": 0.8591766212940185,
+          "max_edge_length_ratio": 1.097904851799215,
+          "min_triangle_area_ratio": 0.8378255724164778,
+          "max_triangle_area_ratio": 1.078295849781741,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_1": {
+          "max_vertex_displacement_m": 0.20330583535332622,
+          "min_edge_length_ratio": 0.8693392350548016,
+          "max_edge_length_ratio": 1.098986238732235,
+          "min_triangle_area_ratio": 0.8398245584196681,
+          "max_triangle_area_ratio": 1.067517469092867,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_2": {
+          "max_vertex_displacement_m": 0.19637552057897464,
+          "min_edge_length_ratio": 0.8790996848412818,
+          "max_edge_length_ratio": 1.1097336720381639,
+          "min_triangle_area_ratio": 0.8365063397083151,
+          "max_triangle_area_ratio": 1.0610416542794756,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_L_3": {
+          "max_vertex_displacement_m": 0.19080667350867278,
+          "min_edge_length_ratio": 0.8489472736397577,
+          "max_edge_length_ratio": 1.121040702720521,
+          "min_triangle_area_ratio": 0.8418942396550001,
+          "max_triangle_area_ratio": 1.0756582156688594,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_0": {
+          "max_vertex_displacement_m": 0.1805285082283262,
+          "min_edge_length_ratio": 0.8398767105839442,
+          "max_edge_length_ratio": 1.051684387992947,
+          "min_triangle_area_ratio": 0.8295371241965531,
+          "max_triangle_area_ratio": 1.0040782895002491,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_1": {
+          "max_vertex_displacement_m": 0.17256567811769877,
+          "min_edge_length_ratio": 0.8400925538027272,
+          "max_edge_length_ratio": 1.0604445038971178,
+          "min_triangle_area_ratio": 0.8432605351467037,
+          "max_triangle_area_ratio": 1.0147645279660695,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_2": {
+          "max_vertex_displacement_m": 0.16528838681753122,
+          "min_edge_length_ratio": 0.8405159378930245,
+          "max_edge_length_ratio": 1.0582820549682381,
+          "min_triangle_area_ratio": 0.8544903163465497,
+          "max_triangle_area_ratio": 1.0387222489002512,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_LaceCross_R_3": {
+          "max_vertex_displacement_m": 0.15864774849605173,
+          "min_edge_length_ratio": 0.8464509898237897,
+          "max_edge_length_ratio": 1.0785221841384587,
+          "min_triangle_area_ratio": 0.8627048360738279,
+          "max_triangle_area_ratio": 1.063959680710816,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_0": {
+          "max_vertex_displacement_m": 0.21494075441551863,
+          "min_edge_length_ratio": 0.8527033728954151,
+          "max_edge_length_ratio": 1.086549325685562,
+          "min_triangle_area_ratio": 0.8189588585071238,
+          "max_triangle_area_ratio": 1.0736342681790625,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_1": {
+          "max_vertex_displacement_m": 0.2069671365437775,
+          "min_edge_length_ratio": 0.8740721636365987,
+          "max_edge_length_ratio": 1.0952147808712056,
+          "min_triangle_area_ratio": 0.8051061717867839,
+          "max_triangle_area_ratio": 1.053423909490234,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_2": {
+          "max_vertex_displacement_m": 0.20024188774934185,
+          "min_edge_length_ratio": 0.8887801704586866,
+          "max_edge_length_ratio": 1.1040132422789035,
+          "min_triangle_area_ratio": 0.8051228855167148,
+          "max_triangle_area_ratio": 1.048715938902114,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_L_3": {
+          "max_vertex_displacement_m": 0.19486022982845158,
+          "min_edge_length_ratio": 0.8856702479270003,
+          "max_edge_length_ratio": 1.1129286258507478,
+          "min_triangle_area_ratio": 0.8195374133565473,
+          "max_triangle_area_ratio": 1.067317063332844,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_0": {
+          "max_vertex_displacement_m": 0.17808241590676105,
+          "min_edge_length_ratio": 0.842817735856038,
+          "max_edge_length_ratio": 1.054500711475377,
+          "min_triangle_area_ratio": 0.8321220041993108,
+          "max_triangle_area_ratio": 1.038185860002857,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_1": {
+          "max_vertex_displacement_m": 0.17028956803160888,
+          "min_edge_length_ratio": 0.8423580655206487,
+          "max_edge_length_ratio": 1.0448274506549595,
+          "min_triangle_area_ratio": 0.8471733854268871,
+          "max_triangle_area_ratio": 1.0435725025280105,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_2": {
+          "max_vertex_displacement_m": 0.16324209894944702,
+          "min_edge_length_ratio": 0.8446399869842417,
+          "max_edge_length_ratio": 1.047920108701239,
+          "min_triangle_area_ratio": 0.8677859347276949,
+          "max_triangle_area_ratio": 1.051862875008514,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Lace_R_3": {
+          "max_vertex_displacement_m": 0.15689022493708865,
+          "min_edge_length_ratio": 0.8529647739369828,
+          "max_edge_length_ratio": 1.0695272556286006,
+          "min_triangle_area_ratio": 0.8713904026810197,
+          "max_triangle_area_ratio": 1.0630330746945198,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_SoleBottom_L": {
+          "max_vertex_displacement_m": 0.30464028072295274,
+          "min_edge_length_ratio": 0.999996947124817,
+          "max_edge_length_ratio": 1.0000031952229045,
+          "min_triangle_area_ratio": 0.9999779146004187,
+          "max_triangle_area_ratio": 1.0000300564724063,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_SoleBottom_R": {
+          "max_vertex_displacement_m": 0.2648758403055535,
+          "min_edge_length_ratio": 0.9999965998246785,
+          "max_edge_length_ratio": 1.0000037382866247,
+          "min_triangle_area_ratio": 0.9999397845229737,
+          "max_triangle_area_ratio": 1.0000198596838201,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Sole_L": {
+          "max_vertex_displacement_m": 0.30647265532178786,
+          "min_edge_length_ratio": 0.999978318515446,
+          "max_edge_length_ratio": 1.0000246500159595,
+          "min_triangle_area_ratio": 0.9999781049174691,
+          "max_triangle_area_ratio": 1.0000253564715262,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Sole_R": {
+          "max_vertex_displacement_m": 0.2667484044833778,
+          "min_edge_length_ratio": 0.9999908091377203,
+          "max_edge_length_ratio": 1.0000122335128256,
+          "min_triangle_area_ratio": 0.9999892631065948,
+          "max_triangle_area_ratio": 1.000014719364025,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Upper_L": {
+          "max_vertex_displacement_m": 0.2955529828966818,
+          "min_edge_length_ratio": 0.8881063603410368,
+          "max_edge_length_ratio": 1.0721748319858992,
+          "min_triangle_area_ratio": 0.8526811539853837,
+          "max_triangle_area_ratio": 1.0693575523580854,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Upper_R": {
+          "max_vertex_displacement_m": 0.25597134675785377,
+          "min_edge_length_ratio": 0.8793381848017994,
+          "max_edge_length_ratio": 1.0910247382127636,
+          "min_triangle_area_ratio": 0.8674358631080467,
+          "max_triangle_area_ratio": 1.090744308860118,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Welt_L": {
+          "max_vertex_displacement_m": 0.3008976581784629,
+          "min_edge_length_ratio": 0.9999736661810027,
+          "max_edge_length_ratio": 1.000015424947992,
+          "min_triangle_area_ratio": 0.9999746644542251,
+          "max_triangle_area_ratio": 1.0000155263720525,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Boot_Welt_R": {
+          "max_vertex_displacement_m": 0.26123383197952516,
+          "min_edge_length_ratio": 0.9999847195281306,
+          "max_edge_length_ratio": 1.0000133676215521,
+          "min_triangle_area_ratio": 0.9999843019421016,
+          "max_triangle_area_ratio": 1.000014293156631,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Buckle_Pin": {
+          "max_vertex_displacement_m": 0.16541432942706566,
+          "min_edge_length_ratio": 0.837351509676679,
+          "max_edge_length_ratio": 1.0009839547149577,
+          "min_triangle_area_ratio": 0.8348136708518091,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ChestPocket_Lip": {
+          "max_vertex_displacement_m": 0.1390193028500569,
+          "min_edge_length_ratio": 0.9999468178062161,
+          "max_edge_length_ratio": 1.0000729660360643,
+          "min_triangle_area_ratio": 0.9998829297885886,
+          "max_triangle_area_ratio": 1.000196156155572,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ChestPocket_Stitch": {
+          "max_vertex_displacement_m": 0.13798124699727318,
+          "min_edge_length_ratio": 0.9998922122694227,
+          "max_edge_length_ratio": 1.0001391918206013,
+          "min_triangle_area_ratio": 0.9998034366459448,
+          "max_triangle_area_ratio": 1.000244318745446,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_-1": {
+          "max_vertex_displacement_m": 0.18662394234825497,
+          "min_edge_length_ratio": 0.8476634978543899,
+          "max_edge_length_ratio": 1.0110930909614306,
+          "min_triangle_area_ratio": 0.7218543898103638,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_1": {
+          "max_vertex_displacement_m": 0.15108848648259338,
+          "min_edge_length_ratio": 0.8590269705540179,
+          "max_edge_length_ratio": 1.0236629696030584,
+          "min_triangle_area_ratio": 0.7622855907107174,
+          "max_triangle_area_ratio": 1.0151557920095111,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_Stitch_-1": {
+          "max_vertex_displacement_m": 0.18818355114538016,
+          "min_edge_length_ratio": 0.7480304276343608,
+          "max_edge_length_ratio": 1.0595962507645333,
+          "min_triangle_area_ratio": 0.7424892717836667,
+          "max_triangle_area_ratio": 1.0946846244312636,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_HipPocket_Stitch_1": {
+          "max_vertex_displacement_m": 0.15309872986951553,
+          "min_edge_length_ratio": 0.7743769591444069,
+          "max_edge_length_ratio": 1.073816434981447,
+          "min_triangle_area_ratio": 0.775115681271451,
+          "max_triangle_area_ratio": 1.0403448560704396,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_KneeReinforcement_-1": {
+          "max_vertex_displacement_m": 0.17895620981499272,
+          "min_edge_length_ratio": 0.8928280346026229,
+          "max_edge_length_ratio": 2.059308782252041,
+          "min_triangle_area_ratio": 0.8003477148021731,
+          "max_triangle_area_ratio": 2.148387555148394,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_KneeReinforcement_1": {
+          "max_vertex_displacement_m": 0.22770927029491084,
+          "min_edge_length_ratio": 0.9251171914415492,
+          "max_edge_length_ratio": 1.7226675708028294,
+          "min_triangle_area_ratio": 0.9413917054219167,
+          "max_triangle_area_ratio": 1.827726375164307,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Knee_Stitch_-1": {
+          "max_vertex_displacement_m": 0.1791521193130069,
+          "min_edge_length_ratio": 0.854815630460927,
+          "max_edge_length_ratio": 1.491956609216617,
+          "min_triangle_area_ratio": 0.7783326496049394,
+          "max_triangle_area_ratio": 1.708507504490735,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Knee_Stitch_1": {
+          "max_vertex_displacement_m": 0.22814077023178295,
+          "min_edge_length_ratio": 0.9276053597848825,
+          "max_edge_length_ratio": 1.719508030477697,
+          "min_triangle_area_ratio": 0.5569622118044656,
+          "max_triangle_area_ratio": 1.4771598100906418,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_LargeChestPocket": {
+          "max_vertex_displacement_m": 0.13715626862466584,
+          "min_edge_length_ratio": 0.9999652982199153,
+          "max_edge_length_ratio": 1.0000425435789373,
+          "min_triangle_area_ratio": 0.9999687823726533,
+          "max_triangle_area_ratio": 1.000049773031121,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Bib": {
+          "max_vertex_displacement_m": 0.16166979918335417,
+          "min_edge_length_ratio": 0.8936108850318218,
+          "max_edge_length_ratio": 1.0006822178708488,
+          "min_triangle_area_ratio": 0.8922139219032436,
+          "max_triangle_area_ratio": 1.0000169352906347,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Strap_-1": {
+          "max_vertex_displacement_m": 0.12419740886978585,
+          "min_edge_length_ratio": 0.97709914219968,
+          "max_edge_length_ratio": 1.142264738283976,
+          "min_triangle_area_ratio": 0.9750386339858854,
+          "max_triangle_area_ratio": 1.182525978116948,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Strap_1": {
+          "max_vertex_displacement_m": 0.14092687161326817,
+          "min_edge_length_ratio": 0.9770314647755607,
+          "max_edge_length_ratio": 1.237149705482586,
+          "min_triangle_area_ratio": 0.9749343913405462,
+          "max_triangle_area_ratio": 1.2389587026361242,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Overall_Trousers": {
+          "max_vertex_displacement_m": 0.22941541806271953,
+          "min_edge_length_ratio": 0.4703700881939731,
+          "max_edge_length_ratio": 1.78636201617678,
+          "min_triangle_area_ratio": 0.4221549865684767,
+          "max_triangle_area_ratio": 1.8715017882700673,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pocket_Tab": {
+          "max_vertex_displacement_m": 0.14163361688943044,
+          "min_edge_length_ratio": 0.999917776921242,
+          "max_edge_length_ratio": 1.0001271472539794,
+          "min_triangle_area_ratio": 0.9998833064782551,
+          "max_triangle_area_ratio": 1.00016701012719,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_BeltLoop": {
+          "max_vertex_displacement_m": 0.17026269642070868,
+          "min_edge_length_ratio": 0.9999719703582827,
+          "max_edge_length_ratio": 1.0000270969297285,
+          "min_triangle_area_ratio": 0.9999611950506002,
+          "max_triangle_area_ratio": 1.0000375081121544,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_BeltLoop.001": {
+          "max_vertex_displacement_m": 0.2220249989200005,
+          "min_edge_length_ratio": 0.9999699352657361,
+          "max_edge_length_ratio": 1.0000297757723196,
+          "min_triangle_area_ratio": 0.9999570540029902,
+          "max_triangle_area_ratio": 1.0000490121645171,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Pouch_Snap": {
+          "max_vertex_displacement_m": 0.19947145371050304,
+          "min_edge_length_ratio": 0.9999561145729406,
+          "max_edge_length_ratio": 1.0000456495917118,
+          "min_triangle_area_ratio": 0.9999346756278891,
+          "max_triangle_area_ratio": 1.000084516962286,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_RolledSleeve_L": {
+          "max_vertex_displacement_m": 0.18987150253732488,
+          "min_edge_length_ratio": 0.9999511058150956,
+          "max_edge_length_ratio": 1.0000434189878904,
+          "min_triangle_area_ratio": 0.9999559725991584,
+          "max_triangle_area_ratio": 1.0000508751662467,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_RolledSleeve_R": {
+          "max_vertex_displacement_m": 0.2959038593500807,
+          "min_edge_length_ratio": 0.9999460051386964,
+          "max_edge_length_ratio": 1.00004434598065,
+          "min_triangle_area_ratio": 0.9999408058034424,
+          "max_triangle_area_ratio": 1.0000467622922484,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Shirt_NeckRib": {
+          "max_vertex_displacement_m": 0.08369297865672108,
+          "min_edge_length_ratio": 0.9950021506957542,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9901358637650483,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_-1_-0.007": {
+          "max_vertex_displacement_m": 0.12476696683373736,
+          "min_edge_length_ratio": 0.9764474848704006,
+          "max_edge_length_ratio": 1.1532398265192887,
+          "min_triangle_area_ratio": 0.7906498804927151,
+          "max_triangle_area_ratio": 1.233619091135308,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_-1_0.007": {
+          "max_vertex_displacement_m": 0.12261922006059807,
+          "min_edge_length_ratio": 0.9552335993604547,
+          "max_edge_length_ratio": 1.1312664346671086,
+          "min_triangle_area_ratio": 0.8143424571072835,
+          "max_triangle_area_ratio": 1.1790416372180446,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_1_-0.007": {
+          "max_vertex_displacement_m": 0.13430515519666422,
+          "min_edge_length_ratio": 0.9537044679597263,
+          "max_edge_length_ratio": 1.7367129968052892,
+          "min_triangle_area_ratio": 0.9047109534064185,
+          "max_triangle_area_ratio": 1.7400237383804409,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Strap_Stitch_1_0.007": {
+          "max_vertex_displacement_m": 0.14037372408147814,
+          "min_edge_length_ratio": 0.9767758852043704,
+          "max_edge_length_ratio": 1.1561621398568707,
+          "min_triangle_area_ratio": 0.905219854276441,
+          "max_triangle_area_ratio": 1.240908918787492,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Button_-1": {
+          "max_vertex_displacement_m": 0.13269048203092976,
+          "min_edge_length_ratio": 0.999855811643886,
+          "max_edge_length_ratio": 1.0001157961227143,
+          "min_triangle_area_ratio": 0.9998444449717815,
+          "max_triangle_area_ratio": 1.0002606602948216,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Button_1": {
+          "max_vertex_displacement_m": 0.14293920871805477,
+          "min_edge_length_ratio": 0.9998439560889574,
+          "max_edge_length_ratio": 1.0001058023974472,
+          "min_triangle_area_ratio": 0.9998355791012471,
+          "max_triangle_area_ratio": 1.0002598152732753,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Clasp_-1": {
+          "max_vertex_displacement_m": 0.13976154000687055,
+          "min_edge_length_ratio": 0.9636023674885058,
+          "max_edge_length_ratio": 1.0000087839874374,
+          "min_triangle_area_ratio": 0.959404054950207,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Suspender_Clasp_1": {
+          "max_vertex_displacement_m": 0.15624924359864018,
+          "min_edge_length_ratio": 0.9636100191294283,
+          "max_edge_length_ratio": 1.0000052822818277,
+          "min_triangle_area_ratio": 0.9594183768741207,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ToolPouch": {
+          "max_vertex_displacement_m": 0.23040371869725518,
+          "min_edge_length_ratio": 0.9999863032443943,
+          "max_edge_length_ratio": 1.000008721606763,
+          "min_triangle_area_ratio": 0.9999856980932784,
+          "max_triangle_area_ratio": 1.0000110706781076,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_ToolPouch_Flap": {
+          "max_vertex_displacement_m": 0.2339822587486702,
+          "min_edge_length_ratio": 0.9999766897927864,
+          "max_edge_length_ratio": 1.0000142104513243,
+          "min_triangle_area_ratio": 0.99996983593812,
+          "max_triangle_area_ratio": 1.0000154022481407,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Screwdriver_Handle": {
+          "max_vertex_displacement_m": 0.23512591863220544,
+          "min_edge_length_ratio": 0.9999826606147121,
+          "max_edge_length_ratio": 1.0000123406057977,
+          "min_triangle_area_ratio": 0.9999787340800842,
+          "max_triangle_area_ratio": 1.0000157858165646,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Screwdriver_Shaft": {
+          "max_vertex_displacement_m": 0.22647217918629714,
+          "min_edge_length_ratio": 0.9999888589142738,
+          "max_edge_length_ratio": 1.0000074632517604,
+          "min_triangle_area_ratio": 0.9999889003675184,
+          "max_triangle_area_ratio": 1.0000104402807743,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Tool_Wrench": {
+          "max_vertex_displacement_m": 0.20305436341912209,
+          "min_edge_length_ratio": 0.9999977754022099,
+          "max_edge_length_ratio": 1.000003210518195,
+          "min_triangle_area_ratio": 0.9999968413332219,
+          "max_triangle_area_ratio": 1.0000036266977763,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Trouser_Hem_L": {
+          "max_vertex_displacement_m": 0.19695762371490283,
+          "min_edge_length_ratio": 0.9906384322264792,
+          "max_edge_length_ratio": 1.0034544049329368,
+          "min_triangle_area_ratio": 0.9899700311646373,
+          "max_triangle_area_ratio": 1.0033970693446033,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Trouser_Hem_R": {
+          "max_vertex_displacement_m": 0.16831522721214529,
+          "min_edge_length_ratio": 0.9920897341443206,
+          "max_edge_length_ratio": 1.0005864915410032,
+          "min_triangle_area_ratio": 0.9919445588554017,
+          "max_triangle_area_ratio": 1.0006919253623148,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Body": {
+          "max_vertex_displacement_m": 0.16994761294294788,
+          "min_edge_length_ratio": 0.9127058532754223,
+          "max_edge_length_ratio": 1.1433557902724,
+          "min_triangle_area_ratio": 0.9098783606213582,
+          "max_triangle_area_ratio": 1.1445012343819678,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Sleeve_L": {
+          "max_vertex_displacement_m": 0.20325903330623524,
+          "min_edge_length_ratio": 0.5057020757578601,
+          "max_edge_length_ratio": 1.3316386327891963,
+          "min_triangle_area_ratio": 0.3422585722074992,
+          "max_triangle_area_ratio": 1.4269859911358593,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Undershirt_Sleeve_R": {
+          "max_vertex_displacement_m": 0.2924290276715793,
+          "min_edge_length_ratio": 0.49504780604473547,
+          "max_edge_length_ratio": 1.3394198407147624,
+          "min_triangle_area_ratio": 0.3343827391681038,
+          "max_triangle_area_ratio": 1.4232679738962202,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_UtilityBelt": {
+          "max_vertex_displacement_m": 0.16605492974251626,
+          "min_edge_length_ratio": 0.8187927090625663,
+          "max_edge_length_ratio": 1.1271204376891186,
+          "min_triangle_area_ratio": 0.8172121356957921,
+          "max_triangle_area_ratio": 1.1301155780529915,
+          "collapsed_triangles": 0
+        },
+        "Mechanic_Wrench_Grip": {
+          "max_vertex_displacement_m": 0.18424030493874924,
+          "min_edge_length_ratio": 0.9999841947900765,
+          "max_edge_length_ratio": 1.0000256164697248,
+          "min_triangle_area_ratio": 0.9999867590814875,
+          "max_triangle_area_ratio": 1.000027987141422,
+          "collapsed_triangles": 0
+        }
+      }
+    }
+  },
+  "limits": {
+    "rest_transform_tolerance": 1E-06,
+    "weight_sum_tolerance": 0.0001,
+    "degenerate_triangle_area_m2": 1E-12,
+    "note": "Open garment boundaries and duplicated seam coordinates are reported, not rejected. This does not establish absence of self-intersections, garment/body penetration, or visual deformation problems."
+  },
+  "source_unchanged": true,
+  "passed": true,
+  "summary": {
+    "mesh_count": 88,
+    "actions_sampled": 3,
+    "errors": 0,
+    "warnings": 0
+  }
+}

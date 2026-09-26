@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "blender_version": "5.2.0 LTS",
+  "export_file": "Models/SKM_LunaMk2_MechanicOutfit.fbx",
+  "mesh_count": 1,
+  "bone_count": 130,
+  "vertices": 12718,
+  "triangles": 25084,
+  "bound_error_m": 1.1920928955078125e-07,
+  "bone_head_error_m": 5.966250802685813e-07,
+  "normalized_weights": true,
+  "material_slots": [
+    "M_Mechanic_NavyCotton",
+    "M_Mechanic_OrangeCanvas",
+    "M_Mechanic_WarmStitch",
+    "M_Mechanic_Brass",
+    "M_Mechanic_OrangeReinforcement",
+    "M_Mechanic_DarkLeather",
+    "M_Mechanic_BrushedSteel",
+    "M_Mechanic_Rubber"
+  ],
+  "pose_previews": [
+    {
+      "action": "AS_LunaMk2_Title_A",
+      "frame": 31
+    },
+    {
+      "action": "AS_LunaMk2_Title_B",
+      "frame": 31
+    },
+    {
+      "action": "AS_LunaMk2_Title_C",
+      "frame": 31
+    }
+  ],
+  "unreal_import_tested": false,
+  "cloth_physics_implemented": false,
+  "equipment_gameplay_implemented": false
+}
