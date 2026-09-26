@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Weapon/TunaSweeperWeaponConfiguration.h"
 #include "TunaSweeperItemDataSubsystem.generated.h"
 
 UENUM(BlueprintType)
@@ -90,6 +91,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName AttachmentSlotTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	bool bProvidesLaserSight = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName AmmoTypeTag;
@@ -419,6 +423,7 @@ UCLASS()
 class TUNASWEEPER_API UTunaSweeperItemDataSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperEquipmentDataTest;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
@@ -452,6 +457,9 @@ public:
 	bool GetAllItemDefinitions(TArray<FTunaSweeperItemDefinition>& OutItemDefinitions);
 
 	bool TryGetWeaponActorClassPath(int32 ItemId, FSoftObjectPath& OutWeaponClassPath);
+	bool TryGetWeaponVisualDefinition(int32 ItemId, FTunaSweeperWeaponVisualDefinition& OutDefinition);
+	bool TryResolveEnemyLoadout(int32 WeaponItemId, int32 AmmoItemId, int32 ReserveAmmoCount, FTunaSweeperEnemyWeaponLoadout& OutLoadout);
+	bool TryGetCombatLabEnemyLoadout(FTunaSweeperEnemyWeaponLoadout& OutLoadout);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool TryGetLootContainerDefinition(int32 ContainerDefinitionId, FTunaSweeperLootContainerDefinition& OutDefinition);
@@ -511,6 +519,14 @@ public:
 	FString BuildItemIconObjectPath(const FTunaSweeperItemDefinition& ItemDefinition) const;
 
 private:
+	friend class FTunaSweeperWeaponConfigurationDataTest;
+	bool LoadWeaponConfigurationJson();
+	bool ParseWeaponVisualDefinitions(const FString& Json);
+	bool ParseEnemyDefaultLoadout(const FString& Json);
+	bool ParseCombatLabEnemyLoadout(const FString& Json);
+	TMap<int32, FTunaSweeperWeaponVisualDefinition> WeaponVisualsByItemId;
+	FTunaSweeperEnemyDefaultLoadout EnemyDefaultLoadout;
+	FTunaSweeperEnemyWeaponLoadout CombatLabEnemyLoadout;
 	bool EnsureItemDataLoaded();
 	bool LoadItemTableJson();
 	bool LoadWeaponActorClassMappingsJson();

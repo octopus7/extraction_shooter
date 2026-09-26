@@ -8,6 +8,7 @@
 #include "Engine/GameInstance.h"
 #include "Misc/AutomationTest.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "UI/TunaSweeperResearchWidgets.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
 #include "Settings/TunaSweeperBuildTargetSettings.h"
@@ -37,15 +38,44 @@ bool FTunaSweeperResearchTabDistributionTest::RunTest(const FString& Parameters)
 		for (const TCHAR* Name : {TEXT("ResearchModeButton"), TEXT("ResearchModeButtonFrame")})
 		{
 			UWidget* Widget = Tabs->WidgetTree->FindWidget(Name);
-			if (!TestNotNull(TEXT("Research tab and layout frame exist"), Widget)) return false;
-			TestEqual(TEXT("Demo removes research and its spacing; full game retains it"), Widget->GetVisibility(),
-				Settings->IsDemoBuild() ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+			TestNull(FString::Printf(TEXT("Research menu has no authored entry or reserved spacing in %s"),
+				Target == ETunaSweeperBuildTarget::SteamDemo ? TEXT("demo") : TEXT("full")), Widget);
 		}
 		for (const TCHAR* Name : {TEXT("InventoryModeButton"), TEXT("QuestModeButton"), TEXT("MapModeButton"), TEXT("MemoModeButton")})
 		{
 			UWidget* Widget = Tabs->WidgetTree->FindWidget(Name);
 			if (!TestNotNull(TEXT("Other HUD tab exists"), Widget)) return false;
 			TestTrue(TEXT("Other HUD tabs remain visible in both builds"), Widget->IsVisible());
+		}
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperResearchLocalizedUiTextTest,
+	"TunaSweeper.Research.LocalizedUiText",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchLocalizedUiTextTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperTextSubsystem* Strings = NewObject<UTunaSweeperTextSubsystem>(GameInstance);
+	if (!TestTrue(TEXT("Common UI text table loads"), Strings->LoadTextData(true))) return false;
+	for (const TCHAR* Key : {
+		TEXT("ui.hud.mode.research"), TEXT("ui.interaction.research"),
+		TEXT("ui.research.requirement"), TEXT("ui.research.remaining_time"),
+		TEXT("ui.research.action.locked"), TEXT("ui.research.action.start"),
+		TEXT("ui.research.action.researching"), TEXT("ui.research.action.complete"),
+		TEXT("ui.research.action.applied"), TEXT("ui.research.status")})
+	{
+		for (ETunaSweeperItemTextLanguage Language : {
+			ETunaSweeperItemTextLanguage::Korean,
+			ETunaSweeperItemTextLanguage::English,
+			ETunaSweeperItemTextLanguage::Japanese})
+		{
+			FText Value;
+			TestTrue(FString::Printf(TEXT("Research UI key %s resolves in language %d"), Key, static_cast<int32>(Language)),
+				Strings->TryGetTextByKey(FName(Key), Language, Value) && !Value.IsEmpty());
 		}
 	}
 	return true;

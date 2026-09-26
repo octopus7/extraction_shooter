@@ -76,7 +76,7 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 - `rewards.housing_facility_unlocks`: 시설 ID 배열
 - `rewards.workbench_recipe_unlocks`: 제작법 ID 배열
 
-지원 목표 타입은 `level_travel`, `item_acquired`, `enemy_killed`, `interaction_completed`, `warp_point_used`, `bunker_rescue_return`이다. 각 타입의 필터 필드는 `Docs/quest_system.md`를 따른다.
+지원 목표 타입은 `level_travel`, `item_acquired`, `item_submitted`, `enemy_killed`, `interaction_completed`, `warp_point_used`, `bunker_rescue_return`이다. 각 타입의 필터 필드는 `Docs/quest_system.md`를 따른다. `item_submitted`는 제출할 `item_id`, 수량 `required_count`, 실제 NPC의 제공자 ID와 일치하는 `target_provider_id`가 필요하다.
 
 ### 4. 제공자 액터 연결 확인
 

@@ -71,6 +71,7 @@ internal static class ItemDataCsvExporter
 		"defense_value",
 		"weapon_type_tag",
 		"attachment_slot_tag",
+		"provides_laser_sight",
 		"ammo_type_tag",
 		"projectile_hit_effect_id",
 		"projectile_damage_multiplier",

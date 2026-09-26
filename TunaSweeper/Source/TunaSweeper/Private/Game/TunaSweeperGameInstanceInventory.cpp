@@ -1120,6 +1120,24 @@ int32 UTunaSweeperGameInstance::CountInventoryItemById(int32 ItemId)
 	return CountInventoryAmmoByItemId(ItemId);
 }
 
+int32 UTunaSweeperGameInstance::CountCarriedItemById(int32 ItemId)
+{
+	EnsureInventoryStateInitialized();
+	int32 Count = CountInventoryAmmoByItemId(ItemId);
+	TSet<FGuid> CountedEquipment;
+	for (const FTunaSweeperInventorySlot& Slot : EquipmentSlots)
+	{
+		if (CountedEquipment.Contains(Slot.ItemUid)) continue;
+		CountedEquipment.Add(Slot.ItemUid);
+		const FTunaSweeperItemInstance* Item = ItemInstancesByUid.Find(Slot.ItemUid);
+		if (Item && Item->ItemId == ItemId)
+		{
+			Count += FMath::Max(0, Item->Quantity);
+		}
+	}
+	return Count;
+}
+
 int32 UTunaSweeperGameInstance::ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount)
 {
 	EnsureInventoryStateInitialized();

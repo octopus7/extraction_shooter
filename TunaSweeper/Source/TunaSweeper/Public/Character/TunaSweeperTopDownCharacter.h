@@ -513,6 +513,7 @@ private:
 	friend class UTunaSweeperCombatLabAutopilotComponent;
 	#if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperDemoStaminaTuningTest;
+	friend class FTunaSweeperEquipmentDataTest;
 	#endif
 	bool bExternalAimControl = false;
 	friend class UTunaSweeperVehicleMountComponent;
@@ -556,7 +557,7 @@ private:
 	void UpdateMeleeSwing(float DeltaSeconds);
 	void CancelMeleeSwing();
 	void ResetEquippedWeaponRelativeTransform();
-	void ApplyEquippedMeleeWeaponVisual();
+	void ApplyEquippedWeaponVisual();
 	void ApplyMeleeAttackJudgement();
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
 	void SpawnMeleeImpactBurst(const FVector& HitLocation, const FVector& BurstDirection);

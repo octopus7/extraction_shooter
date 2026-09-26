@@ -6,8 +6,8 @@ item.shotgun,산탄총,Shotgun,ショットガン
 item.smg,기관단총,SMG,サブマシンガン
 item.advanced_rifle,강화형 돌격소총,Advanced AR,強化型アサルトライフル
 item.advanced_smg,강화형 기관단총,Advanced SMG,強化型サブマシンガン
-item.combat_knife,전투 나이프,Combat Knife,コンバットナイフ
-item.baseball_bat,야구방망이,Baseball Bat,野球バット
+item.wooden_club,나무 방망이,Wooden Club,木のこん棒
+item.spiked_club,도깨비 방망이,Spiked Club,鬼の金棒
 item.pistol_ammo,권총 탄약,Pistol Ammo,ピストル弾薬
 item.rifle_ammo,소총 탄약,Rifle Ammo,ライフル弾薬
 item.shotgun_ammo,산탄총 탄약,Shotgun Ammo,ショットガン弾薬
@@ -50,8 +50,8 @@ item.shotgun.desc,좁은 공간에서 강한 화력을 내는 산탄총이다,A 
 item.smg.desc,짧은 점사와 빠른 재장전에 강한 기관단총이다,A fast-reloading SMG built for short bursts,短いバーストと素早いリロードに強いサブマシンガン
 item.advanced_rifle.desc,개량된 부품으로 탄창과 재장전 성능이 좋아진 돌격소총이다,An upgraded AR with better magazine and reload performance,改良部品でマガジンとリロード性能が向上したアサルトライフル
 item.advanced_smg.desc,고급 부품으로 지속 화력이 강화된 기관단총이다,An advanced SMG with stronger sustained fire,高級部品で継続火力を強化したサブマシンガン
-item.combat_knife.desc,가까운 거리에서 쓰는 기본 근접무기다,A basic melee weapon for close range use,近距離で使う基本的な近接武器
-item.baseball_bat.desc,단단한 목재로 만든 휘두르기 좋은 근접무기다,A sturdy wooden melee weapon built for heavy swings,重いスイングに向いた丈夫な木製近接武器
+item.wooden_club.desc,단단한 나무로 만든 기본적인 근접무기다,A basic melee weapon made of solid wood,硬い木で作られた基本的な近接武器
+item.spiked_club.desc,큼직한 돌기가 달린 묵직한 방망이다,A heavy club fitted with large spikes,大きな突起が付いた重いこん棒
 item.pistol_ammo.desc,권총에 사용하는 소형 탄약 묶음이다,A small bundle of pistol rounds,ピストル用の小型弾薬の束
 item.rifle_ammo.desc,소총에 사용하는 표준 탄약 묶음이다,A standard bundle of rifle rounds,ライフル用の標準弾薬の束
 item.shotgun_ammo.desc,산탄총에 사용하는 산탄 탄약이다,Shells used by shotguns,ショットガンで使う散弾
@@ -82,14 +82,16 @@ item.tactical_earphones_tier2.desc,차음과 통신 성능이 개선된 고급 �
 item.tactical_jacket.desc,신체 슬롯에 장착할 수 있는 방호 의류다,Protective clothing that fits the body equipment slot,身体スロットに装備できる防護服
 item.backpack.desc,추가 보관 공간을 제공하는 배낭이다,A backpack that provides extra storage,追加の収納空間を提供するバックパック
 item.valuables_crate.desc,팔 만한 물건이 들어 있을 수 있는 작은 상자다,A small crate that may hold sellable goods,売れる品が入っているかもしれない小箱
-item.backpack_tier1,1단계 가방,Bag I,バッグ I
-item.backpack_tier2,2단계 가방,Bag II,バッグ II
-item.backpack_tier3,3단계 가방,Bag III,バッグ III
-item.backpack_tier4,4단계 가방,Bag IV,バッグ IV
-item.backpack_tier1.desc,인벤토리를 40칸에서 50칸으로 확장한다,Expands inventory from 40 to 50 slots,インベントリを40スロットから50スロットへ拡張する
-item.backpack_tier2.desc,인벤토리를 40칸에서 60칸으로 확장한다,Expands inventory from 40 to 60 slots,インベントリを40スロットから60スロットへ拡張する
-item.backpack_tier3.desc,인벤토리를 40칸에서 80칸으로 확장한다,Expands inventory from 40 to 80 slots,インベントリを40スロットから80スロットへ拡張する
-item.backpack_tier4.desc,인벤토리를 40칸에서 100칸으로 확장한다,Expands inventory from 40 to 100 slots,インベントリを40スロットから100スロットへ拡張する
+item.backpack_tier1,계란 가방,Egg Backpack,たまごバッグ
+item.backpack_tier2,닭 가방,Chicken Backpack,ニワトリバッグ
+item.backpack_tier3,공룡 가방,Dinosaur Backpack,恐竜バッグ
+item.backpack_tier4,군용배낭,Military Backpack,軍用バックパック
+item.backpack_tier5,카본프레임 가방,Carbon Frame Backpack,カーボンフレームバッグ
+item.backpack_tier1.desc,커다란 계란 모양의 가방. 인벤토리를 50칸으로 확장한다,A large egg-shaped backpack. Expands inventory to 50 slots,大きなたまご型のバッグ。インベントリを50スロットに拡張する
+item.backpack_tier2.desc,동그란 닭 모양의 가방. 인벤토리를 60칸으로 확장한다,A round chicken-shaped backpack. Expands inventory to 60 slots,丸いニワトリ型のバッグ。インベントリを60スロットに拡張する
+item.backpack_tier3.desc,하늘을 보며 이를 다문 공룡을 업는 가방. 인벤토리를 80칸으로 확장한다,A piggyback dinosaur looking skyward with a toothy clenched grin. Expands inventory to 80 slots,空を見上げて歯を食いしばる恐竜を背負うバッグ。インベントリを80スロットに拡張する
+item.backpack_tier4.desc,단순하고 튼튼한 군용배낭. 인벤토리를 100칸으로 확장한다,A simple sturdy military backpack. Expands inventory to 100 slots,シンプルで丈夫な軍用バックパック。インベントリを100スロットに拡張する
+item.backpack_tier5.desc,가벼운 카본프레임이 받쳐 주는 대형 가방. 인벤토리를 120칸으로 확장한다,A large backpack supported by a lightweight carbon frame. Expands inventory to 120 slots,軽量カーボンフレームで支える大型バッグ。インベントリを120スロットに拡張する
 item.wood,목재,Wood,木材
 item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材
 item.blueprint_king_water_bottle,설계도 왕생수,Blueprint: Royal Bottled Water,設計図 王の飲料水
@@ -98,8 +100,8 @@ item.ancient_coin,옛 문명의 동전,Ancient Civilization Coin,古代文明の
 item.ancient_coin.desc,로켓 모양 탑이 양각된 오래된 동전이다. 함께 발견되는 왕국은행권 때문에 종교단체의 물건으로 오해받곤 한다.,An old coin embossed with a rocket-shaped tower. It is often found with Kingdom Banknotes and is sometimes mistaken for a religious group relic.,ロケット型の塔が浮き彫りになった古い硬貨。王国銀行券と一緒に見つかるため宗教団体の遺物と誤解されることがある。
 item.ancient_banknote,옛 문명의 지폐,Ancient Civilization Banknote,古代文明の紙幣
 item.ancient_banknote.desc,왕국은행권이라 불리는 오래된 지폐다. 둥근 머리와 몸통의 사람 실루엣 때문에 종교단체의 상징물로 오해받곤 한다.,An old note known as a Kingdom Banknote. Its simple round-headed human silhouette is sometimes mistaken for a religious group symbol.,王国銀行券と呼ばれる古い紙幣。丸い頭と胴体だけの人型シルエットのため宗教団体の象徴と誤解されることがある。
-item.crowbar,크로우바,Crowbar,バール
-item.crowbar.desc,취수 스크린에 걸린 수초와 이물질을 걷어낼 수 있는 튼튼한 공구다,A sturdy tool for prying weeds and debris out of the water-intake screen,取水スクリーンに絡まった水草や異物を取り除ける頑丈な工具だ
+item.crowbar,쇠지렛대,Crowbar,バール
+item.crowbar.desc,근접무기로도 쓰는 튼튼한 쇠지렛대다. 취수 스크린에 걸린 수초와 이물질을 걷어낼 수 있다.,A sturdy crowbar that doubles as a melee weapon and clears weeds and debris from the water-intake screen,近接武器にもなる頑丈なバール。取水スクリーンに絡まった水草や異物を取り除ける。
 item.replacement_valve_handle,교체용 밸브 손잡이,Replacement Valve Handle,交換用バルブハンドル
 item.replacement_valve_handle.desc,취수 시설의 부러진 밸브에 맞는 교체용 손잡이다,A replacement handle that fits the broken valve at the water intake,取水施設の壊れたバルブに合う交換用ハンドルだ
 item.waterproof_tape,방수 테이프,Waterproof Tape,防水テープ

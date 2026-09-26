@@ -97,6 +97,24 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UWidget> SteamDemoWishlistButtonContainer;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> LaboratoryButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UWidget> LaboratoryPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> LaboratoryBackButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> BossDevelopmentButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> BossSinglePlayerButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> BossMultiplayerButton;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> DemoBuildImage;
 
@@ -301,6 +319,22 @@ protected:
 
 private:
 	friend class FTitleScreenAssetTest;
+	friend class FTunaSweeperLaboratoryMenuTest;
+	void EnsureLaboratoryMenu();
+	void RefreshLaboratoryTexts();
+	bool IsLaboratoryVisible() const;
+	void EnterBossLaboratory(bool bDevelopment);
+	UFUNCTION()
+	void HandleLaboratoryClicked();
+	UFUNCTION()
+	void HandleLaboratoryBackClicked();
+	UFUNCTION()
+	void HandleBossDevelopmentClicked();
+	UFUNCTION()
+	void HandleBossSinglePlayerClicked();
+	UFUNCTION()
+	void HandleBossMultiplayerClicked();
+	friend class FTunaSweeperCoopPresentationTest;
 	UWidget* FindIntroWidget(FName Name) const;
 	void BindScreenWidgets();
 	void BeginSettingsEntry();

@@ -162,6 +162,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	ResetLoadedItemData();
 
 	const bool bLoadedItemTable = LoadItemTableJson();
+	const bool bLoadedWeaponConfiguration = bLoadedItemTable && LoadWeaponConfigurationJson();
 	LoadWeaponActorClassMappingsJson();
 	const bool bLoadedItemStackDefinitions = LoadItemStackDefinitionsJson();
 	const bool bLoadedNameStrings = LoadItemNameStringsCsv();
@@ -172,6 +173,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	const bool bLoadedWorkbenchDismantleRecipes = LoadWorkbenchDismantleRecipesJson();
 	bItemDataLoaded =
 		bLoadedItemTable &&
+		bLoadedWeaponConfiguration &&
 		bLoadedItemStackDefinitions &&
 		bLoadedNameStrings &&
 		bLoadedLootContainerTable &&
@@ -742,6 +744,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 
 		FTunaSweeperItemDefinition ItemDefinition;
 		ItemDefinition.Id = static_cast<int32>(NumericId);
+		(*JsonObject)->TryGetBoolField(TEXT("provides_laser_sight"), ItemDefinition.bProvidesLaserSight);
 		ItemDefinition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
 		ItemDefinition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		ItemDefinition.ShopSellPrice = FMath::Max(0, static_cast<int32>(NumericShopSellPrice));
@@ -1770,6 +1773,9 @@ bool UTunaSweeperItemDataSubsystem::LoadWorkbenchDismantleRecipesJson()
 
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
+	WeaponVisualsByItemId.Reset();
+	EnemyDefaultLoadout = {};
+	CombatLabEnemyLoadout = {};
 	ItemDefinitionsById.Reset();
 	WeaponActorClassPathsByItemId.Reset();
 	MaxStackQuantitiesByCategoryKey.Reset();

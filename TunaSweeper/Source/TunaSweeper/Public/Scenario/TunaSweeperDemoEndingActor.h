@@ -19,7 +19,6 @@ public:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     static ATunaSweeperDemoEndingActor* Find(UWorld* World);
-    static bool TryDeliverToMole(APawn* Pawn);
     void QueueEnding();
     UFUNCTION(BlueprintCallable, Category="Demo Ending")
     bool StartEnding();

@@ -130,23 +130,23 @@
   },
   {
     "id": 1004,
-    "name_string_key": "item.combat_knife",
-    "description_string_key": "item.combat_knife.desc",
+    "name_string_key": "item.wooden_club",
+    "description_string_key": "item.wooden_club.desc",
     "shop_sell_price": 65,
     "experience_value": 24,
     "item_grade": "common",
-    "icon_file_name": "T_UIIcon_CombatKnife.uasset",
+    "icon_file_name": "T_UIIcon_WoodenClub.uasset",
     "category_tag": "item.category.weapon.melee",
     "equipment_slot_tag": "equipment.slot.melee"
   },
   {
     "id": 1005,
-    "name_string_key": "item.baseball_bat",
-    "description_string_key": "item.baseball_bat.desc",
+    "name_string_key": "item.spiked_club",
+    "description_string_key": "item.spiked_club.desc",
     "shop_sell_price": 90,
     "experience_value": 30,
     "item_grade": "uncommon",
-    "icon_file_name": "T_UIIcon_BaseballBat.uasset",
+    "icon_file_name": "T_UIIcon_SpikedClub.uasset",
     "category_tag": "item.category.weapon.melee",
     "equipment_slot_tag": "equipment.slot.melee"
   },
@@ -319,6 +319,7 @@
   {
     "id": 2006,
     "name_string_key": "item.laser_sight",
+    "provides_laser_sight": true,
     "description_string_key": "item.laser_sight.desc",
     "shop_sell_price": 90,
     "experience_value": 30,
@@ -529,6 +530,19 @@
     "carry_strength_bonus": 60
   },
   {
+    "id": 5011,
+    "name_string_key": "item.backpack_tier5",
+    "description_string_key": "item.backpack_tier5.desc",
+    "shop_sell_price": 600,
+    "experience_value": 150,
+    "item_grade": "legendary",
+    "icon_file_name": "T_UIIcon_Backpack_Tier5.uasset",
+    "category_tag": "item.category.bag",
+    "equipment_slot_tag": "equipment.slot.backpack",
+    "inventory_slot_capacity": 120,
+    "carry_strength_bonus": 80
+  },
+  {
     "id": 5006,
     "name_string_key": "item.ballistic_helmet",
     "description_string_key": "item.ballistic_helmet.desc",
@@ -618,8 +632,9 @@
     "shop_sell_price": 0,
     "experience_value": 0,
     "item_grade": "uncommon",
-    "icon_file_name": "T_UIIcon_Crowbar.uasset",
-    "category_tag": "item.category.material",
+    "icon_file_name": "T_UIIcon_MeleeCrowbar.uasset",
+    "category_tag": "item.category.weapon.melee",
+    "equipment_slot_tag": "equipment.slot.melee",
     "weight_kg": 2.5
   },
   {

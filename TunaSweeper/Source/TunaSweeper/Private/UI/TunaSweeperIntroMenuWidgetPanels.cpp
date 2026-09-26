@@ -421,6 +421,10 @@ void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
 
 void UTunaSweeperIntroMenuWidget::ShowDevelopmentSettingsTab()
 {
+#if UE_BUILD_SHIPPING
+	ShowGraphicsSettingsTab();
+	return;
+#else
 	if (TitleGraphicsSettingsWidget)
 	{
 		TitleGraphicsSettingsWidget->DiscardPendingChanges();
@@ -458,6 +462,7 @@ void UTunaSweeperIntroMenuWidget::ShowDevelopmentSettingsTab()
 	}
 
 	RefreshDevelopmentSettingsPanel();
+#endif
 }
 
 void UTunaSweeperIntroMenuWidget::SetTitlePresentationMainMenuActive(bool bActive)
@@ -477,6 +482,10 @@ void UTunaSweeperIntroMenuWidget::SetTitlePresentationMainMenuActive(bool bActiv
 
 void UTunaSweeperIntroMenuWidget::HideOverlayPanels()
 {
+	if (LaboratoryPanel)
+	{
+		LaboratoryPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	if (DifficultySelectPanel)
 	{
 		DifficultySelectPanel->SetVisibility(ESlateVisibility::Collapsed);

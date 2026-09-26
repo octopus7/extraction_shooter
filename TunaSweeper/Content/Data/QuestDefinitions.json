@@ -71,7 +71,7 @@
       { "speaker_name_string_key": "quest.speaker.mole", "dialogue_text_string_key": "quest.demo_q4.accept.line2" }
     ],
     "objectives": [
-      { "objective_id": "deliver_canned_tuna", "type": "interaction_completed", "text_string_key": "quest.demo_q4.objective.deliver", "required_count": 1, "interaction_event_id": "demo.canned_tuna.deliver", "interaction_type": "world_progress" }
+      { "objective_id": "deliver_canned_tuna", "type": "item_submitted", "text_string_key": "quest.demo_q4.objective.deliver", "required_count": 1, "item_id": 3004, "target_provider_id": "provider.mole" }
     ],
     "rewards": { "coins": 250, "items": [{ "item_id": 3004, "quantity": 1 }] }
   }

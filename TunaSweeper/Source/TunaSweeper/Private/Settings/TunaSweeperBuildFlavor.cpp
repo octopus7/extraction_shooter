@@ -1,6 +1,8 @@
 #include "Settings/TunaSweeperBuildFlavor.h"
 
 #include "Dom/JsonObject.h"
+#include "Game/TunaSweeperSaveDirectory.h"
+#include "Game/TunaSweeperSteamCloud.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -75,8 +77,17 @@ namespace TunaSweeperBuildFlavor
 
 	FString GetSaveGameDirectory()
 	{
-		return FPaths::ConvertRelativePathToFull(FPaths::Combine(
-			FPaths::ProjectSavedDir(), TEXT("SaveGames"), GetName().ToString()));
+		const FString SteamDirectory = TunaSweeperSteamCloud::GetSaveDirectory();
+		if (!SteamDirectory.IsEmpty())
+		{
+			return SteamDirectory;
+		}
+		const FString StoveDirectory = TunaSweeperSaveDirectory::GetStoveDirectory();
+		if (!StoveDirectory.IsEmpty())
+		{
+			return StoveDirectory;
+		}
+		return TunaSweeperSaveDirectory::ResolveLocalDirectory(FPaths::ProjectSavedDir(), IsDemo());
 	}
 
 	FString GetExternalMainPayloadRoot()

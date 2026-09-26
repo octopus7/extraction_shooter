@@ -76,8 +76,8 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 	TestFalse(TEXT("Full target is Main flavor"), TunaSweeperBuildFlavor::IsDemo());
 	TestEqual(TEXT("Main flavor name"), TunaSweeperBuildFlavor::GetName(), FName(TEXT("Main")));
 	TestTrue(
-		TEXT("Main saves use Main root"),
-		TunaSweeperBuildFlavor::GetSaveGameDirectory().EndsWith(TEXT("SaveGames/Main")));
+		TEXT("Full game saves use FullGame root without changing serialized Main identity"),
+		TunaSweeperBuildFlavor::GetSaveGameDirectory().EndsWith(TEXT("SaveGames/FullGame")));
 	TestNotEqual(
 		TEXT("Demo and Main save roots are siblings, not the same path"),
 		FPaths::GetCleanFilename(TunaSweeperBuildFlavor::GetSaveGameDirectory()),

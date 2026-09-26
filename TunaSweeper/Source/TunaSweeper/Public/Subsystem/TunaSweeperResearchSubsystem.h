@@ -21,11 +21,13 @@ public:
 	FSimpleMulticastDelegate OnResearchStateChanged;
 	FSimpleMulticastDelegate OnResearchEffectsChanged;
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Research") bool LoadResearchData(bool bForceReload = false);
+	// Loads a research definition file for authoring tools and controlled data validation.
+	bool LoadResearchDataFromFile(const FString& Path);
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") bool GetAllNodeViews(TArray<FTunaSweeperResearchNodeView>& OutViews) const;
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") bool GetNodeView(FName NodeId, FTunaSweeperResearchNodeView& OutView) const;
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Research") bool TryStartResearch(FName NodeId);
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Research") bool TryClaimResearch(FName NodeId);
-	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") int32 GetAppliedNodeCount() const { return AppliedNodeIds.Num(); }
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") int32 GetAppliedNodeCount() const;
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") FTunaSweeperResearchStatBonuses GetAppliedStatBonuses() const;
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") FTunaSweeperResearchBurnBonuses GetAppliedBurnBonuses(FName WeaponTypeTag, FName AmmoTypeTag) const;
 	void ExportResearchProgressForSave(TArray<FName>& OutAppliedNodeIds, TArray<FTunaSweeperActiveResearchSaveData>& OutActiveResearch, int64& OutLastObservedUtcTicks) const;
@@ -42,6 +44,7 @@ private:
 	bool TickResearch(float DeltaSeconds);
 	void RefreshTemporalState(bool bSaveIfChanged);
 	bool EnsureResearchDataLoaded() const;
+	int32 GetKnownAppliedNodeCount() const;
 	ETunaSweeperResearchNodeState EvaluateNodeState(const FTunaSweeperResearchNodeDefinition& Definition, const FTunaSweeperActiveResearchSaveData** OutActive = nullptr) const;
 	int64 GetEffectiveUtcTicks() const;
 	void EnsureSaveStateLoaded() const;

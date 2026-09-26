@@ -1,0 +1,10 @@
+{
+  "weapon_item_id": 1002,
+  "reserve_magazine_count": 2,
+  "ammo_by_weapon_type": [
+    { "weapon_type_tag": "weapon.type.pistol", "ammo_item_id": 2001 },
+    { "weapon_type_tag": "weapon.type.rifle", "ammo_item_id": 2002 },
+    { "weapon_type_tag": "weapon.type.shotgun", "ammo_item_id": 2003 },
+    { "weapon_type_tag": "weapon.type.smg", "ammo_item_id": 2001 }
+  ]
+}

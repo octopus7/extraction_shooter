@@ -56,25 +56,6 @@ void ATunaSweeperDemoEndingActor::ResumePendingEnding()
     if (Quests && Quests->GetQuestState(FinalQuest) == ETunaSweeperQuestState::RewardCompleted && !GI->IsScenarioProgressFlagSet(EndingSeen))
         StartEnding();
 }
-bool ATunaSweeperDemoEndingActor::TryDeliverToMole(APawn* Pawn)
-{
-    if (!TunaSweeperBuildFlavor::IsDemo()) return false;
-    auto* Scene = Pawn ? Find(Pawn->GetWorld()) : nullptr;
-    auto* GI = Pawn ? Pawn->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
-    auto* Quests = GI ? GI->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
-    if (!Scene || !Quests || Scene->bEndingActive) return false;
-    if (Quests->GetQuestState(FinalQuest) == ETunaSweeperQuestState::Accepted)
-    {
-        if (GI->CountInventoryItemById(3004) < 1 || GI->ConsumeInventoryItemById(3004,1) != 1) return false;
-        Quests->NotifyInteractionCompleted(TEXT("demo.canned_tuna.deliver"), TEXT("world_progress"));
-    }
-    if (Quests->CanClaimQuestReward(FinalQuest))
-    {
-        Quests->ClaimQuestReward(FinalQuest);
-        return true;
-    }
-    return false;
-}
 void ATunaSweeperDemoEndingActor::QueueEnding()
 {
     GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::ResumePendingEnding));

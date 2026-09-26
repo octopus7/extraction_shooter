@@ -63,10 +63,6 @@
 			"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/nvidia-dlss"
 		},
 		{
-			"Name": "SogSplat",
-			"Enabled": true
-		},
-		{
 			"Name": "BushMeshBuilder",
 			"Enabled": true
 		},
@@ -120,23 +116,26 @@
 			"Name": "WaveformEditor",
 			"Enabled": true
 		},
-		{"Name": "OnlineSubsystemSteam",
-"Enabled": true,
-"PlatformAllowList": [
-"Win64"
-]
-},
-{
-"Name": "SocketSubsystemEOS",
-"Enabled": true,
-"PlatformAllowList": ["Win64"]
-},
-{
-"Name": "OnlineSubsystemEOS",
-"Enabled": true,
-"PlatformAllowList": [
-"Win64"
-]
-}
-]
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true,
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "SocketSubsystemEOS",
+			"Enabled": true,
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "OnlineSubsystemEOS",
+			"Enabled": true,
+			"PlatformAllowList": [
+				"Win64"
+			]
+		}
+	]
 }

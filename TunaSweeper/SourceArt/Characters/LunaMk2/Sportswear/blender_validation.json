@@ -1,0 +1,4882 @@
+{
+  "source": "TunaSweeper/SourceArt/Characters/LunaMk2/Sportswear/LunaMk2_Sportswear.blend",
+  "source_sha256": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+  "blender_version": "5.2.0 LTS",
+  "errors": [],
+  "warnings": [
+    {
+      "code": "large_animated_edge_distortion",
+      "mesh": "Sportswear_Sleeve_L",
+      "action": "AS_LunaMk2_Title_B",
+      "minimum": 0.1910147066129952,
+      "maximum": 1.7882203633826994
+    }
+  ],
+  "rig": {
+    "original": "SK_LunaMk2",
+    "preview": "SK_LunaMk2_Sportswear",
+    "bones": 130,
+    "max_rest_matrix_error": 0.0,
+    "object_matrix_error": 0.0,
+    "original_action": "AS_LunaMk2_Title_A",
+    "preview_action": null
+  },
+  "face": {
+    "original": "SKM_LunaFace",
+    "preview": "SKM_LunaFace_SportswearBase",
+    "vertices": 1020,
+    "shape_keys": [
+      "Basis",
+      "Merong",
+      "HalfClosedEye",
+      "Smile",
+      "Mouth_Wa",
+      "Mouth_O",
+      "ClosedEye"
+    ],
+    "max_coordinate_error_by_key": {
+      "Basis": 0.0,
+      "Merong": 0.0,
+      "HalfClosedEye": 0.0,
+      "Smile": 0.0,
+      "Mouth_Wa": 0.0,
+      "Mouth_O": 0.0,
+      "ClosedEye": 0.0
+    }
+  },
+  "body_mask": {
+    "object": "SKM_LunaMk2_SportswearBase",
+    "modifier": "Sportswear_BodyCoverage_Reversible",
+    "group": "Sportswear_VisibleBody",
+    "vertices": 3808,
+    "group_members": 584,
+    "underlying_topology_unchanged": true,
+    "maximum_underlying_coordinate_error": 0.0
+  },
+  "meshes": {
+    "Sportswear_AnkleCuff_-1": {
+      "vertices": 256,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          -0.1274159997701645,
+          -0.037429001182317734,
+          0.11400000005960464
+        ],
+        [
+          -0.06258399784564972,
+          0.02942899987101555,
+          0.15299999713897705
+        ]
+      ],
+      "maximum_weight_sum_error": 3.166496753692627e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.861464464143151e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_AnkleCuff_1": {
+      "vertices": 256,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          0.06258399784564972,
+          -0.037429001182317734,
+          0.11400000005960464
+        ],
+        [
+          0.1274159997701645,
+          0.02942899987101555,
+          0.15299999713897705
+        ]
+      ],
+      "maximum_weight_sum_error": 3.259629011154175e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.861464476606813e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_AnkleSock_-1": {
+      "vertices": 192,
+      "polygons": 144,
+      "triangles": 288,
+      "bounds_m": [
+        [
+          -0.11599999666213989,
+          -0.026000000536441803,
+          0.0729999989271164
+        ],
+        [
+          -0.07199999690055847,
+          0.017999999225139618,
+          0.13899999856948853
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 96,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.8875262615909122e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_AnkleSock_1": {
+      "vertices": 192,
+      "polygons": 144,
+      "triangles": 288,
+      "bounds_m": [
+        [
+          0.07199999690055847,
+          -0.026000000536441803,
+          0.0729999989271164
+        ],
+        [
+          0.11599999666213989,
+          0.017999999225139618,
+          0.13899999856948853
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9569491744041443e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 96,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.8875262615909122e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_CenterZipper": {
+      "vertices": 240,
+      "polygons": 236,
+      "triangles": 476,
+      "bounds_m": [
+        [
+          -0.0017999999690800905,
+          -0.13532347977161407,
+          0.8818804621696472
+        ],
+        [
+          0.0017999999690800905,
+          -0.023953191936016083,
+          1.1841933727264404
+        ]
+      ],
+      "maximum_weight_sum_error": 3.5390257835388184e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4029586877055032e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Jacket_RibHem": {
+      "vertices": 384,
+      "polygons": 288,
+      "triangles": 576,
+      "bounds_m": [
+        [
+          -0.11793600022792816,
+          -0.13280799984931946,
+          0.875
+        ],
+        [
+          0.11793600022792816,
+          0.07481600344181061,
+          0.8989999890327454
+        ]
+      ],
+      "maximum_weight_sum_error": 4.0978193283081055e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 192,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4000407330033503e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Joggers": {
+      "vertices": 4703,
+      "polygons": 4600,
+      "triangles": 9200,
+      "bounds_m": [
+        [
+          -0.15433392209466534,
+          -0.11184109028615694,
+          0.13800004012688433
+        ],
+        [
+          0.1543675036961214,
+          0.05575169595661884,
+          0.9450001258421613
+        ]
+      ],
+      "maximum_weight_sum_error": 5.960464477539063e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 208,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.079164350095927e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PantStripe_-1_0": {
+      "vertices": 110,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          -0.15386982262134552,
+          -0.04650000110268593,
+          0.15000000596046448
+        ],
+        [
+          -0.10597855597734451,
+          -0.01850000023841858,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.959974037570646e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 110,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.738127704699966e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PantStripe_-1_1": {
+      "vertices": 110,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          -0.15545274317264557,
+          -0.025499999523162842,
+          0.15000000596046448
+        ],
+        [
+          -0.10855446010828018,
+          0.0024999999441206455,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.6394339986145496e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 110,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.7409412067902376e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PantStripe_1_0": {
+      "vertices": 110,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.1059853807091713,
+          -0.04650000110268593,
+          0.15000000596046448
+        ],
+        [
+          0.1538265496492386,
+          -0.01850000023841858,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.6785422707907856e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 110,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.738094796471618e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PantStripe_1_1": {
+      "vertices": 110,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          0.10855404287576675,
+          -0.025499999523162842,
+          0.15000000596046448
+        ],
+        [
+          0.15548090636730194,
+          0.0024999999441206455,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.9726728573441505e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 110,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.74014430095081e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PocketOpening_-1": {
+      "vertices": 120,
+      "polygons": 114,
+      "triangles": 236,
+      "bounds_m": [
+        [
+          -0.08286003023386002,
+          -0.11708205193281174,
+          0.928824782371521
+        ],
+        [
+          -0.05813997611403465,
+          -0.07230978459119797,
+          0.9919170141220093
+        ]
+      ],
+      "maximum_weight_sum_error": 3.725290298461914e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.8639640144284157e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PocketOpening_1": {
+      "vertices": 120,
+      "polygons": 114,
+      "triangles": 236,
+      "bounds_m": [
+        [
+          0.05813997611403465,
+          -0.11709734052419662,
+          0.9288237690925598
+        ],
+        [
+          0.08286003023386002,
+          -0.07240704447031021,
+          0.9918961524963379
+        ]
+      ],
+      "maximum_weight_sum_error": 3.3527612686157227e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.863937132804867e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_RibCuff_L": {
+      "vertices": 256,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          0.21082113683223724,
+          -0.09960971772670746,
+          0.9056352972984314
+        ],
+        [
+          0.25877973437309265,
+          -0.052174560725688934,
+          0.9531729221343994
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.16694382463454e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_RibCuff_R": {
+      "vertices": 256,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          -0.258889377117157,
+          -0.09966053068637848,
+          0.9059206247329712
+        ],
+        [
+          -0.21095892786979675,
+          -0.05222700908780098,
+          0.9535032510757446
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.1668930068789034e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ShoulderYoke_-1": {
+      "vertices": 1025,
+      "polygons": 960,
+      "triangles": 1920,
+      "bounds_m": [
+        [
+          -0.11314448714256287,
+          -0.033843450248241425,
+          1.0815680027008057
+        ],
+        [
+          -0.01781534217298031,
+          0.04621744155883789,
+          1.153771162033081
+        ]
+      ],
+      "maximum_weight_sum_error": 4.0978193283081055e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.9443915472845412e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ShoulderYoke_1": {
+      "vertices": 1025,
+      "polygons": 960,
+      "triangles": 1920,
+      "bounds_m": [
+        [
+          0.017830168828368187,
+          -0.03386388346552849,
+          1.0815668106079102
+        ],
+        [
+          0.11314579844474792,
+          0.04621618613600731,
+          1.15376877784729
+        ]
+      ],
+      "maximum_weight_sum_error": 4.190951585769653e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.2169383985311859e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_SleeveStripe_L_0": {
+      "vertices": 24,
+      "polygons": 11,
+      "triangles": 22,
+      "bounds_m": [
+        [
+          0.11747919768095016,
+          -0.07213814556598663,
+          0.9384724497795105
+        ],
+        [
+          0.25276273488998413,
+          0.019551735371351242,
+          1.1515201330184937
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 24,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3076474396009675e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_SleeveStripe_L_1": {
+      "vertices": 24,
+      "polygons": 11,
+      "triangles": 22,
+      "bounds_m": [
+        [
+          0.11485007405281067,
+          -0.08197619765996933,
+          0.9452905654907227
+        ],
+        [
+          0.24886436760425568,
+          -0.009010531939566135,
+          1.1522881984710693
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 24,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3076352459389345e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_SleeveStripe_R_0": {
+      "vertices": 24,
+      "polygons": 11,
+      "triangles": 22,
+      "bounds_m": [
+        [
+          -0.22303161025047302,
+          -0.07219001650810242,
+          0.9136273264884949
+        ],
+        [
+          -0.06273231655359268,
+          0.019485751166939735,
+          1.0731747150421143
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 24,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3076406298339436e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_SleeveStripe_R_1": {
+      "vertices": 24,
+      "polygons": 11,
+      "triangles": 22,
+      "bounds_m": [
+        [
+          -0.21697306632995605,
+          -0.08202624320983887,
+          0.9186286330223083
+        ],
+        [
+          -0.06245535612106323,
+          -0.009072701446712017,
+          1.0739877223968506
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 24,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.307645394264107e-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sleeve_L": {
+      "vertices": 896,
+      "polygons": 832,
+      "triangles": 1664,
+      "bounds_m": [
+        [
+          0.0425613597035408,
+          -0.09183250367641449,
+          0.9132187366485596
+        ],
+        [
+          0.2525659203529358,
+          0.04816696047782898,
+          1.156594157218933
+        ]
+      ],
+      "maximum_weight_sum_error": 5.960464477539063e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.325698942024924e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sleeve_R": {
+      "vertices": 896,
+      "polygons": 832,
+      "triangles": 1664,
+      "bounds_m": [
+        [
+          -0.2526276707649231,
+          -0.09188070148229599,
+          0.9134513735771179
+        ],
+        [
+          -0.0425613597035408,
+          0.0480971522629261,
+          1.1566276550292969
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.055141692514646e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Collar_L": {
+      "vertices": 384,
+      "polygons": 384,
+      "triangles": 768,
+      "bounds_m": [
+        [
+          0.05390019342303276,
+          -0.045100003480911255,
+          0.08591260761022568
+        ],
+        [
+          0.1340997964143753,
+          0.045100003480911255,
+          0.10649999976158142
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.0516640602648665e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Collar_R": {
+      "vertices": 384,
+      "polygons": 384,
+      "triangles": 768,
+      "bounds_m": [
+        [
+          -0.1340997964143753,
+          -0.045100003480911255,
+          0.08591260761022568
+        ],
+        [
+          -0.05390019342303276,
+          0.045100003480911255,
+          0.10649999976158142
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.0516640602648665e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_L_Inner": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          0.07111237198114395,
+          -0.12427494674921036,
+          0.06549999862909317
+        ],
+        [
+          0.08141123503446579,
+          -0.039583027362823486,
+          0.0995827168226242
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1509705774305267e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_L_Outer": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          0.10897710174322128,
+          -0.12427494674921036,
+          0.06549999862909317
+        ],
+        [
+          0.12239689379930496,
+          -0.039583027362823486,
+          0.0995827168226242
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1216744434268806e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_R_Inner": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          -0.08141123503446579,
+          -0.12427494674921036,
+          0.06549999862909317
+        ],
+        [
+          -0.07111237198114395,
+          -0.039583027362823486,
+          0.0995827168226242
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1509705774305267e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_R_Outer": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          -0.12239689379930496,
+          -0.12427494674921036,
+          0.06549999862909317
+        ],
+        [
+          -0.10897710174322128,
+          -0.039583027362823486,
+          0.0995827168226242
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1216744434268806e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_HeelTab_L": {
+      "vertices": 110,
+      "polygons": 108,
+      "triangles": 216,
+      "bounds_m": [
+        [
+          0.068428173661232,
+          0.03703734278678894,
+          0.07885000109672546
+        ],
+        [
+          0.11957182735204697,
+          0.048500001430511475,
+          0.09327500313520432
+        ]
+      ],
+      "maximum_weight_sum_error": 2.858723746612668e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.05984389057066e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_HeelTab_R": {
+      "vertices": 110,
+      "polygons": 108,
+      "triangles": 216,
+      "bounds_m": [
+        [
+          -0.11957182735204697,
+          0.03703734278678894,
+          0.07885000109672546
+        ],
+        [
+          -0.068428173661232,
+          0.048500001430511475,
+          0.09327500313520432
+        ]
+      ],
+      "maximum_weight_sum_error": 2.858723746612668e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.05984389057066e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_1": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.07447194308042526,
+          -0.11502119898796082,
+          0.07186393439769745
+        ],
+        [
+          0.11880464851856232,
+          -0.10370755195617676,
+          0.07933276891708374
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710223459520373e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_2": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.07501108199357986,
+          -0.09308206290006638,
+          0.07779983431100845
+        ],
+        [
+          0.11750909686088562,
+          -0.08267593383789062,
+          0.0846998319029808
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710181037092186e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_3": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.07544472068548203,
+          -0.07214188575744629,
+          0.08351512253284454
+        ],
+        [
+          0.11621826142072678,
+          -0.0626220554113388,
+          0.09119943529367447
+        ]
+      ],
+      "maximum_weight_sum_error": 9.685754776000977e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710276868950857e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_4": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.0757545456290245,
+          -0.054599661380052567,
+          0.09077196568250656
+        ],
+        [
+          0.11509591341018677,
+          -0.046942371875047684,
+          0.09959927201271057
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9336661100387573e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710204499634042e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_1": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11880464851856232,
+          -0.11502119898796082,
+          0.07186393439769745
+        ],
+        [
+          -0.07447194308042526,
+          -0.10370755195617676,
+          0.07933276891708374
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710223459520373e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_2": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11750909686088562,
+          -0.09308206290006638,
+          0.07779983431100845
+        ],
+        [
+          -0.07501108199357986,
+          -0.08267593383789062,
+          0.0846998319029808
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710181037092186e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_3": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11621826142072678,
+          -0.07214188575744629,
+          0.08351512253284454
+        ],
+        [
+          -0.07544472068548203,
+          -0.0626220554113388,
+          0.09119943529367447
+        ]
+      ],
+      "maximum_weight_sum_error": 9.685754776000977e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710276868950857e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_4": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11509591341018677,
+          -0.054599661380052567,
+          0.09077196568250656
+        ],
+        [
+          -0.0757545456290245,
+          -0.046942371875047684,
+          0.09959927201271057
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9336661100387573e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710204499634042e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_MidsoleRidge_L": {
+      "vertices": 288,
+      "polygons": 288,
+      "triangles": 576,
+      "bounds_m": [
+        [
+          0.0382000096142292,
+          -0.17880000174045563,
+          0.018633974716067314
+        ],
+        [
+          0.150077223777771,
+          0.06279999762773514,
+          0.024366024881601334
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.796751793532314e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_MidsoleRidge_R": {
+      "vertices": 288,
+      "polygons": 288,
+      "triangles": 576,
+      "bounds_m": [
+        [
+          -0.150077223777771,
+          -0.17880000174045563,
+          0.018633974716067314
+        ],
+        [
+          -0.0382000096142292,
+          0.06279999762773514,
+          0.024366024881601334
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.796751793532314e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Midsole_L": {
+      "vertices": 192,
+      "polygons": 146,
+      "triangles": 380,
+      "bounds_m": [
+        [
+          0.039000000804662704,
+          -0.17800000309944153,
+          -0.0010000000474974513
+        ],
+        [
+          0.14927588403224945,
+          0.06199999898672104,
+          0.02800000086426735
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.344779315874924e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Midsole_R": {
+      "vertices": 192,
+      "polygons": 146,
+      "triangles": 380,
+      "bounds_m": [
+        [
+          -0.14927588403224945,
+          -0.17800000309944153,
+          -0.0010000000474974513
+        ],
+        [
+          -0.039000000804662704,
+          0.06199999898672104,
+          0.02800000086426735
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.344779315874924e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Outsole_L": {
+      "vertices": 144,
+      "polygons": 98,
+      "triangles": 284,
+      "bounds_m": [
+        [
+          0.04019999876618385,
+          -0.17679999768733978,
+          -0.00800000037997961
+        ],
+        [
+          0.1480841040611267,
+          0.06080000102519989,
+          0.004999999888241291
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.674793357171398e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Outsole_R": {
+      "vertices": 144,
+      "polygons": 98,
+      "triangles": 284,
+      "bounds_m": [
+        [
+          -0.1480841040611267,
+          -0.17679999768733978,
+          -0.00800000037997961
+        ],
+        [
+          -0.04019999876618385,
+          0.06080000102519989,
+          0.004999999888241291
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.674793357171398e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_L_Inner": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          0.04233724996447563,
+          -0.11995097994804382,
+          0.03604999929666519
+        ],
+        [
+          0.05853981524705887,
+          -0.0334632433950901,
+          0.07582499831914902
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.628804353037978e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_L_Outer": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          0.1327040195465088,
+          -0.11995097994804382,
+          0.03604999929666519
+        ],
+        [
+          0.1461758315563202,
+          -0.0334632433950901,
+          0.07582499831914902
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.4871616795164185e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_R_Inner": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          -0.05853981524705887,
+          -0.11995097994804382,
+          0.03604999929666519
+        ],
+        [
+          -0.04233724996447563,
+          -0.0334632433950901,
+          0.07582499831914902
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.628804353037978e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_R_Outer": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          -0.1461758315563202,
+          -0.11995097994804382,
+          0.03604999929666519
+        ],
+        [
+          -0.1327040195465088,
+          -0.0334632433950901,
+          0.07582499831914902
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.4871616795164185e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_ToeSeam_L": {
+      "vertices": 150,
+      "polygons": 146,
+      "triangles": 296,
+      "bounds_m": [
+        [
+          0.05350690707564354,
+          -0.14474999904632568,
+          0.05513208359479904
+        ],
+        [
+          0.138240247964859,
+          -0.09861655533313751,
+          0.05625791847705841
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.829469644632949e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_ToeSeam_R": {
+      "vertices": 150,
+      "polygons": 146,
+      "triangles": 296,
+      "bounds_m": [
+        [
+          -0.138240247964859,
+          -0.14474999904632568,
+          0.05513208359479904
+        ],
+        [
+          -0.05350690707564354,
+          -0.09861655533313751,
+          0.05625791847705841
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.829469644632949e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Tongue_L": {
+      "vertices": 126,
+      "polygons": 124,
+      "triangles": 248,
+      "bounds_m": [
+        [
+          0.08089788258075714,
+          -0.1266999989748001,
+          0.06624999642372131
+        ],
+        [
+          0.11308201402425766,
+          -0.042496174573898315,
+          0.10272499918937683
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.644811972861564e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Tongue_R": {
+      "vertices": 126,
+      "polygons": 124,
+      "triangles": 248,
+      "bounds_m": [
+        [
+          -0.11308201402425766,
+          -0.1266999989748001,
+          0.06624999642372131
+        ],
+        [
+          -0.08089788258075714,
+          -0.042496174573898315,
+          0.10272499918937683
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.644811972861564e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Upper_L": {
+      "vertices": 528,
+      "polygons": 482,
+      "triangles": 1052,
+      "bounds_m": [
+        [
+          0.04349999874830246,
+          -0.1679999977350235,
+          0.020999999716877937
+        ],
+        [
+          0.14471696317195892,
+          0.050999999046325684,
+          0.10400000214576721
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.084522840790976e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Upper_R": {
+      "vertices": 528,
+      "polygons": 482,
+      "triangles": 1052,
+      "bounds_m": [
+        [
+          -0.14471696317195892,
+          -0.1679999977350235,
+          0.020999999716877937
+        ],
+        [
+          -0.04349999874830246,
+          0.050999999046325684,
+          0.10400000214576721
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.084522840790976e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_StandCollar": {
+      "vertices": 256,
+      "polygons": 192,
+      "triangles": 384,
+      "bounds_m": [
+        [
+          -0.03999999910593033,
+          -0.027000000700354576,
+          1.1460000276565552
+        ],
+        [
+          0.03999999910593033,
+          0.04500000178813934,
+          1.184000015258789
+        ]
+      ],
+      "maximum_weight_sum_error": 2.8870999813079834e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.232622674116826e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_TrackJacket_Body": {
+      "vertices": 1152,
+      "polygons": 1056,
+      "triangles": 2112,
+      "bounds_m": [
+        [
+          -0.11900000274181366,
+          -0.13099999725818634,
+          0.8790000081062317
+        ],
+        [
+          0.11900000274181366,
+          0.07699999958276749,
+          1.152999997138977
+        ]
+      ],
+      "maximum_weight_sum_error": 4.284083843231201e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 192,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.849989595946598e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ZipTape_-1": {
+      "vertices": 210,
+      "polygons": 206,
+      "triangles": 416,
+      "bounds_m": [
+        [
+          -0.004500000271946192,
+          -0.13380032777786255,
+          0.8849307894706726
+        ],
+        [
+          -0.0024999999441206455,
+          -0.027065271511673927,
+          1.1492944955825806
+        ]
+      ],
+      "maximum_weight_sum_error": 4.284083843231201e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.33004584155844e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ZipTape_1": {
+      "vertices": 210,
+      "polygons": 206,
+      "triangles": 416,
+      "bounds_m": [
+        [
+          0.0024999999441206455,
+          -0.13380107283592224,
+          0.8849307298660278
+        ],
+        [
+          0.004500000271946192,
+          -0.027052447199821472,
+          1.1492958068847656
+        ]
+      ],
+      "maximum_weight_sum_error": 4.377216100692749e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.3301410659978e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ZipperPull": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          -0.003000000026077032,
+          -0.03049999917857349,
+          1.1579999616369605
+        ],
+        [
+          0.003000000026077032,
+          -0.027499999152496457,
+          1.1719999620690942
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.3027085702151495e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    }
+  },
+  "evaluated_meshes": {
+    "Sportswear_AnkleCuff_-1": {
+      "vertices": 512,
+      "polygons": 512,
+      "triangles": 1024,
+      "bounds_m": [
+        [
+          -0.1274159997701645,
+          -0.037428997457027435,
+          0.11400002986192703
+        ],
+        [
+          -0.06258400529623032,
+          0.029429001733660698,
+          0.15337738394737244
+        ]
+      ],
+      "maximum_weight_sum_error": 3.166496753692627e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.458324563318102e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_AnkleCuff_1": {
+      "vertices": 512,
+      "polygons": 512,
+      "triangles": 1024,
+      "bounds_m": [
+        [
+          0.06258399784564972,
+          -0.037428997457027435,
+          0.11400001496076584
+        ],
+        [
+          0.1274159997701645,
+          0.029429001733660698,
+          0.15337736904621124
+        ]
+      ],
+      "maximum_weight_sum_error": 3.259629011154175e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.458317001633132e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_AnkleSock_-1": {
+      "vertices": 384,
+      "polygons": 384,
+      "triangles": 768,
+      "bounds_m": [
+        [
+          -0.11600000411272049,
+          -0.025999998673796654,
+          0.07300002872943878
+        ],
+        [
+          -0.07200000435113907,
+          0.018000001087784767,
+          0.13904769718647003
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3733214544262712e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 192
+    },
+    "Sportswear_AnkleSock_1": {
+      "vertices": 384,
+      "polygons": 384,
+      "triangles": 768,
+      "bounds_m": [
+        [
+          0.07199999690055847,
+          -0.025999998673796654,
+          0.07300000637769699
+        ],
+        [
+          0.11599999666213989,
+          0.018000001087784767,
+          0.13904768228530884
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9569491744041443e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.3733137805560514e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 192
+    },
+    "Sportswear_CenterZipper": {
+      "vertices": 240,
+      "polygons": 236,
+      "triangles": 476,
+      "bounds_m": [
+        [
+          -0.0017999999690800905,
+          -0.13532350957393646,
+          0.8818804621696472
+        ],
+        [
+          0.0017999999690800905,
+          -0.023953191936016083,
+          1.1841932535171509
+        ]
+      ],
+      "maximum_weight_sum_error": 3.5390257835388184e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4029586877055032e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Jacket_RibHem": {
+      "vertices": 768,
+      "polygons": 768,
+      "triangles": 1536,
+      "bounds_m": [
+        [
+          -0.11793600022792816,
+          -0.13280802965164185,
+          0.875
+        ],
+        [
+          0.11793600022792816,
+          0.07481596618890762,
+          0.8996322751045227
+        ]
+      ],
+      "maximum_weight_sum_error": 4.0978193283081055e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.532347419121739e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 384
+    },
+    "Sportswear_Joggers": {
+      "vertices": 9406,
+      "polygons": 9408,
+      "triangles": 18816,
+      "bounds_m": [
+        [
+          -0.15433392209466534,
+          -0.11184109028615692,
+          0.13800005502805787
+        ],
+        [
+          0.1543675036961214,
+          0.05575166987958675,
+          0.9451629657236889
+        ]
+      ],
+      "maximum_weight_sum_error": 5.960464477539063e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.330890968776876e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 416
+    },
+    "Sportswear_PantStripe_-1_0": {
+      "vertices": 220,
+      "polygons": 218,
+      "triangles": 436,
+      "bounds_m": [
+        [
+          -0.15386982262134552,
+          -0.04652012884616852,
+          0.15000003576278687
+        ],
+        [
+          -0.10542804002761841,
+          -0.018212616443634033,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.959974037570646e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1679560728865036e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 220
+    },
+    "Sportswear_PantStripe_-1_1": {
+      "vertices": 220,
+      "polygons": 218,
+      "triangles": 436,
+      "bounds_m": [
+        [
+          -0.15545274317264557,
+          -0.025686737149953842,
+          0.15000003576278687
+        ],
+        [
+          -0.10799133777618408,
+          0.0025198599323630333,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.6394339986145496e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.101864221285071e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 220
+    },
+    "Sportswear_PantStripe_1_0": {
+      "vertices": 220,
+      "polygons": 218,
+      "triangles": 436,
+      "bounds_m": [
+        [
+          0.10543479770421982,
+          -0.04651977866888046,
+          0.15000002086162567
+        ],
+        [
+          0.1538265347480774,
+          -0.01820659264922142,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.6785422707907856e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.1677373904336825e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 220
+    },
+    "Sportswear_PantStripe_1_1": {
+      "vertices": 220,
+      "polygons": 218,
+      "triangles": 436,
+      "bounds_m": [
+        [
+          0.10799091309309006,
+          -0.02568644843995571,
+          0.15000002086162567
+        ],
+        [
+          0.15548089146614075,
+          0.0025217747315764427,
+          0.8809999823570251
+        ]
+      ],
+      "maximum_weight_sum_error": 3.9726728573441505e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.101923795414651e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 220
+    },
+    "Sportswear_PocketOpening_-1": {
+      "vertices": 120,
+      "polygons": 114,
+      "triangles": 236,
+      "bounds_m": [
+        [
+          -0.08286003023386002,
+          -0.11708208918571472,
+          0.928824782371521
+        ],
+        [
+          -0.05813997611403465,
+          -0.07230978459119797,
+          0.991917073726654
+        ]
+      ],
+      "maximum_weight_sum_error": 3.725290298461914e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.8639592474407006e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_PocketOpening_1": {
+      "vertices": 120,
+      "polygons": 114,
+      "triangles": 236,
+      "bounds_m": [
+        [
+          0.05813997611403465,
+          -0.11709737777709961,
+          0.9288237690925598
+        ],
+        [
+          0.08286003023386002,
+          -0.07240704447031021,
+          0.9918962121009827
+        ]
+      ],
+      "maximum_weight_sum_error": 3.3527612686157227e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.8639263562216632e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_RibCuff_L": {
+      "vertices": 512,
+      "polygons": 512,
+      "triangles": 1024,
+      "bounds_m": [
+        [
+          0.21082113683223724,
+          -0.09960971772670746,
+          0.9056353569030762
+        ],
+        [
+          0.25877973437309265,
+          -0.052174560725688934,
+          0.9531729817390442
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.8808617579700047e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_RibCuff_R": {
+      "vertices": 512,
+      "polygons": 512,
+      "triangles": 1024,
+      "bounds_m": [
+        [
+          -0.25888943672180176,
+          -0.0996604636311531,
+          0.9059205651283264
+        ],
+        [
+          -0.21095898747444153,
+          -0.05222693830728531,
+          0.9535031914710999
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.8809005405803102e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_ShoulderYoke_-1": {
+      "vertices": 2050,
+      "polygons": 2048,
+      "triangles": 4096,
+      "bounds_m": [
+        [
+          -0.11314448714256287,
+          -0.033843446522951126,
+          1.081433653831482
+        ],
+        [
+          -0.017579786479473114,
+          0.046438224613666534,
+          1.1537710428237915
+        ]
+      ],
+      "maximum_weight_sum_error": 4.0978193283081055e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.85717873474884e-08,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_ShoulderYoke_1": {
+      "vertices": 2050,
+      "polygons": 2048,
+      "triangles": 4096,
+      "bounds_m": [
+        [
+          0.017592286691069603,
+          -0.03386387974023819,
+          1.081432580947876
+        ],
+        [
+          0.11314579844474792,
+          0.04621618613600731,
+          1.1537686586380005
+        ]
+      ],
+      "maximum_weight_sum_error": 4.190951585769653e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.4404036654562835e-08,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_SleeveStripe_L_0": {
+      "vertices": 48,
+      "polygons": 46,
+      "triangles": 92,
+      "bounds_m": [
+        [
+          0.1170496791601181,
+          -0.07213814556598663,
+          0.938389241695404
+        ],
+        [
+          0.25276273488998413,
+          0.019551729783415794,
+          1.151520013809204
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4028867240961326e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 48
+    },
+    "Sportswear_SleeveStripe_L_1": {
+      "vertices": 48,
+      "polygons": 46,
+      "triangles": 92,
+      "bounds_m": [
+        [
+          0.11443421989679337,
+          -0.08197619020938873,
+          0.9450584650039673
+        ],
+        [
+          0.24886436760425568,
+          -0.008831627666950226,
+          1.1522880792617798
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4028762644452334e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 48
+    },
+    "Sportswear_SleeveStripe_R_0": {
+      "vertices": 48,
+      "polygons": 46,
+      "triangles": 92,
+      "bounds_m": [
+        [
+          -0.2232142686843872,
+          -0.07218994200229645,
+          0.9136272668838501
+        ],
+        [
+          -0.06273238360881805,
+          0.019627150148153305,
+          1.0731747150421143
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.154226984538366e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 48
+    },
+    "Sportswear_SleeveStripe_R_1": {
+      "vertices": 48,
+      "polygons": 46,
+      "triangles": 92,
+      "bounds_m": [
+        [
+          -0.21728138625621796,
+          -0.0820261687040329,
+          0.9186285734176636
+        ],
+        [
+          -0.062455423176288605,
+          -0.009072697721421719,
+          1.0739877223968506
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 8.489815074158511e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 48
+    },
+    "Sportswear_Sleeve_L": {
+      "vertices": 1792,
+      "polygons": 1792,
+      "triangles": 3584,
+      "bounds_m": [
+        [
+          0.04256134480237961,
+          -0.09183250367641449,
+          0.9132187962532043
+        ],
+        [
+          0.2525659203529358,
+          0.04816695302724838,
+          1.1565940380096436
+        ]
+      ],
+      "maximum_weight_sum_error": 5.960464477539063e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.449423076416825e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_Sleeve_R": {
+      "vertices": 1792,
+      "polygons": 1792,
+      "triangles": 3584,
+      "bounds_m": [
+        [
+          -0.25262773036956787,
+          -0.09188062697649002,
+          0.9134513139724731
+        ],
+        [
+          -0.04256138205528259,
+          0.0480971559882164,
+          1.1566275358200073
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4494240233587346e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_Sneaker_Collar_L": {
+      "vertices": 384,
+      "polygons": 384,
+      "triangles": 768,
+      "bounds_m": [
+        [
+          0.05390019714832306,
+          -0.045099999755620956,
+          0.08591259270906448
+        ],
+        [
+          0.1340997815132141,
+          0.045099999755620956,
+          0.10649998486042023
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.0516640602648665e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Collar_R": {
+      "vertices": 384,
+      "polygons": 384,
+      "triangles": 768,
+      "bounds_m": [
+        [
+          -0.1340997964143753,
+          -0.045100003480911255,
+          0.08591260761022568
+        ],
+        [
+          -0.05390019714832306,
+          0.04509999603033066,
+          0.10649999976158142
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.051669318073861e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_L_Inner": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          0.07111236453056335,
+          -0.12427496165037155,
+          0.06549999862909317
+        ],
+        [
+          0.08141123503446579,
+          -0.03958302363753319,
+          0.09958270192146301
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1509705774305267e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_L_Outer": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          0.10897710174322128,
+          -0.12427496165037155,
+          0.06549999862909317
+        ],
+        [
+          0.12239689379930496,
+          -0.03958302363753319,
+          0.09958270192146301
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1216744434268806e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_R_Inner": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          -0.08141123503446579,
+          -0.12427493929862976,
+          0.06549999862909317
+        ],
+        [
+          -0.07111236453056335,
+          -0.039583027362823486,
+          0.0995827168226242
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.1509696422104295e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Eyestay_R_Outer": {
+      "vertices": 100,
+      "polygons": 98,
+      "triangles": 196,
+      "bounds_m": [
+        [
+          -0.12239688634872437,
+          -0.12427493929862976,
+          0.06549999862909317
+        ],
+        [
+          -0.10897710174322128,
+          -0.039583027362823486,
+          0.0995827168226242
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.121673509477429e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_HeelTab_L": {
+      "vertices": 110,
+      "polygons": 108,
+      "triangles": 216,
+      "bounds_m": [
+        [
+          0.068428173661232,
+          0.03703733906149864,
+          0.07884998619556427
+        ],
+        [
+          0.11957182735204697,
+          0.048499997705221176,
+          0.09327498823404312
+        ]
+      ],
+      "maximum_weight_sum_error": 2.858723746612668e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.05984389057066e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_HeelTab_R": {
+      "vertices": 110,
+      "polygons": 108,
+      "triangles": 216,
+      "bounds_m": [
+        [
+          -0.11957182735204697,
+          0.037037335336208344,
+          0.07885000109672546
+        ],
+        [
+          -0.068428173661232,
+          0.04849999397993088,
+          0.09327500313520432
+        ]
+      ],
+      "maximum_weight_sum_error": 2.858723746612668e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.0598443122784532e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_1": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.07447193562984467,
+          -0.11502120643854141,
+          0.07186393439769745
+        ],
+        [
+          0.11880464851856232,
+          -0.10370755940675735,
+          0.07933276891708374
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710223459520373e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_2": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.07501108199357986,
+          -0.09308206290006638,
+          0.07779982686042786
+        ],
+        [
+          0.11750909686088562,
+          -0.08267593383789062,
+          0.08469982445240021
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710181037092186e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_3": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.07544472068548203,
+          -0.07214187830686569,
+          0.08351510763168335
+        ],
+        [
+          0.11621826142072678,
+          -0.06262204796075821,
+          0.09119942039251328
+        ]
+      ],
+      "maximum_weight_sum_error": 9.685754776000977e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710276868950857e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_L_4": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          0.0757545456290245,
+          -0.05459965765476227,
+          0.09077195078134537
+        ],
+        [
+          0.11509591341018677,
+          -0.046942368149757385,
+          0.09959925711154938
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9336661100387573e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710204499634042e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_1": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11880464106798172,
+          -0.11502119153738022,
+          0.07186393439769745
+        ],
+        [
+          -0.07447193562984467,
+          -0.10370754450559616,
+          0.07933276891708374
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710223459520373e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_2": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11750909686088562,
+          -0.09308205544948578,
+          0.07779983431100845
+        ],
+        [
+          -0.07501108199357986,
+          -0.08267592638731003,
+          0.0846998319029808
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710181037092186e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_3": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11621826142072678,
+          -0.07214187830686569,
+          0.08351512253284454
+        ],
+        [
+          -0.07544472068548203,
+          -0.06262204796075821,
+          0.09119943529367447
+        ]
+      ],
+      "maximum_weight_sum_error": 9.685754776000977e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710276868950857e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Lace_R_4": {
+      "vertices": 88,
+      "polygons": 82,
+      "triangles": 172,
+      "bounds_m": [
+        [
+          -0.11509591341018677,
+          -0.05459965765476227,
+          0.09077196568250656
+        ],
+        [
+          -0.0757545456290245,
+          -0.046942368149757385,
+          0.09959927201271057
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9336661100387573e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.710204499634042e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_MidsoleRidge_L": {
+      "vertices": 288,
+      "polygons": 288,
+      "triangles": 576,
+      "bounds_m": [
+        [
+          0.0382000133395195,
+          -0.17880001664161682,
+          0.018633965402841568
+        ],
+        [
+          0.1500772088766098,
+          0.06279999017715454,
+          0.024366024881601334
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.796751793532314e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_MidsoleRidge_R": {
+      "vertices": 288,
+      "polygons": 288,
+      "triangles": 576,
+      "bounds_m": [
+        [
+          -0.150077223777771,
+          -0.17879998683929443,
+          0.018633974716067314
+        ],
+        [
+          -0.0382000133395195,
+          0.06279999017715454,
+          0.024366023018956184
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.796751793532314e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Midsole_L": {
+      "vertices": 192,
+      "polygons": 146,
+      "triangles": 380,
+      "bounds_m": [
+        [
+          0.039000004529953,
+          -0.17800001800060272,
+          -0.0010000074980780482
+        ],
+        [
+          0.14927586913108826,
+          0.06199999526143074,
+          0.02800000086426735
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.344777696725477e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Midsole_R": {
+      "vertices": 192,
+      "polygons": 146,
+      "triangles": 380,
+      "bounds_m": [
+        [
+          -0.14927588403224945,
+          -0.17800000309944153,
+          -0.0010000003967434168
+        ],
+        [
+          -0.039000004529953,
+          0.06199999153614044,
+          0.0279999990016222
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.344776070027003e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Outsole_L": {
+      "vertices": 144,
+      "polygons": 98,
+      "triangles": 284,
+      "bounds_m": [
+        [
+          0.04020000249147415,
+          -0.17680001258850098,
+          -0.008000006899237633
+        ],
+        [
+          0.14808408915996552,
+          0.06079999729990959,
+          0.004999997094273567
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.674791706049827e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Outsole_R": {
+      "vertices": 144,
+      "polygons": 98,
+      "triangles": 284,
+      "bounds_m": [
+        [
+          -0.1480841040611267,
+          -0.1767999827861786,
+          -0.00800000037997961
+        ],
+        [
+          -0.04020000249147415,
+          0.06079999357461929,
+          0.004999998025596142
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.674789522325807e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_L_Inner": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          0.04233725368976593,
+          -0.11995098739862442,
+          0.036049988120794296
+        ],
+        [
+          0.05853981897234917,
+          -0.033463239669799805,
+          0.07582499086856842
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.6288212604094192e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_L_Outer": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          0.1327040046453476,
+          -0.11995098739862442,
+          0.036049988120794296
+        ],
+        [
+          0.146175816655159,
+          -0.033463239669799805,
+          0.07582499086856842
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.4871675858750925e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_R_Inner": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          -0.05853981897234917,
+          -0.11995097249746323,
+          0.03604999929666519
+        ],
+        [
+          -0.04233725368976593,
+          -0.033463239669799805,
+          0.07582499831914902
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.628815337571381e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Quarter_R_Outer": {
+      "vertices": 70,
+      "polygons": 68,
+      "triangles": 136,
+      "bounds_m": [
+        [
+          -0.1461758315563202,
+          -0.11995097249746323,
+          0.03604999929666519
+        ],
+        [
+          -0.1327040195465088,
+          -0.033463239669799805,
+          0.07582499831914902
+        ]
+      ],
+      "maximum_weight_sum_error": 1.1920928955078125e-07,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 3.4871616795164185e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_ToeSeam_L": {
+      "vertices": 150,
+      "polygons": 146,
+      "triangles": 296,
+      "bounds_m": [
+        [
+          0.05350690335035324,
+          -0.14475001394748688,
+          0.05513208359479904
+        ],
+        [
+          0.138240247964859,
+          -0.09861656278371811,
+          0.05625792220234871
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.829469644632949e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_ToeSeam_R": {
+      "vertices": 150,
+      "polygons": 146,
+      "triangles": 296,
+      "bounds_m": [
+        [
+          -0.138240247964859,
+          -0.14474999904632568,
+          0.05513208359479904
+        ],
+        [
+          -0.05350690335035324,
+          -0.09861654788255692,
+          0.05625791847705841
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.829469644632949e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Tongue_L": {
+      "vertices": 126,
+      "polygons": 124,
+      "triangles": 248,
+      "bounds_m": [
+        [
+          0.08089787513017654,
+          -0.1267000138759613,
+          0.06625000387430191
+        ],
+        [
+          0.11308201402425766,
+          -0.04249617084860802,
+          0.10272498428821564
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.644811972861564e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Tongue_R": {
+      "vertices": 126,
+      "polygons": 124,
+      "triangles": 248,
+      "bounds_m": [
+        [
+          -0.11308200657367706,
+          -0.12669998407363892,
+          0.06624999642372131
+        ],
+        [
+          -0.08089787513017654,
+          -0.042496174573898315,
+          0.10272499918937683
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.644811506341145e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Upper_L": {
+      "vertices": 528,
+      "polygons": 482,
+      "triangles": 1052,
+      "bounds_m": [
+        [
+          0.04350000247359276,
+          -0.1680000126361847,
+          0.02099999040365219
+        ],
+        [
+          0.14471694827079773,
+          0.050999995321035385,
+          0.10399998724460602
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.084521601782081e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_Sneaker_Upper_R": {
+      "vertices": 528,
+      "polygons": 482,
+      "triangles": 1052,
+      "bounds_m": [
+        [
+          -0.14471696317195892,
+          -0.1679999828338623,
+          0.020999997854232788
+        ],
+        [
+          -0.04350000247359276,
+          0.05099999159574509,
+          0.10400000214576721
+        ]
+      ],
+      "maximum_weight_sum_error": 2.9802322387695312e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 9.084521601782081e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_StandCollar": {
+      "vertices": 512,
+      "polygons": 512,
+      "triangles": 1024,
+      "bounds_m": [
+        [
+          -0.03999999910593033,
+          -0.027000000700354576,
+          1.1458005905151367
+        ],
+        [
+          0.03999999910593033,
+          0.04500000178813934,
+          1.1839998960494995
+        ]
+      ],
+      "maximum_weight_sum_error": 2.8870999813079834e-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.8728844176054407e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 256
+    },
+    "Sportswear_TrackJacket_Body": {
+      "vertices": 2304,
+      "polygons": 2304,
+      "triangles": 4608,
+      "bounds_m": [
+        [
+          -0.12050110846757889,
+          -0.13249623775482178,
+          0.8786615133285522
+        ],
+        [
+          0.12050110846757889,
+          0.07851395756006241,
+          1.154062032699585
+        ]
+      ],
+      "maximum_weight_sum_error": 4.284083843231201e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.717660948137566e-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 384
+    },
+    "Sportswear_ZipTape_-1": {
+      "vertices": 210,
+      "polygons": 206,
+      "triangles": 416,
+      "bounds_m": [
+        [
+          -0.004500000271946192,
+          -0.13380035758018494,
+          0.8849307894706726
+        ],
+        [
+          -0.0024999999441206455,
+          -0.027065271511673927,
+          1.149294376373291
+        ]
+      ],
+      "maximum_weight_sum_error": 4.284083843231201e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.33004584155844e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ZipTape_1": {
+      "vertices": 210,
+      "polygons": 206,
+      "triangles": 416,
+      "bounds_m": [
+        [
+          0.0024999999441206455,
+          -0.13380110263824463,
+          0.8849307298660278
+        ],
+        [
+          0.004500000271946192,
+          -0.027052447199821472,
+          1.149295687675476
+        ]
+      ],
+      "maximum_weight_sum_error": 4.377216100692749e-08,
+      "max_deform_influences": 4,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.3301410659978e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    },
+    "Sportswear_ZipperPull": {
+      "vertices": 56,
+      "polygons": 54,
+      "triangles": 108,
+      "bounds_m": [
+        [
+          -0.003000000026077032,
+          -0.030499998480081558,
+          1.157999873161316
+        ],
+        [
+          0.003000000026077032,
+          -0.027499999850988388,
+          1.1719998121261597
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.302476423311977e-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0
+    }
+  },
+  "actions": {
+    "AS_LunaMk2_Title_A": {
+      "frames_sampled": [
+        1,
+        11,
+        21,
+        31,
+        41,
+        51,
+        61,
+        71,
+        81,
+        91,
+        101,
+        111,
+        121
+      ],
+      "max_bone_basis_rotation_radians": 1.1512305736541748,
+      "meshes": {
+        "Sportswear_AnkleCuff_-1": {
+          "max_vertex_displacement_m": 0.029717572629821835,
+          "min_edge_length_ratio": 0.99608910791185,
+          "max_edge_length_ratio": 1.000593920586543,
+          "min_triangle_area_ratio": 0.9958323818020453,
+          "max_triangle_area_ratio": 1.0005409467996405,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleCuff_1": {
+          "max_vertex_displacement_m": 0.029893678839906842,
+          "min_edge_length_ratio": 0.9968148064437018,
+          "max_edge_length_ratio": 1.0007776975471812,
+          "min_triangle_area_ratio": 0.9965168667644068,
+          "max_triangle_area_ratio": 1.0007111949879626,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleSock_-1": {
+          "max_vertex_displacement_m": 0.029678621348256228,
+          "min_edge_length_ratio": 0.9951597048143329,
+          "max_edge_length_ratio": 1.0001730787243666,
+          "min_triangle_area_ratio": 0.9951172646491135,
+          "max_triangle_area_ratio": 1.0001790774739825,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleSock_1": {
+          "max_vertex_displacement_m": 0.02976557159045111,
+          "min_edge_length_ratio": 0.9965086684157765,
+          "max_edge_length_ratio": 1.0001205221007528,
+          "min_triangle_area_ratio": 0.996446176793561,
+          "max_triangle_area_ratio": 1.0002671424564322,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_CenterZipper": {
+          "max_vertex_displacement_m": 0.06362947703779309,
+          "min_edge_length_ratio": 0.7883884452814168,
+          "max_edge_length_ratio": 1.0075411131331087,
+          "min_triangle_area_ratio": 0.7805901214666431,
+          "max_triangle_area_ratio": 1.007633735354754,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Jacket_RibHem": {
+          "max_vertex_displacement_m": 0.04722196924832786,
+          "min_edge_length_ratio": 0.9373250467365339,
+          "max_edge_length_ratio": 1.0599247418857365,
+          "min_triangle_area_ratio": 0.9290622995476767,
+          "max_triangle_area_ratio": 1.0659746089937803,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Joggers": {
+          "max_vertex_displacement_m": 0.04914168993499098,
+          "min_edge_length_ratio": 0.5121627465388073,
+          "max_edge_length_ratio": 1.5007609422656583,
+          "min_triangle_area_ratio": 0.5121794649871831,
+          "max_triangle_area_ratio": 1.5715877337056823,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_-1_0": {
+          "max_vertex_displacement_m": 0.04735155034742578,
+          "min_edge_length_ratio": 0.916540717547934,
+          "max_edge_length_ratio": 1.0360207783815638,
+          "min_triangle_area_ratio": 0.9071201173975453,
+          "max_triangle_area_ratio": 1.0353922366581543,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_-1_1": {
+          "max_vertex_displacement_m": 0.04819999895393443,
+          "min_edge_length_ratio": 0.9140901669113137,
+          "max_edge_length_ratio": 1.0735912221222026,
+          "min_triangle_area_ratio": 0.8656698125440985,
+          "max_triangle_area_ratio": 1.0701347692681527,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_1_0": {
+          "max_vertex_displacement_m": 0.047480855518423314,
+          "min_edge_length_ratio": 0.9009972486210387,
+          "max_edge_length_ratio": 1.0277099757356911,
+          "min_triangle_area_ratio": 0.9020048811033704,
+          "max_triangle_area_ratio": 1.0270770267191056,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_1_1": {
+          "max_vertex_displacement_m": 0.048629407050188984,
+          "min_edge_length_ratio": 0.922391040563077,
+          "max_edge_length_ratio": 1.0797258966990397,
+          "min_triangle_area_ratio": 0.857849716454992,
+          "max_triangle_area_ratio": 1.0760918098639134,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PocketOpening_-1": {
+          "max_vertex_displacement_m": 0.03944594078188003,
+          "min_edge_length_ratio": 0.84223646764793,
+          "max_edge_length_ratio": 1.0022624056202936,
+          "min_triangle_area_ratio": 0.8042672997275391,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PocketOpening_1": {
+          "max_vertex_displacement_m": 0.0393651970532273,
+          "min_edge_length_ratio": 0.8392998911630615,
+          "max_edge_length_ratio": 1.0043944620083518,
+          "min_triangle_area_ratio": 0.7964242987841569,
+          "max_triangle_area_ratio": 1.0033714197569006,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_RibCuff_L": {
+          "max_vertex_displacement_m": 0.32955157692036624,
+          "min_edge_length_ratio": 0.9999541267315215,
+          "max_edge_length_ratio": 1.00004858437027,
+          "min_triangle_area_ratio": 0.9999369106628763,
+          "max_triangle_area_ratio": 1.0000718691325408,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_RibCuff_R": {
+          "max_vertex_displacement_m": 0.32846135964194934,
+          "min_edge_length_ratio": 0.9999439291970212,
+          "max_edge_length_ratio": 1.0000441217054261,
+          "min_triangle_area_ratio": 0.999917908176094,
+          "max_triangle_area_ratio": 1.0000622488611424,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ShoulderYoke_-1": {
+          "max_vertex_displacement_m": 0.05361838199185155,
+          "min_edge_length_ratio": 0.9876409201741614,
+          "max_edge_length_ratio": 1.026818286673704,
+          "min_triangle_area_ratio": 0.9741612446225543,
+          "max_triangle_area_ratio": 1.1805141875304326,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ShoulderYoke_1": {
+          "max_vertex_displacement_m": 0.053594451657817795,
+          "min_edge_length_ratio": 0.9876960739287932,
+          "max_edge_length_ratio": 1.0269594885266116,
+          "min_triangle_area_ratio": 0.9463038991861277,
+          "max_triangle_area_ratio": 1.042730486443026,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_L_0": {
+          "max_vertex_displacement_m": 0.3078348427004872,
+          "min_edge_length_ratio": 0.9087774235408386,
+          "max_edge_length_ratio": 1.4034909773432191,
+          "min_triangle_area_ratio": 0.899592790167826,
+          "max_triangle_area_ratio": 1.416185027135972,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_L_1": {
+          "max_vertex_displacement_m": 0.3060091222906113,
+          "min_edge_length_ratio": 0.8528737050863926,
+          "max_edge_length_ratio": 1.7485625352468295,
+          "min_triangle_area_ratio": 0.9313009367558261,
+          "max_triangle_area_ratio": 1.8440760209773333,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_R_0": {
+          "max_vertex_displacement_m": 0.29897384242191294,
+          "min_edge_length_ratio": 0.2962956751960553,
+          "max_edge_length_ratio": 1.000120668190137,
+          "min_triangle_area_ratio": 0.2399959189253175,
+          "max_triangle_area_ratio": 1.000256741769191,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_R_1": {
+          "max_vertex_displacement_m": 0.29423346740441764,
+          "min_edge_length_ratio": 0.4544449429297618,
+          "max_edge_length_ratio": 1.0591263425209194,
+          "min_triangle_area_ratio": 0.40283379016704657,
+          "max_triangle_area_ratio": 1.0531070905305437,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sleeve_L": {
+          "max_vertex_displacement_m": 0.30800392444626007,
+          "min_edge_length_ratio": 0.22389428679168208,
+          "max_edge_length_ratio": 1.7593823140483402,
+          "min_triangle_area_ratio": 0.20513177293506968,
+          "max_triangle_area_ratio": 1.8159758603743268,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sleeve_R": {
+          "max_vertex_displacement_m": 0.3071985914937841,
+          "min_edge_length_ratio": 0.2783724208845652,
+          "max_edge_length_ratio": 1.7279327955778647,
+          "min_triangle_area_ratio": 0.26671601044478255,
+          "max_triangle_area_ratio": 1.8278153972645619,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Collar_L": {
+          "max_vertex_displacement_m": 0.02956841893330858,
+          "min_edge_length_ratio": 0.9873950243061898,
+          "max_edge_length_ratio": 1.0084925188674196,
+          "min_triangle_area_ratio": 0.987215027637744,
+          "max_triangle_area_ratio": 1.008524114349507,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Collar_R": {
+          "max_vertex_displacement_m": 0.02949762285508991,
+          "min_edge_length_ratio": 0.9874040841941089,
+          "max_edge_length_ratio": 1.0086001524109658,
+          "min_triangle_area_ratio": 0.9872316450507478,
+          "max_triangle_area_ratio": 1.0087101049371687,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_L_Inner": {
+          "max_vertex_displacement_m": 0.02956842428699838,
+          "min_edge_length_ratio": 0.9940549193900213,
+          "max_edge_length_ratio": 1.000307858511311,
+          "min_triangle_area_ratio": 0.9937697324745626,
+          "max_triangle_area_ratio": 1.0004398800599423,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_L_Outer": {
+          "max_vertex_displacement_m": 0.029568418509295067,
+          "min_edge_length_ratio": 0.9928893215322151,
+          "max_edge_length_ratio": 1.0002892587257883,
+          "min_triangle_area_ratio": 0.9925001154755462,
+          "max_triangle_area_ratio": 1.0002268786387492,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_R_Inner": {
+          "max_vertex_displacement_m": 0.02949763158942208,
+          "min_edge_length_ratio": 0.9940568534822077,
+          "max_edge_length_ratio": 1.0003122894020549,
+          "min_triangle_area_ratio": 0.9937846122303157,
+          "max_triangle_area_ratio": 1.0004471173931908,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_R_Outer": {
+          "max_vertex_displacement_m": 0.02949763158942208,
+          "min_edge_length_ratio": 0.9928892054254751,
+          "max_edge_length_ratio": 1.0002904088760978,
+          "min_triangle_area_ratio": 0.992509560610482,
+          "max_triangle_area_ratio": 1.0002281976390268,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_HeelTab_L": {
+          "max_vertex_displacement_m": 0.02956841547566695,
+          "min_edge_length_ratio": 0.9995085156860056,
+          "max_edge_length_ratio": 1.0033328381364222,
+          "min_triangle_area_ratio": 0.9994258220114969,
+          "max_triangle_area_ratio": 1.003384611873372,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_HeelTab_R": {
+          "max_vertex_displacement_m": 0.02949762285508991,
+          "min_edge_length_ratio": 0.999506952996032,
+          "max_edge_length_ratio": 1.0033767446475792,
+          "min_triangle_area_ratio": 0.9994250786766841,
+          "max_triangle_area_ratio": 1.0034276317783402,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_1": {
+          "max_vertex_displacement_m": 0.029568422770161192,
+          "min_edge_length_ratio": 0.9999972885148548,
+          "max_edge_length_ratio": 1.0000058818161153,
+          "min_triangle_area_ratio": 0.9999953509035951,
+          "max_triangle_area_ratio": 1.0000070895316155,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_2": {
+          "max_vertex_displacement_m": 0.02956842277018466,
+          "min_edge_length_ratio": 0.9999980743305966,
+          "max_edge_length_ratio": 1.0000029178734149,
+          "min_triangle_area_ratio": 0.9999967522859536,
+          "max_triangle_area_ratio": 1.0000047217181536,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_3": {
+          "max_vertex_displacement_m": 0.029568416992455705,
+          "min_edge_length_ratio": 0.9999847101327668,
+          "max_edge_length_ratio": 1.0000022282243164,
+          "min_triangle_area_ratio": 0.9999832332170753,
+          "max_triangle_area_ratio": 1.000004301723185,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_4": {
+          "max_vertex_displacement_m": 0.02956841042229983,
+          "min_edge_length_ratio": 0.9946415308802431,
+          "max_edge_length_ratio": 1.00009139388706,
+          "min_triangle_area_ratio": 0.9946238157737683,
+          "max_triangle_area_ratio": 1.0000502640591347,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_1": {
+          "max_vertex_displacement_m": 0.029497630169023216,
+          "min_edge_length_ratio": 0.9999934505169941,
+          "max_edge_length_ratio": 1.0000054553104298,
+          "min_triangle_area_ratio": 0.9999933444506229,
+          "max_triangle_area_ratio": 1.0000075061617362,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_2": {
+          "max_vertex_displacement_m": 0.02949763158942208,
+          "min_edge_length_ratio": 0.9999950349728963,
+          "max_edge_length_ratio": 1.0000031708983983,
+          "min_triangle_area_ratio": 0.9999920591321827,
+          "max_triangle_area_ratio": 1.000004679474026,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_3": {
+          "max_vertex_displacement_m": 0.029497631589451248,
+          "min_edge_length_ratio": 0.9999813927974356,
+          "max_edge_length_ratio": 1.0000016910150908,
+          "min_triangle_area_ratio": 0.9999799570023052,
+          "max_triangle_area_ratio": 1.0000017803468721,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_4": {
+          "max_vertex_displacement_m": 0.029497617853917857,
+          "min_edge_length_ratio": 0.9946449794860834,
+          "max_edge_length_ratio": 1.000093345605236,
+          "min_triangle_area_ratio": 0.994638657701041,
+          "max_triangle_area_ratio": 1.0000523690098102,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_MidsoleRidge_L": {
+          "max_vertex_displacement_m": 0.029568437359231158,
+          "min_edge_length_ratio": 0.9999868858840991,
+          "max_edge_length_ratio": 1.0000131141659643,
+          "min_triangle_area_ratio": 0.9999851042904901,
+          "max_triangle_area_ratio": 1.0000131866736692,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_MidsoleRidge_R": {
+          "max_vertex_displacement_m": 0.029497627328267682,
+          "min_edge_length_ratio": 0.9999948237019719,
+          "max_edge_length_ratio": 1.0000055879435799,
+          "min_triangle_area_ratio": 0.9999948403554729,
+          "max_triangle_area_ratio": 1.0000063640267782,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Midsole_L": {
+          "max_vertex_displacement_m": 0.029568437359213398,
+          "min_edge_length_ratio": 0.9999983926705526,
+          "max_edge_length_ratio": 1.0000018218638336,
+          "min_triangle_area_ratio": 0.9999826587407995,
+          "max_triangle_area_ratio": 1.0000151661945578,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Midsole_R": {
+          "max_vertex_displacement_m": 0.029497627328282223,
+          "min_edge_length_ratio": 0.999999266662219,
+          "max_edge_length_ratio": 1.0000008776456228,
+          "min_triangle_area_ratio": 0.999990553007775,
+          "max_triangle_area_ratio": 1.0000104037909414,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Outsole_L": {
+          "max_vertex_displacement_m": 0.029568437359212184,
+          "min_edge_length_ratio": 0.9999977174042974,
+          "max_edge_length_ratio": 1.000002330940569,
+          "min_triangle_area_ratio": 0.9999817247349141,
+          "max_triangle_area_ratio": 1.0000147840107185,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Outsole_R": {
+          "max_vertex_displacement_m": 0.029497627328285675,
+          "min_edge_length_ratio": 0.999999292646042,
+          "max_edge_length_ratio": 1.000000762618281,
+          "min_triangle_area_ratio": 0.9999909072153478,
+          "max_triangle_area_ratio": 1.000011001201051,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_L_Inner": {
+          "max_vertex_displacement_m": 0.029568435228812542,
+          "min_edge_length_ratio": 0.9999974473551341,
+          "max_edge_length_ratio": 1.0000031806972054,
+          "min_triangle_area_ratio": 0.9999969253472761,
+          "max_triangle_area_ratio": 1.0000032075854117,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_L_Outer": {
+          "max_vertex_displacement_m": 0.029568424286976792,
+          "min_edge_length_ratio": 0.9999990216684763,
+          "max_edge_length_ratio": 1.0000016602762358,
+          "min_triangle_area_ratio": 0.9999987204589337,
+          "max_triangle_area_ratio": 1.0000024945158863,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_R_Inner": {
+          "max_vertex_displacement_m": 0.029497630169023216,
+          "min_edge_length_ratio": 0.9999974473473364,
+          "max_edge_length_ratio": 1.0000025526618668,
+          "min_triangle_area_ratio": 0.9999965545525588,
+          "max_triangle_area_ratio": 1.000002640198265,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_R_Outer": {
+          "max_vertex_displacement_m": 0.029497624275503478,
+          "min_edge_length_ratio": 0.9999938486839294,
+          "max_edge_length_ratio": 1.0000022012069678,
+          "min_triangle_area_ratio": 0.9999936073256637,
+          "max_triangle_area_ratio": 1.0000020679090038,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_ToeSeam_L": {
+          "max_vertex_displacement_m": 0.02956843006471582,
+          "min_edge_length_ratio": 0.9999835742742973,
+          "max_edge_length_ratio": 1.0000176599928419,
+          "min_triangle_area_ratio": 0.9999823441062643,
+          "max_triangle_area_ratio": 1.0000193314351438,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_ToeSeam_R": {
+          "max_vertex_displacement_m": 0.02949763300982276,
+          "min_edge_length_ratio": 0.9999711529241208,
+          "max_edge_length_ratio": 1.000028894562373,
+          "min_triangle_area_ratio": 0.9999681433168002,
+          "max_triangle_area_ratio": 1.0000282167024934,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Tongue_L": {
+          "max_vertex_displacement_m": 0.02956843006468273,
+          "min_edge_length_ratio": 0.9916073678578239,
+          "max_edge_length_ratio": 1.0001914028472307,
+          "min_triangle_area_ratio": 0.9915640883094318,
+          "max_triangle_area_ratio": 1.0001764085792693,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Tongue_R": {
+          "max_vertex_displacement_m": 0.02949763300982276,
+          "min_edge_length_ratio": 0.9916094033807302,
+          "max_edge_length_ratio": 1.0001965084766247,
+          "min_triangle_area_ratio": 0.9915652455075198,
+          "max_triangle_area_ratio": 1.0001816019747118,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Upper_L": {
+          "max_vertex_displacement_m": 0.029568437359231158,
+          "min_edge_length_ratio": 0.9930057073270986,
+          "max_edge_length_ratio": 1.0023950687477112,
+          "min_triangle_area_ratio": 0.9928748892888534,
+          "max_triangle_area_ratio": 1.0025631689681844,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Upper_R": {
+          "max_vertex_displacement_m": 0.02949763300982276,
+          "min_edge_length_ratio": 0.9930078931252809,
+          "max_edge_length_ratio": 1.0024283989585332,
+          "min_triangle_area_ratio": 0.9928756153474226,
+          "max_triangle_area_ratio": 1.0025957148573177,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_StandCollar": {
+          "max_vertex_displacement_m": 0.06309909035670566,
+          "min_edge_length_ratio": 0.9991082435315686,
+          "max_edge_length_ratio": 1.0026180623658147,
+          "min_triangle_area_ratio": 0.9991109968452498,
+          "max_triangle_area_ratio": 1.0026173893397154,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_TrackJacket_Body": {
+          "max_vertex_displacement_m": 0.05413241528519676,
+          "min_edge_length_ratio": 0.7804480212780112,
+          "max_edge_length_ratio": 1.1502391831388303,
+          "min_triangle_area_ratio": 0.7806855293029419,
+          "max_triangle_area_ratio": 1.1515563357697622,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipTape_-1": {
+          "max_vertex_displacement_m": 0.05322454955785713,
+          "min_edge_length_ratio": 0.7733052099364249,
+          "max_edge_length_ratio": 1.0069545423458544,
+          "min_triangle_area_ratio": 0.7640406970398661,
+          "max_triangle_area_ratio": 1.0045240019198198,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipTape_1": {
+          "max_vertex_displacement_m": 0.053223082687637646,
+          "min_edge_length_ratio": 0.769437003289377,
+          "max_edge_length_ratio": 1.0039578011759087,
+          "min_triangle_area_ratio": 0.7612486415337606,
+          "max_triangle_area_ratio": 1.001420592435906,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipperPull": {
+          "max_vertex_displacement_m": 0.060174216615804334,
+          "min_edge_length_ratio": 0.9998251821218334,
+          "max_edge_length_ratio": 1.0001423182647207,
+          "min_triangle_area_ratio": 0.9998065847531373,
+          "max_triangle_area_ratio": 1.0001543025743338,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        }
+      }
+    },
+    "AS_LunaMk2_Title_B": {
+      "frames_sampled": [
+        1,
+        11,
+        21,
+        31,
+        41,
+        51,
+        61,
+        71,
+        81,
+        91,
+        101,
+        111,
+        121
+      ],
+      "max_bone_basis_rotation_radians": 1.2144842147827148,
+      "meshes": {
+        "Sportswear_AnkleCuff_-1": {
+          "max_vertex_displacement_m": 0.07755474039753042,
+          "min_edge_length_ratio": 0.997391749684711,
+          "max_edge_length_ratio": 1.00312934880088,
+          "min_triangle_area_ratio": 0.9975590913988809,
+          "max_triangle_area_ratio": 1.0030859452329082,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleCuff_1": {
+          "max_vertex_displacement_m": 0.028914160197878135,
+          "min_edge_length_ratio": 0.9958109961236713,
+          "max_edge_length_ratio": 1.0016144275084202,
+          "min_triangle_area_ratio": 0.9956845181332413,
+          "max_triangle_area_ratio": 1.0015104639964876,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleSock_-1": {
+          "max_vertex_displacement_m": 0.07966329963389449,
+          "min_edge_length_ratio": 0.9976939409129385,
+          "max_edge_length_ratio": 1.0038026645229032,
+          "min_triangle_area_ratio": 0.9976385556732471,
+          "max_triangle_area_ratio": 1.0040204342543266,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleSock_1": {
+          "max_vertex_displacement_m": 0.029964118682026235,
+          "min_edge_length_ratio": 0.9954658954754448,
+          "max_edge_length_ratio": 1.000902724185156,
+          "min_triangle_area_ratio": 0.995417030570465,
+          "max_triangle_area_ratio": 1.0010871884916608,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_CenterZipper": {
+          "max_vertex_displacement_m": 0.06852375791766255,
+          "min_edge_length_ratio": 0.7885361920782618,
+          "max_edge_length_ratio": 1.0069737510332177,
+          "min_triangle_area_ratio": 0.7801275856870198,
+          "max_triangle_area_ratio": 1.0073530299598463,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Jacket_RibHem": {
+          "max_vertex_displacement_m": 0.05825373519742478,
+          "min_edge_length_ratio": 0.9413665169684946,
+          "max_edge_length_ratio": 1.0649474704540238,
+          "min_triangle_area_ratio": 0.9332093478322968,
+          "max_triangle_area_ratio": 1.0711526855406721,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Joggers": {
+          "max_vertex_displacement_m": 0.07638802667751954,
+          "min_edge_length_ratio": 0.5127358505124197,
+          "max_edge_length_ratio": 2.3505277999351732,
+          "min_triangle_area_ratio": 0.49807789577414485,
+          "max_triangle_area_ratio": 2.416192327575043,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_-1_0": {
+          "max_vertex_displacement_m": 0.07519634536942131,
+          "min_edge_length_ratio": 0.8009889124454374,
+          "max_edge_length_ratio": 1.0391217748982828,
+          "min_triangle_area_ratio": 0.7815368409934895,
+          "max_triangle_area_ratio": 1.0255720392567147,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_-1_1": {
+          "max_vertex_displacement_m": 0.07500760228780383,
+          "min_edge_length_ratio": 0.8933663616923802,
+          "max_edge_length_ratio": 1.0680195901154765,
+          "min_triangle_area_ratio": 0.8663290782861524,
+          "max_triangle_area_ratio": 1.0623028208568817,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_1_0": {
+          "max_vertex_displacement_m": 0.052475079674590065,
+          "min_edge_length_ratio": 0.8892590422427296,
+          "max_edge_length_ratio": 1.029319568008414,
+          "min_triangle_area_ratio": 0.8889833283027704,
+          "max_triangle_area_ratio": 1.0389404312134547,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_1_1": {
+          "max_vertex_displacement_m": 0.05397676201595478,
+          "min_edge_length_ratio": 0.9069815176908657,
+          "max_edge_length_ratio": 1.0884713814841152,
+          "min_triangle_area_ratio": 0.8358610393111948,
+          "max_triangle_area_ratio": 1.0959330122306266,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PocketOpening_-1": {
+          "max_vertex_displacement_m": 0.05275927225460876,
+          "min_edge_length_ratio": 0.8471486261708703,
+          "max_edge_length_ratio": 1.0023134225892032,
+          "min_triangle_area_ratio": 0.8054757041152416,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PocketOpening_1": {
+          "max_vertex_displacement_m": 0.04918173289651956,
+          "min_edge_length_ratio": 0.8345480430785687,
+          "max_edge_length_ratio": 1.0044523313871414,
+          "min_triangle_area_ratio": 0.7960535833884359,
+          "max_triangle_area_ratio": 1.0036280301655838,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_RibCuff_L": {
+          "max_vertex_displacement_m": 0.3123754252270958,
+          "min_edge_length_ratio": 0.9999490340896817,
+          "max_edge_length_ratio": 1.000048209168011,
+          "min_triangle_area_ratio": 0.9999210544535369,
+          "max_triangle_area_ratio": 1.000067622617391,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_RibCuff_R": {
+          "max_vertex_displacement_m": 0.347792103820634,
+          "min_edge_length_ratio": 0.999949018022906,
+          "max_edge_length_ratio": 1.0000528561026611,
+          "min_triangle_area_ratio": 0.9999294999182475,
+          "max_triangle_area_ratio": 1.0000729568536868,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ShoulderYoke_-1": {
+          "max_vertex_displacement_m": 0.05962534628090023,
+          "min_edge_length_ratio": 0.9879139560399988,
+          "max_edge_length_ratio": 1.0266038328913019,
+          "min_triangle_area_ratio": 0.9746353581341367,
+          "max_triangle_area_ratio": 1.1781961407428887,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ShoulderYoke_1": {
+          "max_vertex_displacement_m": 0.05910992689469091,
+          "min_edge_length_ratio": 0.9875699969592443,
+          "max_edge_length_ratio": 1.0270999019547877,
+          "min_triangle_area_ratio": 0.9455050546283983,
+          "max_triangle_area_ratio": 1.0437110170879302,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_L_0": {
+          "max_vertex_displacement_m": 0.2909209154588134,
+          "min_edge_length_ratio": 0.9084618519421147,
+          "max_edge_length_ratio": 1.4249188551552139,
+          "min_triangle_area_ratio": 0.9018414377727904,
+          "max_triangle_area_ratio": 1.4319160351153026,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_L_1": {
+          "max_vertex_displacement_m": 0.289369579802124,
+          "min_edge_length_ratio": 0.8347357862132612,
+          "max_edge_length_ratio": 1.7795600585007898,
+          "min_triangle_area_ratio": 0.9345086826135653,
+          "max_triangle_area_ratio": 1.8765176635628937,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_R_0": {
+          "max_vertex_displacement_m": 0.3162994415673885,
+          "min_edge_length_ratio": 0.26019046126694156,
+          "max_edge_length_ratio": 1.0001524844548215,
+          "min_triangle_area_ratio": 0.19577430404181467,
+          "max_triangle_area_ratio": 1.0004381155674833,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_R_1": {
+          "max_vertex_displacement_m": 0.31155124378435206,
+          "min_edge_length_ratio": 0.4151475825275912,
+          "max_edge_length_ratio": 1.0598361168314168,
+          "min_triangle_area_ratio": 0.3537185270529792,
+          "max_triangle_area_ratio": 1.0533864549785246,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sleeve_L": {
+          "max_vertex_displacement_m": 0.29092398733906344,
+          "min_edge_length_ratio": 0.1910147066129952,
+          "max_edge_length_ratio": 1.7882203633826994,
+          "min_triangle_area_ratio": 0.16838819539742222,
+          "max_triangle_area_ratio": 1.8474676909554095,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sleeve_R": {
+          "max_vertex_displacement_m": 0.32621285624813645,
+          "min_edge_length_ratio": 0.24341900777830658,
+          "max_edge_length_ratio": 1.7561253466188802,
+          "min_triangle_area_ratio": 0.23046655991244108,
+          "max_triangle_area_ratio": 1.8700192310884451,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Collar_L": {
+          "max_vertex_displacement_m": 0.029568450576227805,
+          "min_edge_length_ratio": 0.9837484751005585,
+          "max_edge_length_ratio": 1.0096994944932656,
+          "min_triangle_area_ratio": 0.9834908256672953,
+          "max_triangle_area_ratio": 1.0097535894656964,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Collar_R": {
+          "max_vertex_displacement_m": 0.07974898002764703,
+          "min_edge_length_ratio": 0.9941802834702266,
+          "max_edge_length_ratio": 1.007892273330332,
+          "min_triangle_area_ratio": 0.9930819851415323,
+          "max_triangle_area_ratio": 1.009159071849581,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_L_Inner": {
+          "max_vertex_displacement_m": 0.029568456498757476,
+          "min_edge_length_ratio": 0.9933812368395922,
+          "max_edge_length_ratio": 1.0004240318173843,
+          "min_triangle_area_ratio": 0.9930232238096605,
+          "max_triangle_area_ratio": 1.0005391050853087,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_L_Outer": {
+          "max_vertex_displacement_m": 0.029568449204229318,
+          "min_edge_length_ratio": 0.9910391881823676,
+          "max_edge_length_ratio": 1.00034335129883,
+          "min_triangle_area_ratio": 0.9904872032932179,
+          "max_triangle_area_ratio": 1.0001914375468905,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_R_Inner": {
+          "max_vertex_displacement_m": 0.07974897154534473,
+          "min_edge_length_ratio": 0.9984645573804847,
+          "max_edge_length_ratio": 1.0001703528302883,
+          "min_triangle_area_ratio": 0.9976451422580445,
+          "max_triangle_area_ratio": 1.0000337723130253,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_R_Outer": {
+          "max_vertex_displacement_m": 0.07974897532971321,
+          "min_edge_length_ratio": 0.9997191670896166,
+          "max_edge_length_ratio": 1.0033193560505904,
+          "min_triangle_area_ratio": 0.9999859020990072,
+          "max_triangle_area_ratio": 1.0039839652868738,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_HeelTab_L": {
+          "max_vertex_displacement_m": 0.029568446928970493,
+          "min_edge_length_ratio": 0.9993975052824087,
+          "max_edge_length_ratio": 1.0037926554869672,
+          "min_triangle_area_ratio": 0.9991972685625432,
+          "max_triangle_area_ratio": 1.0039012410539712,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_HeelTab_R": {
+          "max_vertex_displacement_m": 0.07974897203070334,
+          "min_edge_length_ratio": 0.9993127641175626,
+          "max_edge_length_ratio": 1.0003504109779113,
+          "min_triangle_area_ratio": 0.9991559753261499,
+          "max_triangle_area_ratio": 1.0005212798896415,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_1": {
+          "max_vertex_displacement_m": 0.029568454981918187,
+          "min_edge_length_ratio": 0.9999933396208713,
+          "max_edge_length_ratio": 1.0000080274121639,
+          "min_triangle_area_ratio": 0.9999867858425002,
+          "max_triangle_area_ratio": 1.0000159515255267,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_2": {
+          "max_vertex_displacement_m": 0.02956845498190598,
+          "min_edge_length_ratio": 0.9999949682579428,
+          "max_edge_length_ratio": 1.0000049983925,
+          "min_triangle_area_ratio": 0.9999932699082721,
+          "max_triangle_area_ratio": 1.0000067301013142,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_3": {
+          "max_vertex_displacement_m": 0.02956844768740561,
+          "min_edge_length_ratio": 0.9999793239474292,
+          "max_edge_length_ratio": 1.0000049981958894,
+          "min_triangle_area_ratio": 0.9999778309633816,
+          "max_triangle_area_ratio": 1.000010441506424,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_4": {
+          "max_vertex_displacement_m": 0.029568431693485723,
+          "min_edge_length_ratio": 0.9935708344162617,
+          "max_edge_length_ratio": 1.0000963669119345,
+          "min_triangle_area_ratio": 0.9934531749865617,
+          "max_triangle_area_ratio": 1.0000748411952889,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_1": {
+          "max_vertex_displacement_m": 0.07974897500614343,
+          "min_edge_length_ratio": 0.9999834513976465,
+          "max_edge_length_ratio": 1.000013971821989,
+          "min_triangle_area_ratio": 0.9999814331518032,
+          "max_triangle_area_ratio": 1.0000266425835642,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_2": {
+          "max_vertex_displacement_m": 0.07974897186891139,
+          "min_edge_length_ratio": 0.9999865883574153,
+          "max_edge_length_ratio": 1.0000153030680796,
+          "min_triangle_area_ratio": 0.9999860873313928,
+          "max_triangle_area_ratio": 1.0000180317829883,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_3": {
+          "max_vertex_displacement_m": 0.07974898192774248,
+          "min_edge_length_ratio": 0.999988768315066,
+          "max_edge_length_ratio": 1.000018113540347,
+          "min_triangle_area_ratio": 0.9999840171933058,
+          "max_triangle_area_ratio": 1.0000205227532935,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_4": {
+          "max_vertex_displacement_m": 0.07974891022173813,
+          "min_edge_length_ratio": 0.9993155976542999,
+          "max_edge_length_ratio": 1.0014492936121682,
+          "min_triangle_area_ratio": 0.9991274302406762,
+          "max_triangle_area_ratio": 1.0020450935385026,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_MidsoleRidge_L": {
+          "max_vertex_displacement_m": 0.02956846957101773,
+          "min_edge_length_ratio": 0.9999929868255111,
+          "max_edge_length_ratio": 1.0000037251922698,
+          "min_triangle_area_ratio": 0.999992754552814,
+          "max_triangle_area_ratio": 1.0000042622982133,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_MidsoleRidge_R": {
+          "max_vertex_displacement_m": 0.07974897879051385,
+          "min_edge_length_ratio": 0.9999841063781792,
+          "max_edge_length_ratio": 1.0000158938840318,
+          "min_triangle_area_ratio": 0.9999829174926426,
+          "max_triangle_area_ratio": 1.0000164879830282,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Midsole_L": {
+          "max_vertex_displacement_m": 0.029568469571029522,
+          "min_edge_length_ratio": 0.9999992727257382,
+          "max_edge_length_ratio": 1.0000009157646044,
+          "min_triangle_area_ratio": 0.9999819314235947,
+          "max_triangle_area_ratio": 1.000013436604424,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Midsole_R": {
+          "max_vertex_displacement_m": 0.07974897549150595,
+          "min_edge_length_ratio": 0.9999981901610671,
+          "max_edge_length_ratio": 1.0000019382513636,
+          "min_triangle_area_ratio": 0.9999734737976705,
+          "max_triangle_area_ratio": 1.0000209145797287,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Outsole_L": {
+          "max_vertex_displacement_m": 0.029568469571035812,
+          "min_edge_length_ratio": 0.999999256983435,
+          "max_edge_length_ratio": 1.0000008996264784,
+          "min_triangle_area_ratio": 0.9999795467932474,
+          "max_triangle_area_ratio": 1.0000150420532488,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Outsole_R": {
+          "max_vertex_displacement_m": 0.07974897219248483,
+          "min_edge_length_ratio": 0.9999974499759883,
+          "max_edge_length_ratio": 1.0000029623315483,
+          "min_triangle_area_ratio": 0.9999600182678032,
+          "max_triangle_area_ratio": 1.000023065205219,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_L_Inner": {
+          "max_vertex_displacement_m": 0.029568467440570984,
+          "min_edge_length_ratio": 0.9999961710341368,
+          "max_edge_length_ratio": 1.0000036032631225,
+          "min_triangle_area_ratio": 0.9999953720939669,
+          "max_triangle_area_ratio": 1.0000034736269872,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_L_Outer": {
+          "max_vertex_displacement_m": 0.029568456498779302,
+          "min_edge_length_ratio": 0.9999922807607965,
+          "max_edge_length_ratio": 1.0000036032263313,
+          "min_triangle_area_ratio": 0.9999932422486334,
+          "max_triangle_area_ratio": 1.0000023276772232,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_R_Inner": {
+          "max_vertex_displacement_m": 0.07974897500614422,
+          "min_edge_length_ratio": 0.9999960451977297,
+          "max_edge_length_ratio": 1.0000097591586345,
+          "min_triangle_area_ratio": 0.9999952898991258,
+          "max_triangle_area_ratio": 1.0000094995137245,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_R_Outer": {
+          "max_vertex_displacement_m": 0.07974898538854361,
+          "min_edge_length_ratio": 0.9999861294400343,
+          "max_edge_length_ratio": 1.0000131099486238,
+          "min_triangle_area_ratio": 0.99998561648831,
+          "max_triangle_area_ratio": 1.0000145229921098,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_ToeSeam_L": {
+          "max_vertex_displacement_m": 0.02956846410010337,
+          "min_edge_length_ratio": 0.9999881989313365,
+          "max_edge_length_ratio": 1.0000108639667329,
+          "min_triangle_area_ratio": 0.9999862852272541,
+          "max_triangle_area_ratio": 1.0000127114158872,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_ToeSeam_R": {
+          "max_vertex_displacement_m": 0.07974897846694164,
+          "min_edge_length_ratio": 0.9999786110371953,
+          "max_edge_length_ratio": 1.0000213893851106,
+          "min_triangle_area_ratio": 0.999963784575018,
+          "max_triangle_area_ratio": 1.0000238775698909,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Tongue_L": {
+          "max_vertex_displacement_m": 0.029568454981918187,
+          "min_edge_length_ratio": 0.9899050922348704,
+          "max_edge_length_ratio": 1.0002927370185901,
+          "min_triangle_area_ratio": 0.9895820704569189,
+          "max_triangle_area_ratio": 1.0002757123281587,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Tongue_R": {
+          "max_vertex_displacement_m": 0.07974897846694269,
+          "min_edge_length_ratio": 0.9992356528801957,
+          "max_edge_length_ratio": 1.002953720683627,
+          "min_triangle_area_ratio": 0.9985496759077771,
+          "max_triangle_area_ratio": 1.0030413055072294,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Upper_L": {
+          "max_vertex_displacement_m": 0.029568469571021543,
+          "min_edge_length_ratio": 0.9916383662787563,
+          "max_edge_length_ratio": 1.0027215394204745,
+          "min_triangle_area_ratio": 0.9913527980121949,
+          "max_triangle_area_ratio": 1.0030818806944874,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Upper_R": {
+          "max_vertex_displacement_m": 0.07974897879051385,
+          "min_edge_length_ratio": 0.9984425258167317,
+          "max_edge_length_ratio": 1.0027722640152108,
+          "min_triangle_area_ratio": 0.9969087640540948,
+          "max_triangle_area_ratio": 1.0043075748317243,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_StandCollar": {
+          "max_vertex_displacement_m": 0.06790539932832251,
+          "min_edge_length_ratio": 0.9990919438012164,
+          "max_edge_length_ratio": 1.0026196184451897,
+          "min_triangle_area_ratio": 0.9990934249699635,
+          "max_triangle_area_ratio": 1.002647771586865,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_TrackJacket_Body": {
+          "max_vertex_displacement_m": 0.05996105996256833,
+          "min_edge_length_ratio": 0.7809083388789493,
+          "max_edge_length_ratio": 1.1502020690549077,
+          "min_triangle_area_ratio": 0.7805878663636149,
+          "max_triangle_area_ratio": 1.153525980838262,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipTape_-1": {
+          "max_vertex_displacement_m": 0.0592208197929635,
+          "min_edge_length_ratio": 0.7735941916971507,
+          "max_edge_length_ratio": 1.006643708637821,
+          "min_triangle_area_ratio": 0.7635808135516524,
+          "max_triangle_area_ratio": 1.004195112025128,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipTape_1": {
+          "max_vertex_displacement_m": 0.059116496362361,
+          "min_edge_length_ratio": 0.7694799450211505,
+          "max_edge_length_ratio": 1.0041330864681939,
+          "min_triangle_area_ratio": 0.7620050922200249,
+          "max_triangle_area_ratio": 1.0015794735003933,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipperPull": {
+          "max_vertex_displacement_m": 0.06547618566648,
+          "min_edge_length_ratio": 0.9997879051978472,
+          "max_edge_length_ratio": 1.0002184739105406,
+          "min_triangle_area_ratio": 0.9997294094826874,
+          "max_triangle_area_ratio": 1.0002493480563859,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        }
+      }
+    },
+    "AS_LunaMk2_Title_C": {
+      "frames_sampled": [
+        1,
+        8,
+        16,
+        24,
+        31,
+        38,
+        46,
+        54,
+        61,
+        68,
+        76,
+        84,
+        91
+      ],
+      "max_bone_basis_rotation_radians": 1.5707964897155762,
+      "meshes": {
+        "Sportswear_AnkleCuff_-1": {
+          "max_vertex_displacement_m": 0.1522004759827726,
+          "min_edge_length_ratio": 0.9907053560538118,
+          "max_edge_length_ratio": 1.0013348586667192,
+          "min_triangle_area_ratio": 0.9900980969407653,
+          "max_triangle_area_ratio": 1.0012972109520373,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleCuff_1": {
+          "max_vertex_displacement_m": 0.17629933178564394,
+          "min_edge_length_ratio": 0.9900387649743502,
+          "max_edge_length_ratio": 1.0068016613270896,
+          "min_triangle_area_ratio": 0.9897422626672261,
+          "max_triangle_area_ratio": 1.0066892517932504,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleSock_-1": {
+          "max_vertex_displacement_m": 0.13964987079529115,
+          "min_edge_length_ratio": 0.9891240470001312,
+          "max_edge_length_ratio": 1.0036081996317046,
+          "min_triangle_area_ratio": 0.9888888518979692,
+          "max_triangle_area_ratio": 1.0035412314329388,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_AnkleSock_1": {
+          "max_vertex_displacement_m": 0.1588134823586995,
+          "min_edge_length_ratio": 0.9895555955324449,
+          "max_edge_length_ratio": 1.004724338870536,
+          "min_triangle_area_ratio": 0.9893134022547437,
+          "max_triangle_area_ratio": 1.0046921327878757,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_CenterZipper": {
+          "max_vertex_displacement_m": 0.17588337519254238,
+          "min_edge_length_ratio": 0.7998257559390423,
+          "max_edge_length_ratio": 1.0070516588795904,
+          "min_triangle_area_ratio": 0.7926558834093463,
+          "max_triangle_area_ratio": 1.007270598606406,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Jacket_RibHem": {
+          "max_vertex_displacement_m": 0.18995136571254004,
+          "min_edge_length_ratio": 0.9412213640701936,
+          "max_edge_length_ratio": 1.056359507177731,
+          "min_triangle_area_ratio": 0.9335137997334683,
+          "max_triangle_area_ratio": 1.062240657896585,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Joggers": {
+          "max_vertex_displacement_m": 0.2368088642286175,
+          "min_edge_length_ratio": 0.4603668590648374,
+          "max_edge_length_ratio": 1.9663807020566868,
+          "min_triangle_area_ratio": 0.2897568222500124,
+          "max_triangle_area_ratio": 2.1024639307887276,
+          "collapsed_triangles": 0,
+          "retessellated_frames": [
+            38,
+            61
+          ]
+        },
+        "Sportswear_PantStripe_-1_0": {
+          "max_vertex_displacement_m": 0.2062037317163132,
+          "min_edge_length_ratio": 0.8444566985530206,
+          "max_edge_length_ratio": 1.0881003951119999,
+          "min_triangle_area_ratio": 0.8260727561441327,
+          "max_triangle_area_ratio": 1.0866536346077063,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_-1_1": {
+          "max_vertex_displacement_m": 0.2024396647441804,
+          "min_edge_length_ratio": 0.8195770529662623,
+          "max_edge_length_ratio": 1.1403174983262974,
+          "min_triangle_area_ratio": 0.7171079276159068,
+          "max_triangle_area_ratio": 1.1458575924100405,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_1_0": {
+          "max_vertex_displacement_m": 0.23815565696525473,
+          "min_edge_length_ratio": 0.8671613278187875,
+          "max_edge_length_ratio": 1.047752810169764,
+          "min_triangle_area_ratio": 0.8674013752642903,
+          "max_triangle_area_ratio": 1.0469790124044083,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PantStripe_1_1": {
+          "max_vertex_displacement_m": 0.23635230688913686,
+          "min_edge_length_ratio": 0.8926692554585434,
+          "max_edge_length_ratio": 1.1082413765887802,
+          "min_triangle_area_ratio": 0.8009295218109322,
+          "max_triangle_area_ratio": 1.1068702312138339,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PocketOpening_-1": {
+          "max_vertex_displacement_m": 0.18549436678785142,
+          "min_edge_length_ratio": 0.8506527723253062,
+          "max_edge_length_ratio": 1.0021646694242767,
+          "min_triangle_area_ratio": 0.8151929099522557,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_PocketOpening_1": {
+          "max_vertex_displacement_m": 0.17141226077056965,
+          "min_edge_length_ratio": 0.8478422649901055,
+          "max_edge_length_ratio": 1.004204674914857,
+          "min_triangle_area_ratio": 0.8078470223664592,
+          "max_triangle_area_ratio": 1.0032470240328073,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_RibCuff_L": {
+          "max_vertex_displacement_m": 0.32955157692036624,
+          "min_edge_length_ratio": 0.999940209305751,
+          "max_edge_length_ratio": 1.000061570323626,
+          "min_triangle_area_ratio": 0.9999171067958311,
+          "max_triangle_area_ratio": 1.0000804851988905,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_RibCuff_R": {
+          "max_vertex_displacement_m": 0.4363722214683123,
+          "min_edge_length_ratio": 0.9999358328062694,
+          "max_edge_length_ratio": 1.0000581967403017,
+          "min_triangle_area_ratio": 0.9999268673691178,
+          "max_triangle_area_ratio": 1.000068565088118,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ShoulderYoke_-1": {
+          "max_vertex_displacement_m": 0.14562024599900994,
+          "min_edge_length_ratio": 0.9886675912856548,
+          "max_edge_length_ratio": 1.0246010709727333,
+          "min_triangle_area_ratio": 0.9762177035768295,
+          "max_triangle_area_ratio": 1.1605692234895724,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ShoulderYoke_1": {
+          "max_vertex_displacement_m": 0.177815007780283,
+          "min_edge_length_ratio": 0.9888437816723541,
+          "max_edge_length_ratio": 1.0246978481631237,
+          "min_triangle_area_ratio": 0.9505798879257892,
+          "max_triangle_area_ratio": 1.039354883773718,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_L_0": {
+          "max_vertex_displacement_m": 0.3078348427004872,
+          "min_edge_length_ratio": 0.9087746939937533,
+          "max_edge_length_ratio": 1.4034911995727861,
+          "min_triangle_area_ratio": 0.8995393210680263,
+          "max_triangle_area_ratio": 1.416188052767635,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_L_1": {
+          "max_vertex_displacement_m": 0.3060091222906113,
+          "min_edge_length_ratio": 0.8528550075858295,
+          "max_edge_length_ratio": 1.748566829989052,
+          "min_triangle_area_ratio": 0.9315553717674159,
+          "max_triangle_area_ratio": 1.844089147457975,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_R_0": {
+          "max_vertex_displacement_m": 0.3757649607305554,
+          "min_edge_length_ratio": 0.2962956751960553,
+          "max_edge_length_ratio": 1.000177729994797,
+          "min_triangle_area_ratio": 0.239990545270118,
+          "max_triangle_area_ratio": 1.0001826933259144,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_SleeveStripe_R_1": {
+          "max_vertex_displacement_m": 0.36216865339827703,
+          "min_edge_length_ratio": 0.45444394701388574,
+          "max_edge_length_ratio": 1.059136040472922,
+          "min_triangle_area_ratio": 0.4028135673972514,
+          "max_triangle_area_ratio": 1.0531178129412386,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sleeve_L": {
+          "max_vertex_displacement_m": 0.30800392444626007,
+          "min_edge_length_ratio": 0.22389140728684823,
+          "max_edge_length_ratio": 1.7593872343180976,
+          "min_triangle_area_ratio": 0.2051296458583861,
+          "max_triangle_area_ratio": 1.815997924051569,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sleeve_R": {
+          "max_vertex_displacement_m": 0.42336608766641565,
+          "min_edge_length_ratio": 0.27837090954763133,
+          "max_edge_length_ratio": 1.7279360595493687,
+          "min_triangle_area_ratio": 0.2667116021464035,
+          "max_triangle_area_ratio": 1.8278288907073799,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Collar_L": {
+          "max_vertex_displacement_m": 0.17731512448670095,
+          "min_edge_length_ratio": 0.9753311461242935,
+          "max_edge_length_ratio": 1.017688068183155,
+          "min_triangle_area_ratio": 0.9785548117804543,
+          "max_triangle_area_ratio": 1.0160440941393045,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Collar_R": {
+          "max_vertex_displacement_m": 0.1668530330666709,
+          "min_edge_length_ratio": 0.9702746059352129,
+          "max_edge_length_ratio": 1.0200556027809695,
+          "min_triangle_area_ratio": 0.9704797158038012,
+          "max_triangle_area_ratio": 1.020078523589445,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_L_Inner": {
+          "max_vertex_displacement_m": 0.22262944979831897,
+          "min_edge_length_ratio": 0.9934239195885022,
+          "max_edge_length_ratio": 1.0041717643395855,
+          "min_triangle_area_ratio": 0.9872675470669036,
+          "max_triangle_area_ratio": 1.0023295504680845,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_L_Outer": {
+          "max_vertex_displacement_m": 0.24773037753296073,
+          "min_edge_length_ratio": 0.9894684517242975,
+          "max_edge_length_ratio": 1.0044323890224074,
+          "min_triangle_area_ratio": 0.9842633115269543,
+          "max_triangle_area_ratio": 1.0029265227864634,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_R_Inner": {
+          "max_vertex_displacement_m": 0.18222651664934425,
+          "min_edge_length_ratio": 0.9849998085071687,
+          "max_edge_length_ratio": 1.0009261236480853,
+          "min_triangle_area_ratio": 0.9836566783813653,
+          "max_triangle_area_ratio": 1.0010478854890796,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Eyestay_R_Outer": {
+          "max_vertex_displacement_m": 0.210938395753008,
+          "min_edge_length_ratio": 0.9844354677642858,
+          "max_edge_length_ratio": 1.0033431389943248,
+          "min_triangle_area_ratio": 0.9826708256679654,
+          "max_triangle_area_ratio": 1.0025917729003722,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_HeelTab_L": {
+          "max_vertex_displacement_m": 0.1556776596213068,
+          "min_edge_length_ratio": 0.9977406809838094,
+          "max_edge_length_ratio": 1.0058585438983985,
+          "min_triangle_area_ratio": 0.9960855583154103,
+          "max_triangle_area_ratio": 1.0063233483438054,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_HeelTab_R": {
+          "max_vertex_displacement_m": 0.1609459581030096,
+          "min_edge_length_ratio": 0.99844969739616,
+          "max_edge_length_ratio": 1.0078722913820521,
+          "min_triangle_area_ratio": 0.9972282701349748,
+          "max_triangle_area_ratio": 1.0078703148949533,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_1": {
+          "max_vertex_displacement_m": 0.23201524562780462,
+          "min_edge_length_ratio": 0.9999763243087963,
+          "max_edge_length_ratio": 1.000025460855274,
+          "min_triangle_area_ratio": 0.9999667893417541,
+          "max_triangle_area_ratio": 1.000031988189481,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_2": {
+          "max_vertex_displacement_m": 0.209202953627578,
+          "min_edge_length_ratio": 0.9999800486702499,
+          "max_edge_length_ratio": 1.0000249777161248,
+          "min_triangle_area_ratio": 0.9999717017005202,
+          "max_triangle_area_ratio": 1.0000357692874648,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_3": {
+          "max_vertex_displacement_m": 0.1891666349578204,
+          "min_edge_length_ratio": 0.9999712320165772,
+          "max_edge_length_ratio": 1.0000211611553933,
+          "min_triangle_area_ratio": 0.999963585695576,
+          "max_triangle_area_ratio": 1.0000349249159965,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_L_4": {
+          "max_vertex_displacement_m": 0.17484509339671017,
+          "min_edge_length_ratio": 0.9891716099201784,
+          "max_edge_length_ratio": 1.0053958208336529,
+          "min_triangle_area_ratio": 0.9873687693450832,
+          "max_triangle_area_ratio": 1.0053744121489203,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_1": {
+          "max_vertex_displacement_m": 0.19654556245031332,
+          "min_edge_length_ratio": 0.9999778207842509,
+          "max_edge_length_ratio": 1.0000176440899071,
+          "min_triangle_area_ratio": 0.9999545068100582,
+          "max_triangle_area_ratio": 1.0000324728310375,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_2": {
+          "max_vertex_displacement_m": 0.1761703962182935,
+          "min_edge_length_ratio": 0.9999872550122644,
+          "max_edge_length_ratio": 1.0000110488481904,
+          "min_triangle_area_ratio": 0.9999779746214614,
+          "max_triangle_area_ratio": 1.0000158761441273,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_3": {
+          "max_vertex_displacement_m": 0.15940748533906757,
+          "min_edge_length_ratio": 0.9999602795540916,
+          "max_edge_length_ratio": 1.0000168647087517,
+          "min_triangle_area_ratio": 0.9999608742645271,
+          "max_triangle_area_ratio": 1.0000213649436624,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Lace_R_4": {
+          "max_vertex_displacement_m": 0.1484403522087953,
+          "min_edge_length_ratio": 0.9874308335014353,
+          "max_edge_length_ratio": 1.0035985199922794,
+          "min_triangle_area_ratio": 0.9875042434693565,
+          "max_triangle_area_ratio": 1.0026070378903194,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_MidsoleRidge_L": {
+          "max_vertex_displacement_m": 0.31055459204204966,
+          "min_edge_length_ratio": 0.9999678484935715,
+          "max_edge_length_ratio": 1.0000436443762766,
+          "min_triangle_area_ratio": 0.9999623788599502,
+          "max_triangle_area_ratio": 1.0000444558554895,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_MidsoleRidge_R": {
+          "max_vertex_displacement_m": 0.270804174968159,
+          "min_edge_length_ratio": 0.9999638524652115,
+          "max_edge_length_ratio": 1.0000325844695193,
+          "min_triangle_area_ratio": 0.9999636842227411,
+          "max_triangle_area_ratio": 1.000033859038122,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Midsole_L": {
+          "max_vertex_displacement_m": 0.3094259208971709,
+          "min_edge_length_ratio": 0.999995104894336,
+          "max_edge_length_ratio": 1.000005076833249,
+          "min_triangle_area_ratio": 0.9999579973602237,
+          "max_triangle_area_ratio": 1.0000612248045444,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Midsole_R": {
+          "max_vertex_displacement_m": 0.2696738734108315,
+          "min_edge_length_ratio": 0.9999952355788033,
+          "max_edge_length_ratio": 1.0000036721274428,
+          "min_triangle_area_ratio": 0.999943868042933,
+          "max_triangle_area_ratio": 1.0000453721232394,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Outsole_L": {
+          "max_vertex_displacement_m": 0.3077132232010498,
+          "min_edge_length_ratio": 0.9999924313391644,
+          "max_edge_length_ratio": 1.000006692697382,
+          "min_triangle_area_ratio": 0.999957628122004,
+          "max_triangle_area_ratio": 1.0000868973591872,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Outsole_R": {
+          "max_vertex_displacement_m": 0.2679770105867191,
+          "min_edge_length_ratio": 0.9999937410916561,
+          "max_edge_length_ratio": 1.000005928090985,
+          "min_triangle_area_ratio": 0.9999251680593996,
+          "max_triangle_area_ratio": 1.0000556419427526,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_L_Inner": {
+          "max_vertex_displacement_m": 0.20306016918091416,
+          "min_edge_length_ratio": 0.9999851104754759,
+          "max_edge_length_ratio": 1.0000211879445502,
+          "min_triangle_area_ratio": 0.999988407047742,
+          "max_triangle_area_ratio": 1.0000165584931293,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_L_Outer": {
+          "max_vertex_displacement_m": 0.2660657846644376,
+          "min_edge_length_ratio": 0.9999870213943992,
+          "max_edge_length_ratio": 1.0000216202254342,
+          "min_triangle_area_ratio": 0.9999863145341349,
+          "max_triangle_area_ratio": 1.0000212200714926,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_R_Inner": {
+          "max_vertex_displacement_m": 0.16126589848190476,
+          "min_edge_length_ratio": 0.9999892246942839,
+          "max_edge_length_ratio": 1.0000108570246018,
+          "min_triangle_area_ratio": 0.999987076525182,
+          "max_triangle_area_ratio": 1.00001236822784,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Quarter_R_Outer": {
+          "max_vertex_displacement_m": 0.23138534764446836,
+          "min_edge_length_ratio": 0.9999770684056102,
+          "max_edge_length_ratio": 1.0000226864504869,
+          "min_triangle_area_ratio": 0.9999762791197478,
+          "max_triangle_area_ratio": 1.0000238461913253,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_ToeSeam_L": {
+          "max_vertex_displacement_m": 0.26686316537410804,
+          "min_edge_length_ratio": 0.9999530702751208,
+          "max_edge_length_ratio": 1.0000454768395561,
+          "min_triangle_area_ratio": 0.9999503791276864,
+          "max_triangle_area_ratio": 1.0000579713815365,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_ToeSeam_R": {
+          "max_vertex_displacement_m": 0.2286115496459211,
+          "min_edge_length_ratio": 0.9999466392393364,
+          "max_edge_length_ratio": 1.000054429817517,
+          "min_triangle_area_ratio": 0.9999431440631853,
+          "max_triangle_area_ratio": 1.0000569251524312,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Tongue_L": {
+          "max_vertex_displacement_m": 0.24550574224529126,
+          "min_edge_length_ratio": 0.989390408548149,
+          "max_edge_length_ratio": 1.0037033872542565,
+          "min_triangle_area_ratio": 0.9852614551012902,
+          "max_triangle_area_ratio": 1.0025709491056622,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Tongue_R": {
+          "max_vertex_displacement_m": 0.2079921713742637,
+          "min_edge_length_ratio": 0.9804543857134934,
+          "max_edge_length_ratio": 1.0027795299528535,
+          "min_triangle_area_ratio": 0.9803807112320194,
+          "max_triangle_area_ratio": 1.0020970821926811,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Upper_L": {
+          "max_vertex_displacement_m": 0.2957644133895352,
+          "min_edge_length_ratio": 0.9887386230399717,
+          "max_edge_length_ratio": 1.008884412051093,
+          "min_triangle_area_ratio": 0.9878523367361959,
+          "max_triangle_area_ratio": 1.0070622821294213,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_Sneaker_Upper_R": {
+          "max_vertex_displacement_m": 0.25620077123422635,
+          "min_edge_length_ratio": 0.9837157604635224,
+          "max_edge_length_ratio": 1.006691392274465,
+          "min_triangle_area_ratio": 0.9833931609588384,
+          "max_triangle_area_ratio": 1.0061167034267804,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_StandCollar": {
+          "max_vertex_displacement_m": 0.09764939286646354,
+          "min_edge_length_ratio": 0.9991733511321217,
+          "max_edge_length_ratio": 1.0023886470594088,
+          "min_triangle_area_ratio": 0.9991759439426007,
+          "max_triangle_area_ratio": 1.0024030046913495,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_TrackJacket_Body": {
+          "max_vertex_displacement_m": 0.19177205182737214,
+          "min_edge_length_ratio": 0.792358861099805,
+          "max_edge_length_ratio": 1.1412512542165132,
+          "min_triangle_area_ratio": 0.7925872704683754,
+          "max_triangle_area_ratio": 1.1426201274698768,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipTape_-1": {
+          "max_vertex_displacement_m": 0.17466855834241896,
+          "min_edge_length_ratio": 0.7856282931289204,
+          "max_edge_length_ratio": 1.0066333661693245,
+          "min_triangle_area_ratio": 0.7771887150085792,
+          "max_triangle_area_ratio": 1.0044529150131671,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipTape_1": {
+          "max_vertex_displacement_m": 0.1734915131451881,
+          "min_edge_length_ratio": 0.7819644931651354,
+          "max_edge_length_ratio": 1.0037967634537555,
+          "min_triangle_area_ratio": 0.7745765246332095,
+          "max_triangle_area_ratio": 1.001441352811354,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        },
+        "Sportswear_ZipperPull": {
+          "max_vertex_displacement_m": 0.09147239181493279,
+          "min_edge_length_ratio": 0.999829512046651,
+          "max_edge_length_ratio": 1.0001351969788563,
+          "min_triangle_area_ratio": 0.9997518285334778,
+          "max_triangle_area_ratio": 1.0001533445776545,
+          "collapsed_triangles": 0,
+          "retessellated_frames": []
+        }
+      }
+    }
+  },
+  "limits": {
+    "bone_matrix_tolerance": 1e-06,
+    "weight_sum_tolerance": 0.0001,
+    "positive_weight_threshold": 1e-07,
+    "max_deform_influences": 4,
+    "minimum_triangle_area_m2": 1e-12,
+    "note": "Open clothing boundaries and coincident UV seam vertices are reported. Numerical validation does not prove absence of intersections or acceptable visual deformation."
+  },
+  "source_unchanged": true,
+  "passed": true,
+  "summary": {
+    "mesh_count": 60,
+    "evaluated_mesh_count": 60,
+    "actions_sampled": 3,
+    "errors": 0,
+    "warnings": 1
+  }
+}

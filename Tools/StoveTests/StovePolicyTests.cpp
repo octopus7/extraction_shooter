@@ -1,4 +1,5 @@
 #include "../../TunaSweeper/Source/TunaSweeper/Private/Platform/TunaSweeperStovePolicy.h"
+#include "../../TunaSweeper/Source/TunaSweeper/Private/Platform/TunaSweeperStoveCloudPolicy.h"
 #include <cstdio>
 
 int main()
@@ -29,5 +30,26 @@ int main()
         }
     }
     std::printf("STOVE ownership policy: %d cases, %d failures\n", int(sizeof(Cases) / sizeof(Cases[0])), Failures);
+    struct CloudCase { const wchar_t* Path; bool Allowed; };
+    const CloudCase CloudCases[] = {
+        {L"C:\\Users\\Player\\Cloud\\12345", true},
+        {L"D:/STOVE/Cloud/12345/", true},
+        {L"C:/Users/\ud14c\uc2a4\ud2b8/Cloud", true},
+        {L"\\\\server\\share\\Cloud", true},
+        {nullptr, false}, {L"", false}, {L"Cloud/12345", false},
+        {L"C:Cloud", false}, {L"C:/", false}, {L"/Cloud", false},
+        {L"C:/Cloud/../Steam", false}, {L"C:/Cloud/./12345", false},
+        {L"($APPDATA_LOCAL)/Cloud/($MEMBER_NO)", false},
+        {L"C:/Cloud/($MEMBER_NO)", false}, {L"C:/%USERNAME%/Cloud", false},
+        {L"\\\\server", false}, {L"\\\\server\\", false},
+        {L"C:/Cloud/*.sav", false}, {L"C:/Cloud\nPlayer", false},
+    };
+    int CloudFailures = 0;
+    for (const CloudCase& Test : CloudCases)
+    {
+        if (TunaSweeperStove::IsUsableCloudSaveRoot(Test.Path) != Test.Allowed) ++CloudFailures;
+    }
+    std::printf("STOVE cloud path policy: %d cases, %d failures\n", int(sizeof(CloudCases) / sizeof(CloudCases[0])), CloudFailures);
+    Failures += CloudFailures;
     return Failures ? 1 : 0;
 }

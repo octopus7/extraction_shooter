@@ -1,4 +1,6 @@
 #include "Weapon/TunaSweeperWeapon.h"
+#include "Weapon/TunaSweeperWeaponConfiguration.h"
+#include "Engine/StaticMesh.h"
 
 #include "CollisionQueryParams.h"
 #include "Component/TunaSweeperLaserSightComponent.h"
@@ -964,4 +966,31 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	}
 
 	return SpawnedProjectile;
+}
+
+bool ATunaSweeperWeapon::ApplyVisualDefinition(const FTunaSweeperWeaponVisualDefinition& Visual)
+{
+	UStaticMesh* LoadedMeshAsset = Cast<UStaticMesh>(Visual.Mesh.TryLoad());
+	UMaterialInterface* Material = Cast<UMaterialInterface>(Visual.Material.TryLoad());
+	if (!LoadedMeshAsset || !Material)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Cannot load weapon visual assets for %s"), *GetPathName());
+		return false;
+	}
+	const FBox Bounds = LoadedMeshAsset->GetBoundingBox();
+	const FVector Size = Bounds.GetSize();
+	FRotator Rotation = Visual.Rotation;
+	if (Visual.bAlignLongestAxisToX)
+	{
+		FRotator Alignment = FRotator::ZeroRotator;
+		if (Size.Z > Size.X && Size.Z > Size.Y) Alignment = FRotator(90, 0, 0);
+		else if (Size.Y > Size.X) Alignment = FRotator(0, -90, 0);
+		Rotation = (Visual.Rotation.Quaternion() * Alignment.Quaternion()).Rotator();
+	}
+	FVector Scale = Visual.Scale;
+	if (Visual.FitLengthCm > 0) Scale *= Visual.FitLengthCm / FMath::Max(1.0, (Size * Scale).GetMax());
+	FVector Location = Visual.Location;
+	if (Visual.bCenterOnBounds) Location -= Rotation.RotateVector(Bounds.GetCenter() * Scale);
+	SetWeaponMeshOverride(LoadedMeshAsset, Material, Location, Rotation, Scale);
+	return true;
 }

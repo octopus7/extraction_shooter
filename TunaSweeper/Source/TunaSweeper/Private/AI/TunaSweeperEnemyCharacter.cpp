@@ -58,9 +58,6 @@ namespace
 	constexpr float LumberjackMeleeKnockbackVelocity = 680.0f;
 	constexpr float LumberjackMeleeImpactHeight = 55.0f;
 	constexpr float LumberjackMeleeImpactLifetimeSeconds = 0.55f;
-	constexpr int32 DefaultEnemyWeaponItemId = 1002;
-	constexpr int32 DefaultEnemyAmmoItemId = 2002;
-	constexpr int32 DefaultEnemyReserveMagazineCount = 2;
 	constexpr float DefaultEnemyReloadSeconds = 1.8f;
 	constexpr float DefaultProjectileDamageAmount = 10.0f;
 	// TEMP_VIDEO_BULLET_STORM: Remove these capture-only tuning values after recording.
@@ -89,31 +86,7 @@ namespace
 		return FMath::Max(MinValue, BaseValue + FMath::FRandRange(MinOffset, MaxOffset));
 	}
 
-	int32 GetDefaultAmmoItemIdForWeaponType(FName WeaponTypeTag)
-	{
-		if (WeaponTypeTag == PistolWeaponTypeTag)
-		{
-			return 2001;
-		}
-		if (WeaponTypeTag == ShotgunWeaponTypeTag)
-		{
-			return 2003;
-		}
-		if (WeaponTypeTag == SmgWeaponTypeTag)
-		{
-			return 2001;
-		}
 
-		return DefaultEnemyAmmoItemId;
-	}
-
-	bool IsAmmoCompatibleWithWeapon(
-		const FTunaSweeperItemDefinition& WeaponDefinition,
-		const FTunaSweeperItemDefinition& AmmoDefinition)
-	{
-		return !AmmoDefinition.AmmoTypeTag.IsNone() &&
-			WeaponDefinition.CompatibleAmmoTypeTags.Contains(AmmoDefinition.AmmoTypeTag);
-	}
 }
 
 ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
@@ -448,34 +421,16 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 		return;
 	}
 
-	FTunaSweeperItemDefinition WeaponDefinition;
-	const int32 RequestedWeaponItemId = EnemyWeaponItemId != INDEX_NONE
-		? EnemyWeaponItemId
-		: DefaultEnemyWeaponItemId;
-	if (!ItemDataSubsystem->TryGetItemDefinition(RequestedWeaponItemId, WeaponDefinition) ||
-		WeaponDefinition.WeaponTypeTag.IsNone())
+	FTunaSweeperEnemyWeaponLoadout Loadout;
+	if (!ItemDataSubsystem->TryResolveEnemyLoadout(EnemyWeaponItemId, EnemyAmmoItemId, EnemyReserveAmmoCount, Loadout))
 	{
-		if (!ItemDataSubsystem->TryGetItemDefinition(DefaultEnemyWeaponItemId, WeaponDefinition) ||
-			WeaponDefinition.WeaponTypeTag.IsNone())
-		{
-			return;
-		}
+		UE_LOG(LogTemp, Error, TEXT("Cannot resolve enemy weapon loadout for %s"), *GetPathName());
+		return;
 	}
-
-	FTunaSweeperItemDefinition AmmoDefinition;
-	const int32 RequestedAmmoItemId = EnemyAmmoItemId != INDEX_NONE
-		? EnemyAmmoItemId
-		: GetDefaultAmmoItemIdForWeaponType(WeaponDefinition.WeaponTypeTag);
-	if (!ItemDataSubsystem->TryGetItemDefinition(RequestedAmmoItemId, AmmoDefinition) ||
-		!IsAmmoCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
-	{
-		const int32 DefaultAmmoItemId = GetDefaultAmmoItemIdForWeaponType(WeaponDefinition.WeaponTypeTag);
-		if (!ItemDataSubsystem->TryGetItemDefinition(DefaultAmmoItemId, AmmoDefinition) ||
-			!IsAmmoCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
-		{
-			return;
-		}
-	}
+	FTunaSweeperItemDefinition WeaponDefinition, AmmoDefinition;
+	if (!ItemDataSubsystem->TryGetItemDefinition(Loadout.WeaponItemId, WeaponDefinition) ||
+		!ItemDataSubsystem->TryGetItemDefinition(Loadout.AmmoItemId, AmmoDefinition)) return;
+	EnemyReserveAmmoCount = Loadout.ReserveAmmoCount;
 
 	EnemyWeaponItemId = WeaponDefinition.Id;
 	EnemyAmmoItemId = AmmoDefinition.Id;
@@ -491,17 +446,13 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 	EnemyProjectileDamageMultiplier = TunaSweeperDataValues::ToRatioFloat(AmmoDefinition.ProjectileDamageMultiplier);
 	EnemyProjectileDamageBonus = AmmoDefinition.ProjectileDamageBonus;
 
-	if (EnemyReserveAmmoCount == INDEX_NONE)
-	{
-		EnemyReserveAmmoCount = EnemyMagazineCapacity * DefaultEnemyReserveMagazineCount;
-	}
-	else
-	{
-		EnemyReserveAmmoCount = FMath::Max(0, EnemyReserveAmmoCount);
-	}
-
 	if (EnsureEnemyWeaponActor() && TunaGameInstance)
 	{
+		FTunaSweeperWeaponVisualDefinition Visual;
+		if (ItemDataSubsystem->TryGetWeaponVisualDefinition(EnemyWeaponItemId, Visual))
+		{
+			EnemyWeapon->ApplyVisualDefinition(Visual);
+		}
 		if (!EnemyWeapon->HasWeaponPresentationDataAsset() &&
 			!TunaGameInstance->EnemyWeaponFallbackPresentationDataAsset.IsNull())
 		{

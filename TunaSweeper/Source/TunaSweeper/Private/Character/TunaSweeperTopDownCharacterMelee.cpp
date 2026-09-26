@@ -109,9 +109,9 @@ void ATunaSweeperTopDownCharacter::ResetEquippedWeaponRelativeTransform()
 	}
 }
 
-void ATunaSweeperTopDownCharacter::ApplyEquippedMeleeWeaponVisual()
+void ATunaSweeperTopDownCharacter::ApplyEquippedWeaponVisual()
 {
-	if (!EquippedWeapon || !bMeleeWeaponSelected)
+	if (!EquippedWeapon)
 	{
 		return;
 	}
@@ -122,23 +122,19 @@ void ATunaSweeperTopDownCharacter::ApplyEquippedMeleeWeaponVisual()
 		return;
 	}
 
-	FTunaSweeperItemInstance MeleeInstance;
-	FTunaSweeperItemDefinition MeleeDefinition;
-	if (!TunaGameInstance->TryGetEquipmentMeleeSlotItem(MeleeInstance, MeleeDefinition) ||
-		MeleeDefinition.Id != TunaSweeperEquippedWeaponVisual::BaseballBatItemId)
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!(bMeleeWeaponSelected
+		? TunaGameInstance->TryGetEquipmentMeleeSlotItem(WeaponInstance, WeaponDefinition)
+		: TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition)))
 	{
 		return;
 	}
 
-	UStaticMesh* BaseballBatMesh = Cast<UStaticMesh>(TunaSweeperEquippedWeaponVisual::BaseballBatMeshPath.TryLoad());
-	UMaterialInterface* BaseballBatMaterial =
-		Cast<UMaterialInterface>(TunaSweeperEquippedWeaponVisual::BaseballBatMaterialPath.TryLoad());
-	EquippedWeapon->SetWeaponMeshOverride(
-		BaseballBatMesh,
-		BaseballBatMaterial,
-		FVector(26.0f, 0.0f, 0.0f),
-		FRotator::ZeroRotator,
-		FVector(0.54f, 1.0f, 1.0f));
+	UTunaSweeperItemDataSubsystem* Items = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperWeaponVisualDefinition Visual;
+	if (!Items || !Items->TryGetWeaponVisualDefinition(WeaponDefinition.Id, Visual)) return;
+	EquippedWeapon->ApplyVisualDefinition(Visual);
 }
 
 void ATunaSweeperTopDownCharacter::ApplyMeleeAttackJudgement()

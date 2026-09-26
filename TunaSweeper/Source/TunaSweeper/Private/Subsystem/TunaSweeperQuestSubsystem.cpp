@@ -86,6 +86,11 @@ namespace TunaSweeperQuestData
 			OutType = ETunaSweeperObjectiveType::ItemAcquired;
 			return true;
 		}
+		if (Type == TEXT("item_submitted"))
+		{
+			OutType = ETunaSweeperObjectiveType::ItemSubmitted;
+			return true;
+		}
 
 		if (Type == TEXT("enemy_killed") || Type == TEXT("enemykilled"))
 		{
@@ -164,7 +169,10 @@ namespace TunaSweeperQuestData
 		OutObjective.TextStringKey = ReadNameField(JsonObject, TEXT("text_string_key"));
 		OutObjective.Text = ReadTextField(JsonObject, TEXT("text"));
 		double RequiredCount = 1.0;
-		JsonObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
+		const bool bHasRequiredCount = JsonObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
+		if (OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted &&
+			(!bHasRequiredCount || !FMath::IsFinite(RequiredCount) || RequiredCount < 1 ||
+			RequiredCount > MAX_int32 || FMath::FloorToDouble(RequiredCount) != RequiredCount)) return false;
 		OutObjective.RequiredCount = FMath::Max(1, FMath::RoundToInt(RequiredCount));
 
 		OutObjective.SourceLevelName = ReadNameField(JsonObject, TEXT("source_level"));
@@ -175,7 +183,11 @@ namespace TunaSweeperQuestData
 		OutObjective.TargetWarpPointId = ReadNameField(JsonObject, TEXT("target_warp_point_id"));
 
 		double ItemId = INDEX_NONE;
-		JsonObject->TryGetNumberField(TEXT("item_id"), ItemId);
+		const bool bHasItemId = JsonObject->TryGetNumberField(TEXT("item_id"), ItemId);
+		OutObjective.TargetProviderId = ReadNameField(JsonObject, TEXT("target_provider_id"));
+		if (OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted &&
+			(!bHasItemId || !FMath::IsFinite(ItemId) || ItemId < 1 || ItemId > MAX_int32 ||
+			FMath::FloorToDouble(ItemId) != ItemId || OutObjective.TargetProviderId.IsNone())) return false;
 		OutObjective.ItemId = FMath::RoundToInt(ItemId);
 
 		FString InteractionTypeString;
@@ -1016,6 +1028,12 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 				if (TunaSweeperQuestData::ParseObjective(ObjectiveValue.IsValid() ? ObjectiveValue->AsObject() : nullptr, Objective))
 				{
 					Definition.Objectives.Add(Objective);
+				}
+				else
+				{
+					UE_LOG(LogTunaSweeperQuest, Error, TEXT("Invalid objective in quest %s"), *Definition.QuestId.ToString());
+					QuestDefinitions.Reset();
+					return false;
 				}
 			}
 		}

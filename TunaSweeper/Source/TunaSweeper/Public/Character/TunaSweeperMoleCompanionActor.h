@@ -51,6 +51,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	FName ResolveQuestId() const;
+	FName GetQuestProviderId() const;
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;

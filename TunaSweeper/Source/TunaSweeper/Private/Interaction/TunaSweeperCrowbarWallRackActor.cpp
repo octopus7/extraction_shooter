@@ -118,7 +118,7 @@ void ATunaSweeperCrowbarWallRackActor::RefreshAvailability()
 bool ATunaSweeperCrowbarWallRackActor::DoesPlayerOwnCrowbar() const
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
-	return TunaGameInstance && TunaGameInstance->CountInventoryItemById(CrowbarItemId) > 0;
+	return TunaGameInstance && TunaGameInstance->CountCarriedItemById(CrowbarItemId) > 0;
 }
 
 bool ATunaSweeperCrowbarWallRackActor::IsWaterIntakeDebrisCleared() const

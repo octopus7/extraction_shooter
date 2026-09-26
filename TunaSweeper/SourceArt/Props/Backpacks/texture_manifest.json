@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Egg",
+    "texture": "T_Backpack_Egg_BaseColor.png",
+    "size": 512,
+    "pixels_per_metre": 308.2626411473196
+  },
+  {
+    "name": "Chicken",
+    "texture": "T_Backpack_Chicken_BaseColor.png",
+    "size": 512,
+    "pixels_per_metre": 308.2626411473196
+  },
+  {
+    "name": "Dinosaur",
+    "texture": "T_Backpack_Dinosaur_BaseColor.png",
+    "size": 512,
+    "pixels_per_metre": 308.2626411473196
+  },
+  {
+    "name": "Military",
+    "texture": "T_Backpack_Military_BaseColor.png",
+    "size": 512,
+    "pixels_per_metre": 308.2626411473196
+  },
+  {
+    "name": "CarbonFrame",
+    "texture": "T_Backpack_CarbonFrame_BaseColor.png",
+    "size": 512,
+    "pixels_per_metre": 308.2626411473196
+  }
+]

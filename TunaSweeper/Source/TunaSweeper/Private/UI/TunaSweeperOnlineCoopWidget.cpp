@@ -11,6 +11,12 @@ void UTunaSweeperOnlineCoopWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	if (DescriptionText)
+	{
+		// The authored 660px Card has 32px Surface padding per side. Wrap during prepass, before the first paint.
+		DescriptionText->SetAutoWrapText(false);
+		DescriptionText->SetWrapTextAt(596.f);
+	}
 	for (UTextBlock* Label : { ConnectButtonText.Get(), HostButtonText.Get(), JoinButtonText.Get(), LeaveButtonText.Get(), CloseButtonText.Get() })
 	{
 		if (Label)

@@ -25,6 +25,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Facility NPC")
 	FName GetNpcId() const { return NpcId; }
+	FName GetQuestProviderId() const { return QuestProviderId; }
 
 protected:
 	virtual void BeginPlay() override;

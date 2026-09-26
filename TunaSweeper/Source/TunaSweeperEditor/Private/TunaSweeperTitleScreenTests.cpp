@@ -42,7 +42,9 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Online co-op entry is present in the composed title menu"), CoopEntry);
 	if (CoopEntry)
 	{
-		TestTrue(TEXT("Online co-op entry has a vertical menu slot"), Cast<UVerticalBoxSlot>(CoopEntry->Slot) != nullptr);
+		const USizeBox* CoopBox = Cast<USizeBox>(Menu->FindIntroWidget(TEXT("OnlineCoopButtonBox")));
+		TestTrue(TEXT("Online co-op entry has a sized vertical menu row"),
+			CoopBox && CoopEntry->GetParent() == CoopBox && Cast<UVerticalBoxSlot>(CoopBox->Slot));
 		TestTrue(TEXT("Online co-op entry binds its open action"), CoopEntry->OnClicked.IsBound());
 		TestNotNull(TEXT("Online co-op entry has a label"), Menu->FindIntroWidget(TEXT("OnlineCoopButtonText")));
 	}
@@ -197,6 +199,11 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->TickMenuTransitions(1.0f);
 	TestEqual(TEXT("Settings closes after exit fade"), Menu->SettingsPanel->GetVisibility(), ESlateVisibility::Collapsed);
 	TestEqual(TEXT("Main menu visible after exit"), Menu->MainMenuPanel->GetVisibility(), ESlateVisibility::Visible);
+	Menu->SetNamedText(TEXT("OnlineCoopButtonText"), PreviewStrings->ResolveText(
+		TEXT("ui.coop.title"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
+	if (Menu->FindIntroWidget(TEXT("LaboratoryButtonText")))
+		Menu->SetNamedText(TEXT("LaboratoryButtonText"), PreviewStrings->ResolveText(
+			TEXT("ui.lab.title"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	Menu->InvalidateLayoutAndVolatility();
 	FSlateApplication::Get().InvalidateAllWidgets(true);
 	Slate->Invalidate(EInvalidateWidgetReason::Layout | EInvalidateWidgetReason::Paint);

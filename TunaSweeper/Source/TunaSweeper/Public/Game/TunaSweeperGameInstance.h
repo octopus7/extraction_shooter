@@ -32,7 +32,7 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 	int32 BareInventorySlots = 40;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
-	int32 MaxInventorySlots = 100;
+	int32 MaxInventorySlots = 120;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	int32 EquipmentSlotCount = 8;
@@ -265,6 +265,9 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaDemoSaveRetirementTest;
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
+	friend class FTunaSweeperCarriedToolTest;
+	friend class FTunaSweeperEquipmentDataTest;
+	friend class FTunaSweeperQuestSubmissionTest;
 
 public:
 	UTunaSweeperGameInstance();
@@ -633,8 +636,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 CountInventoryItemById(int32 ItemId);
 
+	// Includes equipped items for reusable tool requirements; excludes storage.
+	int32 CountCarriedItemById(int32 ItemId);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount);
+
+	// Consume the whole batch, then commit related state before inventory observers/save requests run.
+	bool TryConsumeInventoryItems(const TArray<FTunaSweeperItemStack>& Requirements, TFunctionRef<void()> OnConsumed);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards);
@@ -847,6 +856,8 @@ private:
 	bool ClearInventoryAndSaveInternal(bool bNotifyChanges = true);
 	void GenerateDefaultInventoryState();
 	bool InitializeDemoStartingLoadout();
+	bool ApplyStartingLoadoutJson(const FString& JsonContent);
+	void GrantCombatTestReserveAmmo();
 	void ResetPlayerSlotArrays();
 	void RefreshLegacyPlayerInventoryItems();
 	int32 ResolveItemExperienceValue(int32 ItemId);

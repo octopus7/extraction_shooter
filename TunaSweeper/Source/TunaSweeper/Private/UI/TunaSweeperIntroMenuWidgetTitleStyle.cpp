@@ -72,7 +72,7 @@ namespace TunaSweeperTitleStyle
 		}
 	};
 
-	enum class EArtwork { Play, Settings, Quit, Save, Wishlist };
+	enum class EArtwork { Play, Settings, Quit, Save, Wishlist, Laboratory };
 	UTexture2D* ButtonArtwork(EArtwork Kind, int32 W, int32 H)
 	{
 		FArtwork Art(W, H);
@@ -120,6 +120,16 @@ namespace TunaSweeperTitleStyle
 			}
 			Art.Paint(C - FVector2D(12), C + FVector2D(12), Ink, [=](FVector2D P)
 				{ return FMath::Min(float(((P - C).Size() - 5.0) * 2), float((11.0 - (P - C).Size()) * 2)); });
+		}
+		else if (Kind == EArtwork::Laboratory)
+		{
+			Art.Line(C + FVector2D(-6, -15), C + FVector2D(6, -15), 2, Ink);
+			Art.Line(C + FVector2D(-4, -15), C + FVector2D(-4, -4), 2, Ink);
+			Art.Line(C + FVector2D(4, -15), C + FVector2D(4, -4), 2, Ink);
+			Art.Line(C + FVector2D(-4, -4), C + FVector2D(-14, 13), 2, Ink);
+			Art.Line(C + FVector2D(4, -4), C + FVector2D(14, 13), 2, Ink);
+			Art.Line(C + FVector2D(-14, 13), C + FVector2D(14, 13), 2, Ink);
+			Art.Line(C + FVector2D(-9, 5), C + FVector2D(9, 5), 2, Ink);
 		}
 		else if (Kind == EArtwork::Wishlist)
 		{
@@ -190,7 +200,7 @@ void UTunaSweeperIntroMenuWidget::ApplyReferenceTitleStyle()
 			}
 			if (UScaleBoxSlot* TextSlot = Cast<UScaleBoxSlot>(Label->Slot))
 			{
-				TextSlot->SetHorizontalAlignment(Kind == EArtwork::Settings || Kind == EArtwork::Quit || Kind == EArtwork::Save ? HAlign_Left : HAlign_Center);
+				TextSlot->SetHorizontalAlignment(Kind == EArtwork::Settings || Kind == EArtwork::Quit || Kind == EArtwork::Save || Kind == EArtwork::Laboratory ? HAlign_Left : HAlign_Center);
 				TextSlot->SetVerticalAlignment(VAlign_Center);
 			}
 			if (UButtonSlot* Slot = Cast<UButtonSlot>(Button->GetContent()->Slot))
@@ -201,6 +211,8 @@ void UTunaSweeperIntroMenuWidget::ApplyReferenceTitleStyle()
 	};
 	Apply(StartButton, TEXT("StartButtonBox"), EArtwork::Play, 454, 112, 0, 4);
 	Apply(SlotSelectButton, TEXT("SlotSelectButtonBox"), EArtwork::Save, 418, 98, 12, -4);
+	Apply(LaboratoryButton, TEXT("LaboratoryButtonBox"), EArtwork::Laboratory, 418, 98, 12, -4);
+	Apply(OnlineCoopButton, TEXT("OnlineCoopButtonBox"), EArtwork::Play, 418, 98, 12, -4);
 	Apply(SettingsButton, TEXT("SettingsButtonBox"), EArtwork::Settings, 418, 98, 12, -4);
 	Apply(QuitButton, TEXT("QuitButtonBox"), EArtwork::Quit, 418, 98, 12, 0);
 	Apply(SteamDemoWishlistButton, TEXT("SteamDemoWishlistButtonBox"), EArtwork::Wishlist, 418, 94, 12, 0);

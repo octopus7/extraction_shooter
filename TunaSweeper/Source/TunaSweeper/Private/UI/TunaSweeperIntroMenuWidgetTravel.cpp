@@ -128,6 +128,12 @@ void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)
 {
 	const TArray<UButton*> ButtonsToUpdate = {
 		StartButton.Get(),
+		LaboratoryButton.Get(),
+		LaboratoryBackButton.Get(),
+		BossDevelopmentButton.Get(),
+		BossSinglePlayerButton.Get(),
+		BossMultiplayerButton.Get(),
+		OnlineCoopButton.Get(),
 		DifficultyFarmingButton.Get(),
 		DifficultyNormalButton.Get(),
 		DifficultyHardButton.Get(),

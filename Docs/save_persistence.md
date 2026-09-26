@@ -3,6 +3,17 @@
 This file tracks gameplay/runtime state that must survive gameplay-slot or account-global save/load.
 Update it whenever a new state field is expected to persist across save slots, level travel saves, death saves, or intro-menu reloads.
 
+## Cloud Save Roots
+
+All gameplay slots, selected-slot settings, achievements, previous generations, backups, and cleanup logs resolve their root through `TunaSweeperBuildFlavor::GetSaveGameDirectory()`.
+
+- Editor/local saves: `Saved/SaveGames/<Demo|FullGame>/`.
+- Packaged Steam channel: `Saved/SaveGames/Steam/<64BitSteamID>/<Demo|FullGame>/`, fixed for the process lifetime. Steam Auto-Cloud synchronizes committed `.sav` and `.sav.previous` files, including `Backups/`, when configured in Steamworks. An unavailable identity selects `Steam/LocalOnly/<Demo|FullGame>/`, outside the registered account paths.
+- Packaged Stove channel: `<Base_GetCloudSavingPath result>/<Demo|FullGame>/`. The SDK root/account are cached during authenticated module startup, before GameInstance subsystems load saves. Studio must register an account-specific root; see [Stove cloud setup](stove_cloud_saves.md). An unavailable/invalid SDK root uses `Saved/SaveGames/Stove/LocalOnly/<MemberNumber|UnknownAccount>/<Demo|FullGame>/`. The selected root stays fixed until restart.
+- Steam paths are never selected by Stove/NoStore or the editor. Existing shared local saves are preserved and are not automatically claimed by an arbitrary store account.
+
+Machine-specific settings, candidate files, corrupt archives, and cleanup audit logs are not Steam Cloud targets. Steam Cloud being disabled or the client being offline does not disable local saves. See [Steam cloud setup and verification](Steam/cloud_saves.md) for the required per-app portal configuration; local code tests do not prove live synchronization.
+
 ## Current Save Container
 
 Interface language persists independently of gameplay slots in `GGameUserSettingsIni`, under `TunaSweeper.InterfaceSettings/Language`. Startup restores a valid saved language. If the value is missing or invalid, Steam selects and saves English (`en`); other distribution channels detect the OS language/locale, falling back to English when unsupported. Packaged builds read `TunaSweeper.Distribution/DistributionChannel` from `GGameIni`; editor runs use the selected build target, matching title-menu channel selection. Manual language selection continues to use the existing global setting. This setting remains shared across stores, so a valid language saved by another store also takes precedence over the first-launch default.
@@ -15,7 +26,7 @@ Interface language persists independently of gameplay slots in `GGameUserSetting
 
 ## Account-Global Achievement Container
 
-Achievements use `UTunaSweeperAchievementSaveGame` version `1` instead of `UTunaSweeperSaveGame`. The file is stored as `Saved/SaveGames/<Demo|Main>/Achievements_<DistributionNamespace>.sav`, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
+Achievements use `UTunaSweeperAchievementSaveGame` version `1` instead of `UTunaSweeperSaveGame`. The file is stored as `Achievements_<DistributionNamespace>.sav` in the active save root described above, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
 
 The achievement container persists independently of gameplay slots:
 
@@ -60,6 +71,12 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 
 ## Persisted State
 
+### Melee Item Replacements
+
+- Item `1004` retains its identity and becomes the wooden club.
+- Item `1005` retains its identity and becomes the spiked club. Existing instance UIDs, quantities, equipment/loot references, acquisition history, and shop references remain unchanged. It is not remapped to `6003`.
+- Item `6003` now occupies the melee equipment slot and remains the reusable water-intake tool. Existing stacked quantities are preserved; new weapon stacks use the weapon stack limit. World-progress keys and the reusable-tool ID do not change. No new save fields or save-version change are required.
+
 ### Save Metadata
 
 - `SaveVersion`
@@ -70,15 +87,17 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 - `bDifficultySelected`: whether the slot completed its required start gate. For Main this is difficulty confirmation. For Demo this is the notice confirmation written together with the first slot save; no Demo save is created before confirmation.
 - `LastSavedAtTicks`
 
-Demo and Main use the same logical slot-name format but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/Main/`. Demo exposes and accepts only `TunaSweeperSave_Slot01`; Main exposes slots `TunaSweeperSave_Slot01` through `03`. Each root independently owns last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
+Demo and Main use the same logical slot-name format but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/FullGame/` for editor/local saves, or the per-store cloud roots described above. Demo exposes and accepts only `TunaSweeperSave_Slot01`; Main exposes slots `TunaSweeperSave_Slot01` through `03`. Each root independently owns last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
+
+The full-game directory name is `FullGame`; serialized `BuildFlavor=Main` and quest dataset identifiers remain unchanged. The local path is resolved directly without inspecting, moving, or falling back to a `Main/` directory.
 
 ### Obsolete Save Deletion
 
-Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under the active `Demo` or `Main` root, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings and unreadable files inside the active root are not auto-deleted.
+Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under the active `Demo` or `FullGame` root, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings and unreadable files inside the active root are not auto-deleted.
 
 Every successful obsolete-version deletion appends a local-time timestamp, detected version, and path relative to the active root to that root's `AutoDeletedSaveLog.txt`. The game prepares the audit log before deleting; if the log cannot be prepared, it leaves the versioned save file in place and reports an error through the Unreal log.
 
-Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. The `Demo/` and `Main/` subdirectories are never included in this flat-file cleanup.
+Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. Subdirectories are never included in this flat-file cleanup.
 
 ### Scenario Progress Flags
 
@@ -125,7 +144,9 @@ Marker add/delete actions update `UTunaSweeperGameInstance` memory immediately a
 
 Stored through `UTunaSweeperSaveGame::ItemInstances`.
 
-Confirming the Demo notice creates the single Demo save slot with a starting rifle (`1002`) in equipment weapon slot 1, a laser sight (`2006`) attached to that rifle's `attachment.slot.tactical` slot, and 60 total rifle rounds (`2002`): 30 rounds loaded in the rifle and 30 rounds in the first inventory slot. The rifle stores `2002` as both its loaded and selected ammo item id, and weapon slot 1 is selected for the immediate Bunker entry. The laser sight exists as a nested item instance referenced by the rifle rather than occupying an inventory slot. This loadout is initialized only while creating a new Demo slot; Main saves and already-existing Demo saves are not modified.
+Confirming the Demo notice creates the single Demo save slot using `Content/Data/DemoStartingLoadout.json`. Its default configuration supplies a rifle (`1002`) in equipment weapon slot 1, a laser sight (`2006`) attached to that rifle's `attachment.slot.tactical` slot, and 60 total rifle rounds (`2002`): 30 rounds loaded in the rifle and 30 rounds in the first inventory slot. The rifle stores `2002` as both its loaded and selected ammo item id, and weapon slot 1 is selected for the immediate Bunker entry. The laser sight exists as a nested item instance referenced by the rifle rather than occupying an inventory slot. This loadout is initialized only while creating a new Demo slot; Main saves and already-existing Demo saves are not modified. The combat laboratory also reads this configuration for its temporary equipment.
+
+Starting equipment is validated against item definitions, attachment/ammunition compatibility, slot capacity, and stack limits. Invalid configuration rolls back all newly created instances and slot changes without recording acquisition history. Configuration edits affect future initialization only; existing saves retain their instance IDs, slot layout, attachments, and ammunition. `provides_laser_sight` is a static item-definition property read when checking an equipped attachment, not new per-instance save data. No save-version change is required. See [starting equipment authoring](starting_equipment.md).
 
 Each `FTunaSweeperItemInstance` must preserve:
 
@@ -149,6 +170,8 @@ Weapon attachment slots are keyed by attachment slot tags. Rifle instances may p
 - `UsableQuickSlots`
 
 Slot arrays store item UIDs. Any item UID referenced by these slots, including nested attachment UIDs, must also exist in `ItemInstances`. `FTunaSweeperInventorySlot::bSortLocked` persists the player's inventory sort-lock state; the inventory compact/sort button leaves locked inventory slots in place and only trims unlocked inventory slots around them.
+
+Backpack tiers 1–5 provide 50/60/80/100/120 inventory slots. Tier 5 is item `5011`; existing backpack IDs `5002`–`5005` remain stable after the visual/name replacement. The required maximum and default maximum are 120, including when a legacy Blueprint still specifies a 100-slot maximum. Both equipped-capacity calculation and the load-time occupied-slot preservation limit use this required maximum, so slots 100–119 must not be truncated on load. The existing slot arrays and item-instance payload handle this extension without a save-version change. The equipment regression test serializes and deserializes the item UID and quantity in slot 119 entirely in memory.
 
 `UsableQuickSlots` stores the 3-8 quick-slot layout shown in inventory mode and reflected in the gameplay quick-slot bar. Slots 1, 2, and melee are equipment slots and are not duplicated here. Only usable items can occupy these slots; currently that means item definitions tagged `item.category.consumable` or `item.category.throwable`.
 
@@ -236,6 +259,8 @@ Each entry is a stable facility definition id from `Content/Data/HousingFacility
 
 ### Quest Progress
 
+Item submission objectives (`item_submitted`) use the existing objective id/count and quest state fields. Inventory consumption and all matching objective counts are committed in memory before inventory observers or quest save requests run. Requirements for the same item are aggregated; insufficient batches do not change inventory or progress. A saved `RewardAvailable` submission retries rewards without consuming items again. `RewardCompleted` submissions never consume again. The demo retains `deliver_canned_tuna` as its objective id, so progress recorded by the former interaction event survives the change. No save version or serialized field was added.
+
 Completing `dialogue.demo.toilet_intro` automatically accepts `demo_q1_water_intake_check` through the normal quest acceptance path. The dialogue completion flag is set before acceptance saves, so the same save includes the flag, accepted quest state, and tracked quest. Existing accepted/completed quest states prevent duplicate acceptance and notifications; no new save field or version is required. The acceptance toast is transient and is not replayed on load.
 
 Stored through `UTunaSweeperSaveGame::QuestProgressStates`, `TrackedQuestId`, and `QuestCoinBalance`.
@@ -269,6 +294,9 @@ Ability-stat research is persisted per save slot through `AppliedResearchNodeIds
 - `ResearchLastObservedUtcTicks` prevents a local wall-clock rollback from reducing already-observed progress. Offline progress uses UTC finish times.
 - Starting research, first detecting timer completion, and claiming completion each request an immediate save.
 - New games clear applied and active research. Save version 21 adds these fields while version 20 remains load-compatible and initializes them empty.
+- New games also reset the session UTC/monotonic clock anchors so a future timestamp loaded from a previous slot cannot carry into the new game.
+- Applied and active records whose node IDs are absent from the current definitions are retained across save/load. They do not contribute effects or unlock counts until their definitions are restored. A failed JSON load never deletes progress; a failed reload retains the last valid definitions.
+- The bathroom research station's scan-bar phase is cosmetic runtime state and is not saved. No save schema/version change is needed for the station or these safeguards.
 - Node layout, unlock counts, durations, localization string keys, and stat effects are static editable data in `Content/Data/StatResearchNodes.json`; the corresponding Korean, English, and Japanese text lives in `Content/Data/UITextStrings.csv`. Neither is duplicated in save data.
 
 ## Loaded Ammo Rules
@@ -303,3 +331,12 @@ When adding a field that should survive save/load:
 - Encounter occupancy, boss ownership, ready/active/cleared state, and reset latches are transient; no save fields or migration are added.
 - `TunaSweeperBossTestGameMode` temporarily backs up the player's inventory/equipment/ammunition, acquired-item set, weapon selection, and experience state in memory. The original state is restored when the test game mode ends. Test supplies and repeated deaths never write gameplay saves.
 - Combat-test sessions suppress quest objective/reward progression and achievement event reporting so lab kills and portal use do not become persistent progression.
+
+## Modular Boss Laboratory
+
+- Boss definitions persist independently of gameplay save slots in `Saved/BossLab/<Demo|Main>/Slot01.boss.json` through `Slot12.boss.json`. The library enumerates these fixed filenames; no separate index is required for externally copied files.
+- Version 1 stores catalog version, boss GUID/name, part instance IDs/module IDs/parent IDs/socket/yaw, tactic preset, attack interval, phase threshold, and alternating-weapons setting. Only built-in catalog IDs and bounded values are accepted. Unsupported versions and corrupt files remain on disk and never replace the current draft.
+- Slot saves validate the definition, write and read back a `.candidate`, preserve an existing file as `.previous`, and promote the candidate. A failed validation does not overwrite the slot. Explicit deletion removes the slot and its auxiliary files. A duplicated boss gets a new GUID.
+- Editor drafts, dirty flags, selected slot, preview selection and camera rotation are session state, not automatic disk saves. Switching to solo play preserves the prior editing draft in memory. Exiting the application discards unsaved edits.
+- Part health/destruction, targets, warnings, projectiles, phase and battle results are transient. Each battle uses a definition snapshot and starts with fresh runtime state. The boss lab game mode keeps the existing combat-test save guard active until EndPlay and restores original inventory/experience on exit.
+- No network session data, downloads, matchmaking state or replication is stored. See `Docs/boss_laboratory.md` for the current single-player workflow.

@@ -16,17 +16,30 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperResearch, Log, All);
 
 namespace
 {
-	ETunaSweeperResearchEffectType ParseEffectType(const FString& Value)
+	bool ParseEffectType(const FString& Value, ETunaSweeperResearchEffectType& OutType)
 	{
-		if (Value.Equals(TEXT("max_food"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::MaxFood;
-		if (Value.Equals(TEXT("max_hydration"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::MaxHydration;
-		if (Value.Equals(TEXT("max_stamina"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::MaxStamina;
-		if (Value.Equals(TEXT("carry_strength"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::CarryStrength;
-		if (Value.Equals(TEXT("weapon_burn_ticks"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::WeaponBurnTicks;
-		if (Value.Equals(TEXT("ammo_burn_ticks"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::AmmoBurnTicks;
-		if (Value.Equals(TEXT("weapon_burn_damage"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::WeaponBurnDamage;
-		if (Value.Equals(TEXT("ammo_burn_damage"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::AmmoBurnDamage;
-		return ETunaSweeperResearchEffectType::MaxHealth;
+		if (Value.Equals(TEXT("max_health"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::MaxHealth; return true; }
+		if (Value.Equals(TEXT("max_food"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::MaxFood; return true; }
+		if (Value.Equals(TEXT("max_hydration"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::MaxHydration; return true; }
+		if (Value.Equals(TEXT("max_stamina"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::MaxStamina; return true; }
+		if (Value.Equals(TEXT("carry_strength"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::CarryStrength; return true; }
+		if (Value.Equals(TEXT("weapon_burn_ticks"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::WeaponBurnTicks; return true; }
+		if (Value.Equals(TEXT("ammo_burn_ticks"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::AmmoBurnTicks; return true; }
+		if (Value.Equals(TEXT("weapon_burn_damage"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::WeaponBurnDamage; return true; }
+		if (Value.Equals(TEXT("ammo_burn_damage"), ESearchCase::IgnoreCase)) { OutType = ETunaSweeperResearchEffectType::AmmoBurnDamage; return true; }
+		return false;
+	}
+
+	bool TryGetIntegerField(const FJsonObject& Object, const TCHAR* Field, int32 Minimum, int32 Maximum, int32& OutValue)
+	{
+		double Number = 0.0;
+		if (!Object.TryGetNumberField(Field, Number) || !FMath::IsFinite(Number) ||
+			Number < Minimum || Number > Maximum || FMath::FloorToDouble(Number) != Number)
+		{
+			return false;
+		}
+		OutValue = static_cast<int32>(Number);
+		return true;
 	}
 }
 
@@ -56,93 +69,158 @@ void UTunaSweeperResearchSubsystem::Deinitialize()
 bool UTunaSweeperResearchSubsystem::LoadResearchData(bool bForceReload)
 {
 	if (bResearchDataLoaded && !bForceReload) return true;
-	Definitions.Reset();
-	FString JsonText;
 	const FString Path = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/StatResearchNodes.json"));
+	return LoadResearchDataFromFile(Path);
+}
+
+bool UTunaSweeperResearchSubsystem::LoadResearchDataFromFile(const FString& Path)
+{
+	FString JsonText;
 	if (!FFileHelper::LoadFileToString(JsonText, *Path))
 	{
 		UE_LOG(LogTunaSweeperResearch, Error, TEXT("Could not load research data: %s"), *Path);
-		bResearchDataLoaded = false;
 		return false;
 	}
 	TArray<TSharedPtr<FJsonValue>> Values;
 	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonText);
-	if (!FJsonSerializer::Deserialize(Reader, Values))
+	if (!FJsonSerializer::Deserialize(Reader, Values) || Values.IsEmpty())
 	{
-		UE_LOG(LogTunaSweeperResearch, Error, TEXT("Could not parse research data JSON: %s"), *Path);
-		bResearchDataLoaded = false;
+		UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research data must be a nonempty JSON array: %s"), *Path);
 		return false;
 	}
+	TMap<FName, FTunaSweeperResearchNodeDefinition> ParsedDefinitions;
+	TSet<FIntPoint> OccupiedPositions;
 	TMap<int32, int32> NodesPerRow;
-	for (const TSharedPtr<FJsonValue>& Value : Values)
+	for (int32 Index = 0; Index < Values.Num(); ++Index)
 	{
+		const TSharedPtr<FJsonValue>& Value = Values[Index];
 		const TSharedPtr<FJsonObject> Object = Value.IsValid() ? Value->AsObject() : nullptr;
-		if (!Object.IsValid()) continue;
+		if (!Object.IsValid())
+		{
+			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research entry %d is not an object: %s"), Index, *Path);
+			return false;
+		}
 		FTunaSweeperResearchNodeDefinition Definition;
-		Definition.NodeId = FName(*Object->GetStringField(TEXT("node_id")));
-		double Number = 0.0;
-		if (Object->TryGetNumberField(TEXT("row"), Number)) Definition.Row = FMath::RoundToInt(Number);
-		if (Object->TryGetNumberField(TEXT("column"), Number)) Definition.Column = FMath::RoundToInt(Number);
-		if (Object->TryGetNumberField(TEXT("required_applied_node_count"), Number)) Definition.RequiredAppliedNodeCount = FMath::Max(0, FMath::RoundToInt(Number));
-		if (Object->TryGetNumberField(TEXT("duration_seconds"), Number)) Definition.DurationSeconds = FMath::Clamp(FMath::RoundToInt(Number), 1, 3600);
+		FString NodeIdString;
+		if (!Object->TryGetStringField(TEXT("node_id"), NodeIdString)) return false;
+		Definition.NodeId = FName(*NodeIdString.TrimStartAndEnd());
+		if (Definition.NodeId.IsNone() || ParsedDefinitions.Contains(Definition.NodeId) ||
+			!TryGetIntegerField(*Object, TEXT("row"), 0, MAX_int32, Definition.Row) ||
+			!TryGetIntegerField(*Object, TEXT("column"), 0, 2, Definition.Column) ||
+			!TryGetIntegerField(*Object, TEXT("required_applied_node_count"), 0, Values.Num() - 1, Definition.RequiredAppliedNodeCount) ||
+			!TryGetIntegerField(*Object, TEXT("duration_seconds"), 1, 3600, Definition.DurationSeconds) ||
+			OccupiedPositions.Contains(FIntPoint(Definition.Row, Definition.Column)))
+		{
+			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research entry %d has an invalid ID, position, prerequisite count, or duration: %s"), Index, *Path);
+			return false;
+		}
 		FString DisplayNameStringKey;
 		FString DescriptionStringKey;
-		Object->TryGetStringField(TEXT("display_name_string_key"), DisplayNameStringKey);
-		Object->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey);
+		if (!Object->TryGetStringField(TEXT("display_name_string_key"), DisplayNameStringKey) ||
+			!Object->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey)) return false;
 		Definition.DisplayNameStringKey = FName(*DisplayNameStringKey.TrimStartAndEnd());
 		Definition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
-		FString IconPath;
-		if (Object->TryGetStringField(TEXT("icon"), IconPath)) Definition.Icon = FSoftObjectPath(IconPath);
-		const TArray<TSharedPtr<FJsonValue>>* ParentValues = nullptr;
-		if (Object->TryGetArrayField(TEXT("parent_node_ids"), ParentValues))
-		{
-			for (const TSharedPtr<FJsonValue>& ParentValue : *ParentValues) Definition.ParentNodeIds.Add(FName(*ParentValue->AsString()));
-		}
-		const TArray<TSharedPtr<FJsonValue>>* EffectValues = nullptr;
-		if (Object->TryGetArrayField(TEXT("effects"), EffectValues))
-		{
-			for (const TSharedPtr<FJsonValue>& EffectValue : *EffectValues)
-			{
-				const TSharedPtr<FJsonObject> EffectObject = EffectValue.IsValid() ? EffectValue->AsObject() : nullptr;
-				if (!EffectObject.IsValid()) continue;
-				FTunaSweeperResearchEffect Effect;
-				Effect.Type = ParseEffectType(EffectObject->GetStringField(TEXT("type")));
-				double EffectValueNumber = 0.0;
-				EffectObject->TryGetNumberField(TEXT("value"), EffectValueNumber);
-				Effect.Value = static_cast<float>(EffectValueNumber);
-				FString TargetTypeTag;
-				if (EffectObject->TryGetStringField(TEXT("target_type_tag"), TargetTypeTag))
-				{
-					Effect.TargetTypeTag = FName(*TargetTypeTag.TrimStartAndEnd());
-				}
-				Definition.Effects.Add(Effect);
-			}
-		}
-		if (Definition.NodeId.IsNone() || Definitions.Contains(Definition.NodeId)) continue;
 		if (Definition.DisplayNameStringKey.IsNone() || Definition.DescriptionStringKey.IsNone())
 		{
-			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research node %s is missing a display-name or description string key."), *Definition.NodeId.ToString());
-			Definitions.Reset();
-			bResearchDataLoaded = false;
+			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research node %s has an empty display-name or description string key."), *Definition.NodeId.ToString());
 			return false;
+		}
+		FString IconPath;
+		if (Object->TryGetStringField(TEXT("icon"), IconPath)) Definition.Icon = FSoftObjectPath(IconPath.TrimStartAndEnd());
+		const TArray<TSharedPtr<FJsonValue>>* ParentValues = nullptr;
+		if (Object->HasField(TEXT("parent_node_ids")) && !Object->TryGetArrayField(TEXT("parent_node_ids"), ParentValues)) return false;
+		if (ParentValues)
+		{
+			for (const TSharedPtr<FJsonValue>& ParentValue : *ParentValues)
+			{
+				FString ParentId;
+				if (!ParentValue.IsValid() || !ParentValue->TryGetString(ParentId) || ParentId.TrimStartAndEnd().IsEmpty()) return false;
+				Definition.ParentNodeIds.Add(FName(*ParentId));
+			}
+		}
+		const TArray<TSharedPtr<FJsonValue>>* EffectValues = nullptr;
+		if (!Object->TryGetArrayField(TEXT("effects"), EffectValues) || !EffectValues || EffectValues->IsEmpty()) return false;
+		for (const TSharedPtr<FJsonValue>& EffectValue : *EffectValues)
+		{
+			const TSharedPtr<FJsonObject> EffectObject = EffectValue.IsValid() ? EffectValue->AsObject() : nullptr;
+			FString EffectTypeName;
+			double EffectValueNumber = 0.0;
+			FTunaSweeperResearchEffect Effect;
+			if (!EffectObject.IsValid() || !EffectObject->TryGetStringField(TEXT("type"), EffectTypeName) ||
+				!ParseEffectType(EffectTypeName, Effect.Type) ||
+				!EffectObject->TryGetNumberField(TEXT("value"), EffectValueNumber) ||
+				!FMath::IsFinite(EffectValueNumber) || EffectValueNumber < 0.0 ||
+				!FMath::IsFinite(static_cast<float>(EffectValueNumber)))
+			{
+				UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research node %s has an invalid effect: %s"), *Definition.NodeId.ToString(), *Path);
+				return false;
+			}
+			Effect.Value = static_cast<float>(EffectValueNumber);
+			FString TargetTypeTag;
+			if (EffectObject->TryGetStringField(TEXT("target_type_tag"), TargetTypeTag))
+			{
+				Effect.TargetTypeTag = FName(*TargetTypeTag.TrimStartAndEnd());
+			}
+			Definition.Effects.Add(Effect);
 		}
 		int32& RowCount = NodesPerRow.FindOrAdd(Definition.Row);
 		if (++RowCount > 3)
 		{
 			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research row %d has more than three nodes."), Definition.Row);
-			Definitions.Reset();
-			bResearchDataLoaded = false;
 			return false;
 		}
-		Definitions.Add(Definition.NodeId, MoveTemp(Definition));
+		OccupiedPositions.Add(FIntPoint(Definition.Row, Definition.Column));
+		ParsedDefinitions.Add(Definition.NodeId, MoveTemp(Definition));
 	}
-	bResearchDataLoaded = Definitions.Num() > 0;
-	return bResearchDataLoaded;
+	TArray<const FTunaSweeperResearchNodeDefinition*> OrderedNodes;
+	for (const TPair<FName, FTunaSweeperResearchNodeDefinition>& Pair : ParsedDefinitions)
+	{
+		OrderedNodes.Add(&Pair.Value);
+		for (const FName& ParentId : Pair.Value.ParentNodeIds)
+		{
+			if (ParentId == Pair.Key || !ParsedDefinitions.Contains(ParentId))
+			{
+				UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research node %s references an invalid parent node."), *Pair.Key.ToString());
+				return false;
+			}
+		}
+	}
+	OrderedNodes.Sort([](const FTunaSweeperResearchNodeDefinition& A, const FTunaSweeperResearchNodeDefinition& B)
+	{
+		return A.RequiredAppliedNodeCount < B.RequiredAppliedNodeCount;
+	});
+	for (int32 AvailableClaims = 0; AvailableClaims < OrderedNodes.Num(); ++AvailableClaims)
+	{
+		if (OrderedNodes[AvailableClaims]->RequiredAppliedNodeCount > AvailableClaims)
+		{
+			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research data contains unreachable required node counts: %s"), *Path);
+			return false;
+		}
+	}
+	Definitions = MoveTemp(ParsedDefinitions);
+	bResearchDataLoaded = true;
+	return true;
 }
 
 bool UTunaSweeperResearchSubsystem::EnsureResearchDataLoaded() const
 {
 	return bResearchDataLoaded || const_cast<UTunaSweeperResearchSubsystem*>(this)->LoadResearchData(false);
+}
+
+int32 UTunaSweeperResearchSubsystem::GetKnownAppliedNodeCount() const
+{
+	int32 Count = 0;
+	for (const FName& NodeId : AppliedNodeIds)
+	{
+		if (Definitions.Contains(NodeId)) ++Count;
+	}
+	return Count;
+}
+
+int32 UTunaSweeperResearchSubsystem::GetAppliedNodeCount() const
+{
+	if (!EnsureResearchDataLoaded()) return 0;
+	return GetKnownAppliedNodeCount();
 }
 
 ETunaSweeperResearchNodeState UTunaSweeperResearchSubsystem::EvaluateNodeState(const FTunaSweeperResearchNodeDefinition& Definition, const FTunaSweeperActiveResearchSaveData** OutActive) const
@@ -157,7 +235,7 @@ ETunaSweeperResearchNodeState UTunaSweeperResearchSubsystem::EvaluateNodeState(c
 				? ETunaSweeperResearchNodeState::ReadyToClaim : ETunaSweeperResearchNodeState::Researching;
 		}
 	}
-	return AppliedNodeIds.Num() >= Definition.RequiredAppliedNodeCount
+	return GetKnownAppliedNodeCount() >= Definition.RequiredAppliedNodeCount
 		? ETunaSweeperResearchNodeState::Available : ETunaSweeperResearchNodeState::Locked;
 }
 
@@ -221,6 +299,7 @@ bool UTunaSweeperResearchSubsystem::TryStartResearch(FName NodeId)
 bool UTunaSweeperResearchSubsystem::TryClaimResearch(FName NodeId)
 {
 	EnsureSaveStateLoaded();
+	if (!EnsureResearchDataLoaded() || !Definitions.Contains(NodeId)) return false;
 	RefreshTemporalState(true);
 	const int32 Index = ActiveResearch.IndexOfByPredicate([NodeId](const FTunaSweeperActiveResearchSaveData& Active) { return Active.NodeId == NodeId && Active.bTimerCompleted; });
 	if (Index == INDEX_NONE) return false;
@@ -308,11 +387,11 @@ void UTunaSweeperResearchSubsystem::LoadResearchProgressFromSave(
 	LoadResearchData(false);
 	AppliedNodeIds.Reset();
 	ActiveResearch.Reset();
-	for (const FName& NodeId : SavedAppliedNodeIds) if (Definitions.Contains(NodeId)) AppliedNodeIds.Add(NodeId);
+	for (const FName& NodeId : SavedAppliedNodeIds) if (!NodeId.IsNone()) AppliedNodeIds.Add(NodeId);
 	TSet<FName> Seen;
 	for (const FTunaSweeperActiveResearchSaveData& Saved : SavedActiveResearch)
 	{
-		if (!Definitions.Contains(Saved.NodeId) || AppliedNodeIds.Contains(Saved.NodeId) || Seen.Contains(Saved.NodeId)) continue;
+		if (Saved.NodeId.IsNone() || AppliedNodeIds.Contains(Saved.NodeId) || Seen.Contains(Saved.NodeId)) continue;
 		FTunaSweeperActiveResearchSaveData Active = Saved;
 		Active.StartUtcTicks = FMath::Max<int64>(0, Active.StartUtcTicks);
 		Active.FinishUtcTicks = FMath::Max(Active.StartUtcTicks, Active.FinishUtcTicks);
@@ -331,7 +410,9 @@ void UTunaSweeperResearchSubsystem::ResetResearchProgressForNewGame(
 {
 	AppliedNodeIds.Reset();
 	ActiveResearch.Reset();
-	LastObservedUtcTicks = FDateTime::UtcNow().GetTicks();
+	SessionStartPlatformSeconds = FPlatformTime::Seconds();
+	SessionStartUtcTicks = FDateTime::UtcNow().GetTicks();
+	LastObservedUtcTicks = SessionStartUtcTicks;
 	bProgressLoaded = true;
 	NotifyResearchProgressChanged(NotificationMode);
 }

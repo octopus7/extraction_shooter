@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "blender_version": "5.2.0 LTS",
+  "export_file": "Models/SKM_LunaMk2_BunnyPajamas.fbx",
+  "errors": [],
+  "warnings": [],
+  "unreal_import_tested": false,
+  "cloth_physics_implemented": false,
+  "equipment_gameplay_implemented": false,
+  "source_sha256": "47f502438ae1d36dedc87aac575350ddf8a7788577e219b713088d80dae4e8b7",
+  "fbx_sha256": "443a325636e5d00bba895a1c480df59fb934539c2cc8e111edf19da37fde1b01",
+  "comparison_tolerance_m": 2e-05,
+  "mesh_count": 1,
+  "armature_count": 1,
+  "bone_count": 130,
+  "bone_head_error_m": 5.966250802687546e-07,
+  "vertices": 50282,
+  "triangles": 100460,
+  "source_evaluated_vertices_before_export_weld": 50282,
+  "source_evaluated_triangles": 100460,
+  "bound_error_m": 7.594378392816736e-08,
+  "source_to_fbx_vertex_error_m": 1.5269147013441398e-07,
+  "fbx_to_source_vertex_error_m": 1.5269147013441398e-07,
+  "minimum_triangle_area_m2": 8.999759892653188e-08,
+  "normalized_weights": true,
+  "maximum_weight_sum_error": 4.33719833381474e-08,
+  "maximum_deform_influences": 4,
+  "material_slots": [
+    "M_Bunny_Blush",
+    "M_Bunny_Rib",
+    "M_Bunny_Ivory",
+    "M_Bunny_Inner"
+  ],
+  "triangles_per_material": {
+    "M_Bunny_Blush": 64020,
+    "M_Bunny_Rib": 5632,
+    "M_Bunny_Ivory": 3936,
+    "M_Bunny_Inner": 26872
+  },
+  "manifest_file": "TunaSweeper/Saved/CodexBunnyPajamas/export_manifest.json",
+  "source_unchanged": true,
+  "fbx_unchanged": true
+}

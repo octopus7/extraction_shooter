@@ -8,6 +8,7 @@
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
 	BindScreenWidgets();
+	EnsureLaboratoryMenu();
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyDemoNoticeVisualStyle();
@@ -25,6 +26,7 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	BindScreenWidgets();
+	EnsureLaboratoryMenu();
 	ResetTitleViewportLayoutState();
 	ApplyDemoNoticeVisualStyle();
 	HideLegacyDeleteHoldGaugeWidgets();
@@ -35,6 +37,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	BindScreenWidgets();
+	EnsureLaboratoryMenu();
 	ResetTitleViewportLayoutState();
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
@@ -439,6 +442,15 @@ FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
 	{
 		CloseDifficultyAdjustment();
 		return FReply::Handled();
+	}
+	if (IsLaboratoryVisible())
+	{
+		if (!InKeyEvent.IsRepeat() && InKeyEvent.GetKey() == EKeys::Escape)
+		{
+			HandleLaboratoryBackClicked();
+			return FReply::Handled();
+		}
+		return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
 	}
 
 	if (!InKeyEvent.IsRepeat() && !bDifficultyAdjustmentMode && InKeyEvent.GetKey() == EKeys::R)

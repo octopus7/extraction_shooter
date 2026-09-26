@@ -70,6 +70,10 @@ void ATunaSweeperWorldProgressActor::OnConstruction(const FTransform& Transform)
 void ATunaSweeperWorldProgressActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (RequiredItemId <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("World progress requires an explicit positive item ID: %s"), *GetPathName());
+	}
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance())
 	{
@@ -124,7 +128,11 @@ void ATunaSweeperWorldProgressActor::ConfigureWorldProgressDefaults(
 	InteractionDisplayName = InInteractionDisplayName.IsEmpty()
 		? FText::FromString(TEXT("\uC218\uB9AC\uD558\uAE30"))
 		: InInteractionDisplayName;
-	RequiredItemId = InRequiredItemId == INDEX_NONE ? 6002 : InRequiredItemId;
+	RequiredItemId = InRequiredItemId;
+	if (RequiredItemId <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("World progress requires an explicit positive item ID: %s"), *GetPathName());
+	}
 	RequiredQuantity = FMath::Max(1, InRequiredQuantity);
 	InitialProgressQuantity = FMath::Clamp(InInitialProgressQuantity, 0, RequiredQuantity);
 	RequiredItemDisplayNameStringKey = InRequiredItemDisplayNameStringKey;
@@ -186,12 +194,12 @@ int32 ATunaSweeperWorldProgressActor::GetOwnedRequiredItemCount() const
 
 bool ATunaSweeperWorldProgressActor::IsRepairReady() const
 {
-	return !bCompleted && IsRepairUnlocked() && GetProgressQuantity() >= FMath::Max(1, RequiredQuantity);
+	return RequiredItemId > 0 && !bCompleted && IsRepairUnlocked() && GetProgressQuantity() >= FMath::Max(1, RequiredQuantity);
 }
 
 int32 ATunaSweeperWorldProgressActor::UseAvailableRequiredItems(bool bSaveImmediately)
 {
-	if (bCompleted || !IsRepairUnlocked())
+	if (RequiredItemId <= 0 || bCompleted || !IsRepairUnlocked())
 	{
 		return 0;
 	}
@@ -242,7 +250,7 @@ bool ATunaSweeperWorldProgressActor::Repair(bool bSaveImmediately)
 
 bool ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(bool bSaveImmediately)
 {
-	if (bCompleted || !IsRepairUnlocked())
+	if (RequiredItemId <= 0 || bCompleted || !IsRepairUnlocked())
 	{
 		return false;
 	}
@@ -315,7 +323,7 @@ bool ATunaSweeperWorldProgressActor::IsRepairUnlocked() const
 
 void ATunaSweeperWorldProgressActor::RefreshPresentation()
 {
-	const bool bRepairAvailable = !bCompleted && IsRepairUnlocked();
+	const bool bRepairAvailable = RequiredItemId > 0 && !bCompleted && IsRepairUnlocked();
 	if (DamageLeakComponent)
 	{
 		const bool bShouldLeak = HasActorBegunPlay() && ProgressInfoId == TEXT("bunker_pipe") && bRepairAvailable && DamageLeakEffect;
