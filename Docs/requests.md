@@ -9841,3 +9841,12 @@
 - 이미지: 별도 대화 01a0dcbd-a2d7-71b1-a205-def06987875e를 gpt-6-astra/medium으로 생성. 완성된 T_UIIcon_WoodenClub, T_UIIcon_SpikedClub, T_UIIcon_MeleeCrowbar를 /Game/UI/Icons에 임포트하고 연결.
 - 검증: UE 5.7 Development Editor 빌드 성공, MeleeReplacement 자동화 테스트 2/2 성공, 세 텍스처 재로드 및 256x256/UI 그룹/NoMipmaps/sRGB 검사 성공. 프로젝트 에디터 실행.
 - 제한: 임포트 직후 종료 플래그에서 에디터 오류가 발생했으나 저장된 텍스처의 별도 commandlet 검증은 오류 없이 통과. 3D 외형은 기존 방망이·쇠지렛대 메시 재사용으로 도깨비 방망이 돌기 모델은 미제작. 퀘스트 대사의 기존 크로우바 표기는 필수 quest:status가 Windows 보호 토큰 읽기에 실패하여 보존했으며 게시하지 않음.
+
+## 2026-09-26 17:24:54 (소요시간: 00:17:56)
+
+- 요청: 레이저 사이트의 ID 하드코딩 제거와 시작 지급 장비 데이터화를 승인하고 구현.
+- 완료: ItemTable.json의 provides_laser_sight 속성으로 레이저 기능을 판정하고 소총 전용 조건을 제거해 부착 슬롯·무기 호환 태그를 사용. DemoStartingLoadout.json으로 장착 슬롯, 부착물, 장전 탄약, 인벤토리 물품, 최초 선택 무기를 설정하도록 변경. 기본 소총·레이저·장전 30발·예비 30발 유지. 잘못된 ID/호환/슬롯/수량은 전체 지급을 취소하며 생성 인스턴스와 슬롯을 되돌림.
+- 연계: 전투 실험실의 추가 탄약도 장착 무기의 탄약 ID를 따르도록 수정. CSV 내보내기에 레이저 속성 반영, 시작 장비 저작 안내 및 저장 규칙/모딩 조사 문서 갱신. 기존 세이브 형식과 Main 초기화 정책 유지.
+- 검증: 수정 전 다른 ID 레이저와 SMG 레이저 실패를 재현. 수정 후 다른 ID/비레이저/비호환/근접 선택, 커스텀 시작 장비와 가방 용량, 잘못된 JSON/중복 슬롯/잘못된 ID/탄약/수량의 롤백, 실험실 탄약 종류를 검증. UE 5.7 TunaSweeperEditor Win64 Development 최종 빌드 성공. CSV 도구 빌드·내보내기 성공, 기존 CSV 값 유지와 신규 속성 확인. 별도 코드 검토의 실험실 탄약 지적을 반영하고 재검토 완료.
+- 전체 검사: 최종 렌더링 활성화 실행은 146건 중 141건 통과, 5건 실패로 종료 코드 1. 이번 회귀 검사와 BossEncounter.TransientLoadoutRestoresPlayerState, DemoEnding.AssetsAndInput은 통과. 실패는 TunaSweeper.Gaze.TestRobotRigAndPlacement(배치 로봇 0개), TunaSweeper.Interaction.CrowbarWallRack.Defaults(메시 비어 있음 기대 불일치), TunaSweeper.UI.Tutorial.AuthoredAsset(라운지 위치 불일치), TunaSweeper.Vehicle.DamageAndDestruction(연기 컴포넌트 2개 기대/실제 3개), TunaSweeper.Vehicle.ProjectileContact(탄환 피해·주행 안정성 기대 불일치). 해당 실패 대상의 코드/에셋은 이번 작업에서 수정하지 않음.
+- 검사 로그: TunaSweeper/Saved/Logs/EquipmentDataRed.log, EquipmentDataGreen.log, EquipmentDataFinalSuite.log. 첫 NullRHI 전체 실행은 포즈 렌더 테스트에서 충돌해 렌더링 활성화로 재검증했으며, 추가 오류 로그로 발생한 엔딩 테스트 실패는 데이터 시스템 미초기화와 JSON 오류를 구분하도록 수정하여 해소.

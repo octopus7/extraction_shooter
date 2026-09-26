@@ -266,6 +266,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
+	friend class FTunaSweeperEquipmentDataTest;
 
 public:
 	UTunaSweeperGameInstance();
@@ -851,6 +852,8 @@ private:
 	bool ClearInventoryAndSaveInternal(bool bNotifyChanges = true);
 	void GenerateDefaultInventoryState();
 	bool InitializeDemoStartingLoadout();
+	bool ApplyStartingLoadoutJson(const FString& JsonContent);
+	void GrantCombatTestReserveAmmo();
 	void ResetPlayerSlotArrays();
 	void RefreshLegacyPlayerInventoryItems();
 	int32 ResolveItemExperienceValue(int32 ItemId);

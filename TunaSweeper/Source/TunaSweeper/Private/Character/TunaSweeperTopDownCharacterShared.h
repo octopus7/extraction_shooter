@@ -54,7 +54,6 @@ namespace TunaSweeperEquippedWeaponVisual
 	inline const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
 	inline const FName TacticalAttachmentSlotTag(TEXT("attachment.slot.tactical"));
 	inline const FSoftObjectPath AssaultRifleClassPath(TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle_C"));
-	constexpr int32 LaserSightItemId = 2006;
 	constexpr int32 WoodenClubItemId = 1004;
 	constexpr int32 SpikedClubItemId = 1005;
 	constexpr int32 CrowbarItemId = 6003;

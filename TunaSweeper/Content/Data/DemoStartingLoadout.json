@@ -1,0 +1,14 @@
+{
+  "selected_weapon_slot": 1,
+  "equipment": [
+    {
+      "slot_index": 0,
+      "item_id": 1002,
+      "attachments": [2006],
+      "loaded_ammo": { "item_id": 2002, "quantity": 30 }
+    }
+  ],
+  "inventory": [
+    { "slot_index": 0, "item_id": 2002, "quantity": 30 }
+  ]
+}

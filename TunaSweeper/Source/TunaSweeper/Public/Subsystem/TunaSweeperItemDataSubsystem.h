@@ -92,6 +92,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName AttachmentSlotTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	bool bProvidesLaserSight = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName AmmoTypeTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
@@ -419,6 +422,7 @@ UCLASS()
 class TUNASWEEPER_API UTunaSweeperItemDataSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperEquipmentDataTest;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")

@@ -513,6 +513,7 @@ private:
 	friend class UTunaSweeperCombatLabAutopilotComponent;
 	#if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperDemoStaminaTuningTest;
+	friend class FTunaSweeperEquipmentDataTest;
 	#endif
 	bool bExternalAimControl = false;
 	friend class UTunaSweeperVehicleMountComponent;

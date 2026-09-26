@@ -60,8 +60,24 @@ void UTunaSweeperGameInstance::ResetCombatTestLoadout()
 	{
 		UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Boss lab could not initialize rifle and ammunition."));
 	}
-	AddItemToFirstAvailableInventorySlot(2002, 300);
+	GrantCombatTestReserveAmmo();
 	BroadcastInventoryStateChanged();
+}
+
+void UTunaSweeperGameInstance::GrantCombatTestReserveAmmo()
+{
+	TSet<int32> SuppliedAmmoIds;
+	for (int32 SlotNumber = 1; SlotNumber <= TunaSweeperInventory::WeaponEquipmentSlotCount; ++SlotNumber)
+	{
+		FTunaSweeperItemInstance Weapon;
+		FTunaSweeperItemDefinition Definition;
+		if (TryGetEquipmentWeaponSlotItem(SlotNumber, Weapon, Definition) &&
+			Weapon.LoadedAmmoItemId != INDEX_NONE && !SuppliedAmmoIds.Contains(Weapon.LoadedAmmoItemId))
+		{
+			SuppliedAmmoIds.Add(Weapon.LoadedAmmoItemId);
+			AddItemToFirstAvailableInventorySlot(Weapon.LoadedAmmoItemId, 300);
+		}
+	}
 }
 
 void UTunaSweeperGameInstance::EndCombatTestSession()

@@ -116,8 +116,7 @@ bool ATunaSweeperTopDownCharacter::IsSelectedWeaponLaserSightEquipped() const
 
 	FTunaSweeperItemInstance WeaponInstance;
 	FTunaSweeperItemDefinition WeaponDefinition;
-	if (!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) ||
-		WeaponDefinition.WeaponTypeTag != TunaSweeperEquippedWeaponVisual::RifleWeaponTypeTag)
+	if (!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition))
 	{
 		return false;
 	}
@@ -135,8 +134,11 @@ bool ATunaSweeperTopDownCharacter::IsSelectedWeaponLaserSightEquipped() const
 	return ItemDataSubsystem &&
 		TunaGameInstance->TryGetItemInstance(*AttachmentUid, AttachmentInstance) &&
 		ItemDataSubsystem->TryGetItemDefinition(AttachmentInstance.ItemId, AttachmentDefinition) &&
-		AttachmentDefinition.Id == TunaSweeperEquippedWeaponVisual::LaserSightItemId &&
-		AttachmentDefinition.AttachmentSlotTag == TunaSweeperEquippedWeaponVisual::TacticalAttachmentSlotTag;
+		AttachmentDefinition.bProvidesLaserSight &&
+		AttachmentDefinition.AttachmentSlotTag == TunaSweeperEquippedWeaponVisual::TacticalAttachmentSlotTag &&
+		WeaponDefinition.AttachmentSlotTags.Contains(AttachmentDefinition.AttachmentSlotTag) &&
+		(AttachmentDefinition.CompatibleWeaponTypeTags.IsEmpty() ||
+			AttachmentDefinition.CompatibleWeaponTypeTags.Contains(WeaponDefinition.WeaponTypeTag));
 }
 
 void ATunaSweeperTopDownCharacter::ClearEquippedWeaponActor()
@@ -481,4 +483,3 @@ void ATunaSweeperTopDownCharacter::AddWeaponSpreadRecoilShot(FName WeaponTypeTag
 	EquippedWeapon->ConfigureRuntimeSpreadRecoil(WeaponTypeTag, RecoilDefinition);
 	EquippedWeapon->AddRuntimeSpreadRecoilShot();
 }
-

@@ -742,6 +742,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 
 		FTunaSweeperItemDefinition ItemDefinition;
 		ItemDefinition.Id = static_cast<int32>(NumericId);
+		(*JsonObject)->TryGetBoolField(TEXT("provides_laser_sight"), ItemDefinition.bProvidesLaserSight);
 		ItemDefinition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
 		ItemDefinition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		ItemDefinition.ShopSellPrice = FMath::Max(0, static_cast<int32>(NumericShopSellPrice));

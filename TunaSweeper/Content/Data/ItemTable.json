@@ -319,6 +319,7 @@
   {
     "id": 2006,
     "name_string_key": "item.laser_sight",
+    "provides_laser_sight": true,
     "description_string_key": "item.laser_sight.desc",
     "shop_sell_price": 90,
     "experience_value": 30,
