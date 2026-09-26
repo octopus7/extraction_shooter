@@ -55,9 +55,13 @@ namespace TunaSweeperEquippedWeaponVisual
 	inline const FName TacticalAttachmentSlotTag(TEXT("attachment.slot.tactical"));
 	inline const FSoftObjectPath AssaultRifleClassPath(TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle_C"));
 	constexpr int32 LaserSightItemId = 2006;
-	constexpr int32 BaseballBatItemId = 1005;
+	constexpr int32 WoodenClubItemId = 1004;
+	constexpr int32 SpikedClubItemId = 1005;
+	constexpr int32 CrowbarItemId = 6003;
 	inline const FSoftObjectPath BaseballBatMeshPath(TEXT("/Game/Weapons/SM_BaseballBat.SM_BaseballBat"));
 	inline const FSoftObjectPath BaseballBatMaterialPath(TEXT("/Game/Weapons/M_BaseballBat_Wood.M_BaseballBat_Wood"));
+	inline const FSoftObjectPath CrowbarMeshPath(TEXT("/Game/Environment/Bunker/Agit/Crowbar/SM_Crowbar.SM_Crowbar"));
+	inline const FSoftObjectPath CrowbarMaterialPath(TEXT("/Game/Environment/Bunker/Agit/Crowbar/M_Crowbar.M_Crowbar"));
 }
 
 namespace TunaSweeperStaminaGauge

@@ -214,7 +214,7 @@ ui.title.demo_notice_message,이 데모의 저장 데이터는 본편과 연동�
 ui.toast.load_failed,저장 데이터를 불러오지 못했습니다.,Failed to load save data.,セーブデータを読み込めませんでした。
 ui.toast.save_failed,저장 데이터를 만들지 못했습니다.,Failed to create save data.,セーブデータを作成できませんでした。
 ui.interaction.clear_debris,이물질 제거,Clear Debris,異物を除去
-ui.interaction.take_crowbar,크로우바 획득,Take Crowbar,バールを取る
+ui.interaction.take_crowbar,쇠지렛대 획득,Take Crowbar,バールを取る
 ui.interaction.take_tuna_can,참치캔 획득,Take Tuna Can,ツナ缶を入手
 ui.demo_ending.farewell_title,본편에서 만나요,See you in the full game,本編でまた会いましょう
 ui.demo_ending.return_to_title,아무 키나 누르면 타이틀로 돌아갑니다,Press any key to return to the title,任意のキーを押すとタイトルに戻ります

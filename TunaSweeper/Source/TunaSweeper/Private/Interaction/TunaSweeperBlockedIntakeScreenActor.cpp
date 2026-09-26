@@ -147,7 +147,9 @@ bool ATunaSweeperBlockedIntakeScreenActor::CanClearScreen() const
 	UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
 	return TunaGameInstance &&
 		RequiredItemId != INDEX_NONE &&
-		TunaGameInstance->CountInventoryItemById(RequiredItemId) >= FMath::Max(1, RequiredItemQuantity);
+		(bConsumeRequiredItem
+			? TunaGameInstance->CountInventoryItemById(RequiredItemId)
+			: TunaGameInstance->CountCarriedItemById(RequiredItemId)) >= FMath::Max(1, RequiredItemQuantity);
 }
 
 bool ATunaSweeperBlockedIntakeScreenActor::ClearScreen(bool bSaveImmediately)

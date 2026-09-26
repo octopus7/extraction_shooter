@@ -265,6 +265,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaDemoSaveRetirementTest;
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
+	friend class FTunaSweeperCarriedToolTest;
 
 public:
 	UTunaSweeperGameInstance();
@@ -632,6 +633,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 CountInventoryItemById(int32 ItemId);
+
+	// Includes equipped items for reusable tool requirements; excludes storage.
+	int32 CountCarriedItemById(int32 ItemId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount);

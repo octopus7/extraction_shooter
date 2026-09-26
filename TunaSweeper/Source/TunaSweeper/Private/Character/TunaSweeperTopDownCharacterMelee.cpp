@@ -124,11 +124,29 @@ void ATunaSweeperTopDownCharacter::ApplyEquippedMeleeWeaponVisual()
 
 	FTunaSweeperItemInstance MeleeInstance;
 	FTunaSweeperItemDefinition MeleeDefinition;
-	if (!TunaGameInstance->TryGetEquipmentMeleeSlotItem(MeleeInstance, MeleeDefinition) ||
-		MeleeDefinition.Id != TunaSweeperEquippedWeaponVisual::BaseballBatItemId)
+	if (!TunaGameInstance->TryGetEquipmentMeleeSlotItem(MeleeInstance, MeleeDefinition))
 	{
 		return;
 	}
+
+	if (MeleeDefinition.Id == TunaSweeperEquippedWeaponVisual::CrowbarItemId)
+	{
+		UStaticMesh* CrowbarMesh = Cast<UStaticMesh>(TunaSweeperEquippedWeaponVisual::CrowbarMeshPath.TryLoad());
+		UMaterialInterface* Material = Cast<UMaterialInterface>(TunaSweeperEquippedWeaponVisual::CrowbarMaterialPath.TryLoad());
+		if (!CrowbarMesh) return;
+		// Reuse the existing tool mesh, orienting its longest axis along the weapon.
+		const FBox Bounds = CrowbarMesh->GetBoundingBox();
+		const FVector Size = Bounds.GetSize();
+		FRotator Rotation = FRotator::ZeroRotator;
+		if (Size.Z > Size.X && Size.Z > Size.Y) Rotation = FRotator(90.0f, 0.0f, 0.0f);
+		else if (Size.Y > Size.X) Rotation = FRotator(0.0f, -90.0f, 0.0f);
+		const float Scale = 70.0f / FMath::Max(1.0f, Size.GetMax());
+		const FVector Location = FVector(26.0f, 0.0f, 0.0f) - Rotation.RotateVector(Bounds.GetCenter() * Scale);
+		EquippedWeapon->SetWeaponMeshOverride(CrowbarMesh, Material, Location, Rotation, FVector(Scale));
+		return;
+	}
+	if (MeleeDefinition.Id != TunaSweeperEquippedWeaponVisual::WoodenClubItemId &&
+		MeleeDefinition.Id != TunaSweeperEquippedWeaponVisual::SpikedClubItemId) return;
 
 	UStaticMesh* BaseballBatMesh = Cast<UStaticMesh>(TunaSweeperEquippedWeaponVisual::BaseballBatMeshPath.TryLoad());
 	UMaterialInterface* BaseballBatMaterial =

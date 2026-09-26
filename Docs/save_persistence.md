@@ -60,6 +60,12 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 
 ## Persisted State
 
+### Melee Item Replacements
+
+- Item `1004` retains its identity and becomes the wooden club.
+- Item `1005` retains its identity and becomes the spiked club. Existing instance UIDs, quantities, equipment/loot references, acquisition history, and shop references remain unchanged. It is not remapped to `6003`.
+- Item `6003` now occupies the melee equipment slot and remains the reusable water-intake tool. Existing stacked quantities are preserved; new weapon stacks use the weapon stack limit. World-progress keys and the reusable-tool ID do not change. No new save fields or save-version change are required.
+
 ### Save Metadata
 
 - `SaveVersion`
