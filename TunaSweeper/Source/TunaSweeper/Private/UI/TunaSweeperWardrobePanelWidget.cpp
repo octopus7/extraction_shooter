@@ -1,7 +1,8 @@
 #include "UI/TunaSweeperWardrobePanelWidget.h"
 
 #include "Blueprint/WidgetTree.h"
-#include "Brushes/SlateRoundedBoxBrush.h"
+#include "Brushes/SlateColorBrush.h"
+#include "Brushes/SlateNoResource.h"
 #include "Character/TunaSweeperOutfitCatalog.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -101,6 +102,7 @@ void UTunaSweeperOutfitCardWidget::BuildCard()
 	Stack->AddChildToVerticalBox(PortraitBox)->SetHorizontalAlignment(HAlign_Center);
 	NameText = MakeLabel(WidgetTree, TEXT("OutfitCardName"), 18.0f);
 	NameText->SetJustification(ETextJustify::Center);
+	NameText->SetAutoWrapText(true);
 	Stack->AddChildToVerticalBox(NameText)->SetPadding(FMargin(0.0f, 3.0f));
 	StatusText = MakeLabel(WidgetTree, TEXT("OutfitCardStatus"), 14.0f);
 	StatusText->SetJustification(ETextJustify::Center);
@@ -113,12 +115,17 @@ void UTunaSweeperOutfitCardWidget::RefreshCard()
 	if (!CardButton) return;
 	TunaSweeperUIStyle::ApplyButton(CardButton, TunaSweeperUIStyle::EButtonRole::Secondary, bIsSelected);
 	FButtonStyle Style = CardButton->GetStyle();
+	Style.SetNormal(FSlateNoResource());
+	Style.SetHovered(FSlateNoResource());
+	Style.SetPressed(FSlateNoResource());
+	Style.SetDisabled(FSlateNoResource());
 	Style.SetNormalPadding(FMargin(8.0f));
 	Style.SetPressedPadding(FMargin(8.0f));
 	CardButton->SetStyle(Style);
 	PortraitImage->SetBrushFromTexture(PortraitTexture, true);
 	PortraitImage->SetColorAndOpacity(bIsUnlocked ? FLinearColor::White : FLinearColor(0.4f, 0.4f, 0.4f, 0.65f));
 	NameText->SetText(OutfitName);
+	NameText->SetColorAndOpacity(bIsSelected ? FLinearColor(0.38f, 0.94f, 0.8f) : FLinearColor::White);
 	StatusText->SetText(OutfitStatus);
 	StatusText->SetColorAndOpacity(bIsUnlocked ? FLinearColor(0.38f, 0.94f, 0.8f) : FLinearColor(0.7f, 0.72f, 0.75f));
 	CardButton->SetToolTipText(OutfitName);
@@ -168,9 +175,10 @@ void UTunaSweeperWardrobePanelWidget::NativeDestruct()
 void UTunaSweeperWardrobePanelWidget::BuildPanel()
 {
 	if (!WidgetTree || WidgetTree->RootWidget) return;
-	UBorder* Root = WidgetTree->ConstructWidget<UBorder>();
-	Root->SetBrush(FSlateRoundedBoxBrush(FLinearColor(0.022f, 0.041f, 0.055f, 0.98f), 14.0f));
-	Root->SetPadding(FMargin(24.0f));
+	UBorder* Root = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("WardrobeScreen"));
+	// A viewport-wide scrim keeps the game visible without a framed modal window.
+	Root->SetBrush(FSlateColorBrush(FLinearColor(0.015f, 0.029f, 0.04f, 0.88f)));
+	Root->SetPadding(FMargin(32.0f));
 	WidgetTree->RootWidget = Root;
 	UVerticalBox* Stack = WidgetTree->ConstructWidget<UVerticalBox>();
 	Root->SetContent(Stack);
@@ -198,33 +206,33 @@ void UTunaSweeperWardrobePanelWidget::BuildPanel()
 	ListScroll->SetScrollWhenFocusChanges(EScrollWhenFocusChanges::InstantScroll);
 	ListScroll->SetNavigationDestination(EDescendantScrollDestination::IntoView);
 	UHorizontalBoxSlot* ListSlot = Body->AddChildToHorizontalBox(ListScroll);
-	ListSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	FSlateChildSize ListFill(ESlateSizeRule::Fill);
+	ListFill.Value = 0.58f;
+	ListSlot->SetSize(ListFill);
 	ListSlot->SetPadding(FMargin(0.0f, 0.0f, 20.0f, 0.0f));
 	OutfitGrid = WidgetTree->ConstructWidget<UUniformGridPanel>(UUniformGridPanel::StaticClass(), TEXT("WardrobeOutfitGrid"));
 	OutfitGrid->SetSlotPadding(FMargin(5.0f));
-	OutfitGrid->SetMinDesiredSlotWidth(240.0f);
+	OutfitGrid->SetMinDesiredSlotWidth(166.0f);
 	OutfitGrid->SetMinDesiredSlotHeight(296.0f);
 	ListScroll->AddChild(OutfitGrid);
 
-	USizeBox* PreviewSize = WidgetTree->ConstructWidget<USizeBox>();
-	PreviewSize->SetWidthOverride(400.0f);
-	Body->AddChildToHorizontalBox(PreviewSize);
-	UBorder* PreviewPanel = WidgetTree->ConstructWidget<UBorder>();
-	PreviewPanel->SetBrush(FSlateRoundedBoxBrush(FLinearColor(0.035f, 0.081f, 0.097f), 10.0f));
-	PreviewPanel->SetPadding(FMargin(18.0f, 12.0f));
-	PreviewSize->SetContent(PreviewPanel);
 	UVerticalBox* Detail = WidgetTree->ConstructWidget<UVerticalBox>();
-	PreviewPanel->SetContent(Detail);
+	FSlateChildSize PreviewFill(ESlateSizeRule::Fill);
+	PreviewFill.Value = 0.42f;
+	Body->AddChildToHorizontalBox(Detail)->SetSize(PreviewFill);
 	PreviewTitleText = MakeLabel(WidgetTree, TEXT("WardrobePreviewTitle"), 14.0f);
 	PreviewTitleText->SetColorAndOpacity(FLinearColor(0.59f, 0.72f, 0.75f));
 	Detail->AddChildToVerticalBox(PreviewTitleText);
-	UImage* Portrait = nullptr;
-	USizeBox* PortraitBox = MakePortrait(WidgetTree, Portrait, TEXT("WardrobePreviewImage"), 290.0f, 435.0f);
-	PreviewImage = Portrait;
-	UVerticalBoxSlot* PortraitSlot = Detail->AddChildToVerticalBox(PortraitBox);
+	UScaleBox* PortraitFit = WidgetTree->ConstructWidget<UScaleBox>();
+	PortraitFit->SetStretch(EStretch::ScaleToFit);
+	PreviewImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("WardrobePreviewImage"));
+	PreviewImage->SetDesiredSizeOverride(FVector2D(1024.0f, 1536.0f));
+	PreviewImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+	PortraitFit->SetContent(PreviewImage);
+	UVerticalBoxSlot* PortraitSlot = Detail->AddChildToVerticalBox(PortraitFit);
 	PortraitSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	PortraitSlot->SetHorizontalAlignment(HAlign_Center);
-	PortraitSlot->SetVerticalAlignment(VAlign_Center);
+	PortraitSlot->SetHorizontalAlignment(HAlign_Fill);
+	PortraitSlot->SetVerticalAlignment(VAlign_Fill);
 	SelectedNameText = MakeLabel(WidgetTree, TEXT("WardrobeSelectedName"), 24.0f);
 	SelectedNameText->SetJustification(ETextJustify::Center);
 	Detail->AddChildToVerticalBox(SelectedNameText)->SetPadding(FMargin(0.0f, 2.0f));

@@ -1,0 +1,144 @@
+{
+  "passed": true,
+  "mode": "import",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "errors": [],
+  "meshes": {
+    "Base": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/SKM_LunaMk2_SciFiSuit_Base.SKM_LunaMk2_SciFiSuit_Base",
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "bone_count": 130,
+      "reference_error": {
+        "position_cm": 0.0020427703857421875,
+        "rotation_deg": 0.007493562491185871,
+        "scale": 9.357929229736328e-06
+      },
+      "bounds_cm": [
+        -31.353818893432617,
+        -17.100200653076172,
+        92.62275695800781,
+        31.353818893432617,
+        10.214960098266602,
+        146.25119018554688
+      ],
+      "max_bounds_error_cm": 0.0,
+      "materials": [
+        "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+        "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+      ],
+      "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset",
+      "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C"
+    },
+    "Clothing": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/SKM_LunaMk2_SciFiSuit_Clothing.SKM_LunaMk2_SciFiSuit_Clothing",
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "bone_count": 130,
+      "reference_error": {
+        "position_cm": 0.0020427703857421875,
+        "rotation_deg": 0.007493562491185871,
+        "scale": 9.357929229736328e-06
+      },
+      "bounds_cm": [
+        -28.799386978149414,
+        -8.944002151489258,
+        -0.4000000059604645,
+        28.64306640625,
+        16.599998474121094,
+        144.9112091064453
+      ],
+      "max_bounds_error_cm": 0.0,
+      "materials": [
+        "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_White.M_SciFi_White",
+        "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Joint.M_SciFi_Joint",
+        "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Metal.M_SciFi_Metal",
+        "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Cyan.M_SciFi_Cyan",
+        "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Pink.M_SciFi_Pink"
+      ],
+      "physics_asset": null,
+      "post_process": null
+    }
+  },
+  "materials": {
+    "M_SciFi_White": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_White.M_SciFi_White",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.7300000190734863,
+        0.7699999809265137,
+        0.800000011920929
+      ],
+      "roughness": 0.30000001192092896,
+      "metallic": 0.30000001192092896,
+      "emissive_linear": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "M_SciFi_Joint": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Joint.M_SciFi_Joint",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.027000000700354576,
+        0.03700000047683716,
+        0.052000001072883606
+      ],
+      "roughness": 0.6600000262260437,
+      "metallic": 0.10000000149011612,
+      "emissive_linear": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "M_SciFi_Metal": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Metal.M_SciFi_Metal",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.1599999964237213,
+        0.20999999344348907,
+        0.27000001072883606
+      ],
+      "roughness": 0.3199999928474426,
+      "metallic": 0.75,
+      "emissive_linear": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "M_SciFi_Cyan": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Cyan.M_SciFi_Cyan",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.054999999701976776,
+        0.6499999761581421,
+        0.8199999928474426
+      ],
+      "roughness": 0.25,
+      "metallic": 0.15000000596046448,
+      "emissive_linear": [
+        0.07999999821186066,
+        1.399999976158142,
+        2.0
+      ]
+    },
+    "M_SciFi_Pink": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/M_SciFi_Pink.M_SciFi_Pink",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.6499999761581421,
+        0.20000000298023224,
+        0.3400000035762787
+      ],
+      "roughness": 0.3799999952316284,
+      "metallic": 0.15000000596046448,
+      "emissive_linear": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "preimport_existing_reference_matches_verified_baseline": true
+}

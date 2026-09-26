@@ -30,7 +30,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (TopStatusReserveWidget)
 	{
-		const bool bShowTopStatusReserve = bUtilityModeOpen && !(bQuestMode && bQuestPanelOpenedFromInteraction);
+		const bool bShowTopStatusReserve = bUtilityModeOpen && !bWardrobeMode && !(bQuestMode && bQuestPanelOpenedFromInteraction);
 		SetTransitionedWidgetVisibility(
 			TopStatusReserveWidget,
 			bShowTopStatusReserve ? ESlateVisibility::Visible : ESlateVisibility::Collapsed,
@@ -994,26 +994,11 @@ void UTunaSweeperGameHudWidget::EnsureWardrobePanelWidget()
 		return;
 	}
 	WardrobePanelWidget->SetVisibility(ESlateVisibility::Collapsed);
-	UScaleBox* Fit = WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass(), TEXT("WardrobePanelFit"));
-	Fit->SetStretch(EStretch::ScaleToFit);
-	Fit->SetStretchDirection(EStretchDirection::DownOnly);
-	Fit->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	USizeBox* PanelSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("WardrobePanelSize"));
-	PanelSize->SetWidthOverride(1280.0f);
-	PanelSize->SetHeightOverride(760.0f);
-	PanelSize->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	PanelSize->SetContent(WardrobePanelWidget);
-	Fit->SetContent(PanelSize);
-	if (UScaleBoxSlot* FitSlot = Cast<UScaleBoxSlot>(PanelSize->Slot))
-	{
-		FitSlot->SetHorizontalAlignment(HAlign_Center);
-		FitSlot->SetVerticalAlignment(VAlign_Center);
-	}
-	if (UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(Fit))
+	if (UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(WardrobePanelWidget))
 	{
 		CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		CanvasSlot->SetAlignment(FVector2D::ZeroVector);
-		CanvasSlot->SetOffsets(FMargin(32.0f, 80.0f, 32.0f, 40.0f));
+		CanvasSlot->SetOffsets(FMargin(0.0f));
 		CanvasSlot->SetZOrder(20);
 	}
 }

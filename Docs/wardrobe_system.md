@@ -2,7 +2,7 @@
 
 ## 동작
 
-벙커의 옷장 액터와 상호작용하면 의상 목록이 열린다. 의상을 선택해 전신 이미지를 확인한 뒤 착용한다. 기존 메이드, 교복, 정비사, 운동복, 토끼 잠옷, 탐험가, 우의의 7개 의상을 지원한다. 외형 변경은 능력치나 인벤토리에 영향을 주지 않는다.
+벙커의 옷장 액터와 상호작용하면 전체 화면에 의상 목록이 열린다. 중앙 창이나 미리보기 패널 테두리 없이 왼쪽에 의상 목록, 오른쪽에 큰 전신 이미지와 착용 버튼을 배치한다. 화면 전체를 덮는 어두운 반투명 배경으로 게임 화면과 구분하며, 위쪽 HUD 메뉴는 의상 교체 중 숨긴다. 기존 메이드, 교복, 정비사, 운동복, 토끼 잠옷, 탐험가, 우의, SF 슈트의 8개 의상을 지원한다. 외형 변경은 능력치나 인벤토리에 영향을 주지 않는다.
 
 상호작용 거리 밖으로 이동하거나 옷장이 제거되거나 캐릭터가 사망·탑승하면 창을 닫는다. 착용 요청에서도 같은 조건을 재검사한다. ESC와 닫기 버튼으로 게임 조작에 복귀한다.
 
@@ -15,9 +15,13 @@
 
 ## 에셋과 표시
 
-`/Game/Characters/Player/LunaMk2/Outfits/DA_LunaMk2_Outfits`가 의상 ID, 표시 이름 키, 썸네일, 몸체 메시, 의상 메시를 연결한다. UI 이미지는 `/Game/UI/Wardrobe/T_UIOutfit_<ID>`이며 원본 투명 PNG의 2:3 비율을 유지한다. 목록은 3열 그리드와 세로 스크롤을 사용하며 일곱 번째 우의 카드는 세 번째 행에 표시된다. 키보드로 화면 밖 카드를 선택하면 해당 카드가 보이도록 스크롤한다.
+`/Game/Characters/Player/LunaMk2/Outfits/DA_LunaMk2_Outfits`가 의상 ID, 표시 이름 키, 썸네일, 몸체 메시, 의상 메시를 연결한다. UI 이미지는 `/Game/UI/Wardrobe/T_UIOutfit_<ID>`이며 원본 투명 PNG의 2:3 비율을 유지한다. 목록은 3열 그리드와 세로 스크롤을 사용하며 일곱 번째 우의와 여덟 번째 SF 슈트 카드는 세 번째 행에 표시된다. 키보드로 화면 밖 카드를 선택하면 해당 카드가 보이도록 스크롤한다.
 
 새 의상은 기존 130본 skeleton을 사용한다. 본체는 해당 의상의 몸체 가림을 실제 메시로 반영하고, 의상 컴포넌트는 본체 포즈를 따른다. 토끼 잠옷의 본체만 양갈래를 숨긴다. 별도 얼굴 메시·표정, 애니메이션, 기존 물리는 보존한다. 메이드로 돌아오면 원래 본체·재질·치마를 복원한다. 우의는 내린 후드의 노란 우비, 빨간 리본의 아이보리 원피스, 분홍 장화로 구성하며 기존 얼굴과 체형을 유지한다.
+
+SF 슈트는 흰색 외장판·청록색 발광선·분홍 포인트·장갑·장화·기계식 양갈래 장식으로 구성한다. 원래 머리카락은 유지하고 메이드 머리띠와 리본은 해당 의상의 몸체 사본에서 가린다.
+
+의상 화면은 HUD Canvas의 네 가장자리에 여백 없이 연결한다. 이전의 1280×760 고정 크기 창과 축소 래퍼를 사용하지 않는다. 목록과 미리보기 영역은 가로 공간을 나눠 사용하고, 전신 이미지는 남은 세로 공간에 2:3 비율로 맞춘다. 의상 카드에도 배경 상자를 그리지 않으며 선택한 의상 이름을 강조한다.
 
 표시 문구는 `Content/Data/UITextStrings.csv`의 `ui.wardrobe.*`, `ui.interaction.wardrobe_open` 키로 한국어·영어·일본어를 제공한다.
 
@@ -42,10 +46,11 @@ bUnlockAllOutfitsOverride=False
 | 토끼 잠옷 | `BunnyPajamas` |
 | 탐험가 | `AdventurerOutfit` |
 | 우의 | `Raincoat` |
+| SF 슈트 | `SciFiSuit` |
 
 `IsOutfitUnlocked`는 전체 해금 예외를 포함한 현재 사용 가능 여부를 반환한다. `TryUnlockOutfit`는 예외가 켜져 있어도 영구 해금 기록을 저장한다. 메이드는 항상 사용할 수 있다. 추가 의상은 Catalog와 `TunaSweeperOutfits::IsSupportedOutfitId` 양쪽에 등록한다.
 
-전역 파일은 기존 계정·배포·Demo/Main 저장 경계를 따르는 `CosmeticUnlocks_<DistributionNamespace>.sav`다. 착용 저장은 버전 22이며 버전 20·21 세이브도 계속 읽는다. 우의 추가에도 저장 버전과 전역 해금 파일 형식은 바뀌지 않는다. 자세한 복구 정책은 `Docs/save_persistence.md`를 따른다.
+전역 파일은 기존 계정·배포·Demo/Main 저장 경계를 따르는 `CosmeticUnlocks_<DistributionNamespace>.sav`다. 착용 저장은 버전 22이며 버전 20·21 세이브도 계속 읽는다. 우의와 SF 슈트 추가에도 저장 버전과 전역 해금 파일 형식은 바뀌지 않는다. 자세한 복구 정책은 `Docs/save_persistence.md`를 따른다.
 
 ## 구현 검증
 
@@ -53,6 +58,12 @@ bUnlockAllOutfitsOverride=False
 
 우의 추가 전 검증 기록 (2026-09-26): UE 5.7 에디터 빌드 성공, `TunaSweeper.Wardrobe+TunaSweeper.Outfits+TunaSweeper.Save`의 14개 테스트 성공. 한국어·영어·일본어 패널을 1280 × 760과 960 × 570으로 렌더해 확인했다. `SourceArt/UI/Wardrobe/validation.json`과 `Previews/`에 결과를 보관한다. 의상별 39개 애니메이션 샘플에서 몸체와 의상의 130본 포즈 전달도 검증했다. 모든 전투 동작의 옷 관통 검사를 수행한 것은 아니며, 관련 캡처와 범위는 `SourceArt/Characters/LunaMk2/RuntimeOutfits/README.md`에 기록한다.
 
-우의 추가 검증에는 7개 ID의 저장 복원, 우의의 해금 저장·재시작·실패 복구, 실제 메시 착용과 메이드 복귀를 포함한다. `-WardrobeUIPreview` 렌더 테스트는 3개 언어와 위 두 크기에서 일곱 번째 카드가 전부 보이도록 스크롤한 뒤 우의 미리보기와 활성화된 착용 버튼을 `Saved/WardrobePreview/Panel_<언어>_<크기>_Raincoat.png`로 저장한다.
+우의 추가 검증에는 7개 ID의 저장 복원, 우의의 해금 저장·재시작·실패 복구, 실제 메시 착용과 메이드 복귀를 포함했다. 당시 `-WardrobeUIPreview` 렌더 테스트는 3개 언어와 위 두 크기에서 일곱 번째 카드가 전부 보이도록 스크롤한 뒤 우의 미리보기와 활성화된 착용 버튼을 `Saved/WardrobePreview/Panel_<언어>_<크기>_Raincoat.png`로 저장했다.
 
 2026-09-26 우의 최종 검증: 목 장식 가림 수정 후 같은 14개 테스트가 모두 통과했다. `SourceArt/UI/Wardrobe/raincoat_validation.json`과 `Previews/Raincoat_*`에 결과와 화면을 보관한다. 화면 없는 테스트 실행에는 `-nocef`를 사용하며, 셰이더 작업 경로는 `-ShaderWorkingDir=<프로젝트>/Saved/CodexRaincoat/Shaders`로 지정한다.
+
+SF 슈트 추가 검증은 8개 ID의 저장 복원·실제 메시 교체·메이드 복귀를 다룬다. SF 슈트의 전역 해금 저장, 중복 해금, 슬롯 전환·재시작 보존, 별도 계정 분리, 저장 실패 복구도 검사한다. `-WardrobeUIPreview`는 실제 HUD의 Canvas 연결을 통해 3개 언어, 960×540·1280×720·1920×1080·2560×1080에서 화면 전체 사용, 여덟 번째 카드 표시, 2:3 전신 비율과 버튼 잘림을 검사한다. 결과는 `Saved/WardrobePreview/Panel_<언어>_<크기>_SciFiSuit.png`에 저장한다.
+
+2026-09-27 최종 검증: 생성기를 정리한 뒤 전체 자동 검사 14개 통과. 작은 화면의 일본어 의상명 겹침을 줄바꿈으로 수정하고 재빌드 및 UI 재검사를 통과했다. 세 언어·네 해상도의 실제 화면을 확인했으며 결과는 `SourceArt/UI/Wardrobe/scifi_suit_validation.json`, 대표 캡처는 `Previews/SciFiSuit_Fullscreen_*`에 보관한다.
+
+2026-09-27 최종 검증: 생성기를 정리한 뒤 전체 자동 검사 14개 통과. 작은 화면의 일본어 의상명 겹침을 줄바꿈으로 수정하고 재빌드 및 UI 재검사를 통과했다. 세 언어·네 해상도의 실제 화면을 확인했으며 결과는 `SourceArt/UI/Wardrobe/scifi_suit_validation.json`, 대표 캡처는 `Previews/SciFiSuit_Fullscreen_*`에 보관한다.

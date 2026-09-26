@@ -13,6 +13,7 @@
 | 토끼 잠옷 | [PNG](Images/LunaMk2_BunnyPajamas_UI.png) | [캡처](Captures/LunaMk2_BunnyPajamas_Capture.png) |
 | 모험가복 | [PNG](Images/LunaMk2_AdventurerOutfit_UI.png) | [캡처](Captures/LunaMk2_AdventurerOutfit_Capture.png) |
 | 우의 | [PNG](Images/LunaMk2_Raincoat_UI.png) | [캡처](Captures/LunaMk2_Raincoat_Capture.png) |
+| SF 슈트 | [PNG](Images/LunaMk2_SciFiSuit_UI.png) | [캡처](Captures/LunaMk2_SciFiSuit_Capture.png) |
 
 ## 제작 및 검증 자료
 
@@ -20,5 +21,6 @@
 - `capture_manifest.json`: 같은 카메라로 촬영한 6종 캡처 설정, 표시 오브젝트와 SHA-256. 원본 Blender 파일은 수정되지 않았습니다.
 - `image_validation.json`: PNG 무결성, 공통 해상도·비율, 실제 알파 채널과 캐릭터 영역 검사.
 - `raincoat_validation.json`: 일곱 번째 우의 썸네일의 모델 캡처, 생성 기록과 원본 PNG 검증.
+- `scifi_suit_validation.json`: 여덟 번째 SF 슈트 썸네일의 모델 캡처, 생성 기록과 원본 PNG 검증.
 
-의상별로 새 일러스트를 생성했으므로 자연스러운 자세와 발 위치에는 작은 차이가 있습니다. 공통 캔버스의 비율은 동일합니다. 옷장에서는 `/Game/UI/Wardrobe/T_UIOutfit_<ID>` 텍스처와 의상 Catalog를 통해 표시합니다. 기존 `capture_manifest.json`과 `image_validation.json`은 최초 6종의 제작 기록이며, 우의는 별도 검증 기록을 사용합니다.
+의상별로 새 일러스트를 생성했으므로 자연스러운 자세와 발 위치에는 작은 차이가 있습니다. 공통 캔버스의 비율은 동일합니다. 옷장에서는 `/Game/UI/Wardrobe/T_UIOutfit_<ID>` 텍스처와 의상 Catalog를 통해 표시합니다. 기존 `capture_manifest.json`과 `image_validation.json`은 최초 6종의 제작 기록이며, 이후 추가 의상은 각각 별도 검증 기록을 사용합니다.

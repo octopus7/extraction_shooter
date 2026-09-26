@@ -368,6 +368,7 @@ protected:
 
 private:
 	friend class FTunaSweeperPauseHudTransitionTest;
+	friend class FTunaSweeperWardrobePanelTest;
 	struct FDamageNumberPopup
 	{
 		TWeakObjectPtr<UTextBlock> TextWidget;

@@ -1,0 +1,54 @@
+{
+  "reviewed_at": "2026-09-27 00:24:10",
+  "review_type": "Independent visual review of saved Blender previews and UE runtime captures",
+  "source_blend": "SciFiSuit/LunaMk2_SciFiSuit.blend",
+  "source_sha256": "fa95e0c11f9711ee045a839f0eecde96316298260f84ecfb259c95fd8f6decd9",
+  "reviewed_views": [
+    {
+      "path": "SciFiSuit/Previews/SciFiSuit_Front.png",
+      "sha256": "c3661f360c38e64344627cc25237229f9f189f5ff9cecdd116c87dc6b09c8f75"
+    },
+    {
+      "path": "SciFiSuit/Previews/SciFiSuit_ThreeQuarter.png",
+      "sha256": "2e3c9c7744181d1cba05a42fbf9533192d804af0feeb3968398451b2c6ee4f30"
+    },
+    {
+      "path": "SciFiSuit/Previews/SciFiSuit_Back.png",
+      "sha256": "f72af03d2783a73d3538f29368a1fc344ce3cd2d09b81cb17eac3eb157a0a339"
+    },
+    {
+      "path": "SciFiSuit/Previews/SciFiSuit_Pose_A.png",
+      "sha256": "b2202acc04360cbfa4251363e2883a9be984a5d2bf484e4f9baa855183be462e"
+    },
+    {
+      "path": "SciFiSuit/Previews/SciFiSuit_Pose_B.png",
+      "sha256": "a287b8b99c8e6fb4e0a29291b9804da55a374bf6812626dcbfb038dd1b533cdb"
+    },
+    {
+      "path": "SciFiSuit/Previews/SciFiSuit_Pose_C.png",
+      "sha256": "f9f5da574227fc96e573b18ad5108bb2d96a89c9585b87a4e7ee2c6a85411bf6"
+    },
+    {
+      "path": "RuntimeOutfits/SciFiSuit/Previews/SciFiSuit_Runtime_B.png",
+      "sha256": "e3709fb77596ad89a17ea31ca1222a21691961be7d481ff16105c1c08d16b67e"
+    },
+    {
+      "path": "RuntimeOutfits/SciFiSuit/Previews/SciFiSuit_Runtime_C.png",
+      "sha256": "36674dc616c839ecda410385aef542596f09054d8ac408ebd4df769a2a1d7058"
+    }
+  ],
+  "passed": true,
+  "actionable_findings": [],
+  "observations": [
+    "Boot cuffs overlap the shin armor in the reviewed rest and A/B/C poses; no open ankle seam was visible.",
+    "Round twin-tail attachments and their rear mounts remain seated against the hair roots.",
+    "The confirmed maid frill protrusions and separate ribbon pieces are hidden in the final preview.",
+    "No new suit penetration, open hole, accessory detachment, or weight tear was visible in the reviewed images.",
+    "UE B/C captures retain the same part placement and opaque coverage."
+  ],
+  "retained_source_limitations": [
+    "Original scalp and hair geometry are preserved. The exposed source hair underside shading near the crown remains by design; no crown cover was added.",
+    "Six finger-joint stretch warnings reproduce the original source hand weights. Left ring-joint edge: glove 2.619x versus source 2.664x. Right pinky-joint edge: glove 3.201x versus source 2.884x; the 0.65 mm normal offset changes the short edge baseline."
+  ],
+  "scope_limit": "This review covers the listed static captures. It does not claim that every gameplay animation or camera angle is free of intersection."
+}

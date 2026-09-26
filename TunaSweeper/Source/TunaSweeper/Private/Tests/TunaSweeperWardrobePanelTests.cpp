@@ -1,6 +1,9 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "UI/TunaSweeperWardrobePanelWidget.h"
+#include "UI/TunaSweeperGameHudWidget.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/ScrollBox.h"
@@ -22,8 +25,6 @@
 #include "Slate/WidgetRenderer.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
-#include "Widgets/Layout/SBox.h"
-#include "Widgets/Layout/SScaleBox.h"
 #if WITH_EDITOR
 #include "AssetCompilingManager.h"
 #endif
@@ -70,8 +71,17 @@ bool FTunaSweeperWardrobePanelTest::RunTest(const FString&)
 	auto* Strings = Game->GetSubsystem<UTunaSweeperTextSubsystem>();
 	if (!TestNotNull(TEXT("Real localization subsystem exists"), Strings) ||
 		!TestTrue(TEXT("Localization data loads"), Strings->LoadTextData())) return false;
-	TStrongObjectPtr<UTunaSweeperWardrobePanelWidget> Panel(CreateWidget<UTunaSweeperWardrobePanelWidget>(Controller));
-	TSharedRef<SWidget> Slate = Panel->TakeWidget();
+	TStrongObjectPtr<UTunaSweeperGameHudWidget> Hud(CreateWidget<UTunaSweeperGameHudWidget>(Controller));
+	if (!Hud->WidgetTree) Hud->WidgetTree = NewObject<UWidgetTree>(Hud.Get());
+	auto* HudCanvas = Hud->WidgetTree->ConstructWidget<UCanvasPanel>();
+	Hud->WidgetTree->RootWidget = HudCanvas;
+	Hud->EnsureWardrobePanelWidget();
+	TStrongObjectPtr<UTunaSweeperWardrobePanelWidget> Panel(Hud->WardrobePanelWidget.Get());
+	if (!TestNotNull(TEXT("HUD creates wardrobe screen"), Panel.Get())) return false;
+	Panel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	Panel->TakeWidget();
+	TSharedRef<SWidget> Slate = HudCanvas->TakeWidget();
+	if (!TestNotNull(TEXT("Wardrobe attaches directly to viewport canvas"), Cast<UCanvasPanelSlot>(Panel->Slot))) return false;
 	Panel->OpenWardrobe();
 	Panel->ForceLayoutPrepass();
 	auto* Grid = Cast<UUniformGridPanel>(Panel->WidgetTree->FindWidget(TEXT("WardrobeOutfitGrid")));
@@ -80,7 +90,7 @@ bool FTunaSweeperWardrobePanelTest::RunTest(const FString&)
 	auto* Status = Cast<UTextBlock>(Panel->WidgetTree->FindWidget(TEXT("WardrobeStatus")));
 	if (!TestNotNull(TEXT("Grid exists"), Grid) || !TestNotNull(TEXT("Equip button exists"), Equip) ||
 		!TestNotNull(TEXT("Preview exists"), Preview) || !TestNotNull(TEXT("Status exists"), Status)) return false;
-	if (!TestEqual(TEXT("All seven cards are available"), Grid->GetChildrenCount(), 7)) return false;
+	if (!TestEqual(TEXT("All eight cards are available"), Grid->GetChildrenCount(), 8)) return false;
 	auto* ListScroll = Cast<UScrollBox>(Grid->GetParent());
 	if (!TestNotNull(TEXT("The complete outfit grid is scrollable"), ListScroll)) return false;
 	auto* RaincoatCard = Cast<UTunaSweeperOutfitCardWidget>(Grid->GetChildAt(6));
@@ -91,6 +101,15 @@ bool FTunaSweeperWardrobePanelTest::RunTest(const FString&)
 	RaincoatCard->TakeWidget();
 	auto* RaincoatButton = Cast<UButton>(RaincoatCard->WidgetTree->FindWidget(TEXT("OutfitCardButton")));
 	if (!TestNotNull(TEXT("Raincoat is selectable"), RaincoatButton)) return false;
+	auto* SciFiSuitCard = Cast<UTunaSweeperOutfitCardWidget>(Grid->GetChildAt(7));
+	if (!TestNotNull(TEXT("Eighth sci-fi suit card exists"), SciFiSuitCard)) return false;
+	auto* SciFiSuitSlot = Cast<UUniformGridSlot>(SciFiSuitCard->Slot);
+	if (!TestNotNull(TEXT("Sci-fi suit has a grid slot"), SciFiSuitSlot)) return false;
+	TestEqual(TEXT("Sci-fi suit shares the third row"), SciFiSuitSlot->GetRow(), 2);
+	TestEqual(TEXT("Sci-fi suit uses the second column"), SciFiSuitSlot->GetColumn(), 1);
+	SciFiSuitCard->TakeWidget();
+	auto* SciFiSuitButton = Cast<UButton>(SciFiSuitCard->WidgetTree->FindWidget(TEXT("OutfitCardButton")));
+	if (!TestNotNull(TEXT("Sci-fi suit is selectable"), SciFiSuitButton)) return false;
 	TestFalse(TEXT("Current outfit cannot be redundantly equipped"), Equip->GetIsEnabled());
 	auto* SchoolCard = Cast<UTunaSweeperOutfitCardWidget>(Grid->GetChildAt(1));
 	if (!TestNotNull(TEXT("School card exists"), SchoolCard)) return false;
@@ -129,6 +148,18 @@ bool FTunaSweeperWardrobePanelTest::RunTest(const FString&)
 	Game->OnOutfitUnlocksChanged.Broadcast();
 	TestTrue(TEXT("Raincoat unlock enables equip without reopening"), Equip->GetIsEnabled());
 	Game->bUnlockAllOutfitsOverride = true;
+	Panel->RefreshWardrobe();
+	SciFiSuitButton->OnClicked.Broadcast();
+	TestTrue(TEXT("Eighth outfit enables equip"), Equip->GetIsEnabled());
+	TestTrue(TEXT("Sci-fi suit selection displays its own thumbnail"), Preview->GetBrush().GetResourceObject() &&
+		Preview->GetBrush().GetResourceObject()->GetName() == TEXT("T_UIOutfit_SciFiSuit"));
+	Game->bUnlockAllOutfitsOverride = false;
+	Game->OnOutfitUnlocksChanged.Broadcast();
+	TestFalse(TEXT("An unowned sci-fi suit stays previewable but cannot be equipped"), Equip->GetIsEnabled());
+	Game->UnlockedOutfitIds.Add(TEXT("SciFiSuit"));
+	Game->OnOutfitUnlocksChanged.Broadcast();
+	TestTrue(TEXT("Sci-fi suit unlock enables equip without reopening"), Equip->GetIsEnabled());
+	Game->bUnlockAllOutfitsOverride = true;
 	for (const ETunaSweeperItemTextLanguage Language : {
 		ETunaSweeperItemTextLanguage::Korean, ETunaSweeperItemTextLanguage::English, ETunaSweeperItemTextLanguage::Japanese})
 	{
@@ -148,6 +179,11 @@ bool FTunaSweeperWardrobePanelTest::RunTest(const FString&)
 		const TCHAR* ExpectedRaincoatName = Language == ETunaSweeperItemTextLanguage::Korean ? TEXT("우의")
 			: Language == ETunaSweeperItemTextLanguage::Japanese ? TEXT("レインコート") : TEXT("Raincoat");
 		TestEqual(TEXT("Raincoat label resolves in each supported language"), RaincoatName->GetText().ToString(), FString(ExpectedRaincoatName));
+		auto* SciFiSuitName = Cast<UTextBlock>(SciFiSuitCard->WidgetTree->FindWidget(TEXT("OutfitCardName")));
+		if (!TestNotNull(TEXT("Sci-fi suit name label exists"), SciFiSuitName)) return false;
+		const TCHAR* ExpectedSciFiSuitName = Language == ETunaSweeperItemTextLanguage::Korean ? TEXT("SF 슈트")
+			: Language == ETunaSweeperItemTextLanguage::Japanese ? TEXT("SFスーツ") : TEXT("Sci-Fi Suit");
+		TestEqual(TEXT("Sci-fi suit label resolves in each supported language"), SciFiSuitName->GetText().ToString(), FString(ExpectedSciFiSuitName));
 		if (FParse::Param(FCommandLine::Get(), TEXT("WardrobeUIPreview")))
 		{
 #if WITH_EDITOR
@@ -156,41 +192,58 @@ bool FTunaSweeperWardrobePanelTest::RunTest(const FString&)
 			const FString Directory = FPaths::ProjectSavedDir() / TEXT("WardrobePreview");
 			IFileManager::Get().MakeDirectory(*Directory,true);
 			FWidgetRenderer Renderer(false);
-			auto Fitted = SNew(SScaleBox).Stretch(EStretch::ScaleToFit).StretchDirection(EStretchDirection::DownOnly)
-				[SNew(SBox).WidthOverride(1280).HeightOverride(760)[Slate]];
-			for (FIntPoint Size : {FIntPoint(1280,760), FIntPoint(960,570)})
+			for (FIntPoint Size : {FIntPoint(1280,720), FIntPoint(1920,1080), FIntPoint(2560,1080), FIntPoint(960,540)})
 			{
 				ListScroll->SetScrollOffset(0.0f);
 				// ScaleBox normalizes its layout on the frame following a geometry change.
 				UTextureRenderTarget2D* Target = nullptr;
 				for (int32 Frame = 0; Frame < 3; ++Frame)
-					Target = Renderer.DrawWidget(Fitted,FVector2D(Size.X,Size.Y));
+					Target = Renderer.DrawWidget(Slate,FVector2D(Size.X,Size.Y));
 				if (!TestNotNull(TEXT("Panel render target exists"),Target)) return false;
 				const FVector2D PanelSize = Panel->GetCachedGeometry().GetAbsoluteSize();
-				TestTrue(TEXT("Scaled panel fits the complete viewport"), PanelSize.X <= Size.X + 1 && PanelSize.Y <= Size.Y + 1);
-				TestTrue(TEXT("Seven-card list needs scrolling at this viewport size"), ListScroll->GetScrollOffsetOfEnd() > 0.0f);
-				ListScroll->ScrollWidgetIntoView(RaincoatCard, false, EDescendantScrollDestination::IntoView, 5.0f);
+				TestTrue(TEXT("Wardrobe fills both dimensions of the viewport"),
+					FMath::IsNearlyEqual(PanelSize.X, static_cast<double>(Size.X), 1.0) &&
+					FMath::IsNearlyEqual(PanelSize.Y, static_cast<double>(Size.Y), 1.0));
+				TestTrue(TEXT("Wardrobe begins at the viewport origin"), Panel->GetCachedGeometry().GetAbsolutePosition().IsNearlyZero(1.0));
+				ListScroll->ScrollWidgetIntoView(SciFiSuitCard, false, EDescendantScrollDestination::IntoView, 5.0f);
 				for (int32 Frame = 0; Frame < 3; ++Frame)
-					Target = Renderer.DrawWidget(Fitted,FVector2D(Size.X,Size.Y));
-				TestTrue(TEXT("Scrolling reaches the seventh card"), ListScroll->GetScrollOffset() > 0.0f);
+					Target = Renderer.DrawWidget(Slate,FVector2D(Size.X,Size.Y));
 				const FGeometry& ScrollGeometry = ListScroll->GetCachedGeometry();
-				const FGeometry& CardGeometry = RaincoatCard->GetCachedGeometry();
+				const FGeometry& CardGeometry = SciFiSuitCard->GetCachedGeometry();
 				const FVector2D CardTop = ScrollGeometry.AbsoluteToLocal(CardGeometry.GetAbsolutePosition());
 				const FVector2D CardBottom = ScrollGeometry.AbsoluteToLocal(CardGeometry.LocalToAbsolute(CardGeometry.GetLocalSize()));
-				TestTrue(TEXT("The whole seventh card fits inside the scroll viewport"),
+				TestTrue(TEXT("The whole eighth card fits inside the scroll viewport"),
 					CardTop.Y >= -1.0f && CardBottom.Y <= ScrollGeometry.GetLocalSize().Y + 1.0f);
 				const FVector2D PreviewSize = Preview->GetCachedGeometry().GetAbsoluteSize();
-				TestTrue(TEXT("The selected raincoat portrait keeps its 2:3 aspect"),
+				TestTrue(TEXT("The selected sci-fi suit portrait keeps its 2:3 aspect"),
 					PreviewSize.Y > 0.0 && FMath::IsNearlyEqual(PreviewSize.X / PreviewSize.Y, 2.0 / 3.0, 0.001));
-				RaincoatButton->OnClicked.Broadcast();
-				TestTrue(TEXT("Scrolled raincoat remains equipable"), Equip->GetIsEnabled());
-				Target = Renderer.DrawWidget(Fitted,FVector2D(Size.X,Size.Y));
+				TestTrue(TEXT("The full-body preview expands on large screens"), Size.Y < 1080 || PreviewSize.Y > 650.0);
+				for (int32 Index = 0; Index < Grid->GetChildrenCount(); ++Index)
+				{
+					auto* Card = Cast<UTunaSweeperOutfitCardWidget>(Grid->GetChildAt(Index));
+					auto* Label = Cast<UTextBlock>(Card->WidgetTree->FindWidget(TEXT("OutfitCardName")));
+					TestTrue(TEXT("Localized outfit names fit their own card width"), Label &&
+						Label->GetDesiredSize().X <= Card->GetCachedGeometry().GetLocalSize().X + 1.0f);
+				}
+				for (UWidget* Control : {static_cast<UWidget*>(Preview), static_cast<UWidget*>(Equip),
+					Panel->WidgetTree->FindWidget(TEXT("WardrobeCloseButton"))})
+				{
+					if (!TestNotNull(TEXT("Fullscreen control exists"), Control)) return false;
+					const FGeometry& Geometry = Control->GetCachedGeometry();
+					const FVector2D Top = Geometry.GetAbsolutePosition();
+					const FVector2D Bottom = Geometry.LocalToAbsolute(Geometry.GetLocalSize());
+					TestTrue(TEXT("Preview and actions remain inside the viewport"), Top.X >= -1 && Top.Y >= -1 &&
+						Bottom.X <= Size.X + 1 && Bottom.Y <= Size.Y + 1);
+				}
+				SciFiSuitButton->OnClicked.Broadcast();
+				TestTrue(TEXT("Scrolled sci-fi suit remains equipable"), Equip->GetIsEnabled());
+				Target = Renderer.DrawWidget(Slate,FVector2D(Size.X,Size.Y));
 				FlushRenderingCommands();
 				TArray<FColor> Pixels; FReadSurfaceDataFlags ReadFlags; ReadFlags.SetLinearToGamma(false);
 				Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels,ReadFlags);
 				TArray64<uint8> Png; FImageUtils::PNGCompressImageArray(Size.X,Size.Y,Pixels,Png);
 				TestTrue(TEXT("Panel preview writes"),FFileHelper::SaveArrayToFile(Png,
-					*(Directory/FString::Printf(TEXT("Panel_%d_%dx%d_Raincoat.png"),static_cast<int32>(Language),Size.X,Size.Y))));
+					*(Directory/FString::Printf(TEXT("Panel_%d_%dx%d_SciFiSuit.png"),static_cast<int32>(Language),Size.X,Size.Y))));
 			}
 		}
 	}

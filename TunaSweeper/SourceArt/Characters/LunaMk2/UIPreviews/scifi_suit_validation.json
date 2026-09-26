@@ -1,0 +1,40 @@
+{
+  "id": "SciFiSuit",
+  "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver curled twin-tail hair, blue eyes, petite proportions and the same character identity. Outfit: opaque pearl-white full-body sci-fi armor with a high collar, smooth chest plate, segmented waist and hip guards, full armored gloves, thigh and shin plates, ankle boots, narrow charcoal joint gaps, slim cyan glowing lines and small pink accents. Round white mechanical twin-tail ornaments with cyan and pink rings and short fins. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head ornaments and boots visible with a little space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+  "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_SciFiSuit_Capture.png",
+  "output": "Images/LunaMk2_SciFiSuit_UI.png",
+  "transparent_background": true,
+  "generator": "Built-in image_gen.imagegen",
+  "post_processing": "None. Generated PNG bytes and native alpha are preserved.",
+  "rejected_attempts": [],
+  "passed": true,
+  "checks": {
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1536
+    ],
+    "aspect": "2:3",
+    "alpha_range": [
+      0,
+      254
+    ],
+    "fully_transparent_pixels": 1088105,
+    "visible_alpha_bbox_gt_128": [
+      211,
+      16,
+      823,
+      1492
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "visible_character_not_clipped": true
+  },
+  "png_sha256": "6a92a253fdcfd1726ecc366b9aadc8f6b64b49a274c33144bfb44fc4861af26f",
+  "capture_sha256": "0454e38cf7879173e9946e9a58711053c29951ec4ed07ed58d53245ac35b7cf3",
+  "generated_bytes_preserved": true
+}

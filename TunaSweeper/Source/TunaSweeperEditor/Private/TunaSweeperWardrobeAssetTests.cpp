@@ -33,8 +33,8 @@ bool FTunaSweeperWardrobeAssetTest::RunTest(const FString&)
 		TEXT("/Game/Characters/Player/LunaMk2/Outfits/DA_LunaMk2_Outfits.DA_LunaMk2_Outfits"));
 	if (!TestNotNull(TEXT("Outfit catalog loads"), Catalog)) return false;
 	const FName ExpectedIds[] = {TEXT("Maid"), TEXT("SchoolUniform"), TEXT("MechanicOutfit"),
-		TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit"), TEXT("Raincoat")};
-	TestEqual(TEXT("All seven outfits are listed"), Catalog->Outfits.Num(), 7);
+		TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit"), TEXT("Raincoat"), TEXT("SciFiSuit")};
+	TestEqual(TEXT("All eight outfits are listed"), Catalog->Outfits.Num(), 8);
 	for (FName Id : ExpectedIds) TestNotNull(*Id.ToString(), Catalog->FindOutfit(Id));
 	const auto* Raincoat = Catalog->FindOutfit(TEXT("Raincoat"));
 	if (TestNotNull(TEXT("Raincoat catalog entry exists"), Raincoat))
@@ -46,6 +46,17 @@ bool FTunaSweeperWardrobeAssetTest::RunTest(const FString&)
 			FString(TEXT("/Game/Characters/Player/LunaMk2/Outfits/Raincoat/SKM_LunaMk2_Raincoat_Clothing")));
 		TestEqual(TEXT("Raincoat uses its native transparent thumbnail"), Raincoat->Thumbnail.ToSoftObjectPath().GetLongPackageName(),
 			FString(TEXT("/Game/UI/Wardrobe/T_UIOutfit_Raincoat")));
+	}
+	const auto* SciFiSuit = Catalog->FindOutfit(TEXT("SciFiSuit"));
+	if (TestNotNull(TEXT("Sci-fi suit catalog entry exists"), SciFiSuit))
+	{
+		TestEqual(TEXT("Sci-fi suit uses its localized display key"), SciFiSuit->DisplayNameStringKey, FName(TEXT("ui.wardrobe.outfit.scifi_suit")));
+		TestEqual(TEXT("Sci-fi suit uses its authored masked body"), SciFiSuit->BodyMesh.ToSoftObjectPath().GetLongPackageName(),
+			FString(TEXT("/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/SKM_LunaMk2_SciFiSuit_Base")));
+		TestEqual(TEXT("Sci-fi suit uses its authored clothing"), SciFiSuit->ClothingMesh.ToSoftObjectPath().GetLongPackageName(),
+			FString(TEXT("/Game/Characters/Player/LunaMk2/Outfits/SciFiSuit/SKM_LunaMk2_SciFiSuit_Clothing")));
+		TestEqual(TEXT("Sci-fi suit uses its native transparent thumbnail"), SciFiSuit->Thumbnail.ToSoftObjectPath().GetLongPackageName(),
+			FString(TEXT("/Game/UI/Wardrobe/T_UIOutfit_SciFiSuit")));
 	}
 	auto* Original = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
 	if (!TestNotNull(TEXT("Original character remains available"), Original)) return false;

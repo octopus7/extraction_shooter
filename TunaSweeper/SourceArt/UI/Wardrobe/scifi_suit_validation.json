@@ -1,0 +1,161 @@
+{
+  "Date": "2026-09-27 07:36:54",
+  "Engine": "5.7",
+  "EditorBuild": "Succeeded",
+  "OutfitCount": 8,
+  "Tests": 14,
+  "Failed": 0,
+  "NotRun": 0,
+  "Results": [
+    {
+      "Name": "TunaSweeper.Outfits.GlobalUnlockPersistence",
+      "State": "Success",
+      "Warnings": [
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_4B42DC304DCF8935EA625F8F69C3572A/CosmeticUnlocks.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_4B42DC304DCF8935EA625F8F69C3572A/CosmeticUnlocks.sav.previous' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_4B42DC304DCF8935EA625F8F69C3572A/OtherAccount.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_4B42DC304DCF8935EA625F8F69C3572A/OtherAccount.sav.previous' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_4B42DC304DCF8935EA625F8F69C3572A/NotADirectory/CannotWrite.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_4B42DC304DCF8935EA625F8F69C3572A/NotADirectory/CannotWrite.sav.previous' error."
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Outfits.RealPlayerSwitchAndRestore",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Outfits.SaveAndFallback",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Outfits.SaveFailureRollback",
+      "State": "Success",
+      "Warnings": [
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitRollback_7A611D7645AC63BF341A9DA6B57BF71E.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitRollback_7A611D7645AC63BF341A9DA6B57BF71E.sav.previous' error."
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Save.DemoEndingRetirementGuards",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.FailClosedCandidatePromotion",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.OutdatedCleanup",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.SteamCloudDirectory",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.StoveCloudChannelGate",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.StoveDirectoryRouting",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.VersionPolicy",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Wardrobe.Assets",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Wardrobe.InteractionValidation",
+      "State": "Success",
+      "Warnings": [
+        "LogTunaSweeperText: Duplicate text string key ui.common.confirm found while loading UI data. The later row will replace the earlier row."
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Wardrobe.Panel",
+      "State": "Success",
+      "Warnings": [
+        "LogTunaSweeperText: Duplicate text string key ui.common.confirm found while loading UI data. The later row will replace the earlier row."
+      ]
+    }
+  ],
+  "FinalUIRecheck": {
+    "Tests": 1,
+    "Failed": 0,
+    "Results": [
+      {
+        "Name": "TunaSweeper.Wardrobe.Panel",
+        "State": "Success",
+        "Warnings": [
+          "LogTunaSweeperText: Duplicate text string key ui.common.confirm found while loading UI data. The later row will replace the earlier row."
+        ]
+      }
+    ]
+  },
+  "UI": {
+    "FullViewport": true,
+    "FramedWindow": false,
+    "PreviewPanel": false,
+    "CardBackplates": false,
+    "ActualHUDCanvasAttachment": true,
+    "Languages": [
+      "ko",
+      "en",
+      "ja"
+    ],
+    "Viewports": [
+      "960x540",
+      "1280x720",
+      "1920x1080",
+      "2560x1080"
+    ],
+    "PortraitAspect": "2:3",
+    "ActionsInsideViewport": true,
+    "LocalizedCardNamesWrap": true,
+    "Screenshots": [
+      "SciFiSuit_Fullscreen_Korean.png",
+      "SciFiSuit_Fullscreen_English_Ultrawide.png",
+      "SciFiSuit_Fullscreen_Japanese_Small.png"
+    ]
+  },
+  "ExistingAssets": {
+    "OriginalAssetHashesChecked": 100,
+    "UnexpectedChanges": 0,
+    "OriginalSevenCatalogDefinitionsPreserved": true
+  },
+  "Model": {
+    "BlenderEditableParts": 122,
+    "PoseSamples": 39,
+    "Bones": 130,
+    "LeaderPoseError": 0
+  },
+  "Thumbnail": {
+    "NativeRGBA": true,
+    "Size": [
+      1024,
+      1536
+    ],
+    "GeneratedBytesPreserved": true
+  },
+  "Cleanup": {
+    "OneOffScriptsRemaining": 0,
+    "AllAutomationAfterCleanup": true
+  },
+  "Limitations": [
+    "Original scalp backside shading and six inherited finger edge-stretch warnings are documented in the model README.",
+    "Title A/B/C samples are validated; this is not an exhaustive combat-motion clipping audit."
+  ]
+}

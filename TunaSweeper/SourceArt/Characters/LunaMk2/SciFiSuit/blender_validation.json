@@ -1,0 +1,5255 @@
+{
+  "source": "D:/github/extraction_shooter/TunaSweeper/SourceArt/Characters/LunaMk2/Sportswear/LunaMk2_Sportswear.blend",
+  "source_sha256": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+  "parts_sha256": "fa95e0c11f9711ee045a839f0eecde96316298260f84ecfb259c95fd8f6decd9",
+  "errors": [],
+  "warnings": [
+    {
+      "mesh": "SciFiSuit_Glove_L",
+      "action": "AS_LunaMk2_Title_A",
+      "min_edge_ratio": 0.4095146024048526,
+      "max_edge_ratio": 2.6188302719173975,
+      "min_triangle_area": 5.028160209689232e-07
+    },
+    {
+      "mesh": "SciFiSuit_Glove_R",
+      "action": "AS_LunaMk2_Title_A",
+      "min_edge_ratio": 0.31064558416867066,
+      "max_edge_ratio": 3.2014115949346897,
+      "min_triangle_area": 5.028266967651459e-07
+    },
+    {
+      "mesh": "SciFiSuit_Glove_L",
+      "action": "AS_LunaMk2_Title_B",
+      "min_edge_ratio": 0.40950399714150276,
+      "max_edge_ratio": 2.618824117655384,
+      "min_triangle_area": 5.028056876595806e-07
+    },
+    {
+      "mesh": "SciFiSuit_Glove_R",
+      "action": "AS_LunaMk2_Title_B",
+      "min_edge_ratio": 0.31064386350728546,
+      "max_edge_ratio": 3.2013979458346413,
+      "min_triangle_area": 5.027959266018307e-07
+    },
+    {
+      "mesh": "SciFiSuit_Glove_L",
+      "action": "AS_LunaMk2_Title_C",
+      "min_edge_ratio": 0.40957574618927695,
+      "max_edge_ratio": 2.618839353180051,
+      "min_triangle_area": 5.028467063105366e-07
+    },
+    {
+      "mesh": "SciFiSuit_Glove_R",
+      "action": "AS_LunaMk2_Title_C",
+      "min_edge_ratio": 0.3106423302638315,
+      "max_edge_ratio": 3.2014391167756124,
+      "min_triangle_area": 5.028003890502964e-07
+    }
+  ],
+  "bones": 130,
+  "meshes": [
+    {
+      "name": "SciFiSuit_Glove_L",
+      "vertices": 295,
+      "triangles": 586,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 4,
+      "bounds": [
+        [
+          0.2184867113828659,
+          0.2864306569099426
+        ],
+        [
+          -0.16090382635593414,
+          -0.06588736921548843
+        ],
+        [
+          0.825169026851654,
+          0.9373675584793091
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Glove_R",
+      "vertices": 295,
+      "triangles": 586,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 4,
+      "bounds": [
+        [
+          -0.2879938781261444,
+          -0.21785834431648254
+        ],
+        [
+          -0.15931637585163116,
+          -0.06598705053329468
+        ],
+        [
+          0.8252907991409302,
+          0.937229335308075
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_PelvisUndersuit",
+      "vertices": 1152,
+      "triangles": 2304,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.12990452349185944,
+          0.12990452349185944
+        ],
+        [
+          -0.08899346739053726,
+          0.052993468940258026
+        ],
+        [
+          0.7875666618347168,
+          0.8904339075088501
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TorsoFlexibleSeal",
+      "vertices": 3200,
+      "triangles": 6400,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.13097195327281952,
+          0.13097195327281952
+        ],
+        [
+          -0.10178369283676147,
+          0.08281688392162323
+        ],
+        [
+          0.8667513132095337,
+          1.1559033393859863
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Chest_Front",
+      "vertices": 594,
+      "triangles": 1184,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.11717881262302399,
+          0.11717881262302399
+        ],
+        [
+          -0.0963251069188118,
+          -0.011895084753632545
+        ],
+        [
+          1.006962537765503,
+          1.138121247291565
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Chest_Back",
+      "vertices": 594,
+      "triangles": 1184,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.117191843688488,
+          0.117191843688488
+        ],
+        [
+          0.028072774410247803,
+          0.08944001793861389
+        ],
+        [
+          1.0068137645721436,
+          1.1380733251571655
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Abdomen_Front",
+      "vertices": 594,
+      "triangles": 1184,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.11197125911712646,
+          0.11197125911712646
+        ],
+        [
+          -0.10820186138153076,
+          -0.03931108117103577
+        ],
+        [
+          0.9039891362190247,
+          1.0242390632629395
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Abdomen_FrontSeam",
+      "vertices": 264,
+      "triangles": 524,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.11205960810184479,
+          0.11205960810184479
+        ],
+        [
+          -0.10914070159196854,
+          -0.05455712974071503
+        ],
+        [
+          0.9063500165939331,
+          0.9246010780334473
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Abdomen_Back",
+      "vertices": 594,
+      "triangles": 1184,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.1119939312338829,
+          0.1119939312338829
+        ],
+        [
+          0.018750717863440514,
+          0.085363008081913
+        ],
+        [
+          0.9037853479385376,
+          1.0243524312973022
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Abdomen_BackSeam",
+      "vertices": 264,
+      "triangles": 524,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.11205478757619858,
+          0.11205478757619858
+        ],
+        [
+          0.020980875939130783,
+          0.07286163419485092
+        ],
+        [
+          0.9063500165939331,
+          0.9246010780334473
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Waist_Front",
+      "vertices": 594,
+      "triangles": 1184,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.12777991592884064,
+          0.12777991592884064
+        ],
+        [
+          -0.10772943496704102,
+          -0.042233679443597794
+        ],
+        [
+          0.8559992909431458,
+          0.9163765907287598
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Waist_FrontSeam",
+      "vertices": 264,
+      "triangles": 524,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.1279425472021103,
+          0.1279425472021103
+        ],
+        [
+          -0.10635000467300415,
+          -0.048599667847156525
+        ],
+        [
+          0.8583500385284424,
+          0.8766003251075745
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Waist_Back",
+      "vertices": 594,
+      "triangles": 1184,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.1277906745672226,
+          0.1277906596660614
+        ],
+        [
+          0.004754881840199232,
+          0.07069029659032822
+        ],
+        [
+          0.8559992909431458,
+          0.9162657856941223
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Waist_BackSeam",
+      "vertices": 264,
+      "triangles": 524,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.12794025242328644,
+          0.12794025242328644
+        ],
+        [
+          0.00943131372332573,
+          0.06635000556707382
+        ],
+        [
+          0.8583500385284424,
+          0.8766003251075745
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TorsoGlow_-1",
+      "vertices": 138,
+      "triangles": 272,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.11279978603124619,
+          -0.09536661207675934
+        ],
+        [
+          -0.07083319872617722,
+          -0.028349431231617928
+        ],
+        [
+          0.9228936433792114,
+          1.1092298030853271
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ChestAnchor_-1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.007999995723366737,
+          0.007999998517334461
+        ],
+        [
+          -0.0029999990947544575,
+          0.003000000026077032
+        ],
+        [
+          -0.00800000037997961,
+          0.00800000037997961
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TorsoGlow_1",
+      "vertices": 138,
+      "triangles": 272,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.09536661207675934,
+          0.11279978603124619
+        ],
+        [
+          -0.07083319872617722,
+          -0.028349431231617928
+        ],
+        [
+          0.9228936433792114,
+          1.1092298030853271
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ChestAnchor_1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.007999995723366737,
+          0.007999998517334461
+        ],
+        [
+          -0.0029999990947544575,
+          0.003000000026077032
+        ],
+        [
+          -0.00800000037997961,
+          0.00800000037997961
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ChestPinkInsignia",
+      "vertices": 6,
+      "triangles": 8,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.014999999664723873,
+          0.014999999664723873
+        ],
+        [
+          -0.08894868195056915,
+          -0.08005131781101227
+        ],
+        [
+          1.077683687210083,
+          1.0993162393569946
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ChestEmitter",
+      "vertices": 16,
+      "triangles": 28,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.0027000000700354576,
+          0.0027000000700354576
+        ],
+        [
+          -0.09570000320672989,
+          -0.09030000120401382
+        ],
+        [
+          1.0549999475479126,
+          1.0729999542236328
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_PelvisFrontPlate",
+      "vertices": 12,
+      "triangles": 20,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.07199999690055847,
+          0.07199999690055847
+        ],
+        [
+          -0.1140032410621643,
+          -0.10302276164293289
+        ],
+        [
+          0.7826991081237793,
+          0.8889999985694885
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipShell_-1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.03499998152256012,
+          0.034999992698431015
+        ],
+        [
+          -0.06399998068809509,
+          0.06400000303983688
+        ],
+        [
+          -0.061000000685453415,
+          0.061000000685453415
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipJoint_-1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.006999996490776539,
+          0.006999998819082975
+        ],
+        [
+          -0.022999992594122887,
+          0.023000000044703484
+        ],
+        [
+          -0.023000000044703484,
+          0.023000000044703484
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipPinkRing_-1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.0034999982453882694,
+          0.0034999994095414877
+        ],
+        [
+          -0.014999995008111,
+          0.014999999664723873
+        ],
+        [
+          -0.014999999664723873,
+          0.014999999664723873
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipCenter_-1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.0019999989308416843,
+          0.0019999996293336153
+        ],
+        [
+          -0.008999996818602085,
+          0.008999999612569809
+        ],
+        [
+          -0.008999999612569809,
+          0.008999999612569809
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipShell_1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.03499998152256012,
+          0.034999992698431015
+        ],
+        [
+          -0.06399998068809509,
+          0.06400000303983688
+        ],
+        [
+          -0.061000000685453415,
+          0.061000000685453415
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipJoint_1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.006999996490776539,
+          0.006999998819082975
+        ],
+        [
+          -0.022999992594122887,
+          0.023000000044703484
+        ],
+        [
+          -0.023000000044703484,
+          0.023000000044703484
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipPinkRing_1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.0034999982453882694,
+          0.0034999994095414877
+        ],
+        [
+          -0.014999995008111,
+          0.014999999664723873
+        ],
+        [
+          -0.014999999664723873,
+          0.014999999664723873
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HipCenter_1",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.0019999989308416843,
+          0.0019999996293336153
+        ],
+        [
+          -0.008999996818602085,
+          0.008999999612569809
+        ],
+        [
+          -0.008999999612569809,
+          0.008999999612569809
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_NeckSeal",
+      "vertices": 480,
+      "triangles": 960,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.031997453421354294,
+          0.031997453421354294
+        ],
+        [
+          -0.020996885374188423,
+          0.03899688646197319
+        ],
+        [
+          1.149900197982788,
+          1.190099835395813
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_HighCollar",
+      "vertices": 768,
+      "triangles": 1536,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.03950006142258644,
+          0.03950006142258644
+        ],
+        [
+          -0.02849850058555603,
+          0.04649965092539787
+        ],
+        [
+          1.152903437614441,
+          1.192077398300171
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_CollarEmitter",
+      "vertices": 8,
+      "triangles": 12,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.008999999612569809,
+          0.008999999612569809
+        ],
+        [
+          -0.02949913591146469,
+          -0.02750086411833763
+        ],
+        [
+          1.163970708847046,
+          1.1810293197631836
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ArmSeal_L",
+      "vertices": 2016,
+      "triangles": 4032,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.06389816850423813,
+          0.2588805854320526
+        ],
+        [
+          -0.09879344701766968,
+          0.03715929761528969
+        ],
+        [
+          0.9063236713409424,
+          1.13265860080719
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_UpperArmArmor_L",
+      "vertices": 864,
+      "triangles": 1728,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.06862963736057281,
+          0.1993279904127121
+        ],
+        [
+          -0.04223032668232918,
+          0.04186038300395012
+        ],
+        [
+          0.9834569692611694,
+          1.1242178678512573
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_UpperArmEmitter_L",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.10661865770816803,
+          0.16841232776641846
+        ],
+        [
+          -0.044900063425302505,
+          -0.03533640876412392
+        ],
+        [
+          1.0110238790512085,
+          1.0914357900619507
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ForearmArmor_L",
+      "vertices": 864,
+      "triangles": 1728,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.14822866022586823,
+          0.2565152943134308
+        ],
+        [
+          -0.09550756961107254,
+          0.02167496457695961
+        ],
+        [
+          0.9099211692810059,
+          1.0250431299209595
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ForearmEmitter_L",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.18197588622570038,
+          0.22876247763633728
+        ],
+        [
+          -0.09829498082399368,
+          -0.047496333718299866
+        ],
+        [
+          0.9371758699417114,
+          0.9922447800636292
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShoulderCap_L",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.04899997264146805,
+          0.04899999126791954
+        ],
+        [
+          -0.0429999902844429,
+          0.0430000014603138
+        ],
+        [
+          -0.052000001072883606,
+          0.052000001072883606
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShoulderJoint_L",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.010999994352459908,
+          0.010999998077750206
+        ],
+        [
+          -0.007999997586011887,
+          0.00800000037997961
+        ],
+        [
+          -0.017000000923871994,
+          0.017000000923871994
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShoulderPink_L",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.005999996792525053,
+          0.0059999991208314896
+        ],
+        [
+          -0.003999998793005943,
+          0.004000000189989805
+        ],
+        [
+          -0.010999999940395355,
+          0.010999999940395355
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_WristCuff_L",
+      "vertices": 384,
+      "triangles": 768,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.2043912708759308,
+          0.2650558352470398
+        ],
+        [
+          -0.10540669411420822,
+          -0.045960329473018646
+        ],
+        [
+          0.9001765847206116,
+          0.9590142369270325
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_WristPink_L",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.006999996490776539,
+          0.006999998819082975
+        ],
+        [
+          -0.0029999990947544575,
+          0.003000000026077032
+        ],
+        [
+          -0.007000000216066837,
+          0.007000000216066837
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ArmSeal_R",
+      "vertices": 2016,
+      "triangles": 4032,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.25897249579429626,
+          -0.0638420358300209
+        ],
+        [
+          -0.09884262830018997,
+          0.03709614276885986
+        ],
+        [
+          0.9065852165222168,
+          1.1327096223831177
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_UpperArmArmor_R",
+      "vertices": 864,
+      "triangles": 1728,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.19900517165660858,
+          -0.06851960718631744
+        ],
+        [
+          -0.042290620505809784,
+          0.041800614446401596
+        ],
+        [
+          0.9834016561508179,
+          1.1242222785949707
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_UpperArmEmitter_R",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.16806074976921082,
+          -0.10655903816223145
+        ],
+        [
+          -0.04495709389448166,
+          -0.035370148718357086
+        ],
+        [
+          1.01090669631958,
+          1.091530680656433
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ForearmArmor_R",
+      "vertices": 864,
+      "triangles": 1728,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.2565511167049408,
+          -0.14792656898498535
+        ],
+        [
+          -0.09555406868457794,
+          0.021638834848999977
+        ],
+        [
+          0.9101305603981018,
+          1.0249991416931152
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ForearmEmitter_R",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.2288094311952591,
+          -0.18164566159248352
+        ],
+        [
+          -0.09834323823451996,
+          -0.04752963408827782
+        ],
+        [
+          0.937412440776825,
+          0.9921535849571228
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShoulderCap_R",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.04899997264146805,
+          0.04899999126791954
+        ],
+        [
+          -0.0429999902844429,
+          0.0430000014603138
+        ],
+        [
+          -0.052000001072883606,
+          0.052000001072883606
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShoulderJoint_R",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.010999994352459908,
+          0.010999998077750206
+        ],
+        [
+          -0.007999997586011887,
+          0.00800000037997961
+        ],
+        [
+          -0.017000000923871994,
+          0.017000000923871994
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShoulderPink_R",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.005999996792525053,
+          0.0059999991208314896
+        ],
+        [
+          -0.003999998793005943,
+          0.004000000189989805
+        ],
+        [
+          -0.010999999940395355,
+          0.010999999940395355
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_WristCuff_R",
+      "vertices": 384,
+      "triangles": 768,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.26514732837677,
+          -0.2045367807149887
+        ],
+        [
+          -0.10545538365840912,
+          -0.04601442813873291
+        ],
+        [
+          0.9004335999488831,
+          0.9593629240989685
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_WristPink_R",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.006999996490776539,
+          0.006999998819082975
+        ],
+        [
+          -0.0029999990947544575,
+          0.003000000026077032
+        ],
+        [
+          -0.007000000216066837,
+          0.007000000216066837
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_LegSeal_L",
+      "vertices": 5248,
+      "triangles": 10496,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.009999175556004047,
+          0.1444365680217743
+        ],
+        [
+          -0.09386079758405685,
+          0.03598945587873459
+        ],
+        [
+          0.15981954336166382,
+          0.815155029296875
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighFront_L",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.0038601637352257967,
+          0.12961694598197937
+        ],
+        [
+          -0.10084304958581924,
+          -0.03597540408372879
+        ],
+        [
+          0.5137224197387695,
+          0.8620001077651978
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighBack_L",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.0034553194418549538,
+          0.12989243865013123
+        ],
+        [
+          -0.0344705656170845,
+          0.0435016006231308
+        ],
+        [
+          0.5137969851493835,
+          0.8620001077651978
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighCyan_L",
+      "vertices": 168,
+      "triangles": 332,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.12293671071529388,
+          0.13247734308242798
+        ],
+        [
+          -0.06226612627506256,
+          -0.040948785841464996
+        ],
+        [
+          0.5437001585960388,
+          0.8270444869995117
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighPink_L",
+      "vertices": 72,
+      "triangles": 140,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.10342121124267578,
+          0.11271982640028
+        ],
+        [
+          -0.08779890090227127,
+          -0.07517766207456589
+        ],
+        [
+          0.7146138548851013,
+          0.7633861303329468
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShinFront_L",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.03327571600675583,
+          0.15166781842708588
+        ],
+        [
+          -0.07918734848499298,
+          -0.01398422010242939
+        ],
+        [
+          0.18473227322101593,
+          0.46727168560028076
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShinBack_L",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.032863546162843704,
+          0.1519133299589157
+        ],
+        [
+          -0.020584499463438988,
+          0.04332436993718147
+        ],
+        [
+          0.18473167717456818,
+          0.4673565626144409
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShinCyan_L",
+      "vertices": 168,
+      "triangles": 332,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.13091589510440826,
+          0.15422876179218292
+        ],
+        [
+          -0.043733395636081696,
+          -0.01829875074326992
+        ],
+        [
+          0.2146206498146057,
+          0.43266597390174866
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_KneeGuard_L",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.03199998289346695,
+          0.031999994069337845
+        ],
+        [
+          -0.01199999637901783,
+          0.012000000104308128
+        ],
+        [
+          -0.03999999910593033,
+          0.03999999910593033
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_KneeTopAccent_L",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.017999989911913872,
+          0.01799999549984932
+        ],
+        [
+          -0.0029999990947544575,
+          0.003000000026077032
+        ],
+        [
+          -0.007000000216066837,
+          0.007000000216066837
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_LegSeal_R",
+      "vertices": 5248,
+      "triangles": 10496,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.1444365680217743,
+          -0.009999175556004047
+        ],
+        [
+          -0.09386079758405685,
+          0.03598945587873459
+        ],
+        [
+          0.15981954336166382,
+          0.815155029296875
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighFront_R",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.12961694598197937,
+          -0.0038601637352257967
+        ],
+        [
+          -0.10084304958581924,
+          -0.03597540408372879
+        ],
+        [
+          0.5137224197387695,
+          0.8620001077651978
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighBack_R",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.12989243865013123,
+          -0.0034553194418549538
+        ],
+        [
+          -0.0344705656170845,
+          0.0435016006231308
+        ],
+        [
+          0.5137969851493835,
+          0.8620001077651978
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighCyan_R",
+      "vertices": 168,
+      "triangles": 332,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.13247734308242798,
+          -0.12293671071529388
+        ],
+        [
+          -0.06226612627506256,
+          -0.040948785841464996
+        ],
+        [
+          0.5437001585960388,
+          0.8270444869995117
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ThighPink_R",
+      "vertices": 72,
+      "triangles": 140,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.11271982640028,
+          -0.10342121124267578
+        ],
+        [
+          -0.08779890090227127,
+          -0.07517766207456589
+        ],
+        [
+          0.7146138548851013,
+          0.7633861303329468
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShinFront_R",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.15166781842708588,
+          -0.03327571600675583
+        ],
+        [
+          -0.07918734848499298,
+          -0.01398422010242939
+        ],
+        [
+          0.18473227322101593,
+          0.46727168560028076
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShinBack_R",
+      "vertices": 858,
+      "triangles": 1712,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.1519133299589157,
+          -0.032863546162843704
+        ],
+        [
+          -0.020584499463438988,
+          0.04332436993718147
+        ],
+        [
+          0.18473167717456818,
+          0.4673565626144409
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_ShinCyan_R",
+      "vertices": 168,
+      "triangles": 332,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.15422876179218292,
+          -0.13091589510440826
+        ],
+        [
+          -0.043733395636081696,
+          -0.01829875074326992
+        ],
+        [
+          0.2146206498146057,
+          0.43266597390174866
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_KneeGuard_R",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.03199998289346695,
+          0.031999994069337845
+        ],
+        [
+          -0.01199999637901783,
+          0.012000000104308128
+        ],
+        [
+          -0.03999999910593033,
+          0.03999999910593033
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_KneeTopAccent_R",
+      "vertices": 314,
+      "triangles": 624,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.017999989911913872,
+          0.01799999549984932
+        ],
+        [
+          -0.0029999990947544575,
+          0.003000000026077032
+        ],
+        [
+          -0.007000000216066837,
+          0.007000000216066837
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_Shell",
+      "vertices": 3712,
+      "triangles": 7420,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 3,
+      "bounds": [
+        [
+          0.04899999871850014,
+          0.1509999930858612
+        ],
+        [
+          -0.16444195806980133,
+          0.05204910784959793
+        ],
+        [
+          0.017000000923871994,
+          0.1855383813381195
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_Sole",
+      "vertices": 256,
+      "triangles": 508,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.04800000041723251,
+          0.15199999511241913
+        ],
+        [
+          -0.16599999368190765,
+          0.05400000140070915
+        ],
+        [
+          -0.004000000189989805,
+          0.018400000408291817
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_CyanWelt",
+      "vertices": 256,
+      "triangles": 508,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.048500001430511475,
+          0.15150000154972076
+        ],
+        [
+          -0.1655000001192093,
+          0.05350000038743019
+        ],
+        [
+          0.009999999776482582,
+          0.027400000020861626
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_Cuff",
+      "vertices": 256,
+      "triangles": 512,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.0560000017285347,
+          0.1379999965429306
+        ],
+        [
+          -0.05000000074505806,
+          0.04399999976158142
+        ],
+        [
+          0.16699999570846558,
+          0.188314288854599
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_CuffInner",
+      "vertices": 256,
+      "triangles": 512,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.05900000035762787,
+          0.13500000536441803
+        ],
+        [
+          -0.04699999839067459,
+          0.04100000113248825
+        ],
+        [
+          0.17100000381469727,
+          0.18538914620876312
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_CuffCyan",
+      "vertices": 84,
+      "triangles": 164,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.07198553532361984,
+          0.12201446294784546
+        ],
+        [
+          -0.050338104367256165,
+          -0.0378703735768795
+        ],
+        [
+          0.17000000178813934,
+          0.18318650126457214
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_JointHousing",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.13300000131130219,
+          0.14099998772144318
+        ],
+        [
+          -0.015000000596046448,
+          0.013000000268220901
+        ],
+        [
+          0.10900000482797623,
+          0.13700000941753387
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_JointSocket",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.14030000567436218,
+          0.14329999685287476
+        ],
+        [
+          -0.012500000186264515,
+          0.010499999858438969
+        ],
+        [
+          0.11150000244379044,
+          0.13449999690055847
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_JointPink",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.14225000143051147,
+          0.14474999904632568
+        ],
+        [
+          -0.00930000003427267,
+          0.0072999997064471245
+        ],
+        [
+          0.11470000445842743,
+          0.13130000233650208
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_JointCore",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          0.1446000039577484,
+          0.14559999108314514
+        ],
+        [
+          -0.004500000271946192,
+          0.0024999999441206455
+        ],
+        [
+          0.11950000375509262,
+          0.12650001049041748
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_InstepGasket",
+      "vertices": 850,
+      "triangles": 1696,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 3,
+      "bounds": [
+        [
+          0.08180199563503265,
+          0.11527581512928009
+        ],
+        [
+          -0.14577333629131317,
+          -0.03368692100048065
+        ],
+        [
+          0.05111515894532204,
+          0.1581154614686966
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_InstepPlate",
+      "vertices": 850,
+      "triangles": 1696,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 3,
+      "bounds": [
+        [
+          0.08298520743846893,
+          0.11370863020420074
+        ],
+        [
+          -0.14298689365386963,
+          -0.03534584119915962
+        ],
+        [
+          0.05310850962996483,
+          0.15611088275909424
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_L_ToeCyan",
+      "vertices": 128,
+      "triangles": 252,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.11441679298877716,
+          0.11890996992588043
+        ],
+        [
+          -0.15042217075824738,
+          -0.12480044364929199
+        ],
+        [
+          0.044826291501522064,
+          0.061334941536188126
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_RearMount",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.11259539425373077,
+          0.1663046032190323
+        ],
+        [
+          0.011793691664934158,
+          0.0699063092470169
+        ],
+        [
+          1.3659272193908691,
+          1.4073729515075684
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_Housing",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.1245206966996193,
+          0.17147931456565857
+        ],
+        [
+          -0.0021154768764972687,
+          0.054115477949380875
+        ],
+        [
+          1.3568059206008911,
+          1.4211941957473755
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_Recess",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.13864177465438843,
+          0.1701352596282959
+        ],
+        [
+          0.0006695855408906937,
+          0.04174765199422836
+        ],
+        [
+          1.36447012424469,
+          1.4144881963729858
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_PinkRing",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.14329242706298828,
+          0.16867884993553162
+        ],
+        [
+          0.003507675603032112,
+          0.03651386499404907
+        ],
+        [
+          1.369584560394287,
+          1.4096133708953857
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_DarkCore",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.14718514680862427,
+          0.1679804027080536
+        ],
+        [
+          0.005253570154309273,
+          0.032372280955314636
+        ],
+        [
+          1.373212456703186,
+          1.4062250852584839
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_CyanCore",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.15078747272491455,
+          0.16677376627922058
+        ],
+        [
+          0.007555185817182064,
+          0.028273895382881165
+        ],
+        [
+          1.3772952556610107,
+          1.4023220539093018
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_Center",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.15481014549732208,
+          0.16514678299427032
+        ],
+        [
+          0.010346641764044762,
+          0.023685673251748085
+        ],
+        [
+          1.3818858861923218,
+          1.3979109525680542
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_Fin",
+      "vertices": 72,
+      "triangles": 140,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.1399267315864563,
+          0.1546708047389984
+        ],
+        [
+          0.018435513600707054,
+          0.03746650740504265
+        ],
+        [
+          1.4068479537963867,
+          1.449112057685852
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_FinCyan",
+      "vertices": 72,
+      "triangles": 140,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.14767222106456757,
+          0.15323197841644287
+        ],
+        [
+          0.022053297609090805,
+          0.03125021606683731
+        ],
+        [
+          1.4171677827835083,
+          1.4418472051620483
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_Drop",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.14458341896533966,
+          0.1601351797580719
+        ],
+        [
+          0.01354657206684351,
+          0.03191351518034935
+        ],
+        [
+          1.3179501295089722,
+          1.3593233823776245
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_DropCyan",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.15204185247421265,
+          0.1591469794511795
+        ],
+        [
+          0.015949755907058716,
+          0.02465834841132164
+        ],
+        [
+          1.325648546218872,
+          1.3555841445922852
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_L_DropLink",
+      "vertices": 16,
+      "triangles": 28,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          0.1463465392589569,
+          0.1546844094991684
+        ],
+        [
+          0.020194733515381813,
+          0.028032053261995316
+        ],
+        [
+          1.3574258089065552,
+          1.3658527135849
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_Shell",
+      "vertices": 3712,
+      "triangles": 7420,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 3,
+      "bounds": [
+        [
+          -0.1509999930858612,
+          -0.04899999871850014
+        ],
+        [
+          -0.16444195806980133,
+          0.05204910784959793
+        ],
+        [
+          0.017000000923871994,
+          0.1855383813381195
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_Sole",
+      "vertices": 256,
+      "triangles": 508,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.15199999511241913,
+          -0.04800000041723251
+        ],
+        [
+          -0.16599999368190765,
+          0.05400000140070915
+        ],
+        [
+          -0.004000000189989805,
+          0.018400000408291817
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_CyanWelt",
+      "vertices": 256,
+      "triangles": 508,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.15150000154972076,
+          -0.048500001430511475
+        ],
+        [
+          -0.1655000001192093,
+          0.05350000038743019
+        ],
+        [
+          0.009999999776482582,
+          0.027400000020861626
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_Cuff",
+      "vertices": 256,
+      "triangles": 512,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.1379999965429306,
+          -0.0560000017285347
+        ],
+        [
+          -0.05000000074505806,
+          0.04399999976158142
+        ],
+        [
+          0.16699999570846558,
+          0.188314288854599
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_CuffInner",
+      "vertices": 256,
+      "triangles": 512,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.13500000536441803,
+          -0.05900000035762787
+        ],
+        [
+          -0.04699999839067459,
+          0.04100000113248825
+        ],
+        [
+          0.17100000381469727,
+          0.18538914620876312
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_CuffCyan",
+      "vertices": 84,
+      "triangles": 164,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.12201446294784546,
+          -0.07198553532361984
+        ],
+        [
+          -0.050338104367256165,
+          -0.0378703735768795
+        ],
+        [
+          0.17000000178813934,
+          0.18318650126457214
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_JointHousing",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.14099998772144318,
+          -0.13300000131130219
+        ],
+        [
+          -0.015000000596046448,
+          0.013000000268220901
+        ],
+        [
+          0.10900000482797623,
+          0.13700000941753387
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_JointSocket",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.14329999685287476,
+          -0.14030000567436218
+        ],
+        [
+          -0.012500000186264515,
+          0.010499999858438969
+        ],
+        [
+          0.11150000244379044,
+          0.13449999690055847
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_JointPink",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.14474999904632568,
+          -0.14225000143051147
+        ],
+        [
+          -0.00930000003427267,
+          0.0072999997064471245
+        ],
+        [
+          0.11470000445842743,
+          0.13130000233650208
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_JointCore",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 2,
+      "bounds": [
+        [
+          -0.14559999108314514,
+          -0.1446000039577484
+        ],
+        [
+          -0.004500000271946192,
+          0.0024999999441206455
+        ],
+        [
+          0.11950000375509262,
+          0.12650001049041748
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_InstepGasket",
+      "vertices": 850,
+      "triangles": 1696,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 3,
+      "bounds": [
+        [
+          -0.11527581512928009,
+          -0.08180199563503265
+        ],
+        [
+          -0.14577333629131317,
+          -0.03368692100048065
+        ],
+        [
+          0.05111515894532204,
+          0.1581154614686966
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_InstepPlate",
+      "vertices": 850,
+      "triangles": 1696,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 3,
+      "bounds": [
+        [
+          -0.11370863020420074,
+          -0.08298520743846893
+        ],
+        [
+          -0.14298689365386963,
+          -0.03534584119915962
+        ],
+        [
+          0.05310850962996483,
+          0.15611088275909424
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_Boot_R_ToeCyan",
+      "vertices": 128,
+      "triangles": 252,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.11890996992588043,
+          -0.11441679298877716
+        ],
+        [
+          -0.15042217075824738,
+          -0.12480044364929199
+        ],
+        [
+          0.044826291501522064,
+          0.061334941536188126
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_RearMount",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1663046032190323,
+          -0.11259539425373077
+        ],
+        [
+          0.011793691664934158,
+          0.0699063092470169
+        ],
+        [
+          1.3659272193908691,
+          1.4073729515075684
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_Housing",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.17147931456565857,
+          -0.1245206966996193
+        ],
+        [
+          -0.0021154768764972687,
+          0.054115477949380875
+        ],
+        [
+          1.3568059206008911,
+          1.4211941957473755
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_Recess",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1701352596282959,
+          -0.13864177465438843
+        ],
+        [
+          0.0006695855408906937,
+          0.04174765199422836
+        ],
+        [
+          1.36447012424469,
+          1.4144881963729858
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_PinkRing",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.16867884993553162,
+          -0.14329242706298828
+        ],
+        [
+          0.003507675603032112,
+          0.03651386499404907
+        ],
+        [
+          1.369584560394287,
+          1.4096133708953857
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_DarkCore",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1679804027080536,
+          -0.14718514680862427
+        ],
+        [
+          0.005253570154309273,
+          0.032372280955314636
+        ],
+        [
+          1.373212456703186,
+          1.4062250852584839
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_CyanCore",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.16677376627922058,
+          -0.15078747272491455
+        ],
+        [
+          0.007555185817182064,
+          0.028273895382881165
+        ],
+        [
+          1.3772952556610107,
+          1.4023220539093018
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_Center",
+      "vertices": 192,
+      "triangles": 380,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.16514678299427032,
+          -0.15481014549732208
+        ],
+        [
+          0.010346641764044762,
+          0.023685673251748085
+        ],
+        [
+          1.3818858861923218,
+          1.3979109525680542
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_Fin",
+      "vertices": 72,
+      "triangles": 140,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1546708047389984,
+          -0.1399267315864563
+        ],
+        [
+          0.01843550242483616,
+          0.03746649622917175
+        ],
+        [
+          1.4068479537963867,
+          1.4491119384765625
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_FinCyan",
+      "vertices": 72,
+      "triangles": 140,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.15323199331760406,
+          -0.14767222106456757
+        ],
+        [
+          0.0220533087849617,
+          0.031250208616256714
+        ],
+        [
+          1.4171677827835083,
+          1.441847324371338
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_Drop",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1601351797580719,
+          -0.14458341896533966
+        ],
+        [
+          0.013546572998166084,
+          0.03191351518034935
+        ],
+        [
+          1.3179501295089722,
+          1.3593233823776245
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_DropCyan",
+      "vertices": 104,
+      "triangles": 204,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1591469943523407,
+          -0.15204185247421265
+        ],
+        [
+          0.015949755907058716,
+          0.02465834468603134
+        ],
+        [
+          1.325648546218872,
+          1.3555841445922852
+        ]
+      ]
+    },
+    {
+      "name": "SciFiSuit_TailAttach_R_DropLink",
+      "vertices": 16,
+      "triangles": 28,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "degenerate_triangles": 0,
+      "degenerate_uv_triangles": 0,
+      "max_influences": 1,
+      "bounds": [
+        [
+          -0.1546844094991684,
+          -0.1463465392589569
+        ],
+        [
+          0.020194733515381813,
+          0.028032053261995316
+        ],
+        [
+          1.3574258089065552,
+          1.3658527135849
+        ]
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "AS_LunaMk2_Title_A",
+      "frames": [
+        1.0,
+        11.0,
+        21.0,
+        31.0,
+        41.0,
+        51.0,
+        61.0,
+        71.0,
+        81.0,
+        91.0,
+        101.0,
+        111.0,
+        121.0
+      ],
+      "mesh_extremes": {
+        "SciFiSuit_Glove_L": {
+          "min_edge_ratio": 0.4095146024048526,
+          "max_edge_ratio": 2.6188302719173975,
+          "min_triangle_area": 5.028160209689232e-07
+        },
+        "SciFiSuit_Glove_R": {
+          "min_edge_ratio": 0.31064558416867066,
+          "max_edge_ratio": 3.2014115949346897,
+          "min_triangle_area": 5.028266967651459e-07
+        },
+        "SciFiSuit_PelvisUndersuit": {
+          "min_edge_ratio": 0.8638834094206328,
+          "max_edge_ratio": 1.1381943260176264,
+          "min_triangle_area": 5.570166979656575e-06
+        },
+        "SciFiSuit_TorsoFlexibleSeal": {
+          "min_edge_ratio": 0.7839569917715492,
+          "max_edge_ratio": 1.2420731956913222,
+          "min_triangle_area": 3.0818330676143683e-06
+        },
+        "SciFiSuit_Chest_Front": {
+          "min_edge_ratio": 0.9617899672130671,
+          "max_edge_ratio": 1.0025959439071193,
+          "min_triangle_area": 5.8752183823136e-06
+        },
+        "SciFiSuit_Chest_Back": {
+          "min_edge_ratio": 0.9978227920402156,
+          "max_edge_ratio": 1.063362596252831,
+          "min_triangle_area": 5.867075583355429e-06
+        },
+        "SciFiSuit_Abdomen_Front": {
+          "min_edge_ratio": 0.7591886395513863,
+          "max_edge_ratio": 1.0048240082898179,
+          "min_triangle_area": 1.0273955296210041e-05
+        },
+        "SciFiSuit_Abdomen_FrontSeam": {
+          "min_edge_ratio": 0.8678320084343331,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 8.704066765949733e-08
+        },
+        "SciFiSuit_Abdomen_Back": {
+          "min_edge_ratio": 0.9964750056960006,
+          "max_edge_ratio": 1.267760301499452,
+          "min_triangle_area": 1.0014271362812052e-05
+        },
+        "SciFiSuit_Abdomen_BackSeam": {
+          "min_edge_ratio": 1,
+          "max_edge_ratio": 1.1326695128796902,
+          "min_triangle_area": 8.766962983181734e-08
+        },
+        "SciFiSuit_Waist_Front": {
+          "min_edge_ratio": 0.813122264009521,
+          "max_edge_ratio": 1.0054510640451892,
+          "min_triangle_area": 7.870265587100588e-06
+        },
+        "SciFiSuit_Waist_FrontSeam": {
+          "min_edge_ratio": 0.9351911021783913,
+          "max_edge_ratio": 1.0052525662811107,
+          "min_triangle_area": 8.291876154632334e-08
+        },
+        "SciFiSuit_Waist_Back": {
+          "min_edge_ratio": 0.9942227037632542,
+          "max_edge_ratio": 1.1825818609972956,
+          "min_triangle_area": 8.53763773096011e-06
+        },
+        "SciFiSuit_Waist_BackSeam": {
+          "min_edge_ratio": 0.9947157099872534,
+          "max_edge_ratio": 1.0635725987577658,
+          "min_triangle_area": 9.164976815516027e-08
+        },
+        "SciFiSuit_TorsoGlow_-1": {
+          "min_edge_ratio": 0.8742032925048833,
+          "max_edge_ratio": 1.0000400795247488,
+          "min_triangle_area": 7.116108841373468e-07
+        },
+        "SciFiSuit_ChestAnchor_-1": {
+          "min_edge_ratio": 0.9864929214368111,
+          "max_edge_ratio": 1.000424893374658,
+          "min_triangle_area": 1.5478895194484673e-07
+        },
+        "SciFiSuit_TorsoGlow_1": {
+          "min_edge_ratio": 0.8741966762461388,
+          "max_edge_ratio": 1.0000394996995798,
+          "min_triangle_area": 7.116919383546594e-07
+        },
+        "SciFiSuit_ChestAnchor_1": {
+          "min_edge_ratio": 0.9864929214368111,
+          "max_edge_ratio": 1.000424893374658,
+          "min_triangle_area": 1.5477796247754498e-07
+        },
+        "SciFiSuit_ChestPinkInsignia": {
+          "min_edge_ratio": 0.9720262146246805,
+          "max_edge_ratio": 1.000000000007895,
+          "min_triangle_area": 2.5985796305870797e-05
+        },
+        "SciFiSuit_ChestEmitter": {
+          "min_edge_ratio": 0.945008242475496,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.5095002659221992e-06
+        },
+        "SciFiSuit_PelvisFrontPlate": {
+          "min_edge_ratio": 0.999994241019798,
+          "max_edge_ratio": 1.0000007685364332,
+          "min_triangle_area": 0.00011263219599456728
+        },
+        "SciFiSuit_HipShell_-1": {
+          "min_edge_ratio": 0.9999934345855035,
+          "max_edge_ratio": 1.000007985820949,
+          "min_triangle_area": 1.441348910204829e-05
+        },
+        "SciFiSuit_HipJoint_-1": {
+          "min_edge_ratio": 0.9999784996903877,
+          "max_edge_ratio": 1.0000195616972076,
+          "min_triangle_area": 1.0393967724253716e-06
+        },
+        "SciFiSuit_HipPinkRing_-1": {
+          "min_edge_ratio": 0.9999480766543264,
+          "max_edge_ratio": 1.0000208195730884,
+          "min_triangle_area": 3.3919905981830497e-07
+        },
+        "SciFiSuit_HipCenter_-1": {
+          "min_edge_ratio": 0.9999461855018615,
+          "max_edge_ratio": 1.0000640717098919,
+          "min_triangle_area": 1.1632340934059061e-07
+        },
+        "SciFiSuit_HipShell_1": {
+          "min_edge_ratio": 0.9999934670728557,
+          "max_edge_ratio": 1.0000070555413751,
+          "min_triangle_area": 1.4413518660249209e-05
+        },
+        "SciFiSuit_HipJoint_1": {
+          "min_edge_ratio": 0.9999780080297898,
+          "max_edge_ratio": 1.0000171412654948,
+          "min_triangle_area": 1.0394021263861575e-06
+        },
+        "SciFiSuit_HipPinkRing_1": {
+          "min_edge_ratio": 0.9999700301706238,
+          "max_edge_ratio": 1.0000340420108778,
+          "min_triangle_area": 3.3919806544764494e-07
+        },
+        "SciFiSuit_HipCenter_1": {
+          "min_edge_ratio": 0.9999455256595912,
+          "max_edge_ratio": 1.0000533806583685,
+          "min_triangle_area": 1.1632324306009522e-07
+        },
+        "SciFiSuit_NeckSeal": {
+          "min_edge_ratio": 0.7995209946091778,
+          "max_edge_ratio": 1.205367634292116,
+          "min_triangle_area": 3.1244456841803865e-06
+        },
+        "SciFiSuit_HighCollar": {
+          "min_edge_ratio": 0.7397350149575939,
+          "max_edge_ratio": 1.2666406039055718,
+          "min_triangle_area": 4.760630673048663e-06
+        },
+        "SciFiSuit_CollarEmitter": {
+          "min_edge_ratio": 0.9959313617947461,
+          "max_edge_ratio": 1.1916295333725513,
+          "min_triangle_area": 5.987489355586733e-06
+        },
+        "SciFiSuit_ArmSeal_L": {
+          "min_edge_ratio": 0.5008510067513019,
+          "max_edge_ratio": 1.7111115854191739,
+          "min_triangle_area": 1.0426750403678345e-06
+        },
+        "SciFiSuit_UpperArmArmor_L": {
+          "min_edge_ratio": 0.49687554978799925,
+          "max_edge_ratio": 1.2908099318148762,
+          "min_triangle_area": 1.7283398476508847e-06
+        },
+        "SciFiSuit_UpperArmEmitter_L": {
+          "min_edge_ratio": 0.8956981207811828,
+          "max_edge_ratio": 1.205052811575074,
+          "min_triangle_area": 1.0395963112797818e-06
+        },
+        "SciFiSuit_ForearmArmor_L": {
+          "min_edge_ratio": 0.8537909611677528,
+          "max_edge_ratio": 1.8815886732689775,
+          "min_triangle_area": 4.7962608048299075e-06
+        },
+        "SciFiSuit_ForearmEmitter_L": {
+          "min_edge_ratio": 0.9999567964684339,
+          "max_edge_ratio": 1.6279126126695573,
+          "min_triangle_area": 1.0955230815000354e-06
+        },
+        "SciFiSuit_ShoulderCap_L": {
+          "min_edge_ratio": 0.9999471595016655,
+          "max_edge_ratio": 1.0000354214690999,
+          "min_triangle_area": 1.3598782912910118e-05
+        },
+        "SciFiSuit_ShoulderJoint_L": {
+          "min_edge_ratio": 0.999777315675568,
+          "max_edge_ratio": 1.0002004779223144,
+          "min_triangle_area": 5.725245372509497e-07
+        },
+        "SciFiSuit_ShoulderPink_L": {
+          "min_edge_ratio": 0.9994965887864352,
+          "max_edge_ratio": 1.0003724090429813,
+          "min_triangle_area": 1.570838639165037e-07
+        },
+        "SciFiSuit_WristCuff_L": {
+          "min_edge_ratio": 0.9999729607948248,
+          "max_edge_ratio": 1.0000281754107019,
+          "min_triangle_area": 5.1892616086988954e-06
+        },
+        "SciFiSuit_WristPink_L": {
+          "min_edge_ratio": 0.9996592787521831,
+          "max_edge_ratio": 1.0004592493567823,
+          "min_triangle_area": 1.3544868992449662e-07
+        },
+        "SciFiSuit_ArmSeal_R": {
+          "min_edge_ratio": 0.5022443320147643,
+          "max_edge_ratio": 1.6604570878728802,
+          "min_triangle_area": 9.761209708097812e-07
+        },
+        "SciFiSuit_UpperArmArmor_R": {
+          "min_edge_ratio": 0.49166074703835805,
+          "max_edge_ratio": 1.2843187498086452,
+          "min_triangle_area": 3.7135625522514235e-06
+        },
+        "SciFiSuit_UpperArmEmitter_R": {
+          "min_edge_ratio": 0.9056041393291031,
+          "max_edge_ratio": 1.2133665795523392,
+          "min_triangle_area": 1.0531180161758363e-06
+        },
+        "SciFiSuit_ForearmArmor_R": {
+          "min_edge_ratio": 0.8742631547478805,
+          "max_edge_ratio": 1.8206227958663281,
+          "min_triangle_area": 4.79630049931722e-06
+        },
+        "SciFiSuit_ForearmEmitter_R": {
+          "min_edge_ratio": 0.9999437459447487,
+          "max_edge_ratio": 1.6046029976514062,
+          "min_triangle_area": 1.095499786984034e-06
+        },
+        "SciFiSuit_ShoulderCap_R": {
+          "min_edge_ratio": 0.9999478665679795,
+          "max_edge_ratio": 1.0000379182543147,
+          "min_triangle_area": 1.3598853328394041e-05
+        },
+        "SciFiSuit_ShoulderJoint_R": {
+          "min_edge_ratio": 0.9997495665557813,
+          "max_edge_ratio": 1.0002469411568262,
+          "min_triangle_area": 5.724983559490322e-07
+        },
+        "SciFiSuit_ShoulderPink_R": {
+          "min_edge_ratio": 0.9996170304934258,
+          "max_edge_ratio": 1.0004991691564524,
+          "min_triangle_area": 1.5709804485174602e-07
+        },
+        "SciFiSuit_WristCuff_R": {
+          "min_edge_ratio": 0.9999687346802952,
+          "max_edge_ratio": 1.0000293885088132,
+          "min_triangle_area": 5.189267124497539e-06
+        },
+        "SciFiSuit_WristPink_R": {
+          "min_edge_ratio": 0.9996997051724812,
+          "max_edge_ratio": 1.000321342791302,
+          "min_triangle_area": 1.354472949884524e-07
+        },
+        "SciFiSuit_LegSeal_L": {
+          "min_edge_ratio": 0.8165794524152749,
+          "max_edge_ratio": 1.1607831267576643,
+          "min_triangle_area": 2.4481926901905228e-06
+        },
+        "SciFiSuit_ThighFront_L": {
+          "min_edge_ratio": 0.9903098433365127,
+          "max_edge_ratio": 1.134391318547771,
+          "min_triangle_area": 5.795554197996204e-06
+        },
+        "SciFiSuit_ThighBack_L": {
+          "min_edge_ratio": 0.8974861354450531,
+          "max_edge_ratio": 1.0000479923893077,
+          "min_triangle_area": 5.9557405938197845e-06
+        },
+        "SciFiSuit_ThighCyan_L": {
+          "min_edge_ratio": 0.9999865548119741,
+          "max_edge_ratio": 1.0055559683410997,
+          "min_triangle_area": 1.8639523002069827e-06
+        },
+        "SciFiSuit_ThighPink_L": {
+          "min_edge_ratio": 0.9999869468387319,
+          "max_edge_ratio": 1.0000079934464414,
+          "min_triangle_area": 3.3136735295779866e-06
+        },
+        "SciFiSuit_ShinFront_L": {
+          "min_edge_ratio": 0.9916793171721252,
+          "max_edge_ratio": 1.1180138705043736,
+          "min_triangle_area": 4.422402976123831e-06
+        },
+        "SciFiSuit_ShinBack_L": {
+          "min_edge_ratio": 0.9036635952332882,
+          "max_edge_ratio": 1.000007021883265,
+          "min_triangle_area": 4.544952646050248e-06
+        },
+        "SciFiSuit_ShinCyan_L": {
+          "min_edge_ratio": 0.9999921406155615,
+          "max_edge_ratio": 1.000008692992265,
+          "min_triangle_area": 1.863951540402466e-06
+        },
+        "SciFiSuit_KneeGuard_L": {
+          "min_edge_ratio": 0.9853669744473554,
+          "max_edge_ratio": 1.265919026422397,
+          "min_triangle_area": 2.4732456410592205e-06
+        },
+        "SciFiSuit_KneeTopAccent_L": {
+          "min_edge_ratio": 0.9863229463782389,
+          "max_edge_ratio": 1.2432889478970433,
+          "min_triangle_area": 3.2968816122584766e-07
+        },
+        "SciFiSuit_LegSeal_R": {
+          "min_edge_ratio": 0.8159180201877574,
+          "max_edge_ratio": 1.1599469243512648,
+          "min_triangle_area": 2.448190987780789e-06
+        },
+        "SciFiSuit_ThighFront_R": {
+          "min_edge_ratio": 0.990322627858371,
+          "max_edge_ratio": 1.1338572261966147,
+          "min_triangle_area": 5.796639641732498e-06
+        },
+        "SciFiSuit_ThighBack_R": {
+          "min_edge_ratio": 0.8970892914534109,
+          "max_edge_ratio": 1.0000218568137025,
+          "min_triangle_area": 5.954844355507494e-06
+        },
+        "SciFiSuit_ThighCyan_R": {
+          "min_edge_ratio": 0.9999859240386019,
+          "max_edge_ratio": 1.005527922096697,
+          "min_triangle_area": 1.8639512016258906e-06
+        },
+        "SciFiSuit_ThighPink_R": {
+          "min_edge_ratio": 0.9999892393418616,
+          "max_edge_ratio": 1.0000101889038546,
+          "min_triangle_area": 3.3136813223878678e-06
+        },
+        "SciFiSuit_ShinFront_R": {
+          "min_edge_ratio": 0.9916877900355425,
+          "max_edge_ratio": 1.1175469850639053,
+          "min_triangle_area": 4.422181785853542e-06
+        },
+        "SciFiSuit_ShinBack_R": {
+          "min_edge_ratio": 0.9033232767996103,
+          "max_edge_ratio": 1.0000059632084384,
+          "min_triangle_area": 4.545156934888789e-06
+        },
+        "SciFiSuit_ShinCyan_R": {
+          "min_edge_ratio": 0.9999884344833951,
+          "max_edge_ratio": 1.0000119581113198,
+          "min_triangle_area": 1.8639253578585564e-06
+        },
+        "SciFiSuit_KneeGuard_R": {
+          "min_edge_ratio": 0.9852641659638225,
+          "max_edge_ratio": 1.2650050460965536,
+          "min_triangle_area": 2.4731443941837354e-06
+        },
+        "SciFiSuit_KneeTopAccent_R": {
+          "min_edge_ratio": 0.9863301332307018,
+          "max_edge_ratio": 1.2425304004880786,
+          "min_triangle_area": 3.2968201983080294e-07
+        },
+        "SciFiSuit_Boot_L_Shell": {
+          "min_edge_ratio": 0.9306195183407472,
+          "max_edge_ratio": 1.0545720698807042,
+          "min_triangle_area": 2.0113208987432065e-06
+        },
+        "SciFiSuit_Boot_L_Sole": {
+          "min_edge_ratio": 0.9999984486041128,
+          "max_edge_ratio": 1.0000013671084405,
+          "min_triangle_area": 2.6463553491008603e-06
+        },
+        "SciFiSuit_Boot_L_CyanWelt": {
+          "min_edge_ratio": 0.9999983878547992,
+          "max_edge_ratio": 1.0000013928299487,
+          "min_triangle_area": 2.6085745151971684e-06
+        },
+        "SciFiSuit_Boot_L_Cuff": {
+          "min_edge_ratio": 0.9999927438991604,
+          "max_edge_ratio": 1.0000082359532172,
+          "min_triangle_area": 3.4923913612745565e-06
+        },
+        "SciFiSuit_Boot_L_CuffInner": {
+          "min_edge_ratio": 0.9999927404472695,
+          "max_edge_ratio": 1.000009188224986,
+          "min_triangle_area": 3.2458730462813733e-06
+        },
+        "SciFiSuit_Boot_L_CuffCyan": {
+          "min_edge_ratio": 0.9999898528668979,
+          "max_edge_ratio": 1.000007474565235,
+          "min_triangle_area": 1.2287369146330661e-06
+        },
+        "SciFiSuit_Boot_L_JointHousing": {
+          "min_edge_ratio": 0.9989065917852494,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.888990938054145e-07
+        },
+        "SciFiSuit_Boot_L_JointSocket": {
+          "min_edge_ratio": 0.9989051863932243,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.274497562553749e-07
+        },
+        "SciFiSuit_Boot_L_JointPink": {
+          "min_edge_ratio": 0.9989025435448042,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 6.638333164959612e-08
+        },
+        "SciFiSuit_Boot_L_JointCore": {
+          "min_edge_ratio": 0.9988839063209246,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.1803886165969142e-08
+        },
+        "SciFiSuit_Boot_L_InstepGasket": {
+          "min_edge_ratio": 0.9291055892123948,
+          "max_edge_ratio": 1.0000058959476026,
+          "min_triangle_area": 6.548671443910714e-07
+        },
+        "SciFiSuit_Boot_L_InstepPlate": {
+          "min_edge_ratio": 0.9280915338422275,
+          "max_edge_ratio": 1.0000066435549977,
+          "min_triangle_area": 5.962107405836028e-07
+        },
+        "SciFiSuit_Boot_L_ToeCyan": {
+          "min_edge_ratio": 0.9999896708024354,
+          "max_edge_ratio": 1.0000028140848938,
+          "min_triangle_area": 4.6598251627942787e-07
+        },
+        "SciFiSuit_TailAttach_L_RearMount": {
+          "min_edge_ratio": 0.9999166529061292,
+          "max_edge_ratio": 1.0000784190167675,
+          "min_triangle_area": 3.4826414298696556e-07
+        },
+        "SciFiSuit_TailAttach_L_Housing": {
+          "min_edge_ratio": 0.9999561722827641,
+          "max_edge_ratio": 1.0000427840285504,
+          "min_triangle_area": 9.88404545582239e-07
+        },
+        "SciFiSuit_TailAttach_L_Recess": {
+          "min_edge_ratio": 0.9999191128892276,
+          "max_edge_ratio": 1.000098814596787,
+          "min_triangle_area": 6.03208072498548e-07
+        },
+        "SciFiSuit_TailAttach_L_PinkRing": {
+          "min_edge_ratio": 0.9999015554569879,
+          "max_edge_ratio": 1.0001234617563444,
+          "min_triangle_area": 3.8585546934523873e-07
+        },
+        "SciFiSuit_TailAttach_L_DarkCore": {
+          "min_edge_ratio": 0.9998788760026773,
+          "max_edge_ratio": 1.0001381746470064,
+          "min_triangle_area": 2.625689248277204e-07
+        },
+        "SciFiSuit_TailAttach_L_CyanCore": {
+          "min_edge_ratio": 0.9998295379261851,
+          "max_edge_ratio": 1.0001658605979067,
+          "min_triangle_area": 1.506956527735697e-07
+        },
+        "SciFiSuit_TailAttach_L_Center": {
+          "min_edge_ratio": 0.999772044682175,
+          "max_edge_ratio": 1.0002826272385776,
+          "min_triangle_area": 6.164046920717556e-08
+        },
+        "SciFiSuit_TailAttach_L_Fin": {
+          "min_edge_ratio": 0.9997246862551551,
+          "max_edge_ratio": 1.000287821335692,
+          "min_triangle_area": 1.0202220013649778e-07
+        },
+        "SciFiSuit_TailAttach_L_FinCyan": {
+          "min_edge_ratio": 0.999002416431629,
+          "max_edge_ratio": 1.0010854886512133,
+          "min_triangle_area": 8.08157707457216e-09
+        },
+        "SciFiSuit_TailAttach_L_Drop": {
+          "min_edge_ratio": 0.999767655030891,
+          "max_edge_ratio": 1.0001779454483326,
+          "min_triangle_area": 1.2136412022748614e-07
+        },
+        "SciFiSuit_TailAttach_L_DropCyan": {
+          "min_edge_ratio": 0.9995354577935859,
+          "max_edge_ratio": 1.000589293245188,
+          "min_triangle_area": 1.8095847447978537e-08
+        },
+        "SciFiSuit_TailAttach_L_DropLink": {
+          "min_edge_ratio": 0.9999623445371375,
+          "max_edge_ratio": 1.00003700938482,
+          "min_triangle_area": 2.1205975238774326e-06
+        },
+        "SciFiSuit_Boot_R_Shell": {
+          "min_edge_ratio": 0.9307141504209597,
+          "max_edge_ratio": 1.0553605348996171,
+          "min_triangle_area": 2.011320927679042e-06
+        },
+        "SciFiSuit_Boot_R_Sole": {
+          "min_edge_ratio": 0.9999992243023577,
+          "max_edge_ratio": 1.0000004066415513,
+          "min_triangle_area": 2.646355840736455e-06
+        },
+        "SciFiSuit_Boot_R_CyanWelt": {
+          "min_edge_ratio": 0.9999992049700237,
+          "max_edge_ratio": 1.00000062294095,
+          "min_triangle_area": 2.6085754295833008e-06
+        },
+        "SciFiSuit_Boot_R_Cuff": {
+          "min_edge_ratio": 0.9999869336689329,
+          "max_edge_ratio": 1.0000098475272308,
+          "min_triangle_area": 3.4924155183277344e-06
+        },
+        "SciFiSuit_Boot_R_CuffInner": {
+          "min_edge_ratio": 0.9999865892203474,
+          "max_edge_ratio": 1.000004813104856,
+          "min_triangle_area": 3.2458849178411464e-06
+        },
+        "SciFiSuit_Boot_R_CuffCyan": {
+          "min_edge_ratio": 0.9999856697385604,
+          "max_edge_ratio": 1.0000151859843311,
+          "min_triangle_area": 1.22873054499883e-06
+        },
+        "SciFiSuit_Boot_R_JointHousing": {
+          "min_edge_ratio": 0.998894344478721,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.888862955036768e-07
+        },
+        "SciFiSuit_Boot_R_JointSocket": {
+          "min_edge_ratio": 0.9988938602502181,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.2745229394888368e-07
+        },
+        "SciFiSuit_Boot_R_JointPink": {
+          "min_edge_ratio": 0.9988941603645762,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 6.638564641222381e-08
+        },
+        "SciFiSuit_Boot_R_JointCore": {
+          "min_edge_ratio": 0.9988820010839108,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.1802771002825622e-08
+        },
+        "SciFiSuit_Boot_R_InstepGasket": {
+          "min_edge_ratio": 0.9291957971335852,
+          "max_edge_ratio": 1.0000074808834016,
+          "min_triangle_area": 6.548585295632361e-07
+        },
+        "SciFiSuit_Boot_R_InstepPlate": {
+          "min_edge_ratio": 0.9281738352360014,
+          "max_edge_ratio": 1.0000067954511647,
+          "min_triangle_area": 5.961997802069859e-07
+        },
+        "SciFiSuit_Boot_R_ToeCyan": {
+          "min_edge_ratio": 0.9999927878056535,
+          "max_edge_ratio": 1.0000067279716425,
+          "min_triangle_area": 4.659883954804935e-07
+        },
+        "SciFiSuit_TailAttach_R_RearMount": {
+          "min_edge_ratio": 0.9999186797762933,
+          "max_edge_ratio": 1.0000687020267944,
+          "min_triangle_area": 3.4832688261382055e-07
+        },
+        "SciFiSuit_TailAttach_R_Housing": {
+          "min_edge_ratio": 0.9999542321603669,
+          "max_edge_ratio": 1.0000457247140055,
+          "min_triangle_area": 9.883678055284644e-07
+        },
+        "SciFiSuit_TailAttach_R_Recess": {
+          "min_edge_ratio": 0.9999245307137261,
+          "max_edge_ratio": 1.000090065008599,
+          "min_triangle_area": 6.030795946909255e-07
+        },
+        "SciFiSuit_TailAttach_R_PinkRing": {
+          "min_edge_ratio": 0.9998969945649026,
+          "max_edge_ratio": 1.0001004751335925,
+          "min_triangle_area": 3.8586740875870247e-07
+        },
+        "SciFiSuit_TailAttach_R_DarkCore": {
+          "min_edge_ratio": 0.9998332175183078,
+          "max_edge_ratio": 1.0001267842366304,
+          "min_triangle_area": 2.626117268084149e-07
+        },
+        "SciFiSuit_TailAttach_R_CyanCore": {
+          "min_edge_ratio": 0.9998543332590554,
+          "max_edge_ratio": 1.0001848461624763,
+          "min_triangle_area": 1.5067678592923936e-07
+        },
+        "SciFiSuit_TailAttach_R_Center": {
+          "min_edge_ratio": 0.9997482075641595,
+          "max_edge_ratio": 1.0002286516928254,
+          "min_triangle_area": 6.163608792619329e-08
+        },
+        "SciFiSuit_TailAttach_R_Fin": {
+          "min_edge_ratio": 0.9997907191277914,
+          "max_edge_ratio": 1.0002692817725296,
+          "min_triangle_area": 1.0197088231694619e-07
+        },
+        "SciFiSuit_TailAttach_R_FinCyan": {
+          "min_edge_ratio": 0.998309000028964,
+          "max_edge_ratio": 1.002232799358959,
+          "min_triangle_area": 8.076225432888474e-09
+        },
+        "SciFiSuit_TailAttach_R_Drop": {
+          "min_edge_ratio": 0.9997956098086112,
+          "max_edge_ratio": 1.0001961758406235,
+          "min_triangle_area": 1.2136785931371903e-07
+        },
+        "SciFiSuit_TailAttach_R_DropCyan": {
+          "min_edge_ratio": 0.999546895106541,
+          "max_edge_ratio": 1.0006250297652972,
+          "min_triangle_area": 1.8093433193716747e-08
+        },
+        "SciFiSuit_TailAttach_R_DropLink": {
+          "min_edge_ratio": 0.9999714536639096,
+          "max_edge_ratio": 1.0000417121822578,
+          "min_triangle_area": 2.1206696056158027e-06
+        }
+      }
+    },
+    {
+      "name": "AS_LunaMk2_Title_B",
+      "frames": [
+        1.0,
+        11.0,
+        21.0,
+        31.0,
+        41.0,
+        51.0,
+        61.0,
+        71.0,
+        81.0,
+        91.0,
+        101.0,
+        111.0,
+        121.0
+      ],
+      "mesh_extremes": {
+        "SciFiSuit_Glove_L": {
+          "min_edge_ratio": 0.40950399714150276,
+          "max_edge_ratio": 2.618824117655384,
+          "min_triangle_area": 5.028056876595806e-07
+        },
+        "SciFiSuit_Glove_R": {
+          "min_edge_ratio": 0.31064386350728546,
+          "max_edge_ratio": 3.2013979458346413,
+          "min_triangle_area": 5.027959266018307e-07
+        },
+        "SciFiSuit_PelvisUndersuit": {
+          "min_edge_ratio": 0.8639873000456799,
+          "max_edge_ratio": 1.138125877179737,
+          "min_triangle_area": 5.570143595508061e-06
+        },
+        "SciFiSuit_TorsoFlexibleSeal": {
+          "min_edge_ratio": 0.7841227320041664,
+          "max_edge_ratio": 1.2419479374492688,
+          "min_triangle_area": 3.0817316495565993e-06
+        },
+        "SciFiSuit_Chest_Front": {
+          "min_edge_ratio": 0.9617408428332527,
+          "max_edge_ratio": 1.0029592289482685,
+          "min_triangle_area": 5.875252540233474e-06
+        },
+        "SciFiSuit_Chest_Back": {
+          "min_edge_ratio": 0.9973722526282992,
+          "max_edge_ratio": 1.0633641823633655,
+          "min_triangle_area": 5.866946817268575e-06
+        },
+        "SciFiSuit_Abdomen_Front": {
+          "min_edge_ratio": 0.7593822372197854,
+          "max_edge_ratio": 1.0060268998929893,
+          "min_triangle_area": 1.0269301586916113e-05
+        },
+        "SciFiSuit_Abdomen_FrontSeam": {
+          "min_edge_ratio": 0.8677955591242117,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 8.702399850185146e-08
+        },
+        "SciFiSuit_Abdomen_Back": {
+          "min_edge_ratio": 0.9951289186584148,
+          "max_edge_ratio": 1.2676281471161541,
+          "min_triangle_area": 1.0009498641799303e-05
+        },
+        "SciFiSuit_Abdomen_BackSeam": {
+          "min_edge_ratio": 1,
+          "max_edge_ratio": 1.1325802240111478,
+          "min_triangle_area": 8.767070550422227e-08
+        },
+        "SciFiSuit_Waist_Front": {
+          "min_edge_ratio": 0.8132528977910699,
+          "max_edge_ratio": 1.0068475273883193,
+          "min_triangle_area": 7.8686290053717e-06
+        },
+        "SciFiSuit_Waist_FrontSeam": {
+          "min_edge_ratio": 0.9339016904432232,
+          "max_edge_ratio": 1.0065336980661208,
+          "min_triangle_area": 8.278315749341338e-08
+        },
+        "SciFiSuit_Waist_Back": {
+          "min_edge_ratio": 0.9927449273310498,
+          "max_edge_ratio": 1.1825044999428145,
+          "min_triangle_area": 8.527348952452752e-06
+        },
+        "SciFiSuit_Waist_BackSeam": {
+          "min_edge_ratio": 0.9933259216968413,
+          "max_edge_ratio": 1.0644840434019607,
+          "min_triangle_area": 9.158141818921746e-08
+        },
+        "SciFiSuit_TorsoGlow_-1": {
+          "min_edge_ratio": 0.8741286281699183,
+          "max_edge_ratio": 1.0000422211605058,
+          "min_triangle_area": 7.115968544957922e-07
+        },
+        "SciFiSuit_ChestAnchor_-1": {
+          "min_edge_ratio": 0.9860390156942247,
+          "max_edge_ratio": 1.0003534901417979,
+          "min_triangle_area": 1.5479147049502443e-07
+        },
+        "SciFiSuit_TorsoGlow_1": {
+          "min_edge_ratio": 0.8745355692279345,
+          "max_edge_ratio": 1.000048482194168,
+          "min_triangle_area": 7.116845165493962e-07
+        },
+        "SciFiSuit_ChestAnchor_1": {
+          "min_edge_ratio": 0.9866510314067369,
+          "max_edge_ratio": 1.0005973806086732,
+          "min_triangle_area": 1.5479809996179791e-07
+        },
+        "SciFiSuit_ChestPinkInsignia": {
+          "min_edge_ratio": 0.9712910418388077,
+          "max_edge_ratio": 1.0000000567407843,
+          "min_triangle_area": 2.596658986997614e-05
+        },
+        "SciFiSuit_ChestEmitter": {
+          "min_edge_ratio": 0.945044467237635,
+          "max_edge_ratio": 1.0000009897351334,
+          "min_triangle_area": 1.509441557327287e-06
+        },
+        "SciFiSuit_PelvisFrontPlate": {
+          "min_edge_ratio": 0.9999974281077058,
+          "max_edge_ratio": 1.0000008220649463,
+          "min_triangle_area": 0.00011263274848177896
+        },
+        "SciFiSuit_HipShell_-1": {
+          "min_edge_ratio": 0.999992449823789,
+          "max_edge_ratio": 1.0000063511623376,
+          "min_triangle_area": 1.4413445564802851e-05
+        },
+        "SciFiSuit_HipJoint_-1": {
+          "min_edge_ratio": 0.9999500430245623,
+          "max_edge_ratio": 1.0000372785369094,
+          "min_triangle_area": 1.0393400630162305e-06
+        },
+        "SciFiSuit_HipPinkRing_-1": {
+          "min_edge_ratio": 0.9999164388184592,
+          "max_edge_ratio": 1.0000590299176662,
+          "min_triangle_area": 3.3917473047841114e-07
+        },
+        "SciFiSuit_HipCenter_-1": {
+          "min_edge_ratio": 0.9999234151794179,
+          "max_edge_ratio": 1.0001144079357167,
+          "min_triangle_area": 1.163166147440421e-07
+        },
+        "SciFiSuit_HipShell_1": {
+          "min_edge_ratio": 0.9999932862097533,
+          "max_edge_ratio": 1.0000078678967803,
+          "min_triangle_area": 1.4413449295792818e-05
+        },
+        "SciFiSuit_HipJoint_1": {
+          "min_edge_ratio": 0.9999797155833434,
+          "max_edge_ratio": 1.000035518941085,
+          "min_triangle_area": 1.0393718206617083e-06
+        },
+        "SciFiSuit_HipPinkRing_1": {
+          "min_edge_ratio": 0.9999268439299828,
+          "max_edge_ratio": 1.000074475750543,
+          "min_triangle_area": 3.39176096021036e-07
+        },
+        "SciFiSuit_HipCenter_1": {
+          "min_edge_ratio": 0.9998441482966314,
+          "max_edge_ratio": 1.0001713592808108,
+          "min_triangle_area": 1.1629812275747063e-07
+        },
+        "SciFiSuit_NeckSeal": {
+          "min_edge_ratio": 0.8130206366469868,
+          "max_edge_ratio": 1.1929604418152628,
+          "min_triangle_area": 3.125127238554188e-06
+        },
+        "SciFiSuit_HighCollar": {
+          "min_edge_ratio": 0.7565415023464087,
+          "max_edge_ratio": 1.2506933096506252,
+          "min_triangle_area": 4.761651338692569e-06
+        },
+        "SciFiSuit_CollarEmitter": {
+          "min_edge_ratio": 0.9959556099020557,
+          "max_edge_ratio": 1.185840245743981,
+          "min_triangle_area": 5.988753270620715e-06
+        },
+        "SciFiSuit_ArmSeal_L": {
+          "min_edge_ratio": 0.5005482392083815,
+          "max_edge_ratio": 1.7504201665859924,
+          "min_triangle_area": 7.290708780458402e-07
+        },
+        "SciFiSuit_UpperArmArmor_L": {
+          "min_edge_ratio": 0.5014421974452739,
+          "max_edge_ratio": 1.2967951675478535,
+          "min_triangle_area": 8.844661641453307e-07
+        },
+        "SciFiSuit_UpperArmEmitter_L": {
+          "min_edge_ratio": 0.888249723224766,
+          "max_edge_ratio": 1.1984262768567984,
+          "min_triangle_area": 1.0277207533546458e-06
+        },
+        "SciFiSuit_ForearmArmor_L": {
+          "min_edge_ratio": 0.8371204087623042,
+          "max_edge_ratio": 1.9262880791628945,
+          "min_triangle_area": 4.7962476938222894e-06
+        },
+        "SciFiSuit_ForearmEmitter_L": {
+          "min_edge_ratio": 0.9999577859028249,
+          "max_edge_ratio": 1.6491352392670964,
+          "min_triangle_area": 1.0955428004217394e-06
+        },
+        "SciFiSuit_ShoulderCap_L": {
+          "min_edge_ratio": 0.9999647213090126,
+          "max_edge_ratio": 1.0000395226046142,
+          "min_triangle_area": 1.3599108453905263e-05
+        },
+        "SciFiSuit_ShoulderJoint_L": {
+          "min_edge_ratio": 0.9997511550191683,
+          "max_edge_ratio": 1.0002001027345842,
+          "min_triangle_area": 5.724996490635925e-07
+        },
+        "SciFiSuit_ShoulderPink_L": {
+          "min_edge_ratio": 0.9996337675069741,
+          "max_edge_ratio": 1.0005185449125373,
+          "min_triangle_area": 1.571020993933368e-07
+        },
+        "SciFiSuit_WristCuff_L": {
+          "min_edge_ratio": 0.999969384798022,
+          "max_edge_ratio": 1.0000296386923029,
+          "min_triangle_area": 5.189254212505149e-06
+        },
+        "SciFiSuit_WristPink_L": {
+          "min_edge_ratio": 0.999678166375029,
+          "max_edge_ratio": 1.0003010811945696,
+          "min_triangle_area": 1.354475287164799e-07
+        },
+        "SciFiSuit_ArmSeal_R": {
+          "min_edge_ratio": 0.5062173664836829,
+          "max_edge_ratio": 1.6948676102817102,
+          "min_triangle_area": 1.104704044735865e-06
+        },
+        "SciFiSuit_UpperArmArmor_R": {
+          "min_edge_ratio": 0.5000678690983696,
+          "max_edge_ratio": 1.284669921892709,
+          "min_triangle_area": 3.5279516977500315e-06
+        },
+        "SciFiSuit_UpperArmEmitter_R": {
+          "min_edge_ratio": 0.9016631232554639,
+          "max_edge_ratio": 1.1974251713345967,
+          "min_triangle_area": 1.0415747518843624e-06
+        },
+        "SciFiSuit_ForearmArmor_R": {
+          "min_edge_ratio": 0.852377060134089,
+          "max_edge_ratio": 1.8604903901926397,
+          "min_triangle_area": 4.796270525036559e-06
+        },
+        "SciFiSuit_ForearmEmitter_R": {
+          "min_edge_ratio": 0.9999470646553315,
+          "max_edge_ratio": 1.6265248726320827,
+          "min_triangle_area": 1.095467992819727e-06
+        },
+        "SciFiSuit_ShoulderCap_R": {
+          "min_edge_ratio": 0.99996298723951,
+          "max_edge_ratio": 1.0000437555390955,
+          "min_triangle_area": 1.359919213403054e-05
+        },
+        "SciFiSuit_ShoulderJoint_R": {
+          "min_edge_ratio": 0.9997897895827917,
+          "max_edge_ratio": 1.0001621256466178,
+          "min_triangle_area": 5.725172256629169e-07
+        },
+        "SciFiSuit_ShoulderPink_R": {
+          "min_edge_ratio": 0.9995942775658987,
+          "max_edge_ratio": 1.0003735004892065,
+          "min_triangle_area": 1.5709376307213068e-07
+        },
+        "SciFiSuit_WristCuff_R": {
+          "min_edge_ratio": 0.9999636186264974,
+          "max_edge_ratio": 1.0000263749856202,
+          "min_triangle_area": 5.189227552691057e-06
+        },
+        "SciFiSuit_WristPink_R": {
+          "min_edge_ratio": 0.9996662715655991,
+          "max_edge_ratio": 1.0003943545176153,
+          "min_triangle_area": 1.3544958183180425e-07
+        },
+        "SciFiSuit_LegSeal_L": {
+          "min_edge_ratio": 0.7951331702635557,
+          "max_edge_ratio": 1.1768255438255615,
+          "min_triangle_area": 2.44818721690701e-06
+        },
+        "SciFiSuit_ThighFront_L": {
+          "min_edge_ratio": 0.9880772165883592,
+          "max_edge_ratio": 1.1503291157018496,
+          "min_triangle_area": 5.782348395366388e-06
+        },
+        "SciFiSuit_ThighBack_L": {
+          "min_edge_ratio": 0.8887586731062084,
+          "max_edge_ratio": 1.000378866928474,
+          "min_triangle_area": 5.942212732891511e-06
+        },
+        "SciFiSuit_ThighCyan_L": {
+          "min_edge_ratio": 0.9999774194866468,
+          "max_edge_ratio": 1.0060597979138428,
+          "min_triangle_area": 1.8639488742677796e-06
+        },
+        "SciFiSuit_ThighPink_L": {
+          "min_edge_ratio": 0.9999901717359614,
+          "max_edge_ratio": 1.0000103437880448,
+          "min_triangle_area": 3.3136853499811532e-06
+        },
+        "SciFiSuit_ShinFront_L": {
+          "min_edge_ratio": 0.9897645489188506,
+          "max_edge_ratio": 1.1309603421500343,
+          "min_triangle_area": 4.42238759145781e-06
+        },
+        "SciFiSuit_ShinBack_L": {
+          "min_edge_ratio": 0.8956113005219418,
+          "max_edge_ratio": 1.000027125898093,
+          "min_triangle_area": 4.544962682692106e-06
+        },
+        "SciFiSuit_ShinCyan_L": {
+          "min_edge_ratio": 0.9999844948403621,
+          "max_edge_ratio": 1.0000133952198789,
+          "min_triangle_area": 1.8639536116870164e-06
+        },
+        "SciFiSuit_KneeGuard_L": {
+          "min_edge_ratio": 0.9844888862555671,
+          "max_edge_ratio": 1.2931219482382137,
+          "min_triangle_area": 2.471780808443357e-06
+        },
+        "SciFiSuit_KneeTopAccent_L": {
+          "min_edge_ratio": 0.9851221622208002,
+          "max_edge_ratio": 1.2694660710581458,
+          "min_triangle_area": 3.2907627586494305e-07
+        },
+        "SciFiSuit_LegSeal_R": {
+          "min_edge_ratio": 0.8292033140251037,
+          "max_edge_ratio": 1.1493326753153215,
+          "min_triangle_area": 2.4481922108310884e-06
+        },
+        "SciFiSuit_ThighFront_R": {
+          "min_edge_ratio": 0.9916272125343637,
+          "max_edge_ratio": 1.123727953405124,
+          "min_triangle_area": 5.804273367637475e-06
+        },
+        "SciFiSuit_ThighBack_R": {
+          "min_edge_ratio": 0.9026573691169258,
+          "max_edge_ratio": 1.0003307790140192,
+          "min_triangle_area": 5.962730245073106e-06
+        },
+        "SciFiSuit_ThighCyan_R": {
+          "min_edge_ratio": 0.9999023903007195,
+          "max_edge_ratio": 1.004297545896547,
+          "min_triangle_area": 1.8639157219935993e-06
+        },
+        "SciFiSuit_ThighPink_R": {
+          "min_edge_ratio": 0.9999894713569536,
+          "max_edge_ratio": 1.0000111623193506,
+          "min_triangle_area": 3.313660612849005e-06
+        },
+        "SciFiSuit_ShinFront_R": {
+          "min_edge_ratio": 0.9927967904642958,
+          "max_edge_ratio": 1.1091437425329669,
+          "min_triangle_area": 4.4221966734199495e-06
+        },
+        "SciFiSuit_ShinBack_R": {
+          "min_edge_ratio": 0.9094228546671711,
+          "max_edge_ratio": 1.0001464178313013,
+          "min_triangle_area": 4.545169989349525e-06
+        },
+        "SciFiSuit_ShinCyan_R": {
+          "min_edge_ratio": 0.9999900707794338,
+          "max_edge_ratio": 1.0000098842916971,
+          "min_triangle_area": 1.863945108067699e-06
+        },
+        "SciFiSuit_KneeGuard_R": {
+          "min_edge_ratio": 0.9859667118054039,
+          "max_edge_ratio": 1.2478066414804965,
+          "min_triangle_area": 2.4739248199372865e-06
+        },
+        "SciFiSuit_KneeTopAccent_R": {
+          "min_edge_ratio": 0.9872135832569788,
+          "max_edge_ratio": 1.2248392238866113,
+          "min_triangle_area": 3.30336606145976e-07
+        },
+        "SciFiSuit_Boot_L_Shell": {
+          "min_edge_ratio": 0.910998384474954,
+          "max_edge_ratio": 1.0677706596868877,
+          "min_triangle_area": 2.011320927679042e-06
+        },
+        "SciFiSuit_Boot_L_Sole": {
+          "min_edge_ratio": 0.9999992432625459,
+          "max_edge_ratio": 1.0000013671084405,
+          "min_triangle_area": 2.646354939423281e-06
+        },
+        "SciFiSuit_Boot_L_CyanWelt": {
+          "min_edge_ratio": 0.9999992553096907,
+          "max_edge_ratio": 1.0000013928299487,
+          "min_triangle_area": 2.608577258372681e-06
+        },
+        "SciFiSuit_Boot_L_Cuff": {
+          "min_edge_ratio": 0.999990687997384,
+          "max_edge_ratio": 1.0000082549815696,
+          "min_triangle_area": 3.492400070997807e-06
+        },
+        "SciFiSuit_Boot_L_CuffInner": {
+          "min_edge_ratio": 0.9999925224836183,
+          "max_edge_ratio": 1.0000129615055278,
+          "min_triangle_area": 3.2458690066661462e-06
+        },
+        "SciFiSuit_Boot_L_CuffCyan": {
+          "min_edge_ratio": 0.9999945815546978,
+          "max_edge_ratio": 1.0000094945452673,
+          "min_triangle_area": 1.2287395731183678e-06
+        },
+        "SciFiSuit_Boot_L_JointHousing": {
+          "min_edge_ratio": 0.9981358042464573,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.8869016068470176e-07
+        },
+        "SciFiSuit_Boot_L_JointSocket": {
+          "min_edge_ratio": 0.9981332336098878,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.2731426525483503e-07
+        },
+        "SciFiSuit_Boot_L_JointPink": {
+          "min_edge_ratio": 0.9981386242119968,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 6.63179943225654e-08
+        },
+        "SciFiSuit_Boot_L_JointCore": {
+          "min_edge_ratio": 0.9981276243456116,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.1788904998234145e-08
+        },
+        "SciFiSuit_Boot_L_InstepGasket": {
+          "min_edge_ratio": 0.9091741850421976,
+          "max_edge_ratio": 1.0000039584822547,
+          "min_triangle_area": 6.548439106810451e-07
+        },
+        "SciFiSuit_Boot_L_InstepPlate": {
+          "min_edge_ratio": 0.9082445434574393,
+          "max_edge_ratio": 1.0000044682232057,
+          "min_triangle_area": 5.961663037299049e-07
+        },
+        "SciFiSuit_Boot_L_ToeCyan": {
+          "min_edge_ratio": 0.9999974123344185,
+          "max_edge_ratio": 1.0000032269965542,
+          "min_triangle_area": 4.659883954804935e-07
+        },
+        "SciFiSuit_TailAttach_L_RearMount": {
+          "min_edge_ratio": 0.9999329549431341,
+          "max_edge_ratio": 1.0000753492779764,
+          "min_triangle_area": 3.482507464105406e-07
+        },
+        "SciFiSuit_TailAttach_L_Housing": {
+          "min_edge_ratio": 0.9999560572191535,
+          "max_edge_ratio": 1.0000444442310321,
+          "min_triangle_area": 9.884133024903983e-07
+        },
+        "SciFiSuit_TailAttach_L_Recess": {
+          "min_edge_ratio": 0.9999055368154826,
+          "max_edge_ratio": 1.0001027448377955,
+          "min_triangle_area": 6.030677399605674e-07
+        },
+        "SciFiSuit_TailAttach_L_PinkRing": {
+          "min_edge_ratio": 0.9998877436040639,
+          "max_edge_ratio": 1.0000966669712767,
+          "min_triangle_area": 3.8595182282252514e-07
+        },
+        "SciFiSuit_TailAttach_L_DarkCore": {
+          "min_edge_ratio": 0.9998655727135309,
+          "max_edge_ratio": 1.0001329698168329,
+          "min_triangle_area": 2.625552566464588e-07
+        },
+        "SciFiSuit_TailAttach_L_CyanCore": {
+          "min_edge_ratio": 0.9998595876949158,
+          "max_edge_ratio": 1.000160253972401,
+          "min_triangle_area": 1.5066339622909969e-07
+        },
+        "SciFiSuit_TailAttach_L_Center": {
+          "min_edge_ratio": 0.9997676002448521,
+          "max_edge_ratio": 1.0002720373168998,
+          "min_triangle_area": 6.166136209714981e-08
+        },
+        "SciFiSuit_TailAttach_L_Fin": {
+          "min_edge_ratio": 0.9997129512296088,
+          "max_edge_ratio": 1.0001961307417793,
+          "min_triangle_area": 1.0202547435777377e-07
+        },
+        "SciFiSuit_TailAttach_L_FinCyan": {
+          "min_edge_ratio": 0.9992236553218986,
+          "max_edge_ratio": 1.0009766986399105,
+          "min_triangle_area": 8.08065161893068e-09
+        },
+        "SciFiSuit_TailAttach_L_Drop": {
+          "min_edge_ratio": 0.9998146651507566,
+          "max_edge_ratio": 1.0002681728406377,
+          "min_triangle_area": 1.2137589717398053e-07
+        },
+        "SciFiSuit_TailAttach_L_DropCyan": {
+          "min_edge_ratio": 0.9995158288843412,
+          "max_edge_ratio": 1.00055880954834,
+          "min_triangle_area": 1.8092367403593463e-08
+        },
+        "SciFiSuit_TailAttach_L_DropLink": {
+          "min_edge_ratio": 0.9999624558898478,
+          "max_edge_ratio": 1.0000359480670373,
+          "min_triangle_area": 2.1206605468033295e-06
+        },
+        "SciFiSuit_Boot_R_Shell": {
+          "min_edge_ratio": 0.9601941271379949,
+          "max_edge_ratio": 1.0579721268440339,
+          "min_triangle_area": 2.011320927679042e-06
+        },
+        "SciFiSuit_Boot_R_Sole": {
+          "min_edge_ratio": 0.999997941169518,
+          "max_edge_ratio": 1.0000016018777917,
+          "min_triangle_area": 2.646315772135912e-06
+        },
+        "SciFiSuit_Boot_R_CyanWelt": {
+          "min_edge_ratio": 0.9999972836203446,
+          "max_edge_ratio": 1.0000029386392684,
+          "min_triangle_area": 2.6084417595546726e-06
+        },
+        "SciFiSuit_Boot_R_Cuff": {
+          "min_edge_ratio": 0.9999911402512298,
+          "max_edge_ratio": 1.0000132928223828,
+          "min_triangle_area": 3.492410872566996e-06
+        },
+        "SciFiSuit_Boot_R_CuffInner": {
+          "min_edge_ratio": 0.9999895878540148,
+          "max_edge_ratio": 1.0000128332307994,
+          "min_triangle_area": 3.245872442427065e-06
+        },
+        "SciFiSuit_Boot_R_CuffCyan": {
+          "min_edge_ratio": 0.9999853323478678,
+          "max_edge_ratio": 1.0000114019603252,
+          "min_triangle_area": 1.2287208157324101e-06
+        },
+        "SciFiSuit_Boot_R_JointHousing": {
+          "min_edge_ratio": 0.9987492300437913,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.8903343375779054e-07
+        },
+        "SciFiSuit_Boot_R_JointSocket": {
+          "min_edge_ratio": 0.9987488049767294,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.2754969296152003e-07
+        },
+        "SciFiSuit_Boot_R_JointPink": {
+          "min_edge_ratio": 0.9987289495433486,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 6.643966844504235e-08
+        },
+        "SciFiSuit_Boot_R_JointCore": {
+          "min_edge_ratio": 0.9987134757737347,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.1808049620343784e-08
+        },
+        "SciFiSuit_Boot_R_InstepGasket": {
+          "min_edge_ratio": 0.9883796384856472,
+          "max_edge_ratio": 1.0375254669850589,
+          "min_triangle_area": 6.54857364438188e-07
+        },
+        "SciFiSuit_Boot_R_InstepPlate": {
+          "min_edge_ratio": 0.9899533160845435,
+          "max_edge_ratio": 1.0359214122008464,
+          "min_triangle_area": 5.961984552065306e-07
+        },
+        "SciFiSuit_Boot_R_ToeCyan": {
+          "min_edge_ratio": 0.9999878379718978,
+          "max_edge_ratio": 1.0000131322365988,
+          "min_triangle_area": 4.659756872812565e-07
+        },
+        "SciFiSuit_TailAttach_R_RearMount": {
+          "min_edge_ratio": 0.999914398247051,
+          "max_edge_ratio": 1.0000753620875797,
+          "min_triangle_area": 3.482742608313097e-07
+        },
+        "SciFiSuit_TailAttach_R_Housing": {
+          "min_edge_ratio": 0.9999488760436991,
+          "max_edge_ratio": 1.0000484502431923,
+          "min_triangle_area": 9.884542102394349e-07
+        },
+        "SciFiSuit_TailAttach_R_Recess": {
+          "min_edge_ratio": 0.9999165473367954,
+          "max_edge_ratio": 1.0000847755793987,
+          "min_triangle_area": 6.030869616661465e-07
+        },
+        "SciFiSuit_TailAttach_R_PinkRing": {
+          "min_edge_ratio": 0.9999003642530754,
+          "max_edge_ratio": 1.0001112580495717,
+          "min_triangle_area": 3.859176018955917e-07
+        },
+        "SciFiSuit_TailAttach_R_DarkCore": {
+          "min_edge_ratio": 0.9998568461676145,
+          "max_edge_ratio": 1.0001124850668344,
+          "min_triangle_area": 2.625905924055913e-07
+        },
+        "SciFiSuit_TailAttach_R_CyanCore": {
+          "min_edge_ratio": 0.9998373578316649,
+          "max_edge_ratio": 1.0001791156585875,
+          "min_triangle_area": 1.5070036764455848e-07
+        },
+        "SciFiSuit_TailAttach_R_Center": {
+          "min_edge_ratio": 0.9997761148156683,
+          "max_edge_ratio": 1.0002373604401484,
+          "min_triangle_area": 6.166834469051314e-08
+        },
+        "SciFiSuit_TailAttach_R_Fin": {
+          "min_edge_ratio": 0.9995744255253505,
+          "max_edge_ratio": 1.0002394535544588,
+          "min_triangle_area": 1.019837629879502e-07
+        },
+        "SciFiSuit_TailAttach_R_FinCyan": {
+          "min_edge_ratio": 0.9982631906063263,
+          "max_edge_ratio": 1.0014242877161883,
+          "min_triangle_area": 8.075845324269967e-09
+        },
+        "SciFiSuit_TailAttach_R_Drop": {
+          "min_edge_ratio": 0.9998068648155718,
+          "max_edge_ratio": 1.0002088003921705,
+          "min_triangle_area": 1.2137426155530123e-07
+        },
+        "SciFiSuit_TailAttach_R_DropCyan": {
+          "min_edge_ratio": 0.9994505519419543,
+          "max_edge_ratio": 1.0005563787344287,
+          "min_triangle_area": 1.8096491962636993e-08
+        },
+        "SciFiSuit_TailAttach_R_DropLink": {
+          "min_edge_ratio": 0.9999635386166192,
+          "max_edge_ratio": 1.0000278412677084,
+          "min_triangle_area": 2.1206523826552322e-06
+        }
+      }
+    },
+    {
+      "name": "AS_LunaMk2_Title_C",
+      "frames": [
+        1.0,
+        8.5,
+        16.0,
+        23.5,
+        31.0,
+        38.5,
+        46.0,
+        53.5,
+        61.0,
+        68.5,
+        76.0,
+        83.5,
+        91.0
+      ],
+      "mesh_extremes": {
+        "SciFiSuit_Glove_L": {
+          "min_edge_ratio": 0.40957574618927695,
+          "max_edge_ratio": 2.618839353180051,
+          "min_triangle_area": 5.028467063105366e-07
+        },
+        "SciFiSuit_Glove_R": {
+          "min_edge_ratio": 0.3106423302638315,
+          "max_edge_ratio": 3.2014391167756124,
+          "min_triangle_area": 5.028003890502964e-07
+        },
+        "SciFiSuit_PelvisUndersuit": {
+          "min_edge_ratio": 0.8696210670240995,
+          "max_edge_ratio": 1.1323917349310624,
+          "min_triangle_area": 5.570142709871955e-06
+        },
+        "SciFiSuit_TorsoFlexibleSeal": {
+          "min_edge_ratio": 0.7980132459954681,
+          "max_edge_ratio": 1.2263010989791585,
+          "min_triangle_area": 3.081940972903942e-06
+        },
+        "SciFiSuit_Chest_Front": {
+          "min_edge_ratio": 0.9648956669806522,
+          "max_edge_ratio": 1.0023980422830794,
+          "min_triangle_area": 5.875270587359238e-06
+        },
+        "SciFiSuit_Chest_Back": {
+          "min_edge_ratio": 0.9980002298350671,
+          "max_edge_ratio": 1.05811628880733,
+          "min_triangle_area": 5.867149038633036e-06
+        },
+        "SciFiSuit_Abdomen_Front": {
+          "min_edge_ratio": 0.7749403264227456,
+          "max_edge_ratio": 1.00449120448147,
+          "min_triangle_area": 1.0275168219324937e-05
+        },
+        "SciFiSuit_Abdomen_FrontSeam": {
+          "min_edge_ratio": 0.8734695933773754,
+          "max_edge_ratio": 1.000014835566639,
+          "min_triangle_area": 8.706949173473122e-08
+        },
+        "SciFiSuit_Abdomen_Back": {
+          "min_edge_ratio": 0.9966723719250866,
+          "max_edge_ratio": 1.250320697911848,
+          "min_triangle_area": 1.001421742739806e-05
+        },
+        "SciFiSuit_Abdomen_BackSeam": {
+          "min_edge_ratio": 1,
+          "max_edge_ratio": 1.1270305685300468,
+          "min_triangle_area": 8.766881735342631e-08
+        },
+        "SciFiSuit_Waist_Front": {
+          "min_edge_ratio": 0.8210196224835734,
+          "max_edge_ratio": 1.0052270350326036,
+          "min_triangle_area": 7.887765812376532e-06
+        },
+        "SciFiSuit_Waist_FrontSeam": {
+          "min_edge_ratio": 0.9378087140731118,
+          "max_edge_ratio": 1.0050296547697233,
+          "min_triangle_area": 8.309420421222506e-08
+        },
+        "SciFiSuit_Waist_Back": {
+          "min_edge_ratio": 0.9944691369721871,
+          "max_edge_ratio": 1.1749351051160808,
+          "min_triangle_area": 8.537633248180689e-06
+        },
+        "SciFiSuit_Waist_BackSeam": {
+          "min_edge_ratio": 0.9949355283430155,
+          "max_edge_ratio": 1.0609697478075544,
+          "min_triangle_area": 9.16593045295686e-08
+        },
+        "SciFiSuit_TorsoGlow_-1": {
+          "min_edge_ratio": 0.8824589595760565,
+          "max_edge_ratio": 1.000058431445967,
+          "min_triangle_area": 7.116210669066061e-07
+        },
+        "SciFiSuit_ChestAnchor_-1": {
+          "min_edge_ratio": 0.9876753137700324,
+          "max_edge_ratio": 1.0004414991580615,
+          "min_triangle_area": 1.5479595249982643e-07
+        },
+        "SciFiSuit_TorsoGlow_1": {
+          "min_edge_ratio": 0.8824523571339055,
+          "max_edge_ratio": 1.000044901001539,
+          "min_triangle_area": 7.116914762810946e-07
+        },
+        "SciFiSuit_ChestAnchor_1": {
+          "min_edge_ratio": 0.9876017401209867,
+          "max_edge_ratio": 1.0004375085328088,
+          "min_triangle_area": 1.5475664971819456e-07
+        },
+        "SciFiSuit_ChestPinkInsignia": {
+          "min_edge_ratio": 0.974325609714243,
+          "max_edge_ratio": 1.0000005335700919,
+          "min_triangle_area": 2.6047607981055146e-05
+        },
+        "SciFiSuit_ChestEmitter": {
+          "min_edge_ratio": 0.9495378101732916,
+          "max_edge_ratio": 1.0000016286912345,
+          "min_triangle_area": 1.5095667880948877e-06
+        },
+        "SciFiSuit_PelvisFrontPlate": {
+          "min_edge_ratio": 0.9999926067565741,
+          "max_edge_ratio": 1.0000064999954874,
+          "min_triangle_area": 0.00011263219229816737
+        },
+        "SciFiSuit_HipShell_-1": {
+          "min_edge_ratio": 0.9999892927084112,
+          "max_edge_ratio": 1.0000101427089754,
+          "min_triangle_area": 1.4413370981471402e-05
+        },
+        "SciFiSuit_HipJoint_-1": {
+          "min_edge_ratio": 0.9999268452354414,
+          "max_edge_ratio": 1.0000679986103143,
+          "min_triangle_area": 1.0393275951893216e-06
+        },
+        "SciFiSuit_HipPinkRing_-1": {
+          "min_edge_ratio": 0.999890081481723,
+          "max_edge_ratio": 1.000082149591294,
+          "min_triangle_area": 3.391614108071277e-07
+        },
+        "SciFiSuit_HipCenter_-1": {
+          "min_edge_ratio": 0.9998522429074755,
+          "max_edge_ratio": 1.0002339549521582,
+          "min_triangle_area": 1.1630696968362335e-07
+        },
+        "SciFiSuit_HipShell_1": {
+          "min_edge_ratio": 0.9999898745440362,
+          "max_edge_ratio": 1.0000076228840746,
+          "min_triangle_area": 1.4413435348768173e-05
+        },
+        "SciFiSuit_HipJoint_1": {
+          "min_edge_ratio": 0.999959885850677,
+          "max_edge_ratio": 1.0000606336984332,
+          "min_triangle_area": 1.0393477683623529e-06
+        },
+        "SciFiSuit_HipPinkRing_1": {
+          "min_edge_ratio": 0.9998990877432651,
+          "max_edge_ratio": 1.000082149591294,
+          "min_triangle_area": 3.3917414636001636e-07
+        },
+        "SciFiSuit_HipCenter_1": {
+          "min_edge_ratio": 0.9998807719137208,
+          "max_edge_ratio": 1.000190680879497,
+          "min_triangle_area": 1.1630968417797239e-07
+        },
+        "SciFiSuit_NeckSeal": {
+          "min_edge_ratio": 0.803727630326205,
+          "max_edge_ratio": 1.2011011811981867,
+          "min_triangle_area": 3.1246882061095715e-06
+        },
+        "SciFiSuit_HighCollar": {
+          "min_edge_ratio": 0.7449677526831449,
+          "max_edge_ratio": 1.2613080826723118,
+          "min_triangle_area": 4.761044623323677e-06
+        },
+        "SciFiSuit_CollarEmitter": {
+          "min_edge_ratio": 0.9961556265797606,
+          "max_edge_ratio": 1.1868708185384442,
+          "min_triangle_area": 5.987908975402313e-06
+        },
+        "SciFiSuit_ArmSeal_L": {
+          "min_edge_ratio": 0.5016318105336512,
+          "max_edge_ratio": 1.7111193493493746,
+          "min_triangle_area": 1.044440845696667e-06
+        },
+        "SciFiSuit_UpperArmArmor_L": {
+          "min_edge_ratio": 0.499549766188212,
+          "max_edge_ratio": 1.2908101744408624,
+          "min_triangle_area": 1.728302593926645e-06
+        },
+        "SciFiSuit_UpperArmEmitter_L": {
+          "min_edge_ratio": 0.895688136936286,
+          "max_edge_ratio": 1.2013798383335856,
+          "min_triangle_area": 1.0395739532133308e-06
+        },
+        "SciFiSuit_ForearmArmor_L": {
+          "min_edge_ratio": 0.8537892891109229,
+          "max_edge_ratio": 1.8815928120454462,
+          "min_triangle_area": 4.796239329884911e-06
+        },
+        "SciFiSuit_ForearmEmitter_L": {
+          "min_edge_ratio": 0.9999496193927322,
+          "max_edge_ratio": 1.6279354803978783,
+          "min_triangle_area": 1.0955052302503904e-06
+        },
+        "SciFiSuit_ShoulderCap_L": {
+          "min_edge_ratio": 0.9999677548694865,
+          "max_edge_ratio": 1.0000260424697094,
+          "min_triangle_area": 1.3599084727434583e-05
+        },
+        "SciFiSuit_ShoulderJoint_L": {
+          "min_edge_ratio": 0.9998704384578828,
+          "max_edge_ratio": 1.0001282726679106,
+          "min_triangle_area": 5.725596913407364e-07
+        },
+        "SciFiSuit_ShoulderPink_L": {
+          "min_edge_ratio": 0.9996839004767482,
+          "max_edge_ratio": 1.000296475415059,
+          "min_triangle_area": 1.5710982402989392e-07
+        },
+        "SciFiSuit_WristCuff_L": {
+          "min_edge_ratio": 0.9999672237879916,
+          "max_edge_ratio": 1.000026990947428,
+          "min_triangle_area": 5.18927034204404e-06
+        },
+        "SciFiSuit_WristPink_L": {
+          "min_edge_ratio": 0.9996135879943302,
+          "max_edge_ratio": 1.0003611309700982,
+          "min_triangle_area": 1.354400245946794e-07
+        },
+        "SciFiSuit_ArmSeal_R": {
+          "min_edge_ratio": 0.5022426681634878,
+          "max_edge_ratio": 1.6604625643853013,
+          "min_triangle_area": 1.0337790077536524e-06
+        },
+        "SciFiSuit_UpperArmArmor_R": {
+          "min_edge_ratio": 0.4928541532792096,
+          "max_edge_ratio": 1.2843223771084753,
+          "min_triangle_area": 3.7135625522514235e-06
+        },
+        "SciFiSuit_UpperArmEmitter_R": {
+          "min_edge_ratio": 0.9055876257224698,
+          "max_edge_ratio": 1.209566268267616,
+          "min_triangle_area": 1.0531139159482397e-06
+        },
+        "SciFiSuit_ForearmArmor_R": {
+          "min_edge_ratio": 0.874262618033483,
+          "max_edge_ratio": 1.8206289923588503,
+          "min_triangle_area": 4.796258815575886e-06
+        },
+        "SciFiSuit_ForearmEmitter_R": {
+          "min_edge_ratio": 0.9999497549719902,
+          "max_edge_ratio": 1.6046442051447039,
+          "min_triangle_area": 1.0955026941864757e-06
+        },
+        "SciFiSuit_ShoulderCap_R": {
+          "min_edge_ratio": 0.9999662274547019,
+          "max_edge_ratio": 1.0000345854802646,
+          "min_triangle_area": 1.3599092723961416e-05
+        },
+        "SciFiSuit_ShoulderJoint_R": {
+          "min_edge_ratio": 0.9998465942948147,
+          "max_edge_ratio": 1.0002140599302538,
+          "min_triangle_area": 5.725885740134217e-07
+        },
+        "SciFiSuit_ShoulderPink_R": {
+          "min_edge_ratio": 0.9997917049123171,
+          "max_edge_ratio": 1.0003330077870092,
+          "min_triangle_area": 1.571259493831396e-07
+        },
+        "SciFiSuit_WristCuff_R": {
+          "min_edge_ratio": 0.9999686809156757,
+          "max_edge_ratio": 1.0000312401800204,
+          "min_triangle_area": 5.1892126348356345e-06
+        },
+        "SciFiSuit_WristPink_R": {
+          "min_edge_ratio": 0.9997733220779524,
+          "max_edge_ratio": 1.00033629072166,
+          "min_triangle_area": 1.354742132717753e-07
+        },
+        "SciFiSuit_LegSeal_L": {
+          "min_edge_ratio": 0.7460143915587301,
+          "max_edge_ratio": 1.212606532301076,
+          "min_triangle_area": 2.448173694874008e-06
+        },
+        "SciFiSuit_ThighFront_L": {
+          "min_edge_ratio": 0.982106451886254,
+          "max_edge_ratio": 1.1873126969134342,
+          "min_triangle_area": 5.747500765382353e-06
+        },
+        "SciFiSuit_ThighBack_L": {
+          "min_edge_ratio": 0.872120432609251,
+          "max_edge_ratio": 1.0005303603750595,
+          "min_triangle_area": 5.9063735304907525e-06
+        },
+        "SciFiSuit_ThighCyan_L": {
+          "min_edge_ratio": 0.9999774651083233,
+          "max_edge_ratio": 1.00864765894082,
+          "min_triangle_area": 1.8639157894775466e-06
+        },
+        "SciFiSuit_ThighPink_L": {
+          "min_edge_ratio": 0.9999831819915228,
+          "max_edge_ratio": 1.0000139428266115,
+          "min_triangle_area": 3.313646039495176e-06
+        },
+        "SciFiSuit_ShinFront_L": {
+          "min_edge_ratio": 0.9846394415611699,
+          "max_edge_ratio": 1.1604005853422612,
+          "min_triangle_area": 4.422372888214827e-06
+        },
+        "SciFiSuit_ShinBack_L": {
+          "min_edge_ratio": 0.8784384730369729,
+          "max_edge_ratio": 1.0002532136781535,
+          "min_triangle_area": 4.544932877797155e-06
+        },
+        "SciFiSuit_ShinCyan_L": {
+          "min_edge_ratio": 0.9999810721416595,
+          "max_edge_ratio": 1.0000198762913555,
+          "min_triangle_area": 1.863933934504464e-06
+        },
+        "SciFiSuit_KneeGuard_L": {
+          "min_edge_ratio": 0.9776983711675826,
+          "max_edge_ratio": 1.3541425182995896,
+          "min_triangle_area": 2.463741360780752e-06
+        },
+        "SciFiSuit_KneeTopAccent_L": {
+          "min_edge_ratio": 0.9826051210386127,
+          "max_edge_ratio": 1.328986434987244,
+          "min_triangle_area": 3.2679964717563904e-07
+        },
+        "SciFiSuit_LegSeal_R": {
+          "min_edge_ratio": 0.6498030492206996,
+          "max_edge_ratio": 1.2828824370459517,
+          "min_triangle_area": 2.4481797706338295e-06
+        },
+        "SciFiSuit_ThighFront_R": {
+          "min_edge_ratio": 0.9676507867595863,
+          "max_edge_ratio": 1.2571038902816936,
+          "min_triangle_area": 5.66375224980402e-06
+        },
+        "SciFiSuit_ThighBack_R": {
+          "min_edge_ratio": 0.8501000888021857,
+          "max_edge_ratio": 1.0025055044494906,
+          "min_triangle_area": 5.818374270898165e-06
+        },
+        "SciFiSuit_ThighCyan_R": {
+          "min_edge_ratio": 0.9999773684273628,
+          "max_edge_ratio": 1.0128652710372832,
+          "min_triangle_area": 1.863935259630398e-06
+        },
+        "SciFiSuit_ThighPink_R": {
+          "min_edge_ratio": 0.9999858869837108,
+          "max_edge_ratio": 1.0000177082808097,
+          "min_triangle_area": 3.3136613858392514e-06
+        },
+        "SciFiSuit_ShinFront_R": {
+          "min_edge_ratio": 0.9722652908892675,
+          "max_edge_ratio": 1.213560185505255,
+          "min_triangle_area": 4.422159897544275e-06
+        },
+        "SciFiSuit_ShinBack_R": {
+          "min_edge_ratio": 0.8550802095527263,
+          "max_edge_ratio": 1.0015776744902287,
+          "min_triangle_area": 4.545154192795012e-06
+        },
+        "SciFiSuit_ShinCyan_R": {
+          "min_edge_ratio": 0.9999790467829925,
+          "max_edge_ratio": 1.0000217585266387,
+          "min_triangle_area": 1.8639070294954334e-06
+        },
+        "SciFiSuit_KneeGuard_R": {
+          "min_edge_ratio": 0.9593665694550523,
+          "max_edge_ratio": 1.4613939147564532,
+          "min_triangle_area": 2.449763423796024e-06
+        },
+        "SciFiSuit_KneeTopAccent_R": {
+          "min_edge_ratio": 0.9753710800834428,
+          "max_edge_ratio": 1.4365135757470844,
+          "min_triangle_area": 3.2206626547810645e-07
+        },
+        "SciFiSuit_Boot_L_Shell": {
+          "min_edge_ratio": 0.864819296238652,
+          "max_edge_ratio": 1.1197308795679164,
+          "min_triangle_area": 2.0112990630152913e-06
+        },
+        "SciFiSuit_Boot_L_Sole": {
+          "min_edge_ratio": 0.999996630685784,
+          "max_edge_ratio": 1.0000041013197063,
+          "min_triangle_area": 2.646237353935393e-06
+        },
+        "SciFiSuit_Boot_L_CyanWelt": {
+          "min_edge_ratio": 0.9999956383699627,
+          "max_edge_ratio": 1.0000041073450021,
+          "min_triangle_area": 2.608416528809555e-06
+        },
+        "SciFiSuit_Boot_L_Cuff": {
+          "min_edge_ratio": 0.9999832221618093,
+          "max_edge_ratio": 1.0000159099002381,
+          "min_triangle_area": 3.4923846662860895e-06
+        },
+        "SciFiSuit_Boot_L_CuffInner": {
+          "min_edge_ratio": 0.9999858690302981,
+          "max_edge_ratio": 1.0000143894187576,
+          "min_triangle_area": 3.245863178132511e-06
+        },
+        "SciFiSuit_Boot_L_CuffCyan": {
+          "min_edge_ratio": 0.9999743965421903,
+          "max_edge_ratio": 1.0000265018977028,
+          "min_triangle_area": 1.228730015659369e-06
+        },
+        "SciFiSuit_Boot_L_JointHousing": {
+          "min_edge_ratio": 0.9764367366063635,
+          "max_edge_ratio": 1.0000002785332796,
+          "min_triangle_area": 1.8441957957457502e-07
+        },
+        "SciFiSuit_Boot_L_JointSocket": {
+          "min_edge_ratio": 0.9764380572265065,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.2443038759636025e-07
+        },
+        "SciFiSuit_Boot_L_JointPink": {
+          "min_edge_ratio": 0.9764316575604488,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 6.481657936404723e-08
+        },
+        "SciFiSuit_Boot_L_JointCore": {
+          "min_edge_ratio": 0.9764328127601126,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.152342644203774e-08
+        },
+        "SciFiSuit_Boot_L_InstepGasket": {
+          "min_edge_ratio": 0.8883406422823947,
+          "max_edge_ratio": 1.0710404790131751,
+          "min_triangle_area": 6.53305762826878e-07
+        },
+        "SciFiSuit_Boot_L_InstepPlate": {
+          "min_edge_ratio": 0.8911746371453071,
+          "max_edge_ratio": 1.0697923484109613,
+          "min_triangle_area": 5.939127143726713e-07
+        },
+        "SciFiSuit_Boot_L_ToeCyan": {
+          "min_edge_ratio": 0.9999803121174132,
+          "max_edge_ratio": 1.0000169923571063,
+          "min_triangle_area": 4.6597820038739807e-07
+        },
+        "SciFiSuit_TailAttach_L_RearMount": {
+          "min_edge_ratio": 0.9999302934687895,
+          "max_edge_ratio": 1.000083523609723,
+          "min_triangle_area": 3.4828060237008003e-07
+        },
+        "SciFiSuit_TailAttach_L_Housing": {
+          "min_edge_ratio": 0.9999631254561623,
+          "max_edge_ratio": 1.0000449402406322,
+          "min_triangle_area": 9.885560779034163e-07
+        },
+        "SciFiSuit_TailAttach_L_Recess": {
+          "min_edge_ratio": 0.9999213095281734,
+          "max_edge_ratio": 1.0001063406935593,
+          "min_triangle_area": 6.031132990692123e-07
+        },
+        "SciFiSuit_TailAttach_L_PinkRing": {
+          "min_edge_ratio": 0.9998833536424947,
+          "max_edge_ratio": 1.0001148262493058,
+          "min_triangle_area": 3.8585546934523873e-07
+        },
+        "SciFiSuit_TailAttach_L_DarkCore": {
+          "min_edge_ratio": 0.9998433604134593,
+          "max_edge_ratio": 1.0001292518051494,
+          "min_triangle_area": 2.6257817060696824e-07
+        },
+        "SciFiSuit_TailAttach_L_CyanCore": {
+          "min_edge_ratio": 0.9998503102191303,
+          "max_edge_ratio": 1.0001591656602735,
+          "min_triangle_area": 1.5070140574737474e-07
+        },
+        "SciFiSuit_TailAttach_L_Center": {
+          "min_edge_ratio": 0.9997794256852003,
+          "max_edge_ratio": 1.0002679587909664,
+          "min_triangle_area": 6.166173046902807e-08
+        },
+        "SciFiSuit_TailAttach_L_Fin": {
+          "min_edge_ratio": 0.9998019168985909,
+          "max_edge_ratio": 1.0002960811955173,
+          "min_triangle_area": 1.020269531712881e-07
+        },
+        "SciFiSuit_TailAttach_L_FinCyan": {
+          "min_edge_ratio": 0.9987687885152161,
+          "max_edge_ratio": 1.0010854886512133,
+          "min_triangle_area": 8.079057300229095e-09
+        },
+        "SciFiSuit_TailAttach_L_Drop": {
+          "min_edge_ratio": 0.9998014051927249,
+          "max_edge_ratio": 1.0002156455917397,
+          "min_triangle_area": 1.21377564610015e-07
+        },
+        "SciFiSuit_TailAttach_L_DropCyan": {
+          "min_edge_ratio": 0.9994309211297595,
+          "max_edge_ratio": 1.0005948411025194,
+          "min_triangle_area": 1.8095711502735332e-08
+        },
+        "SciFiSuit_TailAttach_L_DropLink": {
+          "min_edge_ratio": 0.999974253876177,
+          "max_edge_ratio": 1.000034876355421,
+          "min_triangle_area": 2.1206609046830753e-06
+        },
+        "SciFiSuit_Boot_R_Shell": {
+          "min_edge_ratio": 0.8481699329531159,
+          "max_edge_ratio": 1.1319284211913712,
+          "min_triangle_area": 2.0112936224785517e-06
+        },
+        "SciFiSuit_Boot_R_Sole": {
+          "min_edge_ratio": 0.9999963549119346,
+          "max_edge_ratio": 1.000004517428894,
+          "min_triangle_area": 2.6462300662743055e-06
+        },
+        "SciFiSuit_Boot_R_CyanWelt": {
+          "min_edge_ratio": 0.9999963410784957,
+          "max_edge_ratio": 1.0000044687785568,
+          "min_triangle_area": 2.6084132324477768e-06
+        },
+        "SciFiSuit_Boot_R_Cuff": {
+          "min_edge_ratio": 0.999984707735308,
+          "max_edge_ratio": 1.000015883060531,
+          "min_triangle_area": 3.492390507545398e-06
+        },
+        "SciFiSuit_Boot_R_CuffInner": {
+          "min_edge_ratio": 0.9999865892203474,
+          "max_edge_ratio": 1.000013399581913,
+          "min_triangle_area": 3.245860286100276e-06
+        },
+        "SciFiSuit_Boot_R_CuffCyan": {
+          "min_edge_ratio": 0.9999805304706962,
+          "max_edge_ratio": 1.0000199263558769,
+          "min_triangle_area": 1.22873054499883e-06
+        },
+        "SciFiSuit_Boot_R_JointHousing": {
+          "min_edge_ratio": 0.9882103789195706,
+          "max_edge_ratio": 1.0000045857121513,
+          "min_triangle_area": 1.8672539776708432e-07
+        },
+        "SciFiSuit_Boot_R_JointSocket": {
+          "min_edge_ratio": 0.9882102880960628,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.2599125631810278e-07
+        },
+        "SciFiSuit_Boot_R_JointPink": {
+          "min_edge_ratio": 0.9881980313684273,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 6.562214757668796e-08
+        },
+        "SciFiSuit_Boot_R_JointCore": {
+          "min_edge_ratio": 0.9881908816765727,
+          "max_edge_ratio": 1,
+          "min_triangle_area": 1.1666328814253105e-08
+        },
+        "SciFiSuit_Boot_R_InstepGasket": {
+          "min_edge_ratio": 0.8461258592438193,
+          "max_edge_ratio": 1.0244772140322118,
+          "min_triangle_area": 6.541210855898949e-07
+        },
+        "SciFiSuit_Boot_R_InstepPlate": {
+          "min_edge_ratio": 0.8439538318433588,
+          "max_edge_ratio": 1.020874119900289,
+          "min_triangle_area": 5.951053377117696e-07
+        },
+        "SciFiSuit_Boot_R_ToeCyan": {
+          "min_edge_ratio": 0.9999827863980864,
+          "max_edge_ratio": 1.0000246205309493,
+          "min_triangle_area": 4.659737183567093e-07
+        },
+        "SciFiSuit_TailAttach_R_RearMount": {
+          "min_edge_ratio": 0.9999288388940393,
+          "max_edge_ratio": 1.0000791631583823,
+          "min_triangle_area": 3.4832478925761643e-07
+        },
+        "SciFiSuit_TailAttach_R_Housing": {
+          "min_edge_ratio": 0.9999565405636762,
+          "max_edge_ratio": 1.0000463286175267,
+          "min_triangle_area": 9.882347588343753e-07
+        },
+        "SciFiSuit_TailAttach_R_Recess": {
+          "min_edge_ratio": 0.9999138018368854,
+          "max_edge_ratio": 1.0000760867981267,
+          "min_triangle_area": 6.029771522458466e-07
+        },
+        "SciFiSuit_TailAttach_R_PinkRing": {
+          "min_edge_ratio": 0.9998885484003235,
+          "max_edge_ratio": 1.000111969037034,
+          "min_triangle_area": 3.8575112633853517e-07
+        },
+        "SciFiSuit_TailAttach_R_DarkCore": {
+          "min_edge_ratio": 0.9998332175183078,
+          "max_edge_ratio": 1.000112351923532,
+          "min_triangle_area": 2.6268055287498176e-07
+        },
+        "SciFiSuit_TailAttach_R_CyanCore": {
+          "min_edge_ratio": 0.9998639414071602,
+          "max_edge_ratio": 1.0001582091577705,
+          "min_triangle_area": 1.506520741930966e-07
+        },
+        "SciFiSuit_TailAttach_R_Center": {
+          "min_edge_ratio": 0.9997476666897779,
+          "max_edge_ratio": 1.000220756392363,
+          "min_triangle_area": 6.16775530090525e-08
+        },
+        "SciFiSuit_TailAttach_R_Fin": {
+          "min_edge_ratio": 0.9997086150720182,
+          "max_edge_ratio": 1.0002751734322823,
+          "min_triangle_area": 1.0198201049831612e-07
+        },
+        "SciFiSuit_TailAttach_R_FinCyan": {
+          "min_edge_ratio": 0.9983107068298126,
+          "max_edge_ratio": 1.0013803085418607,
+          "min_triangle_area": 8.075914244210524e-09
+        },
+        "SciFiSuit_TailAttach_R_Drop": {
+          "min_edge_ratio": 0.9997562023388142,
+          "max_edge_ratio": 1.000222426288771,
+          "min_triangle_area": 1.2136583602523392e-07
+        },
+        "SciFiSuit_TailAttach_R_DropCyan": {
+          "min_edge_ratio": 0.9995012846310448,
+          "max_edge_ratio": 1.0005716237712934,
+          "min_triangle_area": 1.809293907576572e-08
+        },
+        "SciFiSuit_TailAttach_R_DropLink": {
+          "min_edge_ratio": 0.9999683789504484,
+          "max_edge_ratio": 1.0000408901324294,
+          "min_triangle_area": 2.1206758429132194e-06
+        }
+      }
+    }
+  ],
+  "total_vertices": 63140,
+  "total_triangles": 125864,
+  "source_bone_reference_unchanged": true,
+  "original_body_vertices_unchanged": true,
+  "original_head_vertices_unchanged": true,
+  "hand_l_pose_variation_m": 0.20762465114581424,
+  "pose_sample_count": 39,
+  "expected_inherited_finger_warnings": [
+    {
+      "mesh": "SciFiSuit_Glove_L",
+      "action": "AS_LunaMk2_Title_A",
+      "frame": 21.0,
+      "edge_index": 606,
+      "vertex_indices": [
+        178,
+        288
+      ],
+      "source_vertex_indices": [
+        1632,
+        1742
+      ],
+      "source_edge_exists": true,
+      "ratio": 2.6188302719173975,
+      "rest_mm": 0.8918092166572866,
+      "posed_mm": 2.3354969733570434,
+      "source_ratio": 2.6642572478017863,
+      "source_rest_mm": 0.814690285307142,
+      "source_posed_mm": 2.170544497343258,
+      "rest_coords": [
+        [
+          0.2736022472381592,
+          -0.11327023804187775,
+          0.8422336578369141
+        ],
+        [
+          0.2738359570503235,
+          -0.11412076652050018,
+          0.8421021103858948
+        ]
+      ],
+      "posed_coords": [
+        [
+          -0.05705457925796509,
+          0.15393196046352386,
+          0.9612849950790405
+        ],
+        [
+          -0.05915367603302002,
+          0.15312393009662628,
+          0.9619138240814209
+        ]
+      ],
+      "glove_weights": [
+        {
+          "ring_03_l": 1.0
+        },
+        {
+          "ring_02_l": 1.0
+        }
+      ],
+      "source_weights": [
+        {
+          "ring_03_l": 1.0
+        },
+        {
+          "ring_02_l": 1.0
+        }
+      ],
+      "max_mapping_error": 0.0
+    },
+    {
+      "mesh": "SciFiSuit_Glove_R",
+      "action": "AS_LunaMk2_Title_A",
+      "frame": 31.0,
+      "edge_index": 387,
+      "vertex_indices": [
+        199,
+        200
+      ],
+      "source_vertex_indices": [
+        3512,
+        3513
+      ],
+      "source_edge_exists": true,
+      "ratio": 3.2014115949346897,
+      "rest_mm": 1.0828743717115912,
+      "posed_mm": 3.466726569455105,
+      "source_ratio": 2.8843345710822446,
+      "source_rest_mm": 1.143922142021916,
+      "source_posed_mm": 3.2994541808602658,
+      "rest_coords": [
+        [
+          -0.27794909477233887,
+          -0.0967433899641037,
+          0.8664832711219788
+        ],
+        [
+          -0.27816376090049744,
+          -0.09649709612131119,
+          0.8654508590698242
+        ]
+      ],
+      "posed_coords": [
+        [
+          0.04626059532165527,
+          0.17394180595874786,
+          0.9395454525947571
+        ],
+        [
+          0.04920440912246704,
+          0.1757596731185913,
+          0.9397634267807007
+        ]
+      ],
+      "glove_weights": [
+        {
+          "pinky_01_r": 1.0
+        },
+        {
+          "pinky_02_r": 1.0
+        }
+      ],
+      "source_weights": [
+        {
+          "pinky_01_r": 1.0
+        },
+        {
+          "pinky_02_r": 1.0
+        }
+      ],
+      "max_mapping_error": 0.0
+    },
+    {
+      "mesh": "SciFiSuit_Glove_L",
+      "action": "AS_LunaMk2_Title_B",
+      "frame": 1.0,
+      "edge_index": 606,
+      "vertex_indices": [
+        178,
+        288
+      ],
+      "source_vertex_indices": [
+        1632,
+        1742
+      ],
+      "source_edge_exists": true,
+      "ratio": 2.618824117655384,
+      "rest_mm": 0.8918092166572866,
+      "posed_mm": 2.335491484929458,
+      "source_ratio": 2.6642929289671544,
+      "source_rest_mm": 0.814690285307142,
+      "source_posed_mm": 2.170573566442052,
+      "rest_coords": [
+        [
+          0.2736022472381592,
+          -0.11327023804187775,
+          0.8422336578369141
+        ],
+        [
+          0.2738359570503235,
+          -0.11412076652050018,
+          0.8421021103858948
+        ]
+      ],
+      "posed_coords": [
+        [
+          -0.031124591827392578,
+          0.153240367770195,
+          0.9613158106803894
+        ],
+        [
+          -0.03321915864944458,
+          0.15240849554538727,
+          0.9619284272193909
+        ]
+      ],
+      "glove_weights": [
+        {
+          "ring_03_l": 1.0
+        },
+        {
+          "ring_02_l": 1.0
+        }
+      ],
+      "source_weights": [
+        {
+          "ring_03_l": 1.0
+        },
+        {
+          "ring_02_l": 1.0
+        }
+      ],
+      "max_mapping_error": 0.0
+    },
+    {
+      "mesh": "SciFiSuit_Glove_R",
+      "action": "AS_LunaMk2_Title_B",
+      "frame": 11.0,
+      "edge_index": 387,
+      "vertex_indices": [
+        199,
+        200
+      ],
+      "source_vertex_indices": [
+        3512,
+        3513
+      ],
+      "source_edge_exists": true,
+      "ratio": 3.2013979458346413,
+      "rest_mm": 1.0828743717115912,
+      "posed_mm": 3.466711789194466,
+      "source_ratio": 2.8843997864103077,
+      "source_rest_mm": 1.143922142021916,
+      "source_posed_mm": 3.2995287821180366,
+      "rest_coords": [
+        [
+          -0.27794909477233887,
+          -0.0967433899641037,
+          0.8664832711219788
+        ],
+        [
+          -0.27816376090049744,
+          -0.09649709612131119,
+          0.8654508590698242
+        ]
+      ],
+      "posed_coords": [
+        [
+          0.07227617502212524,
+          0.17390801012516022,
+          0.939577579498291
+        ],
+        [
+          0.0752210021018982,
+          0.17572396993637085,
+          0.9397975206375122
+        ]
+      ],
+      "glove_weights": [
+        {
+          "pinky_01_r": 1.0
+        },
+        {
+          "pinky_02_r": 1.0
+        }
+      ],
+      "source_weights": [
+        {
+          "pinky_01_r": 1.0
+        },
+        {
+          "pinky_02_r": 1.0
+        }
+      ],
+      "max_mapping_error": 0.0
+    },
+    {
+      "mesh": "SciFiSuit_Glove_L",
+      "action": "AS_LunaMk2_Title_C",
+      "frame": 68.5,
+      "edge_index": 606,
+      "vertex_indices": [
+        178,
+        288
+      ],
+      "source_vertex_indices": [
+        1632,
+        1742
+      ],
+      "source_edge_exists": true,
+      "ratio": 2.618839353180051,
+      "rest_mm": 0.8918092166572866,
+      "posed_mm": 2.3355050721107764,
+      "source_ratio": 2.6642158522293995,
+      "source_rest_mm": 0.814690285307142,
+      "source_posed_mm": 2.17051077277258,
+      "rest_coords": [
+        [
+          0.2736022472381592,
+          -0.11327023804187775,
+          0.8422336578369141
+        ],
+        [
+          0.2738359570503235,
+          -0.11412076652050018,
+          0.8421021103858948
+        ]
+      ],
+      "posed_coords": [
+        [
+          -0.04837733507156372,
+          0.15693818032741547,
+          0.9612812399864197
+        ],
+        [
+          -0.050518542528152466,
+          0.1562507301568985,
+          0.9619114995002747
+        ]
+      ],
+      "glove_weights": [
+        {
+          "ring_03_l": 1.0
+        },
+        {
+          "ring_02_l": 1.0
+        }
+      ],
+      "source_weights": [
+        {
+          "ring_03_l": 1.0
+        },
+        {
+          "ring_02_l": 1.0
+        }
+      ],
+      "max_mapping_error": 0.0
+    },
+    {
+      "mesh": "SciFiSuit_Glove_R",
+      "action": "AS_LunaMk2_Title_C",
+      "frame": 31.0,
+      "edge_index": 387,
+      "vertex_indices": [
+        199,
+        200
+      ],
+      "source_vertex_indices": [
+        3512,
+        3513
+      ],
+      "source_edge_exists": true,
+      "ratio": 3.2014391167756124,
+      "rest_mm": 1.0828743717115912,
+      "posed_mm": 3.4667563721513024,
+      "source_ratio": 2.8843920957959583,
+      "source_rest_mm": 1.143922142021916,
+      "source_posed_mm": 3.299519984653996,
+      "rest_coords": [
+        [
+          -0.27794909477233887,
+          -0.0967433899641037,
+          0.8664832711219788
+        ],
+        [
+          -0.27816376090049744,
+          -0.09649709612131119,
+          0.8654508590698242
+        ]
+      ],
+      "posed_coords": [
+        [
+          0.17933809757232666,
+          -0.01605045795440674,
+          0.9394699335098267
+        ],
+        [
+          0.18163281679153442,
+          -0.018640339374542236,
+          0.9396824836730957
+        ]
+      ],
+      "glove_weights": [
+        {
+          "pinky_01_r": 1.0
+        },
+        {
+          "pinky_02_r": 1.0
+        }
+      ],
+      "source_weights": [
+        {
+          "pinky_01_r": 1.0
+        },
+        {
+          "pinky_02_r": 1.0
+        }
+      ],
+      "max_mapping_error": 0.0
+    }
+  ],
+  "passed": true
+}
