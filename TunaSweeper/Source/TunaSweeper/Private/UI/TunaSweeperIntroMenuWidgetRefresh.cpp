@@ -575,6 +575,7 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
 
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 {
+	RefreshLaboratoryTexts();
 	SetNamedText(
 		FName(TEXT("SettingsButtonText")),
 		ResolveUiText(FName(TEXT("ui.title.settings")), FText::GetEmpty()));

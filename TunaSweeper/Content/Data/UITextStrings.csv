@@ -348,3 +348,97 @@ ui.tutorial.inventory.body,<key>Tab</> 키로 가방을 열어 가진 물품을 
 ui.interaction.tutorial_review,조작법,Controls,操作方法
 ui.tutorial.heal.title,회복,Heal,回復
 ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 <key>U</> 키로 사용하세요.,Hover over a healing item in your inventory and press <key>U</> to use it.,バッグの回復アイテムにカーソルを合わせて<key>U</>キーで使いましょう。
+ui.lab.title,연구실,Laboratory,研究室
+ui.lab.description,나만의 보스를 만들고 직접 도전하세요.,Build your own boss and take on the challenge.,自分だけのボスを作って挑戦しましょう。
+ui.lab.development,보스개발,Boss Development,ボス開発
+ui.lab.single,보스플레이(싱글),Boss Play (Single Player),ボスプレイ（シングル）
+ui.lab.multiplayer,보스플레이(멀티),Boss Play (Multiplayer),ボスプレイ（マルチ）
+ui.lab.in_development,개발 중,In development,開発中
+ui.boss_lab.module.core,코어,Core,コア
+ui.boss_lab.module.frame,프레임,Frame,フレーム
+ui.boss_lab.module.armor,장갑,Armor,装甲
+ui.boss_lab.module.drive,구동부,Drive,駆動部
+ui.boss_lab.module.cannon,기관포,Cannon,機関砲
+ui.boss_lab.module.missile,미사일,Missile,ミサイル
+ui.boss_lab.module.laser,레이저,Laser,レーザー
+ui.boss_lab.error.invalid_definition,잘못된 보스 설계도입니다.,Invalid boss design.,ボスの設計図が無効です。
+ui.boss_lab.error.unsupported_version,지원하지 않는 설계도 버전입니다.,This design version is not supported.,この設計図のバージョンには対応していません。
+ui.boss_lab.error.invalid_parts,부품 구성 또는 연결이 올바르지 않습니다.,The parts or their connections are invalid.,部品の構成または接続が正しくありません。
+ui.boss_lab.error.limit,설계도 제한을 초과했습니다.,This design exceeds the allowed limits.,設計図の上限を超えています。
+ui.boss_lab.error.invalid_tactics,전술 설정이 허용 범위를 벗어났습니다.,Tactic settings are outside the allowed range.,戦術設定が許可された範囲外です。
+ui.boss_lab.error.overlap,부품이 서로 겹칩니다.,Parts overlap.,部品が重なっています。
+ui.boss_lab.error.slot,올바른 보스 슬롯을 선택하세요.,Select a valid boss slot.,有効なボススロットを選んでください。
+ui.boss_lab.error.missing,빈 보스 슬롯입니다.,This boss slot is empty.,このボススロットは空です。
+ui.boss_lab.error.read,보스 파일을 읽을 수 없습니다.,Cannot read the boss file.,ボスファイルを読み込めません。
+ui.boss_lab.error.write,보스 파일을 저장할 수 없습니다.,Cannot save the boss file.,ボスファイルを保存できません。
+ui.boss_lab.error.delete,보스 파일을 삭제할 수 없습니다.,Cannot delete the boss file.,ボスファイルを削除できません。
+ui.boss_lab.development_title,보스개발,Boss Development,ボス開発
+ui.boss_lab.single_title,보스플레이(싱글),Boss Play (Single Player),ボスプレイ（シングル）
+ui.boss_lab.library,보스 보관함,Boss Library,ボスライブラリ
+ui.boss_lab.slot_format,{0} · {1},{0} · {1},{0} · {1}
+ui.boss_lab.empty_slot,빈 슬롯,Empty slot,空きスロット
+ui.boss_lab.invalid_slot,읽을 수 없는 설계도,Unreadable design,読み込めない設計図
+ui.boss_lab.refresh,새로고침,Refresh,更新
+ui.boss_lab.new,새 설계도,New design,新しい設計図
+ui.boss_lab.load,불러오기,Load,読み込む
+ui.boss_lab.save,저장,Save,保存
+ui.boss_lab.duplicate,빈 슬롯에 복제,Copy to empty slot,空きスロットに複製
+ui.boss_lab.delete,삭제,Delete,削除
+ui.boss_lab.open_folder,보관 폴더 열기,Open library folder,保存フォルダーを開く
+ui.boss_lab.return_title,타이틀로,Return to title,タイトルへ
+ui.boss_lab.play,전투 시작,Start battle,戦闘開始
+ui.boss_lab.test,시험 전투,Test battle,テスト戦闘
+ui.boss_lab.name,보스 이름,Boss name,ボス名
+ui.boss_lab.parts,조립 부품,Assembled parts,組み立て部品
+ui.boss_lab.part_format,{0} · {1},{0} · {1},{0} · {1}
+ui.boss_lab.parent,연결할 부품,Parent part,接続先の部品
+ui.boss_lab.module,추가할 부품,New part,追加する部品
+ui.boss_lab.socket,연결 방향,Connection direction,接続方向
+ui.boss_lab.yaw,회전 (도),Rotation (degrees),回転（度）
+ui.boss_lab.add_part,부품 연결,Attach part,部品を接続
+ui.boss_lab.remove_branch,선택 부품과 하위 부품 제거,Remove part and its branch,選択部品と子部品を削除
+ui.boss_lab.tactics,전술,Tactics,戦術
+ui.boss_lab.balanced,균형,Balanced,バランス
+ui.boss_lab.keep_distance,거리 유지,Keep distance,距離を維持
+ui.boss_lab.advance,접근,Advance,接近
+ui.boss_lab.attack_interval,공격 간격 (초),Attack interval (seconds),攻撃間隔（秒）
+ui.boss_lab.phase_threshold,2페이즈 전환 체력 (%),Phase 2 health threshold (%),第2段階への移行体力（%）
+ui.boss_lab.alternate_weapons,무장 교대 사용,Alternate weapons,武装を交互に使用
+ui.boss_lab.front,앞,Front,前
+ui.boss_lab.back,뒤,Back,後ろ
+ui.boss_lab.right,오른쪽,Right,右
+ui.boss_lab.left,왼쪽,Left,左
+ui.boss_lab.up,위,Up,上
+ui.boss_lab.down,아래,Down,下
+ui.boss_lab.status_ready,설계도를 준비했습니다.,Design ready.,設計図を準備しました。
+ui.boss_lab.status_loaded,설계도를 불러왔습니다.,Design loaded.,設計図を読み込みました。
+ui.boss_lab.status_saved,설계도를 저장했습니다.,Design saved.,設計図を保存しました。
+ui.boss_lab.status_deleted,보스 슬롯을 삭제했습니다.,Boss slot deleted.,ボススロットを削除しました。
+ui.boss_lab.status_copied,빈 슬롯에 복제했습니다.,Copied to an empty slot.,空きスロットに複製しました。
+ui.boss_lab.status_dirty,저장하지 않은 변경 사항이 있습니다.,You have unsaved changes.,未保存の変更があります。
+ui.boss_lab.confirm_discard,저장하지 않은 변경 사항을 버릴까요?,Discard unsaved changes?,未保存の変更を破棄しますか？
+ui.boss_lab.confirm_overwrite,이 슬롯의 보스 설계도를 덮어쓸까요?,Replace the boss design in this slot?,このスロットの設計図を上書きしますか？
+ui.boss_lab.confirm_delete,이 슬롯의 보스 설계도를 삭제할까요?,Delete the boss design in this slot?,このスロットの設計図を削除しますか？
+ui.boss_lab.confirm_remove_branch,선택한 부품과 연결된 하위 부품을 모두 제거할까요?,Remove this part and all attached child parts?,選択した部品とすべての子部品を削除しますか？
+ui.boss_lab.confirm,확인,Confirm,確認
+ui.boss_lab.cancel,취소,Cancel,キャンセル
+ui.boss_lab.select_saved_slot,플레이할 보스가 저장된 슬롯을 선택하세요.,Select a saved boss to play.,プレイする保存済みのボスを選んでください。
+ui.boss_lab.no_free_slot,빈 보스 슬롯이 없습니다.,No empty boss slots.,空きボススロットがありません。
+ui.boss_lab.core_cannot_remove,코어는 제거할 수 없습니다.,The core cannot be removed.,コアは削除できません。
+ui.boss_lab.core_cannot_add,코어는 하나만 사용할 수 있습니다.,Only one core is allowed.,コアは1つだけ使用できます。
+ui.boss_lab.socket_occupied,이미 부품이 연결된 방향입니다.,A part is already attached there.,その方向にはすでに部品が接続されています。
+ui.boss_lab.draft_summary,{0} · 부품 {1}개,{0} · {1} parts,{0} · 部品{1}個
+ui.boss_lab.editing_hint,부품을 선택하고 연결 방향을 골라 보스를 조립하세요.,Select a part and a connection direction to assemble your boss.,部品と接続方向を選んでボスを組み立てましょう。
+ui.boss_lab.single_hint,저장된 보스를 불러와 전투를 시작하세요.,Load a saved boss and start a battle.,保存済みのボスを読み込んで戦闘を始めましょう。
+ui.boss_lab.rotate_left,왼쪽 회전,Rotate left,左へ回転
+ui.boss_lab.rotate_right,오른쪽 회전,Rotate right,右へ回転
+ui.boss_lab.battle.ready,보스를 조립하거나 저장된 보스를 선택하세요.,Assemble a boss or select a saved boss.,ボスを組み立てるか保存済みのボスを選んでください。
+ui.boss_lab.battle.active,코어 {0} / {1} · 가동 부품 {2},Core {0} / {1} · Active parts {2},コア {0} / {1} · 稼働部品 {2}
+ui.boss_lab.battle.controls,WASD 이동 · 마우스 사격/조준 · Space 회피 · R 재장전 · Home / Esc 시험 종료,WASD move · Mouse fire/aim · Space dodge · R reload · Home / Esc end test,WASD 移動 · マウス 射撃/照準 · Space 回避 · R リロード · Home / Esc テスト終了
+ui.boss_lab.battle.victory,코어 파괴 · 시험 성공,Core destroyed · Test complete,コア破壊 · テスト成功
+ui.boss_lab.battle.defeat,시험 종료 · 다시 도전할 수 있습니다.,Test ended · You can try again.,テスト終了 · 再挑戦できます。
+ui.boss_lab.battle.stopped,시험을 종료했습니다.,Test ended.,テストを終了しました。
+ui.boss_lab.battle.spawn_failed,시험 전투를 준비할 수 없습니다.,Cannot prepare the test battle.,テスト戦闘を準備できません。
+ui.boss_lab.battle.warning,공격 예고,Incoming attack,攻撃予告
+ui.boss_lab.unnamed,이름 없는 보스,Unnamed boss,名前のないボス
+ui.boss_lab.confirm_leave,저장하지 않고 타이틀로 돌아갈까요? 초안은 이번 실행 동안 유지됩니다.,Return to the title without saving? The draft stays available until you close the game.,保存せずにタイトルへ戻りますか？下書きはゲームを終了するまで保持されます。

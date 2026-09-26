@@ -331,3 +331,12 @@ When adding a field that should survive save/load:
 - Encounter occupancy, boss ownership, ready/active/cleared state, and reset latches are transient; no save fields or migration are added.
 - `TunaSweeperBossTestGameMode` temporarily backs up the player's inventory/equipment/ammunition, acquired-item set, weapon selection, and experience state in memory. The original state is restored when the test game mode ends. Test supplies and repeated deaths never write gameplay saves.
 - Combat-test sessions suppress quest objective/reward progression and achievement event reporting so lab kills and portal use do not become persistent progression.
+
+## Modular Boss Laboratory
+
+- Boss definitions persist independently of gameplay save slots in `Saved/BossLab/<Demo|Main>/Slot01.boss.json` through `Slot12.boss.json`. The library enumerates these fixed filenames; no separate index is required for externally copied files.
+- Version 1 stores catalog version, boss GUID/name, part instance IDs/module IDs/parent IDs/socket/yaw, tactic preset, attack interval, phase threshold, and alternating-weapons setting. Only built-in catalog IDs and bounded values are accepted. Unsupported versions and corrupt files remain on disk and never replace the current draft.
+- Slot saves validate the definition, write and read back a `.candidate`, preserve an existing file as `.previous`, and promote the candidate. A failed validation does not overwrite the slot. Explicit deletion removes the slot and its auxiliary files. A duplicated boss gets a new GUID.
+- Editor drafts, dirty flags, selected slot, preview selection and camera rotation are session state, not automatic disk saves. Switching to solo play preserves the prior editing draft in memory. Exiting the application discards unsaved edits.
+- Part health/destruction, targets, warnings, projectiles, phase and battle results are transient. Each battle uses a definition snapshot and starts with fresh runtime state. The boss lab game mode keeps the existing combat-test save guard active until EndPlay and restores original inventory/experience on exit.
+- No network session data, downloads, matchmaking state or replication is stored. See `Docs/boss_laboratory.md` for the current single-player workflow.

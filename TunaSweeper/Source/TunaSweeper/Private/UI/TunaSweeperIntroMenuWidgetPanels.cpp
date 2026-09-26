@@ -482,6 +482,10 @@ void UTunaSweeperIntroMenuWidget::SetTitlePresentationMainMenuActive(bool bActiv
 
 void UTunaSweeperIntroMenuWidget::HideOverlayPanels()
 {
+	if (LaboratoryPanel)
+	{
+		LaboratoryPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	if (DifficultySelectPanel)
 	{
 		DifficultySelectPanel->SetVisibility(ESlateVisibility::Collapsed);
