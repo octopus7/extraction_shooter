@@ -1,0 +1,732 @@
+{
+  "settings": {
+    "resolution": [
+      1024,
+      1536
+    ],
+    "aspect": "2:3",
+    "camera_azimuth_degrees": 18,
+    "ortho_height_m": 1.9,
+    "target": [
+      0,
+      0,
+      0.84
+    ],
+    "camera_location": [
+      1.2360679774997896,
+      -3.804226065180614,
+      1.0
+    ],
+    "floor_z_m": -0.013,
+    "samples": 32,
+    "denoising": true,
+    "pose": "source neutral rest pose",
+    "background": "soft neutral gray studio"
+  },
+  "captures": {
+    "Maid": {
+      "source": "TunaSweeper/SourceArt/Characters/LunaMk2/SchoolUniform/LunaMk2_SchoolUniform.blend",
+      "input_sha256": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+      "after_sha256": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+      "source_unchanged": true,
+      "output": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_Maid_Capture.png",
+      "output_sha256": "a2b92b737a2fc29235593089764c6d57faf1554c591a7b4d373d1c03f91b0a2a",
+      "visible_collections": [
+        "00_Original_Maid_Preserved"
+      ],
+      "visible_mesh_count": 6,
+      "visible_meshes": [
+        "Preview_TitleSkirt",
+        "SKM_Luna.Eye",
+        "SKM_Luna.Head",
+        "SKM_Luna.SideTail",
+        "SKM_LunaFace",
+        "SKM_LunaMk2"
+      ],
+      "world_bounds_m": [
+        [
+          -0.31353819370269775,
+          0.31353819370269775
+        ],
+        [
+          -0.20979338884353638,
+          0.20787261426448822
+        ],
+        [
+          -0.0037578423507511616,
+          1.5054049491882324
+        ]
+      ],
+      "projected_bounds_0_to_1": [
+        [
+          0.25615936517715454,
+          0.7614777088165283
+        ],
+        [
+          0.05320144444704056,
+          0.8502482771873474
+        ]
+      ],
+      "maid_title_skirt_visible": true,
+      "bunny_sidetails_hidden": false,
+      "dimensions_verified": [
+        1024,
+        1536
+      ],
+      "visually_reviewed": true,
+      "visual_review": "Full body, both shoes and hair/hood/ear tips visible; only intended outfit visible; source material detail preserved."
+    },
+    "SchoolUniform": {
+      "source": "TunaSweeper/SourceArt/Characters/LunaMk2/SchoolUniform/LunaMk2_SchoolUniform.blend",
+      "input_sha256": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+      "after_sha256": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+      "source_unchanged": true,
+      "output": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_SchoolUniform_Capture.png",
+      "output_sha256": "290fb0fe67c6df8bf254f8c0828d9e0a7216322ad23e1ae6c68921dab6102721",
+      "visible_collections": [
+        "01_Character_Preview",
+        "02_SchoolUniform_Export"
+      ],
+      "visible_mesh_count": 27,
+      "visible_meshes": [
+        "SKM_Luna.Eye_UniformBase",
+        "SKM_Luna.Head_UniformBase",
+        "SKM_Luna.SideTail_UniformBase",
+        "SKM_LunaFace_UniformBase",
+        "SKM_LunaMk2_UniformBase",
+        "Uniform_Blazer_Body",
+        "Uniform_Blazer_Button",
+        "Uniform_Blazer_Button.001",
+        "Uniform_Blazer_Button.002",
+        "Uniform_Blazer_Cuff_L",
+        "Uniform_Blazer_Cuff_R",
+        "Uniform_Blazer_Sleeve_L",
+        "Uniform_Blazer_Sleeve_R",
+        "Uniform_Blazer_WeltPocket_-1",
+        "Uniform_Blazer_WeltPocket_1",
+        "Uniform_Collar_DoubleStripe_-1_0",
+        "Uniform_Collar_DoubleStripe_-1_0.007",
+        "Uniform_Collar_DoubleStripe_1_0",
+        "Uniform_Collar_DoubleStripe_1_0.007",
+        "Uniform_Pleated_Plaid_Skirt",
+        "Uniform_Ribbon_-1",
+        "Uniform_Ribbon_1",
+        "Uniform_Ribbon_Knot",
+        "Uniform_Sailor_Collar",
+        "Uniform_Shirt_Insert",
+        "Uniform_Shirt_StandCollar",
+        "Uniform_Skirt_Waistband"
+      ],
+      "world_bounds_m": [
+        [
+          -0.31353819370269775,
+          0.31353819370269775
+        ],
+        [
+          -0.16031506657600403,
+          0.17100200057029724
+        ],
+        [
+          -0.0037578423507511616,
+          1.5054049491882324
+        ]
+      ],
+      "projected_bounds_0_to_1": [
+        [
+          0.25615936517715454,
+          0.7614777088165283
+        ],
+        [
+          0.05320144444704056,
+          0.8502482771873474
+        ]
+      ],
+      "maid_title_skirt_visible": false,
+      "bunny_sidetails_hidden": false,
+      "dimensions_verified": [
+        1024,
+        1536
+      ],
+      "visually_reviewed": true,
+      "visual_review": "Full body, both shoes and hair/hood/ear tips visible; only intended outfit visible; source material detail preserved."
+    },
+    "MechanicOutfit": {
+      "source": "TunaSweeper/SourceArt/Characters/LunaMk2/MechanicOutfit/LunaMk2_MechanicOutfit.blend",
+      "input_sha256": "0122b6a060ba5f18642f2405d26a844f4d36ea5f41ebb569b46aebf932329983",
+      "after_sha256": "0122b6a060ba5f18642f2405d26a844f4d36ea5f41ebb569b46aebf932329983",
+      "source_unchanged": true,
+      "output": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_MechanicOutfit_Capture.png",
+      "output_sha256": "c26dd019835c973b5e7c76257748010d94d7a779aaf65b09ba4da876b676b480",
+      "visible_collections": [
+        "01_Character_Preview",
+        "02_MechanicOutfit_Export"
+      ],
+      "visible_mesh_count": 93,
+      "visible_meshes": [
+        "Mechanic_Belt_Buckle",
+        "Mechanic_Bib_EdgeStitch_-1",
+        "Mechanic_Bib_EdgeStitch_1",
+        "Mechanic_Boot_Collar_L",
+        "Mechanic_Boot_Collar_R",
+        "Mechanic_Boot_Eyelet_L",
+        "Mechanic_Boot_Eyelet_L.001",
+        "Mechanic_Boot_Eyelet_L.002",
+        "Mechanic_Boot_Eyelet_L.003",
+        "Mechanic_Boot_Eyelet_L.004",
+        "Mechanic_Boot_Eyelet_L.005",
+        "Mechanic_Boot_Eyelet_L.006",
+        "Mechanic_Boot_Eyelet_L.007",
+        "Mechanic_Boot_Eyelet_R",
+        "Mechanic_Boot_Eyelet_R.001",
+        "Mechanic_Boot_Eyelet_R.002",
+        "Mechanic_Boot_Eyelet_R.003",
+        "Mechanic_Boot_Eyelet_R.004",
+        "Mechanic_Boot_Eyelet_R.005",
+        "Mechanic_Boot_Eyelet_R.006",
+        "Mechanic_Boot_Eyelet_R.007",
+        "Mechanic_Boot_Lace_L_0",
+        "Mechanic_Boot_Lace_L_1",
+        "Mechanic_Boot_Lace_L_2",
+        "Mechanic_Boot_Lace_L_3",
+        "Mechanic_Boot_Lace_R_0",
+        "Mechanic_Boot_Lace_R_1",
+        "Mechanic_Boot_Lace_R_2",
+        "Mechanic_Boot_Lace_R_3",
+        "Mechanic_Boot_LaceCross_L_0",
+        "Mechanic_Boot_LaceCross_L_1",
+        "Mechanic_Boot_LaceCross_L_2",
+        "Mechanic_Boot_LaceCross_L_3",
+        "Mechanic_Boot_LaceCross_R_0",
+        "Mechanic_Boot_LaceCross_R_1",
+        "Mechanic_Boot_LaceCross_R_2",
+        "Mechanic_Boot_LaceCross_R_3",
+        "Mechanic_Boot_Sole_L",
+        "Mechanic_Boot_Sole_R",
+        "Mechanic_Boot_SoleBottom_L",
+        "Mechanic_Boot_SoleBottom_R",
+        "Mechanic_Boot_Upper_L",
+        "Mechanic_Boot_Upper_R",
+        "Mechanic_Boot_Welt_L",
+        "Mechanic_Boot_Welt_R",
+        "Mechanic_Buckle_Pin",
+        "Mechanic_ChestPocket_Lip",
+        "Mechanic_ChestPocket_Stitch",
+        "Mechanic_HipPocket_-1",
+        "Mechanic_HipPocket_1",
+        "Mechanic_HipPocket_Stitch_-1",
+        "Mechanic_HipPocket_Stitch_1",
+        "Mechanic_Knee_Stitch_-1",
+        "Mechanic_Knee_Stitch_1",
+        "Mechanic_KneeReinforcement_-1",
+        "Mechanic_KneeReinforcement_1",
+        "Mechanic_LargeChestPocket",
+        "Mechanic_Overall_Bib",
+        "Mechanic_Overall_Strap_-1",
+        "Mechanic_Overall_Strap_1",
+        "Mechanic_Overall_Trousers",
+        "Mechanic_Pocket_Tab",
+        "Mechanic_Pouch_BeltLoop",
+        "Mechanic_Pouch_BeltLoop.001",
+        "Mechanic_Pouch_Snap",
+        "Mechanic_RolledSleeve_L",
+        "Mechanic_RolledSleeve_R",
+        "Mechanic_Shirt_NeckRib",
+        "Mechanic_Strap_Stitch_-1_-0.007",
+        "Mechanic_Strap_Stitch_-1_0.007",
+        "Mechanic_Strap_Stitch_1_-0.007",
+        "Mechanic_Strap_Stitch_1_0.007",
+        "Mechanic_Suspender_Button_-1",
+        "Mechanic_Suspender_Button_1",
+        "Mechanic_Suspender_Clasp_-1",
+        "Mechanic_Suspender_Clasp_1",
+        "Mechanic_Tool_Screwdriver_Handle",
+        "Mechanic_Tool_Screwdriver_Shaft",
+        "Mechanic_Tool_Wrench",
+        "Mechanic_ToolPouch",
+        "Mechanic_ToolPouch_Flap",
+        "Mechanic_Trouser_Hem_L",
+        "Mechanic_Trouser_Hem_R",
+        "Mechanic_Undershirt_Body",
+        "Mechanic_Undershirt_Sleeve_L",
+        "Mechanic_Undershirt_Sleeve_R",
+        "Mechanic_UtilityBelt",
+        "Mechanic_Wrench_Grip",
+        "SKM_Luna.Eye_MechanicBase",
+        "SKM_Luna.Head_MechanicBase",
+        "SKM_Luna.SideTail_MechanicBase",
+        "SKM_LunaFace_MechanicBase",
+        "SKM_LunaMk2_MechanicBase"
+      ],
+      "world_bounds_m": [
+        [
+          -0.31353819370269775,
+          0.31353819370269775
+        ],
+        [
+          -0.17800000309944153,
+          0.17100200057029724
+        ],
+        [
+          -0.007177826948463917,
+          1.5054049491882324
+        ]
+      ],
+      "projected_bounds_0_to_1": [
+        [
+          0.25615936517715454,
+          0.7614777088165283
+        ],
+        [
+          0.05033358186483383,
+          0.8502482771873474
+        ]
+      ],
+      "maid_title_skirt_visible": false,
+      "bunny_sidetails_hidden": false,
+      "dimensions_verified": [
+        1024,
+        1536
+      ],
+      "visually_reviewed": true,
+      "visual_review": "Full body, both shoes and hair/hood/ear tips visible; only intended outfit visible; source material detail preserved."
+    },
+    "Sportswear": {
+      "source": "TunaSweeper/SourceArt/Characters/LunaMk2/Sportswear/LunaMk2_Sportswear.blend",
+      "input_sha256": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+      "after_sha256": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+      "source_unchanged": true,
+      "output": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_Sportswear_Capture.png",
+      "output_sha256": "fecb51af01a3970794639ac29a9d48ddb1d0c1be3d2679de0130e8a6a6812ec8",
+      "visible_collections": [
+        "01_Character_Preview",
+        "02_Sportswear_Export"
+      ],
+      "visible_mesh_count": 65,
+      "visible_meshes": [
+        "SKM_Luna.Eye_SportswearBase",
+        "SKM_Luna.Head_SportswearBase",
+        "SKM_Luna.SideTail_SportswearBase",
+        "SKM_LunaFace_SportswearBase",
+        "SKM_LunaMk2_SportswearBase",
+        "Sportswear_AnkleCuff_-1",
+        "Sportswear_AnkleCuff_1",
+        "Sportswear_AnkleSock_-1",
+        "Sportswear_AnkleSock_1",
+        "Sportswear_CenterZipper",
+        "Sportswear_Jacket_RibHem",
+        "Sportswear_Joggers",
+        "Sportswear_PantStripe_-1_0",
+        "Sportswear_PantStripe_-1_1",
+        "Sportswear_PantStripe_1_0",
+        "Sportswear_PantStripe_1_1",
+        "Sportswear_PocketOpening_-1",
+        "Sportswear_PocketOpening_1",
+        "Sportswear_RibCuff_L",
+        "Sportswear_RibCuff_R",
+        "Sportswear_ShoulderYoke_-1",
+        "Sportswear_ShoulderYoke_1",
+        "Sportswear_Sleeve_L",
+        "Sportswear_Sleeve_R",
+        "Sportswear_SleeveStripe_L_0",
+        "Sportswear_SleeveStripe_L_1",
+        "Sportswear_SleeveStripe_R_0",
+        "Sportswear_SleeveStripe_R_1",
+        "Sportswear_Sneaker_Collar_L",
+        "Sportswear_Sneaker_Collar_R",
+        "Sportswear_Sneaker_Eyestay_L_Inner",
+        "Sportswear_Sneaker_Eyestay_L_Outer",
+        "Sportswear_Sneaker_Eyestay_R_Inner",
+        "Sportswear_Sneaker_Eyestay_R_Outer",
+        "Sportswear_Sneaker_HeelTab_L",
+        "Sportswear_Sneaker_HeelTab_R",
+        "Sportswear_Sneaker_Lace_L_1",
+        "Sportswear_Sneaker_Lace_L_2",
+        "Sportswear_Sneaker_Lace_L_3",
+        "Sportswear_Sneaker_Lace_L_4",
+        "Sportswear_Sneaker_Lace_R_1",
+        "Sportswear_Sneaker_Lace_R_2",
+        "Sportswear_Sneaker_Lace_R_3",
+        "Sportswear_Sneaker_Lace_R_4",
+        "Sportswear_Sneaker_Midsole_L",
+        "Sportswear_Sneaker_Midsole_R",
+        "Sportswear_Sneaker_MidsoleRidge_L",
+        "Sportswear_Sneaker_MidsoleRidge_R",
+        "Sportswear_Sneaker_Outsole_L",
+        "Sportswear_Sneaker_Outsole_R",
+        "Sportswear_Sneaker_Quarter_L_Inner",
+        "Sportswear_Sneaker_Quarter_L_Outer",
+        "Sportswear_Sneaker_Quarter_R_Inner",
+        "Sportswear_Sneaker_Quarter_R_Outer",
+        "Sportswear_Sneaker_ToeSeam_L",
+        "Sportswear_Sneaker_ToeSeam_R",
+        "Sportswear_Sneaker_Tongue_L",
+        "Sportswear_Sneaker_Tongue_R",
+        "Sportswear_Sneaker_Upper_L",
+        "Sportswear_Sneaker_Upper_R",
+        "Sportswear_StandCollar",
+        "Sportswear_TrackJacket_Body",
+        "Sportswear_ZipperPull",
+        "Sportswear_ZipTape_-1",
+        "Sportswear_ZipTape_1"
+      ],
+      "world_bounds_m": [
+        [
+          -0.31353819370269775,
+          0.31353819370269775
+        ],
+        [
+          -0.17880001664161682,
+          0.17100200057029724
+        ],
+        [
+          -0.008000006899237633,
+          1.5054049491882324
+        ]
+      ],
+      "projected_bounds_0_to_1": [
+        [
+          0.25615936517715454,
+          0.7614777088165283
+        ],
+        [
+          0.05073538050055504,
+          0.8502482771873474
+        ]
+      ],
+      "maid_title_skirt_visible": false,
+      "bunny_sidetails_hidden": false,
+      "dimensions_verified": [
+        1024,
+        1536
+      ],
+      "visually_reviewed": true,
+      "visual_review": "Full body, both shoes and hair/hood/ear tips visible; only intended outfit visible; source material detail preserved."
+    },
+    "BunnyPajamas": {
+      "source": "TunaSweeper/SourceArt/Characters/LunaMk2/BunnyPajamas/LunaMk2_BunnyPajamas.blend",
+      "input_sha256": "47f502438ae1d36dedc87aac575350ddf8a7788577e219b713088d80dae4e8b7",
+      "after_sha256": "47f502438ae1d36dedc87aac575350ddf8a7788577e219b713088d80dae4e8b7",
+      "source_unchanged": true,
+      "output": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_BunnyPajamas_Capture.png",
+      "output_sha256": "96331a0e62f1756a6fef6e0686bd9d0766d93371a5533a52d198adc94e8414a5",
+      "visible_collections": [
+        "01_Character_Preview",
+        "02_BunnyPajamas_Export"
+      ],
+      "visible_mesh_count": 51,
+      "visible_meshes": [
+        "Bunny_Hood_CrownSeam",
+        "Bunny_Hood_FloppyEar_L",
+        "Bunny_Hood_FloppyEar_R",
+        "Bunny_Hood_RolledFaceEdge",
+        "Bunny_Hood_SoftShell",
+        "Bunny_Slipper_PaddedSole_L",
+        "Bunny_Slipper_PaddedSole_R",
+        "Bunny_Slipper_PlushBinding_L",
+        "Bunny_Slipper_PlushBinding_R",
+        "Bunny_Slipper_QuiltBorder_L",
+        "Bunny_Slipper_QuiltBorder_R",
+        "Bunny_Slipper_QuiltedUpper_L",
+        "Bunny_Slipper_QuiltedUpper_R",
+        "Bunny_Slipper_QuiltSeam_L_-1_0",
+        "Bunny_Slipper_QuiltSeam_L_-1_1",
+        "Bunny_Slipper_QuiltSeam_L_-1_2",
+        "Bunny_Slipper_QuiltSeam_L_1_0",
+        "Bunny_Slipper_QuiltSeam_L_1_1",
+        "Bunny_Slipper_QuiltSeam_L_1_2",
+        "Bunny_Slipper_QuiltSeam_R_-1_0",
+        "Bunny_Slipper_QuiltSeam_R_-1_1",
+        "Bunny_Slipper_QuiltSeam_R_-1_2",
+        "Bunny_Slipper_QuiltSeam_R_1_0",
+        "Bunny_Slipper_QuiltSeam_R_1_1",
+        "Bunny_Slipper_QuiltSeam_R_1_2",
+        "Bunny_Slipper_WeltSeam_L",
+        "Bunny_Slipper_WeltSeam_R",
+        "BunnyPajamas_AnkleCuff_-1",
+        "BunnyPajamas_AnkleCuff_1",
+        "BunnyPajamas_AnkleSock_-1",
+        "BunnyPajamas_AnkleSock_1",
+        "BunnyPajamas_HoodCord_-1",
+        "BunnyPajamas_HoodCord_1",
+        "BunnyPajamas_Hoodie_Body",
+        "BunnyPajamas_Hoodie_RibHem",
+        "BunnyPajamas_KangarooPocket",
+        "BunnyPajamas_Pants",
+        "BunnyPajamas_PocketLowerSeam",
+        "BunnyPajamas_PocketMouth_-1",
+        "BunnyPajamas_PocketMouth_1",
+        "BunnyPajamas_PomPom_-1",
+        "BunnyPajamas_PomPom_1",
+        "BunnyPajamas_RibCuff_L",
+        "BunnyPajamas_RibCuff_R",
+        "BunnyPajamas_Sleeve_L",
+        "BunnyPajamas_Sleeve_R",
+        "BunnyPajamas_SoftNeckTransition",
+        "SKM_Luna.Eye_BunnyPajamasBase",
+        "SKM_Luna.Head_BunnyPajamasBase",
+        "SKM_LunaFace_BunnyPajamasBase",
+        "SKM_LunaMk2_BunnyPajamasBase"
+      ],
+      "world_bounds_m": [
+        [
+          -0.3017045855522156,
+          0.2987910509109497
+        ],
+        [
+          -0.17250001430511475,
+          0.2220524549484253
+        ],
+        [
+          -0.008000006899237633,
+          1.6429541110992432
+        ]
+      ],
+      "projected_bounds_0_to_1": [
+        [
+          0.25490257143974304,
+          0.7041977643966675
+        ],
+        [
+          0.05073635280132294,
+          0.9234278798103333
+        ]
+      ],
+      "maid_title_skirt_visible": false,
+      "bunny_sidetails_hidden": true,
+      "dimensions_verified": [
+        1024,
+        1536
+      ],
+      "visually_reviewed": true,
+      "visual_review": "Full body, both shoes and hair/hood/ear tips visible; only intended outfit visible; source material detail preserved."
+    },
+    "AdventurerOutfit": {
+      "source": "TunaSweeper/SourceArt/Characters/LunaMk2/AdventurerOutfit/LunaMk2_AdventurerOutfit.blend",
+      "input_sha256": "77fc47b2feef61c9b4f50f2a7443fe3b03c7a9b3ec7120cf90a5792e457349b7",
+      "after_sha256": "77fc47b2feef61c9b4f50f2a7443fe3b03c7a9b3ec7120cf90a5792e457349b7",
+      "source_unchanged": true,
+      "output": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_AdventurerOutfit_Capture.png",
+      "output_sha256": "8343ca39270a05792a651ed74c11cd7cdfa62df4ee53b09567ffb1de80d02513",
+      "visible_collections": [
+        "01_Character_Preview",
+        "02_AdventurerOutfit_Export"
+      ],
+      "visible_mesh_count": 172,
+      "visible_meshes": [
+        "Adv_Belt_Edge0",
+        "Adv_Belt_Edge1",
+        "Adv_Belt_Keeper_0",
+        "Adv_Belt_Keeper_1",
+        "Adv_Belt_Keeper_2",
+        "Adv_Belt_Keeper_3",
+        "Adv_Belt_MainBuckle_Frame",
+        "Adv_Belt_MainBuckle_Pin",
+        "Adv_Belt_WaistLeather",
+        "Adv_Boot_AnkleStrap_L",
+        "Adv_Boot_AnkleStrap_R",
+        "Adv_Boot_BucklePin_L",
+        "Adv_Boot_BucklePin_R",
+        "Adv_Boot_CollarRivet_L0.64",
+        "Adv_Boot_CollarRivet_L5.64",
+        "Adv_Boot_CollarRivet_R0.64",
+        "Adv_Boot_CollarRivet_R5.64",
+        "Adv_Boot_CrossLace_L_0_-1",
+        "Adv_Boot_CrossLace_L_0_1",
+        "Adv_Boot_CrossLace_L_1_-1",
+        "Adv_Boot_CrossLace_L_1_1",
+        "Adv_Boot_CrossLace_L_2_-1",
+        "Adv_Boot_CrossLace_L_2_1",
+        "Adv_Boot_CrossLace_L_3_-1",
+        "Adv_Boot_CrossLace_L_3_1",
+        "Adv_Boot_CrossLace_L_4_-1",
+        "Adv_Boot_CrossLace_L_4_1",
+        "Adv_Boot_CrossLace_L_5_-1",
+        "Adv_Boot_CrossLace_L_5_1",
+        "Adv_Boot_CrossLace_R_0_-1",
+        "Adv_Boot_CrossLace_R_0_1",
+        "Adv_Boot_CrossLace_R_1_-1",
+        "Adv_Boot_CrossLace_R_1_1",
+        "Adv_Boot_CrossLace_R_2_-1",
+        "Adv_Boot_CrossLace_R_2_1",
+        "Adv_Boot_CrossLace_R_3_-1",
+        "Adv_Boot_CrossLace_R_3_1",
+        "Adv_Boot_CrossLace_R_4_-1",
+        "Adv_Boot_CrossLace_R_4_1",
+        "Adv_Boot_CrossLace_R_5_-1",
+        "Adv_Boot_CrossLace_R_5_1",
+        "Adv_Boot_Eyelet_L_0_-1",
+        "Adv_Boot_Eyelet_L_0_1",
+        "Adv_Boot_Eyelet_L_1_-1",
+        "Adv_Boot_Eyelet_L_1_1",
+        "Adv_Boot_Eyelet_L_2_-1",
+        "Adv_Boot_Eyelet_L_2_1",
+        "Adv_Boot_Eyelet_L_3_-1",
+        "Adv_Boot_Eyelet_L_3_1",
+        "Adv_Boot_Eyelet_L_4_-1",
+        "Adv_Boot_Eyelet_L_4_1",
+        "Adv_Boot_Eyelet_L_5_-1",
+        "Adv_Boot_Eyelet_L_5_1",
+        "Adv_Boot_Eyelet_L_6_-1",
+        "Adv_Boot_Eyelet_L_6_1",
+        "Adv_Boot_Eyelet_R_0_-1",
+        "Adv_Boot_Eyelet_R_0_1",
+        "Adv_Boot_Eyelet_R_1_-1",
+        "Adv_Boot_Eyelet_R_1_1",
+        "Adv_Boot_Eyelet_R_2_-1",
+        "Adv_Boot_Eyelet_R_2_1",
+        "Adv_Boot_Eyelet_R_3_-1",
+        "Adv_Boot_Eyelet_R_3_1",
+        "Adv_Boot_Eyelet_R_4_-1",
+        "Adv_Boot_Eyelet_R_4_1",
+        "Adv_Boot_Eyelet_R_5_-1",
+        "Adv_Boot_Eyelet_R_5_1",
+        "Adv_Boot_Eyelet_R_6_-1",
+        "Adv_Boot_Eyelet_R_6_1",
+        "Adv_Boot_Eyestay_L-1",
+        "Adv_Boot_Eyestay_L1",
+        "Adv_Boot_Eyestay_R-1",
+        "Adv_Boot_Eyestay_R1",
+        "Adv_Boot_FoldedCollar_L",
+        "Adv_Boot_FoldedCollar_R",
+        "Adv_Boot_LaceEnd_L-1",
+        "Adv_Boot_LaceEnd_L1",
+        "Adv_Boot_LaceEnd_R-1",
+        "Adv_Boot_LaceEnd_R1",
+        "Adv_Boot_LaceLoop_L-1",
+        "Adv_Boot_LaceLoop_L1",
+        "Adv_Boot_LaceLoop_R-1",
+        "Adv_Boot_LaceLoop_R1",
+        "Adv_Boot_LeatherUpper_L",
+        "Adv_Boot_LeatherUpper_R",
+        "Adv_Boot_Outsole_L",
+        "Adv_Boot_Outsole_R",
+        "Adv_Boot_SideBuckle_L",
+        "Adv_Boot_SideBuckle_R",
+        "Adv_Boot_ToeCap_L",
+        "Adv_Boot_ToeCap_R",
+        "Adv_Boot_ToeCapSeam_L",
+        "Adv_Boot_ToeCapSeam_R",
+        "Adv_Boot_Tongue_L",
+        "Adv_Boot_Tongue_R",
+        "Adv_Boot_TreadLugs_L",
+        "Adv_Boot_TreadLugs_R",
+        "Adv_Boot_Welt_L",
+        "Adv_Boot_Welt_R",
+        "Adv_Boot_WeltStitch_L",
+        "Adv_Boot_WeltStitch_R",
+        "Adv_Cuff_L_Buckle_Frame",
+        "Adv_Cuff_L_Buckle_Pin",
+        "Adv_Cuff_L_CenterStrap",
+        "Adv_Cuff_L_Edge0",
+        "Adv_Cuff_L_Edge1",
+        "Adv_Cuff_L_Leather",
+        "Adv_Cuff_R_Buckle_Frame",
+        "Adv_Cuff_R_Buckle_Pin",
+        "Adv_Cuff_R_CenterStrap",
+        "Adv_Cuff_R_Edge0",
+        "Adv_Cuff_R_Edge1",
+        "Adv_Cuff_R_Leather",
+        "Adv_Ribbon_Knot",
+        "Adv_Ribbon_Loop_-1",
+        "Adv_Ribbon_Loop_1",
+        "Adv_Ribbon_Tail_-1",
+        "Adv_Ribbon_Tail_1",
+        "Adv_Shirt_Body",
+        "Adv_Shirt_Button_0",
+        "Adv_Shirt_Button_1",
+        "Adv_Shirt_Button_2",
+        "Adv_Shirt_Button_3",
+        "Adv_Shirt_Button_4",
+        "Adv_Shirt_Button_5",
+        "Adv_Shirt_ButtonPlacket",
+        "Adv_Shirt_ChestPocket_-1",
+        "Adv_Shirt_ChestPocket_1",
+        "Adv_Shirt_NeckBand",
+        "Adv_Shirt_PocketButton_-1",
+        "Adv_Shirt_PocketButton_1",
+        "Adv_Shirt_PocketStitch_-1",
+        "Adv_Shirt_PocketStitch_1",
+        "Adv_Shirt_PointCollar_-1",
+        "Adv_Shirt_PointCollar_1",
+        "Adv_Shirt_RolledCuff_L",
+        "Adv_Shirt_RolledCuff_R",
+        "Adv_Shirt_Sleeve_L",
+        "Adv_Shirt_Sleeve_R",
+        "Adv_Shorts",
+        "Adv_Shorts_FlySeam",
+        "Adv_Shorts_PocketWelt_-1",
+        "Adv_Shorts_PocketWelt_1",
+        "Adv_Shorts_RolledCuff_-1",
+        "Adv_Shorts_RolledCuff_1",
+        "Adv_Sock_Slouch_L",
+        "Adv_Sock_Slouch_R",
+        "Adv_Sock_TopBinding_L",
+        "Adv_Sock_TopBinding_R",
+        "Adv_Strap_L_ChestBuckle_Frame",
+        "Adv_Strap_L_ChestBuckle_Pin",
+        "Adv_Strap_L_Edge_Inner",
+        "Adv_Strap_L_Edge_Outer",
+        "Adv_Strap_L_WaistBuckle_Frame",
+        "Adv_Strap_L_WaistBuckle_Pin",
+        "Adv_Strap_LeftShorts_Buckle_Frame",
+        "Adv_Strap_LeftShorts_Buckle_Pin",
+        "Adv_Strap_LeftShorts_Horizontal",
+        "Adv_Strap_LeftShorts_Vertical",
+        "Adv_Strap_R_ChestBuckle_Frame",
+        "Adv_Strap_R_ChestBuckle_Pin",
+        "Adv_Strap_R_Edge_Inner",
+        "Adv_Strap_R_Edge_Outer",
+        "Adv_Strap_R_WaistBuckle_Frame",
+        "Adv_Strap_R_WaistBuckle_Pin",
+        "Adv_Strap_Suspender_L",
+        "Adv_Strap_Suspender_R",
+        "SKM_Luna.Eye_AdventurerOutfitBase",
+        "SKM_Luna.Head_AdventurerOutfitBase",
+        "SKM_Luna.SideTail_AdventurerOutfitBase",
+        "SKM_LunaFace_AdventurerOutfitBase",
+        "SKM_LunaMk2_AdventurerOutfitBase"
+      ],
+      "world_bounds_m": [
+        [
+          -0.31353819370269775,
+          0.31353819370269775
+        ],
+        [
+          -0.17795002460479736,
+          0.17100200057029724
+        ],
+        [
+          -0.00850000698119402,
+          1.5054049491882324
+        ]
+      ],
+      "projected_bounds_0_to_1": [
+        [
+          0.25615936517715454,
+          0.7614777088165283
+        ],
+        [
+          0.049953680485486984,
+          0.8502482771873474
+        ]
+      ],
+      "maid_title_skirt_visible": false,
+      "bunny_sidetails_hidden": false,
+      "dimensions_verified": [
+        1024,
+        1536
+      ],
+      "visually_reviewed": true,
+      "visual_review": "Full body, both shoes and hair/hood/ear tips visible; only intended outfit visible; source material detail preserved."
+    }
+  },
+  "verification": {
+    "all_6_visually_reviewed": true,
+    "all_source_hashes_unchanged": true,
+    "maximum_outfit_height_m": 1.6429541110992432,
+    "minimum_outfit_z_m": -0.00850000698119402,
+    "feet_baseline_max_variation_px": 4.988565444946289,
+    "common_camera_world_scale": true,
+    "original_blend_files_saved": false
+  }
+}

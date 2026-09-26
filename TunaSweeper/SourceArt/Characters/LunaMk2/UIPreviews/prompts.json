@@ -1,0 +1,49 @@
+{
+  "generator": "Built-in image_gen.imagegen",
+  "mode": "New illustration generation from model capture references",
+  "canvas": {
+    "width": 1024,
+    "height": 1536,
+    "aspect": "2:3"
+  },
+  "transparent_background": true,
+  "post_processing": "None. The generated PNG bytes and native alpha channel are preserved.",
+  "records": [
+    {
+      "id": "SchoolUniform",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver twin-tail hair, blue eyes, petite proportions, white frilled headband, navy sailor blazer, burgundy bow and blue-gray plaid skirt, white stockings and dark shoes. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair and shoes visible. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_SchoolUniform_Capture.png",
+      "output": "Images/LunaMk2_SchoolUniform_UI.png"
+    },
+    {
+      "id": "Maid",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver hair, blue eyes, petite proportions, and the same character identity as the capture. Outfit: a charcoal short-sleeved maid dress, white frilled bib and apron, white sleeve cuffs and skirt hem, a dark neck bow, white stockings and dark low shoes, as shown in the capture. Preserve the silver curled twin tails, dark bows and white frilled headband. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head accessories and shoes visible with space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_Maid_Capture.png",
+      "output": "Images/LunaMk2_Maid_UI.png"
+    },
+    {
+      "id": "MechanicOutfit",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver hair, blue eyes, petite proportions, and the same character identity as the capture. Outfit: orange full-length mechanic overalls with chest pocket and knee patches, navy short-sleeved undershirt, brown tool belt with wrench and screwdriver in a side pouch, and dark lace-up work boots, as shown in the capture. Preserve the silver curled twin tails, dark bows and white frilled headband. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head accessories and shoes visible with space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_MechanicOutfit_Capture.png",
+      "output": "Images/LunaMk2_MechanicOutfit_UI.png"
+    },
+    {
+      "id": "Sportswear",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver hair, blue eyes, petite proportions, and the same character identity as the capture. Outfit: a navy zipped tracksuit with ivory shoulder yoke, two ivory stripes down the sleeves and outer pant legs, short white socks and navy-and-ivory sneakers, as shown in the capture. Preserve the silver curled twin tails, dark bows and white frilled headband. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head accessories and shoes visible with space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_Sportswear_Capture.png",
+      "output": "Images/LunaMk2_Sportswear_UI.png"
+    },
+    {
+      "id": "BunnyPajamas",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver hair, blue eyes, petite proportions, and the same character identity as the capture. Outfit: a blush-pink roomy bunny-eared hoodie with long floppy ears, two ivory pom-pom drawstrings, a kangaroo pocket, loose pink pants and pink quilted slippers. The hood covers her headband and long twin tails; only silver bangs and short face-framing hair show, as shown in the capture.  Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head accessories and shoes visible with space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_BunnyPajamas_Capture.png",
+      "output": "Images/LunaMk2_BunnyPajamas_UI.png"
+    },
+    {
+      "id": "AdventurerOutfit",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver hair, blue eyes, petite proportions, and the same character identity as the capture. Outfit: an ivory shirt with rolled sleeves, small russet neck bow, brown leather suspenders and belt with brass buckles, brown wrist cuffs, khaki rolled-cuff shorts with a small brown thigh strap, ivory slouch socks and brown lace-up boots, as shown in the capture. Preserve the silver curled twin tails, dark bows and white frilled headband. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head accessories and shoes visible with space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_AdventurerOutfit_Capture.png",
+      "output": "Images/LunaMk2_AdventurerOutfit_UI.png"
+    }
+  ]
+}

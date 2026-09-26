@@ -22,7 +22,7 @@
 - Use `Docs/game_conventions.md` for project-wide gameplay conventions such as direction, distance, units, and currency.
 - Before placing or editing `BP_RaidPlacementAnchor`, changing a raid `PlacementId`, or editing `EnemySpawns.json`, `LootContainerSpawns.json`, or `MemoSpawns.json`, read and follow `Docs/raid_placement_id_numbering.md`.
 - Use `Docs/save_persistence.md` to track gameplay/runtime state that must survive save/load. Update it whenever adding or changing persisted save data.
-- For project-local transparent icon or icon-sheet generation, use `.codex/skills/icon-alpha-from-solid-bg`: generate one muted mid-value solid-background source image, derive matched black/white background images locally, then extract alpha from their difference.
+- For transparent PNG assets, use built-in image generation with native transparency. For outfit thumbnails, use the model captures as references to generate new illustrations. Do not use solid-background recoloring, black/white image pairs, or multi-image alpha extraction.
 - For `Tools/QuestStudio` changes, after implementation and pre-deployment verification pass, commit and push the verified source before deploying with Wrangler. Report build/test and deployment-command results, but leave final acceptance of live behavior to the user; do not claim that deployed functionality is confirmed working on the user's behalf.
 - Before editing quest authoring data, run `npm run quest:status -- --flavor Demo` or `Main` in `Tools/QuestStudio`. If the result is `pull-required`, run the matching `quest:pull` before editing. Run `quest:validate` after edits. Run `quest:push` only when the user explicitly requests publishing. Never copy the Main authoring pack into the public repository.
 
