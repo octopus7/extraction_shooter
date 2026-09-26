@@ -1,0 +1,1294 @@
+{
+  "source": "TunaSweeper/SourceArt/Characters/LunaMk2/SchoolUniform/LunaMk2_SchoolUniform.blend",
+  "source_sha256": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+  "blender_version": "5.2.0 LTS",
+  "errors": [],
+  "warnings": [],
+  "rig": {
+    "original": "SK_LunaMk2",
+    "preview": "SK_LunaMk2_Uniform",
+    "bones": 130,
+    "max_rest_matrix_error": 0.0,
+    "object_matrix_error": 0.0,
+    "original_action": "AS_LunaMk2_Title_A",
+    "preview_action": null
+  },
+  "face": {
+    "shape_keys": [
+      "Basis",
+      "Merong",
+      "HalfClosedEye",
+      "Smile",
+      "Mouth_Wa",
+      "Mouth_O",
+      "ClosedEye"
+    ],
+    "max_coordinate_error_by_key": {
+      "Basis": 0.0,
+      "Merong": 0.0,
+      "HalfClosedEye": 0.0,
+      "Smile": 0.0,
+      "Mouth_Wa": 0.0,
+      "Mouth_O": 0.0,
+      "ClosedEye": 0.0
+    },
+    "vertices": 1020
+  },
+  "meshes": {
+    "Uniform_Blazer_Body": {
+      "vertices": 704,
+      "polygons": 640,
+      "triangles": 1280,
+      "bounds_m": [
+        [
+          -0.10300000011920929,
+          -0.07400000095367432,
+          0.9039999842643738
+        ],
+        [
+          0.10300000011920929,
+          0.07000000029802322,
+          1.1579999923706055
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.0923151959729515E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Button": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.004000000189989805,
+          -0.06799999624490738,
+          0.9889999628067017
+        ],
+        [
+          0.004000000189989805,
+          -0.06400000303983688,
+          0.996999979019165
+        ]
+      ],
+      "maximum_weight_sum_error": 1.4901161193847656E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.225951394025584E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Button.001": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.004000000189989805,
+          -0.06300000101327896,
+          0.953000009059906
+        ],
+        [
+          0.004000000189989805,
+          -0.05900000035762787,
+          0.9610000252723694
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.225951394025584E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Button.002": {
+      "vertices": 62,
+      "polygons": 72,
+      "triangles": 120,
+      "bounds_m": [
+        [
+          -0.004000000189989805,
+          -0.06799999624490738,
+          0.9229999780654907
+        ],
+        [
+          0.004000000189989805,
+          -0.06400000303983688,
+          0.9309999942779541
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.225951394025584E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Cuff_L": {
+      "vertices": 40,
+      "polygons": 20,
+      "triangles": 40,
+      "bounds_m": [
+        [
+          0.20966839790344238,
+          -0.09555740654468536,
+          0.9094221591949463
+        ],
+        [
+          0.25640377402305603,
+          -0.051751021295785904,
+          0.9537398815155029
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 40,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.0000235194036008E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Cuff_R": {
+      "vertices": 40,
+      "polygons": 20,
+      "triangles": 40,
+      "bounds_m": [
+        [
+          -0.25647369027137756,
+          -0.09560490399599075,
+          0.909645140171051
+        ],
+        [
+          -0.20980827510356903,
+          -0.05180516839027405,
+          0.9540989398956299
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 40,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 2.0000256600323568E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Sleeve_L": {
+      "vertices": 280,
+      "polygons": 260,
+      "triangles": 520,
+      "bounds_m": [
+        [
+          0.04272419586777687,
+          -0.09450137615203857,
+          0.9104933142662048
+        ],
+        [
+          0.255257248878479,
+          0.04303576424717903,
+          1.1537785530090332
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 40,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.627365330212988E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_Sleeve_R": {
+      "vertices": 280,
+      "polygons": 260,
+      "triangles": 520,
+      "bounds_m": [
+        [
+          -0.25532954931259155,
+          -0.09454907476902008,
+          0.9107203483581543
+        ],
+        [
+          -0.04272419586777687,
+          0.04296664148569107,
+          1.1538091897964478
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 40,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 6.566276088989409E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_WeltPocket_-1": {
+      "vertices": 12,
+      "polygons": 8,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          -0.0677160918712616,
+          -0.06160198897123337,
+          0.9450034499168396
+        ],
+        [
+          -0.03228390961885452,
+          -0.04439800977706909,
+          0.9509965777397156
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.732075120261731E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Blazer_WeltPocket_1": {
+      "vertices": 12,
+      "polygons": 8,
+      "triangles": 20,
+      "bounds_m": [
+        [
+          0.03228390961885452,
+          -0.06160198897123337,
+          0.9450034499168396
+        ],
+        [
+          0.0677160918712616,
+          -0.04439800977706909,
+          0.9509965777397156
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.732075120261731E-06,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Collar_DoubleStripe_-1_0": {
+      "vertices": 30,
+      "polygons": 26,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          -0.09821217507123947,
+          -0.08616483211517334,
+          1.052996277809143
+        ],
+        [
+          0.0,
+          0.08521243184804916,
+          1.1383708715438843
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 8.486794264705337E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Collar_DoubleStripe_-1_0.007": {
+      "vertices": 30,
+      "polygons": 26,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          -0.09121217578649521,
+          -0.08615508675575256,
+          1.0601067543029785
+        ],
+        [
+          0.0,
+          0.08521243184804916,
+          1.1453709602355957
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 8.486993863243697E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Collar_DoubleStripe_1_0": {
+      "vertices": 30,
+      "polygons": 26,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          0.0,
+          -0.08616483211517334,
+          1.052996277809143
+        ],
+        [
+          0.09821217507123947,
+          0.08521243184804916,
+          1.1383708715438843
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 8.486794264705337E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Collar_DoubleStripe_1_0.007": {
+      "vertices": 30,
+      "polygons": 26,
+      "triangles": 56,
+      "bounds_m": [
+        [
+          0.0,
+          -0.08615508675575256,
+          1.0601067543029785
+        ],
+        [
+          0.09121217578649521,
+          0.08521243184804916,
+          1.1453709602355957
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 8.486993863243697E-07,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Pleated_Plaid_Skirt": {
+      "vertices": 1080,
+      "polygons": 960,
+      "triangles": 1920,
+      "bounds_m": [
+        [
+          -0.21760138869285583,
+          -0.1539519876241684,
+          0.7070000171661377
+        ],
+        [
+          0.21760138869285583,
+          0.1539519876241684,
+          0.9300000071525574
+        ]
+      ],
+      "maximum_weight_sum_error": 4.470348358154297E-08,
+      "max_deform_influences": 3,
+      "boundary_edges": 240,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.436537082002415E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Ribbon_-1": {
+      "vertices": 7,
+      "polygons": 2,
+      "triangles": 4,
+      "bounds_m": [
+        [
+          -0.04600000008940697,
+          -0.10000000149011612,
+          1.0470000505447388
+        ],
+        [
+          -0.004000000189989805,
+          -0.09000000357627869,
+          1.1130000352859497
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 8,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 0.00014059038627016674,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Ribbon_1": {
+      "vertices": 7,
+      "polygons": 2,
+      "triangles": 4,
+      "bounds_m": [
+        [
+          0.004000000189989805,
+          -0.10000000149011612,
+          1.0470000505447388
+        ],
+        [
+          0.04600000008940697,
+          -0.09000000357627869,
+          1.1130000352859497
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 8,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 0.00014059038627016674,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Ribbon_Knot": {
+      "vertices": 4,
+      "polygons": 1,
+      "triangles": 2,
+      "bounds_m": [
+        [
+          -0.00800000037997961,
+          -0.10300000011920929,
+          1.0870000123977661
+        ],
+        [
+          0.00800000037997961,
+          -0.10100000351667404,
+          1.1050000190734863
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 4,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 0.0001448862191695484,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Sailor_Collar": {
+      "vertices": 140,
+      "polygons": 224,
+      "triangles": 224,
+      "bounds_m": [
+        [
+          -0.1080000028014183,
+          -0.0820000022649765,
+          1.034999966621399
+        ],
+        [
+          0.1080000028014183,
+          0.0820000022649765,
+          1.1619999408721924
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 56,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 4.4168258749080696E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Shirt_Insert": {
+      "vertices": 5,
+      "polygons": 1,
+      "triangles": 3,
+      "bounds_m": [
+        [
+          -0.03799999877810478,
+          -0.07699999958276749,
+          1.0399999618530273
+        ],
+        [
+          0.03799999877810478,
+          -0.019999999552965164,
+          1.1540000438690186
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 5,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 0.0019609998656084596,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Shirt_StandCollar": {
+      "vertices": 144,
+      "polygons": 96,
+      "triangles": 192,
+      "bounds_m": [
+        [
+          -0.03099999949336052,
+          -0.01899999938905239,
+          1.1480000019073486
+        ],
+        [
+          0.03099999949336052,
+          0.03700000047683716,
+          1.1770000457763672
+        ]
+      ],
+      "maximum_weight_sum_error": 2.980232238769531E-08,
+      "max_deform_influences": 2,
+      "boundary_edges": 96,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 1.4216292963475601E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    },
+    "Uniform_Skirt_Waistband": {
+      "vertices": 128,
+      "polygons": 64,
+      "triangles": 128,
+      "bounds_m": [
+        [
+          -0.09300000220537186,
+          -0.06800000369548798,
+          0.9160000085830688
+        ],
+        [
+          0.09300000220537186,
+          0.06800000369548798,
+          0.9330000281333923
+        ]
+      ],
+      "maximum_weight_sum_error": 0.0,
+      "max_deform_influences": 1,
+      "boundary_edges": 128,
+      "nonmanifold_edges": 0,
+      "degenerate_triangles": 0,
+      "minimum_triangle_area_m2": 5.687183621436729E-05,
+      "loose_vertices": 0,
+      "duplicate_seam_coordinate_count": 0,
+      "zero_area_uv_triangles": 0,
+      "modifiers": [
+        "SOLIDIFY",
+        "ARMATURE"
+      ]
+    }
+  },
+  "actions": {
+    "AS_LunaMk2_Title_A": {
+      "frames_sampled": [
+        1,
+        11,
+        21,
+        31,
+        41,
+        51,
+        61,
+        71,
+        81,
+        91,
+        101,
+        111,
+        121
+      ],
+      "max_bone_basis_rotation_radians": 1.1512305736541748,
+      "meshes": {
+        "Uniform_Blazer_Body": {
+          "max_vertex_displacement_m": 0.05466955387091169,
+          "min_edge_length_ratio": 0.9308344063487956,
+          "max_edge_length_ratio": 1.139799105298129,
+          "min_triangle_area_ratio": 0.9308265265849046,
+          "max_triangle_area_ratio": 1.1398034022475978,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button": {
+          "max_vertex_displacement_m": 0.032647221280170134,
+          "min_edge_length_ratio": 0.9999415430712368,
+          "max_edge_length_ratio": 1.00003869854539,
+          "min_triangle_area_ratio": 0.9999315625769116,
+          "max_triangle_area_ratio": 1.000065241219021,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button.001": {
+          "max_vertex_displacement_m": 0.029790717064829005,
+          "min_edge_length_ratio": 0.898681900315637,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.8986398135436052,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button.002": {
+          "max_vertex_displacement_m": 0.03205856092531123,
+          "min_edge_length_ratio": 0.9999573195445939,
+          "max_edge_length_ratio": 1.0000669049902697,
+          "min_triangle_area_ratio": 0.9999366649829325,
+          "max_triangle_area_ratio": 1.0000753299672616,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Cuff_L": {
+          "max_vertex_displacement_m": 0.3101537417068817,
+          "min_edge_length_ratio": 0.999944176093411,
+          "max_edge_length_ratio": 1.0000427604256465,
+          "min_triangle_area_ratio": 0.9999417429323733,
+          "max_triangle_area_ratio": 1.0000466299770565,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Cuff_R": {
+          "max_vertex_displacement_m": 0.30924835529877975,
+          "min_edge_length_ratio": 0.9999405483066209,
+          "max_edge_length_ratio": 1.0000508266157722,
+          "min_triangle_area_ratio": 0.9999382675287475,
+          "max_triangle_area_ratio": 1.0000529863875436,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Sleeve_L": {
+          "max_vertex_displacement_m": 0.3096301558867178,
+          "min_edge_length_ratio": 0.2892846226249083,
+          "max_edge_length_ratio": 1.504960146643036,
+          "min_triangle_area_ratio": 0.27907924575503035,
+          "max_triangle_area_ratio": 1.677994912185552,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Sleeve_R": {
+          "max_vertex_displacement_m": 0.3087570502896455,
+          "min_edge_length_ratio": 0.34138199695730964,
+          "max_edge_length_ratio": 1.4901237780645458,
+          "min_triangle_area_ratio": 0.33043794751517497,
+          "max_triangle_area_ratio": 1.5868205623661693,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_WeltPocket_-1": {
+          "max_vertex_displacement_m": 0.029347177017587503,
+          "min_edge_length_ratio": 0.9021070386756805,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.8988875232402012,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_WeltPocket_1": {
+          "max_vertex_displacement_m": 0.029347177017587503,
+          "min_edge_length_ratio": 0.9021070386756805,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.8983188678378494,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_-1_0": {
+          "max_vertex_displacement_m": 0.0510342946764517,
+          "min_edge_length_ratio": 0.9854936070279391,
+          "max_edge_length_ratio": 1.06069461747496,
+          "min_triangle_area_ratio": 0.9714231990596136,
+          "max_triangle_area_ratio": 1.061295097274176,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_-1_0.007": {
+          "max_vertex_displacement_m": 0.05288038896873615,
+          "min_edge_length_ratio": 0.9817314063438317,
+          "max_edge_length_ratio": 1.060547143618948,
+          "min_triangle_area_ratio": 0.9816634500842593,
+          "max_triangle_area_ratio": 1.0611828517477946,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_1_0": {
+          "max_vertex_displacement_m": 0.0510342946764517,
+          "min_edge_length_ratio": 0.9854938420968693,
+          "max_edge_length_ratio": 1.06069461747496,
+          "min_triangle_area_ratio": 0.9717604379380552,
+          "max_triangle_area_ratio": 1.0613564328465905,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_1_0.007": {
+          "max_vertex_displacement_m": 0.052880367774110905,
+          "min_edge_length_ratio": 0.9817316458042841,
+          "max_edge_length_ratio": 1.060547143618948,
+          "min_triangle_area_ratio": 0.9816470244795495,
+          "max_triangle_area_ratio": 1.061186927670266,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Pleated_Plaid_Skirt": {
+          "max_vertex_displacement_m": 0.04370418837739642,
+          "min_edge_length_ratio": 0.8619754350528221,
+          "max_edge_length_ratio": 1.1858272823035014,
+          "min_triangle_area_ratio": 0.7852517532321889,
+          "max_triangle_area_ratio": 1.1955271655086013,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_-1": {
+          "max_vertex_displacement_m": 0.05600307948450824,
+          "min_edge_length_ratio": 0.9464556533080795,
+          "max_edge_length_ratio": 1.0000297520668626,
+          "min_triangle_area_ratio": 0.9458970314370921,
+          "max_triangle_area_ratio": 1.0000308317201825,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_1": {
+          "max_vertex_displacement_m": 0.05600307948450824,
+          "min_edge_length_ratio": 0.9464556050621113,
+          "max_edge_length_ratio": 1.000020933037762,
+          "min_triangle_area_ratio": 0.945593981321424,
+          "max_triangle_area_ratio": 1.0000214113987298,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_Knot": {
+          "max_vertex_displacement_m": 0.05631385587712261,
+          "min_edge_length_ratio": 0.940678675590217,
+          "max_edge_length_ratio": 1.0000000000277556,
+          "min_triangle_area_ratio": 0.9404852651789825,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Sailor_Collar": {
+          "max_vertex_displacement_m": 0.0561429349821844,
+          "min_edge_length_ratio": 0.9730638794534503,
+          "max_edge_length_ratio": 1.056369968154821,
+          "min_triangle_area_ratio": 0.9720514746059478,
+          "max_triangle_area_ratio": 1.0563700239467215,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Shirt_Insert": {
+          "max_vertex_displacement_m": 0.05378624017649715,
+          "min_edge_length_ratio": 0.9835264109959376,
+          "max_edge_length_ratio": 1.00002733667554,
+          "min_triangle_area_ratio": 0.9656491658536555,
+          "max_triangle_area_ratio": 1.0000192138964739,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Shirt_StandCollar": {
+          "max_vertex_displacement_m": 0.05874290310277566,
+          "min_edge_length_ratio": 0.9947932570224143,
+          "max_edge_length_ratio": 1.0000030827494173,
+          "min_triangle_area_ratio": 0.9896329023975748,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Skirt_Waistband": {
+          "max_vertex_displacement_m": 0.029924636391279746,
+          "min_edge_length_ratio": 0.9999856834440367,
+          "max_edge_length_ratio": 1.0000236896755539,
+          "min_triangle_area_ratio": 0.9999854229065135,
+          "max_triangle_area_ratio": 1.0000232296128382,
+          "collapsed_triangles": 0
+        }
+      }
+    },
+    "AS_LunaMk2_Title_B": {
+      "frames_sampled": [
+        1,
+        11,
+        21,
+        31,
+        41,
+        51,
+        61,
+        71,
+        81,
+        91,
+        101,
+        111,
+        121
+      ],
+      "max_bone_basis_rotation_radians": 1.2144842147827148,
+      "meshes": {
+        "Uniform_Blazer_Body": {
+          "max_vertex_displacement_m": 0.06007405621146103,
+          "min_edge_length_ratio": 0.930875745362725,
+          "max_edge_length_ratio": 1.1397236605617798,
+          "min_triangle_area_ratio": 0.9308640107672099,
+          "max_triangle_area_ratio": 1.1397287211853915,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button": {
+          "max_vertex_displacement_m": 0.0445559006211982,
+          "min_edge_length_ratio": 0.9999451303193273,
+          "max_edge_length_ratio": 1.0000393200835622,
+          "min_triangle_area_ratio": 0.9999385258106528,
+          "max_triangle_area_ratio": 1.0000679789529137,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button.001": {
+          "max_vertex_displacement_m": 0.042358000776799264,
+          "min_edge_length_ratio": 0.8987730655601357,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.8986538448715115,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button.002": {
+          "max_vertex_displacement_m": 0.04444595542599589,
+          "min_edge_length_ratio": 0.9999632620208404,
+          "max_edge_length_ratio": 1.0000850002462383,
+          "min_triangle_area_ratio": 0.9999535726534188,
+          "max_triangle_area_ratio": 1.000085679875502,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Cuff_L": {
+          "max_vertex_displacement_m": 0.2931796749850143,
+          "min_edge_length_ratio": 0.9999473645513729,
+          "max_edge_length_ratio": 1.0000490348520916,
+          "min_triangle_area_ratio": 0.9999473006524806,
+          "max_triangle_area_ratio": 1.0000593266634195,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Cuff_R": {
+          "max_vertex_displacement_m": 0.3284734637855111,
+          "min_edge_length_ratio": 0.9999363921834133,
+          "max_edge_length_ratio": 1.0000506820056267,
+          "min_triangle_area_ratio": 0.9999334069254663,
+          "max_triangle_area_ratio": 1.0000603182365948,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Sleeve_L": {
+          "max_vertex_displacement_m": 0.29264180836660764,
+          "min_edge_length_ratio": 0.25558086921925127,
+          "max_edge_length_ratio": 1.5216433489996908,
+          "min_triangle_area_ratio": 0.24260501778329469,
+          "max_triangle_area_ratio": 1.7055182099216972,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Sleeve_R": {
+          "max_vertex_displacement_m": 0.32793449557688786,
+          "min_edge_length_ratio": 0.30893240474536143,
+          "max_edge_length_ratio": 1.4932507991835062,
+          "min_triangle_area_ratio": 0.29640278077452975,
+          "max_triangle_area_ratio": 1.6174688917700604,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_WeltPocket_-1": {
+          "max_vertex_displacement_m": 0.04294817955097918,
+          "min_edge_length_ratio": 0.902300887968393,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.899103448485198,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_WeltPocket_1": {
+          "max_vertex_displacement_m": 0.04107369894375158,
+          "min_edge_length_ratio": 0.9020956512562012,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.8983179309004633,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_-1_0": {
+          "max_vertex_displacement_m": 0.06005813719424565,
+          "min_edge_length_ratio": 0.9850706591340578,
+          "max_edge_length_ratio": 1.0605767468271672,
+          "min_triangle_area_ratio": 0.9714953631806015,
+          "max_triangle_area_ratio": 1.0616965595092782,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_-1_0.007": {
+          "max_vertex_displacement_m": 0.06144753666315656,
+          "min_edge_length_ratio": 0.9824201540294739,
+          "max_edge_length_ratio": 1.0605066785258288,
+          "min_triangle_area_ratio": 0.9823055767943115,
+          "max_triangle_area_ratio": 1.061108671480925,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_1_0": {
+          "max_vertex_displacement_m": 0.05663426692544502,
+          "min_edge_length_ratio": 0.9848355467966378,
+          "max_edge_length_ratio": 1.0605767468271672,
+          "min_triangle_area_ratio": 0.9718568953267375,
+          "max_triangle_area_ratio": 1.061181964713648,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_1_0.007": {
+          "max_vertex_displacement_m": 0.05841092354784211,
+          "min_edge_length_ratio": 0.9810626952310788,
+          "max_edge_length_ratio": 1.0605066785258288,
+          "min_triangle_area_ratio": 0.980999291272641,
+          "max_triangle_area_ratio": 1.061092351539805,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Pleated_Plaid_Skirt": {
+          "max_vertex_displacement_m": 0.06287581252890465,
+          "min_edge_length_ratio": 0.8447800919039604,
+          "max_edge_length_ratio": 1.2500002877702823,
+          "min_triangle_area_ratio": 0.7993893106452292,
+          "max_triangle_area_ratio": 1.2791735752978224,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_-1": {
+          "max_vertex_displacement_m": 0.06498893109650081,
+          "min_edge_length_ratio": 0.9462890247717134,
+          "max_edge_length_ratio": 1.0000144578462329,
+          "min_triangle_area_ratio": 0.9459173613309536,
+          "max_triangle_area_ratio": 1.0000129496098347,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_1": {
+          "max_vertex_displacement_m": 0.06280210509151804,
+          "min_edge_length_ratio": 0.9466870501185949,
+          "max_edge_length_ratio": 1.000015585693377,
+          "min_triangle_area_ratio": 0.9457424218234334,
+          "max_triangle_area_ratio": 1.0000137012882675,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_Knot": {
+          "max_vertex_displacement_m": 0.06465232569175391,
+          "min_edge_length_ratio": 0.9407096232109432,
+          "max_edge_length_ratio": 1.0000001290740261,
+          "min_triangle_area_ratio": 0.9405148002469123,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Sailor_Collar": {
+          "max_vertex_displacement_m": 0.06174673014817759,
+          "min_edge_length_ratio": 0.9728365972044793,
+          "max_edge_length_ratio": 1.0565631070836004,
+          "min_triangle_area_ratio": 0.9720140245644269,
+          "max_triangle_area_ratio": 1.056561144074105,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Shirt_Insert": {
+          "max_vertex_displacement_m": 0.05974248255717045,
+          "min_edge_length_ratio": 0.9831646829125211,
+          "max_edge_length_ratio": 1.0000334204392496,
+          "min_triangle_area_ratio": 0.964886479005712,
+          "max_triangle_area_ratio": 1.0000163356599105,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Shirt_StandCollar": {
+          "max_vertex_displacement_m": 0.06341207465725822,
+          "min_edge_length_ratio": 0.9953677240352111,
+          "max_edge_length_ratio": 1.0000070367880405,
+          "min_triangle_area_ratio": 0.990796313560147,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Skirt_Waistband": {
+          "max_vertex_displacement_m": 0.04288224264852611,
+          "min_edge_length_ratio": 0.9999779942316207,
+          "max_edge_length_ratio": 1.0000210709068644,
+          "min_triangle_area_ratio": 0.9999779176823224,
+          "max_triangle_area_ratio": 1.0000218422788802,
+          "collapsed_triangles": 0
+        }
+      }
+    },
+    "AS_LunaMk2_Title_C": {
+      "frames_sampled": [
+        1,
+        8,
+        16,
+        24,
+        31,
+        38,
+        46,
+        54,
+        61,
+        68,
+        76,
+        84,
+        91
+      ],
+      "max_bone_basis_rotation_radians": 1.5707964897155762,
+      "meshes": {
+        "Uniform_Blazer_Body": {
+          "max_vertex_displacement_m": 0.16994761294294788,
+          "min_edge_length_ratio": 0.9353643701682018,
+          "max_edge_length_ratio": 1.1306685012079347,
+          "min_triangle_area_ratio": 0.9353559815400933,
+          "max_triangle_area_ratio": 1.1306739828660657,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button": {
+          "max_vertex_displacement_m": 0.09874835569143885,
+          "min_edge_length_ratio": 0.9999593914903964,
+          "max_edge_length_ratio": 1.0000694761262026,
+          "min_triangle_area_ratio": 0.9999177548039075,
+          "max_triangle_area_ratio": 1.0000824899017549,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button.001": {
+          "max_vertex_displacement_m": 0.0847012242277942,
+          "min_edge_length_ratio": 0.9054243726234187,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9053868692738621,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Button.002": {
+          "max_vertex_displacement_m": 0.08804606890774723,
+          "min_edge_length_ratio": 0.9999574549581906,
+          "max_edge_length_ratio": 1.0000515413465887,
+          "min_triangle_area_ratio": 0.9999429345937927,
+          "max_triangle_area_ratio": 1.0000539103079777,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Cuff_L": {
+          "max_vertex_displacement_m": 0.3101537417068817,
+          "min_edge_length_ratio": 0.9999428193921887,
+          "max_edge_length_ratio": 1.0000536122165427,
+          "min_triangle_area_ratio": 0.9999341130609201,
+          "max_triangle_area_ratio": 1.000058340399564,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Cuff_R": {
+          "max_vertex_displacement_m": 0.43222365631143306,
+          "min_edge_length_ratio": 0.999951140573025,
+          "max_edge_length_ratio": 1.0000543287689727,
+          "min_triangle_area_ratio": 0.999947821624226,
+          "max_triangle_area_ratio": 1.0000595715795522,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Sleeve_L": {
+          "max_vertex_displacement_m": 0.3096301558867178,
+          "min_edge_length_ratio": 0.2892821727789387,
+          "max_edge_length_ratio": 1.5049601879455432,
+          "min_triangle_area_ratio": 0.27907814671499587,
+          "max_triangle_area_ratio": 1.6779974934822872,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_Sleeve_R": {
+          "max_vertex_displacement_m": 0.43006379264737987,
+          "min_edge_length_ratio": 0.34138147244569766,
+          "max_edge_length_ratio": 1.4896644969355401,
+          "min_triangle_area_ratio": 0.330436838069368,
+          "max_triangle_area_ratio": 1.5868261870141045,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_WeltPocket_-1": {
+          "max_vertex_displacement_m": 0.12242588282917426,
+          "min_edge_length_ratio": 0.9084806687239169,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9054721727300178,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Blazer_WeltPocket_1": {
+          "max_vertex_displacement_m": 0.10543075721169262,
+          "min_edge_length_ratio": 0.9084803083205047,
+          "max_edge_length_ratio": 1.0,
+          "min_triangle_area_ratio": 0.9049485208638134,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_-1_0": {
+          "max_vertex_displacement_m": 0.14551090369716976,
+          "min_edge_length_ratio": 0.9866873170493582,
+          "max_edge_length_ratio": 1.0556697223854672,
+          "min_triangle_area_ratio": 0.9738557191734785,
+          "max_triangle_area_ratio": 1.0562882919527523,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_-1_0.007": {
+          "max_vertex_displacement_m": 0.13949704997067564,
+          "min_edge_length_ratio": 0.9832372983506694,
+          "max_edge_length_ratio": 1.0555439700156806,
+          "min_triangle_area_ratio": 0.9831296698724385,
+          "max_triangle_area_ratio": 1.0561506983471713,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_1_0": {
+          "max_vertex_displacement_m": 0.1799360688490172,
+          "min_edge_length_ratio": 0.986686891686217,
+          "max_edge_length_ratio": 1.0556697223854672,
+          "min_triangle_area_ratio": 0.9741690489228588,
+          "max_triangle_area_ratio": 1.0562705381789643,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Collar_DoubleStripe_1_0.007": {
+          "max_vertex_displacement_m": 0.1743970808798405,
+          "min_edge_length_ratio": 0.9832376764223959,
+          "max_edge_length_ratio": 1.0555439700156806,
+          "min_triangle_area_ratio": 0.9831488395089767,
+          "max_triangle_area_ratio": 1.056114416989031,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Pleated_Plaid_Skirt": {
+          "max_vertex_displacement_m": 0.31710941782903374,
+          "min_edge_length_ratio": 0.793682922832957,
+          "max_edge_length_ratio": 1.2870084169360267,
+          "min_triangle_area_ratio": 0.6812727916625199,
+          "max_triangle_area_ratio": 1.3364728477138434,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_-1": {
+          "max_vertex_displacement_m": 0.16564980291543555,
+          "min_edge_length_ratio": 0.95088978867547,
+          "max_edge_length_ratio": 1.0000189953289584,
+          "min_triangle_area_ratio": 0.9503781426813147,
+          "max_triangle_area_ratio": 1.0000198383528534,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_1": {
+          "max_vertex_displacement_m": 0.17920233204286967,
+          "min_edge_length_ratio": 0.9508860157470088,
+          "max_edge_length_ratio": 1.000010319411746,
+          "min_triangle_area_ratio": 0.9500867020338399,
+          "max_triangle_area_ratio": 1.0000086623903193,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Ribbon_Knot": {
+          "max_vertex_displacement_m": 0.17366520357499082,
+          "min_edge_length_ratio": 0.945581551011944,
+          "max_edge_length_ratio": 1.0000014128633694,
+          "min_triangle_area_ratio": 0.945414033480392,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Sailor_Collar": {
+          "max_vertex_displacement_m": 0.19294717396099087,
+          "min_edge_length_ratio": 0.9752735730947494,
+          "max_edge_length_ratio": 1.0517207547072613,
+          "min_triangle_area_ratio": 0.9743487298246073,
+          "max_triangle_area_ratio": 1.0517211215659366,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Shirt_Insert": {
+          "max_vertex_displacement_m": 0.14159467262927775,
+          "min_edge_length_ratio": 0.9848840716853496,
+          "max_edge_length_ratio": 1.0000137459209877,
+          "min_triangle_area_ratio": 0.968441520577584,
+          "max_triangle_area_ratio": 1.0000136988196455,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Shirt_StandCollar": {
+          "max_vertex_displacement_m": 0.08260663616948782,
+          "min_edge_length_ratio": 0.9950230614527893,
+          "max_edge_length_ratio": 1.0000074202096387,
+          "min_triangle_area_ratio": 0.9900991772947203,
+          "max_triangle_area_ratio": 1.0,
+          "collapsed_triangles": 0
+        },
+        "Uniform_Skirt_Waistband": {
+          "max_vertex_displacement_m": 0.14905547248609582,
+          "min_edge_length_ratio": 0.999976629594472,
+          "max_edge_length_ratio": 1.0000236896755539,
+          "min_triangle_area_ratio": 0.9999760386701866,
+          "max_triangle_area_ratio": 1.0000235979366443,
+          "collapsed_triangles": 0
+        }
+      }
+    }
+  },
+  "limits": {
+    "rest_transform_tolerance": 1E-06,
+    "weight_sum_tolerance": 0.0001,
+    "degenerate_triangle_area_m2": 1E-12,
+    "note": "Boundary edges and duplicated seam coordinates are reported, not rejected. This does not establish absence of garment/body intersections or visually acceptable deformation."
+  },
+  "source_unchanged": true,
+  "passed": true,
+  "summary": {
+    "mesh_count": 22,
+    "actions_sampled": 3,
+    "errors": 0,
+    "warnings": 0
+  }
+}
