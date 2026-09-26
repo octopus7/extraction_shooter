@@ -1,0 +1,47 @@
+{
+  "id": "Raincoat",
+  "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver curled twin-tail hair, blue eyes, petite proportions, dark hair bows and white frilled headband. Yellow glossy raincoat with lowered hood, lapels, flap pockets and dark snap buttons; ivory collared dress and red neck bow; pink rubber rain boots with dark soles. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair and shoes visible. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+  "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_Raincoat_Capture.png",
+  "output": "Images/LunaMk2_Raincoat_UI.png",
+  "transparent_background": true,
+  "generator": "Built-in image_gen.imagegen",
+  "post_processing": "None. Generated PNG bytes and native alpha are preserved.",
+  "rejected_attempts": [
+    {
+      "reason": "RGB without alpha. Not imported or retained in project."
+    },
+    {
+      "reason": "RGB without alpha. Not imported or retained in project."
+    }
+  ],
+  "passed": true,
+  "checks": {
+    "mode": "RGBA",
+    "size": [
+      1024,
+      1536
+    ],
+    "aspect": "2:3",
+    "alpha_range": [
+      0,
+      254
+    ],
+    "fully_transparent_pixels": 1031005,
+    "visible_alpha_bbox_gt_128": [
+      198,
+      9,
+      838,
+      1506
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "visible_character_not_clipped": true
+  },
+  "png_sha256": "4839053a2cc34563e104d864f4ae7058b2a554132fe8ceb7e8dcf7991a56a7bf",
+  "capture_sha256": "170c022f985638f201e19a1bf9643ec555e69c97e32744c58bc065fd8abe960f",
+  "generated_bytes_preserved": true
+}

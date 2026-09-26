@@ -1,0 +1,179 @@
+{
+  "passed": true,
+  "source": "SourceArt\\Characters\\LunaMk2\\Raincoat\\LunaMk2_Raincoat.blend",
+  "source_sha256": "18f3d271271d0966e78ebb2178b7578b9c018d106317d2d48bdd3f4ecac4e00f",
+  "base_source_meshes": [
+    "SKM_Luna.Eye_RaincoatBase",
+    "SKM_Luna.Head_RaincoatBase",
+    "SKM_Luna.SideTail_RaincoatBase",
+    "SKM_LunaMk2_RaincoatBase"
+  ],
+  "face_excluded": true,
+  "side_tail_retained": true,
+  "bone_count": 130,
+  "materials": {
+    "M_Raincoat_BootPink": {
+      "base_color_linear": [
+        0.6000000238418579,
+        0.2549999952316284,
+        0.27000001072883606,
+        1.0
+      ],
+      "roughness": 0.25999999046325684,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Sole": {
+      "base_color_linear": [
+        0.11999999731779099,
+        0.07000000029802322,
+        0.07500000298023224,
+        1.0
+      ],
+      "roughness": 0.6299999952316284,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Seam": {
+      "base_color_linear": [
+        0.6600000262260437,
+        0.38999998569488525,
+        0.03500000014901161,
+        1.0
+      ],
+      "roughness": 0.3700000047683716,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Yellow": {
+      "base_color_linear": [
+        0.9200000166893005,
+        0.5699999928474426,
+        0.06499999761581421,
+        1.0
+      ],
+      "roughness": 0.25,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Bow": {
+      "base_color_linear": [
+        0.3799999952316284,
+        0.07500000298023224,
+        0.06199999898672104,
+        1.0
+      ],
+      "roughness": 0.5600000023841858,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Snap": {
+      "base_color_linear": [
+        0.10999999940395355,
+        0.10499999672174454,
+        0.09000000357627869,
+        1.0
+      ],
+      "roughness": 0.2800000011920929,
+      "metallic": 0.699999988079071
+    },
+    "M_Raincoat_Lining": {
+      "base_color_linear": [
+        0.7400000095367432,
+        0.4000000059604645,
+        0.03799999877810478,
+        1.0
+      ],
+      "roughness": 0.3700000047683716,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Cord": {
+      "base_color_linear": [
+        0.0949999988079071,
+        0.07400000095367432,
+        0.0430000014603138,
+        1.0
+      ],
+      "roughness": 0.699999988079071,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Ivory": {
+      "base_color_linear": [
+        0.7900000214576721,
+        0.75,
+        0.6499999761581421,
+        1.0
+      ],
+      "roughness": 0.6800000071525574,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Collar": {
+      "base_color_linear": [
+        0.9100000262260437,
+        0.8799999952316284,
+        0.7900000214576721,
+        1.0
+      ],
+      "roughness": 0.6299999952316284,
+      "metallic": 0.0
+    }
+  },
+  "meshes": {
+    "Base": {
+      "name": "SKM_LunaMk2_Raincoat_Base",
+      "vertices": 4290,
+      "triangles": 8099,
+      "material_names": [
+        "M_Luna.001",
+        "M_Luna"
+      ],
+      "bounds_cm": [
+        [
+          -31.353818893432617,
+          31.353818893432617
+        ],
+        [
+          -16.031509399414062,
+          17.100200653076172
+        ],
+        [
+          33.045413970947266,
+          150.54051208496094
+        ]
+      ],
+      "max_influences": 7,
+      "degenerate_triangles": 0,
+      "fbx_sha256": "80608e3cd30d8bb644924e4429093e296948a4bce5bc63bc75fe371ee768848c"
+    },
+    "Clothing": {
+      "name": "SKM_LunaMk2_Raincoat_Clothing",
+      "vertices": 56298,
+      "triangles": 112340,
+      "material_names": [
+        "M_Raincoat_Yellow",
+        "M_Raincoat_Seam",
+        "M_Raincoat_Snap",
+        "M_Raincoat_Ivory",
+        "M_Raincoat_Collar",
+        "M_Raincoat_Bow",
+        "M_Raincoat_Lining",
+        "M_Raincoat_Cord",
+        "M_Raincoat_BootPink",
+        "M_Raincoat_Sole"
+      ],
+      "bounds_cm": [
+        [
+          -26.297155380249023,
+          26.28766632080078
+        ],
+        [
+          -16.599998474121094,
+          14.320000648498535
+        ],
+        [
+          -0.4000000059604645,
+          117.60965728759766
+        ]
+      ],
+      "max_influences": 3,
+      "degenerate_triangles": 0,
+      "fbx_sha256": "89da10536a74af5c31a76c3ffdc7c4a3c7b4a6eb394cfc317ad0f54c9e34c8ab"
+    }
+  },
+  "fbx_reimport": {}
+}

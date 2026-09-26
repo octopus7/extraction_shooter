@@ -39,3 +39,13 @@ UE의 FBX importer가 Blender bind pose의 상대 행렬을 재구성한다는 �
 - `cleanup_validation.json`: 일회성 스크립트 제거 후 원본과 최종 산출물 해시 확인.
 
 `Previews/`의 이미지는 게임용 UI 일러스트와 별개인 실제 UE 검증 캡처다. 천 물리, 새 LOD, 모든 전투 동작의 옷 관통 검사는 이 에셋 검증에 포함하지 않는다. 후속 모델 수정은 각 의상의 기존 Blender 원본에서 진행한다.
+
+## Raincoat 추가
+
+일곱 번째 착용 의상인 우비는 `Raincoat/` 아래에 별도 기록한다. 기존 다섯 교체 의상의 검증 기록은 유지한다.
+
+- `/Game/Characters/Player/LunaMk2/Outfits/Raincoat/SKM_LunaMk2_Raincoat_Base`: Mask 적용 몸체·Eye·Head·SideTail, 4,290정점·8,099삼각형. Face 제외, 기존 재질·물리·손목 후처리 사용.
+- 같은 폴더의 `SKM_LunaMk2_Raincoat_Clothing`: 의상·원피스·분홍 장화, 56,298정점·112,340삼각형, 새 재질 10개. Base의 Leader Pose 사용.
+- [편집 원본 안내](../Raincoat/README.md), [FBX 기록](Raincoat/export_manifest.json), [재임포트 검사](Raincoat/fbx_validation.json), [UE 재읽기 검사](Raincoat/unreal_reload_validation.json), [실제 포즈·캡처 검사](Raincoat/unreal_runtime_visual_validation.json), [정리·해시 검사](Raincoat/cleanup_validation.json).
+
+Raincoat는 동일한 130본 스켈레톤을 사용하며, 원래 목 장식은 Raincoat 사본의 Mask로 가린다. A/B/C 39개 UE 샘플은 손 위치가 실제로 변하는지도 검사해 정지된 포즈를 반복한 결과와 구분한다. `Raincoat/Previews/`의 A/B/C PNG는 실제 UE 메시로 만든 전신 캡처다.

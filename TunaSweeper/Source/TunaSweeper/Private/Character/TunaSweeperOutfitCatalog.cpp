@@ -3,7 +3,7 @@
 bool TunaSweeperOutfits::IsSupportedOutfitId(FName OutfitId)
 {
     static const FName Ids[] = {TEXT("Maid"), TEXT("SchoolUniform"), TEXT("MechanicOutfit"),
-        TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit")};
+        TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit"), TEXT("Raincoat")};
     for (FName Id : Ids) if (OutfitId == Id) return true;
     return false;
 }

@@ -1,0 +1,1128 @@
+{
+  "passed": true,
+  "objects": [
+    {
+      "name": "Raincoat_Sleeve_L",
+      "vertices": 1792,
+      "triangles": 3584,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 5.960464477539063e-08
+    },
+    {
+      "name": "Raincoat_Cuff_L",
+      "vertices": 512,
+      "triangles": 1024,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.7939677238464355e-08
+    },
+    {
+      "name": "Raincoat_Sleeve_R",
+      "vertices": 1792,
+      "triangles": 3584,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Cuff_R",
+      "vertices": 512,
+      "triangles": 1024,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.7939677238464355e-08
+    },
+    {
+      "name": "Raincoat_CoatBody",
+      "vertices": 9600,
+      "triangles": 19196,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.284083843231201e-08
+    },
+    {
+      "name": "Raincoat_FrontEdge_-1",
+      "vertices": 400,
+      "triangles": 796,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.470348358154297e-08
+    },
+    {
+      "name": "Raincoat_FrontFacing_-1",
+      "vertices": 500,
+      "triangles": 996,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.470348358154297e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_-1_0.665",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.725290298461914e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_-1_0.81",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.166496753692627e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_-1_0.955",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.6600901037454605e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_-1_1.078",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_FrontEdge_1",
+      "vertices": 400,
+      "triangles": 796,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.470348358154297e-08
+    },
+    {
+      "name": "Raincoat_FrontFacing_1",
+      "vertices": 500,
+      "triangles": 996,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.470348358154297e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_1_0.665",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_1_0.81",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.3527612686157227e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_1_0.955",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.6600901037454605e-08
+    },
+    {
+      "name": "Raincoat_FrontSnap_1_1.078",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Seam_Hem",
+      "vertices": 768,
+      "triangles": 1532,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.725290298461914e-08
+    },
+    {
+      "name": "Raincoat_Seam_BackShoulder",
+      "vertices": 768,
+      "triangles": 1532,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.421438694000244e-08
+    },
+    {
+      "name": "Raincoat_IvoryDress",
+      "vertices": 9600,
+      "triangles": 19200,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.470348358154297e-08
+    },
+    {
+      "name": "Raincoat_DressSeam_0.558",
+      "vertices": 768,
+      "triangles": 1536,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.294553607702255e-08
+    },
+    {
+      "name": "Raincoat_DressSeam_0.89",
+      "vertices": 768,
+      "triangles": 1536,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.7752165010497265e-08
+    },
+    {
+      "name": "Raincoat_DressButton_1.075",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_DressButton_1.018",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_DressButton_0.955",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.60770320892334e-08
+    },
+    {
+      "name": "Raincoat_CollarStand",
+      "vertices": 480,
+      "triangles": 960,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Collar_-1",
+      "vertices": 10,
+      "triangles": 16,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9336661100387573e-08
+    },
+    {
+      "name": "Raincoat_BowLoop_-1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_BowTail_-1",
+      "vertices": 10,
+      "triangles": 16,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 1.4901161193847656e-08
+    },
+    {
+      "name": "Raincoat_Collar_1",
+      "vertices": 10,
+      "triangles": 16,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9336661100387573e-08
+    },
+    {
+      "name": "Raincoat_BowLoop_1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_BowTail_1",
+      "vertices": 10,
+      "triangles": 16,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 1.4901161193847656e-08
+    },
+    {
+      "name": "Raincoat_BowKnot",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_TurnedLapel_-1",
+      "vertices": 10,
+      "triangles": 16,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_LapelSeam_-1",
+      "vertices": 32,
+      "triangles": 60,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_LapelSnap_-1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_TurnedLapel_1",
+      "vertices": 10,
+      "triangles": 16,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_LapelSeam_1",
+      "vertices": 32,
+      "triangles": 60,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_LapelSnap_1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_CuffTab_L",
+      "vertices": 8,
+      "triangles": 12,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.7939677238464355e-08
+    },
+    {
+      "name": "Raincoat_CuffSnap_L",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.7939677238464355e-08
+    },
+    {
+      "name": "Raincoat_CuffTab_R",
+      "vertices": 8,
+      "triangles": 12,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.7939677238464355e-08
+    },
+    {
+      "name": "Raincoat_CuffSnap_R",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.7939677238464355e-08
+    },
+    {
+      "name": "Raincoat_Pocket_-1",
+      "vertices": 338,
+      "triangles": 672,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.378954716026783e-08
+    },
+    {
+      "name": "Raincoat_PocketFlap_-1",
+      "vertices": 130,
+      "triangles": 256,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_PocketSeam_-1",
+      "vertices": 200,
+      "triangles": 396,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 4.033790901303291e-08
+    },
+    {
+      "name": "Raincoat_PocketSnap_-1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.1781382858753204e-08
+    },
+    {
+      "name": "Raincoat_Pocket_1",
+      "vertices": 338,
+      "triangles": 672,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.684544935822487e-08
+    },
+    {
+      "name": "Raincoat_PocketFlap_1",
+      "vertices": 130,
+      "triangles": 256,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.0086084734648466e-08
+    },
+    {
+      "name": "Raincoat_PocketSeam_1",
+      "vertices": 200,
+      "triangles": 396,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.975583240389824e-08
+    },
+    {
+      "name": "Raincoat_PocketSnap_1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 3.207242116332054e-08
+    },
+    {
+      "name": "Raincoat_BackStormYoke",
+      "vertices": 980,
+      "triangles": 1956,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_BackVentSeam",
+      "vertices": 392,
+      "triangles": 780,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 1.1175870895385742e-08
+    },
+    {
+      "name": "Raincoat_BackVentSnap",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_DroppedHood",
+      "vertices": 1920,
+      "triangles": 3840,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_HoodBottom",
+      "vertices": 128,
+      "triangles": 252,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 1.4901161193847656e-08
+    },
+    {
+      "name": "Raincoat_HoodRim",
+      "vertices": 512,
+      "triangles": 1024,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_HoodCenterSeam",
+      "vertices": 208,
+      "triangles": 412,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Drawcord_-1",
+      "vertices": 32,
+      "triangles": 60,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_CordStop_-1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Drawcord_1",
+      "vertices": 32,
+      "triangles": 60,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_CordStop_1",
+      "vertices": 222,
+      "triangles": 440,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_Shell",
+      "vertices": 5760,
+      "triangles": 11516,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_Sole",
+      "vertices": 320,
+      "triangles": 636,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_Boot_L_TopRim",
+      "vertices": 768,
+      "triangles": 1536,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.2351741790771484e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_RimSeam",
+      "vertices": 768,
+      "triangles": 1536,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_BackSeam",
+      "vertices": 384,
+      "triangles": 764,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_SideStrap",
+      "vertices": 84,
+      "triangles": 164,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_Buckle",
+      "vertices": 40,
+      "triangles": 80,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_BucklePin",
+      "vertices": 16,
+      "triangles": 28,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_L_Label",
+      "vertices": 36,
+      "triangles": 68,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 1.4901161193847656e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_Shell",
+      "vertices": 5760,
+      "triangles": 11516,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_Sole",
+      "vertices": 320,
+      "triangles": 636,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 1,
+      "max_weight_sum_error": 0.0
+    },
+    {
+      "name": "Raincoat_Boot_R_TopRim",
+      "vertices": 768,
+      "triangles": 1536,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.2351741790771484e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_RimSeam",
+      "vertices": 768,
+      "triangles": 1536,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_BackSeam",
+      "vertices": 384,
+      "triangles": 764,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 3,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_SideStrap",
+      "vertices": 84,
+      "triangles": 164,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_Buckle",
+      "vertices": 40,
+      "triangles": 80,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_BucklePin",
+      "vertices": 16,
+      "triangles": 28,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 2.9802322387695312e-08
+    },
+    {
+      "name": "Raincoat_Boot_R_Label",
+      "vertices": 36,
+      "triangles": 68,
+      "degenerate_triangles": 0,
+      "nonmanifold_edges": 0,
+      "loose_vertices": 0,
+      "zero_area_uv_triangles": 0,
+      "max_influences": 2,
+      "max_weight_sum_error": 1.4901161193847656e-08
+    }
+  ],
+  "bone_count": 130,
+  "body_mask": "Raincoat_BodyCoverage_Reversible",
+  "face_exported": false,
+  "side_tail_retained": true,
+  "errors": [],
+  "pose_samples": [
+    {
+      "action": "A",
+      "frame": 1,
+      "max_edge_ratio": 1.9962653413872111,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 11,
+      "max_edge_ratio": 1.995409341505013,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 21,
+      "max_edge_ratio": 1.9930740736512909,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 31,
+      "max_edge_ratio": 1.9898488623883734,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 41,
+      "max_edge_ratio": 1.9866013216143417,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 51,
+      "max_edge_ratio": 1.9841999052832746,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 61,
+      "max_edge_ratio": 1.9833333232038217,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 71,
+      "max_edge_ratio": 1.9841999052832746,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 81,
+      "max_edge_ratio": 1.9866013216143417,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 91,
+      "max_edge_ratio": 1.9898488623883734,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 101,
+      "max_edge_ratio": 1.9930740736512909,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 111,
+      "max_edge_ratio": 1.995409341505013,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "A",
+      "frame": 121,
+      "max_edge_ratio": 1.9962653413872111,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 1,
+      "max_edge_ratio": 2.037721945110823,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 11,
+      "max_edge_ratio": 2.036925462149665,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 21,
+      "max_edge_ratio": 2.034713895653899,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 31,
+      "max_edge_ratio": 2.031675322467166,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 41,
+      "max_edge_ratio": 2.02861749713123,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 51,
+      "max_edge_ratio": 2.0263584417419285,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 61,
+      "max_edge_ratio": 2.0255246326834055,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 71,
+      "max_edge_ratio": 2.0263584417419285,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 81,
+      "max_edge_ratio": 2.02861749713123,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 91,
+      "max_edge_ratio": 2.031675322467166,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 101,
+      "max_edge_ratio": 2.034713895653899,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 111,
+      "max_edge_ratio": 2.036925462149665,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "B",
+      "frame": 121,
+      "max_edge_ratio": 2.037721945110823,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 1,
+      "max_edge_ratio": 1.9962641961808136,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 8,
+      "max_edge_ratio": 1.9962641961808136,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 16,
+      "max_edge_ratio": 1.9962673744486354,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 24,
+      "max_edge_ratio": 1.9962603487972068,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 31,
+      "max_edge_ratio": 1.9962639709997032,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 38,
+      "max_edge_ratio": 1.9962604372613784,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 46,
+      "max_edge_ratio": 1.9962603427655587,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 54,
+      "max_edge_ratio": 1.9962638937947452,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 61,
+      "max_edge_ratio": 1.9962606962201113,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 68,
+      "max_edge_ratio": 1.9962634241311865,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 76,
+      "max_edge_ratio": 1.9962645950730045,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 84,
+      "max_edge_ratio": 1.9962653413872111,
+      "degenerate_triangles": 0
+    },
+    {
+      "action": "C",
+      "frame": 91,
+      "max_edge_ratio": 1.9962653413872111,
+      "degenerate_triangles": 0
+    }
+  ],
+  "warnings": [],
+  "source_bone_reference_unchanged": true
+}

@@ -24,6 +24,8 @@
 namespace TunaSweeperOutfitTests
 {
 constexpr auto Flags = EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter;
+const FName ExpectedOutfitIds[] = {TEXT("Maid"), TEXT("SchoolUniform"), TEXT("MechanicOutfit"),
+    TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit"), TEXT("Raincoat")};
 struct FContextAccess : UGameInstance
 {
     static void Attach(UGameInstance* Instance, FWorldContext* Context)
@@ -41,23 +43,28 @@ bool FTunaSweeperOutfitSaveTest::RunTest(const FString&)
     // Catches a missing serialized field and unknown/legacy IDs leaking into runtime selection.
     auto* Save = NewObject<UTunaSweeperSaveGame>();
     TestEqual(TEXT("Legacy/new saves start in the maid outfit"), Save->SelectedOutfitId, FName(TEXT("Maid")));
-    Save->SelectedOutfitId = TEXT("BunnyPajamas");
-    TArray<uint8> Bytes;
-    if (!TestTrue(TEXT("Outfit serializes"), UGameplayStatics::SaveGameToMemory(Save, Bytes))) return false;
-    auto* Loaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
-    if (!TestNotNull(TEXT("Saved outfit deserializes"), Loaded)) return false;
-    TestEqual(TEXT("Chosen outfit survives serialization"), Loaded->SelectedOutfitId, FName(TEXT("BunnyPajamas")));
+    for (FName Id : TunaSweeperOutfitTests::ExpectedOutfitIds)
+    {
+        TestTrue(*FString::Printf(TEXT("%s is supported"), *Id.ToString()), TunaSweeperOutfits::IsSupportedOutfitId(Id));
+        Save->SelectedOutfitId = Id;
+        TArray<uint8> Bytes;
+        if (!TestTrue(TEXT("Outfit serializes"), UGameplayStatics::SaveGameToMemory(Save, Bytes))) return false;
+        auto* Loaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
+        if (!TestNotNull(TEXT("Saved outfit deserializes"), Loaded)) return false;
+        TestEqual(*FString::Printf(TEXT("%s survives serialization and restore validation"), *Id.ToString()),
+            TunaSweeperOutfits::SanitizePersistedOutfitId(Loaded->SelectedOutfitId), Id);
+    }
     TestEqual(TEXT("Missing legacy ID becomes maid"), TunaSweeperOutfits::SanitizePersistedOutfitId(NAME_None), FName(TEXT("Maid")));
     TestEqual(TEXT("Retired/unknown ID becomes maid"), TunaSweeperOutfits::SanitizePersistedOutfitId(TEXT("RemovedOutfit")), FName(TEXT("Maid")));
 
     auto* Game = NewObject<UTunaSweeperGameInstance>();
     Game->bInventoryStateInitialized = true;
     Game->bOutfitUnlocksLoaded = true;
-    Game->SelectedOutfitId = TEXT("Sportswear");
+    Game->SelectedOutfitId = TEXT("Raincoat");
     int32 Notifications = 0;
     Game->OnOutfitChanged.AddLambda([&Notifications] { ++Notifications; });
     TestFalse(TEXT("An explicit unknown selection is rejected"), Game->TryEquipOutfit(TEXT("RemovedOutfit")));
-    TestEqual(TEXT("Rejected request does not change selection"), Game->GetSelectedOutfitId(), FName(TEXT("Sportswear")));
+    TestEqual(TEXT("Rejected request does not change selection"), Game->GetSelectedOutfitId(), FName(TEXT("Raincoat")));
     TestEqual(TEXT("Rejected request does not notify listeners"), Notifications, 0);
     Game->ResetRuntimeStateForSaveSlotSelection();
     Game->bInventoryStateInitialized = true;
@@ -83,7 +90,7 @@ bool FTunaSweeperOutfitRuntimeTest::RunTest(const FString&)
     if (!TestNotNull(TEXT("Player owns outfit component"), Outfit)) return false;
     auto* Catalog = LoadObject<UTunaSweeperOutfitCatalog>(nullptr,
         TEXT("/Game/Characters/Player/LunaMk2/Outfits/DA_LunaMk2_Outfits.DA_LunaMk2_Outfits"));
-    if (!TestNotNull(TEXT("Authored six-outfit catalog"), Catalog)) return false;
+    if (!TestNotNull(TEXT("Authored seven-outfit catalog"), Catalog)) return false;
     auto* Body = Player->GetMesh();
     auto* OriginalBody = Body->GetSkeletalMeshAsset();
     auto* OriginalAnimClass = Body->GetAnimClass();
@@ -103,11 +110,11 @@ bool FTunaSweeperOutfitRuntimeTest::RunTest(const FString&)
     auto* FaceParent = Face->GetAttachParent();
     auto* FaceLeader = Face->LeaderPoseComponent.Get();
     Face->SetMorphTarget(TEXT("Smile"), 0.65f);
-    const FName Ids[] = {TEXT("SchoolUniform"), TEXT("MechanicOutfit"), TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit")};
     const auto* Maid = Catalog->FindOutfit(TEXT("Maid"));
     if (!TestNotNull(TEXT("Catalog contains maid"), Maid)) return false;
-    for (FName Id : Ids)
+    for (FName Id : TunaSweeperOutfitTests::ExpectedOutfitIds)
     {
+        if (Id == TEXT("Maid")) continue;
         const auto* Definition = Catalog->FindOutfit(Id);
         if (!TestNotNull(*Id.ToString(), Definition)) continue;
         if (!TestTrue(*FString::Printf(TEXT("%s applies"), *Id.ToString()), Outfit->ApplyOutfit(*Definition))) continue;
@@ -222,19 +229,27 @@ bool FTunaSweeperOutfitSaveFailureTest::RunTest(const FString&)
     TestEqual(TEXT("Failed save restores the actual appearance"), Player->GetMesh()->GetSkeletalMeshAsset(), OriginalBody);
     TestEqual(TEXT("Failed save never publishes the temporary selection"), Notifications, 0);
 
-    const auto* BunnyPajamas = Game->GetOutfitCatalog()->FindOutfit(TEXT("BunnyPajamas"));
-    if (!TestNotNull(TEXT("Real bunny pajamas definition"), BunnyPajamas)) return false;
-    if (!TestTrue(TEXT("Bunny pajamas assets are usable before save failure"), Player->GetOutfitComponent()->ApplyOutfit(*BunnyPajamas))) return false;
-    if (!TestTrue(TEXT("Sportswear baseline applies before save failure"), Player->GetOutfitComponent()->ApplyOutfit(*Definition))) return false;
-    Game->SelectedOutfitId = TEXT("Sportswear");
-    auto* SportswearBody = Player->GetMesh()->GetSkeletalMeshAsset();
-    auto* SportswearClothing = Player->GetOutfitComponent()->GetClothingMesh()->GetSkeletalMeshAsset();
-    TestFalse(TEXT("Failed save rejects a change between non-maid outfits"), Game->TryEquipOutfit(TEXT("BunnyPajamas")));
-    TestEqual(TEXT("Failed save restores the previous non-maid selection"), Game->GetSelectedOutfitId(), FName(TEXT("Sportswear")));
-    TestEqual(TEXT("Failed save restores the previous non-maid body"), Player->GetMesh()->GetSkeletalMeshAsset(), SportswearBody);
-    TestEqual(TEXT("Failed save restores the previous non-maid clothing"), Player->GetOutfitComponent()->GetClothingMesh()->GetSkeletalMeshAsset(), SportswearClothing);
-    TestEqual(TEXT("Failed save restores the component's applied outfit"), Player->GetOutfitComponent()->GetAppliedOutfitId(), FName(TEXT("Sportswear")));
-    TestEqual(TEXT("Failed non-maid save never publishes the temporary selection"), Notifications, 0);
+    for (FName TargetId : {FName(TEXT("BunnyPajamas")), FName(TEXT("Raincoat"))})
+    {
+        const auto* Target = Game->GetOutfitCatalog()->FindOutfit(TargetId);
+        if (!TestNotNull(*TargetId.ToString(), Target)) return false;
+        if (!TestTrue(TEXT("Target assets are usable before save failure"), Player->GetOutfitComponent()->ApplyOutfit(*Target))) return false;
+        if (!TestTrue(TEXT("Sportswear baseline applies before save failure"), Player->GetOutfitComponent()->ApplyOutfit(*Definition))) return false;
+        Game->SelectedOutfitId = TEXT("Sportswear");
+        auto* SportswearBody = Player->GetMesh()->GetSkeletalMeshAsset();
+        auto* SportswearClothing = Player->GetOutfitComponent()->GetClothingMesh()->GetSkeletalMeshAsset();
+        TestFalse(*FString::Printf(TEXT("Failed save rejects %s equip"), *TargetId.ToString()), Game->TryEquipOutfit(TargetId));
+        TestEqual(TEXT("Failed save restores the previous non-maid selection"), Game->GetSelectedOutfitId(), FName(TEXT("Sportswear")));
+        TestEqual(TEXT("Failed save restores the previous non-maid body"), Player->GetMesh()->GetSkeletalMeshAsset(), SportswearBody);
+        TestEqual(TEXT("Failed save restores the previous non-maid clothing"), Player->GetOutfitComponent()->GetClothingMesh()->GetSkeletalMeshAsset(), SportswearClothing);
+        TestEqual(TEXT("Failed save restores the component's applied outfit"), Player->GetOutfitComponent()->GetAppliedOutfitId(), FName(TEXT("Sportswear")));
+        TestEqual(TEXT("Failed non-maid save never publishes the temporary selection"), Notifications, 0);
+    }
+
+    Game->SelectedOutfitId = TEXT("Raincoat");
+    TestTrue(TEXT("Restoring selected raincoat succeeds without changing the saved choice"), Game->TryEquipOutfit(TEXT("Raincoat")));
+    TestEqual(TEXT("Raincoat equip changes the actual component"), Player->GetOutfitComponent()->GetAppliedOutfitId(), FName(TEXT("Raincoat")));
+    TestEqual(TEXT("Restoring the saved raincoat does not publish a new selection"), Notifications, 0);
 
     Game->SelectedOutfitId = TEXT("Sportswear");
     auto* InvalidCatalog = NewObject<UTunaSweeperOutfitCatalog>();
@@ -282,20 +297,31 @@ bool FTunaSweeperOutfitUnlockTest::RunTest(const FString&)
     TestEqual(TEXT("Successful unlock notifies once"), Notifications, 1);
     TestTrue(TEXT("Duplicate unlock is idempotent"), Game->TryUnlockOutfit(TEXT("Sportswear")));
     TestEqual(TEXT("Duplicate unlock does not notify again"), Notifications, 1);
+    TestFalse(TEXT("Raincoat starts locked when only sportswear is owned"), Game->IsOutfitUnlocked(TEXT("Raincoat")));
+    Game->bUnlockAllOutfitsOverride = true;
+    TestTrue(TEXT("Temporary override also exposes raincoat"), Game->IsOutfitUnlocked(TEXT("Raincoat")));
+    Game->bUnlockAllOutfitsOverride = false;
+    TestFalse(TEXT("Raincoat override does not grant permanent ownership"), Game->IsOutfitUnlocked(TEXT("Raincoat")));
+    TestTrue(TEXT("Raincoat unlock commits to the same global file"), Game->TryUnlockOutfit(TEXT("Raincoat")));
+    TestTrue(TEXT("Raincoat unlock is idempotent"), Game->TryUnlockOutfit(TEXT("Raincoat")));
+    TestEqual(TEXT("Each distinct committed unlock notifies once"), Notifications, 2);
     TestFalse(TEXT("Unknown unlock is rejected"), Game->TryUnlockOutfit(TEXT("Unknown")));
     Game->ResetRuntimeStateForSaveSlotSelection();
     TestTrue(TEXT("Save-slot reset preserves global unlocks"), Game->IsOutfitUnlocked(TEXT("Sportswear")));
+    TestTrue(TEXT("Save-slot reset preserves raincoat ownership"), Game->IsOutfitUnlocked(TEXT("Raincoat")));
     Game->OnOutfitUnlocksChanged.Clear();
 
     auto* Restarted = NewObject<UTunaSweeperGameInstance>();
     Restarted->OutfitUnlockSavePath = SavePath;
     Restarted->bUnlockAllOutfitsOverride = false;
     TestTrue(TEXT("A fresh game instance restores the committed unlock"), Restarted->IsOutfitUnlocked(TEXT("Sportswear")));
+    TestTrue(TEXT("A fresh game instance restores raincoat ownership"), Restarted->IsOutfitUnlocked(TEXT("Raincoat")));
     TestFalse(TEXT("Temporary override did not persist other outfits"), Restarted->IsOutfitUnlocked(TEXT("BunnyPajamas")));
     auto* OtherAccount = NewObject<UTunaSweeperGameInstance>();
     OtherAccount->OutfitUnlockSavePath = FPaths::Combine(Directory, TEXT("OtherAccount.sav"));
     OtherAccount->bUnlockAllOutfitsOverride = false;
     TestFalse(TEXT("An independent save root does not inherit unlocks"), OtherAccount->IsOutfitUnlocked(TEXT("Sportswear")));
+    TestFalse(TEXT("An independent save root does not inherit raincoat"), OtherAccount->IsOutfitUnlocked(TEXT("Raincoat")));
 
     const FString Blocker = FPaths::Combine(Directory, TEXT("NotADirectory"));
     FFileHelper::SaveStringToFile(TEXT("block"), *Blocker);
@@ -304,6 +330,8 @@ bool FTunaSweeperOutfitUnlockTest::RunTest(const FString&)
     Failed->bUnlockAllOutfitsOverride = false;
     TestFalse(TEXT("Failed disk write rejects unlock"), Failed->TryUnlockOutfit(TEXT("SchoolUniform")));
     TestFalse(TEXT("Failed disk write rolls back the in-memory unlock"), Failed->IsOutfitUnlocked(TEXT("SchoolUniform")));
+    TestFalse(TEXT("Failed disk write rejects raincoat unlock"), Failed->TryUnlockOutfit(TEXT("Raincoat")));
+    TestFalse(TEXT("Failed disk write leaves raincoat locked"), Failed->IsOutfitUnlocked(TEXT("Raincoat")));
     return true;
 }
 #endif

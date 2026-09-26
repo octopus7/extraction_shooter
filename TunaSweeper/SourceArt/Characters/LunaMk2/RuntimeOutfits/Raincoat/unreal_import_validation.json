@@ -1,0 +1,192 @@
+{
+  "passed": true,
+  "mode": "import",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "errors": [],
+  "meshes": {
+    "Base": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/SKM_LunaMk2_Raincoat_Base.SKM_LunaMk2_Raincoat_Base",
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "bone_count": 130,
+      "reference_error": {
+        "position_cm": 0.0020427703857421875,
+        "rotation_deg": 0.007493562491185872,
+        "scale": 9.357929229736328e-06
+      },
+      "bounds_cm": [
+        -31.353818893432617,
+        -17.100200653076172,
+        33.045413970947266,
+        31.353818893432617,
+        16.03150749206543,
+        150.54051208496094
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-06,
+      "materials": [
+        "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+        "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+      ],
+      "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset",
+      "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C"
+    },
+    "Clothing": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/SKM_LunaMk2_Raincoat_Clothing.SKM_LunaMk2_Raincoat_Clothing",
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "bone_count": 130,
+      "reference_error": {
+        "position_cm": 0.0020427703857421875,
+        "rotation_deg": 0.007493562491185872,
+        "scale": 9.357929229736328e-06
+      },
+      "bounds_cm": [
+        -26.297155380249023,
+        -14.320000648498535,
+        -0.4000000059604645,
+        26.28766632080078,
+        16.599998474121094,
+        117.60965728759766
+      ],
+      "max_bounds_error_cm": 0.0,
+      "materials": [
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Yellow.M_Raincoat_Yellow",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Seam.M_Raincoat_Seam",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Snap.M_Raincoat_Snap",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Ivory.M_Raincoat_Ivory",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Collar.M_Raincoat_Collar",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Bow.M_Raincoat_Bow",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Lining.M_Raincoat_Lining",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Cord.M_Raincoat_Cord",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_BootPink.M_Raincoat_BootPink",
+        "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Sole.M_Raincoat_Sole"
+      ],
+      "physics_asset": null,
+      "post_process": null
+    }
+  },
+  "materials": {
+    "M_Raincoat_BootPink": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_BootPink.M_Raincoat_BootPink",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.6000000238418579,
+        0.2549999952316284,
+        0.27000001072883606,
+        1.0
+      ],
+      "roughness": 0.25999999046325684,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Sole": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Sole.M_Raincoat_Sole",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.11999999731779099,
+        0.07000000029802322,
+        0.07500000298023224,
+        1.0
+      ],
+      "roughness": 0.6299999952316284,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Seam": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Seam.M_Raincoat_Seam",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.6600000262260437,
+        0.38999998569488525,
+        0.03500000014901161,
+        1.0
+      ],
+      "roughness": 0.3700000047683716,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Yellow": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Yellow.M_Raincoat_Yellow",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.9200000166893005,
+        0.5699999928474426,
+        0.06499999761581421,
+        1.0
+      ],
+      "roughness": 0.25,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Bow": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Bow.M_Raincoat_Bow",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.3799999952316284,
+        0.07500000298023224,
+        0.06199999898672104,
+        1.0
+      ],
+      "roughness": 0.5600000023841858,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Snap": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Snap.M_Raincoat_Snap",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.10999999940395355,
+        0.10499999672174454,
+        0.09000000357627869,
+        1.0
+      ],
+      "roughness": 0.2800000011920929,
+      "metallic": 0.699999988079071
+    },
+    "M_Raincoat_Lining": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Lining.M_Raincoat_Lining",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.7400000095367432,
+        0.4000000059604645,
+        0.03799999877810478,
+        1.0
+      ],
+      "roughness": 0.3700000047683716,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Cord": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Cord.M_Raincoat_Cord",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.0949999988079071,
+        0.07400000095367432,
+        0.0430000014603138,
+        1.0
+      ],
+      "roughness": 0.699999988079071,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Ivory": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Ivory.M_Raincoat_Ivory",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.7900000214576721,
+        0.75,
+        0.6499999761581421,
+        1.0
+      ],
+      "roughness": 0.6800000071525574,
+      "metallic": 0.0
+    },
+    "M_Raincoat_Collar": {
+      "asset": "/Game/Characters/Player/LunaMk2/Outfits/Raincoat/M_Raincoat_Collar.M_Raincoat_Collar",
+      "used_with_skeletal_mesh": true,
+      "base_color_linear": [
+        0.9100000262260437,
+        0.8799999952316284,
+        0.7900000214576721,
+        1.0
+      ],
+      "roughness": 0.6299999952316284,
+      "metallic": 0.0
+    }
+  },
+  "originals_unchanged": true,
+  "preimport_existing_reference_matches_verified_baseline": true,
+  "preimport_blender_source_reference": "Raincoat/blender_validation.json: source_bone_reference_unchanged true against Sportswear source rig",
+  "protected_files": 81
+}

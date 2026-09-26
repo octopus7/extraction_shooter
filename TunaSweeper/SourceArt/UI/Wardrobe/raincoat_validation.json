@@ -1,0 +1,158 @@
+{
+  "Date": "2026-09-26 23:34:14",
+  "Engine": "5.7",
+  "OutfitCount": 7,
+  "EditorBuild": "Succeeded",
+  "Tests": 14,
+  "Failed": 0,
+  "NotRun": 0,
+  "Results": [
+    {
+      "Name": "TunaSweeper.Outfits.GlobalUnlockPersistence",
+      "State": "Success",
+      "Warnings": [
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_74D1D2EC4162D23F58CBC2A413A77400/CosmeticUnlocks.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_74D1D2EC4162D23F58CBC2A413A77400/CosmeticUnlocks.sav.previous' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_74D1D2EC4162D23F58CBC2A413A77400/OtherAccount.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_74D1D2EC4162D23F58CBC2A413A77400/OtherAccount.sav.previous' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_74D1D2EC4162D23F58CBC2A413A77400/NotADirectory/CannotWrite.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitUnlocks_74D1D2EC4162D23F58CBC2A413A77400/NotADirectory/CannotWrite.sav.previous' error."
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Outfits.RealPlayerSwitchAndRestore",
+      "State": "Success",
+      "Warnings": [
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: invalid HTTP response code received. URL: https://api.epicgames.dev/sdk/v1/default?platformId=WIN, HTTP code: 0, content length: 0, actual payload size: 0",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: request failed, libcurl error: 7 (Couldn't connect to server)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 0 (Hostname api.epicgames.dev was found in DNS cache)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 1 (  Trying 104.18.125.108:443...)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 2 (connect to 104.18.125.108 port 443 failed: Bad access)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 3 (  Trying 104.18.124.108:443...)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 4 (connect to 104.18.124.108 port 443 failed: Bad access)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 5 (Failed to connect to api.epicgames.dev port 443 after 14 ms: Couldn't connect to server)",
+        "LogEOSSDK: LogHttp: 00000278D9BC9600: libcurl info message cache 6 (Closing connection)",
+        "LogEOSSDK: LogHttp: Retry exhausted on https://api.epicgames.dev/sdk/v1/default?platformId=WIN",
+        "LogEOSSDK: LogEOS: Failed to connect to the backend. ServiceName=[SDKConfig], OperationName=[GetPlatformConfigRoute], Url=[<Redacted>]"
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Outfits.SaveAndFallback",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Outfits.SaveFailureRollback",
+      "State": "Success",
+      "Warnings": [
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitRollback_05BEB25C4611CF25AFB265A098204C23.sav' error.",
+        "LogStreaming: Failed to read file 'D:/github/extraction_shooter/TunaSweeper/Saved/Automation/OutfitRollback_05BEB25C4611CF25AFB265A098204C23.sav.previous' error."
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Save.DemoEndingRetirementGuards",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.FailClosedCandidatePromotion",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.OutdatedCleanup",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.SteamCloudDirectory",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.StoveCloudChannelGate",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.StoveDirectoryRouting",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Save.VersionPolicy",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Wardrobe.Assets",
+      "State": "Success",
+      "Warnings": []
+    },
+    {
+      "Name": "TunaSweeper.Wardrobe.InteractionValidation",
+      "State": "Success",
+      "Warnings": [
+        "LogTunaSweeperText: Duplicate text string key ui.common.confirm found while loading UI data. The later row will replace the earlier row."
+      ]
+    },
+    {
+      "Name": "TunaSweeper.Wardrobe.Panel",
+      "State": "Success",
+      "Warnings": [
+        "LogTunaSweeperText: Duplicate text string key ui.common.confirm found while loading UI data. The later row will replace the earlier row."
+      ]
+    }
+  ],
+  "UI": {
+    "Languages": [
+      "ko",
+      "en",
+      "ja"
+    ],
+    "PanelSizes": [
+      "1280x760",
+      "960x570"
+    ],
+    "SeventhCardScrolledIntoView": true,
+    "FullCardFits": true,
+    "PortraitAspect": "2:3",
+    "NativePNGBytesPreserved": true,
+    "PNGMode": "RGBA",
+    "PNGSize": [
+      1024,
+      1536
+    ]
+  },
+  "ExistingAssets": {
+    "OriginalAssetHashesChecked": 80,
+    "UnexpectedChanges": 0,
+    "OriginalSixCatalogDefinitionsPreserved": true
+  },
+  "TestArguments": [
+    "Automation RunTests TunaSweeper.Wardrobe+TunaSweeper.Outfits+TunaSweeper.Save",
+    "-WardrobeUIPreview",
+    "-RenderOffscreen",
+    "-nocef",
+    "-ShaderWorkingDir=<Project>/Saved/CodexRaincoat/Shaders"
+  ],
+  "Limitations": [
+    "Title A/B/C sample poses are validated; this is not an exhaustive combat-motion clipping audit.",
+    "Full UI renders use offscreen Slate; browser rendering is disabled for this test process."
+  ],
+  "PostCleanupTests": {
+    "Tests": 2,
+    "Failed": 0,
+    "NotRun": 0,
+    "Results": [
+      {
+        "fullTestPath": "TunaSweeper.Outfits.RealPlayerSwitchAndRestore",
+        "state": "Success"
+      },
+      {
+        "fullTestPath": "TunaSweeper.Wardrobe.Assets",
+        "state": "Success"
+      }
+    ]
+  }
+}

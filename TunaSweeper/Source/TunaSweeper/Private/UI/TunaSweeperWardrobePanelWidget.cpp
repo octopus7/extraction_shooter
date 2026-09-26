@@ -195,6 +195,8 @@ void UTunaSweeperWardrobePanelWidget::BuildPanel()
 	Stack->AddChildToVerticalBox(Body)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	UScrollBox* ListScroll = WidgetTree->ConstructWidget<UScrollBox>();
 	ListScroll->SetOrientation(Orient_Vertical);
+	ListScroll->SetScrollWhenFocusChanges(EScrollWhenFocusChanges::InstantScroll);
+	ListScroll->SetNavigationDestination(EDescendantScrollDestination::IntoView);
 	UHorizontalBoxSlot* ListSlot = Body->AddChildToHorizontalBox(ListScroll);
 	ListSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	ListSlot->SetPadding(FMargin(0.0f, 0.0f, 20.0f, 0.0f));

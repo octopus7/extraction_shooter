@@ -44,6 +44,12 @@
       "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver hair, blue eyes, petite proportions, and the same character identity as the capture. Outfit: an ivory shirt with rolled sleeves, small russet neck bow, brown leather suspenders and belt with brass buckles, brown wrist cuffs, khaki rolled-cuff shorts with a small brown thigh strap, ivory slouch socks and brown lace-up boots, as shown in the capture. Preserve the silver curled twin tails, dark bows and white frilled headband. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair, head accessories and shoes visible with space around them. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
       "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_AdventurerOutfit_Capture.png",
       "output": "Images/LunaMk2_AdventurerOutfit_UI.png"
+    },
+    {
+      "id": "Raincoat",
+      "prompt": "Generate a new anime game character full-body thumbnail, using this 3D model screenshot only as a design reference. Silver curled twin-tail hair, blue eyes, petite proportions, dark hair bows and white frilled headband. Yellow glossy raincoat with lowered hood, lapels, flap pockets and dark snap buttons; ivory collared dress and red neck bow; pink rubber rain boots with dark soles. Clean elegant anime drawing, soft cel shading. Full body centered, standing naturally, all hair and shoes visible. Portrait 2:3 canvas, 1024×1536. Transparent background. Output a transparent PNG cutout with real alpha transparency.",
+      "reference": "TunaSweeper/SourceArt/Characters/LunaMk2/UIPreviews/Captures/LunaMk2_Raincoat_Capture.png",
+      "output": "Images/LunaMk2_Raincoat_UI.png"
     }
   ]
 }

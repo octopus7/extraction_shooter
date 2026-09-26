@@ -32,7 +32,21 @@ bool FTunaSweeperWardrobeAssetTest::RunTest(const FString&)
 	auto* Catalog = LoadObject<UTunaSweeperOutfitCatalog>(nullptr,
 		TEXT("/Game/Characters/Player/LunaMk2/Outfits/DA_LunaMk2_Outfits.DA_LunaMk2_Outfits"));
 	if (!TestNotNull(TEXT("Outfit catalog loads"), Catalog)) return false;
-	TestEqual(TEXT("All six outfits are listed"), Catalog->Outfits.Num(), 6);
+	const FName ExpectedIds[] = {TEXT("Maid"), TEXT("SchoolUniform"), TEXT("MechanicOutfit"),
+		TEXT("Sportswear"), TEXT("BunnyPajamas"), TEXT("AdventurerOutfit"), TEXT("Raincoat")};
+	TestEqual(TEXT("All seven outfits are listed"), Catalog->Outfits.Num(), 7);
+	for (FName Id : ExpectedIds) TestNotNull(*Id.ToString(), Catalog->FindOutfit(Id));
+	const auto* Raincoat = Catalog->FindOutfit(TEXT("Raincoat"));
+	if (TestNotNull(TEXT("Raincoat catalog entry exists"), Raincoat))
+	{
+		TestEqual(TEXT("Raincoat uses its localized display key"), Raincoat->DisplayNameStringKey, FName(TEXT("ui.wardrobe.outfit.raincoat")));
+		TestEqual(TEXT("Raincoat uses its authored masked body"), Raincoat->BodyMesh.ToSoftObjectPath().GetLongPackageName(),
+			FString(TEXT("/Game/Characters/Player/LunaMk2/Outfits/Raincoat/SKM_LunaMk2_Raincoat_Base")));
+		TestEqual(TEXT("Raincoat uses its authored clothing"), Raincoat->ClothingMesh.ToSoftObjectPath().GetLongPackageName(),
+			FString(TEXT("/Game/Characters/Player/LunaMk2/Outfits/Raincoat/SKM_LunaMk2_Raincoat_Clothing")));
+		TestEqual(TEXT("Raincoat uses its native transparent thumbnail"), Raincoat->Thumbnail.ToSoftObjectPath().GetLongPackageName(),
+			FString(TEXT("/Game/UI/Wardrobe/T_UIOutfit_Raincoat")));
+	}
 	auto* Original = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
 	if (!TestNotNull(TEXT("Original character remains available"), Original)) return false;
 	TSet<FName> Seen;
