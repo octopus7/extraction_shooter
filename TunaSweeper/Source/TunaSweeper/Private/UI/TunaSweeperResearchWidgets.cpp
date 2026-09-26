@@ -2,10 +2,13 @@
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
+#include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUIStyle.h"
 
 namespace TunaSweeperResearchUi
@@ -19,6 +22,7 @@ namespace TunaSweeperResearchUi
 void UTunaSweeperResearchNodeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	TunaSweeperUIStyle::ApplyButton(NodeButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	TunaSweeperUIStyle::ApplyLabel(ActionText);
 	NodeButton->OnClicked.RemoveAll(this);
@@ -31,7 +35,25 @@ void UTunaSweeperResearchNodeWidget::RefreshFromSubsystem()
 	const UTunaSweeperGameInstance* GameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const UTunaSweeperResearchSubsystem* Research = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>() : nullptr;
 	FTunaSweeperResearchNodeView View;
-	if (!Research || !Research->GetNodeView(NodeId, View)) return;
+	if (!Research || !Research->GetNodeView(NodeId, View))
+	{
+		ClearIcon();
+		return;
+	}
+	if (IconImage)
+	{
+		if (!bIconLoadAttempted || CachedIconPath != View.Icon)
+		{
+			CachedIconPath = View.Icon;
+			bIconLoadAttempted = true;
+			CachedIconTexture = View.Icon.IsNull() ? nullptr : Cast<UTexture2D>(View.Icon.TryLoad());
+			IconImage->SetBrushFromTexture(CachedIconTexture.Get(), false);
+			IconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		}
+		IconImage->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f,
+			View.State == ETunaSweeperResearchNodeState::Locked ? FMath::Clamp(LockedIconOpacity, 0.0f, 1.0f) : 1.0f));
+		IconImage->SetVisibility(CachedIconTexture ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
 	NameText->SetText(View.DisplayName);
 	SetToolTipText(View.Description);
 	RequirementText->SetText(FText::Format(
@@ -67,6 +89,20 @@ void UTunaSweeperResearchNodeWidget::RefreshFromSubsystem()
 	ResearchProgressBar->SetVisibility(View.State == ETunaSweeperResearchNodeState::Researching ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 }
 
+void UTunaSweeperResearchNodeWidget::ClearIcon()
+{
+	const bool bHadIcon = bIconLoadAttempted || CachedIconTexture ||
+		(IconImage && IconImage->GetBrush().GetResourceObject());
+	CachedIconPath.Reset();
+	bIconLoadAttempted = false;
+	CachedIconTexture = nullptr;
+	if (IconImage)
+	{
+		if (bHadIcon) IconImage->SetBrushFromTexture(nullptr, false);
+		IconImage->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void UTunaSweeperResearchNodeWidget::HandleNodeClicked()
 {
 	if (UGameInstance* GameInstance = GetGameInstance())
@@ -87,6 +123,7 @@ void UTunaSweeperResearchNodeWidget::HandleNodeClicked()
 void UTunaSweeperResearchTreeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	NodeWidgets.Reset();
 	TArray<UWidget*> Widgets;
 	WidgetTree->GetAllWidgets(Widgets);

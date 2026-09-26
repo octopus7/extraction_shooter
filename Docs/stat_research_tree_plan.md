@@ -373,3 +373,15 @@ Content/UI/WBP_ResearchTree.uasset
 - 게임을 종료해도 UTC 종료 시각을 기준으로 연구가 진행된다.
 - 타이머 종료만으로 효과가 적용되지 않고 완료 버튼을 눌러야 적용된다.
 - 기존 세이브 슬롯, 경험치 레벨 보너스, 레벨 전환과 충돌하지 않는다.
+
+## 연구 아이콘 연결 (2026-09-26)
+
+- 백색 단색 아이콘 9종을 `/Game/UI/Research/Icons`의 256×256 투명 UI 텍스처로 저장한다. 같은 능력의 단계별 노드는 아이콘을 공유하며 현재 17개 노드에 연결된다.
+- `Content/Data/StatResearchNodes.json`의 `icon`에 텍스처 객체 경로를 지정한다. 예: `/Game/UI/Research/Icons/T_Research_Vitality_White.T_Research_Vitality_White`.
+- `WBP_ResearchNode` 디자이너의 `NodeHeader`에 `IconSizeBox > IconImage`와 `NameText`가 나란히 존재한다. 기본 아이콘 크기 48×48 및 여백은 WBP에서 수정한다. 실행 코드는 이 배치를 생성하거나 크기를 덮어쓰지 않는다.
+- 잠긴 노드는 백색 아이콘의 알파를 0.35로 낮추고 그 외 상태는 1.0으로 표시한다. `LockedIconOpacity`는 WBP 기본값에서 조정할 수 있다.
+- JSON의 아이콘 경로가 바뀔 때만 텍스처를 읽는다. 빈 경로·없는 에셋·텍스처가 아닌 에셋·없는 노드는 이전 이미지를 제거하고 숨긴다. 실패한 경로도 캐시하여 주기 갱신마다 다시 읽지 않는다.
+- `/Game/UI`는 기존 AlwaysCook 대상이다. UI 밖의 경로로 아이콘을 옮길 때는 JSON 문자열만으로 쿠킹 의존성이 생기지 않으므로 별도로 빌드 포함 설정이 필요하다.
+- 아이콘은 저장 데이터가 아니다. 연구 시간·개방 조건·보너스·저장 형식은 변경하지 않는다.
+- 원본 PNG와 노드별 대응표: `GeneratedImages/ResearchIcons/WhiteMinimal_v1/README.md`, `manifest.json`.
+- 연구 위젯 자체에서 기존 공용 한·영·일 폰트를 적용한다. 17개 노드의 세 언어 이름·아이콘 배치 및 스크롤 상·하단 화면을 자동 렌더링하여 검증한다. [상단 미리보기](Images/ResearchIcons/Tree_Top_Korean.png), [하단 미리보기](Images/ResearchIcons/Tree_Bottom_Korean.png).

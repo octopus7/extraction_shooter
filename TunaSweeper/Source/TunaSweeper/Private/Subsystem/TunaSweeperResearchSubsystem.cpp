@@ -249,6 +249,7 @@ bool UTunaSweeperResearchSubsystem::GetNodeView(FName NodeId, FTunaSweeperResear
 	OutView.NodeId = NodeId;
 	OutView.DisplayName = ResolveLocalizedText(Definition->DisplayNameStringKey);
 	OutView.Description = ResolveLocalizedText(Definition->DescriptionStringKey);
+	OutView.Icon = Definition->Icon;
 	OutView.Row = Definition->Row;
 	OutView.Column = Definition->Column;
 	OutView.RequiredAppliedNodeCount = Definition->RequiredAppliedNodeCount;

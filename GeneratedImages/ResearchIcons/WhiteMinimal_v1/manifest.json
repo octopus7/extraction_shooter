@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "status": "connected_to_research_ui",
+  "unreal_texture_directory": "/Game/UI/Research/Icons",
+  "unreal_widget": "/Game/UI/WBP_ResearchNode",
+  "research_data": "TunaSweeper/Content/Data/StatResearchNodes.json",
+  "icon_size": 256,
+  "sheet": "ResearchIcons_Transparent.png",
+  "sheet_size": 768,
+  "layout": "3x3_row_major",
+  "icons": [
+    {
+      "id": "Vitality",
+      "label": "체력",
+      "symbol": "heart",
+      "png": "T_Research_Vitality_White.png",
+      "row": 0,
+      "column": 0,
+      "node_ids": [
+        "vitality_1",
+        "vitality_2",
+        "vitality_3"
+      ]
+    },
+    {
+      "id": "Nutrition",
+      "label": "포만감",
+      "symbol": "apple",
+      "png": "T_Research_Nutrition_White.png",
+      "row": 0,
+      "column": 1,
+      "node_ids": [
+        "nutrition_1",
+        "nutrition_2"
+      ]
+    },
+    {
+      "id": "Hydration",
+      "label": "수분",
+      "symbol": "drop",
+      "png": "T_Research_Hydration_White.png",
+      "row": 0,
+      "column": 2,
+      "node_ids": [
+        "hydration_1",
+        "hydration_2"
+      ]
+    },
+    {
+      "id": "Stamina",
+      "label": "스태미나",
+      "symbol": "lightning",
+      "png": "T_Research_Stamina_White.png",
+      "row": 1,
+      "column": 0,
+      "node_ids": [
+        "stamina_1",
+        "stamina_2"
+      ]
+    },
+    {
+      "id": "Carry",
+      "label": "운반 능력",
+      "symbol": "backpack",
+      "png": "T_Research_Carry_White.png",
+      "row": 1,
+      "column": 1,
+      "node_ids": [
+        "carry_1",
+        "carry_2"
+      ]
+    },
+    {
+      "id": "SurvivalMastery",
+      "label": "생존 숙련",
+      "symbol": "shield_heart",
+      "png": "T_Research_SurvivalMastery_White.png",
+      "row": 1,
+      "column": 2,
+      "node_ids": [
+        "survival_mastery"
+      ]
+    },
+    {
+      "id": "UltimateConditioning",
+      "label": "최종 신체 강화",
+      "symbol": "person_star",
+      "png": "T_Research_UltimateConditioning_White.png",
+      "row": 2,
+      "column": 0,
+      "node_ids": [
+        "ultimate_conditioning"
+      ]
+    },
+    {
+      "id": "WeaponBurn",
+      "label": "무기 화상 강화",
+      "symbol": "rifle_flame",
+      "png": "T_Research_WeaponBurn_White.png",
+      "row": 2,
+      "column": 1,
+      "node_ids": [
+        "weapon_burn_1",
+        "weapon_burn_2"
+      ]
+    },
+    {
+      "id": "AmmoBurn",
+      "label": "탄약 화상 강화",
+      "symbol": "bullet_flame",
+      "png": "T_Research_AmmoBurn_White.png",
+      "row": 2,
+      "column": 2,
+      "node_ids": [
+        "ammo_burn_1",
+        "ammo_burn_2"
+      ]
+    }
+  ]
+}

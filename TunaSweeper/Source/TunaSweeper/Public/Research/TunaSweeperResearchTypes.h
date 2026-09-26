@@ -75,6 +75,7 @@ struct TUNASWEEPER_API FTunaSweeperResearchNodeView
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") FName NodeId;
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") FText DisplayName;
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") FText Description;
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") FSoftObjectPath Icon;
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") int32 Row = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") int32 Column = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Research") int32 RequiredAppliedNodeCount = 0;

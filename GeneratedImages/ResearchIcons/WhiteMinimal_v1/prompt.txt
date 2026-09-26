@@ -1,0 +1,16 @@
+Tool mode: built-in imagegen generation, opaque solid-background source; local project alpha extraction and mechanical cell export.
+
+Create one square game UI icon sprite sheet, exactly nine different pictograms arranged in a perfectly regular 3 by 3 grid. This is a cohesive icon family for a survival game's ability research tree. Use flat solid PURE WHITE (#FFFFFF) shapes only for every icon, with bold simplified silhouettes and very few broad negative-space cutouts. Absolutely no gray shading, gradients, highlights, texture, fine lines, tiny details, glow, drop shadow, perspective, 3D, letters, numbers, labels, framing boxes or grid lines.
+BACKGROUND: perfectly uniform flat muted slate blue-gray #6C7480 across the entire canvas and all gaps, with no checkerboard or texture. That background color must not appear as colored decoration inside the white subjects; negative-space cutouts may reveal the background. All icons opaque and cleanly separated from the background, antialiasing only at edges.
+LAYOUT: square canvas 1536 by 1536 if possible. Nine equal square cells. Icon centers at exactly the center of each cell: x and y at one-sixth, one-half, five-sixths of canvas. Each whole pictogram occupies about 60 percent of its cell width and height, with generous consistent clear padding. Optical weight and scale consistent. No touching cells. Intended to remain very readable at 32-48 pixels.
+Exact subjects in row-major order:
+Row 1 left: health, a solid classic heart silhouette.
+Row 1 middle: nutrition, a simple apple silhouette with a short stem and ONE leaf, no shine cutout.
+Row 1 right: hydration, ONE solid teardrop/water drop, no shine cutout.
+Row 2 left: stamina, ONE thick solid lightning bolt.
+Row 2 middle: carrying capacity, a very simple backpack silhouette with top handle, rounded body and ONE broad pocket cutout; no straps or zippers detail.
+Row 2 right: survival mastery, a bold solid shield silhouette with ONE large simple heart-shaped negative-space cutout centered inside.
+Row 3 left: ultimate conditioning, a simple strong human upper-body pictogram with circular head and both arms raised in a V, plus ONE small five-point star above the head; no fingers, muscles or facial details.
+Row 3 middle: weapon fire enhancement, a very simplified side-profile rifle pointing right, with one large stylized flame rising above the barrel; rifle uses only stock, grip, body and thick barrel with no machinery details.
+Row 3 right: ammunition fire enhancement, one upright pointed bullet/cartridge silhouette beside one large simplified flame; only one broad negative-space gap separates bullet and flame.
+Design language: minimal contemporary game HUD stencil glyphs, confident thick shapes, slightly softened corners, maximum clarity. The image contains precisely these nine icon groups, no other marks.
