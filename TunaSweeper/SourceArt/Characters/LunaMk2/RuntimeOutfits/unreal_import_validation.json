@@ -1,0 +1,353 @@
+{
+  "passed": true,
+  "mode": "import",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "outfits": {
+    "SchoolUniform": {
+      "Base": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/SKM_LunaMk2_SchoolUniform_Base.SKM_LunaMk2_SchoolUniform_Base",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -31.353818893432617,
+          -17.100200653076172,
+          -0.3757851719856262,
+          31.353818893432617,
+          16.03150749206543,
+          150.54051208496094
+        ],
+        "maximum_bounds_error_cm": 5.245208740234375e-06,
+        "vertices_lod0": 8037,
+        "section_count": 2,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+          "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+        ],
+        "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C",
+        "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset"
+      },
+      "Clothing": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/SKM_LunaMk2_SchoolUniform_Clothing.SKM_LunaMk2_SchoolUniform_Clothing",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -25.713417053222656,
+          -15.464078903198242,
+          70.67438507080078,
+          25.706539154052734,
+          15.464078903198242,
+          117.70829010009766
+        ],
+        "maximum_bounds_error_cm": 1.430511474609375e-06,
+        "vertices_lod0": 15115,
+        "section_count": 5,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/M_Uniform_Navy.M_Uniform_Navy",
+          "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/M_Uniform_Ivory.M_Uniform_Ivory",
+          "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/M_Uniform_Burgundy.M_Uniform_Burgundy",
+          "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/M_Uniform_Brass.M_Uniform_Brass",
+          "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/M_Uniform_Plaid.M_Uniform_Plaid"
+        ],
+        "post_process": null,
+        "physics_asset": null
+      }
+    },
+    "MechanicOutfit": {
+      "Base": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/SKM_LunaMk2_MechanicOutfit_Base.SKM_LunaMk2_MechanicOutfit_Base",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -31.353818893432617,
+          -17.100200653076172,
+          82.52642059326172,
+          31.353818893432617,
+          16.03150749206543,
+          150.54051208496094
+        ],
+        "maximum_bounds_error_cm": 5.245208740234375e-06,
+        "vertices_lod0": 7186,
+        "section_count": 2,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+          "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+        ],
+        "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C",
+        "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset"
+      },
+      "Clothing": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/SKM_LunaMk2_MechanicOutfit_Clothing.SKM_LunaMk2_MechanicOutfit_Clothing",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -19.432350158691406,
+          -7.914791107177734,
+          -0.7177820205688477,
+          19.45929527282715,
+          17.80000114440918,
+          117.22746276855469
+        ],
+        "maximum_bounds_error_cm": 3.814697265625e-06,
+        "vertices_lod0": 22872,
+        "section_count": 8,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_NavyCotton.M_Mechanic_NavyCotton",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_OrangeCanvas.M_Mechanic_OrangeCanvas",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_WarmStitch.M_Mechanic_WarmStitch",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_Brass.M_Mechanic_Brass",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_OrangeReinforcement.M_Mechanic_OrangeReinforcement",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_DarkLeather.M_Mechanic_DarkLeather",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_BrushedSteel.M_Mechanic_BrushedSteel",
+          "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/M_Mechanic_Rubber.M_Mechanic_Rubber"
+        ],
+        "post_process": null,
+        "physics_asset": null
+      }
+    },
+    "Sportswear": {
+      "Base": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/SKM_LunaMk2_Sportswear_Base.SKM_LunaMk2_Sportswear_Base",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -31.353818893432617,
+          -17.100200653076172,
+          82.52642059326172,
+          31.353818893432617,
+          16.03150749206543,
+          150.54051208496094
+        ],
+        "maximum_bounds_error_cm": 5.245208740234375e-06,
+        "vertices_lod0": 6935,
+        "section_count": 2,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+          "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+        ],
+        "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C",
+        "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset"
+      },
+      "Clothing": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/SKM_LunaMk2_Sportswear_Clothing.SKM_LunaMk2_Sportswear_Clothing",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -25.88893699645996,
+          -7.851394176483154,
+          -0.800000011920929,
+          25.877973556518555,
+          17.880001068115234,
+          118.4193344116211
+        ],
+        "maximum_bounds_error_cm": 2.86102294921875e-06,
+        "vertices_lod0": 41186,
+        "section_count": 6,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/M_Sportswear_Navy.M_Sportswear_Navy",
+          "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/M_Sportswear_Rib.M_Sportswear_Rib",
+          "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/M_Sportswear_Ivory.M_Sportswear_Ivory",
+          "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/M_Sportswear_Zipper.M_Sportswear_Zipper",
+          "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/M_Sportswear_Rubber.M_Sportswear_Rubber",
+          "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/M_Sportswear_Laces.M_Sportswear_Laces"
+        ],
+        "post_process": null,
+        "physics_asset": null
+      }
+    },
+    "BunnyPajamas": {
+      "Base": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/SKM_LunaMk2_BunnyPajamas_Base.SKM_LunaMk2_BunnyPajamas_Base",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -28.73537826538086,
+          -17.100200653076172,
+          82.52642059326172,
+          28.58002471923828,
+          16.03150749206543,
+          150.54051208496094
+        ],
+        "maximum_bounds_error_cm": 5.245208740234375e-06,
+        "vertices_lod0": 4779,
+        "section_count": 2,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+          "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+        ],
+        "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C",
+        "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset"
+      },
+      "Clothing": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/SKM_LunaMk2_BunnyPajamas_Clothing.SKM_LunaMk2_BunnyPajamas_Clothing",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -30.17045783996582,
+          -22.205245971679688,
+          -0.800000011920929,
+          29.879104614257812,
+          17.25,
+          164.29542541503906
+        ],
+        "maximum_bounds_error_cm": 2.384185791015625e-06,
+        "vertices_lod0": 63197,
+        "section_count": 4,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/M_Bunny_Blush.M_Bunny_Blush",
+          "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/M_Bunny_Rib.M_Bunny_Rib",
+          "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/M_Bunny_Ivory.M_Bunny_Ivory",
+          "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/M_Bunny_Inner.M_Bunny_Inner"
+        ],
+        "post_process": null,
+        "physics_asset": null
+      }
+    },
+    "AdventurerOutfit": {
+      "Base": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/SKM_LunaMk2_AdventurerOutfit_Base.SKM_LunaMk2_AdventurerOutfit_Base",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -31.353818893432617,
+          -17.100200653076172,
+          20.397924423217773,
+          31.353818893432617,
+          16.03150749206543,
+          150.54051208496094
+        ],
+        "maximum_bounds_error_cm": 5.245208740234375e-06,
+        "vertices_lod0": 7456,
+        "section_count": 2,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/M_Luna_001.M_Luna_001",
+          "/Game/Characters/Player/LunaMk2/M_Luna.M_Luna"
+        ],
+        "post_process": "/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2_WristPostProcess.ABP_LunaMk2_WristPostProcess_C",
+        "physics_asset": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_PhysicsAsset.SKM_LunaMk2_PhysicsAsset"
+      },
+      "Clothing": {
+        "asset": "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/SKM_LunaMk2_AdventurerOutfit_Clothing.SKM_LunaMk2_AdventurerOutfit_Clothing",
+        "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+        "bone_count": 130,
+        "reference_transform_errors": {
+          "position_error_cm": 0.0020427703857421875,
+          "rotation_error_deg": 0.007493562491185872,
+          "scale_error": 9.357929229736328e-06
+        },
+        "bounds_cm": [
+          -25.53912353515625,
+          -8.859108924865723,
+          -0.8500000238418579,
+          25.533103942871094,
+          17.795000076293945,
+          118.72236633300781
+        ],
+        "maximum_bounds_error_cm": 9.5367431640625e-07,
+        "vertices_lod0": 63119,
+        "section_count": 6,
+        "materials": [
+          "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/M_Adv_Olive.M_Adv_Olive",
+          "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/M_Adv_Ivory.M_Adv_Ivory",
+          "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/M_Adv_Brass.M_Adv_Brass",
+          "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/M_Adv_Russet.M_Adv_Russet",
+          "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/M_Adv_Leather.M_Adv_Leather",
+          "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/M_Adv_DarkLeather.M_Adv_DarkLeather"
+        ],
+        "post_process": null,
+        "physics_asset": null
+      }
+    }
+  },
+  "protected_originals_unchanged": true,
+  "protected_hashes": {
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\M_Luna.uasset": "46d21807048b3339ccec4073e326e83050db461cce2195644e45215e1f206c7f",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\M_Luna_001.uasset": "ee7b95977b88b5d678fabb7e9188a6646643d9c8cf177c74f95866020ccde5d0",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\PA_LunaMk2_SideTail.uasset": "c35fd24f2576024333292e0a29f27ba6fbdbff4e52d884ce565f2cc9356c877c",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\SKM_LunaFace.uasset": "bcdf17b0babafb74ba8aa543b52e211bf381d2361a0554a6cca5c972f25d4008",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\SKM_LunaFace_PhysicsAsset.uasset": "c64c52127f12141a2f6a0d0be117b17c7f22baa420d0409acf9b93e61d14b4b8",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\SKM_LunaMk2.uasset": "841268063487ef2ea31509219d42bc906a4b9d6b371ffacaf69f934c2e739daa",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\SKM_LunaMk2_PhysicsAsset.uasset": "cc86e67d6cb6c9c42e07d344442562b5221a7613c1aafd9dda9da344b0989ac6",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\SKM_LunaMk2_Skeleton.uasset": "aadee6b1396c4072320e01774a6accf7e2090567c4ff49485019656456b53f6a",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\T_Luna_BaseColor.uasset": "3bb69188f40a63e713ec5d68186d7e5d4b02d3fc59167f5c64d01907e986c0e2",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\ABP_LunaMk2.uasset": "bcce99f8a755b718cfb58468e60b591e0b0c0b308ec980c1b44aec99f825fbcb",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\ABP_LunaMk2_WristPostProcess.uasset": "7ce5e73027023f44fdb5f7956471debf2cda1a60bdccad689e9f03b5dcdfbfeb",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\AS_Luna_Catwalk-loop.uasset": "c2c2abe78efe8551d9abb64f08ff362b6335e3301c8b657eb77ffe7047b735d7",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\AS_Luna_StrafeLeft.uasset": "c3fd079eee0279f2ea0c7ca9ef30bfd739a0913b5c273c064628aba1aa66276b",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\AS_Luna_StrafeRight.uasset": "b3546d00c3b01ce2f7bdd4db8fa225c6cd66618174938fecb44e387165e67b78",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\AS_Luna_WalkBackward.uasset": "761db49f0c82698083f13d6ab56ea67182eab3cc3628825aa55b822eb5157f35",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\BS_DirectionalWalk.uasset": "55f6bc26443fda0b8383a1ba167eb03abe867feacedb82a843d28d4695b8052f",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\BS_RunWalk.uasset": "1972a147b1bdc6c536942ce79cd3a4a5a0f8b03eb9e76f993cb270488f6e6dd3",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\IK_AutoGeneratedSource.uasset": "6f7bf4772180dc6cc0a3b7928f3a50a52caf9db9a3b887a7d273ea31a5e51243",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\IK_AutoGeneratedTarget.uasset": "0d60fa509e4e1fad100626b15db2884f043142feae70c59620e64e1c160d6066",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\MF_Rifle_Idle_Hipfire.uasset": "29e5bc094f71554bd017a70d256684913f63045243d9c4eb935ede44707641d8",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\MF_Rifle_Idle_Hipfire1.uasset": "8a6867191c21a587a41e88663357be16181d7cddddbab986958b4f7c1c433140",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\RTG_AutoGenerated.uasset": "29dc730a3a1aae9ac6386d784d0ee5a8987f7edfde73557333da9b932dce2bfc",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\SKM_LunaMk2_Lift_Sequence.uasset": "5e57dd2aed9dc7e69075f37fea3fa7c81ec96e25764ad7b2e284c1c85ef9bf16",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\SKM_LunaMk2_Sequence_LootSmile.uasset": "c7a05f6eab041fbc152fc414ab3879f1556ed13f852fdc98527c9660adcef9fd",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\Title\\ABP_LunaMk2_Title.uasset": "ce45c68263a021d27acba7f4b90f0e1633ec0cdfe280d5f97b768fdf0cfbacf6",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\Title\\AS_LunaMk2_Title_A.uasset": "53ffa203060399b8b4aa59b6e1e364dca6c59d48f7e71fdadf071999e297b1d6",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\Title\\AS_LunaMk2_Title_AtoB.uasset": "e707a620ef8347a20ab1fe4985fdb75a5e5622df0c3b0c4bd3088b7a8d13b580",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\Title\\AS_LunaMk2_Title_B.uasset": "7b9f1c2c93eaac792e2b953a3348aa0db899e82cd4e5cb9810f0fdead1022aa7",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\Title\\AS_LunaMk2_Title_BtoA.uasset": "9be3aa7b9e6b7d68f79e377ea301d1fb0eababab53bc984457d7f97c95841f23",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Animations\\Title\\AS_LunaMk2_Title_C.uasset": "182b71cde36a09b6c04855cf5892f38595c44cc5fff534effc8307711066ddde",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Skirt\\ABP_LunaMk2_TitleSkirt.uasset": "ca50796dd61bfcd2f543f1aa40308ec8f758a9e782bca81a370bb2e58c2b8036",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Skirt\\PA_LunaMk2_TitleSkirt.uasset": "80e1a9b4b69a4a5f5006c002b03a3ad1af111ed75ad51baefd2fe3aeeaa1f669",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Skirt\\SKM_LunaMk2_TitleSkirt.uasset": "a74ab8edae0083462f4463ee858a9f21a1f81c7537b6eedd3a9a3e8e25947998",
+    "TunaSweeper\\Content\\Characters\\Player\\LunaMk2\\Skirt\\SK_LunaMk2_TitleSkirt.uasset": "e6e57794d6dd6630953d2e6e4875306a0aa14d4c99bbe8cac9f6783dca02a16e",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\SchoolUniform\\LunaMk2_SchoolUniform.blend": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\SchoolUniform\\Models\\SKM_LunaMk2_SchoolUniform.fbx": "d3a635c8aa033fe3c677caa5b166b258c6632eb5ae3c1a48712892900a8e0aaf",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\MechanicOutfit\\LunaMk2_MechanicOutfit.blend": "0122b6a060ba5f18642f2405d26a844f4d36ea5f41ebb569b46aebf932329983",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\MechanicOutfit\\Models\\SKM_LunaMk2_MechanicOutfit.fbx": "02f544c345e54c781be7f26ae78078f1d7691a7ea1a2d6fc5b3d6b10b44128fb",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\Sportswear\\LunaMk2_Sportswear.blend": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\Sportswear\\Models\\SKM_LunaMk2_Sportswear.fbx": "9e4fa65e7e2b7fa13feda2cc969d11b2a05125b032461aa3a0490b90ba611a68",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\BunnyPajamas\\LunaMk2_BunnyPajamas.blend": "47f502438ae1d36dedc87aac575350ddf8a7788577e219b713088d80dae4e8b7",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\BunnyPajamas\\Models\\SKM_LunaMk2_BunnyPajamas.fbx": "443a325636e5d00bba895a1c480df59fb934539c2cc8e111edf19da37fde1b01",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\AdventurerOutfit\\LunaMk2_AdventurerOutfit.blend": "77fc47b2feef61c9b4f50f2a7443fe3b03c7a9b3ec7120cf90a5792e457349b7",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\AdventurerOutfit\\Models\\SKM_LunaMk2_AdventurerOutfit.fbx": "e3754b7237c601cc4499a048ceaafcf31928616241f67f92cca6a10936d61723"
+  }
+}

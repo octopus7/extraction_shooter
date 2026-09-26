@@ -20,6 +20,7 @@ class UTunaSweeperScenarioPresentationWidget;
 class UTunaSweeperScreenFadeWidget;
 class UInputAction;
 class ATunaSweeperPickupItemActor;
+class ATunaSweeperWardrobeActor;
 struct FInputActionValue;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -108,6 +109,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	bool OpenResearchPanel();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Wardrobe")
+	bool OpenWardrobePanel(ATunaSweeperWardrobeActor* WardrobeActor);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Wardrobe")
+	bool TryEquipWardrobeOutfit(FName OutfitId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Wardrobe")
+	void CloseWardrobePanel();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Wardrobe")
+	bool IsWardrobeInteractionValid() const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 
@@ -163,6 +176,12 @@ public:
 
 protected:
 	friend class FTunaTutorialTriggerTest;
+	friend class FTunaWardrobeInteractionTest;
+	void UpdateWardrobeInteraction();
+
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ATunaSweeperWardrobeActor> ActiveWardrobeActor;
+
 	bool IsTutorialGameplayReady() const;
 	bool ShowTutorialPage(int32 PageIndex, FName CompletionFlag, bool bReviewMode = false);
 	FName ActiveTutorialCompletionFlag;

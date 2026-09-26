@@ -1,6 +1,7 @@
 #include "TunaSweeperGameInstanceShared.h"
 
 #include "Game/TunaSweeperSafeSave.h"
+#include "Character/TunaSweeperOutfitCatalog.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 
 namespace TunaSweeperSave
@@ -559,6 +560,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		return false;
 	}
 
+	SelectedOutfitId = TunaSweeperOutfits::SanitizePersistedOutfitId(SaveGame->SelectedOutfitId);
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
@@ -865,6 +867,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	}
 
 	SaveGame->SaveVersion = TunaSweeperSave::CurrentSaveVersion;
+	SaveGame->SelectedOutfitId = SelectedOutfitId;
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->BuildFlavor = TunaSweeperBuildFlavor::GetName();
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
@@ -1044,6 +1047,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	SelectedOutfitId = TEXT("Maid");
 	TGuardValue<bool> InitializationGuard(bInventoryStateInitializing, true);
 	DespawnPetCompanion();
 
@@ -1117,6 +1121,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
+	SelectedOutfitId = TEXT("Maid");
 	ItemInstancesByUid.Reset();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
 	bActiveSaveSlotDifficultySelected = false;

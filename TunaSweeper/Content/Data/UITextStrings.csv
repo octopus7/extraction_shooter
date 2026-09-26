@@ -478,3 +478,20 @@ ui.boss_lab.battle.spawn_failed,시험 전투를 준비할 수 없습니다.,Can
 ui.boss_lab.battle.warning,공격 예고,Incoming attack,攻撃予告
 ui.boss_lab.unnamed,이름 없는 보스,Unnamed boss,名前のないボス
 ui.boss_lab.confirm_leave,저장하지 않고 타이틀로 돌아갈까요? 초안은 이번 실행 동안 유지됩니다.,Return to the title without saving? The draft stays available until you close the game.,保存せずにタイトルへ戻りますか？下書きはゲームを終了するまで保持されます。
+ui.interaction.wardrobe_open,옷장 열기,Open Wardrobe,クローゼットを開く
+ui.wardrobe.title,옷장,Wardrobe,クローゼット
+ui.wardrobe.subtitle,옷장에서 원하는 의상으로 갈아입으세요.,Choose an outfit to wear.,着たい衣装に着替えましょう。
+ui.wardrobe.outfit.maid,메이드복,Maid Outfit,メイド服
+ui.wardrobe.outfit.school_uniform,교복,School Uniform,制服
+ui.wardrobe.outfit.mechanic,정비사 작업복,Mechanic Outfit,整備士の作業着
+ui.wardrobe.outfit.sportswear,운동복,Sportswear,スポーツウェア
+ui.wardrobe.outfit.bunny_pajamas,토끼 잠옷,Bunny Pajamas,うさぎのパジャマ
+ui.wardrobe.outfit.adventurer,모험가 의상,Adventurer Outfit,冒険者の衣装
+ui.wardrobe.equip,착용,Wear,着用
+ui.wardrobe.equipped,착용 중,Wearing,着用中
+ui.wardrobe.close,닫기,Close,閉じる
+ui.wardrobe.apply_failed,의상을 변경하지 못했습니다.,Could not change the outfit.,衣装を変更できませんでした。
+ui.wardrobe.locked,잠김,Locked,未解放
+ui.wardrobe.locked_hint,의상을 해금하면 착용할 수 있습니다.,Unlock this outfit to wear it.,衣装を解放すると着用できます。
+ui.wardrobe.preview,미리보기,Preview,プレビュー
+ui.wardrobe.unavailable,이 의상은 현재 사용할 수 없습니다.,This outfit is currently unavailable.,この衣装は現在使用できません。

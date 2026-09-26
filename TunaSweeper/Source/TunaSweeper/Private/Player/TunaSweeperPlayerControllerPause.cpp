@@ -31,6 +31,11 @@ void ATunaSweeperPlayerController::TogglePauseMenu()
 		ResumeFromPauseMenu();
 		return;
 	}
+	if (GameHudWidget && GameHudWidget->GetHudMode() == ETunaSweeperHudMode::Wardrobe)
+	{
+		CloseWardrobePanel();
+		return;
+	}
 	const auto* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
 	if (!IsLocalController() || IsIntroMap() || IsOpeningScenarioMap() ||
 		bDialogueSequenceActive || (ControlledCharacter && ControlledCharacter->IsDead()) ||

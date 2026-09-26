@@ -21,5 +21,6 @@ enum class ETunaSweeperHudMode : uint8
 	Quest UMETA(DisplayName = "Quest"),
 	Map UMETA(DisplayName = "Map"),
 	Memo UMETA(DisplayName = "Memo"),
-	Research UMETA(DisplayName = "Research")
+	Research UMETA(DisplayName = "Research"),
+	Wardrobe UMETA(DisplayName = "Wardrobe")
 };

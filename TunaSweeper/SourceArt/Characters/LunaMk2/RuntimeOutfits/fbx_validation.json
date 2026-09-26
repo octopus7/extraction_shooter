@@ -1,0 +1,185 @@
+{
+  "passed": true,
+  "files": {
+    "SchoolUniform_Base": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 4797,
+      "triangles": 9177,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.313187673687935e-08,
+      "maximum_influences": 7,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Luna.001",
+        "M_Luna"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "SchoolUniform_Clothing": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 6048,
+      "triangles": 12044,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 3.91155481338501e-08,
+      "maximum_influences": 3,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Uniform_Navy",
+        "M_Uniform_Ivory",
+        "M_Uniform_Burgundy",
+        "M_Uniform_Brass",
+        "M_Uniform_Plaid"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "MechanicOutfit_Base": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 4182,
+      "triangles": 7976,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.3888576328754425e-08,
+      "maximum_influences": 7,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Luna.001",
+        "M_Luna"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "MechanicOutfit_Clothing": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 12718,
+      "triangles": 25084,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.272442311048508e-08,
+      "maximum_influences": 7,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Mechanic_NavyCotton",
+        "M_Mechanic_OrangeCanvas",
+        "M_Mechanic_WarmStitch",
+        "M_Mechanic_Brass",
+        "M_Mechanic_OrangeReinforcement",
+        "M_Mechanic_DarkLeather",
+        "M_Mechanic_BrushedSteel",
+        "M_Mechanic_Rubber"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "Sportswear_Base": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 4003,
+      "triangles": 7588,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.3888576328754425e-08,
+      "maximum_influences": 7,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Luna.001",
+        "M_Luna"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "Sportswear_Clothing": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 30746,
+      "triangles": 61320,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.33719833381474e-08,
+      "maximum_influences": 4,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Sportswear_Navy",
+        "M_Sportswear_Rib",
+        "M_Sportswear_Ivory",
+        "M_Sportswear_Zipper",
+        "M_Sportswear_Rubber",
+        "M_Sportswear_Laces"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "BunnyPajamas_Base": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 2435,
+      "triangles": 4540,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.3888576328754425e-08,
+      "maximum_influences": 7,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Luna.001",
+        "M_Luna"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "BunnyPajamas_Clothing": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 50282,
+      "triangles": 100460,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.33719833381474e-08,
+      "maximum_influences": 4,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Bunny_Blush",
+        "M_Bunny_Rib",
+        "M_Bunny_Ivory",
+        "M_Bunny_Inner"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "AdventurerOutfit_Base": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 4407,
+      "triangles": 8372,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.3888576328754425e-08,
+      "maximum_influences": 7,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Luna.001",
+        "M_Luna"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    },
+    "AdventurerOutfit_Clothing": {
+      "bone_count": 130,
+      "same_reference_as_all_other_meshes": true,
+      "vertices": 42270,
+      "triangles": 84092,
+      "degenerate_triangles": 0,
+      "maximum_weight_sum_error": 4.516914486885071e-08,
+      "maximum_influences": 4,
+      "maximum_bounds_error_m": 1.1920928955078125e-07,
+      "materials": [
+        "M_Adv_Olive",
+        "M_Adv_Ivory",
+        "M_Adv_Brass",
+        "M_Adv_Russet",
+        "M_Adv_Leather",
+        "M_Adv_DarkLeather"
+      ],
+      "uv_layers": 1,
+      "face_excluded": true
+    }
+  },
+  "source_blends_unchanged": true
+}

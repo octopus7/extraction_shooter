@@ -504,6 +504,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	ActiveWardrobeActor.Reset();
 	if (TutorialPopupWidget)
 	{
 		TutorialPopupWidget->RemoveFromParent();
@@ -680,6 +681,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+	UpdateWardrobeInteraction();
 	if (TutorialPopupWidget || TryShowBunkerBasicsTutorial() || TryShowRaidCombatTutorial()) return;
 
 	if (bEnemyCombatDebugEnabled)

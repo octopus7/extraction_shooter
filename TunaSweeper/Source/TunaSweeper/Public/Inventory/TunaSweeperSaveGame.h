@@ -88,7 +88,10 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 21;
+	int32 SaveVersion = 22;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Outfits")
+	FName SelectedOutfitId = TEXT("Maid");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -189,4 +192,20 @@ class TUNASWEEPER_API UTunaSweeperSaveSettings : public USaveGame
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 LastSelectedSaveSlotIndex = 1;
+};
+
+/** Account/build-global cosmetic ownership, independent of gameplay slots. */
+UCLASS()
+class TUNASWEEPER_API UTunaSweeperCosmeticUnlockSaveGame : public USaveGame
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+	int32 SaveVersion = 1;
+	UPROPERTY()
+	FName BuildFlavor;
+	UPROPERTY()
+	FName DistributionNamespace;
+	UPROPERTY()
+	TArray<FName> UnlockedOutfitIds;
 };

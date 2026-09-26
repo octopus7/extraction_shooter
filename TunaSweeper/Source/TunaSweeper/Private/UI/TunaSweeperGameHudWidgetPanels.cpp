@@ -196,6 +196,23 @@ void UTunaSweeperGameHudWidget::ShowWorkbenchPanel(int32 WorkbenchId, ETunaSweep
 	HandleSelectedInventoryItemChanged();
 }
 
+bool UTunaSweeperGameHudWidget::ShowWardrobePanel()
+{
+	const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	if (!Controller || !Controller->IsWardrobeInteractionValid())
+	{
+		return false;
+	}
+	EnsureWardrobePanelWidget();
+	if (!WardrobePanelWidget)
+	{
+		return false;
+	}
+	SetHudMode(ETunaSweeperHudMode::Wardrobe);
+	WardrobePanelWidget->OpenWardrobe();
+	return ActiveHudMode == ETunaSweeperHudMode::Wardrobe;
+}
+
 void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 {
 	SetHudMode(ETunaSweeperHudMode::Memo);

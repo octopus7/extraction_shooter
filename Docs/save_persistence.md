@@ -19,10 +19,20 @@ Machine-specific settings, candidate files, corrupt archives, and cleanup audit 
 Interface language persists independently of gameplay slots in `GGameUserSettingsIni`, under `TunaSweeper.InterfaceSettings/Language`. Startup restores a valid saved language. If the value is missing or invalid, Steam selects and saves English (`en`); other distribution channels detect the OS language/locale, falling back to English when unsupported. Packaged builds read `TunaSweeper.Distribution/DistributionChannel` from `GGameIni`; editor runs use the selected build target, matching title-menu channel selection. Manual language selection continues to use the existing global setting. This setting remains shared across stores, so a valid language saved by another store also takes precedence over the first-launch default.
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `21`
+- Current save version: `22` (versions `20` and `21` remain readable)
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
+
+## Outfit Selection and Global Unlocks
+
+`UTunaSweeperSaveGame::SelectedOutfitId` stores the equipped appearance per gameplay slot. The supported IDs are `Maid`, `SchoolUniform`, `MechanicOutfit`, `Sportswear`, `BunnyPajamas`, and `AdventurerOutfit`. New slots and older saves default to `Maid`; missing or unknown saved IDs resolve to `Maid`. New-game/slot initialization resets the selection, while death inventory loss, bunker/raid travel, and normal saves preserve it. A locally controlled player's new pawn restores the selection at startup/possession. The original face component, expressions, animation class, and ragdoll physics remain in place.
+
+Cosmetic ownership is separate: `UTunaSweeperCosmeticUnlockSaveGame` version `1` stores `UnlockedOutfitIds` in `CosmeticUnlocks_<DistributionNamespace>.sav` under the same active account/build root used by achievements. The distribution namespace uses the existing `TunaSweeperAchievements/DistributionNamespace` setting. This file is independent of gameplay slots and is never reset by new game, slot selection, death, or gameplay-slot deletion. Demo/Main and account-root boundaries continue to apply. `Maid` is always unlocked. Unknown IDs are rejected and ignored when loading the unlock list.
+
+`UTunaSweeperGameInstance::bUnlockAllOutfitsOverride` is a config property, default `true`. Set it to `False` under `[/Script/TunaSweeper.TunaSweeperGameInstance]` in `DefaultGame.ini` to require actual unlocks. The override only controls access; it does not write all outfit IDs into the unlock file. `TryUnlockOutfit` still records a real unlock while the override is enabled, is idempotent, and rolls back the runtime addition if saving fails. A fresh process with the override disabled restores only the committed unlocks plus `Maid`.
+
+Unlock writes use the existing CRC envelope and candidate/previous fail-closed commit path. If neither the active file nor previous generation is valid, they are retained and new unlock writes are blocked for the session to avoid silently replacing ownership data. Appearance changes validate the complete body/clothing pair before applying it. `TryEquipOutfit` rejects locked/unknown/unloadable outfits; failure leaves the previous selection and appearance intact. A gameplay save failure restores both after an attempted change and does not broadcast a successful selection. If a saved outfit becomes locked after the override is disabled, or its assets cannot be restored, restoration selects and displays `Maid` in memory and updates the UI. It does not grant an outfit or immediately overwrite the save; the next normal gameplay save includes the fallback selection. The previously selected outfit can be equipped normally after it is unlocked or repaired.
 
 ## Account-Global Achievement Container
 

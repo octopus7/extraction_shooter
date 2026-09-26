@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Component/TunaSweeperOutfitComponent.h"
 
 float ATunaSweeperTopDownCharacter::GetStaminaPercent() const
 {
@@ -80,6 +81,7 @@ void ATunaSweeperTopDownCharacter::RefreshCharacterVisualVisibility()
 			StaminaGaugeWidgetComponent->SetVisibility(false);
 		}
 	}
+	if (OutfitComponent) OutfitComponent->RefreshVisibility(bHousingModeVisualHidden);
 }
 
 void ATunaSweeperTopDownCharacter::CacheBaseSurvivalStats()

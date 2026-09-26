@@ -1,0 +1,671 @@
+{
+  "outfits": {
+    "SchoolUniform": {
+      "source": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\SchoolUniform\\LunaMk2_SchoolUniform.blend",
+      "source_sha256": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+      "base_source_meshes": [
+        "SKM_Luna.Eye_UniformBase",
+        "SKM_Luna.Head_UniformBase",
+        "SKM_Luna.SideTail_UniformBase",
+        "SKM_LunaMk2_UniformBase"
+      ],
+      "materials": {
+        "M_Uniform_Navy": {
+          "name": "M_Uniform_Navy",
+          "base_color_linear": [
+            0.02800000086426735,
+            0.050999999046325684,
+            0.09200000017881393,
+            1.0
+          ],
+          "roughness": 0.7799999713897705,
+          "metallic": 0.0
+        },
+        "M_Uniform_Ivory": {
+          "name": "M_Uniform_Ivory",
+          "base_color_linear": [
+            0.8299999833106995,
+            0.8399999737739563,
+            0.800000011920929,
+            1.0
+          ],
+          "roughness": 0.7799999713897705,
+          "metallic": 0.0
+        },
+        "M_Uniform_Burgundy": {
+          "name": "M_Uniform_Burgundy",
+          "base_color_linear": [
+            0.2199999988079071,
+            0.03500000014901161,
+            0.04500000178813934,
+            1.0
+          ],
+          "roughness": 0.7799999713897705,
+          "metallic": 0.0
+        },
+        "M_Uniform_Brass": {
+          "name": "M_Uniform_Brass",
+          "base_color_linear": [
+            0.5199999809265137,
+            0.3199999928474426,
+            0.09000000357627869,
+            1.0
+          ],
+          "roughness": 0.7799999713897705,
+          "metallic": 0.6000000238418579
+        },
+        "M_Uniform_Plaid": {
+          "name": "M_Uniform_Plaid",
+          "base_color_linear": [
+            0.1599999964237213,
+            0.23000000417232513,
+            0.27000001072883606,
+            1.0
+          ],
+          "roughness": 0.7799999713897705,
+          "metallic": 0.0,
+          "base_color_texture": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Characters\\LunaMk2\\SchoolUniform\\Textures\\T_LunaUniform_Plaid_BaseColor.png"
+        }
+      },
+      "Base": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\SchoolUniform\\SKM_LunaMk2_SchoolUniform_Base.fbx",
+        "sha256": "98e92a6880e80a909767a5bf0e002d8e4b88a26026e4a5c4b2de0a4ffb71ce7e",
+        "vertices": 4797,
+        "triangles": 9177,
+        "degenerate_triangles": 6,
+        "removed_original_degenerate_triangles": 12,
+        "bounds_m": [
+          -0.31353819370269775,
+          -0.16031509637832642,
+          -0.0037578516639769077,
+          0.31353819370269775,
+          0.17100200057029724,
+          1.505405068397522
+        ],
+        "maximum_influences": 7,
+        "source_weight_sum_error_before_normalization": 0.7709504645317793,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Luna.001",
+          "M_Luna"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      },
+      "Clothing": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\SchoolUniform\\SKM_LunaMk2_SchoolUniform_Clothing.fbx",
+        "sha256": "62f71d93edc645c8be3d404a725390e66909b6d433f6d57380aea062624b726f",
+        "vertices": 6048,
+        "triangles": 12044,
+        "degenerate_triangles": 0,
+        "removed_original_degenerate_triangles": 0,
+        "bounds_m": [
+          -0.25713416934013367,
+          -0.154640793800354,
+          0.7067438364028931,
+          0.25706538558006287,
+          0.154640793800354,
+          1.177082896232605
+        ],
+        "maximum_influences": 3,
+        "source_weight_sum_error_before_normalization": 4.470348358154297e-08,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Uniform_Navy",
+          "M_Uniform_Ivory",
+          "M_Uniform_Burgundy",
+          "M_Uniform_Brass",
+          "M_Uniform_Plaid"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      }
+    },
+    "MechanicOutfit": {
+      "source": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\MechanicOutfit\\LunaMk2_MechanicOutfit.blend",
+      "source_sha256": "0122b6a060ba5f18642f2405d26a844f4d36ea5f41ebb569b46aebf932329983",
+      "base_source_meshes": [
+        "SKM_Luna.Eye_MechanicBase",
+        "SKM_Luna.Head_MechanicBase",
+        "SKM_Luna.SideTail_MechanicBase",
+        "SKM_LunaMk2_MechanicBase"
+      ],
+      "materials": {
+        "M_Mechanic_NavyCotton": {
+          "name": "M_Mechanic_NavyCotton",
+          "base_color_linear": [
+            0.017999999225139618,
+            0.03700000047683716,
+            0.06499999761581421,
+            1.0
+          ],
+          "roughness": 0.7599999904632568,
+          "metallic": 0.0
+        },
+        "M_Mechanic_OrangeCanvas": {
+          "name": "M_Mechanic_OrangeCanvas",
+          "base_color_linear": [
+            0.6399999856948853,
+            0.1850000023841858,
+            0.041999999433755875,
+            1.0
+          ],
+          "roughness": 0.7599999904632568,
+          "metallic": 0.0
+        },
+        "M_Mechanic_WarmStitch": {
+          "name": "M_Mechanic_WarmStitch",
+          "base_color_linear": [
+            0.7699999809265137,
+            0.49000000953674316,
+            0.20999999344348907,
+            1.0
+          ],
+          "roughness": 0.7599999904632568,
+          "metallic": 0.0
+        },
+        "M_Mechanic_Brass": {
+          "name": "M_Mechanic_Brass",
+          "base_color_linear": [
+            0.5699999928474426,
+            0.33000001311302185,
+            0.0949999988079071,
+            1.0
+          ],
+          "roughness": 0.3499999940395355,
+          "metallic": 0.6200000047683716
+        },
+        "M_Mechanic_OrangeReinforcement": {
+          "name": "M_Mechanic_OrangeReinforcement",
+          "base_color_linear": [
+            0.38999998569488525,
+            0.08799999952316284,
+            0.017000000923871994,
+            1.0
+          ],
+          "roughness": 0.7599999904632568,
+          "metallic": 0.0
+        },
+        "M_Mechanic_DarkLeather": {
+          "name": "M_Mechanic_DarkLeather",
+          "base_color_linear": [
+            0.054999999701976776,
+            0.0430000014603138,
+            0.029999999329447746,
+            1.0
+          ],
+          "roughness": 0.6800000071525574,
+          "metallic": 0.0
+        },
+        "M_Mechanic_BrushedSteel": {
+          "name": "M_Mechanic_BrushedSteel",
+          "base_color_linear": [
+            0.3799999952316284,
+            0.4300000071525574,
+            0.46000000834465027,
+            1.0
+          ],
+          "roughness": 0.3400000035762787,
+          "metallic": 0.75
+        },
+        "M_Mechanic_Rubber": {
+          "name": "M_Mechanic_Rubber",
+          "base_color_linear": [
+            0.017000000923871994,
+            0.020999999716877937,
+            0.027000000700354576,
+            1.0
+          ],
+          "roughness": 0.8999999761581421,
+          "metallic": 0.0
+        }
+      },
+      "Base": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\MechanicOutfit\\SKM_LunaMk2_MechanicOutfit_Base.fbx",
+        "sha256": "d185c68cf77b1d10d7eb8bed6d01ef82e35a3ff271203fedd8c3c98ae4fb4645",
+        "vertices": 4182,
+        "triangles": 7976,
+        "degenerate_triangles": 6,
+        "removed_original_degenerate_triangles": 12,
+        "bounds_m": [
+          -0.31353819370269775,
+          -0.16031509637832642,
+          0.8252642154693604,
+          0.31353819370269775,
+          0.17100200057029724,
+          1.505405068397522
+        ],
+        "maximum_influences": 7,
+        "source_weight_sum_error_before_normalization": 0.7709504645317793,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Luna.001",
+          "M_Luna"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      },
+      "Clothing": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\MechanicOutfit\\SKM_LunaMk2_MechanicOutfit_Clothing.fbx",
+        "sha256": "d83b607c56777ae178a10b7352943a42a208db495caf432c77a2177a56ba41c8",
+        "vertices": 12718,
+        "triangles": 25084,
+        "degenerate_triangles": 0,
+        "removed_original_degenerate_triangles": 0,
+        "bounds_m": [
+          -0.19432349503040314,
+          -0.17800000309944153,
+          -0.007177819963544607,
+          0.19459295272827148,
+          0.07914791256189346,
+          1.1722745895385742
+        ],
+        "maximum_influences": 7,
+        "source_weight_sum_error_before_normalization": 1.4408768038265407e-05,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Mechanic_NavyCotton",
+          "M_Mechanic_OrangeCanvas",
+          "M_Mechanic_WarmStitch",
+          "M_Mechanic_Brass",
+          "M_Mechanic_OrangeReinforcement",
+          "M_Mechanic_DarkLeather",
+          "M_Mechanic_BrushedSteel",
+          "M_Mechanic_Rubber"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      }
+    },
+    "Sportswear": {
+      "source": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\Sportswear\\LunaMk2_Sportswear.blend",
+      "source_sha256": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+      "base_source_meshes": [
+        "SKM_Luna.Eye_SportswearBase",
+        "SKM_Luna.Head_SportswearBase",
+        "SKM_Luna.SideTail_SportswearBase",
+        "SKM_LunaMk2_SportswearBase"
+      ],
+      "materials": {
+        "M_Sportswear_Navy": {
+          "name": "M_Sportswear_Navy",
+          "base_color_linear": [
+            0.01899999938905239,
+            0.02800000086426735,
+            0.04500000178813934,
+            1.0
+          ],
+          "roughness": 0.699999988079071,
+          "metallic": 0.0
+        },
+        "M_Sportswear_Rib": {
+          "name": "M_Sportswear_Rib",
+          "base_color_linear": [
+            0.014000000432133675,
+            0.020999999716877937,
+            0.03500000014901161,
+            1.0
+          ],
+          "roughness": 0.8600000143051147,
+          "metallic": 0.0
+        },
+        "M_Sportswear_Ivory": {
+          "name": "M_Sportswear_Ivory",
+          "base_color_linear": [
+            0.7200000286102295,
+            0.699999988079071,
+            0.6299999952316284,
+            1.0
+          ],
+          "roughness": 0.699999988079071,
+          "metallic": 0.0
+        },
+        "M_Sportswear_Zipper": {
+          "name": "M_Sportswear_Zipper",
+          "base_color_linear": [
+            0.36000001430511475,
+            0.4000000059604645,
+            0.4300000071525574,
+            1.0
+          ],
+          "roughness": 0.3400000035762787,
+          "metallic": 0.699999988079071
+        },
+        "M_Sportswear_Rubber": {
+          "name": "M_Sportswear_Rubber",
+          "base_color_linear": [
+            0.5600000023841858,
+            0.5600000023841858,
+            0.5099999904632568,
+            1.0
+          ],
+          "roughness": 0.8299999833106995,
+          "metallic": 0.0
+        },
+        "M_Sportswear_Laces": {
+          "name": "M_Sportswear_Laces",
+          "base_color_linear": [
+            0.8199999928474426,
+            0.800000011920929,
+            0.7300000190734863,
+            1.0
+          ],
+          "roughness": 0.8500000238418579,
+          "metallic": 0.0
+        }
+      },
+      "Base": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\Sportswear\\SKM_LunaMk2_Sportswear_Base.fbx",
+        "sha256": "ee120475d274899af165d72043eda6f6ad0c58b6ca908804560b41034db76434",
+        "vertices": 4003,
+        "triangles": 7588,
+        "degenerate_triangles": 6,
+        "removed_original_degenerate_triangles": 12,
+        "bounds_m": [
+          -0.31353819370269775,
+          -0.16031509637832642,
+          0.8252642154693604,
+          0.31353819370269775,
+          0.17100200057029724,
+          1.505405068397522
+        ],
+        "maximum_influences": 7,
+        "source_weight_sum_error_before_normalization": 0.7709504645317793,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Luna.001",
+          "M_Luna"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      },
+      "Clothing": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\Sportswear\\SKM_LunaMk2_Sportswear_Clothing.fbx",
+        "sha256": "c21c4fc696d02d73e68ebf64b390339ffb7a97d1c5ff25f99943ae79217cac36",
+        "vertices": 30746,
+        "triangles": 61320,
+        "degenerate_triangles": 0,
+        "removed_original_degenerate_triangles": 0,
+        "bounds_m": [
+          -0.258889377117157,
+          -0.17880000174045563,
+          -0.00800000037997961,
+          0.25877973437309265,
+          0.07851394265890121,
+          1.1841933727264404
+        ],
+        "maximum_influences": 4,
+        "source_weight_sum_error_before_normalization": 1.1920928955078125e-07,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Sportswear_Navy",
+          "M_Sportswear_Rib",
+          "M_Sportswear_Ivory",
+          "M_Sportswear_Zipper",
+          "M_Sportswear_Rubber",
+          "M_Sportswear_Laces"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      }
+    },
+    "BunnyPajamas": {
+      "source": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\BunnyPajamas\\LunaMk2_BunnyPajamas.blend",
+      "source_sha256": "47f502438ae1d36dedc87aac575350ddf8a7788577e219b713088d80dae4e8b7",
+      "base_source_meshes": [
+        "SKM_Luna.Eye_BunnyPajamasBase",
+        "SKM_Luna.Head_BunnyPajamasBase",
+        "SKM_LunaMk2_BunnyPajamasBase"
+      ],
+      "materials": {
+        "M_Bunny_Blush": {
+          "name": "M_Bunny_Blush",
+          "base_color_linear": [
+            0.6200000047683716,
+            0.3100000023841858,
+            0.2800000011920929,
+            1.0
+          ],
+          "roughness": 0.8799999952316284,
+          "metallic": 0.0
+        },
+        "M_Bunny_Rib": {
+          "name": "M_Bunny_Rib",
+          "base_color_linear": [
+            0.5099999904632568,
+            0.25,
+            0.23499999940395355,
+            1.0
+          ],
+          "roughness": 0.949999988079071,
+          "metallic": 0.0
+        },
+        "M_Bunny_Ivory": {
+          "name": "M_Bunny_Ivory",
+          "base_color_linear": [
+            0.7799999713897705,
+            0.7300000190734863,
+            0.6399999856948853,
+            1.0
+          ],
+          "roughness": 0.8799999952316284,
+          "metallic": 0.0
+        },
+        "M_Bunny_Inner": {
+          "name": "M_Bunny_Inner",
+          "base_color_linear": [
+            0.8199999928474426,
+            0.5099999904632568,
+            0.46000000834465027,
+            1.0
+          ],
+          "roughness": 0.8799999952316284,
+          "metallic": 0.0
+        }
+      },
+      "Base": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\BunnyPajamas\\SKM_LunaMk2_BunnyPajamas_Base.fbx",
+        "sha256": "25eb20acedb540ec6357379d5fd41ae363825dd1ac4967a2c5802af22b83b0b6",
+        "vertices": 2435,
+        "triangles": 4540,
+        "degenerate_triangles": 6,
+        "removed_original_degenerate_triangles": 12,
+        "bounds_m": [
+          -0.2873537838459015,
+          -0.16031509637832642,
+          0.8252642154693604,
+          0.2858002483844757,
+          0.17100200057029724,
+          1.505405068397522
+        ],
+        "maximum_influences": 7,
+        "source_weight_sum_error_before_normalization": 0.7709504645317793,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Luna.001",
+          "M_Luna"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      },
+      "Clothing": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\BunnyPajamas\\SKM_LunaMk2_BunnyPajamas_Clothing.fbx",
+        "sha256": "4879f3280ea60082f3ef747798650bd2660083cc449e1977b6087a6b1902c93c",
+        "vertices": 50282,
+        "triangles": 100460,
+        "degenerate_triangles": 0,
+        "removed_original_degenerate_triangles": 0,
+        "bounds_m": [
+          -0.3017045855522156,
+          -0.17249999940395355,
+          -0.00800000037997961,
+          0.2987910509109497,
+          0.2220524549484253,
+          1.6429542303085327
+        ],
+        "maximum_influences": 4,
+        "source_weight_sum_error_before_normalization": 5.960464477539063e-08,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Bunny_Blush",
+          "M_Bunny_Rib",
+          "M_Bunny_Ivory",
+          "M_Bunny_Inner"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      }
+    },
+    "AdventurerOutfit": {
+      "source": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\AdventurerOutfit\\LunaMk2_AdventurerOutfit.blend",
+      "source_sha256": "77fc47b2feef61c9b4f50f2a7443fe3b03c7a9b3ec7120cf90a5792e457349b7",
+      "base_source_meshes": [
+        "SKM_Luna.Eye_AdventurerOutfitBase",
+        "SKM_Luna.Head_AdventurerOutfitBase",
+        "SKM_Luna.SideTail_AdventurerOutfitBase",
+        "SKM_LunaMk2_AdventurerOutfitBase"
+      ],
+      "materials": {
+        "M_Adv_Olive": {
+          "name": "M_Adv_Olive",
+          "base_color_linear": [
+            0.2199999988079071,
+            0.20000000298023224,
+            0.14000000059604645,
+            1.0
+          ],
+          "roughness": 0.800000011920929,
+          "metallic": 0.0
+        },
+        "M_Adv_Ivory": {
+          "name": "M_Adv_Ivory",
+          "base_color_linear": [
+            0.7200000286102295,
+            0.6399999856948853,
+            0.5099999904632568,
+            1.0
+          ],
+          "roughness": 0.800000011920929,
+          "metallic": 0.0
+        },
+        "M_Adv_Brass": {
+          "name": "M_Adv_Brass",
+          "base_color_linear": [
+            0.44999998807907104,
+            0.27000001072883606,
+            0.09000000357627869,
+            1.0
+          ],
+          "roughness": 0.3799999952316284,
+          "metallic": 0.699999988079071
+        },
+        "M_Adv_Russet": {
+          "name": "M_Adv_Russet",
+          "base_color_linear": [
+            0.23000000417232513,
+            0.0430000014603138,
+            0.02500000037252903,
+            1.0
+          ],
+          "roughness": 0.800000011920929,
+          "metallic": 0.0
+        },
+        "M_Adv_Leather": {
+          "name": "M_Adv_Leather",
+          "base_color_linear": [
+            0.12999999523162842,
+            0.07400000095367432,
+            0.039000000804662704,
+            1.0
+          ],
+          "roughness": 0.7200000286102295,
+          "metallic": 0.0
+        },
+        "M_Adv_DarkLeather": {
+          "name": "M_Adv_DarkLeather",
+          "base_color_linear": [
+            0.04500000178813934,
+            0.026000000536441803,
+            0.017999999225139618,
+            1.0
+          ],
+          "roughness": 0.7799999713897705,
+          "metallic": 0.0
+        }
+      },
+      "Base": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\AdventurerOutfit\\SKM_LunaMk2_AdventurerOutfit_Base.fbx",
+        "sha256": "cecc40c5a1efda1dcb061435f3790db63eb40fc581cb063c5e2e06b98c34b3b5",
+        "vertices": 4407,
+        "triangles": 8372,
+        "degenerate_triangles": 6,
+        "removed_original_degenerate_triangles": 12,
+        "bounds_m": [
+          -0.31353819370269775,
+          -0.16031509637832642,
+          0.2039792388677597,
+          0.31353819370269775,
+          0.17100200057029724,
+          1.505405068397522
+        ],
+        "maximum_influences": 7,
+        "source_weight_sum_error_before_normalization": 0.7709504645317793,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Luna.001",
+          "M_Luna"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      },
+      "Clothing": {
+        "fbx": "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\RuntimeOutfits\\AdventurerOutfit\\SKM_LunaMk2_AdventurerOutfit_Clothing.fbx",
+        "sha256": "ac51cc5049066bc6fd639502699499fe84871110be51e797b3f4d99548489bcb",
+        "vertices": 42270,
+        "triangles": 84092,
+        "degenerate_triangles": 0,
+        "removed_original_degenerate_triangles": 0,
+        "bounds_m": [
+          -0.2553912401199341,
+          -0.17795000970363617,
+          -0.008500000461935997,
+          0.25533103942871094,
+          0.0885910913348198,
+          1.1872236728668213
+        ],
+        "maximum_influences": 4,
+        "source_weight_sum_error_before_normalization": 4.842877388000488e-08,
+        "maximum_weight_sum_error": 1.1102230246251565e-16,
+        "materials": [
+          "M_Adv_Olive",
+          "M_Adv_Ivory",
+          "M_Adv_Brass",
+          "M_Adv_Russet",
+          "M_Adv_Leather",
+          "M_Adv_DarkLeather"
+        ],
+        "uv_layers": [
+          "UVMap"
+        ]
+      }
+    }
+  },
+  "protected_source_hashes": {
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\SchoolUniform\\LunaMk2_SchoolUniform.blend": "ab0ff5b3fa20aac9cf2846d39bebd2c8c7f85d41db3ea1284c1ae73ace5dd8c3",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\MechanicOutfit\\LunaMk2_MechanicOutfit.blend": "0122b6a060ba5f18642f2405d26a844f4d36ea5f41ebb569b46aebf932329983",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\Sportswear\\LunaMk2_Sportswear.blend": "5164b075501f48b08818c3323af26c012ea6bc26dcdb2c1a90fbda8ef1adfe9f",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\BunnyPajamas\\LunaMk2_BunnyPajamas.blend": "47f502438ae1d36dedc87aac575350ddf8a7788577e219b713088d80dae4e8b7",
+    "TunaSweeper\\SourceArt\\Characters\\LunaMk2\\AdventurerOutfit\\LunaMk2_AdventurerOutfit.blend": "77fc47b2feef61c9b4f50f2a7443fe3b03c7a9b3ec7120cf90a5792e457349b7"
+  },
+  "axis_mapping": "UE cm=(Blender X,-Blender Y,Blender Z)*100",
+  "face_included": false
+}

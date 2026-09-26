@@ -22,6 +22,7 @@
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
+#include "Interaction/TunaSweeperWardrobeActor.h"
 #include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -134,6 +135,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("difficulty_adjustment"));
 		case ETunaSweeperInteractionType::Research:
 			return FName(TEXT("research"));
+		case ETunaSweeperInteractionType::WardrobeOpen:
+			return FName(TEXT("wardrobe_open"));
 		case ETunaSweeperInteractionType::TutorialReview:
 			return FName(TEXT("tutorial_review"));
 		case ETunaSweeperInteractionType::VehicleMount:
@@ -336,6 +339,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::Research:
 		bHandled = HandleResearchInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::WardrobeOpen:
+		bHandled = HandleWardrobeOpenInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::TutorialReview:
 		if (Cast<ATunaSweeperTutorialReviewActor>(Interactable->GetOwner()))
 		{
@@ -458,6 +464,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 			Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner());
 	}
 
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WardrobeOpen)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
+			Cast<ATunaSweeperWardrobeActor>(Interactable->GetOwner());
+	}
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Research)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
@@ -1062,6 +1073,17 @@ bool UTunaSweeperInteractionSubsystem::HandleDifficultyAdjustmentInteraction(
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
 	return TunaPlayerController && TunaPlayerController->OpenDifficultyAdjustmentPanel();
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWardrobeOpenInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperWardrobeActor* Wardrobe = Interactable
+		? Cast<ATunaSweeperWardrobeActor>(Interactable->GetOwner()) : nullptr;
+	ATunaSweeperPlayerController* Controller = InstigatorPawn
+		? Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController()) : nullptr;
+	return Wardrobe && Controller && Controller->OpenWardrobePanel(Wardrobe);
 }
 
 bool UTunaSweeperInteractionSubsystem::HandleResearchInteraction(

@@ -28,6 +28,7 @@ class UStaticMeshComponent;
 class UTunaSweeperStaminaGaugeWidget;
 class UTunaSweeperPlayerVisionComponent;
 class UTunaSweeperScratchComponent;
+class UTunaSweeperOutfitComponent;
 class UTunaSweeperLevelTransitionWidget;
 class UWidgetComponent;
 struct FDamageEvent;
@@ -121,6 +122,7 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PawnClientRestart() override;
+	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual float TakeDamage(
 		float DamageAmount,
@@ -162,6 +164,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Scratch")
 	UTunaSweeperScratchComponent* GetScratchComponent() const { return ScratchComponent; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Outfits")
+	UTunaSweeperOutfitComponent* GetOutfitComponent() const { return OutfitComponent; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Camera")
 	ETunaSweeperPlayerCameraMode GetPlayerCameraMode() const { return CurrentCameraMode; }
@@ -286,6 +291,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperScratchComponent> ScratchComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperOutfitComponent> OutfitComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetComponent> StaminaGaugeWidgetComponent;

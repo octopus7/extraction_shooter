@@ -3,6 +3,7 @@
 
 #include "Component/TunaSweeperFactionComponent.h"
 #include "Component/TunaSweeperScratchComponent.h"
+#include "Component/TunaSweeperOutfitComponent.h"
 
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 {
@@ -73,6 +74,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
 	HeadphoneListenerComponent = CreateDefaultSubobject<UTunaSweeperHeadphoneListenerComponent>(TEXT("HeadphoneListenerComponent"));
 	ScratchComponent = CreateDefaultSubobject<UTunaSweeperScratchComponent>(TEXT("ScratchComponent"));
+	OutfitComponent = CreateDefaultSubobject<UTunaSweeperOutfitComponent>(TEXT("OutfitComponent"));
 	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
 	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);
 	StaminaGaugeWidgetComponent->SetRelativeLocation(TunaSweeperStaminaGauge::RelativeLocation);
@@ -184,6 +186,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	UpdateMovementSpeed();
 	RefreshCarryWeightConditionDebuffs();
 	UpdateStaminaGauge(0.0f);
+	if (OutfitComponent) OutfitComponent->RestoreSelectedOutfit();
 }
 
 void ATunaSweeperTopDownCharacter::ConfigureSkirtExternalPhysicsCollision()
@@ -274,5 +277,12 @@ void ATunaSweeperTopDownCharacter::PawnClientRestart()
 	Super::PawnClientRestart();
 
 	AddDefaultInputMapping();
+	if (OutfitComponent) OutfitComponent->RestoreSelectedOutfit();
+}
+
+void ATunaSweeperTopDownCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	if (OutfitComponent) OutfitComponent->RestoreSelectedOutfit();
 }
 

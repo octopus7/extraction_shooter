@@ -31,7 +31,7 @@ namespace TunaSweeperSave
 	inline const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	inline const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
 	inline const TCHAR* AutoDeletedSaveLogFileName = TEXT("AutoDeletedSaveLog.txt");
-	constexpr int32 CurrentSaveVersion = 21;
+	constexpr int32 CurrentSaveVersion = 22;
 	constexpr int32 MinimumSupportedSaveVersion = 20;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;

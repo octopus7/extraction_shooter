@@ -21,12 +21,13 @@ bool FTunaSweeperSaveVersionPolicyTest::RunTest(const FString& Parameters)
 {
 	(void)Parameters;
 
-	TestEqual(TEXT("Current save version"), TunaSweeperSave::CurrentSaveVersion, 21);
+	TestEqual(TEXT("Current save version"), TunaSweeperSave::CurrentSaveVersion, 22);
 	TestEqual(TEXT("Minimum supported save version"), TunaSweeperSave::MinimumSupportedSaveVersion, 20);
 	TestTrue(TEXT("Version 19 is outdated"), TunaSweeperSave::IsOutdatedSaveVersion(19));
 	TestFalse(TEXT("Version 20 is supported"), TunaSweeperSave::IsOutdatedSaveVersion(20));
-	TestFalse(TEXT("Current version is supported"), TunaSweeperSave::IsOutdatedSaveVersion(21));
-	TestFalse(TEXT("Future versions are not auto-deleted"), TunaSweeperSave::IsOutdatedSaveVersion(22));
+	TestFalse(TEXT("Version 21 remains supported"), TunaSweeperSave::IsOutdatedSaveVersion(21));
+	TestFalse(TEXT("Current version is supported"), TunaSweeperSave::IsOutdatedSaveVersion(22));
+	TestFalse(TEXT("Future versions are not auto-deleted"), TunaSweeperSave::IsOutdatedSaveVersion(23));
 	return true;
 }
 

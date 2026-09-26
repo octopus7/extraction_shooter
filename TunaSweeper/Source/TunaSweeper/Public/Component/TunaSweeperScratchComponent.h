@@ -39,6 +39,7 @@ UCLASS(ClassGroup = (TunaSweeper), meta = (BlueprintSpawnableComponent))
 class TUNASWEEPER_API UTunaSweeperScratchComponent : public UActorComponent
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperOutfitRuntimeTest;
 
 public:
 	UTunaSweeperScratchComponent();

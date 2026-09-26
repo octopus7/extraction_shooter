@@ -487,7 +487,8 @@ void UTunaSweeperScratchComponent::SpawnAfterimage(double RealTimeSeconds)
 		GhostMesh->SetReceivesDecals(false);
 		GhostMesh->SetComponentTickEnabled(false);
 		GhostMesh->RegisterComponentWithWorld(World);
-		GhostMesh->CopyPoseFromSkeletalComponent(SourceMesh);
+		USkeletalMeshComponent* PoseSource = Cast<USkeletalMeshComponent>(SourceMesh->LeaderPoseComponent.Get());
+		GhostMesh->CopyPoseFromSkeletalComponent(PoseSource ? PoseSource : SourceMesh);
 
 		const int32 MaterialCount = FMath::Max(1, SourceMesh->GetNumMaterials());
 		for (int32 MaterialIndex = 0; MaterialIndex < MaterialCount; ++MaterialIndex)

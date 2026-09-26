@@ -26,6 +26,7 @@ class UTunaSweeperMapWidget;
 class UTunaSweeperMemoWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperResearchTreeWidget;
+class UTunaSweeperWardrobePanelWidget;
 class UTunaSweeperReloadRingWidget;
 class UBorder;
 class UButton;
@@ -94,6 +95,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowMemoPanel(int32 MemoId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	bool ShowWardrobePanel();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowQuestPanel(FName QuestId);
@@ -217,6 +221,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperResearchTreeWidget> ResearchPanelWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperWardrobePanelWidget> WardrobePanelWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Top Status Direction Override"))
 	ETunaSweeperHudTransitionEdge TopStatusReserveTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
@@ -411,6 +418,7 @@ private:
 	void EnsureHousingFacilityContextMenuWidget();
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
+	void EnsureWardrobePanelWidget();
 	void EnsureQuestPanelWidgets();
 	void EnsureShopSellPanelWidget();
 	void SetShopSellPanelVisible(bool bVisible);

@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "world_saved": false,
+  "fresh_editor_process": true,
+  "leader_pose_130_bones": true,
+  "outfits": {
+    "SchoolUniform": {
+      "base": "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/SKM_LunaMk2_SchoolUniform_Base.SKM_LunaMk2_SchoolUniform_Base",
+      "clothing": "/Game/Characters/Player/LunaMk2/Outfits/SchoolUniform/SKM_LunaMk2_SchoolUniform_Clothing.SKM_LunaMk2_SchoolUniform_Clothing",
+      "maximum_leader_position_error_cm": 0.0,
+      "maximum_leader_rotation_error_deg": 0.0,
+      "samples": 39,
+      "capture": "Previews/LunaMk2_SchoolUniform_Runtime.png"
+    },
+    "MechanicOutfit": {
+      "base": "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/SKM_LunaMk2_MechanicOutfit_Base.SKM_LunaMk2_MechanicOutfit_Base",
+      "clothing": "/Game/Characters/Player/LunaMk2/Outfits/MechanicOutfit/SKM_LunaMk2_MechanicOutfit_Clothing.SKM_LunaMk2_MechanicOutfit_Clothing",
+      "maximum_leader_position_error_cm": 0.0,
+      "maximum_leader_rotation_error_deg": 0.0,
+      "samples": 39,
+      "capture": "Previews/LunaMk2_MechanicOutfit_Runtime.png"
+    },
+    "Sportswear": {
+      "base": "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/SKM_LunaMk2_Sportswear_Base.SKM_LunaMk2_Sportswear_Base",
+      "clothing": "/Game/Characters/Player/LunaMk2/Outfits/Sportswear/SKM_LunaMk2_Sportswear_Clothing.SKM_LunaMk2_Sportswear_Clothing",
+      "maximum_leader_position_error_cm": 0.0,
+      "maximum_leader_rotation_error_deg": 0.0,
+      "samples": 39,
+      "capture": "Previews/LunaMk2_Sportswear_Runtime.png"
+    },
+    "BunnyPajamas": {
+      "base": "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/SKM_LunaMk2_BunnyPajamas_Base.SKM_LunaMk2_BunnyPajamas_Base",
+      "clothing": "/Game/Characters/Player/LunaMk2/Outfits/BunnyPajamas/SKM_LunaMk2_BunnyPajamas_Clothing.SKM_LunaMk2_BunnyPajamas_Clothing",
+      "maximum_leader_position_error_cm": 0.0,
+      "maximum_leader_rotation_error_deg": 0.0,
+      "samples": 39,
+      "capture": "Previews/LunaMk2_BunnyPajamas_Runtime.png"
+    },
+    "AdventurerOutfit": {
+      "base": "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/SKM_LunaMk2_AdventurerOutfit_Base.SKM_LunaMk2_AdventurerOutfit_Base",
+      "clothing": "/Game/Characters/Player/LunaMk2/Outfits/AdventurerOutfit/SKM_LunaMk2_AdventurerOutfit_Clothing.SKM_LunaMk2_AdventurerOutfit_Clothing",
+      "maximum_leader_position_error_cm": 0.0,
+      "maximum_leader_rotation_error_deg": 0.0,
+      "samples": 39,
+      "capture": "Previews/LunaMk2_AdventurerOutfit_Runtime.png"
+    }
+  },
+  "pose_samples_per_outfit": 39,
+  "camera": "perspective 18deg three-quarter, horizontal FOV20, near clip1cm, 720x1080",
+  "visual_review": "passed: inspected all five full-body PNGs after perspective recapture; head, bunny ears, hands and shoes remain visible; no camera clipping. Wardrobe actor is fully within its separate frame.",
+  "errors": [],
+  "wardrobe_actor": {
+    "class": "/Game/Interaction/BP_Wardrobe.BP_Wardrobe_C",
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "capture": "Previews/BP_Wardrobe_Runtime.png"
+  },
+  "protected_originals_unchanged": true
+}

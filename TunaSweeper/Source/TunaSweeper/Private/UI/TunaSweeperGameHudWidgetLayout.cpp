@@ -1,4 +1,6 @@
 #include "TunaSweeperGameHudWidgetShared.h"
+#include "Components/ScaleBox.h"
+#include "Components/ScaleBoxSlot.h"
 #include "UI/TunaSweeperUIStyle.h"
 
 void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
@@ -9,6 +11,14 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	const bool bMemoMode = ActiveHudMode == ETunaSweeperHudMode::Memo;
 	const bool bQuestMode = ActiveHudMode == ETunaSweeperHudMode::Quest;
 	const bool bResearchMode = ActiveHudMode == ETunaSweeperHudMode::Research;
+	const bool bWardrobeMode = ActiveHudMode == ETunaSweeperHudMode::Wardrobe;
+	if (!bWardrobeMode)
+	{
+		if (ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+		{
+			Controller->CloseWardrobePanel();
+		}
+	}
 	const UTunaSweeperGameInstance* WorkbenchGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const bool bWorkbenchPanelOpen =
 		bInventoryMode &&
@@ -167,6 +177,14 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 			bUtilityModeOpen && bResearchMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
 			ETunaSweeperHudTransitionEdge::Right);
 	}
+	if (WardrobePanelWidget)
+	{
+		WardrobePanelWidget->SetIsEnabled(bWardrobeMode);
+		SetTransitionedWidgetVisibility(
+			WardrobePanelWidget,
+			bWardrobeMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			ETunaSweeperHudTransitionEdge::Right);
+	}
 
 	if (ExternalPanelWidget)
 	{
@@ -192,7 +210,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	{
 		SetTransitionedWidgetVisibility(
 			UnsupportedModePanel,
-			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode && !bResearchMode
+			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode && !bResearchMode && !bWardrobeMode
 				? ESlateVisibility::HitTestInvisible
 				: ESlateVisibility::Collapsed,
 			UnsupportedModePanelTransitionEdge);
@@ -955,6 +973,48 @@ void UTunaSweeperGameHudWidget::EnsureMapPanelWidget()
 		CanvasSlot->SetOffsets(FMargin(0.0f));
 		CanvasSlot->SetAlignment(FVector2D(0.0f, 0.0f));
 		CanvasSlot->SetZOrder(-5);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureWardrobePanelWidget()
+{
+	if (WardrobePanelWidget || !WidgetTree)
+	{
+		return;
+	}
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+	WardrobePanelWidget = CreateWidget<UTunaSweeperWardrobePanelWidget>(
+		GetOwningPlayer(), UTunaSweeperWardrobePanelWidget::StaticClass());
+	if (!WardrobePanelWidget)
+	{
+		return;
+	}
+	WardrobePanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UScaleBox* Fit = WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass(), TEXT("WardrobePanelFit"));
+	Fit->SetStretch(EStretch::ScaleToFit);
+	Fit->SetStretchDirection(EStretchDirection::DownOnly);
+	Fit->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	USizeBox* PanelSize = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("WardrobePanelSize"));
+	PanelSize->SetWidthOverride(1280.0f);
+	PanelSize->SetHeightOverride(760.0f);
+	PanelSize->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	PanelSize->SetContent(WardrobePanelWidget);
+	Fit->SetContent(PanelSize);
+	if (UScaleBoxSlot* FitSlot = Cast<UScaleBoxSlot>(PanelSize->Slot))
+	{
+		FitSlot->SetHorizontalAlignment(HAlign_Center);
+		FitSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(Fit))
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D::ZeroVector);
+		CanvasSlot->SetOffsets(FMargin(32.0f, 80.0f, 32.0f, 40.0f));
+		CanvasSlot->SetZOrder(20);
 	}
 }
 

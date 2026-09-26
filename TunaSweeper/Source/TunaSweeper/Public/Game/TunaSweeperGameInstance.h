@@ -15,6 +15,7 @@
 class APawn;
 class ATunaSweeperPetCompanionCharacter;
 class UTunaSweeperFootstepPresentationDataAsset;
+class UTunaSweeperOutfitCatalog;
 class UTunaSweeperOcclusionRevealSettingsDataAsset;
 class UTunaSweeperVitalsComponent;
 class UTunaSweeperWeaponPresentationDataAsset;
@@ -258,7 +259,7 @@ struct TUNASWEEPER_API FTunaSweeperWorkbenchBlueprintItemView
 	bool bCanRegister = false;
 };
 
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, Config = Game)
 class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public ITunaWarpTransitionProfileProvider
 {
 	GENERATED_BODY()
@@ -268,9 +269,31 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperCarriedToolTest;
 	friend class FTunaSweeperEquipmentDataTest;
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperOutfitSaveTest;
+	friend class FTunaSweeperOutfitSaveFailureTest;
+	friend class FTunaSweeperOutfitUnlockTest;
+	friend class FTunaSweeperWardrobePanelTest;
+	friend class FTunaWardrobeInteractionTest;
 
 public:
 	UTunaSweeperGameInstance();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Outfits")
+	UTunaSweeperOutfitCatalog* GetOutfitCatalog() const;
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Outfits")
+	FName GetSelectedOutfitId();
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Outfits")
+	bool TryEquipOutfit(FName OutfitId);
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Outfits")
+	bool IsOutfitUnlocked(FName OutfitId);
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Outfits")
+	bool TryUnlockOutfit(FName OutfitId);
+	/** Restoration can fall back without overwriting the user's save during asset loading. */
+	void NotifyOutfitRestoreFallback(FName ExpectedOutfitId);
+
+	/** Temporary access override. It never adds entries to the persistent unlock list. */
+	UPROPERTY(Config, EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Outfits")
+	bool bUnlockAllOutfitsOverride = true;
 
 	virtual void Init() override;
 	virtual UTunaWarpTransitionProfile* GetWarpTransitionProfile_Implementation() const override;
@@ -834,8 +857,24 @@ public:
 	FSimpleMulticastDelegate OnMapMarkersChanged;
 	FSimpleMulticastDelegate OnLanguageChanged;
 	FSimpleMulticastDelegate OnExperienceChanged;
+	FSimpleMulticastDelegate OnOutfitChanged;
+	FSimpleMulticastDelegate OnOutfitUnlocksChanged;
 
 private:
+	void EnsureOutfitUnlocksLoaded();
+	bool SaveOutfitUnlocks() const;
+	FName GetOutfitUnlockDistributionNamespace() const;
+	UPROPERTY(Transient)
+	FName SelectedOutfitId = TEXT("Maid");
+	UPROPERTY(Transient)
+	TSet<FName> UnlockedOutfitIds;
+	UPROPERTY(EditDefaultsOnly, Category = "TunaSweeper|Outfits")
+	TSoftObjectPtr<UTunaSweeperOutfitCatalog> OutfitCatalog = TSoftObjectPtr<UTunaSweeperOutfitCatalog>(
+		FSoftObjectPath(TEXT("/Game/Characters/Player/LunaMk2/Outfits/DA_LunaMk2_Outfits.DA_LunaMk2_Outfits")));
+	bool bOutfitUnlocksLoaded = false;
+	bool bOutfitUnlockSaveBlocked = false;
+	FString OutfitUnlockSavePath;
+
 	struct FCombatTestInventoryBackup;
 	TSharedPtr<FCombatTestInventoryBackup> CombatTestInventoryBackup;
 
