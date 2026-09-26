@@ -220,7 +220,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 				: bMemoMode
 					? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.memo"), TEXT("\uBA54\uBAA8"))
 					: bResearchMode
-						? FText::FromString(TEXT("연구"))
+						? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.research"), TEXT(""))
 						: FText::GetEmpty());
 	}
 

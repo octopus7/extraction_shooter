@@ -294,6 +294,9 @@ Ability-stat research is persisted per save slot through `AppliedResearchNodeIds
 - `ResearchLastObservedUtcTicks` prevents a local wall-clock rollback from reducing already-observed progress. Offline progress uses UTC finish times.
 - Starting research, first detecting timer completion, and claiming completion each request an immediate save.
 - New games clear applied and active research. Save version 21 adds these fields while version 20 remains load-compatible and initializes them empty.
+- New games also reset the session UTC/monotonic clock anchors so a future timestamp loaded from a previous slot cannot carry into the new game.
+- Applied and active records whose node IDs are absent from the current definitions are retained across save/load. They do not contribute effects or unlock counts until their definitions are restored. A failed JSON load never deletes progress; a failed reload retains the last valid definitions.
+- The bathroom research station's scan-bar phase is cosmetic runtime state and is not saved. No save schema/version change is needed for the station or these safeguards.
 - Node layout, unlock counts, durations, localization string keys, and stat effects are static editable data in `Content/Data/StatResearchNodes.json`; the corresponding Korean, English, and Japanese text lives in `Content/Data/UITextStrings.csv`. Neither is duplicated in save data.
 
 ## Loaded Ammo Rules

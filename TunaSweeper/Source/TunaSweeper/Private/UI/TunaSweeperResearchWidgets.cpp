@@ -8,6 +8,14 @@
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
 #include "UI/TunaSweeperUIStyle.h"
 
+namespace TunaSweeperResearchUi
+{
+	FText Resolve(const UTunaSweeperGameInstance* GameInstance, const TCHAR* Key)
+	{
+		return GameInstance ? GameInstance->ResolveLocalizedText(FName(Key), FText::GetEmpty()) : FText::GetEmpty();
+	}
+}
+
 void UTunaSweeperResearchNodeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -20,25 +28,30 @@ void UTunaSweeperResearchNodeWidget::NativeConstruct()
 
 void UTunaSweeperResearchNodeWidget::RefreshFromSubsystem()
 {
-	const UGameInstance* GameInstance = GetGameInstance();
+	const UTunaSweeperGameInstance* GameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const UTunaSweeperResearchSubsystem* Research = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>() : nullptr;
 	FTunaSweeperResearchNodeView View;
 	if (!Research || !Research->GetNodeView(NodeId, View)) return;
 	NameText->SetText(View.DisplayName);
 	SetToolTipText(View.Description);
-	RequirementText->SetText(FText::Format(NSLOCTEXT("TunaSweeperResearch", "Requirement", "Unlocked: {0}"), View.RequiredAppliedNodeCount));
+	RequirementText->SetText(FText::Format(
+		TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.requirement")),
+		View.RequiredAppliedNodeCount));
 	ResearchProgressBar->SetPercent(View.Progress);
 	RemainingTimeText->SetText(View.State == ETunaSweeperResearchNodeState::Researching
-		? FText::FromString(FString::Printf(TEXT("%02d:%02d"), View.RemainingSeconds / 60, View.RemainingSeconds % 60))
+		? FText::Format(
+			TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.remaining_time")),
+			FText::FromString(FString::Printf(TEXT("%02d"), View.RemainingSeconds / 60)),
+			FText::FromString(FString::Printf(TEXT("%02d"), View.RemainingSeconds % 60)))
 		: FText::GetEmpty());
 	FText Action;
 	switch (View.State)
 	{
-	case ETunaSweeperResearchNodeState::Locked: Action = NSLOCTEXT("TunaSweeperResearch", "Locked", "Locked"); break;
-	case ETunaSweeperResearchNodeState::Available: Action = NSLOCTEXT("TunaSweeperResearch", "Start", "Start Research"); break;
-	case ETunaSweeperResearchNodeState::Researching: Action = NSLOCTEXT("TunaSweeperResearch", "Researching", "Researching"); break;
-	case ETunaSweeperResearchNodeState::ReadyToClaim: Action = NSLOCTEXT("TunaSweeperResearch", "Complete", "Complete"); break;
-	case ETunaSweeperResearchNodeState::Applied: Action = NSLOCTEXT("TunaSweeperResearch", "Applied", "Applied"); break;
+	case ETunaSweeperResearchNodeState::Locked: Action = TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.action.locked")); break;
+	case ETunaSweeperResearchNodeState::Available: Action = TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.action.start")); break;
+	case ETunaSweeperResearchNodeState::Researching: Action = TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.action.researching")); break;
+	case ETunaSweeperResearchNodeState::ReadyToClaim: Action = TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.action.complete")); break;
+	case ETunaSweeperResearchNodeState::Applied: Action = TunaSweeperResearchUi::Resolve(GameInstance, TEXT("ui.research.action.applied")); break;
 	}
 	ActionText->SetText(Action);
 	const bool bActionable =
@@ -125,6 +138,8 @@ void UTunaSweeperResearchTreeWidget::RefreshAllNodes()
 	{
 		if (const UTunaSweeperResearchSubsystem* Research = GameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>()) AppliedCount = Research->GetAppliedNodeCount();
 	}
-	ResearchStatusText->SetText(FText::Format(NSLOCTEXT("TunaSweeperResearch", "Status", "Applied {0} / {1}"), AppliedCount, TotalCount));
+	ResearchStatusText->SetText(FText::Format(
+		TunaSweeperResearchUi::Resolve(GetGameInstance<UTunaSweeperGameInstance>(), TEXT("ui.research.status")),
+		AppliedCount, TotalCount));
 	for (const TWeakObjectPtr<UTunaSweeperResearchNodeWidget>& NodeWidget : NodeWidgets) if (NodeWidget.IsValid()) NodeWidget->RefreshFromSubsystem();
 }

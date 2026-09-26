@@ -1,0 +1,215 @@
+{
+  "name": "ResearchMirror",
+  "concept": "Wall-mounted retro diagnostic mirror over bathroom sink",
+  "coordinate_contract": "UE centimeters: front +X, width +Y, height +Z; body pivot at bottom centre",
+  "body": {
+    "file": "Models/SM_ResearchMirror.fbx",
+    "bounds_cm_xyz": {
+      "min": [
+        -2.75,
+        -32.0,
+        0.0
+      ],
+      "max": [
+        7.35,
+        32.0,
+        90.0
+      ]
+    },
+    "pivot_cm_xyz": [
+      0,
+      0,
+      0
+    ],
+    "triangles": 8812,
+    "material_slots": [
+      "M_RM_CreamEnamel",
+      "M_RM_PanelShadow",
+      "M_RM_WarmTrim",
+      "M_RM_ReflectivePanel",
+      "M_RM_TealAccent",
+      "M_RM_GraphiteFrame",
+      "M_RM_CyanEmitter",
+      "M_RM_AmberEmitter"
+    ]
+  },
+  "scan_bar": {
+    "file": "Models/SM_ResearchScanBar.fbx",
+    "bounds_cm_xyz": {
+      "min": [
+        -0.9,
+        -27.9,
+        -1.3
+      ],
+      "max": [
+        1.25,
+        27.9,
+        1.3
+      ]
+    },
+    "pivot_cm_xyz": [
+      0,
+      0,
+      0
+    ],
+    "triangles": 940,
+    "material_slots": [
+      "M_RM_GraphiteFrame",
+      "M_RM_WarmTrim",
+      "M_RM_CyanEmitter",
+      "M_RM_TealAccent"
+    ]
+  },
+  "scan_component_relative_location_cm_xyz": [
+    8.3,
+    0.0,
+    48.0
+  ],
+  "scan_animation": {
+    "axis": "Z",
+    "travel_cm": [
+      -28.0,
+      28.0
+    ],
+    "period_seconds": 4.0,
+    "motion": "ping_pong"
+  },
+  "materials": {
+    "M_RM_CreamEnamel": {
+      "base_color_linear_rgba": [
+        0.52,
+        0.49,
+        0.38,
+        1
+      ],
+      "metallic": 0.16,
+      "roughness": 0.48,
+      "emission_color_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    "M_RM_WarmTrim": {
+      "base_color_linear_rgba": [
+        0.4,
+        0.38,
+        0.32,
+        1
+      ],
+      "metallic": 0.68,
+      "roughness": 0.3,
+      "emission_color_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    "M_RM_GraphiteFrame": {
+      "base_color_linear_rgba": [
+        0.055,
+        0.086,
+        0.108,
+        1
+      ],
+      "metallic": 0.48,
+      "roughness": 0.43,
+      "emission_color_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    "M_RM_ReflectivePanel": {
+      "base_color_linear_rgba": [
+        0.018,
+        0.052,
+        0.072,
+        1
+      ],
+      "metallic": 0.57,
+      "roughness": 0.31,
+      "emission_color_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    "M_RM_PanelShadow": {
+      "base_color_linear_rgba": [
+        0.012,
+        0.025,
+        0.034,
+        1
+      ],
+      "metallic": 0.18,
+      "roughness": 0.58,
+      "emission_color_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    "M_RM_TealAccent": {
+      "base_color_linear_rgba": [
+        0.075,
+        0.46,
+        0.47,
+        1
+      ],
+      "metallic": 0.5,
+      "roughness": 0.32,
+      "emission_color_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    "M_RM_CyanEmitter": {
+      "base_color_linear_rgba": [
+        0.025,
+        0.6,
+        0.8,
+        1
+      ],
+      "metallic": 0.12,
+      "roughness": 0.26,
+      "emission_color_linear_rgba": [
+        0.03,
+        0.65,
+        0.95,
+        1
+      ],
+      "emission_strength": 4.0
+    },
+    "M_RM_AmberEmitter": {
+      "base_color_linear_rgba": [
+        0.95,
+        0.48,
+        0.12,
+        1
+      ],
+      "metallic": 0.05,
+      "roughness": 0.36,
+      "emission_color_linear_rgba": [
+        1.0,
+        0.29,
+        0.04,
+        1
+      ],
+      "emission_strength": 4.0
+    }
+  }
+}

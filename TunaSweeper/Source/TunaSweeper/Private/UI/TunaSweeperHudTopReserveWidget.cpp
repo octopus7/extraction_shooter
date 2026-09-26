@@ -5,7 +5,6 @@
 #include "Components/ButtonSlot.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
-#include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUIStyle.h"
 
@@ -26,8 +25,6 @@ namespace TunaSweeperHudTopReserve
 			return 2;
 		case ETunaSweeperHudMode::Memo:
 			return 3;
-		case ETunaSweeperHudMode::Research:
-			return 4;
 		default:
 			return INDEX_NONE;
 		}
@@ -63,12 +60,6 @@ void UTunaSweeperHudTopReserveWidget::NativeConstruct()
 		MemoModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked);
 		MemoModeButton->OnClicked.AddDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked);
 	}
-	if (ResearchModeButton)
-	{
-		ResearchModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked);
-		ResearchModeButton->OnClicked.AddDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked);
-	}
-
 	RefreshTabVisuals();
 }
 
@@ -93,11 +84,6 @@ void UTunaSweeperHudTopReserveWidget::NativeDestruct()
 	{
 		MemoModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked);
 	}
-	if (ResearchModeButton)
-	{
-		ResearchModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked);
-	}
-
 	Super::NativeDestruct();
 }
 
@@ -114,12 +100,6 @@ void UTunaSweeperHudTopReserveWidget::RefreshTabVisuals()
 	SetTabVisual(ETunaSweeperHudMode::Quest, QuestModeButton, QuestModeIcon, TEXT("QuestModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Map, MapModeButton, MapModeIcon, TEXT("MapModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Memo, MemoModeButton, MemoModeIcon, TEXT("MemoModeIcon"));
-	SetTabVisual(ETunaSweeperHudMode::Research, ResearchModeButton, ResearchModeIcon, TEXT("ResearchModeIcon"));
-	const ESlateVisibility ResearchVisibility = TunaSweeperBuildFlavor::IsDemo()
-		? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
-	if (ResearchModeButton) ResearchModeButton->SetVisibility(ResearchVisibility);
-	if (UWidget* ResearchFrame = WidgetTree ? WidgetTree->FindWidget(TEXT("ResearchModeButtonFrame")) : nullptr)
-		ResearchFrame->SetVisibility(ResearchVisibility);
 }
 
 void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
@@ -145,11 +125,6 @@ void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
 	{
 		MemoModeButton = Cast<UButton>(WidgetTree->FindWidget(FName(TEXT("MemoModeButton"))));
 	}
-	if (!ResearchModeButton)
-	{
-		ResearchModeButton = Cast<UButton>(WidgetTree->FindWidget(FName(TEXT("ResearchModeButton"))));
-	}
-
 	if (!InventoryModeIcon)
 	{
 		InventoryModeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("InventoryModeIcon"))));
@@ -165,10 +140,6 @@ void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
 	if (!MemoModeIcon)
 	{
 		MemoModeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("MemoModeIcon"))));
-	}
-	if (!ResearchModeIcon)
-	{
-		ResearchModeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("ResearchModeIcon"))));
 	}
 }
 
@@ -278,10 +249,4 @@ void UTunaSweeperHudTopReserveWidget::HandleMapModeClicked()
 void UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked()
 {
 	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Memo);
-}
-
-void UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked()
-{
-	if (TunaSweeperBuildFlavor::IsDemo()) return;
-	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Research);
 }

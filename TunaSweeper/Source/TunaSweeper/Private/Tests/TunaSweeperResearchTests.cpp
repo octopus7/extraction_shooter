@@ -3,7 +3,9 @@
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "Engine/GameInstance.h"
+#include "HAL/FileManager.h"
 #include "Misc/AutomationTest.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -13,6 +15,7 @@
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "UObject/UnrealType.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperResearchJsonContractTest,
@@ -142,7 +145,14 @@ bool FTunaSweeperResearchInteractionDefaultsTest::RunTest(const FString& Paramet
 
 	TestNotNull(TEXT("Research station has an interactable component"), Defaults->GetInteractableComponent());
 	TestEqual(TEXT("Research station interaction type"), Defaults->GetInteractionType(), ETunaSweeperInteractionType::Research);
-	TestFalse(TEXT("Research station has a visible interaction label"), Defaults->GetInteractionDisplayName().IsEmpty());
+	const FNameProperty* LabelKeyProperty = FindFProperty<FNameProperty>(
+		UTunaSweeperInteractableComponent::StaticClass(), TEXT("InteractionDisplayNameStringKey"));
+	if (TestNotNull(TEXT("Research station interaction has a string-key property"), LabelKeyProperty))
+	{
+		TestEqual(TEXT("Research station interaction uses the localized text key"),
+			LabelKeyProperty->GetPropertyValue_InContainer(Defaults->GetInteractableComponent()),
+			FName(TEXT("ui.interaction.research")));
+	}
 	UClass* BlueprintClass = LoadClass<ATunaSweeperResearchStationActor>(
 		nullptr,
 		TEXT("/Game/Interaction/BP_ResearchSinkInteraction.BP_ResearchSinkInteraction_C"));
@@ -198,6 +208,101 @@ bool FTunaSweeperResearchDeferredInitializationNotificationsTest::RunTest(const 
 		ETunaSweeperResearchNotificationMode::Immediate);
 	TestEqual(TEXT("Immediate effects notification remains immediate"), EffectsNotificationCount, 2);
 	TestEqual(TEXT("Immediate state notification remains immediate"), StateNotificationCount, 2);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperResearchNewGameClockResetTest,
+	"TunaSweeper.Research.NewGameClockReset",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchNewGameClockResetTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperResearchSubsystem* Research = NewObject<UTunaSweeperResearchSubsystem>(GameInstance);
+	const int64 FutureTicks = (FDateTime::UtcNow() + FTimespan::FromDays(7)).GetTicks();
+	Research->LoadResearchProgressFromSave({}, {}, FutureTicks);
+	Research->ResetResearchProgressForNewGame();
+
+	TArray<FName> Applied;
+	TArray<FTunaSweeperActiveResearchSaveData> Active;
+	int64 ExportedTicks = 0;
+	Research->ExportResearchProgressForSave(Applied, Active, ExportedTicks);
+	TestTrue(TEXT("New game clock does not inherit a future save slot clock"),
+		ExportedTicks < (FDateTime::UtcNow() + FTimespan::FromMinutes(1)).GetTicks());
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperResearchUnknownProgressRoundTripTest,
+	"TunaSweeper.Research.UnknownProgressRoundTrip",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchUnknownProgressRoundTripTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperResearchSubsystem* Research = NewObject<UTunaSweeperResearchSubsystem>(GameInstance);
+	const FName UnavailableApplied(TEXT("research_saved_but_definition_unavailable"));
+	const FName UnavailableActive(TEXT("research_active_but_definition_unavailable"));
+	FTunaSweeperActiveResearchSaveData SavedActive;
+	SavedActive.NodeId = UnavailableActive;
+	SavedActive.StartUtcTicks = FDateTime::UtcNow().GetTicks();
+	SavedActive.FinishUtcTicks = SavedActive.StartUtcTicks + ETimespan::TicksPerHour;
+	Research->LoadResearchProgressFromSave({UnavailableApplied}, {SavedActive}, SavedActive.StartUtcTicks);
+
+	TArray<FName> Applied;
+	TArray<FTunaSweeperActiveResearchSaveData> Active;
+	int64 ExportedTicks = 0;
+	Research->ExportResearchProgressForSave(Applied, Active, ExportedTicks);
+	TestTrue(TEXT("Unavailable applied node survives a save round trip"), Applied.Contains(UnavailableApplied));
+	TestTrue(TEXT("Unavailable active node survives a save round trip"),
+		Active.ContainsByPredicate([UnavailableActive](const FTunaSweeperActiveResearchSaveData& Entry)
+		{
+			return Entry.NodeId == UnavailableActive;
+		}));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperResearchInvalidReloadTest,
+	"TunaSweeper.Research.InvalidReloadKeepsDefinitions",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchInvalidReloadTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperResearchSubsystem* Research = NewObject<UTunaSweeperResearchSubsystem>(GameInstance);
+	if (!TestTrue(TEXT("Original research definitions load"), Research->LoadResearchData())) return false;
+	const FString TempPath = FPaths::CreateTempFilename(*FPaths::ProjectSavedDir(), TEXT("ResearchInvalid"), TEXT(".json"));
+	const FString Node = TEXT(R"({"node_id":"fixture_a","row":0,"column":0,"required_applied_node_count":0,"duration_seconds":10,"effects":[{"type":"max_health","value":5}],"display_name_string_key":"research.node.vitality_1.name","description_string_key":"research.node.vitality_1.description"})");
+	const FString OtherColumn = Node.Replace(TEXT("\"column\":0"), TEXT("\"column\":1"));
+	const FString OtherId = Node.Replace(TEXT("fixture_a"), TEXT("fixture_b"));
+	auto CheckRejectedReload = [this, Research, &TempPath](const FString& Json, const TCHAR* ExpectedLog, const TCHAR* CaseDescription)
+	{
+		if (!TestTrue(TEXT("Temporary invalid research fixture writes"), FFileHelper::SaveStringToFile(Json, *TempPath))) return;
+		AddExpectedError(ExpectedLog, EAutomationExpectedErrorFlags::Contains, 1);
+		TestFalse(CaseDescription, Research->LoadResearchDataFromFile(TempPath));
+		FTunaSweeperResearchNodeView ExistingView;
+		TestTrue(TEXT("Rejected reload retains the last good research tree"),
+			Research->GetNodeView(FName(TEXT("vitality_1")), ExistingView));
+	};
+	CheckRejectedReload(TEXT("[{"), TEXT("Research data must be a nonempty JSON array"), TEXT("Malformed JSON reload is rejected"));
+	CheckRejectedReload(FString(TEXT("[")) + Node.Replace(TEXT("max_health"), TEXT("unrecognized_effect")) + TEXT("]"),
+		TEXT("has an invalid effect"), TEXT("Unknown effect type is rejected"));
+	CheckRejectedReload(FString(TEXT("[")) + Node + TEXT(",") + OtherColumn + TEXT("]"),
+		TEXT("has an invalid ID, position"), TEXT("Duplicate node ID is rejected"));
+	CheckRejectedReload(FString(TEXT("[")) + Node + TEXT(",") + OtherId + TEXT("]"),
+		TEXT("has an invalid ID, position"), TEXT("Duplicate grid position is rejected"));
+	CheckRejectedReload(FString(TEXT("[")) + Node.Replace(TEXT("\"column\":0"), TEXT("\"column\":3")) + TEXT("]"),
+		TEXT("has an invalid ID, position"), TEXT("Out-of-range grid column is rejected"));
+	CheckRejectedReload(FString(TEXT("[")) + Node.Replace(TEXT("\"required_applied_node_count\":0"), TEXT("\"required_applied_node_count\":1")) +
+		TEXT(",") + OtherId.Replace(TEXT("\"column\":0"), TEXT("\"column\":1"))
+			.Replace(TEXT("\"required_applied_node_count\":0"), TEXT("\"required_applied_node_count\":1")) + TEXT("]"),
+		TEXT("unreachable required node counts"), TEXT("Research tree with no initial node is rejected"));
+	IFileManager::Get().Delete(*TempPath);
 	return true;
 }
 
