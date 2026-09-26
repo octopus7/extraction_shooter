@@ -267,6 +267,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
 	friend class FTunaSweeperEquipmentDataTest;
+	friend class FTunaSweeperQuestSubmissionTest;
 
 public:
 	UTunaSweeperGameInstance();
@@ -640,6 +641,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount);
+
+	// Consume the whole batch, then commit related state before inventory observers/save requests run.
+	bool TryConsumeInventoryItems(const TArray<FTunaSweeperItemStack>& Requirements, TFunctionRef<void()> OnConsumed);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards);

@@ -32,7 +32,6 @@
 #include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Interaction/TunaSweeperFoodWarehouseActor.h"
-#include "Scenario/TunaSweeperDemoEndingActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "GameFramework/Actor.h"
@@ -71,6 +70,13 @@ namespace TunaSweeperInteractionQuestEvents
 			return FacilityNpcActor->ResolveQuestId();
 		}
 
+		return NAME_None;
+	}
+
+	FName ResolveQuestProviderIdForActor(const AActor* Actor)
+	{
+		if (const auto* Mole = Cast<ATunaSweeperMoleCompanionActor>(Actor)) return Mole->GetQuestProviderId();
+		if (const auto* Npc = Cast<ATunaSweeperFacilityNpcActor>(Actor)) return Npc->GetQuestProviderId();
 		return NAME_None;
 	}
 
@@ -476,6 +482,10 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	// Keep an unfinished introduction reachable even before a quest becomes available.
 	const UWorld* World = GetWorld();
 	const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+	const auto* Quests = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
+	FName SubmissionQuest;
+	if (Quests && Quests->TryGetItemSubmissionQuestForProvider(
+		TunaSweeperInteractionQuestEvents::ResolveQuestProviderIdForActor(Interactable->GetOwner()), SubmissionQuest)) return true;
 	const auto* Scenarios = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperScenarioSubsystem>() : nullptr;
 	FTunaSweeperScenarioPresentation Presentation;
 	return Cast<ATunaSweeperMoleCompanionActor>(Interactable->GetOwner()) &&
@@ -737,9 +747,31 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		return false;
 	}
 
+	const FName ProviderId = TunaSweeperInteractionQuestEvents::ResolveQuestProviderIdForActor(QuestOwner);
+	if (auto* Game = GetWorld()->GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			FName SubmittedQuest;
+			if (Quests->TrySubmitItemsToProvider(ProviderId, SubmittedQuest))
+			{
+				if (Quests->CanClaimQuestReward(SubmittedQuest))
+				{
+					if (Quests->ClaimQuestReward(SubmittedQuest))
+						TunaPlayerController->PlayQuestPresentation(SubmittedQuest, ETunaSweeperQuestPresentationTrigger::OnRewardClaim);
+					else TunaPlayerController->OpenQuestPanel(SubmittedQuest);
+				}
+				return true;
+			}
+			if (Quests->TryGetItemSubmissionQuestForProvider(ProviderId, SubmittedQuest))
+			{
+				TunaPlayerController->OpenQuestPanel(SubmittedQuest);
+				return true;
+			}
+		}
+	}
 	if (Cast<ATunaSweeperMoleCompanionActor>(QuestOwner))
 	{
-		if (ATunaSweeperDemoEndingActor::TryDeliverToMole(InstigatorPawn)) return true;
 		if (TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
 			TunaPlayerController->StartScenarioForTrigger(TEXT("interaction.mole"), false)) return true;
 	}

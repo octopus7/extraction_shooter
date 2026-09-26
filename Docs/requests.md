@@ -9887,3 +9887,15 @@
 - 보존: 원래 130개 본의 이름·계층·레퍼런스 행렬과 얼굴 표정 6개 유지. 기존 메이드복 보존 컬렉션을 포함하며 작업복용 몸체 사본의 가림은 Mask로 복원 가능. 바지는 원래 하체와 twist 웨이트를 이어받고, 원본 허리 뒤의 미세한 내부 면 1개는 의상 사본에서만 정리. 원본 Blender·교복·UE 캐릭터 에셋과 런타임 코드는 변경하지 않음.
 - 검증: 생성기 제거 후 최종 Blender 재로드 검사 0오류·0경고. 타이틀 A/B/C 각각 13프레임 평가, 별도 시각 검토와 뒤 멜빵 연결부 수정 후 재검토 완료. 빈 장면에서 FBX를 다시 가져와 본 계층·정점 범위·삼각형 수·정규화 웨이트 확인; 최대 본 위치 오차 0.000001m 미만.
 - 범위·정리: UE 임포트·게임 적용·교체 UI·공구 기능·천 물리는 미구현. 사용 구조와 조건은 해당 폴더 README.md에 기록. 임시 모델 생성기·내보내기·검사 스크립트 제거, 결과물·검증 기록·이 요청 로그를 한 작업 커밋으로 묶음.
+
+
+## 2026-09-26 19:20:08 (소요시간: 00:17:31)
+
+- 요청: 참치캔 제출 대상·아이템·수량을 퀘스트 데이터에 정의하고 공용 보유 검사·소모·완료 처리로 하드코딩 제거.
+- 완료: item_submitted 목표와 target_provider_id 추가. 기존 item_id/required_count로 제출 물품·수량을 정의하고 Demo의 deliver_canned_tuna 목표를 provider.mole/3004/1로 전환. 두더지·시설 NPC의 실제 제공자 ID로 공용 제출 처리. 엔딩 액터의 TryDeliverToMole과 고정 참치캔 소모 코드 제거. 기존 보상·최종 엔딩 연결 유지.
+- 동작: 선택한 퀘스트의 해당 대상 미완료 목표를 합산해 전량 검사한 뒤 소모. 부족하면 소모·진행 변경 없음. 소모와 진행도를 모두 반영한 뒤 인벤토리/퀘스트 알림과 저장 요청. 재진입 차단, 보상 대기 시 재소모 없이 수령 재시도. 발급자가 다른 NPC인 경우에도 제출 대상 상호작용을 제공하며, 보상 성공 후 기존 보상 대사 재생 경로 호출.
+- 저장/문서: 기존 목표 ID와 저장 필드를 유지하며 저장 버전 변경 없음. 기존 제출 완료 진행도 호환과 재소모 방지를 문서화. Docs/quest_system.md, quest_and_runtime_actor_data_authoring_guide.md, save_persistence.md 갱신.
+- 동기화: 편집 전 quest:status Demo 실행. Windows 보호 토큰 읽기 실패 후 Demo 공개 조회로 bootstrap-required 확인(가져올 원격 최신 퀘스트 없음). 편집 후 quest:validate Demo 성공. 원격 게시·bootstrap·push는 실행하지 않음.
+- 검증: 기존 일반 상호작용 이벤트만으로 제출 목표 완료되는 동작을 실패 테스트로 재현. 검토에서 발견한 다른 발급자의 제출 대상 상호작용 차단도 실패 재현 후 수정. 최종 UE 5.7 Editor 빌드 성공. 신규 TunaSweeper.Quest.ItemSubmission 통과: 잘못된 대상/미수락/부족 수량/중복 아이템 요구 합산/정확한 소모/알림 시 상태 일관성/재진입/보상 재시도/기존 세이브 메모리 직렬화·복원/잘못된 조건 거부 검증. 별도 코드 검토 2건 반영 후 재검토 완료.
+- 전체 검사: 150건 모두 실행, 145건 통과·5건 실패로 종료 코드 1. 실패는 이전에도 확인된 TunaSweeper.Gaze.TestRobotRigAndPlacement, TunaSweeper.Interaction.CrowbarWallRack.Defaults, TunaSweeper.UI.Tutorial.AuthoredAsset, TunaSweeper.Vehicle.DamageAndDestruction, TunaSweeper.Vehicle.ProjectileContact. 이번 변경의 회귀 및 DemoEnding 검사는 통과.
+- 로그: TunaSweeper/Saved/Logs/QuestSubmissionRed.log, QuestSubmissionGateRed.log, QuestSubmissionSuite.log. 보고서: TunaSweeper/Saved/Automation/QuestSubmissionSuite.

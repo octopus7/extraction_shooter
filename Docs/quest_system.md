@@ -110,6 +110,7 @@ v1 목표 타입:
 
 - `level_travel`: 레벨 이동 요청 성공. `source_level`, `target_level`로 필터링한다.
 - `item_acquired`: 플레이어가 아이템을 획득했을 때. `item_id`가 비어 있으면 모든 아이템을 허용한다.
+- `item_submitted`: 지정 NPC에게 아이템을 제출했을 때. 양의 정수 `item_id`, `required_count`와 비어 있지 않은 `target_provider_id`를 명시한다. 획득/일반 상호작용 이벤트로 완료되지 않는다.
 - `enemy_killed`: 플레이어가 적을 처치했을 때. `enemy_id`가 비어 있으면 모든 적 처치를 허용한다.
 - `interaction_completed`: 상호작용 처리가 성공했을 때. `interaction_event_id`나 `interaction_type`으로 필터링한다.
 - `warp_point_used`: 워프 포인트 액터가 플레이어 워프를 성공시켰을 때. `source_level`, `warp_point_id`, `target_warp_point_id`로 필터링한다. `source_level`은 워프가 발생한 현재 맵을 의미한다.
@@ -132,6 +133,27 @@ v1 목표 타입:
 이벤트는 `Accepted` 상태의 퀘스트에만 진행도를 반영한다. 목표 진행도는 목표별 `RequiredCount`까지만 증가하고, 모든 목표가 완료되면 상태가 `RewardAvailable`로 바뀐다.
 
 ## UI와 보상
+
+### 아이템 제출
+
+```json
+{
+  "objective_id": "deliver_canned_tuna",
+  "type": "item_submitted",
+  "text_string_key": "quest.demo_q4.objective.deliver",
+  "item_id": 3004,
+  "required_count": 1,
+  "target_provider_id": "provider.mole"
+}
+```
+
+두더지와 시설 NPC의 퀘스트 상호작용은 실제 액터의 퀘스트 제공자 ID를 공용 `TrySubmitItemsToProvider`에 전달한다. 퀘스트 발급자와 제출 대상은 서로 달라도 된다. 수락한 퀘스트 중 해당 대상으로 제출할 목표를 찾아, 한 번의 상호작용에서 퀘스트 하나를 처리한다. 보상 대기 중인 제출 퀘스트를 먼저 확인하고 나머지는 `sort_order`, 퀘스트 ID 순으로 확인한다.
+
+선택한 퀘스트에서 해당 대상에게 아직 제출하지 않은 수량을 모두 요구한다. 같은 아이템을 여러 목표가 요구하면 합산한다. 인벤토리와 보조 가방의 물품을 사용하며 창고·장착 슬롯은 제외한다. 수량이 부족하면 그 퀘스트는 아무것도 소모하거나 진행시키지 않는다. 아이템 소모와 목표 진행을 모두 갱신한 뒤 인벤토리·퀘스트 변경 알림과 저장 요청을 보낸다.
+
+목표를 모두 달성하면 기존 보상 수령 경로를 호출한다. 보상 공간 부족 등으로 수령하지 못한 상태에서 다시 상호작용하면 재소모 없이 보상을 재시도한다. 일반 퀘스트 패널에서도 기존 보상 버튼을 사용할 수 있다.
+
+데모 참치캔 목표는 제출 조건을 위 데이터에서 읽는다. 보상은 기존 `rewards`의 참치캔 1개와 코인 250을 유지한다. 기존 목표 ID를 유지하므로 이미 제출한 세이브의 진행도도 보존한다. 데모 엔딩 액터는 아이템 보유 검사·소모를 하지 않으며, 마지막 퀘스트 보상 수령 후 기존 엔딩 연결이 실행된다.
 
 `UTunaSweeperQuestWidget`은 한 퀘스트의 제목, 설명, 다중 목표 진행도, 보상을 표시한다.
 

@@ -173,11 +173,16 @@ void ATunaSweeperMoleCompanionActor::EndPlay(const EEndPlayReason::Type EndPlayR
 	Super::EndPlay(EndPlayReason);
 }
 
-FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
+FName ATunaSweeperMoleCompanionActor::GetQuestProviderId() const
 {
-	const FName EffectiveProviderId = QuestProviderId.IsNone()
+	return QuestProviderId.IsNone()
 		? UTunaSweeperQuestSubsystem::GetMoleProviderId()
 		: QuestProviderId;
+}
+
+FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
+{
+	const FName EffectiveProviderId = GetQuestProviderId();
 
 	if (UWorld* World = GetWorld())
 	{

@@ -246,6 +246,8 @@ Each entry is a stable facility definition id from `Content/Data/HousingFacility
 
 ### Quest Progress
 
+Item submission objectives (`item_submitted`) use the existing objective id/count and quest state fields. Inventory consumption and all matching objective counts are committed in memory before inventory observers or quest save requests run. Requirements for the same item are aggregated; insufficient batches do not change inventory or progress. A saved `RewardAvailable` submission retries rewards without consuming items again. `RewardCompleted` submissions never consume again. The demo retains `deliver_canned_tuna` as its objective id, so progress recorded by the former interaction event survives the change. No save version or serialized field was added.
+
 Completing `dialogue.demo.toilet_intro` automatically accepts `demo_q1_water_intake_check` through the normal quest acceptance path. The dialogue completion flag is set before acceptance saves, so the same save includes the flag, accepted quest state, and tracked quest. Existing accepted/completed quest states prevent duplicate acceptance and notifications; no new save field or version is required. The acceptance toast is transient and is not replayed on load.
 
 Stored through `UTunaSweeperSaveGame::QuestProgressStates`, `TrackedQuestId`, and `QuestCoinBalance`.

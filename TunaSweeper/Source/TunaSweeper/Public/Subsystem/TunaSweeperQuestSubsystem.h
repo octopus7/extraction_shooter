@@ -100,6 +100,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyInteractionCompleted(FName InteractionEventId, FName InteractionTypeName);
 
+	// One eligible quest per interaction; an already submitted quest can retry its reward without consuming again.
+	bool TrySubmitItemsToProvider(FName ProviderId, FName& OutQuestId, bool bSaveImmediately = true);
+	bool TryGetItemSubmissionQuestForProvider(FName ProviderId, FName& OutQuestId) const;
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	int32 GetCoinBalance() const { return CoinBalance; }
 
@@ -120,6 +124,8 @@ public:
 	void ResetQuestProgressForNewGame();
 
 private:
+	friend class FTunaSweeperQuestSubmissionTest;
+	bool bItemSubmissionInProgress = false;
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();
 	bool LoadQuestTextStringsCsv();
