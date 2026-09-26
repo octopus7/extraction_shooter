@@ -15,7 +15,7 @@ Windows packaged paths:
 
 Slots, last-selected-slot settings, achievements, previous generations and timestamped backups all use this directory. Editor sessions and other stores do not write into Steam account directories. If Steam identity is unavailable, the game uses `SaveGames/Steam/LocalOnly/<Demo|FullGame>/` and logs a warning. That fallback is deliberately excluded from Auto-Cloud and is not automatically imported into another account. Restart through Steam to retry identity initialization.
 
-Pre-existing shared saves remain in `SaveGames/Demo` or `SaveGames/FullGame`; legacy `Main` is renamed to `FullGame` when the local full-game directory is resolved. They are not automatically assigned to a Steam account because they may belong to another store or user. To transfer an existing save, close the game, preserve a backup, and explicitly copy the desired complete save set into the intended account/flavor directory before its next launch. Never copy a running game's `.candidate` files.
+Pre-existing shared saves remain in `SaveGames/Demo` or `SaveGames/FullGame`. They are not automatically assigned to a Steam account because they may belong to another store or user. To transfer an existing save, close the game, preserve a backup, and explicitly copy the desired complete save set into the intended account/flavor directory before its next launch. Never copy a running game's `.candidate` files.
 
 ## Required Steamworks configuration
 
@@ -39,7 +39,7 @@ The Windows paths above target Windows builds, including the Windows build under
 
 ## Validation
 
-Local automation checks the packaged-only/channel gate, account separation, Demo/FullGame separation and unavailable/invalid-identity fallback. FullGame migration tests cover preservation of save/recovery files, idempotence, and an existing destination.
+Local automation checks the packaged-only/channel gate, account separation, Demo/FullGame separation and unavailable/invalid-identity fallback. The build-flavor path test verifies that full-game saves resolve directly to `FullGame`.
 
 After publishing the Steamworks settings, run the Steam console command `testappcloudpaths <AppId>` and inspect `%Steam Install%/logs/cloud_log.txt`. Save and exit on PC A; wait for Steam synchronization; launch on PC B with the same account; verify slots, selected slot, achievements and recovery files. Test slot deletion and account switching as well. Cloud-disabled/offline sessions must retain local saves. End test overrides with `testappcloudpaths 0`.
 

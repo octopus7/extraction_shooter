@@ -89,7 +89,7 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 
 Demo and Main use the same logical slot-name format but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/FullGame/` for editor/local saves, or the per-store cloud roots described above. Demo exposes and accepts only `TunaSweeperSave_Slot01`; Main exposes slots `TunaSweeperSave_Slot01` through `03`. Each root independently owns last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
 
-The full-game directory name is `FullGame`; serialized `BuildFlavor=Main` and quest dataset identifiers remain unchanged. If `FullGame/` does not exist, an existing `Main/` tree is renamed in place, preserving slots, settings, achievements, backups, and recovery artifacts. An existing destination is never overwritten or merged. A failed rename keeps the legacy directory active for the entire process so existing progress remains accessible; migration is retried only after restart. Successful and failed local resolutions are cached independently per saved-root/flavor. The moved source cannot later resurrect deleted slots.
+The full-game directory name is `FullGame`; serialized `BuildFlavor=Main` and quest dataset identifiers remain unchanged. The local path is resolved directly without inspecting, moving, or falling back to a `Main/` directory.
 
 ### Obsolete Save Deletion
 
@@ -97,7 +97,7 @@ Save version 20 is the minimum supported version. During `UTunaSweeperGameInstan
 
 Every successful obsolete-version deletion appends a local-time timestamp, detected version, and path relative to the active root to that root's `AutoDeletedSaveLog.txt`. The game prepares the audit log before deleting; if the log cannot be prepared, it leaves the versioned save file in place and reports an error through the Unreal log.
 
-Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. The `Demo/`, `FullGame/`, and legacy `Main/` subdirectories are never included in this flat-file cleanup.
+Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. Subdirectories are never included in this flat-file cleanup.
 
 ### Scenario Progress Flags
 
