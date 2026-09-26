@@ -258,6 +258,7 @@ bool FTunaSweeperSpeechBubbleInvalidInputTest::RunTest(const FString& Parameters
 	return true;
 }
 
+#if WITH_EDITORONLY_DATA
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperSpeechBubbleTextureAssetsTest,
 	"TunaSweeper.UI.SpeechBubble.TextureAssets",
@@ -323,5 +324,6 @@ bool FTunaSweeperSpeechBubbleTextureAssetsTest::RunTest(const FString& Parameter
 	}
 	return true;
 }
+#endif // WITH_EDITORONLY_DATA
 
 #endif

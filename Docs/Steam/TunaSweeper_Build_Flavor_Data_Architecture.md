@@ -45,10 +45,10 @@ Demo 타깃의 타이틀 화면에는 `DemoBuildImage`라는 별도 이미지 �
 
 ## 세이브 격리
 
-슬롯명은 양쪽에서 동일하지만 파일 루트가 물리적으로 분리된다.
+슬롯명은 양쪽에서 동일하지만 파일 루트가 물리적으로 분리된다. 다음은 에디터/로컬 기준이며, Steam·Stove 패키지는 각 플랫폼 계정의 클라우드 루트 아래에서 같은 `Demo`/`FullGame` 구분을 사용한다. [저장 경로 규칙](../save_persistence.md)을 참조한다.
 
 - Demo: `Saved/SaveGames/Demo/`
-- Main: `Saved/SaveGames/Main/`
+- Main: `Saved/SaveGames/FullGame/`
 
 Demo는 슬롯 1만 허용하고 Main은 슬롯 1~3을 허용한다. Demo 알림 확인 전에는 gameplay save가 존재하지 않는다.
 

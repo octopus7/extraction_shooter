@@ -8,6 +8,8 @@
 #include "Misc/App.h"
 #include "Misc/CoreDelegates.h"
 #include "Misc/MessageDialog.h"
+#include "Misc/Paths.h"
+#include "Platform/TunaSweeperStoveCloudPolicy.h"
 #include "Platform/TunaSweeperStovePolicy.h"
 #include "TunaSweeperStoveCredentials.h"
 
@@ -33,6 +35,36 @@ namespace TunaSweeperStove
         FDelegateHandle ExitHandle;
         FString FailureStage;
         uint32 FailureCode = 0;
+        FString CloudSaveRoot;
+        FString SaveAccountId;
+
+        void CacheSaveLocation()
+        {
+            Base::StovePCUser User;
+            const Result UserResult = Base::Base_GetUser(&User);
+            if (UserResult.IsSuccessful() && User.GetMemberNumber() != 0)
+            {
+                SaveAccountId = LexToString(User.GetMemberNumber());
+            }
+
+            // Allow long configured paths. Length is in wchar_t elements, not bytes.
+            TArray<wchar_t> PathBuffer;
+            PathBuffer.SetNumZeroed(32768);
+            const Result PathResult = Base::Base_GetCloudSavingPath(PathBuffer.GetData(), PathBuffer.Num());
+            if (PathResult.IsSuccessful() && PathBuffer.Last() == 0
+                && IsUsableCloudSaveRoot(PathBuffer.GetData()))
+            {
+                CloudSaveRoot = PathBuffer.GetData();
+                FPaths::NormalizeDirectoryName(CloudSaveRoot);
+                UE_LOG(LogTunaStove, Display, TEXT("STOVE launcher cloud save directory is available."));
+            }
+            else
+            {
+                // Never log the configured path or member number; both can identify the account.
+                UE_LOG(LogTunaStove, Warning, TEXT("STOVE cloud save directory unavailable (code %u); using local saves."),
+                    PathResult.GetResultCode());
+            }
+        }
 
         void Fail(const TCHAR* Stage, uint32 Code)
         {
@@ -144,6 +176,8 @@ namespace TunaSweeperStove
     {
         if (IsRunningCommandlet() || IsRunningDedicatedServer()) return;
         State = EStartupState::Pending;
+        CloudSaveRoot.Reset();
+        SaveAccountId.Reset();
         // Keep parameters alive throughout the asynchronous launcher and initialization flow.
         Base::StovePCInitializeParam Parameters;
         Parameters.SetEnvironment(L"LIVE");
@@ -173,6 +207,7 @@ namespace TunaSweeperStove
             FPlatformMisc::RequestExitWithStatus(false, State == EStartupState::Relaunch ? 0 : 1);
             return;
         }
+        CacheSaveLocation();
         TickHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([](float)
         {
             Base::Base_RunCallback();
@@ -180,6 +215,18 @@ namespace TunaSweeperStove
         }));
         // Base shutdown records play time; run before engine teardown, with module shutdown as fallback.
         ExitHandle = FCoreDelegates::OnPreExit.AddStatic(&Shutdown);
+    }
+
+    bool TryGetCloudSaveRoot(FString& OutDirectory)
+    {
+        OutDirectory = State == EStartupState::Ready ? CloudSaveRoot : FString();
+        return !OutDirectory.IsEmpty();
+    }
+
+    bool TryGetSaveAccountId(FString& OutAccountId)
+    {
+        OutAccountId = State == EStartupState::Ready ? SaveAccountId : FString();
+        return !OutAccountId.IsEmpty();
     }
 }
 
@@ -189,6 +236,8 @@ namespace TunaSweeperStove
 {
     void Startup() {}
     void Shutdown() {}
+    bool TryGetCloudSaveRoot(FString& OutDirectory) { OutDirectory.Reset(); return false; }
+    bool TryGetSaveAccountId(FString& OutAccountId) { OutAccountId.Reset(); return false; }
 }
 
 #endif

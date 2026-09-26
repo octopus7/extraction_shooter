@@ -3,6 +3,17 @@
 This file tracks gameplay/runtime state that must survive gameplay-slot or account-global save/load.
 Update it whenever a new state field is expected to persist across save slots, level travel saves, death saves, or intro-menu reloads.
 
+## Cloud Save Roots
+
+All gameplay slots, selected-slot settings, achievements, previous generations, backups, and cleanup logs resolve their root through `TunaSweeperBuildFlavor::GetSaveGameDirectory()`.
+
+- Editor/local saves: `Saved/SaveGames/<Demo|FullGame>/`.
+- Packaged Steam channel: `Saved/SaveGames/Steam/<64BitSteamID>/<Demo|FullGame>/`, fixed for the process lifetime. Steam Auto-Cloud synchronizes committed `.sav` and `.sav.previous` files, including `Backups/`, when configured in Steamworks. An unavailable identity selects `Steam/LocalOnly/<Demo|FullGame>/`, outside the registered account paths.
+- Packaged Stove channel: `<Base_GetCloudSavingPath result>/<Demo|FullGame>/`. The SDK root/account are cached during authenticated module startup, before GameInstance subsystems load saves. Studio must register an account-specific root; see [Stove cloud setup](stove_cloud_saves.md). An unavailable/invalid SDK root uses `Saved/SaveGames/Stove/LocalOnly/<MemberNumber|UnknownAccount>/<Demo|FullGame>/`. The selected root stays fixed until restart.
+- Steam paths are never selected by Stove/NoStore or the editor. Existing shared local saves are preserved and are not automatically claimed by an arbitrary store account.
+
+Machine-specific settings, candidate files, corrupt archives, and cleanup audit logs are not Steam Cloud targets. Steam Cloud being disabled or the client being offline does not disable local saves. See [Steam cloud setup and verification](Steam/cloud_saves.md) for the required per-app portal configuration; local code tests do not prove live synchronization.
+
 ## Current Save Container
 
 Interface language persists independently of gameplay slots in `GGameUserSettingsIni`, under `TunaSweeper.InterfaceSettings/Language`. Startup restores a valid saved language. If the value is missing or invalid, Steam selects and saves English (`en`); other distribution channels detect the OS language/locale, falling back to English when unsupported. Packaged builds read `TunaSweeper.Distribution/DistributionChannel` from `GGameIni`; editor runs use the selected build target, matching title-menu channel selection. Manual language selection continues to use the existing global setting. This setting remains shared across stores, so a valid language saved by another store also takes precedence over the first-launch default.
@@ -15,7 +26,7 @@ Interface language persists independently of gameplay slots in `GGameUserSetting
 
 ## Account-Global Achievement Container
 
-Achievements use `UTunaSweeperAchievementSaveGame` version `1` instead of `UTunaSweeperSaveGame`. The file is stored as `Saved/SaveGames/<Demo|Main>/Achievements_<DistributionNamespace>.sav`, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
+Achievements use `UTunaSweeperAchievementSaveGame` version `1` instead of `UTunaSweeperSaveGame`. The file is stored as `Achievements_<DistributionNamespace>.sav` in the active save root described above, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
 
 The achievement container persists independently of gameplay slots:
 
@@ -76,15 +87,17 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 - `bDifficultySelected`: whether the slot completed its required start gate. For Main this is difficulty confirmation. For Demo this is the notice confirmation written together with the first slot save; no Demo save is created before confirmation.
 - `LastSavedAtTicks`
 
-Demo and Main use the same logical slot-name format but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/Main/`. Demo exposes and accepts only `TunaSweeperSave_Slot01`; Main exposes slots `TunaSweeperSave_Slot01` through `03`. Each root independently owns last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
+Demo and Main use the same logical slot-name format but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/FullGame/` for editor/local saves, or the per-store cloud roots described above. Demo exposes and accepts only `TunaSweeperSave_Slot01`; Main exposes slots `TunaSweeperSave_Slot01` through `03`. Each root independently owns last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
+
+The full-game directory name is `FullGame`; serialized `BuildFlavor=Main` and quest dataset identifiers remain unchanged. If `FullGame/` does not exist, an existing `Main/` tree is renamed in place, preserving slots, settings, achievements, backups, and recovery artifacts. An existing destination is never overwritten or merged. A failed rename keeps the legacy directory active for the entire process so existing progress remains accessible; migration is retried only after restart. Successful and failed local resolutions are cached independently per saved-root/flavor. The moved source cannot later resurrect deleted slots.
 
 ### Obsolete Save Deletion
 
-Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under the active `Demo` or `Main` root, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings and unreadable files inside the active root are not auto-deleted.
+Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under the active `Demo` or `FullGame` root, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings and unreadable files inside the active root are not auto-deleted.
 
 Every successful obsolete-version deletion appends a local-time timestamp, detected version, and path relative to the active root to that root's `AutoDeletedSaveLog.txt`. The game prepares the audit log before deleting; if the log cannot be prepared, it leaves the versioned save file in place and reports an error through the Unreal log.
 
-Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. The `Demo/` and `Main/` subdirectories are never included in this flat-file cleanup.
+Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. The `Demo/`, `FullGame/`, and legacy `Main/` subdirectories are never included in this flat-file cleanup.
 
 ### Scenario Progress Flags
 

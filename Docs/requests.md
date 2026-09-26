@@ -9920,3 +9920,13 @@
 - 보존: 원래 130개 본 계층·레퍼런스 행렬과 얼굴 표정 6개, 몸체 지오메트리를 유지. 운동복용 몸체 사본은 되돌릴 수 있는 Mask로 의상 아래 표면을 숨김. 원래 모델, 메이드복·교복·정비사 작업복과 UE 캐릭터 파일은 변경하지 않음.
 - 검증: 생성기 제거 후 재검사에서 Blender 0오류·1경고, 타이틀 A/B/C 각각 13프레임 평가. 경고는 왼팔꿈치 안쪽의 깊은 접힘 압축으로, 별도 시각 검토에서 찢어짐·줄무늬 단절 없음 확인 및 README 기록. 양말·시보리 관통과 어깨 배색천 겹침 수정 후 재검토 통과. FBX 재읽기에서 본 계층·형태·재질·정규화 웨이트 일치, 최대 좌표 오차 0.000001m 미만.
 - 정리·범위: 일회성 모델 생성기, 내보내기·검사 스크립트와 중간 운동화 파일·초안 렌더 제거 후 재검증. 레퍼런스·최종 에셋·검증 기록·이 로그를 한 작업 커밋에 포함. UE 임포트·게임 적용·교체 UI·천 물리는 미구현.
+
+## 2026-09-26 19:51:55 (소요시간: 00:22:43)
+
+- 요청: 정식판 저장 경로의 Main을 FullGame으로 변경하고 Steam 패키지 채널에서 클라우드 저장을 지원. FullGame 작업 완료 후 병렬 에이전트로 Stove 채널 지원도 구현.
+- 구현: 로컬 Main 폴더를 기존 FullGame이 없을 때만 전체 이전하여 슬롯·설정·업적·복구·백업 파일 보존. 저장 데이터의 BuildFlavor=Main은 유지. 이전 실패 시 기존 Main을 사용하며 성공·실패 경로 모두 저장 루트/빌드별로 프로세스 동안 고정하여 저장 도중 경로 전환 방지.
+- Steam: Steam 패키지만 OnlineSubsystem의 Steam ID를 사용하여 SaveGames/Steam/<64BitSteamID>/<Demo|FullGame> 경로 선택. 계정 조회 불가 시 Steam/LocalOnly 경로에서 로컬 저장을 유지. 에디터 및 다른 채널은 Steam 계정 경로를 사용하지 않음. Steam Auto-Cloud의 .sav/.sav.previous 재귀 규칙과 App ID별 등록값을 Docs/Steam/cloud_saves.md에 문서화.
+- Stove: FullGame 경로 빌드·테스트 완료 후 에이전트 작업 시작. SDK 초기화·소유권 확인 직후 Base_GetCloudSavingPath 및 회원 번호를 캐시하고 반환 루트의 Demo/FullGame을 사용. 경로 조회 실패 시 Stove/LocalOnly/<계정|UnknownAccount>로 격리. 비-Stove SDK 호출 차단, 경로 검증 및 Studio 설정을 Docs/stove_cloud_saves.md에 추가.
+- 호환 범위: 기존 공용 세이브는 보존하되 임의의 스토어 계정에 자동 귀속·복사하지 않음. Steamworks/Studio 경로 등록과 서비스 활성화는 별도 필요하며 포털 설정 변경, 실제 업로드·다운로드, 두 PC 간 동기화는 수행하지 않음.
+- 검증: FullGame·Steam 경로 및 실패 후 경로 전환 회귀 테스트의 미구현/수정 전 실패 확인 후 최종 자동화 11개 통과. Stove 네이티브 소유권 13개·경로 19개 통과. UE 5.7 Win64 Development의 TunaSweeperEditor, TunaSweeperDemo(Steam), TunaSweeperStoveDemo 빌드 성공. 검토 지적의 경로 고정 문제 수정·재검토 완료.
+- 빌드 보완: 기존 SpeechBubble.TextureAssets 테스트가 게임 타깃에서 에디터 전용 Texture.Source를 참조하던 오류를 WITH_EDITORONLY_DATA 경계로 수정. 에디터의 해당 자산 테스트도 통과. 스토어 패키징·배포는 수행하지 않음.
