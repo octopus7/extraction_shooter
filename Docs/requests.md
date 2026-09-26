@@ -9899,3 +9899,10 @@
 - 검증: 기존 일반 상호작용 이벤트만으로 제출 목표 완료되는 동작을 실패 테스트로 재현. 검토에서 발견한 다른 발급자의 제출 대상 상호작용 차단도 실패 재현 후 수정. 최종 UE 5.7 Editor 빌드 성공. 신규 TunaSweeper.Quest.ItemSubmission 통과: 잘못된 대상/미수락/부족 수량/중복 아이템 요구 합산/정확한 소모/알림 시 상태 일관성/재진입/보상 재시도/기존 세이브 메모리 직렬화·복원/잘못된 조건 거부 검증. 별도 코드 검토 2건 반영 후 재검토 완료.
 - 전체 검사: 150건 모두 실행, 145건 통과·5건 실패로 종료 코드 1. 실패는 이전에도 확인된 TunaSweeper.Gaze.TestRobotRigAndPlacement, TunaSweeper.Interaction.CrowbarWallRack.Defaults, TunaSweeper.UI.Tutorial.AuthoredAsset, TunaSweeper.Vehicle.DamageAndDestruction, TunaSweeper.Vehicle.ProjectileContact. 이번 변경의 회귀 및 DemoEnding 검사는 통과.
 - 로그: TunaSweeper/Saved/Logs/QuestSubmissionRed.log, QuestSubmissionGateRed.log, QuestSubmissionSuite.log. 보고서: TunaSweeper/Saved/Automation/QuestSubmissionSuite.
+
+## 2026-09-26 19:57:43 (소요시간: 00:05:36)
+
+- 요청: 무기별로 공유 가능한 모딩 위치 데이터에 따라 부착 부위 빈 슬롯 UI를 동적으로 구성하는 방식을 설계하고 설명.
+- 설계: WeaponModdingLayouts.json의 공유 부위명·배치 템플릿과 ItemTable의 modding_layout_id를 연결. attachment_slot_tags를 지원 부위 기준으로 유지하며 공통 CanvasPanel/WBP 슬롯을 동적으로 구성. 위치·표시 순서와 무기 UID/부위 태그 식별자를 분리하고 기존 저장 맵을 유지.
+- 보완: 같은 배치를 참조하는 무기의 부분 슬롯 사용, 현지화, DPI/크기, 실제 위젯 드롭 영역, 선택 변경 방어, 데이터 검증과 기존 부품 참조 보존을 명시. 별도 수정 커밋 893e40d1의 main 미통합을 확인하여 구현 선행 조건으로 기록.
+- 결과: Docs/superpowers/specs/2026-09-26-weapon-modding-layout-design.md에 사용자 검토용 설계안 작성. 읽기 전용 보조 에이전트의 저장·호환 검토 반영. JSON 예제 2개 파싱과 슬롯 범위 검사, 문서 diff 검사 완료. 게임 코드·데이터·애셋 수정 및 빌드는 수행하지 않음.
