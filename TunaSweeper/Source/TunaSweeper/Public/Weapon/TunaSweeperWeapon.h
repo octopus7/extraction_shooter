@@ -18,6 +18,7 @@ class UStaticMeshComponent;
 class UStaticMesh;
 class UTunaSweeperLaserSightComponent;
 class UWorld;
+struct FTunaSweeperWeaponVisualDefinition;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperWeapon : public AActor
@@ -26,6 +27,7 @@ class TUNASWEEPER_API ATunaSweeperWeapon : public AActor
 
 public:
 	ATunaSweeperWeapon();
+	bool ApplyVisualDefinition(const FTunaSweeperWeaponVisualDefinition& Definition);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	bool Fire(

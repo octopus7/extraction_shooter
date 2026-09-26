@@ -557,7 +557,7 @@ private:
 	void UpdateMeleeSwing(float DeltaSeconds);
 	void CancelMeleeSwing();
 	void ResetEquippedWeaponRelativeTransform();
-	void ApplyEquippedMeleeWeaponVisual();
+	void ApplyEquippedWeaponVisual();
 	void ApplyMeleeAttackJudgement();
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
 	void SpawnMeleeImpactBurst(const FVector& HitLocation, const FVector& BurstDirection);

@@ -128,7 +128,7 @@ protected:
 	FName InteractionDisplayNameStringKey;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
-	int32 RequiredItemId = 6002;
+	int32 RequiredItemId = INDEX_NONE;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
 	int32 RequiredQuantity = 2;

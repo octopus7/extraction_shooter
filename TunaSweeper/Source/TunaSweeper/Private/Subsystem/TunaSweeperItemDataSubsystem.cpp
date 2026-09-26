@@ -162,6 +162,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	ResetLoadedItemData();
 
 	const bool bLoadedItemTable = LoadItemTableJson();
+	const bool bLoadedWeaponConfiguration = bLoadedItemTable && LoadWeaponConfigurationJson();
 	LoadWeaponActorClassMappingsJson();
 	const bool bLoadedItemStackDefinitions = LoadItemStackDefinitionsJson();
 	const bool bLoadedNameStrings = LoadItemNameStringsCsv();
@@ -172,6 +173,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	const bool bLoadedWorkbenchDismantleRecipes = LoadWorkbenchDismantleRecipesJson();
 	bItemDataLoaded =
 		bLoadedItemTable &&
+		bLoadedWeaponConfiguration &&
 		bLoadedItemStackDefinitions &&
 		bLoadedNameStrings &&
 		bLoadedLootContainerTable &&
@@ -1771,6 +1773,9 @@ bool UTunaSweeperItemDataSubsystem::LoadWorkbenchDismantleRecipesJson()
 
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
+	WeaponVisualsByItemId.Reset();
+	EnemyDefaultLoadout = {};
+	CombatLabEnemyLoadout = {};
 	ItemDefinitionsById.Reset();
 	WeaponActorClassPathsByItemId.Reset();
 	MaxStackQuantitiesByCategoryKey.Reset();

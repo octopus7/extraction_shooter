@@ -9850,3 +9850,14 @@
 - 검증: 수정 전 다른 ID 레이저와 SMG 레이저 실패를 재현. 수정 후 다른 ID/비레이저/비호환/근접 선택, 커스텀 시작 장비와 가방 용량, 잘못된 JSON/중복 슬롯/잘못된 ID/탄약/수량의 롤백, 실험실 탄약 종류를 검증. UE 5.7 TunaSweeperEditor Win64 Development 최종 빌드 성공. CSV 도구 빌드·내보내기 성공, 기존 CSV 값 유지와 신규 속성 확인. 별도 코드 검토의 실험실 탄약 지적을 반영하고 재검토 완료.
 - 전체 검사: 최종 렌더링 활성화 실행은 146건 중 141건 통과, 5건 실패로 종료 코드 1. 이번 회귀 검사와 BossEncounter.TransientLoadoutRestoresPlayerState, DemoEnding.AssetsAndInput은 통과. 실패는 TunaSweeper.Gaze.TestRobotRigAndPlacement(배치 로봇 0개), TunaSweeper.Interaction.CrowbarWallRack.Defaults(메시 비어 있음 기대 불일치), TunaSweeper.UI.Tutorial.AuthoredAsset(라운지 위치 불일치), TunaSweeper.Vehicle.DamageAndDestruction(연기 컴포넌트 2개 기대/실제 3개), TunaSweeper.Vehicle.ProjectileContact(탄환 피해·주행 안정성 기대 불일치). 해당 실패 대상의 코드/에셋은 이번 작업에서 수정하지 않음.
 - 검사 로그: TunaSweeper/Saved/Logs/EquipmentDataRed.log, EquipmentDataGreen.log, EquipmentDataFinalSuite.log. 첫 NullRHI 전체 실행은 포즈 렌더 테스트에서 충돌해 렌더링 활성화로 재검증했으며, 추가 오류 로그로 발생한 엔딩 테스트 실패는 데이터 시스템 미초기화와 JSON 오류를 구분하도록 수정하여 해소.
+
+
+## 2026-09-26 17:56:44 (소요시간: 00:19:32)
+
+- 요청: 무기 외형, 적 기본 무장, 실험실 적 지급 정보를 각각 별도 데이터로 분리하고 월드 진행 재료 미지정 시 오류 처리.
+- 완료: WeaponVisualDefinitions.json에 메시·재질·위치·회전·크기 보정을 정의하고 플레이어 총기/근접무기와 적 총기에 공통 적용. EnemyDefaultLoadout.json으로 기본 무기·종류별 탄약·예비 탄창 수를, CombatLabEnemyLoadout.json으로 실험실 적 무기·탄약·예비 탄수를 분리. 기존 ID 분기와 숫자 대체값 제거. 데이터 누락/잘못된 ID/호환/수치/중복을 검증하며 기본 지급값 유지.
+- 월드 진행: RequiredItemId 기본값과 미지정 목재 대체를 제거. 미지정 시 오류 로그 및 재료 투입·수리 완료·상호작용 차단. 기존 다리 Blueprint에는 목재 6002를 명시 저장하여 동작 유지. 일회성 UE Python 이전 스크립트는 성공 검증 후 삭제했고 재실행용 진입점이나 의존성은 추가하지 않음.
+- 문서: Docs/weapon_configuration.md에 데이터 필드, 적용 대상, 오류 정책, 재로딩 및 쿠킹 주의점 기록. 저장 형식 변경 없음.
+- 검증: 수정 전 미지정 재료의 6002 대체 및 완료 허용 실패를 재현. 최종 UE 5.7 Editor 빌드 성공. 전체 자동화 149건 중 143건 통과, 6건 실패(종료 코드 1). 신규 AuthoredFiles, MissingProgressMaterial, ResolutionAndValidation 모두 통과. 실제 무기 액터의 메시·변환 적용, 새 ID 조회, 기본/명시적/실험실 지급, 잘못된 데이터 거부와 이전 설정 보존, 로드한 다리 Blueprint의 6002 값을 확인. 별도 코드 검토 지적 2건을 반영하고 재검토 완료.
+- 전체 검사 실패: TunaSweeper.Gaze.TestRobotRigAndPlacement, TunaSweeper.Interaction.CrowbarWallRack.Defaults, TunaSweeper.UI.Tutorial.AuthoredAsset, TunaSweeper.Vehicle.DamageAndDestruction, TunaSweeper.Vehicle.ProjectileContact는 이전 실행에서도 실패. TunaSweeper.Inventory.EquipmentData.LaserAndStartingLoadout은 동시 진행 중인 다른 작업이 추가한 Carbon frame backpack accepts the 120th slot 검사에서 실패. 이 작업은 해당 가방 데이터/용량 코드/검사를 수정하지 않음.
+- 로그: TunaSweeper/Saved/Logs/WeaponConfigurationRed.log, WeaponConfigurationGreen.log, BridgeMaterialMigration.log, WeaponConfigurationSuite.log. 최종 전체 검사는 다리 데이터 저장 및 일회성 이전 스크립트 제거 후 실행.

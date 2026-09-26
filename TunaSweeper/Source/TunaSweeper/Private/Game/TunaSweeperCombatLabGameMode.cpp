@@ -17,6 +17,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
@@ -117,6 +118,13 @@ void ATunaSweeperCombatLabGameMode::StartRound()
 	auto* GI = GetGameInstance<UTunaSweeperGameInstance>();
 	auto* PC = UGameplayStatics::GetPlayerController(this, 0);
 	if (!GI || !PC || !EnemyClass) { NextRoundAt = TNumericLimits<float>::Max(); ResultKey = TEXT("ui.combat_lab.error"); return; }
+	FTunaSweeperEnemyWeaponLoadout EnemyLoadout;
+	auto* Items = GI->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (!Items || !Items->TryGetCombatLabEnemyLoadout(EnemyLoadout))
+	{
+		UE_LOG(LogCombatLab, Error, TEXT("Cannot load CombatLabEnemyLoadout.json"));
+		NextRoundAt = TNumericLimits<float>::Max(); ResultKey = TEXT("ui.combat_lab.error"); return;
+	}
 	GI->ResetCombatTestLoadout();
 	PC->ResetIgnoreMoveInput(); PC->ResetIgnoreLookInput();
 	RestartPlayer(PC);
@@ -144,7 +152,8 @@ void ATunaSweeperCombatLabGameMode::StartRound()
 		if (auto* Spawns = GI->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>())
 			if (Spawns->TryGetEnemyCombatProfile(TEXT("enemy.rifle_anchor"), Profile))
 				Enemy->ConfigureCombatProfile(Profile, 10, FName(*FString::Printf(TEXT("lab.%d"), Index)), 0);
-		Enemy->ConfigureSpawnData({}, TEXT("enemy.combat_lab"), INDEX_NONE, INDEX_NONE, 60.f, 0, 0, 0, 1002, 2002, 120);
+		Enemy->ConfigureSpawnData({}, TEXT("enemy.combat_lab"), INDEX_NONE, INDEX_NONE, 60.f, 0, 0, 0,
+			EnemyLoadout.WeaponItemId, EnemyLoadout.AmmoItemId, EnemyLoadout.ReserveAmmoCount);
 		Enemy->FinishSpawning(Transform);
 		EnemyHealth.Add(Enemy, Enemy->GetHealth());
 	}

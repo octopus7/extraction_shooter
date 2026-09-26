@@ -109,9 +109,9 @@ void ATunaSweeperTopDownCharacter::ResetEquippedWeaponRelativeTransform()
 	}
 }
 
-void ATunaSweeperTopDownCharacter::ApplyEquippedMeleeWeaponVisual()
+void ATunaSweeperTopDownCharacter::ApplyEquippedWeaponVisual()
 {
-	if (!EquippedWeapon || !bMeleeWeaponSelected)
+	if (!EquippedWeapon)
 	{
 		return;
 	}
@@ -122,41 +122,19 @@ void ATunaSweeperTopDownCharacter::ApplyEquippedMeleeWeaponVisual()
 		return;
 	}
 
-	FTunaSweeperItemInstance MeleeInstance;
-	FTunaSweeperItemDefinition MeleeDefinition;
-	if (!TunaGameInstance->TryGetEquipmentMeleeSlotItem(MeleeInstance, MeleeDefinition))
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!(bMeleeWeaponSelected
+		? TunaGameInstance->TryGetEquipmentMeleeSlotItem(WeaponInstance, WeaponDefinition)
+		: TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition)))
 	{
 		return;
 	}
 
-	if (MeleeDefinition.Id == TunaSweeperEquippedWeaponVisual::CrowbarItemId)
-	{
-		UStaticMesh* CrowbarMesh = Cast<UStaticMesh>(TunaSweeperEquippedWeaponVisual::CrowbarMeshPath.TryLoad());
-		UMaterialInterface* Material = Cast<UMaterialInterface>(TunaSweeperEquippedWeaponVisual::CrowbarMaterialPath.TryLoad());
-		if (!CrowbarMesh) return;
-		// Reuse the existing tool mesh, orienting its longest axis along the weapon.
-		const FBox Bounds = CrowbarMesh->GetBoundingBox();
-		const FVector Size = Bounds.GetSize();
-		FRotator Rotation = FRotator::ZeroRotator;
-		if (Size.Z > Size.X && Size.Z > Size.Y) Rotation = FRotator(90.0f, 0.0f, 0.0f);
-		else if (Size.Y > Size.X) Rotation = FRotator(0.0f, -90.0f, 0.0f);
-		const float Scale = 70.0f / FMath::Max(1.0f, Size.GetMax());
-		const FVector Location = FVector(26.0f, 0.0f, 0.0f) - Rotation.RotateVector(Bounds.GetCenter() * Scale);
-		EquippedWeapon->SetWeaponMeshOverride(CrowbarMesh, Material, Location, Rotation, FVector(Scale));
-		return;
-	}
-	if (MeleeDefinition.Id != TunaSweeperEquippedWeaponVisual::WoodenClubItemId &&
-		MeleeDefinition.Id != TunaSweeperEquippedWeaponVisual::SpikedClubItemId) return;
-
-	UStaticMesh* BaseballBatMesh = Cast<UStaticMesh>(TunaSweeperEquippedWeaponVisual::BaseballBatMeshPath.TryLoad());
-	UMaterialInterface* BaseballBatMaterial =
-		Cast<UMaterialInterface>(TunaSweeperEquippedWeaponVisual::BaseballBatMaterialPath.TryLoad());
-	EquippedWeapon->SetWeaponMeshOverride(
-		BaseballBatMesh,
-		BaseballBatMaterial,
-		FVector(26.0f, 0.0f, 0.0f),
-		FRotator::ZeroRotator,
-		FVector(0.54f, 1.0f, 1.0f));
+	UTunaSweeperItemDataSubsystem* Items = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperWeaponVisualDefinition Visual;
+	if (!Items || !Items->TryGetWeaponVisualDefinition(WeaponDefinition.Id, Visual)) return;
+	EquippedWeapon->ApplyVisualDefinition(Visual);
 }
 
 void ATunaSweeperTopDownCharacter::ApplyMeleeAttackJudgement()

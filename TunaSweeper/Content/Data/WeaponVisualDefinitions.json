@@ -1,0 +1,23 @@
+[
+  {
+    "item_id": 1004,
+    "mesh": "/Game/Weapons/SM_BaseballBat.SM_BaseballBat",
+    "material": "/Game/Weapons/M_BaseballBat_Wood.M_BaseballBat_Wood",
+    "location": [26, 0, 0], "rotation": [0, 0, 0], "scale": [0.54, 1, 1],
+    "align_longest_axis_to_x": false, "center_on_bounds": false, "fit_length_cm": 0
+  },
+  {
+    "item_id": 1005,
+    "mesh": "/Game/Weapons/SM_BaseballBat.SM_BaseballBat",
+    "material": "/Game/Weapons/M_BaseballBat_Wood.M_BaseballBat_Wood",
+    "location": [26, 0, 0], "rotation": [0, 0, 0], "scale": [0.54, 1, 1],
+    "align_longest_axis_to_x": false, "center_on_bounds": false, "fit_length_cm": 0
+  },
+  {
+    "item_id": 6003,
+    "mesh": "/Game/Environment/Bunker/Agit/Crowbar/SM_Crowbar.SM_Crowbar",
+    "material": "/Game/Environment/Bunker/Agit/Crowbar/M_Crowbar.M_Crowbar",
+    "location": [26, 0, 0], "rotation": [0, 0, 0], "scale": [1, 1, 1],
+    "align_longest_axis_to_x": true, "center_on_bounds": true, "fit_length_cm": 70
+  }
+]

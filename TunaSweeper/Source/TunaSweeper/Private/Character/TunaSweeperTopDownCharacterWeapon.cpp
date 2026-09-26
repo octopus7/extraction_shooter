@@ -26,7 +26,6 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 		if (bMeleeWeaponSelected)
 		{
 			EquippedWeapon->ConfigureMeleeVisual();
-			ApplyEquippedMeleeWeaponVisual();
 		}
 		else
 		{
@@ -35,6 +34,7 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 				EquippedWeapon->ConfigureGunVisual();
 			}
 		}
+		ApplyEquippedWeaponVisual();
 		EquippedWeapon->SetActorHiddenInGame(bHousingModeVisualHidden);
 		ApplyEquippedWeaponAttachmentVisuals();
 	}
