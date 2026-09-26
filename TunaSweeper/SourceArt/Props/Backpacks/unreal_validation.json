@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "icons": [
+    "/Game/UI/Icons/T_UIIcon_Backpack_Tier1.T_UIIcon_Backpack_Tier1",
+    "/Game/UI/Icons/T_UIIcon_Backpack_Tier2.T_UIIcon_Backpack_Tier2",
+    "/Game/UI/Icons/T_UIIcon_Backpack_Tier3.T_UIIcon_Backpack_Tier3",
+    "/Game/UI/Icons/T_UIIcon_Backpack_Tier4.T_UIIcon_Backpack_Tier4",
+    "/Game/UI/Icons/T_UIIcon_Backpack_Tier5.T_UIIcon_Backpack_Tier5"
+  ],
+  "models": [
+    {
+      "mesh": "/Game/Props/Backpacks/Meshes/SM_Backpack_Egg.SM_Backpack_Egg",
+      "triangles": 240,
+      "uv_channels": 2,
+      "material": "/Game/Props/Backpacks/Materials/M_Backpack_Egg.M_Backpack_Egg",
+      "texture": "/Game/Props/Backpacks/Textures/T_Backpack_Egg_BaseColor.T_Backpack_Egg_BaseColor",
+      "dimensions_cm": [
+        30.000001907348633,
+        30.90077781677246,
+        44.20000076293945
+      ]
+    },
+    {
+      "mesh": "/Game/Props/Backpacks/Meshes/SM_Backpack_Chicken.SM_Backpack_Chicken",
+      "triangles": 390,
+      "uv_channels": 2,
+      "material": "/Game/Props/Backpacks/Materials/M_Backpack_Chicken.M_Backpack_Chicken",
+      "texture": "/Game/Props/Backpacks/Textures/T_Backpack_Chicken_BaseColor.T_Backpack_Chicken_BaseColor",
+      "dimensions_cm": [
+        33.888973236083984,
+        36.30000019073486,
+        47.5
+      ]
+    },
+    {
+      "mesh": "/Game/Props/Backpacks/Meshes/SM_Backpack_Dinosaur.SM_Backpack_Dinosaur",
+      "triangles": 364,
+      "uv_channels": 2,
+      "material": "/Game/Props/Backpacks/Materials/M_Backpack_Dinosaur.M_Backpack_Dinosaur",
+      "texture": "/Game/Props/Backpacks/Textures/T_Backpack_Dinosaur_BaseColor.T_Backpack_Dinosaur_BaseColor",
+      "dimensions_cm": [
+        31.0,
+        33.47128200531006,
+        53.70000076293945
+      ]
+    },
+    {
+      "mesh": "/Game/Props/Backpacks/Meshes/SM_Backpack_Military.SM_Backpack_Military",
+      "triangles": 328,
+      "uv_channels": 2,
+      "material": "/Game/Props/Backpacks/Materials/M_Backpack_Military.M_Backpack_Military",
+      "texture": "/Game/Props/Backpacks/Textures/T_Backpack_Military_BaseColor.T_Backpack_Military_BaseColor",
+      "dimensions_cm": [
+        30.000001907348633,
+        35.10000038146973,
+        44.20000076293945
+      ]
+    },
+    {
+      "mesh": "/Game/Props/Backpacks/Meshes/SM_Backpack_CarbonFrame.SM_Backpack_CarbonFrame",
+      "triangles": 336,
+      "uv_channels": 2,
+      "material": "/Game/Props/Backpacks/Materials/M_Backpack_CarbonFrame.M_Backpack_CarbonFrame",
+      "texture": "/Game/Props/Backpacks/Textures/T_Backpack_CarbonFrame_BaseColor.T_Backpack_CarbonFrame_BaseColor",
+      "dimensions_cm": [
+        35.19937324523926,
+        31.20000171661377,
+        59.01999521255493
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -138,6 +139,33 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Default file can initialize after failed attempts"), Game->InitializeDemoStartingLoadout());
 	TestEqual(TEXT("Default loaded rounds"), Game->GetWeaponLoadedAmmoCount(1), 30);
 	TestEqual(TEXT("Default reserve rounds"), Game->GetWeaponInventoryAmmoCount(1), 30);
+
+	// The fifth backpack must override legacy 100-slot defaults and retain the
+	// final slot through the real save serializer, without writing player files.
+	Game->ItemInstancesByUid.Reset();
+	Game->ResetPlayerSlotArrays();
+	Game->GameplaySettings.MaxInventorySlots = 100;
+	const FString CarbonLoadout = TEXT(R"({"selected_weapon_slot":1,
+		"equipment":[{"slot_index":0,"item_id":1002},{"slot_index":7,"item_id":5011}],
+		"inventory":[{"slot_index":119,"item_id":2001,"quantity":11}]})");
+	if (!TestTrue(TEXT("Carbon frame backpack accepts the 120th slot"), Game->ApplyStartingLoadoutJson(CarbonLoadout))) return false;
+	TestEqual(TEXT("Carbon frame capacity is 120 despite legacy settings"), Game->PlayerInventorySlots.Num(), 120);
+	const FGuid LastSlotUid = Game->PlayerInventorySlots[119].ItemUid;
+	TStrongObjectPtr<UTunaSweeperSaveGame> Snapshot(NewObject<UTunaSweeperSaveGame>());
+	Snapshot->InventorySlots = Game->PlayerInventorySlots;
+	Snapshot->EquipmentSlots = Game->EquipmentSlots;
+	Game->ItemInstancesByUid.GenerateValueArray(Snapshot->ItemInstances);
+	TArray<uint8> SaveBytes;
+	if (!TestTrue(TEXT("120-slot inventory serializes"), UGameplayStatics::SaveGameToMemory(Snapshot.Get(), SaveBytes))) return false;
+	TStrongObjectPtr<UTunaSweeperSaveGame> Restored(Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(SaveBytes)));
+	if (!TestNotNull(TEXT("120-slot inventory deserializes"), Restored.Get())) return false;
+	TestEqual(TEXT("Save retains all 120 slots"), Restored->InventorySlots.Num(), 120);
+	TestEqual(TEXT("Save retains the last-slot item UID"), Restored->InventorySlots[119].ItemUid, LastSlotUid);
+	const FTunaSweeperItemInstance* SavedItem = Restored->ItemInstances.FindByPredicate(
+		[&LastSlotUid](const FTunaSweeperItemInstance& Item) { return Item.Uid == LastSlotUid; });
+	if (!TestNotNull(TEXT("Last-slot item exists in serialized instances"), SavedItem)) return false;
+	TestEqual(TEXT("Last-slot quantity survives serialization"), SavedItem->Quantity, 11);
+	TestEqual(TEXT("Loaded backpack still resolves 120 slots"), Game->CalculateInventoryCapacityForEquipmentSlots(Restored->EquipmentSlots), 120);
 	return true;
 }
 

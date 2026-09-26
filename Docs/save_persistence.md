@@ -158,6 +158,8 @@ Weapon attachment slots are keyed by attachment slot tags. Rifle instances may p
 
 Slot arrays store item UIDs. Any item UID referenced by these slots, including nested attachment UIDs, must also exist in `ItemInstances`. `FTunaSweeperInventorySlot::bSortLocked` persists the player's inventory sort-lock state; the inventory compact/sort button leaves locked inventory slots in place and only trims unlocked inventory slots around them.
 
+Backpack tiers 1–5 provide 50/60/80/100/120 inventory slots. Tier 5 is item `5011`; existing backpack IDs `5002`–`5005` remain stable after the visual/name replacement. The required maximum and default maximum are 120, including when a legacy Blueprint still specifies a 100-slot maximum. Both equipped-capacity calculation and the load-time occupied-slot preservation limit use this required maximum, so slots 100–119 must not be truncated on load. The existing slot arrays and item-instance payload handle this extension without a save-version change. The equipment regression test serializes and deserializes the item UID and quantity in slot 119 entirely in memory.
+
 `UsableQuickSlots` stores the 3-8 quick-slot layout shown in inventory mode and reflected in the gameplay quick-slot bar. Slots 1, 2, and melee are equipment slots and are not duplicated here. Only usable items can occupy these slots; currently that means item definitions tagged `item.category.consumable` or `item.category.throwable`.
 
 Unlike memo unlocks and map markers, usable quick slots are item-possession state. Generic saves preserve the previously saved quick-slot payload without rewriting it, successful RaidMap-to-BunkerMap extraction saves write the current runtime quick slots, and death saves clear all usable quick slots.

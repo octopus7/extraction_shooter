@@ -32,7 +32,7 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 	int32 BareInventorySlots = 40;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
-	int32 MaxInventorySlots = 100;
+	int32 MaxInventorySlots = 120;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	int32 EquipmentSlotCount = 8;

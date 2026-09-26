@@ -530,6 +530,19 @@
     "carry_strength_bonus": 60
   },
   {
+    "id": 5011,
+    "name_string_key": "item.backpack_tier5",
+    "description_string_key": "item.backpack_tier5.desc",
+    "shop_sell_price": 600,
+    "experience_value": 150,
+    "item_grade": "legendary",
+    "icon_file_name": "T_UIIcon_Backpack_Tier5.uasset",
+    "category_tag": "item.category.bag",
+    "equipment_slot_tag": "equipment.slot.backpack",
+    "inventory_slot_capacity": 120,
+    "carry_strength_bonus": 80
+  },
+  {
     "id": 5006,
     "name_string_key": "item.ballistic_helmet",
     "description_string_key": "item.ballistic_helmet.desc",

@@ -302,7 +302,7 @@ namespace TunaSweeperMapMarkers
 namespace TunaSweeperInventory
 {
 	constexpr int32 RequiredBareInventorySlots = 40;
-	constexpr int32 RequiredMaxInventorySlots = 100;
+	constexpr int32 RequiredMaxInventorySlots = 120;
 	constexpr int32 RequiredEquipmentSlots = 8;
 	constexpr int32 BackpackSlotIndex = 7;
 	constexpr int32 WeaponEquipmentSlotCount = 2;

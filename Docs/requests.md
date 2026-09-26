@@ -9861,3 +9861,13 @@
 - 검증: 수정 전 미지정 재료의 6002 대체 및 완료 허용 실패를 재현. 최종 UE 5.7 Editor 빌드 성공. 전체 자동화 149건 중 143건 통과, 6건 실패(종료 코드 1). 신규 AuthoredFiles, MissingProgressMaterial, ResolutionAndValidation 모두 통과. 실제 무기 액터의 메시·변환 적용, 새 ID 조회, 기본/명시적/실험실 지급, 잘못된 데이터 거부와 이전 설정 보존, 로드한 다리 Blueprint의 6002 값을 확인. 별도 코드 검토 지적 2건을 반영하고 재검토 완료.
 - 전체 검사 실패: TunaSweeper.Gaze.TestRobotRigAndPlacement, TunaSweeper.Interaction.CrowbarWallRack.Defaults, TunaSweeper.UI.Tutorial.AuthoredAsset, TunaSweeper.Vehicle.DamageAndDestruction, TunaSweeper.Vehicle.ProjectileContact는 이전 실행에서도 실패. TunaSweeper.Inventory.EquipmentData.LaserAndStartingLoadout은 동시 진행 중인 다른 작업이 추가한 Carbon frame backpack accepts the 120th slot 검사에서 실패. 이 작업은 해당 가방 데이터/용량 코드/검사를 수정하지 않음.
 - 로그: TunaSweeper/Saved/Logs/WeaponConfigurationRed.log, WeaponConfigurationGreen.log, BridgeMaterialMigration.log, WeaponConfigurationSuite.log. 최종 전체 검사는 다리 데이터 저장 및 일회성 이전 스크립트 제거 후 실행.
+
+## 2026-09-26 17:33:31 (소요시간: 00:44:36)
+
+- 요청: 기존 가방 1~4단계를 계란 가방·닭 가방·공룡 가방·군용배낭으로 교체하고 5단계 카본프레임 가방을 120칸으로 추가. 귀엽고 단순한 둥근 화풍, 500면 미만 모델, 가방별 고유 이미지 생성 텍스처, 연결된 UV 아일랜드와 기존 대비 절반 밀도 적용. 장비 문서에 가방 항목을 만들고 단계별 아이콘을 먼저 나열한 뒤 상세 설명.
+- 디자인 반영: 알·닭·공룡의 외부 보조 주머니 제거. 닭은 바깥을 보는 얼굴 유지. 공룡은 배가 착용자 등에 붙는 업힌 자세, 하늘을 보는 고개와 날카로운 이를 다문 우스꽝스러운 표정. 카본프레임은 하드케이스로 변경하고 초기 모델 높이의 1.3배 적용.
+- 결과: 256px 아이콘 5개 교체/추가 및 UE 임포트. Blender 원본·FBX 5개·UE 메시/재질/텍스처 저장. 모델 삼각형 수는 계란 240, 닭 390, 공룡 364, 군용 328, 카본 336. 각각 고유 512px 텍스처와 재질을 사용하며 UV 아일랜드 수는 11/27/44/19/28개, 밀도는 약 616.53px/m에서 308.26px/m로 절반. 양 UV 채널 겹침 없음.
+- 데이터·문서: 기존 ID 5002~5005 유지, 5011/120칸/운반 힘 80 추가. 기존 문자열 키로 한국어·영어·일본어 이름과 설명 반영, CSV 내보내기/관계 검증 통과. Docs/equipment.md에 아이콘과 상세 사양·경로·검증 링크 추가.
+- 120칸 지원: 기존 코드의 100칸 상한을 확인하여 필수 상한과 기본 최대값을 120으로 변경. 불러오기 시 점유 슬롯 보존에도 같은 상한이 적용됨. Docs/save_persistence.md 갱신, 세이브 형식 변경 없음.
+- 검증: Blender 및 FBX 재로드, UV 겹침·밀도·고유 텍스처 검사 통과. UE 5.7.4 최종 임포트와 별도 프로세스 재로드 종료 코드 0. 120번째 슬롯 회귀 검사는 수정 전 실패하고 수정 후 통과했으며 슬롯 UID·수량의 메모리 저장 직렬화/복원 확인. TunaSweeperEditor Win64 Development 최종 빌드 성공. 실행 중인 해당 프로젝트 Unreal Editor 재사용.
+- 정리: 일회성 모델/이미지 준비/임포트 생성기와 폐기한 공유 텍스처·면별 UV 자료 제거 후 재검증. 최종 소스·애셋·문서·검증 도구·이 기록을 한 작업 커밋으로 묶음. 로그: TunaSweeper/Saved/BackpackWork/.
