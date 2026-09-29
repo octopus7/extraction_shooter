@@ -49,6 +49,9 @@ struct FTunaSweeperScenarioLocalizedText
 	FText Korean;
 	FText English;
 	FText Japanese;
+	FText SimplifiedChinese;
+	FText TraditionalChinese;
+	FText Russian;
 };
 
 /** Loads the active build flavor's scenario pack and resolves eligible presentations from runtime triggers. */

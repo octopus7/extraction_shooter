@@ -7234,3 +7234,8 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 코옵 변경은 아직 메인에 머지되지 않았는지 확인.
 - 답변: main에는 코옵 구현 커밋 7c375766이 포함되지 않았고, codex/eos-coop-steam-key 브랜치에만 있다. git merge-base --is-ancestor 7c375766 main 종료 코드 1과 git branch --contains 결과로 확인했다. 머지는 수행하지 않았다.
+
+## 2026-09-29 18:34:42 (소요시간: 00:20:57)
+
+- 질문: 언어 지원 작업이 끝나면 드래프트 파일이 제거되는가?
+- 답변: 번역 CSV 6개를 실제 게임에서 읽는 TunaSweeper/Content/Data/Translations로 이동하고 기존 LocalizationDrafts 폴더를 제거했다. 이후 번역 수정은 옮겨진 런타임 CSV에서 진행한다.

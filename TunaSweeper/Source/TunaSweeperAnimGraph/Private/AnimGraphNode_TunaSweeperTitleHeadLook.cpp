@@ -2,14 +2,15 @@
 #include "Internationalization/Internationalization.h"
 #include "Internationalization/Culture.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Settings/TunaSweeperLanguage.h"
 
 namespace
 {
 	FText ResolveNodeText(FName Key)
 	{
-		const FString Language = FInternationalization::Get().GetCurrentLanguage()->GetTwoLetterISOLanguageName();
-		const auto TextLanguage = Language == TEXT("ko") ? ETunaSweeperItemTextLanguage::Korean
-			: Language == TEXT("ja") ? ETunaSweeperItemTextLanguage::Japanese : ETunaSweeperItemTextLanguage::English;
+		auto TextLanguage = ETunaSweeperItemTextLanguage::English;
+		TunaSweeperLanguage::TryParseLanguageCode(
+			FInternationalization::Get().GetCurrentLanguage()->GetName(), TextLanguage);
 		return GetDefault<UTunaSweeperTextSubsystem>()->ResolveText(Key, TextLanguage, FText::GetEmpty());
 	}
 }

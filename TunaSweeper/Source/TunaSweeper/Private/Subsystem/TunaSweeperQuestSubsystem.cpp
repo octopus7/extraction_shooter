@@ -1,4 +1,6 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Settings/TunaSweeperLanguage.h"
+#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 #include "Scenario/TunaSweeperDemoEndingActor.h"
 
 #include "Dom/JsonObject.h"
@@ -383,21 +385,7 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestTextByKey(
 		return false;
 	}
 
-	switch (Language)
-	{
-	case ETunaSweeperItemTextLanguage::Korean:
-		OutText = QuestTextString->Korean;
-		break;
-	case ETunaSweeperItemTextLanguage::English:
-		OutText = QuestTextString->English;
-		break;
-	case ETunaSweeperItemTextLanguage::Japanese:
-		OutText = QuestTextString->Japanese;
-		break;
-	default:
-		OutText = FText::GetEmpty();
-		break;
-	}
+	OutText = TunaSweeperLanguage::Resolve(*QuestTextString, Language);
 
 	return !OutText.IsEmpty();
 }
@@ -1131,6 +1119,13 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 			continue;
 		}
 
+		FTunaSweeperAdditionalTranslations AdditionalTranslations;
+		if (!AdditionalTranslations.Load(CsvPath))
+		{
+			bAllFilesValid = false;
+			continue;
+		}
+
 		FCsvParser CsvParser(CsvContent);
 		const FCsvParser::FRows& Rows = CsvParser.GetRows();
 		if (Rows.Num() < 1)
@@ -1179,6 +1174,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 			QuestTextString.Korean = FText::FromString(Korean);
 			QuestTextString.English = FText::FromString(English);
 			QuestTextString.Japanese = FText::FromString(Japanese);
+			AdditionalTranslations.Apply(QuestTextString.StringKey, QuestTextString);
 			if (QuestTextStringsByKey.Contains(QuestTextString.StringKey))
 			{
 				UE_LOG(LogTunaSweeperQuest, Error, TEXT("Duplicate quest text string key %s across build-flavor data. Keys may not override each other."), *StringKey);

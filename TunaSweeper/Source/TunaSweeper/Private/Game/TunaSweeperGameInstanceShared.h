@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Game/TunaSweeperGameInstance.h"
+#include "Settings/TunaSweeperLanguage.h"
 
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
@@ -228,53 +229,6 @@ namespace TunaSweeperExperience
 namespace TunaSweeperProjectileHitEffects
 {
 	inline const TCHAR* DefaultDataAssetPath = TEXT("/Game/Effects/DA_ProjectileHitEffects.DA_ProjectileHitEffects");
-}
-
-namespace TunaSweeperLanguage
-{
-	inline const TCHAR* SectionName = TEXT("TunaSweeper.InterfaceSettings");
-	inline const TCHAR* LanguageKey = TEXT("Language");
-	inline const TCHAR* EnglishCode = TEXT("en");
-	inline const TCHAR* KoreanCode = TEXT("ko");
-	inline const TCHAR* JapaneseCode = TEXT("ja");
-
-	inline const TCHAR* ToLanguageCode(ETunaSweeperItemTextLanguage Language)
-	{
-		switch (Language)
-		{
-		case ETunaSweeperItemTextLanguage::Korean:
-			return KoreanCode;
-		case ETunaSweeperItemTextLanguage::Japanese:
-			return JapaneseCode;
-		case ETunaSweeperItemTextLanguage::English:
-		default:
-			return EnglishCode;
-		}
-	}
-
-	inline bool TryParseLanguageCode(const FString& LanguageCode, ETunaSweeperItemTextLanguage& OutLanguage)
-	{
-		const FString NormalizedCode = LanguageCode.TrimStartAndEnd().ToLower();
-		if (NormalizedCode.StartsWith(KoreanCode))
-		{
-			OutLanguage = ETunaSweeperItemTextLanguage::Korean;
-			return true;
-		}
-
-		if (NormalizedCode.StartsWith(JapaneseCode))
-		{
-			OutLanguage = ETunaSweeperItemTextLanguage::Japanese;
-			return true;
-		}
-
-		if (NormalizedCode.StartsWith(EnglishCode))
-		{
-			OutLanguage = ETunaSweeperItemTextLanguage::English;
-			return true;
-		}
-
-		return false;
-	}
 }
 
 namespace TunaSweeperMapMarkers

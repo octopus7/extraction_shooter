@@ -1,4 +1,6 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Settings/TunaSweeperLanguage.h"
+#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 #include "Combat/TunaSweeperBurnTypes.h"
 
 #include "Dom/JsonObject.h"
@@ -251,21 +253,7 @@ bool UTunaSweeperItemDataSubsystem::TryGetItemTextByKey(
 		return false;
 	}
 
-	switch (Language)
-	{
-	case ETunaSweeperItemTextLanguage::Korean:
-		OutText = NameString.Korean;
-		break;
-	case ETunaSweeperItemTextLanguage::English:
-		OutText = NameString.English;
-		break;
-	case ETunaSweeperItemTextLanguage::Japanese:
-		OutText = NameString.Japanese;
-		break;
-	default:
-		OutText = FText::GetEmpty();
-		break;
-	}
+	OutText = TunaSweeperLanguage::Resolve(NameString, Language);
 
 	return !OutText.IsEmpty();
 }
@@ -1117,6 +1105,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 		return false;
 	}
 
+	FTunaSweeperAdditionalTranslations AdditionalTranslations;
+	if (!AdditionalTranslations.Load(ItemNameStringsCsvPath))
+	{
+		return false;
+	}
+
 	FCsvParser CsvParser(CsvContent);
 	const FCsvParser::FRows& Rows = CsvParser.GetRows();
 	if (Rows.Num() < 2)
@@ -1163,6 +1157,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 		NameString.Korean = FText::FromString(Korean);
 		NameString.English = FText::FromString(English);
 		NameString.Japanese = FText::FromString(Japanese);
+		AdditionalTranslations.Apply(NameString.StringKey, NameString);
 
 		if (ItemNameStringsByKey.Contains(NameString.StringKey))
 		{

@@ -1,4 +1,6 @@
 #include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Settings/TunaSweeperLanguage.h"
+#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -57,19 +59,7 @@ bool UTunaSweeperTextSubsystem::TryGetTextByKey(
 		return false;
 	}
 
-	switch (Language)
-	{
-	case ETunaSweeperItemTextLanguage::Korean:
-		OutText = TextString->Korean;
-		break;
-	case ETunaSweeperItemTextLanguage::Japanese:
-		OutText = TextString->Japanese;
-		break;
-	case ETunaSweeperItemTextLanguage::English:
-	default:
-		OutText = TextString->English;
-		break;
-	}
+	OutText = TunaSweeperLanguage::Resolve(*TextString, Language);
 
 	return !OutText.IsEmpty();
 }
@@ -102,6 +92,12 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, co
 	if (!FFileHelper::LoadFileToString(CsvContent, *TextStringsCsvPath))
 	{
 		UE_LOG(LogTunaSweeperText, Error, TEXT("Failed to read %s text strings CSV: %s"), DatasetLabel, *TextStringsCsvPath);
+		return false;
+	}
+
+	FTunaSweeperAdditionalTranslations AdditionalTranslations;
+	if (!AdditionalTranslations.Load(TextStringsCsvPath))
+	{
 		return false;
 	}
 
@@ -150,6 +146,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, co
 		TextString.Korean = FText::FromString(Korean);
 		TextString.English = FText::FromString(English);
 		TextString.Japanese = FText::FromString(Japanese);
+		AdditionalTranslations.Apply(TextString.StringKey, TextString);
 
 		if (TextStringsByKey.Contains(TextString.StringKey))
 		{

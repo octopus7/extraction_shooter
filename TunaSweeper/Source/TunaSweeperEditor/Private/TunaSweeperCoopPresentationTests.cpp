@@ -139,8 +139,9 @@ bool FTunaSweeperCoopPresentationTest::RunTest(const FString&)
 	Menu->ShowMainMenu();
 	Menu->TickMenuTransitions(1.f);
 	FWidgetRenderer Renderer(false);
-	const ETunaSweeperItemTextLanguage Languages[] = { ETunaSweeperItemTextLanguage::Korean, ETunaSweeperItemTextLanguage::English, ETunaSweeperItemTextLanguage::Japanese };
-	for (int32 Index = 0; Index < 3; ++Index)
+	const ETunaSweeperItemTextLanguage Languages[] = { ETunaSweeperItemTextLanguage::Korean, ETunaSweeperItemTextLanguage::English, ETunaSweeperItemTextLanguage::Japanese,
+		ETunaSweeperItemTextLanguage::SimplifiedChinese, ETunaSweeperItemTextLanguage::TraditionalChinese, ETunaSweeperItemTextLanguage::Russian };
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(Languages); ++Index)
 	{
 		Instance->SetCurrentTextLanguage(Languages[Index], false);
 		TestEqual(TEXT("Actual title co-op entry resolves current language"), EntryLabel->GetText().ToString(), Instance->ResolveLocalizedText(TEXT("ui.coop.title"), FText::GetEmpty()).ToString());

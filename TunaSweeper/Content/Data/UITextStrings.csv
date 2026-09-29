@@ -299,6 +299,9 @@ ui.settings.unavailable_suffix,{0} (사용 불가),{0} (Unavailable),{0} (使用
 ui.language.english,English,English,English
 ui.language.korean,한국어,한국어,한국어
 ui.language.japanese,日本語,日本語,日本語
+ui.language.simplified_chinese,简体中文,简体中文,简体中文
+ui.language.traditional_chinese,繁體中文,繁體中文,繁體中文
+ui.language.russian,Русский,Русский,Русский
 ui.settings.development,개발,Development,開発
 ui.settings.development.enemy_combat_debug,적 전투 디버그,Enemy Combat Debug,敵戦闘デバッグ
 ui.settings.development.debug_display_language,디버그 표시 언어,Debug Display Language,デバッグ表示言語

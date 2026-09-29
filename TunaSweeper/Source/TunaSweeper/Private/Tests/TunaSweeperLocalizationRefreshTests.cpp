@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -10,10 +11,20 @@
 #include "GameFramework/PlayerController.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
+#include "Misc/ConfigCacheIni.h"
+#include "Misc/Paths.h"
+#include "HAL/FileManager.h"
+#include "Internationalization/Internationalization.h"
+#include "Internationalization/Culture.h"
+#include "Settings/TunaSweeperLanguage.h"
+#include "Settings/TunaSweeperBuildTargetSettings.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperScenarioSubsystem.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "UI/TunaSweeperGraphicsQualityRowWidget.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "UI/TunaSweeperOptionRowWidget.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace TunaSweeperLocalizationRefreshTests
@@ -62,6 +73,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 {
+	const FString OriginalCulture = FInternationalization::Get().GetCurrentCulture()->GetName();
+	ON_SCOPE_EXIT { FInternationalization::Get().SetCurrentCulture(OriginalCulture); };
 	using namespace TunaSweeperLocalizationRefreshTests;
 	(void)Parameters;
 
@@ -115,6 +128,28 @@ bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("Title action label follows the selected language"), Label->GetText().ToString(), Expected.Value);
 	}
 
+	UTunaSweeperOptionRowWidget* LanguageRow = Cast<UTunaSweeperOptionRowWidget>(
+		FindNestedWidget(Intro.Get(), TEXT("InterfaceLanguageOptionRow")));
+	if (!TestNotNull(TEXT("Language selector exists"), LanguageRow)) return false;
+	const TCHAR* LanguageNames[] = {TEXT("English"), TEXT("한국어"), TEXT("日本語"),
+		TEXT("简体中文"), TEXT("繁體中文"), TEXT("Русский")};
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(LanguageNames); ++Index)
+	{
+		LanguageRow->OnStepRequested.Broadcast(Index == 0 ? 0 : 1);
+		UTextBlock* Value = Cast<UTextBlock>(FindNestedWidget(LanguageRow, TEXT("OptionValueText")));
+		if (!TestNotNull(TEXT("Language value label exists"), Value)) return false;
+		TestEqual(TEXT("Selector reaches each native language name"), Value->GetText().ToString(), FString(LanguageNames[Index]));
+	}
+	UButton* Next = Cast<UButton>(FindNestedWidget(LanguageRow, TEXT("NextButton")));
+	if (!TestNotNull(TEXT("Language next button exists"), Next)) return false;
+	TestFalse(TEXT("Last language disables next"), Next->GetIsEnabled());
+	for (int32 Index = UE_ARRAY_COUNT(LanguageNames) - 2; Index >= 0; --Index)
+	{
+		LanguageRow->OnStepRequested.Broadcast(-1);
+		UTextBlock* Value = Cast<UTextBlock>(FindNestedWidget(LanguageRow, TEXT("OptionValueText")));
+		TestEqual(TEXT("Selector steps backward"), Value->GetText().ToString(), FString(LanguageNames[Index]));
+	}
+
 	Instance->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::Korean, false);
 	TStrongObjectPtr<UTunaSweeperGraphicsSettingsWidget> Graphics(
 		CreateWidget<UTunaSweeperGraphicsSettingsWidget>(Controller, UTunaSweeperGraphicsSettingsWidget::StaticClass()));
@@ -132,6 +167,137 @@ bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 
 	GraphicsSlate.Reset();
 	IntroSlate.Reset();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperAdditionalLanguagesTest,
+	"TunaSweeper.UI.Localization.AdditionalLanguages",
+	TunaSweeperLocalizationRefreshTests::TestFlags)
+
+bool FTunaSweeperAdditionalLanguagesTest::RunTest(const FString& Parameters)
+{
+	const UTunaSweeperTextSubsystem* Strings = GetDefault<UTunaSweeperTextSubsystem>();
+	if (!TestTrue(TEXT("Text data loads"), Strings->LoadTextData(true))) return false;
+	// Existing enum values 0-2 must remain stable for serialized references.
+	const TCHAR* Expected[] = { TEXT("下车"), TEXT("下車"), TEXT("Выйти") };
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(Expected); ++Index)
+	{
+		FText Text;
+		TestTrue(TEXT("Additional language resolves"), Strings->TryGetTextByKey(
+			TEXT("ui.vehicle.dismount"), static_cast<ETunaSweeperItemTextLanguage>(Index + 3), Text));
+		TestEqual(TEXT("Selected translation is returned"), Text.ToString(), FString(Expected[Index]));
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperLanguageCodesTest,
+	"TunaSweeper.UI.Localization.CodesAndPersistence",
+	TunaSweeperLocalizationRefreshTests::TestFlags)
+
+bool FTunaSweeperLanguageCodesTest::RunTest(const FString& Parameters)
+{
+	const FString OriginalCulture = FInternationalization::Get().GetCurrentCulture()->GetName();
+	ON_SCOPE_EXIT { FInternationalization::Get().SetCurrentCulture(OriginalCulture); };
+	using namespace TunaSweeperLanguage;
+	const TPair<const TCHAR*, ETunaSweeperItemTextLanguage> Cases[] = {
+		{TEXT("zh-CN"), ETunaSweeperItemTextLanguage::SimplifiedChinese},
+		{TEXT("zh_SG"), ETunaSweeperItemTextLanguage::SimplifiedChinese},
+		{TEXT("zh"), ETunaSweeperItemTextLanguage::SimplifiedChinese},
+		{TEXT("zh-TW"), ETunaSweeperItemTextLanguage::TraditionalChinese},
+		{TEXT("zh-HK"), ETunaSweeperItemTextLanguage::TraditionalChinese},
+		{TEXT("zh-MO"), ETunaSweeperItemTextLanguage::TraditionalChinese},
+		{TEXT("zh-Hant-CN"), ETunaSweeperItemTextLanguage::TraditionalChinese},
+		{TEXT("zh-Hans-HK"), ETunaSweeperItemTextLanguage::SimplifiedChinese},
+		{TEXT(" RU-ru "), ETunaSweeperItemTextLanguage::Russian},
+		{TEXT("ja-JP"), ETunaSweeperItemTextLanguage::Japanese},
+		{TEXT("ko-KR"), ETunaSweeperItemTextLanguage::Korean},
+		{TEXT("en-US"), ETunaSweeperItemTextLanguage::English}};
+	for (const auto& Pair : Cases)
+	{
+		auto Parsed = ETunaSweeperItemTextLanguage::English;
+		TestTrue(Pair.Key, TryParseLanguageCode(Pair.Key, Parsed));
+		TestTrue(TEXT("Locale resolves to expected language"), Parsed == Pair.Value);
+	}
+	for (const TCHAR* Invalid : {TEXT(""), TEXT("fr-FR"), TEXT("rubbish"), TEXT("english")})
+	{
+		auto Parsed = ETunaSweeperItemTextLanguage::Korean;
+		TestFalse(TEXT("Unsupported code is rejected"), TryParseLanguageCode(Invalid, Parsed));
+		TestTrue(TEXT("Invalid code leaves output unchanged"), Parsed == ETunaSweeperItemTextLanguage::Korean);
+	}
+	const FString TestIni = FConfigCacheIni::NormalizeConfigIniPath(
+		FPaths::CreateTempFilename(*FPaths::ProjectSavedDir(), TEXT("LanguageTest"), TEXT(".ini")));
+	// SetString only writes registered config files in UE 5.7.
+	GConfig->Add(TestIni, FConfigFile());
+	TGuardValue<FString> IniGuard(GGameUserSettingsIni, TestIni);
+	ON_SCOPE_EXIT { GConfig->UnloadFile(TestIni); IFileManager::Get().Delete(*TestIni); };
+	TStrongObjectPtr<UTunaSweeperGameInstance> Instance(NewObject<UTunaSweeperGameInstance>());
+	for (const auto Language : SupportedLanguages)
+	{
+		TestTrue(TEXT("Engine culture is available"), FInternationalization::Get().GetCulture(ToLanguageCode(Language)).IsValid());
+		Instance->SetCurrentTextLanguage(Language, true);
+		FConfigFile SavedConfig;
+		SavedConfig.Read(TestIni);
+		FString SavedCode;
+		TestTrue(TEXT("Language is written to disk"), SavedConfig.GetString(SectionName, LanguageKey, SavedCode));
+		TestEqual(TEXT("Saved code is canonical"), SavedCode, FString(ToLanguageCode(Language)));
+		auto Restored = ETunaSweeperItemTextLanguage::English;
+		TestTrue(TEXT("Saved language can be restored"), TryParseLanguageCode(SavedCode, Restored));
+		TestTrue(TEXT("Restored language matches selection"), Restored == Language);
+	}
+	FTunaSweeperLocalizedTextString MissingTranslation;
+	MissingTranslation.English = FText::FromString(TEXT("English fallback"));
+	for (const auto Language : SupportedLanguages)
+	{
+		TestEqual(TEXT("Missing translation falls back to English"), Resolve(MissingTranslation, Language).ToString(), FString(TEXT("English fallback")));
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperLanguageDatasetsTest,
+	"TunaSweeper.UI.Localization.AllTextDatasets",
+	TunaSweeperLocalizationRefreshTests::TestFlags)
+
+bool FTunaSweeperLanguageDatasetsTest::RunTest(const FString& Parameters)
+{
+	const FString OriginalCulture = FInternationalization::Get().GetCurrentCulture()->GetName();
+	ON_SCOPE_EXIT { FInternationalization::Get().SetCurrentCulture(OriginalCulture); };
+	TGuardValue<ETunaSweeperBuildTarget> DemoGuard(GetMutableDefault<UTunaSweeperBuildTargetSettings>()->BuildTarget,
+		ETunaSweeperBuildTarget::SteamDemo);
+	TStrongObjectPtr<UTunaSweeperGameInstance> Instance(NewObject<UTunaSweeperGameInstance>());
+	UTunaSweeperItemDataSubsystem* Items = NewObject<UTunaSweeperItemDataSubsystem>(Instance.Get());
+	UTunaSweeperQuestSubsystem* Quests = NewObject<UTunaSweeperQuestSubsystem>(Instance.Get());
+	UTunaSweeperScenarioSubsystem* Scenarios = NewObject<UTunaSweeperScenarioSubsystem>(Instance.Get());
+	UTunaSweeperTextSubsystem* Strings = NewObject<UTunaSweeperTextSubsystem>(Instance.Get());
+	if (!TestTrue(TEXT("Items load"), Items->LoadItemData()) ||
+		!TestTrue(TEXT("Quests load"), Quests->LoadQuestData()) ||
+		!TestTrue(TEXT("Scenarios load"), Scenarios->LoadScenarioData()) ||
+		!TestTrue(TEXT("UI, memo and difficulty load"), Strings->LoadTextData())) return false;
+	const TCHAR* ItemExpected[] = {TEXT("手枪"), TEXT("手槍"), TEXT("Пистолет")};
+	const TCHAR* QuestExpected[] = {TEXT("任务"), TEXT("任務"), TEXT("Задания")};
+	const TCHAR* MemoExpected[] = {TEXT("另一片森林"), TEXT("另一片森林"), TEXT("Другой лес")};
+	const TCHAR* DifficultyExpected[] = {TEXT("搜集"), TEXT("蒐集"), TEXT("Сбор ресурсов")};
+	const TCHAR* SpeakerExpected[] = {TEXT("露娜"), TEXT("露娜"), TEXT("Луна")};
+	for (int32 Index = 0; Index < 3; ++Index)
+	{
+		const auto Language = static_cast<ETunaSweeperItemTextLanguage>(Index + 3);
+		Instance->SetCurrentTextLanguage(Language, false);
+		FText Text;
+		TestTrue(TEXT("Item key resolves"), Items->TryGetItemTextByKey(TEXT("item.pistol"), Language, Text));
+		TestEqual(TEXT("Item translation"), Text.ToString(), FString(ItemExpected[Index]));
+		TestTrue(TEXT("Quest key resolves"), Quests->TryGetQuestTextByKey(TEXT("quest.ui.title"), Language, Text));
+		TestEqual(TEXT("Quest translation"), Text.ToString(), FString(QuestExpected[Index]));
+		TestTrue(TEXT("Memo key resolves"), Strings->TryGetTextByKey(TEXT("memo.1.title"), Language, Text));
+		TestEqual(TEXT("Memo translation"), Text.ToString(), FString(MemoExpected[Index]));
+		TestTrue(TEXT("Difficulty key resolves"), Strings->TryGetTextByKey(TEXT("difficulty.stage.1.title"), Language, Text));
+		TestEqual(TEXT("Difficulty translation"), Text.ToString(), FString(DifficultyExpected[Index]));
+		FTunaSweeperScenarioPresentation Presentation;
+		TestTrue(TEXT("Scenario resolves"), Scenarios->TryResolveScenario(TEXT("interaction.mole"), TEXT("BunkerMap"), false, Presentation));
+		if (!TestTrue(TEXT("Scenario has dialogue"), !Presentation.DialogueLines.IsEmpty())) return false;
+		TestEqual(TEXT("Scenario translation"), Presentation.DialogueLines[0].SpeakerName.ToString(), FString(SpeakerExpected[Index]));
+	}
 	return true;
 }
 

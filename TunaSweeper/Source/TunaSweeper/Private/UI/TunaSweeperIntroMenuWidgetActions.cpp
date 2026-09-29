@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Settings/TunaSweeperLanguage.h"
 #include "Component/TunaSweeperScratchComponent.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
@@ -228,10 +229,7 @@ void UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleInterfaceLanguageStepRequested(int32 Delta)
 {
-	static constexpr ETunaSweeperItemTextLanguage Languages[] = {
-		ETunaSweeperItemTextLanguage::English,
-		ETunaSweeperItemTextLanguage::Korean,
-		ETunaSweeperItemTextLanguage::Japanese};
+	const auto& Languages = TunaSweeperLanguage::SupportedLanguages;
 
 	int32 CurrentIndex = 0;
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(Languages); ++Index)

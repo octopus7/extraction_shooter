@@ -90,6 +90,15 @@ struct TUNASWEEPER_API FTunaSweeperQuestTextString
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
 	FText Japanese;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText SimplifiedChinese;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText TraditionalChinese;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText Russian;
 };
 
 USTRUCT(BlueprintType)

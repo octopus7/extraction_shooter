@@ -1,4 +1,6 @@
 #include "Subsystem/TunaSweeperScenarioSubsystem.h"
+#include "Settings/TunaSweeperLanguage.h"
+#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -337,6 +339,12 @@ bool UTunaSweeperScenarioSubsystem::LoadScenarioTextStringsCsv()
 		return false;
 	}
 
+	FTunaSweeperAdditionalTranslations AdditionalTranslations;
+	if (!AdditionalTranslations.Load(CsvPath))
+	{
+		return false;
+	}
+
 	FCsvParser Parser(CsvContent);
 	const FCsvParser::FRows& Rows = Parser.GetRows();
 	if (Rows.Num() < 2)
@@ -376,6 +384,7 @@ bool UTunaSweeperScenarioSubsystem::LoadScenarioTextStringsCsv()
 		Text.Korean = FText::FromString(Korean);
 		Text.English = FText::FromString(English);
 		Text.Japanese = FText::FromString(Japanese);
+		AdditionalTranslations.Apply(StringKey, Text);
 		ScenarioTextStringsByKey.Add(StringKey, MoveTemp(Text));
 	}
 	return !ScenarioTextStringsByKey.IsEmpty();
@@ -452,14 +461,5 @@ FText UTunaSweeperScenarioSubsystem::ResolveScenarioText(FName StringKey) const
 		return FText::GetEmpty();
 	}
 
-	switch (TunaGameInstance->GetCurrentTextLanguage())
-	{
-	case ETunaSweeperItemTextLanguage::Korean:
-		return Text->Korean;
-	case ETunaSweeperItemTextLanguage::Japanese:
-		return Text->Japanese;
-	case ETunaSweeperItemTextLanguage::English:
-	default:
-		return Text->English;
-	}
+	return TunaSweeperLanguage::Resolve(*Text, TunaGameInstance->GetCurrentTextLanguage());
 }

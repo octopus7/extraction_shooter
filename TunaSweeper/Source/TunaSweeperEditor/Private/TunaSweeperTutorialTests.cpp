@@ -65,10 +65,11 @@ bool FTutorialAuthoredAssetTest::RunTest(const FString& Parameters)
     FWidgetRenderer Renderer(false);
     const FString Output=FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()/TEXT("../GeneratedImages/UI/Tutorial/WidgetPreviews"));
     IFileManager::Get().MakeDirectory(*Output,true);
-    const ETunaSweeperItemTextLanguage Languages[]={ETunaSweeperItemTextLanguage::Korean,ETunaSweeperItemTextLanguage::English,ETunaSweeperItemTextLanguage::Japanese};
-    const TCHAR* Tags[]={TEXT("ko"),TEXT("en"),TEXT("ja")};
+    const ETunaSweeperItemTextLanguage Languages[]={ETunaSweeperItemTextLanguage::Korean,ETunaSweeperItemTextLanguage::English,ETunaSweeperItemTextLanguage::Japanese,
+        ETunaSweeperItemTextLanguage::SimplifiedChinese,ETunaSweeperItemTextLanguage::TraditionalChinese,ETunaSweeperItemTextLanguage::Russian};
+    const TCHAR* Tags[]={TEXT("ko"),TEXT("en"),TEXT("ja"),TEXT("zh-Hans"),TEXT("zh-Hant"),TEXT("ru")};
     const TCHAR* Pages[]={TEXT("Basics"),TEXT("Combat"),TEXT("Items")};
-    for(int32 L=0;L<3;++L)
+    for(int32 L=0;L<UE_ARRAY_COUNT(Languages);++L)
     {
         Widget->PreviewLanguage=Languages[L];
         Widget->RefreshLocalizedText();

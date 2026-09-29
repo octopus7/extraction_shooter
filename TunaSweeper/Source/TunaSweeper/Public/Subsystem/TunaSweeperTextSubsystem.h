@@ -21,6 +21,15 @@ struct TUNASWEEPER_API FTunaSweeperLocalizedTextString
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Text")
 	FText Japanese;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Text")
+	FText SimplifiedChinese;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Text")
+	FText TraditionalChinese;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Text")
+	FText Russian;
 };
 
 UCLASS()

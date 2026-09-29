@@ -296,9 +296,9 @@ ui.settings.preset.auto_details,{0}（{1}，显存 {2} MB）,{0}（{1}，顯存 
 ui.settings.pending_suffix, · 等待应用, · 等待應用, · Ожидает применения
 ui.settings.fps_value,{0} FPS,{0} FPS,{0} FPS
 ui.settings.unavailable_suffix,{0}（不可用）,{0}（不可用）,{0} (недоступно)
-ui.language.english,英语,英語,Английский
-ui.language.korean,韩语,韓語,Корейский
-ui.language.japanese,日本語,日本語,Японский
+ui.language.english,English,English,English
+ui.language.korean,한국어,한국어,한국어
+ui.language.japanese,日本語,日本語,日本語
 ui.settings.development,开发选项,開發選項,Настройки разработчика
 ui.settings.development.enemy_combat_debug,敌人战斗调试,敵人戰鬥調試,Отладка поведения врагов
 ui.settings.development.debug_display_language,调试显示语言,調試顯示語言,Язык отладочного интерфейса
@@ -497,3 +497,6 @@ ui.wardrobe.locked,未解锁,未解鎖,Заблокировано
 ui.wardrobe.locked_hint,解锁此服装后即可穿上。,解鎖此服裝後即可穿上。,"Откройте этот наряд, чтобы надеть его."
 ui.wardrobe.preview,预览,預覽,Предпросмотр
 ui.wardrobe.unavailable,此服装目前不可用。,此服裝目前不可用。,Этот наряд сейчас недоступен.
+ui.language.simplified_chinese,简体中文,简体中文,简体中文
+ui.language.traditional_chinese,繁體中文,繁體中文,繁體中文
+ui.language.russian,Русский,Русский,Русский
