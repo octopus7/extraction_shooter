@@ -1,0 +1,69 @@
+string_key,zh-Hans,zh-Hant,ru
+quest.ui.title,任务,任務,Задания
+quest.ui.list_title,任务列表,任務列表,Список заданий
+quest.ui.tab.available,可接取,可接取,Доступные
+quest.ui.tab.in_progress,进行中,進行中,Выполняются
+quest.ui.tab.completed,奖励已领取,獎勵已領取,Награды получены
+quest.ui.select_prompt,请从右侧列表选择任务。,請從右側列表選擇任務。,Выберите задание в списке справа.
+quest.ui.empty.available,没有可接取的任务。,沒有可接取的任務。,Нет доступных заданий.
+quest.ui.empty.in_progress,没有进行中的任务。,沒有進行中的任務。,Нет активных заданий.
+quest.ui.empty.completed,没有已领取奖励的任务。,沒有已領取獎勵的任務。,Нет заданий с полученной наградой.
+quest.ui.empty.detail,没有任务,沒有任務,Нет заданий
+quest.ui.objectives,目标,目標,Цели
+quest.ui.rewards,奖励,獎勵,Награды
+quest.ui.no_reward,无,無,Нет
+quest.ui.coins,硬币,硬幣,Монеты
+quest.ui.item_fallback,物品,物品,Предмет
+quest.ui.facility_unlock,设施解锁,設施解鎖,Открытие объекта
+quest.ui.state.available,可接取,可接取,Доступно
+quest.ui.state.locked,未解锁,未解鎖,Заблокировано
+quest.ui.state.accepted,进行中,進行中,Выполняется
+quest.ui.state.reward_available,可领取奖励,可領取獎勵,Награда доступна
+quest.ui.state.reward_completed,奖励已领取,獎勵已領取,Награда получена
+quest.ui.button.accept,接取,接取,Принять
+quest.ui.button.locked,未解锁,未解鎖,Заблокировано
+quest.ui.button.in_progress,进行中,進行中,Выполняется
+quest.ui.button.claim_reward,领取奖励,領取獎勵,Получить награду
+quest.ui.button.completed,已完成,已完成,Завершено
+quest.speaker.mole,鼹鼠,鼴鼠,Крот
+quest.first_outing.title,首次外出,首次外出,Первый выход
+quest.first_outing.description,走出地堡，确认突袭区域并准备返回。,走出地堡，確認突襲區域並準備返回。,"Выйдите из бункера, осмотрите зону рейда и приготовьтесь вернуться."
+quest.first_outing.objective.leave_bunker,前往地堡外,前往地堡外,Выйти из бункера
+quest.first_outing.accept.line1,你看起来没事，装备也带齐了。现在可以出去了。,你看起來沒事，裝備也帶齊了。現在可以出去了。,"Выглядишь нормально, снаряжение на месте. Теперь можно выходить."
+quest.first_outing.accept.line2,左边的梯子通往外面。别急，准备好了再走。,左邊的梯子通往外面。別急，準備好了再走。,"Лестница слева ведёт наружу. Не спеши, пойдём, когда будешь готов."
+quest.lumberjack_first_kill.title,消灭伐木机,消滅伐木機,Уничтожить лесоруба
+quest.lumberjack_first_kill.description,在突袭区域消灭一台伐木机并活着返回。,在突襲區域消滅一臺伐木機並活着返回。,Уничтожьте лесоруба в зоне рейда и вернитесь живым.
+quest.lumberjack_first_kill.objective.kill_lumberjack,消灭伐木机,消滅伐木機,Уничтожить лесоруба
+quest.signalbot_map_check.title,检查信号控制设施,檢查信號控制設施,Проверка центра связи
+quest.signalbot_map_check.description,与信号机器人一起检查新的信号控制设施。,與信號機器人一起檢查新的信號控制設施。,Проверьте новый центр связи вместе с Сигналботом.
+quest.signalbot_map_check.objective.talk_to_signalbot,与信号机器人交谈,與信號機器人交談,Поговорить с Сигналботом
+quest.ricepotbot_supply_check.title,检查补给设施,檢查補給設施,Проверка пункта снабжения
+quest.ricepotbot_supply_check.description,与饭锅机器人一起检查新的补给设施。,與飯鍋機器人一起檢查新的補給設施。,Проверьте новый пункт снабжения вместе с Рисоварботом.
+quest.ricepotbot_supply_check.objective.talk_to_ricepotbot,与饭锅机器人交谈,與飯鍋機器人交談,Поговорить с Рисоварботом
+quest.rescue_cart_return.title,确认救援返回,確認救援返回,Проверка спасательной эвакуации
+quest.rescue_cart_return.description,行动中检测到异常状态时，救护车会将你送回地堡。,行動中檢測到異常狀態時，救護車會將你送回地堡。,"Если во время вылазки обнаружат критическое состояние, спасательная тележка доставит вас в бункер."
+quest.rescue_cart_return.objective.return_by_rescue_cart,乘救护车返回地堡,乘救護車返回地堡,Вернуться в бункер на спасательной тележке
+quest.warp_point_used_test.title,测试传送点,測試傳送點,Проверка точки телепортации
+quest.warp_point_used_test.description,用于验证传送点目标的数据，未连接实际任务提供者或流程。,用於驗證傳送點目標的數據，未連接實際任務提供者或流程。,Тестовые данные для цели с точкой телепортации. Не связаны с действующим заданием.
+quest.warp_point_used_test.objective.use_raid_warp_point_a,使用传送点,使用傳送點,Использовать точку телепортации
+quest.demo_q1.title,检查取水设施,檢查取水設施,Проверить водозабор
+quest.demo_q1.description,包括厕所在内，所有生活设施都停水了。去调查外部取水设施吧。,包括廁所在內，所有生活設施都停水了。去調查外部取水設施吧。,"Подача воды ко всем бытовым объектам, включая туалет, прекратилась. Осмотрим внешний водозабор."
+quest.demo_q1.accept.line1,地堡里几乎没水了。得先去看看取水设施。,地堡裏幾乎沒水了。得先去看看取水設施。,В бункере почти нет воды. Сначала нужно проверить водозабор.
+quest.demo_q1.accept.line2,外面很危险，小心点。发现异常就马上回来告诉我。,外面很危險，小心點。發現異常就馬上回來告訴我。,"Снаружи опасно. Если заметишь что-то странное, сразу возвращайся и расскажи мне."
+quest.demo_q1.objective.inspect,调查取水设施,調查取水設施,Осмотреть водозабор
+quest.demo_q2.title,撬棍与滤网清理,撬棍與濾網清理,Лом и очистка сетки
+quest.demo_q2.description,带上撬棍，清除取水滤网上的水草和杂物。,帶上撬棍，清除取水濾網上的水草和雜物。,Возьмите лом и очистите водозаборную сетку от водорослей и мусора.
+quest.demo_q2.accept.line1,取水滤网被垃圾堵死了。有撬棍就能清开。,取水濾網被垃圾堵死了。有撬棍就能清開。,Водозаборная сетка забита мусором. Лом поможет её расчистить.
+quest.demo_q2.accept.line2,从工具架拿上撬棍，别太用力挥。,從工具架拿上撬棍，別太用力揮。,Возьми лом со стойки для инструментов. Только не размахивай им слишком сильно.
+quest.demo_q2.objective.clear,清理取水滤网,清理取水濾網,Очистить водозаборную сетку
+quest.demo_q3a.title,损坏的阀门手柄,損壞的閥門手柄,Сломанная рукоятка клапана
+quest.demo_q3a.description,找到备用阀门手柄，修理取水设施。,找到備用閥門手柄，修理取水設施。,Найдите запасную рукоятку клапана и почините водозабор.
+quest.demo_q3a.objective.repair,修理取水设施,修理取水設施,Починить водозабор
+quest.demo_q3b.title,地堡管道漏水,地堡管道漏水,Протечка трубы в бункере
+quest.demo_q3b.description,找到防水胶带，修理地堡内受损的管道。,找到防水膠帶，修理地堡內受損的管道。,Найдите водостойкую ленту и почините повреждённую трубу в бункере.
+quest.demo_q3b.objective.repair,修理地堡管道,修理地堡管道,Починить трубу в бункере
+quest.demo_q4.title,今天的奖励,今天的獎勵,Сегодняшняя награда
+quest.demo_q4.description,从外部食品仓库带回金枪鱼罐头，交给鼹鼠。,從外部食品倉庫帶回金槍魚罐頭，交給鼴鼠。,Принесите банку тунца с внешнего продовольственного склада и отдайте Кроту.
+quest.demo_q4.accept.line1,水通了，管道也不漏了。你辛苦了。,水通了，管道也不漏了。你辛苦了。,"Вода снова течёт, трубы больше не протекают. Ты отлично справился."
+quest.demo_q4.accept.line2,外面的食品仓库里还剩一罐金枪鱼。带回来，我们一起吃。,外面的食品倉庫裏還剩一罐金槍魚。帶回來，我們一起喫。,"На внешнем продовольственном складе осталась банка тунца. Принеси её, и поедим вместе."
+quest.demo_q4.objective.deliver,交付金枪鱼罐头,交付金槍魚罐頭,Передать банку тунца

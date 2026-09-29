@@ -1,0 +1,499 @@
+string_key,zh-Hans,zh-Hant,ru
+editor.anim.title_head_look.title,标题画面头部追踪,標題畫面頭部追蹤,Поворот головы на главном экране
+editor.anim.title_head_look.tooltip,在物理计算前，将标题画面头部的目标方向应用于姿势。,在物理計算前，將標題畫面頭部的目標方向應用於姿勢。,Применяет целевое направление головы на главном экране к позе перед расчётом физики.
+ui.vehicle.mount,乘坐,乘坐,Сесть
+ui.vehicle.no_fuel,燃料不足。,燃料不足。,Нет топлива.
+ui.vehicle.dismount,下车,下車,Выйти
+ui.key.x,X,X,X
+ui.pause.title,已暂停,已暫停,Пауза
+ui.pause.resume,继续游戏,繼續遊戲,Продолжить
+ui.pause.return_to_title,返回标题画面,返回標題畫面,На главный экран
+ui.pause.confirm_title,返回标题画面吗？,返回標題畫面嗎？,Вернуться на главный экран?
+ui.pause.confirm_quit,退出游戏吗？,退出遊戲嗎？,Выйти из игры?
+ui.pause.raid_warning,离开突袭会失去随身物品、装备、快捷栏物品，以及本次突袭未结算的经验值。仓库物品和任务、世界进度会保存。,離開突襲會失去隨身物品、裝備、快捷欄物品，以及本次突襲未結算的經驗值。倉庫物品和任務、世界進度會保存。,"При выходе из рейда вы потеряете переносимые предметы, снаряжение, вещи в быстрых ячейках и неполученный опыт рейда. Содержимое хранилища, задания и прогресс мира сохранятся."
+ui.pause.bunker_warning,退出前会保存当前地堡进度，物品不会丢失。,退出前會保存當前地堡進度，物品不會丟失。,Перед выходом прогресс в бункере будет сохранён. Предметы не пропадут.
+ui.pause.save_failed,保存失败。游戏尚未退出，请重试或取消。,保存失敗。遊戲尚未退出，請重試或取消。,Не удалось сохранить игру. Вы всё ещё в игре. Повторите попытку или отмените выход.
+ui.debuff.overweight,超重,超重,Перегрузка
+ui.debuff.movement_blocked,无法移动,無法移動,Движение заблокировано
+ui.debuff.bleeding,出血,出血,Кровотечение
+ui.common.ok,确定,確定,ОК
+ui.common.cancel,取消,取消,Отмена
+ui.common.confirm,确认,確認,Подтвердить
+ui.common.back,返回,返回,Назад
+ui.common.delete,删除,刪除,Удалить
+ui.common.continue,继续,繼續,Продолжить
+ui.common.no_item,没有物品,沒有物品,Нет предмета
+ui.common.item_fallback,物品 {0},物品 {0},Предмет {0}
+ui.common.container_fallback,容器,容器,Контейнер
+ui.common.unimplemented,尚未实现,尚未實現,Не реализовано
+ui.toast.save_slot_deleted,已删除,已刪除,Удалено
+ui.toast.quest_completed,任务完成：{0},任務完成：{0},Задание выполнено: {0}
+ui.toast.quest_completed_generic,任务完成,任務完成,Задание выполнено
+ui.toast.quest_accepted,已接取任务：{0},已接取任務：{0},Задание принято: {0}
+ui.toast.quest_accepted_generic,已接取任务,已接取任務,Задание принято
+ui.toast.facility_unlocked,设施已解锁：{0},設施已解鎖：{0},Объект открыт: {0}
+ui.title.continue,继续,繼續,Продолжить
+ui.title.new_game,新游戏,新遊戲,Новая игра
+ui.title.slot_select,选择存档,選擇存檔,Выбор сохранения
+ui.title.settings,设置,設置,Настройки
+ui.title.quit,退出,退出,Выход
+ui.title.wishlist,加入愿望单,加入願望單,Добавить в список желаемого
+ui.title.primary_save_slot,选择存档栏位,選擇存檔欄位,Выберите ячейку сохранения
+ui.title.delete_hold,长按删除,長按刪除,"Удерживайте, чтобы удалить"
+ui.title.delete_confirm_title,删除栏位,刪除欄位,Удалить ячейку
+ui.title.delete_confirm_message,删除选中的存档数据吗？,刪除選中的存檔數據嗎？,Удалить выбранное сохранение?
+ui.title.slot_label,栏位 {0},欄位 {0},Ячейка {0}
+ui.title.empty_slot,空栏位,空欄位,Пустая ячейка
+ui.title.start_new_game,开始新游戏,開始新遊戲,Начать новую игру
+ui.title.has_progress_data,已有进度数据,已有進度數據,Сохранение уже существует
+ui.title.play_time_pattern,游戏时间：{0},遊戲時間：{0},Время игры: {0}
+ui.title.difficulty_pattern,难度：{0},難度：{0},Сложность: {0}
+ui.title.difficulty.farming,搜集,蒐集,Сбор ресурсов
+ui.settings.graphics,画面,畫面,Графика
+ui.settings.interface,界面,界面,Интерфейс
+ui.settings.current_graphics,当前：{0} / {1}×{2} / DLSS {3},當前：{0} / {1}×{2} / DLSS {3},Текущие: {0} / {1}×{2} / DLSS {3}
+ui.settings.current_language,当前语言：{0},當前語言：{0},Текущий язык: {0}
+ui.settings.window_mode,窗口模式,窗口模式,Режим окна
+ui.settings.windowed,窗口,窗口,Оконный режим
+ui.settings.borderless,无边框窗口,無邊框窗口,Окно без рамки
+ui.settings.fullscreen,全屏,全屏,Полный экран
+ui.settings.resolution,分辨率,分辨率,Разрешение
+ui.settings.dlss,DLSS,DLSS,DLSS
+ui.settings.dlss.off,关闭,關閉,Выкл.
+ui.settings.dlss.quality,画质,畫質,Качество
+ui.settings.dlss.balanced,平衡,平衡,Сбалансированный
+ui.settings.dlss.performance,性能,性能,Производительность
+ui.settings.dlss.unavailable,不可用,不可用,Недоступно
+ui.settings.language,语言,語言,Язык
+ui.settings.development.save_data_title,存档管理,存檔管理,Управление сохранениями
+ui.settings.development.save_data_exists,当前栏位 {0}：已有存档,當前欄位 {0}：已有存檔,Текущая ячейка {0}: сохранение есть
+ui.settings.development.no_save_data,当前栏位 {0}：没有存档,當前欄位 {0}：沒有存檔,Текущая ячейка {0}: сохранения нет
+ui.settings.development.delete_current_save,立即删除当前栏位存档,立即刪除當前欄位存檔,Удалить сохранение в текущей ячейке
+ui.toast.save_delete_failed,删除存档失败。,刪除存檔失敗。,Не удалось удалить сохранение.
+ui.hud.mode.inventory,背包,揹包,Инвентарь
+ui.hud.mode.quest,任务,任務,Задания
+ui.hud.mode.map,地图,地圖,Карта
+ui.hud.mode.memo,备忘录,備忘錄,Записки
+ui.hud.mode.research,研究,研究,Исследование
+ui.research.requirement,需要完成的研究节点：{0},需要完成的研究節點：{0},Требуется завершённых исследований: {0}
+ui.research.remaining_time,{0}:{1},{0}:{1},{0}:{1}
+ui.research.action.locked,未解锁,未解鎖,Заблокировано
+ui.research.action.start,开始研究,開始研究,Начать исследование
+ui.research.action.researching,研究中,研究中,Исследование идёт
+ui.research.action.complete,完成,完成,Завершено
+ui.research.action.applied,已应用,已應用,Применено
+ui.research.status,已应用 {0} / {1},已應用 {0} / {1},Применено {0} / {1}
+ui.hud.quick_slot_guide,将物品拖入栏位即可设置快捷栏,將物品拖入欄位即可設置快捷欄,Перетащите предметы в ячейки быстрого доступа.
+ui.hud.reload_prompt,装填,裝填,Перезарядить
+ui.hud.ammo_unset,未装备弹药,未裝備彈藥,Патроны не выбраны
+ui.hud.health_pattern,生命值 {0} / {1},生命值 {0} / {1},Здоровье {0} / {1}
+ui.hud.food_pattern,饱腹度 {0},飽腹度 {0},Сытость {0}
+ui.hud.hydration_pattern,饮水值 {0},飲水值 {0},Жажда {0}
+ui.inventory.weight_label,负重,負重,Вес снаряжения
+ui.inventory.weight_pattern,{0}/{1} 千克,{0}/{1} 千克,{0}/{1} кг
+ui.inventory.title,背包,揹包,Инвентарь
+ui.inventory.overweight,超重,超重,Перегрузка
+ui.inventory.sort,整理,整理,Сортировать
+ui.inventory.slot.gun1,武器 1,武器 1,Оружие 1
+ui.inventory.slot.gun2,武器 2,武器 2,Оружие 2
+ui.inventory.slot.melee,近战武器,近戰武器,Ближний бой
+ui.inventory.slot.head,头部,頭部,Голова
+ui.inventory.slot.body,身体,身體,Тело
+ui.inventory.slot.face,面部,面部,Лицо
+ui.inventory.slot.ear,耳机,耳機,Наушники
+ui.inventory.slot.bag,背包,揹包,Рюкзак
+ui.inventory.slot.generic,栏位 {0},欄位 {0},Ячейка {0}
+ui.item_info.attachment_magazine,弹匣,彈匣,Магазин
+ui.item_info.attachment_optic,瞄具,瞄具,Прицел
+ui.item_info.attachment_tactical,战术配件,戰術配件,Тактический модуль
+ui.item_info.mod,模块,模塊,Модуль
+ui.item_info.attachments,配件,配件,Модули
+ui.item_info.rifle_modding,步枪配件：扩容弹匣／瞄具／战术配件,步槍配件：擴容彈匣／瞄具／戰術配件,Модули винтовки: увеличенный магазин / прицел / тактический модуль
+ui.item_info.weapon_modding,武器模块,武器模塊,Модули оружия
+ui.item_hover.take,拾取／放置,拾取／放置,Взять / положить
+ui.item_hover.use,使用,使用,Использовать
+ui.item_hover.drop,丢弃,丟棄,Выбросить
+ui.item_hover.split_drag,+ 拖动：拆分,+ 拖動：拆分,+ перетаскивание: разделить
+ui.item_hover.assign_dismantle_target,指定拆解栏位,指定拆解欄位,Назначить ячейку разборки
+ui.item_hover.assign_blueprint_target,指定蓝图栏位,指定藍圖欄位,Назначить ячейку чертежа
+ui.item_hover.name_pattern,{0} #{1},{0} #{1},{0} #{1}
+ui.item_hover.weight_kg_pattern,{0} 千克,{0} 千克,{0} кг
+ui.item_hover.price_pattern,{0},{0},{0}
+ui.item_hover.buy,按 F 购买,按 F 購買,Купить: F
+ui.item_hover.craft,制作,製作,Создать
+ui.item_hover.sort_lock,锁定排序,鎖定排序,Заблокировать сортировку
+ui.item_hover.sort_unlock,解除排序锁定,解除排序鎖定,Разрешить сортировку
+ui.shop.title,商店,商店,Магазин
+ui.shop.debug_refresh_stock,刷新,刷新,Обновить
+ui.shop.sell_button,按 F 出售,按 F 出售,Продать: F
+ui.storage.title,仓库,倉庫,Хранилище
+ui.storage.filter.all,全部,全部,Все
+ui.storage.filter.weapon,武器,武器,Оружие
+ui.storage.filter.ammo,弹药,彈藥,Патроны
+ui.storage.filter.attachment,配件,配件,Модуль
+ui.storage.filter.consumable,消耗品,消耗品,Расходники
+ui.storage.filter.gear,装备,裝備,Снаряжение
+ui.storage.filter.material,材料,材料,Материалы
+ui.storage.filter.blueprint,蓝图,藍圖,Чертёж
+ui.storage.filter.other,其他,其他,Прочее
+ui.workbench.craft,制作,製作,Создать
+ui.workbench.dismantle,拆解,拆解,Разобрать
+ui.workbench.blueprint_register,登记蓝图,登記藍圖,Зарегистрировать чертёж
+ui.workbench.no_ingredients,没有材料,沒有材料,Нет материалов
+ui.workbench.no_dismantle_results,没有可拆解的物品,沒有可拆解的物品,Нет предметов для разборки
+ui.workbench.blueprint_already_known,已登记,已登記,Уже зарегистрировано
+ui.workbench.dismantle_target,拆解物品,拆解物品,Разобрать предмет
+ui.workbench.blueprint_target,待登记蓝图,待登記藍圖,Чертёж для регистрации
+ui.shop.sell_price_pattern,出售 {0},出售 {0},Продать за {0}
+ui.split.title,拆分数量,拆分數量,Разделить количество
+ui.split.guide,输入拆分数量（1～{0}）,輸入拆分數量（1～{0}）,Введите количество для разделения (1–{0})
+ui.memo.title,备忘录,備忘錄,Записка
+ui.memo.list_title,备忘录列表,備忘錄列表,Список записок
+ui.memo.none,还没有获得备忘录。,還沒有獲得備忘錄。,Записок пока нет.
+ui.dialogue.continue,继续,繼續,Продолжить
+ui.scenario.title,重启日志,重啓日誌,Журнал перезагрузки
+ui.scenario.status,B-07 地堡／紧急唤醒,B-07 地堡／緊急喚醒,Бункер B-07 / аварийное пробуждение
+ui.scenario.prompt,点击继续,點擊繼續,"Нажмите, чтобы продолжить"
+ui.scenario.monologue1,记忆数据损坏。,記憶數據損壞。,Данные памяти повреждены.
+ui.scenario.monologue2,位置已确认……B-07 地堡。,位置已確認……B-07 地堡。,Местоположение подтверждено... бункер B-07.
+ui.scenario.monologue3,生存系统已重启。,生存系統已重啓。,Системы жизнеобеспечения перезапущены.
+ui.scenario.monologue4,电力不足。内部系统不稳定。,電力不足。內部系統不穩定。,Нехватка энергии. Внутренние системы нестабильны.
+ui.scenario.monologue5,还能移动。,還能移動。,Двигаться всё ещё могу.
+ui.scenario.monologue6,得先查看这里。,得先查看這裏。,Сначала нужно осмотреться.
+ui.interaction.default,互动,互動,Взаимодействовать
+ui.interaction.inspect,调查,調查,Осмотреть
+ui.interaction.research,研究,研究,Исследование
+ui.interaction.open,打开,打開,Открыть
+ui.interaction.repair,修理,修理,Починить
+ui.interaction.door,门,門,Дверь
+ui.interaction.broken_bridge,断桥,斷橋,Разрушенный мост
+ui.interaction.wood,木材,木材,Древесина
+ui.interaction.memo,备忘录,備忘錄,Записка
+ui.interaction.travel,前往,前往,Перейти
+ui.interaction.item_spawn,生成物品,生成物品,Создать предмет
+ui.interaction.container_spawn,生成容器,生成容器,Создать контейнер
+ui.interaction.self_destruct,自毁,自毀,Самоуничтожение
+ui.interaction.piggy_bank,给我钱,給我錢,Дай мне деньги
+ui.interaction.piggy_bank_deposit,存入,存入,Положить
+ui.interaction.piggy_bank_withdraw,取出,取出,Снять
+ui.interaction.housing_management,设施管理,設施管理,Управление объектами
+ui.interaction.storage_open,打开仓库,打開倉庫,Открыть хранилище
+ui.interaction.shop_open,商店,商店,Магазин
+ui.interaction.difficulty_adjustment,调整难度,調整難度,Изменить сложность
+ui.interaction.workbench_open,工作台,工作臺,Верстак
+ui.interaction.workbench_craft,制作,製作,Создать
+ui.interaction.workbench_dismantle,拆解,拆解,Разобрать
+ui.interaction.workbench_blueprint_register,登记蓝图,登記藍圖,Зарегистрировать чертёж
+ui.transition.returning_to_bunker,正在返回地堡,正在返回地堡,Возвращение в бункер
+ui.raid_experience.header,突袭经验,突襲經驗,Опыт рейда
+ui.raid_experience.level_pattern,等级 {0},等級 {0},Уровень {0}
+ui.raid_experience.max_level,最高等级,最高等級,Максимальный уровень
+ui.raid_experience.exp_pattern,{0} / {1} 经验值,{0} / {1} 經驗值,{0} / {1} опыта
+ui.raid_experience.gain_pattern,+{0} 经验值,+{0} 經驗值,+{0} опыта
+ui.raid_experience.calculating,正在结算突袭奖励……,正在結算突襲獎勵……,Подсчёт наград за рейд...
+ui.raid_experience.return_ready,按任意键或点击鼠标返回地堡,按任意鍵或點擊鼠標返回地堡,"Нажмите любую клавишу или кнопку мыши, чтобы вернуться в бункер."
+ui.raid_experience.loading_bunker,正在加载地堡……,正在加載地堡……,Загрузка бункера...
+ui.housing.title,地堡设施,地堡設施,Обустройство бункера
+ui.housing.guide.place,用 Q/E 旋转。点击地面放置。,用 Q/E 旋轉。點擊地面放置。,"Поворачивайте клавишами Q/E. Щёлкните по полу, чтобы разместить."
+ui.housing.guide.select,点击已存放或可建造的设施。长按已放置设施可将其收起。,點擊已存放或可建造的設施。長按已放置設施可將其收起。,"Выберите объект на хранении или готовый к постройке. Удерживайте размещённый объект, чтобы убрать его."
+ui.housing.no_materials,无需材料,無需材料,Материалы не нужны
+ui.housing.ready_to_build,可以建造,可以建造,Готово к постройке
+ui.housing.stored,已存放,已存放,На хранении
+ui.housing.placed_hold_to_store,已放置，长按收起,已放置，長按收起,"Размещено — удерживайте, чтобы убрать"
+ui.housing.need_materials,需要材料,需要材料,Нужны материалы
+ui.housing.facility.workbench,工作台,工作臺,Верстак
+ui.housing.facility.workbench.desc,用于制作物品和修理的工作台。,用於製作物品和修理的工作臺。,Рабочая поверхность для создания предметов и ремонта.
+ui.housing.facility.piggy_bank,储蓄罐,儲蓄罐,Копилка
+ui.housing.facility.piggy_bank.desc,可存放古代硬币和纸币的储蓄罐。,可存放古代硬幣和紙幣的儲蓄罐。,Копилка для хранения древних монет и банкнот.
+ui.housing.facility.signal_control,信号控制设施,信號控制設施,Центр связи
+ui.housing.facility.signal_control.desc,用于地图和传送点管理的地堡控制台。,用於地圖和傳送點管理的地堡控制檯。,Консоль бункера для работы с картой и точками телепортации.
+ui.housing.facility.supply,补给设施,補給設施,Пункт снабжения
+ui.housing.facility.supply.desc,储存食品和消耗品的地堡设施。,儲存食品和消耗品的地堡設施。,Пункт бункера с пищевыми продуктами и расходниками.
+ui.interaction.boom,轰！,轟！,Бум!
+ui.notification.rescue_cart,救护车正在返回,救護車正在返回,Спасательная тележка возвращается
+ui.interaction.mole_dialogue,对话,對話,Диалог
+ui.quest.interaction_name,任务,任務,Задание
+ui.map_overlay.start_location,起点,起點,Стартовая позиция
+ui.map_overlay.extraction_point,撤离点,撤離點,Точка эвакуации
+ui.map_marker.help,右键点击：添加标记／右键点击已有标记：删除,右鍵點擊：添加標記／右鍵點擊已有標記：刪除,Правая кнопка мыши: добавить метку / нажать на существующую метку: удалить
+ui.enemy.status.reload,装填中,裝填中,Перезарядка
+ui.common.confirm,确认,確認,Подтвердить
+ui.title.demo_label,试玩版,試玩版,Демоверсия
+ui.title.demo_notice_title,试玩版须知,試玩版須知,О демоверсии
+ui.title.demo_notice_message,试玩版的存档无法继承至完整版。,試玩版的存檔無法繼承至完整版。,Сохранения демоверсии не переносятся в полную игру.
+ui.toast.load_failed,读取存档失败。,讀取存檔失敗。,Не удалось загрузить сохранение.
+ui.toast.save_failed,创建存档失败。,創建存檔失敗。,Не удалось создать сохранение.
+ui.interaction.clear_debris,清除杂物,清除雜物,Убрать мусор
+ui.interaction.take_crowbar,拾取撬棍,拾取撬棍,Взять лом
+ui.interaction.take_tuna_can,拾取金枪鱼罐头,拾取金槍魚罐頭,Взять банку тунца
+ui.demo_ending.farewell_title,完整版再见,完整版再見,До встречи в полной игре
+ui.demo_ending.return_to_title,按任意键返回标题画面,按任意鍵返回標題畫面,"Нажмите любую клавишу, чтобы вернуться на главный экран."
+ui.common.apply,应用,應用,Применить
+ui.common.keep,保留,保留,Сохранить
+ui.common.revert,恢复原设置,恢復原設置,Вернуть прежние настройки
+ui.settings.preset.auto,自动,自動,Авто
+ui.settings.preset.low,低,低,Низкое
+ui.settings.preset.medium,中,中,Среднее
+ui.settings.preset.high,高,高,Высокое
+ui.settings.preset.epic,极高,極高,Эпическое
+ui.settings.preset.custom,自定义,自定義,Пользовательское
+ui.settings.texture,纹理,紋理,Текстуры
+ui.settings.shadow,阴影,陰影,Тени
+ui.settings.global_illumination,全局光照,全局光照,Глобальное освещение
+ui.settings.reflection,反射,反射,Отражения
+ui.settings.view_distance,视距,視距,Дальность видимости
+ui.settings.effects,特效,特效,Эффекты
+ui.settings.post_process,后期处理,後期處理,Постобработка
+ui.settings.foliage,植被,植被,Растительность
+ui.settings.shading,着色,着色,Затенение
+ui.settings.landscape,地形,地形,Ландшафт
+ui.settings.anti_aliasing,抗锯齿,抗鋸齒,Сглаживание
+ui.settings.vsync,垂直同步,垂直同步,Вертикальная синхронизация
+ui.settings.motion_blur,动态模糊,動態模糊,Размытие движения
+ui.settings.dynamic_resolution,动态分辨率,動態分辨率,Динамическое разрешение
+ui.settings.hardware_ray_tracing,硬件光线追踪,硬件光線追蹤,Аппаратная трассировка лучей
+ui.settings.fps_unlimited,无限制,無限制,Без ограничений
+ui.settings.resolution_confirm_countdown,保留这些显示设置吗？{0} 秒后将恢复原设置。,保留這些顯示設置嗎？{0} 秒後將恢復原設置。,Сохранить настройки экрана? Возврат к прежним через {0} сек.
+research.node.vitality_1.name,基础生命力,基礎生命力,Основы выживания
+research.node.vitality_1.description,生命值上限 +5。,生命值上限 +5。,Максимум здоровья +5.
+research.node.nutrition_1.name,食物储备 I,食物儲備 I,Запас пищи I
+research.node.nutrition_1.description,饱腹度上限 +5。,飽腹度上限 +5。,Максимум сытости +5.
+research.node.hydration_1.name,饮水储备 I,飲水儲備 I,Запас воды I
+research.node.hydration_1.description,饮水值上限 +5。,飲水值上限 +5。,Максимум запаса воды +5.
+research.node.vitality_2.name,生命力强化 I,生命力強化 I,Укрепление здоровья I
+research.node.vitality_2.description,生命值上限 +10。,生命值上限 +10。,Максимум здоровья +10.
+research.node.stamina_1.name,耐力 I,耐力 I,Выносливость I
+research.node.stamina_1.description,耐力上限 +5。,耐力上限 +5。,Максимум выносливости +5.
+research.node.carry_1.name,负重技巧 I,負重技巧 I,Переноска грузов I
+research.node.carry_1.description,负重能力 +1。,負重能力 +1。,Грузоподъёмность +1.
+research.node.nutrition_2.name,食物储备 II,食物儲備 II,Запас пищи II
+research.node.nutrition_2.description,饱腹度上限 +10。,飽腹度上限 +10。,Максимум сытости +10.
+research.node.hydration_2.name,饮水储备 II,飲水儲備 II,Запас воды II
+research.node.hydration_2.description,饮水值上限 +10。,飲水值上限 +10。,Максимум запаса воды +10.
+research.node.vitality_3.name,生命力强化 II,生命力強化 II,Укрепление здоровья II
+research.node.vitality_3.description,生命值上限 +15。,生命值上限 +15。,Максимум здоровья +15.
+research.node.stamina_2.name,耐力 II,耐力 II,Выносливость II
+research.node.stamina_2.description,耐力上限 +10。,耐力上限 +10。,Максимум выносливости +10.
+research.node.carry_2.name,负重技巧 II,負重技巧 II,Переноска грузов II
+research.node.carry_2.description,负重能力 +2。,負重能力 +2。,Грузоподъёмность +2.
+research.node.survival_mastery.name,生存精通,生存精通,Мастерство выживания
+research.node.survival_mastery.description,所有生存属性上限 +10。,所有生存屬性上限 +10。,Все максимальные показатели выживания +10.
+research.node.ultimate_conditioning.name,极限训练,極限訓練,Предел возможностей
+research.node.ultimate_conditioning.description,生命值和耐力上限 +20，负重能力 +2。,生命值和耐力上限 +20，負重能力 +2。,"Максимум здоровья и выносливости +20, грузоподъёмность +2."
+research.node.weapon_burn_1.name,步枪燃烧强化 I,步槍燃燒強化 I,Усиление поджога винтовки I
+research.node.weapon_burn_1.description,步枪引燃效果延长 1 秒，每次灼烧伤害增加基础伤害的 25%。,步槍引燃效果延長 1 秒，每次灼燒傷害增加基礎傷害的 25%。,Поджог винтовки длится на 1 секунду дольше. Урон каждого тика увеличивается на 25% от базового.
+research.node.ammo_burn_1.name,燃烧弹药 I,燃燒彈藥 I,Зажигательные патроны I
+research.node.ammo_burn_1.description,步枪弹药的引燃效果延长 1 秒，每次灼烧伤害增加基础伤害的 25%。,步槍彈藥的引燃效果延長 1 秒，每次灼燒傷害增加基礎傷害的 25%。,Поджог винтовочных патронов длится на 1 секунду дольше. Урон каждого тика увеличивается на 25% от базового.
+research.node.weapon_burn_2.name,步枪燃烧强化 II,步槍燃燒強化 II,Усиление поджога винтовки II
+research.node.weapon_burn_2.description,步枪引燃效果再延长 1 秒，每次灼烧伤害再增加基础伤害的 25%。,步槍引燃效果再延長 1 秒，每次灼燒傷害再增加基礎傷害的 25%。,Поджог винтовки длится ещё на 1 секунду дольше. Урон каждого тика дополнительно увеличивается на 25% от базового.
+research.node.ammo_burn_2.name,燃烧弹药 II,燃燒彈藥 II,Зажигательные патроны II
+research.node.ammo_burn_2.description,步枪弹药的引燃效果再延长 1 秒，每次灼烧伤害再增加基础伤害的 25%。,步槍彈藥的引燃效果再延長 1 秒，每次灼燒傷害再增加基礎傷害的 25%。,Поджог винтовочных патронов длится ещё на 1 секунду дольше. Урон каждого тика дополнительно увеличивается на 25% от базового.
+ui.settings.preset,整体画质预设,整體畫質預設,Общий уровень качества
+ui.settings.frame_rate,帧率上限,幀率上限,Ограничение частоты кадров
+ui.settings.individual_quality,详细画质设置,詳細畫質設置,Отдельные настройки качества
+ui.settings.performance_effects,性能与特效,性能與特效,Производительность и эффекты
+ui.settings.preset.auto_details,{0}（{1}，显存 {2} MB）,{0}（{1}，顯存 {2} MB）,"{0} ({1}, видеопамять {2} МБ)"
+ui.settings.pending_suffix, · 等待应用, · 等待應用, · Ожидает применения
+ui.settings.fps_value,{0} FPS,{0} FPS,{0} FPS
+ui.settings.unavailable_suffix,{0}（不可用）,{0}（不可用）,{0} (недоступно)
+ui.language.english,英语,英語,Английский
+ui.language.korean,韩语,韓語,Корейский
+ui.language.japanese,日本語,日本語,Японский
+ui.settings.development,开发选项,開發選項,Настройки разработчика
+ui.settings.development.enemy_combat_debug,敌人战斗调试,敵人戰鬥調試,Отладка поведения врагов
+ui.settings.development.debug_display_language,调试显示语言,調試顯示語言,Язык отладочного интерфейса
+ui.settings.development.piggy_bank,储蓄罐,儲蓄罐,Копилка
+ui.settings.development.always_slow_presentation,始终使用慢速演出,始終使用慢速演出,Всегда показывать замедленную анимацию
+ui.difficulty.select_title,选择难度,選擇難度,Выберите сложность
+ui.difficulty.adjust_title,更改难度,更改難度,Изменить сложность
+ui.difficulty.start,开始,開始,Начать
+ui.settings.resolution_value,{0} × {1},{0} × {1},{0} × {1}
+ui.combat_lab.status,战斗实验室 · 第 {0} 轮 · {1} · 敌人 {2},戰鬥實驗室 · 第 {0} 輪 · {1} · 敵人 {2},Боевая лаборатория · Раунд {0} · {1} · врагов: {2}
+ui.combat_lab.metrics,{0} 秒 · 弹丸 {1}／敌人 {2} · 受到伤害 {3},{0} 秒 · 彈丸 {1}／敵人 {2} · 受到傷害 {3},{0} с · Снарядов {1} / врагов {2} · Получено урона {3}
+ui.combat_lab.controls,F6 自动／手动 · Home 重启 · F8 敌人状态 · WASD 移动 · 鼠标开火,F6 自動／手動 · Home 重啓 · F8 敵人狀態 · WASD 移動 · 鼠標開火,F6 Авто/ручной · Home Перезапуск · F8 Состояние врага · WASD Движение · Мышь Огонь
+ui.combat_lab.manual,手动控制,手動控制,Ручное управление
+ui.combat_lab.seek,搜索中,搜索中,Поиск
+ui.combat_lab.engage,交战中,交戰中,В бою
+ui.combat_lab.reload,装填中,裝填中,Перезарядка
+ui.combat_lab.dodge,闪避中,閃避中,Уклонение
+ui.combat_lab.ready,准备中,準備中,Подготовка
+ui.combat_lab.win,胜利 · 准备下一轮,勝利 · 準備下一輪,Победа · Подготовка к следующему раунду
+ui.combat_lab.loss,失败 · 准备下一轮,失敗 · 準備下一輪,Поражение · Подготовка к следующему раунду
+ui.combat_lab.timeout,时间耗尽 · 重新尝试,時間耗盡 · 重新嘗試,Время вышло · Повторная попытка
+ui.combat_lab.reset,重置中,重置中,Сброс
+ui.combat_lab.stopped,已停止,已停止,Остановлено
+ui.combat_lab.error,检查战斗放置位置,檢查戰鬥放置位置,Проверьте размещение бойцов
+ui.tutorial.page.1,操作说明 1 / 3,操作說明 1 / 3,УПРАВЛЕНИЕ 1 / 3
+ui.tutorial.page.2,操作说明 2 / 3,操作說明 2 / 3,УПРАВЛЕНИЕ 2 / 3
+ui.tutorial.page.3,操作说明 3 / 3,操作說明 3 / 3,УПРАВЛЕНИЕ 3 / 3
+ui.tutorial.basics.title,迈出第一步,邁出第一步,Первые шаги
+ui.tutorial.combat.title,在战斗中生存,在戰鬥中生存,Выжить в бою
+ui.tutorial.items.title,搜集与恢复,蒐集與恢復,Добыча и восстановление
+ui.tutorial.move.title,移动,移動,Движение
+ui.tutorial.move.body,使用 <key>WASD</> 探索周围。,使用 <key>WASD</> 探索周圍。,"Используйте <key>WASD</>, чтобы осмотреться."
+ui.tutorial.interact.title,互动,互動,Взаимодействовать
+ui.tutorial.interact.body,靠近物体并按 <key>F</> 互动。,靠近物體並按 <key>F</> 互動。,"Подойдите к объекту и нажмите <key>F</>, чтобы взаимодействовать."
+ui.tutorial.fire.title,开火,開火,Стрельба
+ui.tutorial.fire.body,用鼠标瞄准，按 <key>鼠标左键</> 开火。,用鼠標瞄準，按 <key>鼠標左鍵</> 開火。,"Цельтесь мышью и нажмите <key>левую кнопку мыши</>, чтобы стрелять."
+ui.tutorial.reload.title,装填,裝填,Перезарядить
+ui.tutorial.reload.body,按 <key>R</> 装填。留意剩余弹药。,按 <key>R</> 裝填。留意剩餘彈藥。,"Нажмите <key>R</>, чтобы перезарядить оружие. Следите за патронами."
+ui.tutorial.dodge.title,翻滚闪避,翻滾閃避,Перекат
+ui.tutorial.dodge.body,按 <key>空格</> 翻滚躲避敌人的攻击。,按 <key>空格</> 翻滾躲避敵人的攻擊。,"Нажмите <key>Пробел</>, чтобы уклониться от атаки врага."
+ui.tutorial.sprint.title,奔跑,奔跑,Бег
+ui.tutorial.sprint.body,移动时按住 <key>左 Shift</> 奔跑。,移動時按住 <key>左 Shift</> 奔跑。,"Удерживайте <key>левый Shift</> при движении, чтобы бежать."
+ui.tutorial.loot.title,收集物资,收集物資,Собрать добычу
+ui.tutorial.loot.body,按 <key>F</> 打开容器并收集物资。,按 <key>F</> 打開容器並收集物資。,"Нажмите <key>F</>, чтобы открыть контейнер и забрать припасы."
+ui.tutorial.inventory.title,背包,揹包,Инвентарь
+ui.tutorial.inventory.body,按 <key>Tab</> 打开背包，查看物资。,按 <key>Tab</> 打開揹包，查看物資。,"Нажмите <key>Tab</>, чтобы открыть инвентарь и проверить припасы."
+ui.interaction.tutorial_review,操作说明,操作說明,Управление
+ui.tutorial.heal.title,治疗,治療,Лечение
+ui.tutorial.heal.body,将光标移到背包中的治疗物品上，按 <key>U</> 使用。,將光標移到揹包中的治療物品上，按 <key>U</> 使用。,"Наведите курсор на лечебный предмет в инвентаре и нажмите <key>U</>, чтобы использовать его."
+ui.coop.title,在线合作,在線合作,Совместная игра
+ui.coop.description,双人连接测试大厅。合作游戏进度不会保存。,雙人連接測試大廳。合作遊戲進度不會保存。,Тестовое лобби для двух игроков. Прогресс совместной игры не сохраняется.
+ui.coop.host,创建房间,創建房間,Создать комнату
+ui.coop.join_code,邀请码,邀請碼,Код приглашения
+ui.coop.join,输入代码加入,輸入代碼加入,Войти по коду
+ui.coop.leave,离开／取消,離開／取消,Выйти / отменить
+ui.coop.close,关闭,關閉,Закрыть
+ui.coop.code_hint,输入 8 位代码,輸入 8 位代碼,Введите 8-значный код
+ui.coop.no_code,创建房间后即可获得邀请码。,創建房間後即可獲得邀請碼。,"Создайте комнату, чтобы получить код приглашения."
+ui.coop.code_pattern,邀请码：{0},邀請碼：{0},Код приглашения: {0}
+ui.coop.status.Offline,离线,離線,Не в сети
+ui.coop.status.Initializing,正在初始化……,正在初始化……,Инициализация...
+ui.coop.status.Authenticating,正在验证身份……,正在驗證身份……,Проверка подлинности...
+ui.coop.status.Ready,就绪,就緒,Готово
+ui.coop.status.Creating,正在创建房间……,正在創建房間……,Создание комнаты...
+ui.coop.status.Hosting,正在等待好友,正在等待好友,Ожидание друга
+ui.coop.status.Searching,正在搜索……,正在搜索……,Поиск...
+ui.coop.status.Joining,正在加入……,正在加入……,Подключение...
+ui.coop.status.Connected,已连接,已連接,Подключено
+ui.coop.status.Failed,连接失败,連接失敗,Ошибка подключения
+ui.coop.status.Leaving,正在离开会话……,正在離開會話……,Выход из сеанса...
+ui.coop.error.SubsystemUnavailable,在线服务不可用。请检查 EOS 配置。,在線服務不可用。請檢查 EOS 配置。,Сетевой сервис недоступен. Проверьте настройки EOS.
+ui.coop.error.AuthenticationFailed,身份验证失败，请重试。,身份驗證失敗，請重試。,Ошибка проверки подлинности. Повторите попытку.
+ui.coop.error.InvalidInviteCode,请检查 8 位邀请码。,請檢查 8 位邀請碼。,Проверьте 8-значный код приглашения.
+ui.coop.error.SessionCreateFailed,无法创建房间，请重试。,無法創建房間，請重試。,Не удалось создать комнату. Повторите попытку.
+ui.coop.error.SessionSearchFailed,无法搜索房间，请重试。,無法搜索房間，請重試。,Не удалось найти комнаты. Повторите попытку.
+ui.coop.error.CodeNotFound,找不到邀请码。,找不到邀請碼。,Код приглашения не найден.
+ui.coop.error.RoomFull,房间已满。,房間已滿。,Комната заполнена.
+ui.coop.error.VersionMismatch,你的游戏版本与房主不同。,你的遊戲版本與房主不同。,Ваша версия игры отличается от версии хозяина комнаты.
+ui.coop.error.JoinFailed,无法加入房间，请重试。,無法加入房間，請重試。,Не удалось войти в комнату. Повторите попытку.
+ui.coop.error.ResolveConnectStringFailed,无法解析房主地址。,無法解析房主地址。,Не удалось определить адрес хозяина комнаты.
+ui.coop.error.TravelFailed,无法进入大厅，请重试。,無法進入大廳，請重試。,Не удалось перейти в лобби. Повторите попытку.
+ui.coop.error.OperationTimeout,在线请求超时。请等待清理完成或重启游戏后重试。,在線請求超時。請等待清理完成或重啓遊戲後重試。,Время ожидания сетевого запроса истекло. Дождитесь завершения очистки или перезапустите игру перед повторной попыткой.
+ui.coop.error.CodeCollision,无法生成邀请码，请重试。,無法生成邀請碼，請重試。,Не удалось назначить код приглашения. Повторите попытку.
+ui.coop.error.CleanupFailed,无法关闭会话，请再次尝试离开。,無法關閉會話，請再次嘗試離開。,Не удалось закрыть сеанс. Попробуйте выйти ещё раз.
+ui.coop.connect,连接在线服务,連接在線服務,Подключиться к сети
+ui.lab.title,实验室,實驗室,Лаборатория
+ui.lab.description,创造自己的首领，迎接挑战。,創造自己的首領，迎接挑戰。,Создайте собственного босса и примите вызов.
+ui.lab.development,首领开发,首領開發,Создание босса
+ui.lab.single,首领战（单人）,首領戰（單人）,Бой с боссом (один игрок)
+ui.lab.multiplayer,首领战（多人）,首領戰（多人）,Бой с боссом (несколько игроков)
+ui.lab.in_development,开发中,開發中,В разработке
+ui.boss_lab.module.core,核心,核心,Ядро
+ui.boss_lab.module.frame,框架,框架,Каркас
+ui.boss_lab.module.armor,装甲,裝甲,Броня
+ui.boss_lab.module.drive,驱动装置,驅動裝置,Привод
+ui.boss_lab.module.cannon,加农炮,加農炮,Пушка
+ui.boss_lab.module.missile,导弹,導彈,Ракета
+ui.boss_lab.module.laser,激光,激光,Лазер
+ui.boss_lab.error.invalid_definition,首领设计无效。,首領設計無效。,Недопустимая конструкция босса.
+ui.boss_lab.error.unsupported_version,不支持此设计版本。,不支持此設計版本。,Эта версия конструкции не поддерживается.
+ui.boss_lab.error.invalid_parts,部件或连接无效。,部件或連接無效。,Недопустимые детали или соединения.
+ui.boss_lab.error.limit,此设计超过允许的限制。,此設計超過允許的限制。,Конструкция превышает допустимые ограничения.
+ui.boss_lab.error.invalid_tactics,战术设置超出允许范围。,戰術設置超出允許範圍。,Тактические настройки выходят за допустимые пределы.
+ui.boss_lab.error.overlap,部件重叠。,部件重疊。,Детали перекрывают друг друга.
+ui.boss_lab.error.slot,请选择有效的首领栏位。,請選擇有效的首領欄位。,Выберите допустимую ячейку босса.
+ui.boss_lab.error.missing,此首领栏位为空。,此首領欄位爲空。,Эта ячейка босса пуста.
+ui.boss_lab.error.read,无法读取首领文件。,無法讀取首領文件。,Не удалось прочитать файл босса.
+ui.boss_lab.error.write,无法保存首领文件。,無法保存首領文件。,Не удалось сохранить файл босса.
+ui.boss_lab.error.delete,无法删除首领文件。,無法刪除首領文件。,Не удалось удалить файл босса.
+ui.boss_lab.development_title,首领开发,首領開發,Создание босса
+ui.boss_lab.single_title,首领战（单人）,首領戰（單人）,Бой с боссом (один игрок)
+ui.boss_lab.library,首领设计库,首領設計庫,Библиотека боссов
+ui.boss_lab.slot_format,{0} · {1},{0} · {1},{0} · {1}
+ui.boss_lab.empty_slot,空栏位,空欄位,Пустая ячейка
+ui.boss_lab.invalid_slot,设计无法读取,設計無法讀取,Не удалось прочитать конструкцию
+ui.boss_lab.refresh,刷新,刷新,Обновить
+ui.boss_lab.new,新建设计,新建設計,Новая конструкция
+ui.boss_lab.load,读取,讀取,Загрузить
+ui.boss_lab.save,保存,保存,Сохранить
+ui.boss_lab.duplicate,复制到空栏位,複製到空欄位,Копировать в пустую ячейку
+ui.boss_lab.delete,删除,刪除,Удалить
+ui.boss_lab.open_folder,打开设计库文件夹,打開設計庫文件夾,Открыть папку библиотеки
+ui.boss_lab.return_title,返回标题画面,返回標題畫面,На главный экран
+ui.boss_lab.play,开始战斗,開始戰鬥,Начать бой
+ui.boss_lab.test,测试战斗,測試戰鬥,Испытательный бой
+ui.boss_lab.name,首领名称,首領名稱,Имя босса
+ui.boss_lab.parts,已组装部件,已組裝部件,Собранные детали
+ui.boss_lab.part_format,{0} · {1},{0} · {1},{0} · {1}
+ui.boss_lab.parent,上级部件,上級部件,Родительская деталь
+ui.boss_lab.module,新部件,新部件,Новая деталь
+ui.boss_lab.socket,连接方向,連接方向,Направление соединения
+ui.boss_lab.yaw,旋转角度,旋轉角度,Угол поворота
+ui.boss_lab.add_part,连接部件,連接部件,Прикрепить деталь
+ui.boss_lab.remove_branch,移除部件及其分支,移除部件及其分支,Удалить деталь и её ответвление
+ui.boss_lab.tactics,战术,戰術,Тактика
+ui.boss_lab.balanced,平衡,平衡,Сбалансировано
+ui.boss_lab.keep_distance,保持距离,保持距離,Держать дистанцию
+ui.boss_lab.advance,向前推进,向前推進,Сближаться
+ui.boss_lab.attack_interval,攻击间隔（秒）,攻擊間隔（秒）,Интервал атак (сек.)
+ui.boss_lab.phase_threshold,第二阶段生命值阈值（%）,第二階段生命值閾值（%）,Порог здоровья для второй фазы (%)
+ui.boss_lab.alternate_weapons,交替使用武器,交替使用武器,Чередовать оружие
+ui.boss_lab.front,前,前,Спереди
+ui.boss_lab.back,后,後,Сзади
+ui.boss_lab.right,右,右,Справа
+ui.boss_lab.left,左,左,Слева
+ui.boss_lab.up,上,上,Сверху
+ui.boss_lab.down,下,下,Снизу
+ui.boss_lab.status_ready,设计已就绪。,設計已就緒。,Конструкция готова.
+ui.boss_lab.status_loaded,设计已读取。,設計已讀取。,Конструкция загружена.
+ui.boss_lab.status_saved,设计已保存。,設計已保存。,Конструкция сохранена.
+ui.boss_lab.status_deleted,首领栏位已删除。,首領欄位已刪除。,Ячейка босса удалена.
+ui.boss_lab.status_copied,已复制到空栏位。,已複製到空欄位。,Скопировано в пустую ячейку.
+ui.boss_lab.status_dirty,有尚未保存的更改。,有尚未保存的更改。,Есть несохранённые изменения.
+ui.boss_lab.confirm_discard,放弃尚未保存的更改吗？,放棄尚未保存的更改嗎？,Отменить несохранённые изменения?
+ui.boss_lab.confirm_overwrite,替换此栏位中的首领设计吗？,替換此欄位中的首領設計嗎？,Заменить конструкцию босса в этой ячейке?
+ui.boss_lab.confirm_delete,删除此栏位中的首领设计吗？,刪除此欄位中的首領設計嗎？,Удалить конструкцию босса из этой ячейки?
+ui.boss_lab.confirm_remove_branch,移除此部件及其所有子部件吗？,移除此部件及其所有子部件嗎？,Удалить эту деталь и все прикреплённые к ней дочерние детали?
+ui.boss_lab.confirm,确认,確認,Подтвердить
+ui.boss_lab.cancel,取消,取消,Отмена
+ui.boss_lab.select_saved_slot,选择已保存的首领，开始战斗。,選擇已保存的首領，開始戰鬥。,Выберите сохранённого босса для боя.
+ui.boss_lab.no_free_slot,没有空的首领栏位。,沒有空的首領欄位。,Нет свободных ячеек для боссов.
+ui.boss_lab.core_cannot_remove,无法移除核心。,無法移除核心。,Ядро нельзя удалить.
+ui.boss_lab.core_cannot_add,只能安装一个核心。,只能安裝一個核心。,Допускается только одно ядро.
+ui.boss_lab.socket_occupied,此处已有部件。,此處已有部件。,Здесь уже прикреплена деталь.
+ui.boss_lab.draft_summary,{0} · {1} 个部件,{0} · {1} 個部件,{0} · деталей: {1}
+ui.boss_lab.editing_hint,选择部件和连接方向，组装你的首领。,選擇部件和連接方向，組裝你的首領。,"Выберите деталь и направление соединения, чтобы собрать босса."
+ui.boss_lab.single_hint,读取已保存的首领并开始战斗。,讀取已保存的首領並開始戰鬥。,Загрузите сохранённого босса и начните бой.
+ui.boss_lab.rotate_left,向左旋转,向左旋轉,Повернуть влево
+ui.boss_lab.rotate_right,向右旋转,向右旋轉,Повернуть вправо
+ui.boss_lab.battle.ready,组装首领或选择已保存的首领。,組裝首領或選擇已保存的首領。,Соберите босса или выберите сохранённого.
+ui.boss_lab.battle.active,核心 {0} / {1} · 工作中的部件 {2},核心 {0} / {1} · 工作中的部件 {2},Ядро {0} / {1} · Активных деталей: {2}
+ui.boss_lab.battle.controls,WASD 移动 · 鼠标开火／瞄准 · 空格闪避 · R 装填 · Home／Esc 结束测试,WASD 移動 · 鼠標開火／瞄準 · 空格閃避 · R 裝填 · Home／Esc 結束測試,WASD — движение · Мышь — стрельба/прицел · Пробел — уклонение · R — перезарядка · Home/Esc — завершить тест
+ui.boss_lab.battle.victory,核心已摧毁 · 测试完成,核心已摧毀 · 測試完成,Ядро уничтожено · Испытание завершено
+ui.boss_lab.battle.defeat,测试结束 · 可以再试一次。,測試結束 · 可以再試一次。,Испытание завершено · Можно попробовать снова.
+ui.boss_lab.battle.stopped,测试已结束。,測試已結束。,Испытание завершено.
+ui.boss_lab.battle.spawn_failed,无法准备测试战斗。,無法準備測試戰鬥。,Не удалось подготовить испытательный бой.
+ui.boss_lab.battle.warning,攻击将至,攻擊將至,Входящая атака
+ui.boss_lab.unnamed,未命名首领,未命名首領,Безымянный босс
+ui.boss_lab.confirm_leave,不保存就返回标题画面吗？关闭游戏前仍可使用这份草稿。,不保存就返回標題畫面嗎？關閉遊戲前仍可使用這份草稿。,Вернуться на главный экран без сохранения? Черновик останется доступен до закрытия игры.
+ui.interaction.wardrobe_open,打开衣柜,打開衣櫃,Открыть гардероб
+ui.wardrobe.title,衣柜,衣櫃,Гардероб
+ui.wardrobe.subtitle,选择要穿的服装。,選擇要穿的服裝。,Выберите наряд.
+ui.wardrobe.outfit.maid,女仆装,女僕裝,Костюм горничной
+ui.wardrobe.outfit.school_uniform,校服,校服,Школьная форма
+ui.wardrobe.outfit.mechanic,机械师服,機械師服,Костюм механика
+ui.wardrobe.outfit.sportswear,运动服,運動服,Спортивная одежда
+ui.wardrobe.outfit.bunny_pajamas,兔子睡衣,兔子睡衣,Пижама-кролик
+ui.wardrobe.outfit.adventurer,冒险者服,冒險者服,Костюм искателя приключений
+ui.wardrobe.outfit.raincoat,雨衣,雨衣,Дождевик
+ui.wardrobe.outfit.scifi_suit,科幻服,科幻服,Фантастический костюм
+ui.wardrobe.equip,穿上,穿上,Надеть
+ui.wardrobe.equipped,穿着中,穿着中,Надето
+ui.wardrobe.close,关闭,關閉,Закрыть
+ui.wardrobe.apply_failed,无法更换服装。,無法更換服裝。,Не удалось сменить наряд.
+ui.wardrobe.locked,未解锁,未解鎖,Заблокировано
+ui.wardrobe.locked_hint,解锁此服装后即可穿上。,解鎖此服裝後即可穿上。,"Откройте этот наряд, чтобы надеть его."
+ui.wardrobe.preview,预览,預覽,Предпросмотр
+ui.wardrobe.unavailable,此服装目前不可用。,此服裝目前不可用。,Этот наряд сейчас недоступен.
