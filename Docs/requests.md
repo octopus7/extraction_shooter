@@ -9821,3 +9821,11 @@
 - 원인: 설치본 PAK의 BinaryConfig에는 TunaSweeper.ProgressTracker 섹션과 수집 Endpoint가 없다. 버전은 두 패키지 모두0.2.9200이라 화면 버전으로 구별되지 않는다. 별도 워크트리의 트래커 패키지가 Steam에 적용되지 않은 상태다.
 - 조치: 올바른 워크트리 Windows 폴더를 탐색기로 열었다. 설치본/운영 데이터/Steam 배포는 변경하지 않았으며 검증용 추출본은 제거했다. 올바른 패키지로 업로드 및 default 빌드 적용 필요.
 
+
+## 2026-10-01 00:15:33 (소요시간: 00:01:43)
+
+- 요청: D 경로 파일을 건드리지 않고 워크트리의 Steam Demo 업로드 파일만 수정.
+- 변경: 워크트리 app_5158070.vdf의 디폿 참조를 같은 폴더 상대경로, buildoutput을 ../output으로 변경. depot_5158071.vdf의 contentroot를 현재 워크트리 TunaSweeper/Builds/Steam/Demo/Windows로 해석되는 상대경로로 변경. BAT의 steam_appid.txt 제외 경로도 Steam/Demo/Windows로 수정하고 패키지 존재 검사·경로 출력을 추가했다.
+- 검증: 상대경로 해석 결과 및 Shipping 실행 파일 존재 확인. D 원본 BAT/VDF3개의 변경 전후 SHA256 일치. git diff --check 통과. SteamCMD/로그인/업로드는 실행하지 않았다.
+- 저장: SDK 아래 VDF2개는 기존 Git 무시 대상이라 로컬 워크트리 설정으로 유지. 추적 대상 BAT와 작업 기록을 함께 커밋.
+

@@ -8,7 +8,7 @@ set "STEAM_LOGIN_FILE=%STEAMWORKS_ROOT%\steamid.txt"
 set "CONTENT_BUILDER=%STEAMWORKS_ROOT%\sdk\tools\ContentBuilder"
 set "STEAMCMD=%CONTENT_BUILDER%\builder\steamcmd.exe"
 set "DEMO_VDF=%CONTENT_BUILDER%\scripts\app_5158070.vdf"
-set "STEAM_APPID_SOURCE=%~dp0Demo\Windows\TunaSweeper\Binaries\Win64\steam_appid.txt"
+set "STEAM_APPID_SOURCE=%~dp0Steam\Demo\Windows\TunaSweeper\Binaries\Win64\steam_appid.txt"
 set "STEAM_APPID_TEMP=%~dp0steam_appid.txt"
 set "STEAM_APPID_MOVED=0"
 
@@ -36,6 +36,13 @@ if not exist "%STEAMCMD%" (
 if not exist "%DEMO_VDF%" (
     echo [ERROR] Demo VDF not found:
     echo         %DEMO_VDF%
+    exit /b 1
+)
+
+echo Upload configuration: "%DEMO_VDF%"
+echo Expected package: "%~dp0Steam\Demo\Windows"
+if not exist "%~dp0Steam\Demo\Windows\TunaSweeper\Binaries\Win64\TunaSweeperDemo-Win64-Shipping.exe" (
+    echo [ERROR] Steam Demo Shipping package not found beside this script.
     exit /b 1
 )
 
