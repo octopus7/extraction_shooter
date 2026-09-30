@@ -7274,3 +7274,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 범위: 코드·설정 조사만 수행. 실제 사용자의 직접 실행 경로에서 재실행 호출이 생략/실패한 원인은 런타임 로그 미확인으로 확정하지 않았다. 제품 코드 변경 없음.
 - 근거: 로컬 UE5.7 OnlineSubsystemSteam.cpp 및 OnlineSubsystemModule.cpp, https://partner.steamgames.com/doc/sdk/api
 
+
+## 2026-09-30 22:48:16 (소요시간: 00:00:36)
+
+- 질문: 월요일에 보이던 Release Demo 버튼이 날짜가 지나서 사라졌는가?
+- 답변: 캡처의 Earliest possible release: 30 Sep는 출시 마감이 아닌 최초 가능일이다. 캡처는 상점/빌드 승인과 최초 앱 크레딧 구매 후 최소21일 조건을 안내하지만 어느 조건이 미충족인지는 판별할 수 없다. 버튼을 며칠 누르지 않아 만료됐다고 볼 근거는 없다. 오른쪽 승인 체크리스트와 대기기간 충족 시각을 확인해야 하며 날짜만으로 한국시간 자정 해제를 단정하지 않는다.
+- 근거: 사용자 첨부 화면 및 https://partner.steamgames.com/doc/store/application/demos / https://partner.steamgames.com/doc/store/types . 실제 Steamworks 계정 상태는 조회하지 않았다.
+
