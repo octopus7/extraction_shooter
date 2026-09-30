@@ -7230,3 +7230,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Wrangler 없이 Worker에 폴더를 올리는 방식으로 진행할 수 있는가?
 - 답변: Wrangler 없이 Cloudflare 대시보드에서 Worker 코드 배포와 D1 생성·바인딩·SQL 실행이 가능하다. 정적 폴더 업로드만으로 수집 API와 D1 초기화까지 자동 완료된다고 볼 수는 없다. 확실한 수동 배포 경로는 Worker 편집기에 단일 JS를 반영하고 D1을 별도로 연결하는 방식이며 통계 HTML을 Worker 코드에 포함할 수 있다.
 - 근거: https://developers.cloudflare.com/d1/get-started/ ; https://developers.cloudflare.com/workers/static-assets/direct-upload/
+
+## 2026-09-30 21:01:50 (소요시간: 00:00:23)
+
+- 질문: Wrangler 인증은 Windows 계정 단위인가?
+- 답변: 기본 OAuth 로그인 정보는 OS 사용자별 전역 Wrangler 설정에 저장되어 같은 Windows 사용자와 설정 경로를 쓰는 프로젝트·워크트리에서 공유한다. 실제 Cloudflare 권한은 로그인한 Cloudflare 사용자·토큰에 따른다. 환경변수 API 토큰이나 별도 인증 프로필·설정 경로가 있으면 달라질 수 있으며 브라우저 로그인 세션과 CLI 인증은 별개다. 이번 만료 오류만으로 워크트리 생성이 원인이라고 볼 수 없다.
+- 근거: Wrangler 설치 코드의 사용자 설정 경로·OAuth 읽기와 https://developers.cloudflare.com/workers/wrangler/commands/general/ , https://developers.cloudflare.com/workers/wrangler/system-environment-variables/ 확인. 인증 상태 변경 없이 질문 기록만 추가.
