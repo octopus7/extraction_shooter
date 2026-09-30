@@ -7242,3 +7242,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: tunatrack.oc7.workers.dev에 배포했는데 UE5에서 추가로 필요한 정보가 있는가?
 - 답변: 수신 Endpoint는 https://tunatrack.oc7.workers.dev/api/events이며 추가로 BuildId를 정하고 Enabled=True로 설정해야 한다. 관리자 토큰·Cloudflare 인증·D1 ID는 게임에 필요 없다. Editor/Development 시험에만 AllowDevelopment=True가 필요하다. 현재 워크트리 설정은 비활성·Endpoint/BuildId 공란이며 이번 질문에서는 변경하지 않았다.
 - 확인: 공개 /api/health GET이 HTTP200 및 ok=true, preview=false를 반환했다. 게임 이벤트 전송이나 D1 저장·집계 실연동은 시험하지 않았다.
+
+## 2026-09-30 22:01:25 (소요시간: 00:00:40)
+
+- 질문: 프로젝트에 기존 버전이 있는지 확인.
+- 답변: 원래 작업 폴더와 데모 트래커 워크트리 모두 DefaultGame.ini GeneralProjectSettings의 ProjectVersion=0.2.9200이다. 기존 타이틀 버전 표시도 이 값을 GConfig에서 읽는다. 별도 BuildId를 새로 정하는 대신 이 버전을 읽어 보내는 방식이 적합하며 현재 Worker 입력 규격도 허용한다. 현재 트래커는 별도 BuildId 설정을 읽는 상태로 자동 연결은 아직 하지 않았다.
+- 확인: 설정·타이틀 코드·Worker BuildId 검증을 읽었으며 제품 코드 변경 없이 질문 기록만 추가.
