@@ -136,6 +136,10 @@
 			"PlatformAllowList": [
 				"Win64"
 			]
+		},
+		{
+			"Name": "RaidLevelKit",
+			"Enabled": true
 		}
 	]
 }

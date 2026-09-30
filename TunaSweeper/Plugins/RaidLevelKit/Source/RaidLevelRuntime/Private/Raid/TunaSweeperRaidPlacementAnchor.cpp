@@ -106,11 +106,13 @@ void ATunaSweeperRaidPlacementAnchor::RefreshEditorPreview()
 	}
 	if (EditorPreviewLabel)
 	{
-		const TCHAR* KindName = bIsEnemy ? TEXT("ENEMY") : bIsLootContainer ? TEXT("LOOT BOX") : TEXT("MEMO");
-		const FString PreviewSuffix = bIsLootContainer && !LootPreviewId.IsNone()
-			? FString::Printf(TEXT(" [%s]"), *LootPreviewId.ToString())
-			: FString();
-		EditorPreviewLabel->SetText(FText::FromString(FString::Printf(TEXT("%s #%d%s"), KindName, PlacementId, *PreviewSuffix)));
+        const TCHAR* KindKey = bIsEnemy ? TEXT("Anchor.Kind.Enemy") : bIsLootContainer ? TEXT("Anchor.Kind.LootContainer") : AnchorKind == ETunaSweeperRaidPlacementAnchorKind::AuthoredActor ? TEXT("Anchor.Kind.AuthoredActor") : TEXT("Anchor.Kind.Memo");
+        FFormatNamedArguments Args;
+        Args.Add(TEXT("Kind"), FText::FromStringTable(TEXT("RaidLevelKit.Editor"), KindKey));
+        Args.Add(TEXT("PlacementId"), FText::AsNumber(PlacementId, &FNumberFormattingOptions::DefaultNoGrouping()));
+        Args.Add(TEXT("PreviewId"), FText::FromName(LootPreviewId));
+        const TCHAR* LabelKey = bIsLootContainer && !LootPreviewId.IsNone() ? TEXT("Anchor.LabelWithPreview") : TEXT("Anchor.Label");
+        EditorPreviewLabel->SetText(FText::Format(FText::FromStringTable(TEXT("RaidLevelKit.Editor"), LabelKey), Args));
 		EditorPreviewLabel->SetTextRenderColor(PreviewColor);
 	}
 #endif

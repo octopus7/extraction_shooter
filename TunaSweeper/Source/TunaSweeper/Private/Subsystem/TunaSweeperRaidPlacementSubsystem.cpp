@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperRaidPlacementSubsystem.h"
+#include "Raid/RaidLevelIdentity.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Dom/JsonObject.h"
@@ -135,47 +136,25 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 	}
 
 	TMap<int32, TArray<ATunaSweeperRaidPlacementAnchor*>> AnchorsByPlacementId;
-	TSet<int32> InvalidPlacementIds;
-	for (TActorIterator<ATunaSweeperRaidPlacementAnchor> It(World); It; ++It)
-	{
-		ATunaSweeperRaidPlacementAnchor* Anchor = *It;
-		const int32 PlacementId = Anchor->GetPlacementId();
-		if (PlacementId <= 0)
-		{
-			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Raid anchor '%s' has invalid PlacementId %d."), *Anchor->GetPathName(), PlacementId);
-			continue;
-		}
-		TArray<ATunaSweeperRaidPlacementAnchor*>& Anchors = AnchorsByPlacementId.FindOrAdd(PlacementId);
-		if (Anchors.Num() > 0)
-		{
-			const bool bAllExistingAnchorsAllowDuplicate = Anchors.ContainsByPredicate(
-				[](const ATunaSweeperRaidPlacementAnchor* ExistingAnchor)
-				{
-					return !ExistingAnchor ||
-						ExistingAnchor->GetAnchorKind() != ETunaSweeperRaidPlacementAnchorKind::Enemy ||
-						!ExistingAnchor->AllowsDuplicatePlacementId();
-				});
-			const bool bDuplicateAllowed = Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Enemy &&
-				Anchor->AllowsDuplicatePlacementId() && !bAllExistingAnchorsAllowDuplicate;
-			if (!bDuplicateAllowed)
-			{
-				UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Duplicate raid PlacementId %d in level %s: existing anchor '%s' and '%s'. All duplicate enemy anchors must opt in."), PlacementId, *World->GetMapName(), *Anchors[0]->GetPathName(), *Anchor->GetPathName());
-				InvalidPlacementIds.Add(PlacementId);
-			}
-		}
-		Anchors.Add(Anchor);
-	}
-	for (int32 InvalidId : InvalidPlacementIds)
-	{
-		AnchorsByPlacementId.Remove(InvalidId);
-	}
+    TArray<FRaidPlacementDescriptor> Descriptors;
+    for (TActorIterator<ATunaSweeperRaidPlacementAnchor> It(World); It; ++It)
+    {
+        Descriptors.Add({It->GetPlacementId(), It->GetAnchorKind(), It->AllowsDuplicatePlacementId()});
+        AnchorsByPlacementId.FindOrAdd(It->GetPlacementId()).Add(*It);
+    }
+    for (const auto& Issue : ValidateRaidPlacementStructure(Descriptors))
+    {
+        const int32 InvalidId = FCString::Atoi(*Issue.Arguments.FindRef(TEXT("PlacementId")));
+        UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Raid anchor validation %s: %s/%d"), *Issue.StringKey.ToString(), *World->GetMapName(), InvalidId);
+        AnchorsByPlacementId.Remove(InvalidId);
+    }
 	TArray<int32> MemoPlacementIds;
 	for (const TPair<int32, TArray<ATunaSweeperRaidPlacementAnchor*>>& Pair : AnchorsByPlacementId)
 	{
 		if (Pair.Value.ContainsByPredicate(
 			[](const ATunaSweeperRaidPlacementAnchor* Anchor)
 			{
-				return Anchor && Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo;
+				return Anchor && (Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo || Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::AuthoredActor);
 			}))
 		{
 			MemoPlacementIds.Add(Pair.Key);

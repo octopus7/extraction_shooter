@@ -18,9 +18,10 @@ class UTextRenderComponent;
 UENUM(BlueprintType)
 enum class ETunaSweeperRaidPlacementAnchorKind : uint8
 {
-	Enemy UMETA(DisplayName = "Enemy"),
-	LootContainer UMETA(DisplayName = "Loot Container"),
-	Memo UMETA(DisplayName = "Memo")
+	Enemy = 0 UMETA(DisplayName = "Enemy"),
+	LootContainer = 1 UMETA(DisplayName = "Loot Container"),
+	Memo = 2 UMETA(DisplayName = "Memo"),
+    AuthoredActor = 3
 };
 
 /**
@@ -28,7 +29,7 @@ enum class ETunaSweeperRaidPlacementAnchorKind : uint8
  * collision or authority; runtime actors are created by the matching placement subsystem.
  */
 UCLASS(BlueprintType, Blueprintable)
-class TUNASWEEPER_API ATunaSweeperRaidPlacementAnchor : public AActor
+class RAIDLEVELRUNTIME_API ATunaSweeperRaidPlacementAnchor : public AActor
 {
 	GENERATED_BODY()
 

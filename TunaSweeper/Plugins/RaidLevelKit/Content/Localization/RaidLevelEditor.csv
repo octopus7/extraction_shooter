@@ -1,0 +1,10 @@
+Key,SourceString
+Anchor.Kind.Enemy,ENEMY
+Anchor.Kind.LootContainer,LOOT BOX
+Anchor.Kind.Memo,MEMO
+Anchor.Label,{Kind} #{PlacementId}
+Anchor.LabelWithPreview,{Kind} #{PlacementId} [{PreviewId}]
+Validation.InvalidPlacementId,Placement ID {PlacementId} must be positive.
+Validation.DuplicatePlacementId,Placement ID {PlacementId} may be shared only by enemy anchors that all allow duplicates.
+Validation.InvalidAnchorKind,Placement ID {PlacementId} has an unknown anchor kind.
+Anchor.Kind.AuthoredActor,AUTHORED ACTOR

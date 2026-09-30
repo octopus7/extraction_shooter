@@ -76,7 +76,7 @@ bool FTunaSweeperAnchorPlacementSchemaTest::RunTest(const FString& Parameters)
 
 	ValidateAnchorRows(TEXT("EnemySpawns.json"), false);
 	ValidateAnchorRows(TEXT("MemoSpawns.json"), true);
-	TestTrue(TEXT("The shared placement-anchor Blueprint exists"), FPackageName::DoesPackageExist(TEXT("/Game/Raid/Placement/BP_RaidPlacementAnchor")));
+	TestTrue(TEXT("The shared placement-anchor Blueprint exists"), FPackageName::DoesPackageExist(TEXT("/RaidLevelKit/Placement/BP_RaidPlacementAnchor")));
 	TestTrue(TEXT("The directly placeable extraction Blueprint exists"), FPackageName::DoesPackageExist(TEXT("/Game/Interaction/BP_ExtractionPoint")));
 	return true;
 }
