@@ -7295,3 +7295,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 답변: 데모 앱의 Steamworks 설정 > SteamPipe > Builds에서 해당 BuildID의 Set build live on branch를 default로 선택하고 Preview Change > Set Build Live Now로 적용한다. 데모 AppID5158070의 페이지는 https://partner.steamgames.com/apps/builds/5158070 이다. 미출시 데모의 공개 출시는 별도 Release Demo 단계다.
 - 근거: https://partner.steamgames.com/doc/store/application/branches . 실제 빌드 적용 작업은 수행하지 않았다.
 
+
+## 2026-09-30 23:09:50 (소요시간: 00:00:11)
+
+- 질문: 데모 출시 후 부모 앱에서 데모를 켜려면?
+- 답변: 부모 앱5137900의 상점 페이지 편집 > Special Settings > Associated Demos에서 데모5158070 연결 및 표시 옵션을 확인하고 저장한 후 부모 상점 페이지 변경사항을 게시한다. 이미 연결돼 있어도 데모 출시 후 부모 상점 재게시가 필요하다. 부모 게임은 Coming Soon 상태여도 된다.
+- 근거: https://partner.steamgames.com/doc/store/application/demos . 외부 게시 작업은 수행하지 않았다.
+
