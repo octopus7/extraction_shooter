@@ -9775,3 +9775,9 @@
 - 코드 확인: AchievementSubsystem의 장소 도달·퀘스트 보상 수령과 QuestSubsystem의 진행 변경 이벤트를 확인했다. 저장 불러오기에서도 보상 수령 보고가 발생하므로 재전송 중복과 과거 진행 복원을 구분해야 한다.
 - 범위: 공식 문서와 코드 검토만 수행했다. 제품 코드 변경, 외부 리소스 생성, 배포 및 빌드는 하지 않았다.
 - 근거: https://developers.cloudflare.com/pages/functions/ ; https://developers.cloudflare.com/pages/functions/bindings/ ; https://developers.cloudflare.com/workers/best-practices/workers-best-practices/
+
+## 2026-09-30 20:56:20 (소요시간: 00:00:41)
+- 요청: 트래커는 Workers로 구성하며 구현에 앞서 현재 Wrangler 권한 확인.
+- 확인: 기존 QuestStudio에 설치된 Wrangler 4.116.0을 재사용해 별도 트래커 워크트리에서 whoami 실행.
+- 결과: 종료 코드 1. 저장된 인증 토큰이 만료되어 갱신하지 못했고 비대화형 환경에서 Not logged in 오류가 발생했다. 현재 로그인 및 Workers/D1 권한 확인은 불가능하며 wrangler login 재인증이 필요하다.
+- 범위: 외부 Worker/D1 생성·수정·배포 및 제품 코드 변경 없이 인증 상태만 조회했다.
