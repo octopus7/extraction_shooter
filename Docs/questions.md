@@ -7239,3 +7239,11 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 언어 지원 작업이 끝나면 드래프트 파일이 제거되는가?
 - 답변: 번역 CSV 6개를 실제 게임에서 읽는 TunaSweeper/Content/Data/Translations로 이동하고 기존 LocalizationDrafts 폴더를 제거했다. 이후 번역 수정은 옮겨진 런타임 CSV에서 진행한다.
+
+
+## 2026-09-30 20:17:41 (소요시간: 00:12:06)
+
+- 질문: 사용자가 레이드 레벨을 직접 만들어 Steam 창작마당 또는 ZIP 파일로 배포할 수 있는가?
+- 답변: 가능하다. 별도 UE 5.7 제작 프로젝트와 중립 앵커 플러그인으로 제작하고, 게임과 호환되는 플랫폼별 cooked 맵 팩·manifest를 내보내는 구성을 권장했다. 원본 umap ZIP만으로 실행되지 않으며 공통 검사·마운트·AssetRegistry 등록·맵 카탈로그·진행 상태 분리가 필요하다. 팩 고유 패키지 경로는 cook 전에 만들고 설치 후에도 유지해야 한다.
+- 배포: ZIP으로 실제 패키지 로딩을 먼저 검증한 뒤 같은 팩에 Steam UGC 게시·구독·다운로드/설치 처리를 연결한다. 현재 공개 프로젝트에서 창작마당·외부 팩 로더 구현을 찾지 못했다. 현재 엔진 기본값은 Pak과 IoStore를 사용하므로 실제 생성 컨테이너와 런타임 로딩 검증이 필요하다.
+- 근거·범위: Epic cooking/plugins/packaging/EULA 및 Steamworks Workshop 공식 문서와 로컬 UE 5.7 헤더를 확인. 세부 근거는 Docs/raid_level_plugin_review.md에 연결했다. 제작 SDK의 엔진 도구·타사 에셋 배포 조건도 확인해야 한다. 외부 맵의 패키지 실행·Steam 게시·멀티플레이 호환성은 검증하지 않았다.
