@@ -303,3 +303,17 @@ When adding a field that should survive save/load:
 - Encounter occupancy, boss ownership, ready/active/cleared state, and reset latches are transient; no save fields or migration are added.
 - `TunaSweeperBossTestGameMode` temporarily backs up the player's inventory/equipment/ammunition, acquired-item set, weapon selection, and experience state in memory. The original state is restored when the test game mode ends. Test supplies and repeated deaths never write gameplay saves.
 - Combat-test sessions suppress quest objective/reward progression and achievement event reporting so lab kills and portal use do not become persistent progression.
+
+## Demo Progress Tracker
+
+Progress tracking is opt-in through `[TunaSweeper.ProgressTracker]` in `DefaultGame.ini`: set `Enabled=True`, an HTTPS `/api/events` `Endpoint`, and a release-specific `BuildId` (maximum 128 ASCII characters: first character alphanumeric, remaining characters alphanumeric or `_ . : -`, without spaces). `AllowDevelopment=False` keeps Development and PIE disabled unless explicitly enabled for testing. Main and combat-test sessions never send. No administrator token belongs in the game configuration.
+
+The random installation `PlayerId` is stored in the same named section of `GGameUserSettingsIni`; it is shared across save slots and is not a Steam identifier. Deleting settings or using another installation can create another player ID.
+
+`UTunaSweeperSaveGame::ProgressTrackerState` adds an optional run GUID and attempted checkpoint set to the existing version 21 serialized save. Unreal's tagged properties let older supported saves load with empty tracker fields. New Demo games create a new run GUID. Older Demo saves receive one when loaded, persisted through the existing safe-save writer without inventing earlier checkpoint events. Runtime reset clears slot tracker state; save/load restores it.
+
+Only actual new-game activation, the five Demo quest reward claims, named achievement location overlaps, and the farewell card send observations. Quest restoration never sends retrospective events. `NAME_None` locations remain inactive; this change adds no map placements or map-arrival events. Demo completion captures its payload before the automatic slot deletion and runtime reset.
+
+The attempted set is saved before the single HTTP dispatch and remains attempted whether delivery succeeds or fails. There is no retry, delivery queue, error UI, or reconstruction of missing milestones. A failed local save, recovery from an older backup, or a crash can lose an attempted marker; server aggregation still counts each observed checkpoint once per run. Disabled tracking does not mark observations as attempted. A later checkpoint does not require any earlier checkpoint to be present.
+
+`playtimeSeconds` uses the existing slot total plus elapsed session wall time (`GetCurrentActiveSlotTotalPlaySeconds`), including pause time. Each request holds its serialized payload across level travel and slot retirement, has a ten-second timeout, and is cancelled without waiting when the game instance shuts down. Exiting can therefore drop an in-flight observation, as allowed by best-effort collection.

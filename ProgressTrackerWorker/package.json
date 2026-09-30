@@ -1,0 +1,14 @@
+{
+  "name": "tunasweeper-progress-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check.mjs",
+    "preview": "node scripts/preview.mjs"
+  }
+}

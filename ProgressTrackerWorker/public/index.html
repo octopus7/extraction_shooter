@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title></title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="nav.skip"></a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">◈</span><div><strong data-i18n="brand.name"></strong><span data-i18n="brand.sub"></span></div></div>
+    <div class="header-actions"><span class="environment" data-i18n="badge.demo"></span><button id="signout" class="quiet" data-i18n="auth.signout" hidden></button></div>
+  </header>
+  <main id="main" class="shell">
+    <section class="intro"><p class="eyebrow" data-i18n="page.eyebrow"></p><h1 data-i18n="page.title"></h1><p class="muted" data-i18n="page.description"></p></section>
+    <p id="preview-note" class="notice" data-i18n="preview.notice" hidden></p>
+    <section id="login" class="panel login-panel" aria-labelledby="login-title">
+      <div><span class="section-index" aria-hidden="true">01</span><h2 id="login-title" data-i18n="auth.title"></h2><p class="muted" data-i18n="auth.description"></p></div>
+      <form id="login-form" autocomplete="off"><label for="token" data-i18n="auth.token"></label><div class="input-row"><input id="token" name="token" type="password" autocomplete="off" required data-i18n-placeholder="auth.placeholder"><button id="connect" class="primary" type="submit" data-i18n="auth.connect"></button></div><p class="fine" data-i18n="auth.memory"></p></form>
+    </section>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <div id="dashboard" hidden>
+      <section class="toolbar"><div><label for="build" data-i18n="filter.build"></label><select id="build"></select></div><button id="refresh" class="quiet" data-i18n="action.refresh"></button></section>
+      <section class="metrics" data-i18n-label="metrics.title">
+        <article class="metric"><p data-i18n="metric.players"></p><strong id="total-players"></strong><small data-i18n="metric.players.note"></small></article>
+        <article class="metric"><p data-i18n="metric.runs"></p><strong id="total-runs"></strong><small data-i18n="metric.runs.note"></small></article>
+        <article class="metric accent"><p data-i18n="metric.completed"></p><strong id="total-completed"></strong><small id="completed-rate"></small></article>
+        <article class="metric"><p data-i18n="metric.missing"></p><strong id="total-missing"></strong><small data-i18n="metric.missing.note"></small></article>
+      </section>
+      <section class="panel" aria-labelledby="stages-title"><div class="section-heading"><div><p class="eyebrow" data-i18n="stages.eyebrow"></p><h2 id="stages-title" data-i18n="stages.title"></h2></div><span id="start-count" class="chip"></span></div><p class="muted description" data-i18n="stages.note"></p>
+        <div class="table-scroll"><table><thead><tr><th data-i18n="column.stage"></th><th data-i18n="column.players"></th><th data-i18n="column.rate"></th><th data-i18n="column.runs"></th><th data-i18n="column.time"></th><th data-i18n="column.missing"></th></tr></thead><tbody id="stages"></tbody></table></div>
+      </section>
+      <section class="panel" aria-labelledby="runs-title"><div class="section-heading"><div><p class="eyebrow" data-i18n="runs.eyebrow"></p><h2 id="runs-title" data-i18n="runs.title"></h2></div><span id="run-count" class="chip"></span></div><p class="muted description" data-i18n="runs.note"></p><div class="table-scroll"><table><thead><tr><th data-i18n="column.player"></th><th data-i18n="column.run"></th><th data-i18n="column.build"></th><th data-i18n="column.received"></th><th data-i18n="column.checkpoints"></th><th data-i18n="column.state"></th><th data-i18n="column.detail"></th></tr></thead><tbody id="runs"></tbody></table></div><nav class="pagination" data-i18n-label="pagination.label"><button id="previous" class="quiet" data-i18n="pagination.previous"></button><span id="page-label"></span><button id="next" class="quiet" data-i18n="pagination.next"></button></nav></section>
+      <aside class="explanation"><span aria-hidden="true">ⓘ</span><p data-i18n="missing.explanation"></p></aside>
+    </div>
+    <footer data-i18n="footer.note"></footer>
+  </main>
+  <dialog id="detail" aria-labelledby="detail-title"><div class="section-heading"><div><p class="eyebrow" data-i18n="detail.eyebrow"></p><h2 id="detail-title" data-i18n="detail.title"></h2></div><button id="close-detail" class="quiet" data-i18n="action.close"></button></div><div id="detail-body"></div></dialog>
+</body>
+</html>

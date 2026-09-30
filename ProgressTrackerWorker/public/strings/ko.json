@@ -1,0 +1,18 @@
+{
+  "brand.name":"TUNASWEEPER", "brand.sub":"데모 진행도 관측", "badge.demo":"DEMO", "nav.skip":"본문으로 이동",
+  "page.eyebrow":"플레이 흐름 살펴보기", "page.title":"데모 진행도", "page.description":"수신된 체크포인트로 이용자의 진행 흐름을 확인합니다.",
+  "preview.notice":"로컬 미리보기 · 예시 데이터입니다. 실제 게임 기록이나 Cloudflare에 연결하지 않습니다.",
+  "auth.title":"관리자 연결", "auth.description":"관리자 토큰으로 진행 통계를 조회합니다.", "auth.token":"관리자 토큰", "auth.placeholder":"토큰을 입력하세요", "auth.connect":"통계 열기", "auth.signout":"연결 해제", "auth.memory":"토큰은 이 페이지의 메모리에만 보관됩니다. 새로고침하거나 연결을 해제하면 지워집니다.",
+  "filter.build":"빌드 범위", "filter.all":"전체 빌드", "action.refresh":"새로고침", "action.close":"닫기", "action.detail":"상세 보기", "action.detailFor":"진행 {id} 상세 보기",
+  "metrics.title":"진행 요약", "metric.players":"고유 이용자 ID 수", "metric.players.note":"하나 이상의 기록이 수신된 ID", "metric.runs":"관측된 진행 수", "metric.runs.note":"이용자 · 진행 · 빌드별 집계", "metric.completed":"데모 완료 인원", "metric.completed.rate":"관측된 이용자의 {rate}", "metric.missing":"선행 기록 미수신 진행", "metric.missing.note":"도달 기록은 그대로 집계",
+  "stages.eyebrow":"체크포인트", "stages.title":"단계별 도달", "stages.note":"도달률은 현재 범위의 관측된 고유 이용자 ID 수를 기준으로 합니다. 시간은 진행별 최초 도달 시점의 평균입니다.", "stages.started":"시작 기록 {count}명",
+  "column.stage":"단계", "column.players":"도달 인원", "column.rate":"도달률", "column.runs":"진행 수", "column.time":"평균 도달 시간", "column.missing":"선행 미수신 진행", "column.player":"이용자 ID", "column.run":"진행 ID", "column.build":"빌드", "column.received":"최근 수신", "column.checkpoints":"단계 수", "column.state":"관측 상태", "column.detail":"상세",
+  "runs.eyebrow":"수신 기록", "runs.title":"진행 목록", "runs.note":"진행을 열어 관측된 단계와 필수 선행 기록 미수신을 확인하세요.", "runs.count":"총 {count}개 진행", "runs.complete":"완료 수신", "runs.observed":"기록 수신", "runs.missing":"미수신 {count}",
+  "pagination.label":"진행 목록 페이지", "pagination.previous":"이전", "pagination.next":"다음", "pagination.page":"{page} / {pages} 페이지",
+  "missing.explanation":"기록 미수신은 해당 진행에서 필수 선행 기록을 관측하지 못했다는 뜻입니다. 미도달이나 전송 실패를 확정하지 않으며, 후속 도달 기록은 유효하게 집계됩니다.",
+  "detail.eyebrow":"진행 살펴보기", "detail.title":"진행 상세", "detail.observed":"관측된 체크포인트", "detail.missing":"필수 선행 기록 미수신", "detail.none":"현재 관측된 단계에 필요한 선행 기록이 모두 수신되었습니다.", "detail.required":"후속 수신 단계: {stages}", "detail.time":"누적 플레이 시간 {time}", "detail.identity":"이용자 {player} · 진행 {run} · 빌드 {build}", "detail.received":"수신 시각 {time}",
+  "stage.start":"게임 시작", "stage.quest1":"취수 시설 점검", "stage.quest2":"취수 스크린 정리", "stage.quest3a":"밸브 수리", "stage.quest3b":"벙커 배관 수리", "stage.quest4":"오늘의 보상", "stage.complete":"데모 완료", "stage.unregistered":"분류 미등록",
+  "status.loading":"기록을 불러오는 중입니다…", "status.loaded":"기록을 불러왔습니다.", "status.empty":"아직 수신된 기록이 없습니다.", "status.signedout":"연결을 해제했습니다.",
+  "error.unauthorized":"관리자 토큰을 확인한 뒤 다시 연결하세요.", "error.not_configured":"서버에 관리자 토큰이 설정되지 않았습니다.", "error.invalid_filter":"조회 범위를 확인한 뒤 다시 연결하세요.", "error.not_found":"해당 진행 기록을 찾을 수 없습니다.", "error.unavailable":"기록을 불러오지 못했습니다. 잠시 후 다시 연결하세요.",
+  "format.none":"—", "format.seconds":"{value}초", "format.minutes":"{minutes}분 {seconds}초", "format.hours":"{hours}시간 {minutes}분", "footer.note":"수신된 기록만 표시합니다. 누락된 도달 기록을 추정하거나 생성하지 않습니다."
+}

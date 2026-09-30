@@ -14,6 +14,7 @@
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "TimerManager.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperProgressTrackerSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 namespace
 {
@@ -168,6 +169,7 @@ void ATunaSweeperDemoEndingActor::ShowFarewell()
     if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
     {
         GI->MarkScenarioProgressFlag(EndingSeen,true);
+        if (auto* Tracker = GI->GetSubsystem<UTunaSweeperProgressTrackerSubsystem>()) Tracker->ReportDemoComplete();
         GI->DeleteCompletedDemoSave();
     }
     Fade->StartFadeFromBlack(FadeSeconds);

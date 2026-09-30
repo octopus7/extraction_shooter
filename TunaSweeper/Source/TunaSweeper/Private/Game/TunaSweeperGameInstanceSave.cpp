@@ -2,6 +2,7 @@
 
 #include "Game/TunaSweeperSafeSave.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperProgressTrackerSubsystem.h"
 
 namespace TunaSweeperSave
 {
@@ -395,6 +396,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 	bInventoryStateInitializing = true;
 	if (bStartNewGame)
 	{
+		if (TunaSweeperBuildFlavor::IsDemo()) ProgressTrackerState.StartNewRun();
 		LoadedSlotTotalPlaySeconds = 0.0f;
 		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 		GenerateDefaultInventoryState();
@@ -416,6 +418,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		const bool bSaved = SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
 		if (bSaved)
 		{
+			if (auto* Tracker = GetSubsystem<UTunaSweeperProgressTrackerSubsystem>()) Tracker->ReportNewGame();
 			bPendingBunkerItemStateSave = false;
 		}
 		return bSaved;
@@ -559,6 +562,14 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		return false;
 	}
 
+	ProgressTrackerState = SaveGame->ProgressTrackerState;
+	if (TunaSweeperBuildFlavor::IsDemo() && !ProgressTrackerState.RunId.IsValid())
+	{
+		// Old saves gain identity without replaying their historical milestones.
+		ProgressTrackerState.StartNewRun();
+		SaveGame->ProgressTrackerState = ProgressTrackerState;
+		TunaSweeperSave::SaveFlavorSave(SaveGame, ExistingSlotName);
+	}
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
@@ -868,6 +879,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->BuildFlavor = TunaSweeperBuildFlavor::GetName();
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
+	SaveGame->ProgressTrackerState = ProgressTrackerState;
 	SaveGame->DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(ActiveSaveSlotDifficultyStage);
 	SaveGame->bDifficultySelected = bActiveSaveSlotDifficultySelected;
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
@@ -1044,6 +1056,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	ProgressTrackerState = FTunaSweeperProgressTrackerState();
 	TGuardValue<bool> InitializationGuard(bInventoryStateInitializing, true);
 	DespawnPetCompanion();
 
