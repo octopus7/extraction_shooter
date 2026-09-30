@@ -11,7 +11,7 @@
   "pagination.label":"진행 목록 페이지", "pagination.previous":"이전", "pagination.next":"다음", "pagination.page":"{page} / {pages} 페이지",
   "missing.explanation":"기록 미수신은 해당 진행에서 필수 선행 기록을 관측하지 못했다는 뜻입니다. 미도달이나 전송 실패를 확정하지 않으며, 후속 도달 기록은 유효하게 집계됩니다.",
   "detail.eyebrow":"진행 살펴보기", "detail.title":"진행 상세", "detail.observed":"관측된 체크포인트", "detail.missing":"필수 선행 기록 미수신", "detail.none":"현재 관측된 단계에 필요한 선행 기록이 모두 수신되었습니다.", "detail.required":"후속 수신 단계: {stages}", "detail.time":"누적 플레이 시간 {time}", "detail.identity":"이용자 {player} · 진행 {run} · 빌드 {build}", "detail.received":"수신 시각 {time}",
-  "stage.start":"게임 시작", "stage.quest1":"취수 시설 점검", "stage.quest2":"취수 스크린 정리", "stage.quest3a":"밸브 수리", "stage.quest3b":"벙커 배관 수리", "stage.quest4":"오늘의 보상", "stage.complete":"데모 완료", "stage.unregistered":"분류 미등록",
+  "stage.titleScreen":"타이틀 화면 진입", "stage.endingScreen":"엔딩 화면 진입", "stage.start":"게임 시작", "stage.quest1":"취수 시설 점검", "stage.quest2":"취수 스크린 정리", "stage.quest3a":"밸브 수리", "stage.quest3b":"벙커 배관 수리", "stage.quest4":"오늘의 보상", "stage.complete":"데모 완료", "stage.unregistered":"분류 미등록",
   "status.loading":"기록을 불러오는 중입니다…", "status.loaded":"기록을 불러왔습니다.", "status.empty":"아직 수신된 기록이 없습니다.", "status.signedout":"연결을 해제했습니다.",
   "error.unauthorized":"관리자 토큰을 확인한 뒤 다시 연결하세요.", "error.not_configured":"서버에 관리자 토큰이 설정되지 않았습니다.", "error.invalid_filter":"조회 범위를 확인한 뒤 다시 연결하세요.", "error.not_found":"해당 진행 기록을 찾을 수 없습니다.", "error.unavailable":"기록을 불러오지 못했습니다. 잠시 후 다시 연결하세요.",
   "format.none":"—", "format.seconds":"{value}초", "format.minutes":"{minutes}분 {seconds}초", "format.hours":"{hours}시간 {minutes}분", "footer.note":"수신된 기록만 표시합니다. 누락된 도달 기록을 추정하거나 생성하지 않습니다."

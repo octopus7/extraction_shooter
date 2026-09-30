@@ -10,12 +10,14 @@
 void UTunaSweeperProgressTrackerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+    SessionState.StartNewRun();
     if (!GConfig) return;
     const TCHAR* Section = TEXT("TunaSweeper.ProgressTracker");
     GConfig->GetBool(Section, TEXT("Enabled"), bEnabled, GGameIni);
     GConfig->GetBool(Section, TEXT("AllowDevelopment"), bAllowDevelopment, GGameIni);
     GConfig->GetString(Section, TEXT("Endpoint"), Endpoint, GGameIni);
-    GConfig->GetString(Section, TEXT("BuildId"), BuildId, GGameIni);
+    // Match the project version displayed by the title screen.
+    GConfig->GetString(TEXT("/Script/EngineSettings.GeneralProjectSettings"), TEXT("ProjectVersion"), BuildId, GGameIni);
     Endpoint.TrimStartAndEndInline();
     BuildId.TrimStartAndEndInline();
     if (!bEnabled || !TunaSweeperBuildFlavor::IsDemo() || !Endpoint.StartsWith(TEXT("https://")) ||
@@ -44,6 +46,8 @@ void UTunaSweeperProgressTrackerSubsystem::Deinitialize()
     Super::Deinitialize();
 }
 
+void UTunaSweeperProgressTrackerSubsystem::ReportTitleScreenEntered() { Report(TEXT("location.title_screen"), TEXT("location"), true); }
+void UTunaSweeperProgressTrackerSubsystem::ReportEndingScreenEntered() { Report(TEXT("location.ending_screen"), TEXT("location")); }
 void UTunaSweeperProgressTrackerSubsystem::ReportNewGame() { Report(TEXT("game.start"), TEXT("start")); }
 void UTunaSweeperProgressTrackerSubsystem::ReportDemoComplete() { Report(TEXT("demo.complete"), TEXT("complete")); }
 void UTunaSweeperProgressTrackerSubsystem::ReportQuestRewardClaimed(FName QuestId)
@@ -55,20 +59,21 @@ void UTunaSweeperProgressTrackerSubsystem::ReportLocationReached(FName LocationI
     if (!LocationId.IsNone()) Report(TunaSweeperProgressTrackerModel::LocationCheckpoint(LocationId), TEXT("location"));
 }
 
-void UTunaSweeperProgressTrackerSubsystem::Report(const FString& CheckpointId, const FString& Category)
+void UTunaSweeperProgressTrackerSubsystem::Report(const FString& CheckpointId, const FString& Category, bool bSessionObservation)
 {
     UTunaSweeperGameInstance* GI = Cast<UTunaSweeperGameInstance>(GetGameInstance());
     if (!bEnabled || !PlayerId.IsValid() || !TunaSweeperBuildFlavor::IsDemo() || !GI || GI->IsCombatTestSession() ||
-        !GI->ProgressTrackerState.RunId.IsValid()) return;
+        (!bSessionObservation && !GI->ProgressTrackerState.RunId.IsValid())) return;
 #if !UE_BUILD_SHIPPING
     if (!bAllowDevelopment) return;
 #endif
     if (GetWorld() && GetWorld()->WorldType == EWorldType::PIE && !bAllowDevelopment) return;
-    const FString Body = TunaSweeperProgressTrackerModel::SerializeEvent(FGuid::NewGuid(), PlayerId,
-        GI->ProgressTrackerState.RunId, BuildId, CheckpointId, Category, GI->GetCurrentActiveSlotTotalPlaySeconds());
-    if (Body.IsEmpty() || !GI->ProgressTrackerState.TryRecordAttempt(FName(*CheckpointId))) return;
-    // Persist the observation before dispatch. Failure is deliberately not a request queue.
-    GI->SaveGameStateInternal();
+    FTunaSweeperProgressTrackerState& State = bSessionObservation ? SessionState : GI->ProgressTrackerState;
+    const FString Body = TunaSweeperProgressTrackerModel::PrepareEvent(State, PlayerId, BuildId, CheckpointId, Category,
+        bSessionObservation ? 0.0 : GI->GetCurrentActiveSlotTotalPlaySeconds());
+    if (Body.IsEmpty()) return;
+    // Persist run observations before dispatch. Title visits have no save or gameplay run.
+    if (!bSessionObservation) GI->SaveGameStateInternal();
     const TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
     Request->SetURL(Endpoint);
     Request->SetVerb(TEXT("POST"));

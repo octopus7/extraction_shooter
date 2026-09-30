@@ -1,6 +1,6 @@
 # TunaSweeper 진행도 트래커
 
-Unreal 게임에서 보내는 **주요 퀘스트·장소 도달·데모 완료** 이벤트를 Cloudflare Workers로 받아 D1에 저장하고, 관리자 웹 화면에서 통계를 조회하는 독립 프로젝트입니다.
+Unreal 게임에서 보내는 **주요 퀘스트·장소 도달·타이틀/엔딩 화면·데모 완료** 이벤트를 Cloudflare Workers로 받아 D1에 저장하고, 관리자 웹 화면에서 통계를 조회하는 독립 프로젝트입니다.
 
 이 폴더의 내용 전체를 새 리포의 루트로 옮겨 사용합니다. Unreal 전송 코드는 원래 게임 리포에 있으며, 이 리포는 게임 소스 없이 테스트·배포할 수 있습니다.
 
@@ -9,7 +9,7 @@ Unreal 게임에서 보내는 **주요 퀘스트·장소 도달·데모 완료**
 - 전송 누락은 허용합니다. 게임은 실패 시 재시도·전송 대기열·오류 UI를 사용하지 않습니다.
 - A 기록 없이 B가 도달해도 **B를 정상 집계**합니다. 필수 선행 A는 '기록 미수신'으로만 표시하고 도달 기록을 추정해서 만들지 않습니다.
 - 도달률 분모는 선택한 빌드에서 한 번 이상 관측된 고유 playerId 수입니다.
-- playerId는 설치별 임의 ID, runId는 새 게임별 ID입니다. 진행은 playerId/runId/buildId/dataset으로 구분합니다.
+- playerId는 설치별 임의 ID, runId는 새 게임별 ID입니다. 타이틀 진입은 실행 세션의 별도 임시 runId를 사용하므로 관측 진행 수는 새 게임 횟수와 다릅니다. 진행은 playerId/runId/buildId/dataset으로 구분합니다.
 - 같은 eventId의 동일 내용은 중복 처리하고, 다른 내용이면 기존 데이터를 덮어쓰지 않습니다.
 - 화면 문구는 `public/strings/ko.json`에 추가하고 키로 조회합니다.
 - 관리자 Secret `ADMIN_TOKEN`은 서버에서만 사용합니다. 게임·Git·URL에 넣지 않습니다.
@@ -39,7 +39,7 @@ Node 22.18 이상에서 `npm ci`, `npm test`, `npm run check`로 확인합니다
 1. D1 생성 및 초기 SQL 실행.
 2. `wrangler.jsonc`의 Worker 이름·DB 이름·DB UUID 교체. 현재 DB UUID는 자리표시자입니다.
 3. Cloudflare에서 `ADMIN_TOKEN` Secret 설정.
-4. 배포 후 게임 리포에서 Endpoint·BuildId를 채우고 전송 활성화.
+4. 게임은 ProjectVersion을 buildId로 읽습니다. 현재 Steam Demo는 배포한 Endpoint로 전송하도록 설정되어 있으며, 서버 주소를 바꾸면 게임의 해당 CustomConfig도 갱신합니다.
 
 ## 상세 문서와 현재 상태
 

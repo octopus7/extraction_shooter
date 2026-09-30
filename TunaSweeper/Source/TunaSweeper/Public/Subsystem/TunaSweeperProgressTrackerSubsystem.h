@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Progress/TunaSweeperProgressTrackerModel.h"
 class IHttpRequest;
 #include "TunaSweeperProgressTrackerSubsystem.generated.h"
 
@@ -12,13 +13,17 @@ class TUNASWEEPER_API UTunaSweeperProgressTrackerSubsystem : public UGameInstanc
 public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     virtual void Deinitialize() override;
+    void ReportTitleScreenEntered();
+    void ReportEndingScreenEntered();
     void ReportNewGame();
     void ReportQuestRewardClaimed(FName QuestId);
     void ReportLocationReached(FName LocationId);
     void ReportDemoComplete();
 private:
-    void Report(const FString& CheckpointId, const FString& Category);
+    void Report(const FString& CheckpointId, const FString& Category, bool bSessionObservation = false);
     FGuid PlayerId;
+    // Title observations are transient and must never create or write a gameplay save.
+    FTunaSweeperProgressTrackerState SessionState;
     FString Endpoint;
     FString BuildId;
     bool bEnabled = false;

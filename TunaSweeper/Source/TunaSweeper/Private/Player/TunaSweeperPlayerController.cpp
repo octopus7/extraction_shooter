@@ -12,6 +12,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperProgressTrackerSubsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
@@ -792,6 +793,14 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 	{
 		IntroMenuWidget->PrepareForInitialViewport();
 		IntroMenuWidget->AddToViewport(50);
+        if (IsIntroMap() && IntroMenuWidget->IsInViewport())
+        {
+            if (UGameInstance* GI = GetGameInstance())
+            {
+                if (auto* Tracker = GI->GetSubsystem<UTunaSweeperProgressTrackerSubsystem>())
+                    Tracker->ReportTitleScreenEntered();
+            }
+        }
 		IntroMenuWidget->ForceLayoutPrepass();
 		ScreenFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(
 			this,

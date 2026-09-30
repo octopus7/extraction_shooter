@@ -306,14 +306,20 @@ When adding a field that should survive save/load:
 
 ## Demo Progress Tracker
 
-Progress tracking is opt-in through `[TunaSweeper.ProgressTracker]` in `DefaultGame.ini`: set `Enabled=True`, an HTTPS `/api/events` `Endpoint`, and a release-specific `BuildId` (maximum 128 ASCII characters: first character alphanumeric, remaining characters alphanumeric or `_ . : -`, without spaces). `AllowDevelopment=False` keeps Development and PIE disabled unless explicitly enabled for testing. Main and combat-test sessions never send. No administrator token belongs in the game configuration.
+Progress tracking uses `[TunaSweeper.ProgressTracker]`. The common DefaultGame.ini is disabled, while Config/Custom/Demo/DefaultGame.ini enables the Steam Demo endpoint. The transmitted buildId is read automatically from GeneralProjectSettings.ProjectVersion (maximum 128 ASCII characters: first character alphanumeric, remaining characters alphanumeric or `_ . : -`, without spaces); no separate BuildId setting is used. `AllowDevelopment=False` keeps Development and PIE disabled unless explicitly enabled for testing. Main and combat-test sessions never send. No administrator token belongs in the game configuration.
 
 The random installation `PlayerId` is stored in the same named section of `GGameUserSettingsIni`; it is shared across save slots and is not a Steam identifier. Deleting settings or using another installation can create another player ID.
 
 `UTunaSweeperSaveGame::ProgressTrackerState` adds an optional run GUID and attempted checkpoint set to the existing version 21 serialized save. Unreal's tagged properties let older supported saves load with empty tracker fields. New Demo games create a new run GUID. Older Demo saves receive one when loaded, persisted through the existing safe-save writer without inventing earlier checkpoint events. Runtime reset clears slot tracker state; save/load restores it.
 
-Only actual new-game activation, the five Demo quest reward claims, named achievement location overlaps, and the farewell card send observations. Quest restoration never sends retrospective events. `NAME_None` locations remain inactive; this change adds no map placements or map-arrival events. Demo completion captures its payload before the automatic slot deletion and runtime reset.
+Title and ending screen entry, actual new-game activation, the five Demo quest reward claims, named achievement location overlaps, and the farewell card send observations. Quest restoration never sends retrospective events. `NAME_None` locations remain inactive; this change adds no map placements or map-arrival events. Demo completion captures its payload before the automatic slot deletion and runtime reset.
 
-The attempted set is saved before the single HTTP dispatch and remains attempted whether delivery succeeds or fails. There is no retry, delivery queue, error UI, or reconstruction of missing milestones. A failed local save, recovery from an older backup, or a crash can lose an attempted marker; server aggregation still counts each observed checkpoint once per run. Disabled tracking does not mark observations as attempted. A later checkpoint does not require any earlier checkpoint to be present.
+For gameplay observations, the attempted set is saved before the single HTTP dispatch and remains attempted whether delivery succeeds or fails. There is no retry, delivery queue, error UI, or reconstruction of missing milestones. A failed local save, recovery from an older backup, or a crash can lose an attempted marker; server aggregation still counts each observed checkpoint once per run. Disabled tracking does not mark observations as attempted. A later checkpoint does not require any earlier checkpoint to be present.
 
 `playtimeSeconds` uses the existing slot total plus elapsed session wall time (`GetCurrentActiveSlotTotalPlaySeconds`), including pause time. Each request holds its serialized payload across level travel and slot retirement, has a ten-second timeout, and is cancelled without waiting when the game instance shuts down. Exiting can therefore drop an in-flight observation, as allowed by best-effort collection.
+
+### 화면 진입 관측
+
+- 타이틀 화면: `location.title_screen`, category `location`. 게임 실행 세션마다 한 번, 별도 임시 runId와 시간 0으로 전송하며 게임 세이브를 만들지 않는다. 타이틀 관측도 고유 이용자 분모와 관측 진행 수에 포함되므로 진행 수는 새 게임 횟수와 다르다.
+- 엔딩 화면: `location.ending_screen`, category `location`. 기존 진행 ID와 누적 시간으로 진행별 한 번 전송한다. `demo.complete`는 별도 유지한다.
+- 두 이벤트는 필수 선행 관계를 지정하지 않는다. 기존 배포 Worker도 미등록 장소로 수신할 수 있으며 한국어 표시명은 카탈로그와 문자열 파일을 새 리포에 반영하면 적용된다.

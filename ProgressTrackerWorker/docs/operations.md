@@ -33,17 +33,17 @@ D1 SQL 변경은 자동으로 운영 DB에 적용하지 않습니다. 다음 마
 
 ## Unreal 설정
 
-원래 게임 리포의 `TunaSweeper/Config/DefaultGame.ini`:
+원래 게임 리포의 `TunaSweeper/Config/Custom/Demo/DefaultGame.ini`(Steam Demo):
 
 ```ini
 [TunaSweeper.ProgressTracker]
 Enabled=True
 AllowDevelopment=False
-Endpoint=https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/api/events
-BuildId=demo-2026.09.30
+Endpoint="https://tunatrack.oc7.workers.dev/api/events"
 ```
 
-- 기본값은 비활성이며 URL·BuildId도 비어 있습니다. 배포 후 실제 값을 설정합니다.
+- 공통 기본값은 비활성이며 Steam Demo 전용 설정에서 위 주소로 활성화합니다.
+- buildId는 GeneralProjectSettings의 ProjectVersion을 자동으로 읽습니다. 현재 프로젝트 버전은 0.2.9200이며 별도 BuildId 설정은 사용하지 않습니다.
 - Demo 빌드에서만 전송합니다. Main·전투 테스트는 차단합니다.
 - Development/PIE에서 확인하려면 `AllowDevelopment=True`를 명시하고 별도 테스트 Worker/DB를 사용합니다.
 - BuildId와 체크포인트 ID는 최대 128자, ASCII 영숫자로 시작하고 이후 영숫자·`_`·`.`·`:`·`-`만 사용합니다.
@@ -129,3 +129,9 @@ npm run preview
 - `docs/`: 승인한 설계와 구현 계획.
 
 이 폴더 밖의 절대 경로나 다른 리포의 인증 파일은 필요하지 않습니다.
+
+### 화면 진입 관측
+
+- 타이틀 화면: `location.title_screen`, category `location`. 게임 실행 세션마다 한 번, 별도 임시 runId와 시간 0으로 전송하며 게임 세이브를 만들지 않는다. 타이틀 관측도 고유 이용자 분모와 관측 진행 수에 포함되므로 진행 수는 새 게임 횟수와 다르다.
+- 엔딩 화면: `location.ending_screen`, category `location`. 기존 진행 ID와 누적 시간으로 진행별 한 번 전송한다. `demo.complete`는 별도 유지한다.
+- 두 이벤트는 필수 선행 관계를 지정하지 않는다. 기존 배포 Worker도 미등록 장소로 수신할 수 있으며 한국어 표시명은 카탈로그와 문자열 파일을 새 리포에 반영하면 적용된다.

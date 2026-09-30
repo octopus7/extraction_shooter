@@ -52,4 +52,44 @@ bool FTunaProgressTrackerContractTest::RunTest(const FString&)
     TestTrue(TEXT("Empty location is ignored"), TunaSweeperProgressTrackerModel::LocationCheckpoint(NAME_None).IsEmpty());
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaProgressTrackerScreenAttemptsTest, "TunaSweeper.ProgressTracker.ScreenAttempts",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaProgressTrackerScreenAttemptsTest::RunTest(const FString&)
+{
+    FTunaSweeperProgressTrackerState Session;
+    Session.StartNewRun();
+    FTunaSweeperProgressTrackerState Gameplay;
+    const FGuid Player = FGuid::NewGuid();
+    const FString Title = TunaSweeperProgressTrackerModel::PrepareEvent(Session, Player, TEXT("0.2.9200"),
+        TEXT("location.title_screen"), TEXT("location"), 0);
+    TestFalse(TEXT("Title produces an observation before a gameplay run exists"), Title.IsEmpty());
+    TestFalse(TEXT("Title does not create a gameplay run"), Gameplay.RunId.IsValid());
+    TestEqual(TEXT("Title does not mark gameplay checkpoints"), Gameplay.AttemptedCheckpoints.Num(), 0);
+    TSharedPtr<FJsonObject> Json;
+    TestTrue(TEXT("Title payload is JSON"), FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Title), Json));
+    if (Json)
+    {
+        TestEqual(TEXT("Title uses its transient session identity"), Json->GetStringField(TEXT("runId")),
+            Session.RunId.ToString(EGuidFormats::DigitsWithHyphensLower));
+        TestEqual(TEXT("Title has no gameplay elapsed time"), Json->GetNumberField(TEXT("playtimeSeconds")), 0.0);
+    }
+    Gameplay.StartNewRun();
+    TestTrue(TEXT("Returning to title during gameplay does not retry"), TunaSweeperProgressTrackerModel::PrepareEvent(
+        Session, Player, TEXT("0.2.9200"), TEXT("location.title_screen"), TEXT("location"), 0).IsEmpty());
+    TestFalse(TEXT("Ending records in the gameplay run"), TunaSweeperProgressTrackerModel::PrepareEvent(
+        Gameplay, Player, TEXT("0.2.9200"), TEXT("location.ending_screen"), TEXT("location"), 125).IsEmpty());
+    TestTrue(TEXT("Repeated ending entry does not retry"), TunaSweeperProgressTrackerModel::PrepareEvent(
+        Gameplay, Player, TEXT("0.2.9200"), TEXT("location.ending_screen"), TEXT("location"), 130).IsEmpty());
+    Gameplay.StartNewRun();
+    TestFalse(TEXT("Another run can enter the ending"), TunaSweeperProgressTrackerModel::PrepareEvent(
+        Gameplay, Player, TEXT("0.2.9200"), TEXT("location.ending_screen"), TEXT("location"), 10).IsEmpty());
+    Session.StartNewRun();
+    TestFalse(TEXT("Another application session can enter the title"), TunaSweeperProgressTrackerModel::PrepareEvent(
+        Session, Player, TEXT("0.2.9200"), TEXT("location.title_screen"), TEXT("location"), 0).IsEmpty());
+    TestTrue(TEXT("Invalid data produces no observation"), TunaSweeperProgressTrackerModel::PrepareEvent(
+        Gameplay, Player, TEXT("invalid build"), TEXT("location.other_screen"), TEXT("location"), 10).IsEmpty());
+    TestFalse(TEXT("Invalid data does not consume an attempt"), Gameplay.AttemptedCheckpoints.Contains(TEXT("location.other_screen")));
+    return true;
+}
 #endif

@@ -62,3 +62,10 @@ bool TunaSweeperProgressTrackerModel::IsTrackedQuest(FName QuestId)
         TEXT("demo_q3a_repair_valve"), TEXT("demo_q3b_repair_bunker_pipe"), TEXT("demo_q4_todays_reward") };
     return Quests.Contains(QuestId);
 }
+
+FString TunaSweeperProgressTrackerModel::PrepareEvent(FTunaSweeperProgressTrackerState& State, const FGuid& PlayerId,
+    const FString& BuildId, const FString& CheckpointId, const FString& Category, double PlaytimeSeconds)
+{
+    const FString Body = SerializeEvent(FGuid::NewGuid(), PlayerId, State.RunId, BuildId, CheckpointId, Category, PlaytimeSeconds);
+    return !Body.IsEmpty() && State.TryRecordAttempt(FName(*CheckpointId)) ? Body : FString();
+}

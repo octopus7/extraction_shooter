@@ -9802,3 +9802,14 @@
 - 요청: 옮긴 리포의 에이전트가 읽을 수 있도록 Worker 폴더 안에 간략한 README 작성.
 - 수행: ProgressTrackerWorker/README.md를 목적, 누락 허용 규칙, 코드 위치, 이벤트 계약, 검증 명령과 남은 배포 설정 중심으로 요약했다. 기존 상세 내용은 docs/operations.md에 보존하고 상대 링크로 연결했다.
 - 검증: README 내부 문서 링크 대상과 git diff --check 확인. 문서만 변경하여 제품 테스트·빌드는 다시 실행하지 않았다.
+
+## 2026-09-30 22:02:24 (소요시간: 00:19:12)
+
+- 요청: 배포한 Worker와 기존 프로젝트 버전으로 트래커를 구성하고 Steam Demo를 패키징. 추가로 타이틀·엔딩 화면 진입 이벤트 수집.
+- 구현: ProjectVersion 0.2.9200을 buildId로 자동 사용. Steam Demo CustomConfig에서 수집 활성화, HTTPS /api/events 주소 설정. URL은 INI 주석 해석 방지를 위해 따옴표로 감쌌다.
+- 화면: location.title_screen은 실행 세션별 한 번, 임시 runId·시간 0, 세이브 생성/수정 없음. location.ending_screen은 진행별 한 번, 기존 demo.complete와 함께 저장 삭제 전 전송. Worker 카탈로그·한국어 키·인수인계 문서 갱신. 기존 배포 Worker도 미등록 location으로 수신 가능.
+- 검증: Worker19/19 및 check 통과. UE5.7 Editor 빌드와 Contract/ScreenAttempts/DemoEndingRetirementGuards/VersionPolicy 자동화4개 통과. 화면 테스트 구현 전 실패 확인. 코드 검토 차단 결함 없음.
+- 패키징: TunaSweeperDemo / Demo / Win64 Shipping 전체 BuildCookRun 최종 BUILD SUCCESSFUL, ExitCode=0. 최초 쿡 오류0·경고16(기존 BP_Morph None 참조 등). 주소 절단을 최종 BinaryConfig 검사에서 발견하여 수정 후 전체 재패키징 완료.
+- 산출물: TunaSweeper/Builds/Steam/Demo/Windows/ 전체. 실제 실행 파일과 최신 컴파일 산출물 SHA256 일치(2A4F8AF59541657D6C4616C0ECD3356F847E4209741104F58500A72CF773269E). VerifyDemo 통과. PAK에서 추출한 BinaryConfig와 최신 생성본 동일하며 Enabled=True, AllowDevelopment=False, 전체 Endpoint, 버전, Steam Demo ID 확인. 검증용 추출본 정리.
+- 에디터: 지침의 원래 TunaSweeper.uproject를 명시하여 열고 프로세스 확인.
+- 미확인: 패키지 실제 타이틀/엔딩 화면, Steam 계정 실행, 게임→운영 D1 수신. Worker 배포/push/스토어 업로드 미실시. 빌드/자동화 로그는 TunaSweeper/Saved/Logs에 보관.

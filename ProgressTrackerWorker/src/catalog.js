@@ -2,12 +2,14 @@ const q=id=>'quest.'+id;
 const q1=q('demo_q1_water_intake_check'),q2=q('demo_q2_clear_water_screen');
 const q3a=q('demo_q3a_repair_valve'),q3b=q('demo_q3b_repair_bunker_pipe'),q4=q('demo_q4_todays_reward');
 export const catalog=[
+ {id:'location.title_screen',category:'location',labelKey:'stage.titleScreen',requires:[]},
  {id:'game.start',category:'start',labelKey:'stage.start',requires:[]},
  {id:q1,category:'quest',labelKey:'stage.quest1',requires:[]},
  {id:q2,category:'quest',labelKey:'stage.quest2',requires:[q1]},
  {id:q3a,category:'quest',labelKey:'stage.quest3a',requires:[q2]},
  {id:q3b,category:'quest',labelKey:'stage.quest3b',requires:[q2]},
  {id:q4,category:'quest',labelKey:'stage.quest4',requires:[q3a,q3b]},
+ {id:'location.ending_screen',category:'location',labelKey:'stage.endingScreen',requires:[]},
  {id:'demo.complete',category:'complete',labelKey:'stage.complete',requires:[q4]}
 ];
 export function validateCatalog(entries){

@@ -169,7 +169,11 @@ void ATunaSweeperDemoEndingActor::ShowFarewell()
     if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
     {
         GI->MarkScenarioProgressFlag(EndingSeen,true);
-        if (auto* Tracker = GI->GetSubsystem<UTunaSweeperProgressTrackerSubsystem>()) Tracker->ReportDemoComplete();
+        if (auto* Tracker = GI->GetSubsystem<UTunaSweeperProgressTrackerSubsystem>())
+        {
+            Tracker->ReportEndingScreenEntered();
+            Tracker->ReportDemoComplete();
+        }
         GI->DeleteCompletedDemoSave();
     }
     Fade->StartFadeFromBlack(FadeSeconds);
