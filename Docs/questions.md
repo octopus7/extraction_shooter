@@ -7302,3 +7302,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 답변: 부모 앱5137900의 상점 페이지 편집 > Special Settings > Associated Demos에서 데모5158070 연결 및 표시 옵션을 확인하고 저장한 후 부모 상점 페이지 변경사항을 게시한다. 이미 연결돼 있어도 데모 출시 후 부모 상점 재게시가 필요하다. 부모 게임은 Coming Soon 상태여도 된다.
 - 근거: https://partner.steamgames.com/doc/store/application/demos . 외부 게시 작업은 수행하지 않았다.
 
+
+## 2026-10-01 00:12:58 (소요시간: 00:00:39)
+
+- 질문: 업로드 BAT가 상대경로가 아니었는가?
+- 확인: BAT 자체는 위치 기준으로 리포 루트와 app_5158070.vdf를 찾지만 해당 VDF의 디폿 VDF 참조와 depot_5158071.vdf의 contentroot가 D:/github/extraction_shooter 쪽 절대경로로 고정되어 있다. 워크트리의 VDF도 같은 경로를 가리킨다. 따라서 워크트리 BAT를 실행해도 원래 리포 패키지가 업로드되는 구성이다.
+- 추가 확인: BAT의 steam_appid.txt 임시 제외 경로는 Builds/Demo/Windows로 현재 Builds/Steam/Demo/Windows와 불일치한다. 이번 패키지에는 해당 파일이 없었다. 수정/업로드는 수행하지 않았다.
+
