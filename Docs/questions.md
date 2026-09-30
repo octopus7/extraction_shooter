@@ -7266,3 +7266,11 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 트래커 playerId는 누가 제공하는가?
 - 답변: Unreal 클라이언트가 추적 초기화 시 저장된 유효한 ID가 없으면 FGuid::NewGuid()로 생성하고 GGameUserSettingsIni의 TunaSweeper.ProgressTracker/PlayerId에 저장한다. 다음 실행과 새 게임에서도 재사용하며 Worker는 전달받은 ID를 저장한다. Steam 계정 ID나 서버 발급 ID가 아니다. 설정 파일을 삭제하거나 다른 PC에서 실행하면 별도 ID가 생성될 수 있다.
 
+
+## 2026-09-30 22:43:03 (소요시간: 00:01:04)
+
+- 질문: Steam 런처 미실행 시 게임 실행 차단·런처 실행 유도가 없는가? 직접 실행되는 것 같다.
+- 확인: Demo CustomConfig에 bRelaunchInSteam=true와 SteamDevAppId가 있고 게임 타겟에 Shipping ID가 정의돼 있다. 프로젝트 자체의 Steam 초기화 실패 시 실행 차단 코드는 없다. UE5.7 Steam OSS는 RestartAppIfNecessary가 true이면 종료하지만 API 초기화 실패 자체는 false를 반환하며 기본 OSS 로더가 Null로 폴백할 수 있다. 따라서 런처 미실행 시 반드시 게임을 차단하는 구조는 아니다. 패키지에서 steam_appid.txt는 발견되지 않았다.
+- 범위: 코드·설정 조사만 수행. 실제 사용자의 직접 실행 경로에서 재실행 호출이 생략/실패한 원인은 런타임 로그 미확인으로 확정하지 않았다. 제품 코드 변경 없음.
+- 근거: 로컬 UE5.7 OnlineSubsystemSteam.cpp 및 OnlineSubsystemModule.cpp, https://partner.steamgames.com/doc/sdk/api
+
