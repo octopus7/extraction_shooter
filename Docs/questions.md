@@ -7260,3 +7260,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 답변: 같은 앱의 일반적인 빌드 업데이트는 최초 승인 후 매번 재심사를 받지 않고 배포할 수 있다. 공식 문서는 심사 중·승인 후에도 빌드 변경이 가능하다고 안내한다. 이번 트래커 추가도 일반 업데이트에 해당한다.
 - 근거: https://partner.steamgames.com/doc/store/Review_Process 및 https://partner.steamgames.com/doc/store/releasing
 
+
+## 2026-09-30 22:23:02 (소요시간: 00:00:18)
+
+- 질문: 트래커 playerId는 누가 제공하는가?
+- 답변: Unreal 클라이언트가 추적 초기화 시 저장된 유효한 ID가 없으면 FGuid::NewGuid()로 생성하고 GGameUserSettingsIni의 TunaSweeper.ProgressTracker/PlayerId에 저장한다. 다음 실행과 새 게임에서도 재사용하며 Worker는 전달받은 ID를 저장한다. Steam 계정 ID나 서버 발급 ID가 아니다. 설정 파일을 삭제하거나 다른 PC에서 실행하면 별도 ID가 생성될 수 있다.
+
