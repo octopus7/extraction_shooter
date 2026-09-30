@@ -7236,3 +7236,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Wrangler 인증은 Windows 계정 단위인가?
 - 답변: 기본 OAuth 로그인 정보는 OS 사용자별 전역 Wrangler 설정에 저장되어 같은 Windows 사용자와 설정 경로를 쓰는 프로젝트·워크트리에서 공유한다. 실제 Cloudflare 권한은 로그인한 Cloudflare 사용자·토큰에 따른다. 환경변수 API 토큰이나 별도 인증 프로필·설정 경로가 있으면 달라질 수 있으며 브라우저 로그인 세션과 CLI 인증은 별개다. 이번 만료 오류만으로 워크트리 생성이 원인이라고 볼 수 없다.
 - 근거: Wrangler 설치 코드의 사용자 설정 경로·OAuth 읽기와 https://developers.cloudflare.com/workers/wrangler/commands/general/ , https://developers.cloudflare.com/workers/wrangler/system-environment-variables/ 확인. 인증 상태 변경 없이 질문 기록만 추가.
+
+## 2026-09-30 21:58:29 (소요시간: 00:00:38)
+
+- 질문: tunatrack.oc7.workers.dev에 배포했는데 UE5에서 추가로 필요한 정보가 있는가?
+- 답변: 수신 Endpoint는 https://tunatrack.oc7.workers.dev/api/events이며 추가로 BuildId를 정하고 Enabled=True로 설정해야 한다. 관리자 토큰·Cloudflare 인증·D1 ID는 게임에 필요 없다. Editor/Development 시험에만 AllowDevelopment=True가 필요하다. 현재 워크트리 설정은 비활성·Endpoint/BuildId 공란이며 이번 질문에서는 변경하지 않았다.
+- 확인: 공개 /api/health GET이 HTTP200 및 ok=true, preview=false를 반환했다. 게임 이벤트 전송이나 D1 저장·집계 실연동은 시험하지 않았다.
