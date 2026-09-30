@@ -9796,3 +9796,9 @@
 - 검증: Worker 테스트 19개 및 구문·문자열·바인딩 검사 통과. 폴더만 임시 위치로 복사한 동일 검증도 통과. 브라우저에서 로그인/실패/해제, 필터, 페이지 이동, 누락 상세, 모바일 배치 확인. 빈 데이터 API 확인.
 - Unreal 검증: UE5.7 Editor 빌드 성공, Contract/DemoEndingRetirementGuards/VersionPolicy 자동화 3개 성공(exit0). 계약 테스트에 실제 저장 직렬화/복원 포함. 별도 에이전트 코드 리뷰에서 blocking finding 없음. 기존 원래 프로젝트 Editor 유지.
 - 제한: 설치된 Miniflare/workerd 날짜 제한 및 응답 대기 때문에 추가 로컬 런타임 검증은 완료하지 못했으며 실제 Cloudflare 동작은 미확인. 장소 맵 배치 수정 없음. 현재 데모 범위를 넘는 단계/빌드 증가 시 조회·보관 정책 확장 필요.
+
+## 2026-09-30 21:25:50 (소요시간: 00:00:55)
+
+- 요청: 옮긴 리포의 에이전트가 읽을 수 있도록 Worker 폴더 안에 간략한 README 작성.
+- 수행: ProgressTrackerWorker/README.md를 목적, 누락 허용 규칙, 코드 위치, 이벤트 계약, 검증 명령과 남은 배포 설정 중심으로 요약했다. 기존 상세 내용은 docs/operations.md에 보존하고 상대 링크로 연결했다.
+- 검증: README 내부 문서 링크 대상과 git diff --check 확인. 문서만 변경하여 제품 테스트·빌드는 다시 실행하지 않았다.
