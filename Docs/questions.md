@@ -7288,3 +7288,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 답변: 첨부 화면에서 데모 빌드는 완료이고 상점의 라이브러리 자료만 미완료다. 사용자가 확인한4/5는 해당 검사 일부가 미충족임을 뜻하며 전체 이미지 삭제를 의미하지 않는다. 정확히 빠진 항목이나 이전 완료 상태가 바뀐 원인은 이 화면으로 확인할 수 없다. 라이브러리 자료 상세의 미완료 항목을 먼저 확인해야 한다. 날짜 경과보다는 현재 상점 체크리스트 미완료가 확인된 출시 차단 요인이다.
 - 근거: 사용자 첨부 화면 및 https://partner.steamgames.com/doc/store/assets/libraryassets . 공식 문서의 필수 이미지 목록만으로 화면의5개 검사를 임의 대응하지 않았다.
 
+
+## 2026-09-30 23:02:13 (소요시간: 00:00:20)
+
+- 질문: 업로드한 디폿을 포함하는 빌드를 라이브로 적용하는 메뉴 위치는?
+- 답변: 데모 앱의 Steamworks 설정 > SteamPipe > Builds에서 해당 BuildID의 Set build live on branch를 default로 선택하고 Preview Change > Set Build Live Now로 적용한다. 데모 AppID5158070의 페이지는 https://partner.steamgames.com/apps/builds/5158070 이다. 미출시 데모의 공개 출시는 별도 Release Demo 단계다.
+- 근거: https://partner.steamgames.com/doc/store/application/branches . 실제 빌드 적용 작업은 수행하지 않았다.
+
