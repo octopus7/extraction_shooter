@@ -9813,3 +9813,11 @@
 - 산출물: TunaSweeper/Builds/Steam/Demo/Windows/ 전체. 실제 실행 파일과 최신 컴파일 산출물 SHA256 일치(2A4F8AF59541657D6C4616C0ECD3356F847E4209741104F58500A72CF773269E). VerifyDemo 통과. PAK에서 추출한 BinaryConfig와 최신 생성본 동일하며 Enabled=True, AllowDevelopment=False, 전체 Endpoint, 버전, Steam Demo ID 확인. 검증용 추출본 정리.
 - 에디터: 지침의 원래 TunaSweeper.uproject를 명시하여 열고 프로세스 확인.
 - 미확인: 패키지 실제 타이틀/엔딩 화면, Steam 계정 실행, 게임→운영 D1 수신. Worker 배포/push/스토어 업로드 미실시. 빌드/자동화 로그는 TunaSweeper/Saved/Logs에 보관.
+
+## 2026-10-01 00:10:17 (소요시간: 00:02:32)
+
+- 요청: 트래커 전송이 없는 것으로 보여 Steam 설치 경로와 작업 패키지 비교.
+- 확인: E:/Steam/steamapps/common/TunaSweeper Demo, 설치 BuildID25629493. 실행 파일 및 PAK/UCAS/UTOC 모두 트래커 워크트리 패키지와 불일치하며 D:/github/extraction_shooter/TunaSweeper/Builds/Steam/Demo/Windows의 같은 파일과는4개 모두 일치했다.
+- 원인: 설치본 PAK의 BinaryConfig에는 TunaSweeper.ProgressTracker 섹션과 수집 Endpoint가 없다. 버전은 두 패키지 모두0.2.9200이라 화면 버전으로 구별되지 않는다. 별도 워크트리의 트래커 패키지가 Steam에 적용되지 않은 상태다.
+- 조치: 올바른 워크트리 Windows 폴더를 탐색기로 열었다. 설치본/운영 데이터/Steam 배포는 변경하지 않았으며 검증용 추출본은 제거했다. 올바른 패키지로 업로드 및 default 빌드 적용 필요.
+
