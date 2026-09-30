@@ -7224,3 +7224,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Steam에서 이용자 도달 수준 통계를 제공하는가?
 - 답변: Steam Stats의 전역 합계와 업적 달성률을 제공하지만 게임 내 기록 연동이 필요하다. 체크포인트별 0/1 통계를 전역 합계로 모으는 단순 집계는 설계할 수 있다. 임의 빌드·유입 집단·도달시간별 상세 분석에는 자체 이벤트 저장이 적합하다. Valve는 데모 업적 비활성화를 권장하며, 데모 AppID의 실제 Stats 설정 가능 여부는 파트너 계정에서 확인하지 않았다.
 - 근거: https://partner.steamgames.com/doc/features/achievements ; https://partner.steamgames.com/doc/store/application/demos
+
+## 2026-09-30 20:59:34 (소요시간: 00:00:53)
+
+- 질문: Wrangler 없이 Worker에 폴더를 올리는 방식으로 진행할 수 있는가?
+- 답변: Wrangler 없이 Cloudflare 대시보드에서 Worker 코드 배포와 D1 생성·바인딩·SQL 실행이 가능하다. 정적 폴더 업로드만으로 수집 API와 D1 초기화까지 자동 완료된다고 볼 수는 없다. 확실한 수동 배포 경로는 Worker 편집기에 단일 JS를 반영하고 D1을 별도로 연결하는 방식이며 통계 HTML을 Worker 코드에 포함할 수 있다.
+- 근거: https://developers.cloudflare.com/d1/get-started/ ; https://developers.cloudflare.com/workers/static-assets/direct-upload/
