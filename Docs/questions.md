@@ -7253,3 +7253,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 이벤트는 화이트리스트 제한 없이 보내면 모두 받는가?
 - 답변: 서버는 규격에 맞는 미등록 quest/location ID를 받으며 카탈로그는 표시·선행 관계용이다. JSON 필드·ID·category/접두사 규칙은 검증한다. UE 퀘스트 전송은 현재 주요 데모 퀘스트5개로 제한하고 이름 있는 장소를 전송한다. 이후 요청한 타이틀/엔딩도 location 범주로 추가했다.
+
+## 2026-09-30 22:22:24 (소요시간: 00:00:25)
+
+- 질문: Steam 빌드는 최초 리뷰 이후 업데이트마다 추가 리뷰를 받는가?
+- 답변: 같은 앱의 일반적인 빌드 업데이트는 최초 승인 후 매번 재심사를 받지 않고 배포할 수 있다. 공식 문서는 심사 중·승인 후에도 빌드 변경이 가능하다고 안내한다. 이번 트래커 추가도 일반 업데이트에 해당한다.
+- 근거: https://partner.steamgames.com/doc/store/Review_Process 및 https://partner.steamgames.com/doc/store/releasing
+
