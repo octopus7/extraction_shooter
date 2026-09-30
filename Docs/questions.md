@@ -7219,3 +7219,8 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: Windows 그림판을 Computer Use로 사용할 수 있는가?
 - 답변: 가능하다. 브러시·연필·도형·채우기·캔버스 드래그를 조작할 수 있으며, 현재는 앱 연결 문제를 Codex 재시작 후 다시 확인해야 한다.
+
+## 2026-09-30 20:53:29 (소요시간: 00:01:34)
+- 질문: Steam에서 이용자 도달 수준 통계를 제공하는가?
+- 답변: Steam Stats의 전역 합계와 업적 달성률을 제공하지만 게임 내 기록 연동이 필요하다. 체크포인트별 0/1 통계를 전역 합계로 모으는 단순 집계는 설계할 수 있다. 임의 빌드·유입 집단·도달시간별 상세 분석에는 자체 이벤트 저장이 적합하다. Valve는 데모 업적 비활성화를 권장하며, 데모 AppID의 실제 Stats 설정 가능 여부는 파트너 계정에서 확인하지 않았다.
+- 근거: https://partner.steamgames.com/doc/features/achievements ; https://partner.steamgames.com/doc/store/application/demos

@@ -9767,3 +9767,11 @@
 - 수행: origin/demo의 665d90e0을 기준으로 demo-tracker 관리 워크트리를 생성하고 codex/demo-tracker 브랜치를 준비했다. 생성 직후 git status로 변경 사항이 없는 것을 확인했다.
 - 범위: 워크트리 준비만 완료했다. 트래커 기능과 변경 범위는 사용자 답변 대기 중이며 구현 및 빌드는 수행하지 않았다.
 
+
+## 2026-09-30 20:53:29 (소요시간: 00:01:34)
+- 요청: 데모 이용자의 도달 수준을 웹으로 수집하기 위한 Cloudflare Pages 및 Workers/D1 구성을 검토.
+- 결과: 정적 Pages 단독으로는 수집·저장이 불가능하며 Pages Functions + D1으로 구현할 수 있다. Functions는 Workers 런타임을 사용한다. 사용자 선호에 맞춰 Pages + Functions + D1을 제안하며, 신규 프로젝트에 대한 Cloudflare의 Workers Static Assets 권장도 안내한다.
+- 제안: 시작 및 주요 체크포인트를 수집하고 이용자별 중복 도달을 제거한다. 빌드/데이터셋별 도달률·최종 도달 지점·첫 도달 시간을 집계하며 전송 실패 재시도와 테스트 데이터 분리가 필요하다. 사용자가 주요 퀘스트 + 장소 도달 + 데모 완료를 수집 기준으로 선택했다.
+- 코드 확인: AchievementSubsystem의 장소 도달·퀘스트 보상 수령과 QuestSubsystem의 진행 변경 이벤트를 확인했다. 저장 불러오기에서도 보상 수령 보고가 발생하므로 재전송 중복과 과거 진행 복원을 구분해야 한다.
+- 범위: 공식 문서와 코드 검토만 수행했다. 제품 코드 변경, 외부 리소스 생성, 배포 및 빌드는 하지 않았다.
+- 근거: https://developers.cloudflare.com/pages/functions/ ; https://developers.cloudflare.com/pages/functions/bindings/ ; https://developers.cloudflare.com/workers/best-practices/workers-best-practices/
