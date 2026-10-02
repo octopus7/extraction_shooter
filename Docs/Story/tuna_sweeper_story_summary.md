@@ -6,15 +6,9 @@
 
 ## 최신 기준
 
-이 문서는 스토리 감정선과 과거 상세 기획을 보존하는 보조 문서다.
+이 문서는 2026-10-03 이전 본편의 감정선과 상세 기획을 보존하는 보관본이다. 아래 본문 전체는 당시 기록이며 현재 본편의 필수 조건이나 구현 지시로 사용하지 않는다.
 
-현재 퀘스트 구조, 아이템 요구량, 지역 개방, 퀘스트 대화의 우선 기준은 아래 SSOT 문서다.
-
-- `Docs/SSOT/TunaSweeper_SSOT_Quest_Item_v0.6.md`
-- `Docs/SSOT/TunaSweeper_Quest_Dialogue_v0.6.1.md`
-- `Docs/SSOT/area_unlocking.md`
-
-아래의 과거 상세 퀘스트안 중 `시설 복구 1/2`, 고급보안구역 이전 명칭, 포탈/워프포인트 직접 안내, 보스 처치 즉시 엔딩, 후속 지역 떡밥과 충돌하는 내용은 폐기된 초안으로 본다.
+현재 본편의 우선 기준은 접근 제한 저장소의 [본편 설계 SSOT](../../TunaSweeper/External/MainPayload/Docs/SSOT/main_game_design.md)다. 공개 문서의 적용 범위는 [SSOT 색인](../SSOT/README.md)을 따른다. 이전 아이템이나 장면의 재사용 여부는 현재 SSOT에 맞춰 판단한다.
 
 ## 1. 핵심 방향
 

@@ -1,5 +1,9 @@
 # Quest Implementation Progress
 
+> **과거 구현 점검 기록 · 2026-10-03 기준 보관**
+>
+> 아래 완료/미완료 목록은 2026-05-25 점검 당시 기록이며 현재 구현 상태를 보장하지 않는다. 이전 M/S 본편 체인의 추가 계획은 현행 구현 지시에서 제외한다. 현재 본편 기획은 [본편 설계 SSOT](../TunaSweeper/External/MainPayload/Docs/SSOT/main_game_design.md), 공용 시스템과 데이터 경계는 [퀘스트 시스템](quest_system.md) 및 [Demo/Main 빌드 데이터 구조](Steam/TunaSweeper_Build_Flavor_Data_Architecture.md)를 참조하고 실제 코드와 대조한다.
+
 Last updated: 2026-05-25 17:34:26
 
 이 문서는 TunaSweeper 퀘스트 시스템 구현 진행상황을 추적한다. 상세 설계는 `Docs/quest_system.md`를 기준으로 보고, 이 문서는 완료/남은 작업/결정 필요 항목만 정리한다.
