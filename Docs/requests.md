@@ -9829,3 +9829,11 @@
 - 검증: 상대경로 해석 결과 및 Shipping 실행 파일 존재 확인. D 원본 BAT/VDF3개의 변경 전후 SHA256 일치. git diff --check 통과. SteamCMD/로그인/업로드는 실행하지 않았다.
 - 저장: SDK 아래 VDF2개는 기존 Git 무시 대상이라 로컬 워크트리 설정으로 유지. 추적 대상 BAT와 작업 기록을 함께 커밋.
 
+
+## 2026-10-03 00:41:48 (소요시간: 00:02:21)
+
+- 요청: Steam도 STOVE처럼 OS 언어를 따르도록 복구.
+- 변경: 워크트리 InitializeGlobalLanguageSetting에서 Steam 채널 영어 기본값 분기와 불필요한 설정 헤더를 제거했다. 유효한 저장 언어는 우선 복원하고, 없거나 잘못된 값이면 모든 채널에서 OS 언어/로캘을 감지한다. 미지원 언어는 기존처럼 영어. 저장 정책 문서도 갱신했다.
+- 검증: UE5.7 Editor 빌드 성공, 기존 TunaSweeper.UI.Localization.RefreshesTitleAndGraphicsLabels 자동화 성공(exit0). 테스트 중 기존 UI 문자열 중복 키 경고 있음. OS 최초 선택은 코드 경로 확인이며 실제 Windows 언어 변경 테스트는 미실시.
+- 범위: D 원본 파일은 수정하지 않았다. 기존 사용자 언어 설정은 초기화하지 않았다. Shipping 패키징과 Steam 업로드는 수행하지 않았다. 빌드한 워크트리 프로젝트 에디터를 명시하여 실행했다.
+
