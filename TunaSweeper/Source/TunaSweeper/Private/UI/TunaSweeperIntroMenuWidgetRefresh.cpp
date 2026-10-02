@@ -235,7 +235,7 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 		InterfaceLanguageOptionRow->SetValue(BuildLanguageNameText(PendingInterfaceLanguage));
 		InterfaceLanguageOptionRow->SetStepEnabled(
 			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::English,
-			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::Russian);
+			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::BrazilianPortuguese);
 	}
 
 	if (LanguageEnglishButton)

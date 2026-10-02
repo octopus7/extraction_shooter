@@ -302,6 +302,7 @@ ui.language.japanese,日本語,日本語,日本語
 ui.language.simplified_chinese,简体中文,简体中文,简体中文
 ui.language.traditional_chinese,繁體中文,繁體中文,繁體中文
 ui.language.russian,Русский,Русский,Русский
+ui.language.brazilian_portuguese,Português (Brasil),Português (Brasil),Português (Brasil)
 ui.settings.development,개발,Development,開発
 ui.settings.development.enemy_combat_debug,적 전투 디버그,Enemy Combat Debug,敵戦闘デバッグ
 ui.settings.development.debug_display_language,디버그 표시 언어,Debug Display Language,デバッグ表示言語

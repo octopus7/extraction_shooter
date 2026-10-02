@@ -9,6 +9,7 @@ const TCHAR* TunaSweeperLanguage::ToLanguageCode(ETunaSweeperItemTextLanguage La
 	case ETunaSweeperItemTextLanguage::SimplifiedChinese: return TEXT("zh-Hans");
 	case ETunaSweeperItemTextLanguage::TraditionalChinese: return TEXT("zh-Hant");
 	case ETunaSweeperItemTextLanguage::Russian: return TEXT("ru");
+	case ETunaSweeperItemTextLanguage::BrazilianPortuguese: return TEXT("pt-BR");
 	default: return TEXT("en");
 	}
 }
@@ -18,6 +19,12 @@ bool TunaSweeperLanguage::TryParseLanguageCode(const FString& Code, ETunaSweeper
 	TArray<FString> Parts;
 	Code.TrimStartAndEnd().ToLower().Replace(TEXT("_"), TEXT("-")).ParseIntoArray(Parts, TEXT("-"), true);
 	if (Parts.IsEmpty()) return false;
+	if (Parts[0] == TEXT("pt"))
+	{
+		if (Parts.Num() > 1 && Parts[1] != TEXT("br")) return false;
+		OutLanguage = ETunaSweeperItemTextLanguage::BrazilianPortuguese;
+		return true;
+	}
 	if (Parts[0] == TEXT("zh"))
 	{
 		// An explicit script takes precedence over a region (for example zh-Hans-HK).

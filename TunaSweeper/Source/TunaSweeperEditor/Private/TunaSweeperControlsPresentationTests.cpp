@@ -94,8 +94,8 @@ bool FTunaSweeperControlsPresentationTest::RunTest(const FString& Parameters)
 
 	const ETunaSweeperItemTextLanguage Languages[] = {
 		ETunaSweeperItemTextLanguage::Korean, ETunaSweeperItemTextLanguage::English, ETunaSweeperItemTextLanguage::Japanese,
-		ETunaSweeperItemTextLanguage::SimplifiedChinese, ETunaSweeperItemTextLanguage::TraditionalChinese, ETunaSweeperItemTextLanguage::Russian };
-	const TCHAR* LanguageNames[] = { TEXT("ko"), TEXT("en"), TEXT("ja"), TEXT("zh-Hans"), TEXT("zh-Hant"), TEXT("ru") };
+		ETunaSweeperItemTextLanguage::SimplifiedChinese, ETunaSweeperItemTextLanguage::TraditionalChinese, ETunaSweeperItemTextLanguage::Russian, ETunaSweeperItemTextLanguage::BrazilianPortuguese };
+	const TCHAR* LanguageNames[] = { TEXT("ko"), TEXT("en"), TEXT("ja"), TEXT("zh-Hans"), TEXT("zh-Hant"), TEXT("ru"), TEXT("pt-BR") };
 	for (int32 LanguageIndex = 0; LanguageIndex < UE_ARRAY_COUNT(Languages); ++LanguageIndex)
 	{
 		Instance->SetCurrentTextLanguage(Languages[LanguageIndex], false);

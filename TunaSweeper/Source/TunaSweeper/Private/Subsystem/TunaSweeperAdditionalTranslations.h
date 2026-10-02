@@ -17,6 +17,7 @@ public:
 			Text.SimplifiedChinese = Translation->SimplifiedChinese;
 			Text.TraditionalChinese = Translation->TraditionalChinese;
 			Text.Russian = Translation->Russian;
+			Text.BrazilianPortuguese = Translation->BrazilianPortuguese;
 		}
 	}
 
@@ -26,6 +27,7 @@ private:
 		FText SimplifiedChinese;
 		FText TraditionalChinese;
 		FText Russian;
+		FText BrazilianPortuguese;
 	};
 	TMap<FName, FTranslation> ByKey;
 };

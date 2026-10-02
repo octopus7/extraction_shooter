@@ -1,13 +1,13 @@
-string_key,zh-Hans,zh-Hant,ru
-scenario.demo.speaker.luna,露娜,露娜,Луна
-scenario.demo.speaker.mole,鼹鼠,鼴鼠,Крот
-scenario.demo.bunker_toilet.line1,要是厕所冲不了水，这就不只是生活问题，而是文明末日了！,要是廁所衝不了水，這就不只是生活問題，而是文明末日了！,"Если туалет не смывает, это уже не бытовая проблема, а конец цивилизации!"
-scenario.demo.bunker_toilet.line2,末日先缓一缓，我们先修好取水设施。,末日先緩一緩，我們先修好取水設施。,С концом света повременим. Сначала починим водозабор.
-scenario.demo.ending.dinner.line1,找到了。最后一罐。,找到了。最後一罐。,Нашёл. Последняя банка.
-scenario.demo.ending.dinner.line2,辛苦了。今天坐这儿，和我一起吃吧。,辛苦了。今天坐這兒，和我一起喫吧。,"Ты отлично справился. Садись, сегодня поедим вместе."
-scenario.demo.ending.dinner.line3,感觉这比维修零件还珍贵。,感覺這比維修零件還珍貴。,"Кажется, это ценнее деталей для ремонта."
-scenario.demo.ending.dinner.line4,水通了，管道也修好了。现在可以安心吃了。,水通了，管道也修好了。現在可以安心喫了。,"Вода снова идёт, трубы починены. Теперь можно спокойно поесть."
-scenario.demo.ending.dinner.line5,今天真正的英雄是你。,今天真正的英雄是你。,Сегодня настоящий герой — ты.
-scenario.demo.ending.dinner.line6,修好取水设施的人可是你。,修好取水設施的人可是你。,Это ты починил водозабор.
-scenario.demo.ending.dinner.line7,不，带来金枪鱼罐头的人才是英雄。,不，帶來金槍魚罐頭的人才是英雄。,"Нет. Герой тот, кто принёс банку тунца."
-scenario.demo.ending.dinner.line8,那就和英雄一人一半吧。,那就和英雄一人一半吧。,Тогда разделим её с героем пополам.
+string_key,zh-Hans,zh-Hant,ru,pt-BR
+scenario.demo.speaker.luna,露娜,露娜,Луна,Luna
+scenario.demo.speaker.mole,鼹鼠,鼴鼠,Крот,Toupeira
+scenario.demo.bunker_toilet.line1,要是厕所冲不了水，这就不只是生活问题，而是文明末日了！,要是廁所衝不了水，這就不只是生活問題，而是文明末日了！,"Если туалет не смывает, это уже не бытовая проблема, а конец цивилизации!","Se a descarga não funciona, isso não é só um problema doméstico. É o fim da civilização!"
+scenario.demo.bunker_toilet.line2,末日先缓一缓，我们先修好取水设施。,末日先緩一緩，我們先修好取水設施。,С концом света повременим. Сначала починим водозабор.,"Vamos adiar o apocalipse. Primeiro, consertar a instalação de captação de água."
+scenario.demo.ending.dinner.line1,找到了。最后一罐。,找到了。最後一罐。,Нашёл. Последняя банка.,Achei. A última lata.
+scenario.demo.ending.dinner.line2,辛苦了。今天坐这儿，和我一起吃吧。,辛苦了。今天坐這兒，和我一起喫吧。,"Ты отлично справился. Садись, сегодня поедим вместе.","Bom trabalho. Hoje, sente aqui e coma comigo."
+scenario.demo.ending.dinner.line3,感觉这比维修零件还珍贵。,感覺這比維修零件還珍貴。,"Кажется, это ценнее деталей для ремонта.",Isso parece mais precioso que as peças de reparo.
+scenario.demo.ending.dinner.line4,水通了，管道也修好了。现在可以安心吃了。,水通了，管道也修好了。現在可以安心喫了。,"Вода снова идёт, трубы починены. Теперь можно спокойно поесть.",A água voltou e os canos estão consertados. Agora dá para comer sem preocupação.
+scenario.demo.ending.dinner.line5,今天真正的英雄是你。,今天真正的英雄是你。,Сегодня настоящий герой — ты.,"Hoje, foi você quem salvou o dia."
+scenario.demo.ending.dinner.line6,修好取水设施的人可是你。,修好取水設施的人可是你。,Это ты починил водозабор.,Foi você quem consertou a instalação de captação de água.
+scenario.demo.ending.dinner.line7,不，带来金枪鱼罐头的人才是英雄。,不，帶來金槍魚罐頭的人才是英雄。,"Нет. Герой тот, кто принёс банку тунца.",Não. Quem trouxe a lata de atum é que salvou o dia.
+scenario.demo.ending.dinner.line8,那就和英雄一人一半吧。,那就和英雄一人一半吧。,Тогда разделим её с героем пополам.,Então vamos dividir com quem salvou o dia. Metade para cada um.

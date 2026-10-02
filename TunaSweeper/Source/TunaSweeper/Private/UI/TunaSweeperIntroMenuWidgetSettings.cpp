@@ -101,6 +101,8 @@ FText UTunaSweeperIntroMenuWidget::BuildLanguageNameText(ETunaSweeperItemTextLan
 		return ResolveUiText(TEXT("ui.language.traditional_chinese"), FText::GetEmpty());
 	case ETunaSweeperItemTextLanguage::Russian:
 		return ResolveUiText(TEXT("ui.language.russian"), FText::GetEmpty());
+	case ETunaSweeperItemTextLanguage::BrazilianPortuguese:
+		return ResolveUiText(TEXT("ui.language.brazilian_portuguese"), FText::GetEmpty());
 	case ETunaSweeperItemTextLanguage::English:
 	default:
 		return ResolveUiText(FName(TEXT("ui.language.english")), FText::GetEmpty());
