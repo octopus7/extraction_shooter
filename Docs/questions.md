@@ -7253,3 +7253,19 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 열차 플러그인이 프로젝트에 역의존하지 않는지, 탑승 가시성 검사가 엔진 플레이어 기준인지?
 - 답변: 런타임은 Core, CoreUObject, Engine만 참조하며 전용 에셋은 /LoopRail 안에 있다. 게임 모듈과 /Game 에셋 참조가 없는지 검사하고, 빈 UE 프로젝트에서 플러그인만 로드해 기능 검사를 통과했다. 샘플 맵의 플레이어 생성은 호스트의 기본 GameMode를 따르며 특정 프로젝트 캐릭터를 저장 참조하지 않는다.
 - 검증 구분: 탑승 자동검사는 엔진 ACharacter에 프로젝트와 같은 68cm 지름·176cm 높이 캡슐을 적용한 바닥 추종·충돌 검사다. 기본 ACharacter에는 표시 모델이 없으므로 프로젝트 캐릭터 외형 가시성을 확인한 것은 아니다. 객차 지붕은 별도로 켜고 끌 수 있으며 기본 숨김이다.
+
+
+## 2026-10-03 02:50:18 (소요시간: 00:00:39)
+- 질문: 호퍼를 테스트하려면 레벨 스폰 앵커에 어떤 ID를 할당해야 하는가?
+- 답변: 호퍼는 아직 EnemySpawns.json과 EnemySpawnProfiles.json에 등록하지 않아 할당된 스폰 앵커 ID가 없다. 현재 codex/hopper-combat 작업 폴더의 /Game/Maps/HopperCombatTestMap 또는 /Game/Characters/Hopper/BP_HopperEnemy 직접 배치로 확인할 수 있다. 기본 작업 폴더에는 호퍼 에셋을 아직 통합하지 않았다. 구현 작업은 사용자 요청에 따라 중단 상태를 유지한다.
+
+
+## 2026-10-03 02:53:53 (소요시간: 00:00:20)
+
+- 질문: 지금 브랜치는 무엇인가?
+- 답변: 호퍼 작업 폴더는 codex/hopper-combat, 기본 D:\github\extraction_shooter 폴더는 codex/guided-rocket-plugin이다. git branch --show-current로 각각 확인했다.
+
+
+## 2026-10-03 00:34:04 (소요시간: 02:24:50)
+- 질문: HOPPER_03_ArmModules_v5 폴더와 파일럿 토끼, 메카닉 몸통·팔다리를 구분할 수 있는가?
+- 답변: 원본 GLB와 부품 이름·형상을 확인해 토끼를 별도 파일럿으로 분리하고 메카닉 정적 부품 62개를 몸통·콕핏·좌우 팔·다리 단위로 구분했다. 원본 L/R 이름과 텍스처를 유지했다.

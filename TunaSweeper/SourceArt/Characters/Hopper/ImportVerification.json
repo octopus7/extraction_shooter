@@ -1,0 +1,899 @@
+{
+  "static_meshes": 62,
+  "skeletal_mesh": "/Game/Characters/Hopper/Pilot/SK_Rabbit_Pilot.SK_Rabbit_Pilot",
+  "skeleton": "/Game/Characters/Hopper/Pilot/SK_Rabbit_Pilot_Skeleton.SK_Rabbit_Pilot_Skeleton",
+  "animation_lengths": {
+    "Idle": 1.600000023841858,
+    "Boarding": 2.0,
+    "Seated": 2.0,
+    "Disembark": 1.399999976158142,
+    "Walk": 0.800000011920929,
+    "Fire": 0.5,
+    "Melee": 0.699999988079071
+  },
+  "textures": 9,
+  "materials": 14,
+  "axis_probe_cm": [],
+  "data_asset": "/Game/Characters/Hopper/DA_HopperVisual.DA_HopperVisual",
+  "reload_verified": true,
+  "all_static_bounds_max_error_cm": 8.404254913330078e-06,
+  "bone_names": [
+    "root",
+    "pelvis",
+    "spine",
+    "head",
+    "ear_l",
+    "ear_r",
+    "upperarm_l",
+    "forearm_l",
+    "hand_l",
+    "upperarm_r",
+    "forearm_r",
+    "hand_r",
+    "thigh_l",
+    "foot_l",
+    "thigh_r",
+    "foot_r"
+  ],
+  "reference_bones": {
+    "root": {
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        -3.061616469718424e-17,
+        -5.960464477539052e-08,
+        -3.061617462335159e-17,
+        0.9999999999999982
+      ],
+      "scale": [
+        0.9999999403953552,
+        1.0,
+        0.9999999403953552
+      ]
+    },
+    "pelvis": {
+      "location": [
+        -3.5000005327907946,
+        -9.157340455965169e-23,
+        8.219372795857561
+      ],
+      "rotation": [
+        3.061616469718401e-17,
+        5.960465188081788e-08,
+        3.061617462335181e-17,
+        -0.9999999999999982
+      ],
+      "scale": [
+        0.9999999403953552,
+        1.0,
+        0.9999999403953552
+      ]
+    },
+    "spine": {
+      "location": [
+        -3.50000136725661,
+        -1.6198760347132612e-22,
+        15.219378577507685
+      ],
+      "rotation": [
+        -3.210325584336826e-17,
+        0.0498134039730041,
+        -2.905306577372498e-17,
+        0.9987585417830589
+      ],
+      "scale": [
+        1.0000000596046377,
+        1.0,
+        1.0000000596046377
+      ]
+    },
+    "head": {
+      "location": [
+        -2.500003441266065,
+        -1.5509634598607962e-22,
+        24.719380037800534
+      ],
+      "rotation": [
+        3.06161670819575e-17,
+        6.332531731628732e-08,
+        3.0616174591301984e-17,
+        -0.999999999999998
+      ],
+      "scale": [
+        0.9999999999999893,
+        1.0,
+        1.0000000596046377
+      ]
+    },
+    "ear_l": {
+      "location": [
+        -3.700004729337139,
+        4.9000000953674325,
+        39.21937693538948
+      ],
+      "rotation": [
+        -0.04769829860992729,
+        -0.00228038980313734,
+        -0.04769829347507555,
+        0.9977196725191047
+      ],
+      "scale": [
+        1.000000119209279,
+        1.0,
+        1.0000001788139343
+      ]
+    },
+    "ear_r": {
+      "location": [
+        -3.7000047293371394,
+        -4.900000095367431,
+        39.21937693538948
+      ],
+      "rotation": [
+        0.047698298609927234,
+        -0.00228038980313734,
+        0.047698293475075496,
+        0.9977196725191047
+      ],
+      "scale": [
+        1.000000119209279,
+        1.0,
+        1.0000001788139343
+      ]
+    },
+    "upperarm_l": {
+      "location": [
+        -3.7000025868712343,
+        8.299999237060547,
+        22.819374605833488
+      ],
+      "rotation": [
+        -0.26942081980284577,
+        -0.9190451628442886,
+        -0.269420919329625,
+        -0.1008998450784589
+      ],
+      "scale": [
+        1.0000000596046377,
+        1.000000238418579,
+        1.0000001788139343
+      ]
+    },
+    "forearm_l": {
+      "location": [
+        -1.6000028641258335,
+        11.100000685361232,
+        17.51937942175634
+      ],
+      "rotation": [
+        -0.4413428585591574,
+        0.3146434179897825,
+        -0.44134284851471645,
+        0.7151450837273889
+      ],
+      "scale": [
+        1.0000001788139343,
+        1.000000357627897,
+        0.999999999999968
+      ]
+    },
+    "hand_l": {
+      "location": [
+        4.100000431489853,
+        13.500000065987173,
+        20.319373870195797
+      ],
+      "rotation": [
+        0.7071068248991693,
+        1.5968819100375953e-08,
+        0.7071067374739146,
+        1.0363502150889659e-07
+      ],
+      "scale": [
+        1.0000000596046235,
+        1.0000001192092327,
+        0.9999998211860337
+      ]
+    },
+    "upperarm_r": {
+      "location": [
+        -3.700002586871235,
+        -8.299999237060547,
+        22.819374605833488
+      ],
+      "rotation": [
+        0.26942081980284577,
+        -0.9190451628442886,
+        0.2694209193296251,
+        -0.10089984507845887
+      ],
+      "scale": [
+        1.0000000596046377,
+        1.000000238418579,
+        1.0000001788139343
+      ]
+    },
+    "forearm_r": {
+      "location": [
+        -1.6000028641258344,
+        -11.100000685361234,
+        17.51937942175634
+      ],
+      "rotation": [
+        -0.44134285855915734,
+        -0.31464341798978257,
+        -0.44134284851471645,
+        -0.715145083727389
+      ],
+      "scale": [
+        1.0000001788139343,
+        1.000000357627897,
+        0.999999999999968
+      ]
+    },
+    "hand_r": {
+      "location": [
+        4.100000431489855,
+        -13.500000065987175,
+        20.319373870195797
+      ],
+      "rotation": [
+        0.7071068248991694,
+        -1.596881898935365e-08,
+        0.7071067374739148,
+        -1.0363502145338543e-07
+      ],
+      "scale": [
+        1.0000000596046235,
+        1.0000001192092327,
+        0.9999998211860337
+      ]
+    },
+    "thigh_l": {
+      "location": [
+        -4.100001450702414,
+        5.900000095367432,
+        8.51937394026655
+      ],
+      "rotation": [
+        0.04811803736133079,
+        0.8378506025917347,
+        0.04811808035035422,
+        0.5416416458882733
+      ],
+      "scale": [
+        1.0000001788139201,
+        1.0,
+        1.0000000596046377
+      ]
+    },
+    "foot_l": {
+      "location": [
+        5.499999942259142,
+        6.200000015171778,
+        4.219374688535593
+      ],
+      "rotation": [
+        -0.034789484493351584,
+        -0.8166606748233927,
+        -0.034789523372445064,
+        -0.5750171502044146
+      ],
+      "scale": [
+        1.0000001788139201,
+        0.9999998807907104,
+        1.0000000596046377
+      ]
+    },
+    "thigh_r": {
+      "location": [
+        -4.100001450702415,
+        -5.900000095367432,
+        8.519373940266552
+      ],
+      "rotation": [
+        -0.04811803736133076,
+        0.8378506025917347,
+        -0.0481180803503543,
+        0.5416416458882733
+      ],
+      "scale": [
+        1.0000001788139201,
+        1.0,
+        1.0000000596046377
+      ]
+    },
+    "foot_r": {
+      "location": [
+        5.499999942259141,
+        -6.20000001517178,
+        4.219374688535595
+      ],
+      "rotation": [
+        0.03478948449335156,
+        -0.8166606748233927,
+        0.03478952337244515,
+        -0.5750171502044146
+      ],
+      "scale": [
+        1.0000001788139201,
+        0.9999998807907104,
+        1.0000000596046377
+      ]
+    }
+  },
+  "hatch_tracks": 13,
+  "hatch_samples_per_track": 31,
+  "normal_strength": 0.8,
+  "final_reload_check": "Fresh Unreal process exited 0 after faithful handedness correction: 62 static bounds and winding, 16 unit-scale reference bones through read-only AnimPoseExtensions, 7 animation clips, matching DA pivots and 13 cockpit motion tracks.",
+  "gun_local_transform": {
+    "location": [
+      2.5680003577341077,
+      -7.564530390737783e-08,
+      2.8933996824976482
+    ],
+    "rotation_xyzw": [
+      -0.7071068286895752,
+      1.5968819155887104e-08,
+      -0.7071067094802856,
+      -1.0363502411792069e-07
+    ],
+    "scale": [
+      0.45,
+      0.45,
+      0.45
+    ]
+  },
+  "rhi_material_verification": {
+    "platform": "PCD3D_SM6 DirectX12",
+    "material_count": 14,
+    "compilation_complete": true,
+    "materials": [
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Arms_Metal.M_HOPPER_Arms_Metal",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Arms_Paint.M_HOPPER_Arms_Paint",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Arms_Rubber.M_HOPPER_Arms_Rubber",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_CoolLight.M_HOPPER_CoolLight",
+        "pixel_instructions": 207,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Eye.M_HOPPER_Eye",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Fabric.M_HOPPER_Fabric",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Glass.M_HOPPER_Glass",
+        "pixel_instructions": 321,
+        "vertex_instructions": 489,
+        "samplers": 2
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Legs_Metal.M_HOPPER_Legs_Metal",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Legs_Paint.M_HOPPER_Legs_Paint",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Legs_Rubber.M_HOPPER_Legs_Rubber",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Metal.M_HOPPER_Metal",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Paint.M_HOPPER_Paint",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_Rubber.M_HOPPER_Rubber",
+        "pixel_instructions": 204,
+        "vertex_instructions": 293,
+        "samplers": 4
+      },
+      {
+        "material": "/Game/Characters/Hopper/Materials/M_HOPPER_WarmLight.M_HOPPER_WarmLight",
+        "pixel_instructions": 207,
+        "vertex_instructions": 293,
+        "samplers": 4
+      }
+    ]
+  },
+  "winding_verification": {
+    "convention": "Matches Unreal EngineCube: triangle cross dot outward vertex normal < 0",
+    "part_count": 62,
+    "matched_source_winding": true,
+    "parts": [
+      {
+        "part": "Waist_Interface",
+        "front_face_triangles": 652,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Load_Frame",
+        "front_face_triangles": 1132,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Armor_Cheeks",
+        "front_face_triangles": 1008,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Armor_Rear_Skins",
+        "front_face_triangles": 648,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Cabin_Interior",
+        "front_face_triangles": 796,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Rear_Power_Module",
+        "front_face_triangles": 552,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Cooling_Cassettes",
+        "front_face_triangles": 328,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Roof_Equipment",
+        "front_face_triangles": 448,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Socket_L",
+        "front_face_triangles": 728,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Socket_R",
+        "front_face_triangles": 728,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Hatch_Pivot",
+        "front_face_triangles": 1192,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Catch_L",
+        "front_face_triangles": 76,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Catch_R",
+        "front_face_triangles": 76,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Body_Seated_Surround",
+        "front_face_triangles": 874,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_C_Drive",
+        "front_face_triangles": 432,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Bell_Crank_L",
+        "front_face_triangles": 208,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Rigid_Connecting_Link_L",
+        "front_face_triangles": 92,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_Cylinder_Barrel_L",
+        "front_face_triangles": 40,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_Piston_Rod_L",
+        "front_face_triangles": 16,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_Rod_End_L",
+        "front_face_triangles": 40,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Bell_Crank_R",
+        "front_face_triangles": 208,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Rigid_Connecting_Link_R",
+        "front_face_triangles": 92,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_Cylinder_Barrel_R",
+        "front_face_triangles": 40,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_Piston_Rod_R",
+        "front_face_triangles": 16,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Internal_Rod_End_R",
+        "front_face_triangles": 40,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "LowerBody_Pelvis_Mount",
+        "front_face_triangles": 380,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_01_Hip",
+        "front_face_triangles": 860,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_02_Thigh_Frame",
+        "front_face_triangles": 460,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_03_Thigh_Armor",
+        "front_face_triangles": 600,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_04_Knee_FourBar",
+        "front_face_triangles": 1596,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_05_Shin_Frame",
+        "front_face_triangles": 608,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_06_Shin_Armor",
+        "front_face_triangles": 380,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_07_Ankle",
+        "front_face_triangles": 700,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_08_Foot",
+        "front_face_triangles": 786,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_L_09_Foot_Armor",
+        "front_face_triangles": 356,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_01_Hip",
+        "front_face_triangles": 860,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_02_Thigh_Frame",
+        "front_face_triangles": 460,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_03_Thigh_Armor",
+        "front_face_triangles": 600,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_04_Knee_FourBar",
+        "front_face_triangles": 1596,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_05_Shin_Frame",
+        "front_face_triangles": 608,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_06_Shin_Armor",
+        "front_face_triangles": 380,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_07_Ankle",
+        "front_face_triangles": 700,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_08_Foot",
+        "front_face_triangles": 786,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Leg_R_09_Foot_Armor",
+        "front_face_triangles": 356,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_01_Interface_Cup",
+        "front_face_triangles": 552,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_03_Upper_Frame",
+        "front_face_triangles": 172,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_04_Shoulder_Armor",
+        "front_face_triangles": 372,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_05_Elbow_Pivot",
+        "front_face_triangles": 170,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_06_Forearm_Frame",
+        "front_face_triangles": 220,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_07_Forearm_Armor",
+        "front_face_triangles": 280,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_08_Wrist_Pivot",
+        "front_face_triangles": 64,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_10_Hand_Frame",
+        "front_face_triangles": 532,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_L_11_Hand_Armor",
+        "front_face_triangles": 44,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_01_Interface_Cup",
+        "front_face_triangles": 552,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_03_Upper_Frame",
+        "front_face_triangles": 172,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_04_Shoulder_Armor",
+        "front_face_triangles": 372,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_05_Elbow_Pivot",
+        "front_face_triangles": 170,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_06_Forearm_Frame",
+        "front_face_triangles": 220,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_07_Forearm_Armor",
+        "front_face_triangles": 280,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_08_Wrist_Pivot",
+        "front_face_triangles": 64,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_10_Hand_Frame",
+        "front_face_triangles": 532,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      },
+      {
+        "part": "Arm_R_11_Hand_Armor",
+        "front_face_triangles": 44,
+        "source_normal_edge_cases": 0,
+        "source_baseline_edge_cases": 0,
+        "degenerate_triangles": 0
+      }
+    ]
+  },
+  "coordinate_revision": "faithful_left_handed_v2",
+  "source_corner_uv_verification": {
+    "coordinate_revision": "faithful_left_handed_v2",
+    "Hatch_Pivot_triangles": 1192,
+    "Arm_L_04_Shoulder_Armor_triangles": 372,
+    "missing_triangles": 0,
+    "material_mismatches": 0,
+    "uv_mismatches_over_0_001": 0,
+    "max_uv_error": 0.000244140625,
+    "method": "Compare actual Unreal render-buffer triangle corners and material sections to original Blender loop UVs using final coordinate mapping."
+  },
+  "visual_verification": {
+    "capture_local_time": "2026-10-03 02:18:44",
+    "mounted": "Original white armor, sage structure, readable 03 and FIELD markings, and correct asymmetric shoulder placement match the Blender source preview. Inside-out atlas appearance and mirrored lettering are resolved.",
+    "on_foot": "Separate rabbit with attached pistol beside a single opened mech confirmed in current PilotRanged capture.",
+    "scope": "Visual asset fidelity inspected from runtime captures; gameplay/navigation behavior is verified by the parent task."
+  }
+}

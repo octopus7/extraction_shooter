@@ -11,6 +11,7 @@ public class TunaSweeperEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"InputCore",
+            "AIModule", // Hopper PIE test issues real navigation requests.
 			"Core",
 			"CoreUObject",
 			"Engine",

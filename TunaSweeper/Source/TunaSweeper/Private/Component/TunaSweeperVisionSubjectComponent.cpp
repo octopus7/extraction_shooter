@@ -27,6 +27,7 @@ void UTunaSweeperVisionSubjectComponent::BeginPlay()
 void UTunaSweeperVisionSubjectComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	ResetVisionVisibility();
+	LinkedActors.Reset();
 
 	if (UWorld* World = GetWorld())
 	{
@@ -93,6 +94,31 @@ void UTunaSweeperVisionSubjectComponent::ResetVisionVisibility()
 	bVisionHidden = false;
 }
 
+void UTunaSweeperVisionSubjectComponent::AddLinkedActor(AActor* Actor)
+{
+	if (!IsValid(Actor) || Actor == GetOwner()) return;
+	LinkedActors.RemoveAll([](const TWeakObjectPtr<AActor>& Linked) { return !Linked.IsValid(); });
+	LinkedActors.AddUnique(Actor);
+	if (bVisionHidden) HideActorPrimitives(Actor);
+}
+
+void UTunaSweeperVisionSubjectComponent::RemoveLinkedActor(AActor* Actor)
+{
+	if (!Actor || Actor == GetOwner()) return;
+	if (LinkedActors.RemoveAll([Actor](const TWeakObjectPtr<AActor>& Linked)
+		{ return !Linked.IsValid() || Linked.Get() == Actor; }) == 0) return;
+	CachedPrimitiveRenderStates.RemoveAll([Actor](const FTunaSweeperVisionSubjectPrimitiveRenderState& State)
+	{
+		UPrimitiveComponent* Component = State.Component.Get();
+		if (!Component) return true;
+		if (Component->GetOwner() != Actor) return false;
+		Component->SetRenderInMainPass(State.bRenderInMainPass);
+		Component->SetRenderInDepthPass(State.bRenderInDepthPass);
+		Component->SetCastShadow(State.bCastShadow);
+		return true;
+	});
+}
+
 void UTunaSweeperVisionSubjectComponent::HideSubjectPrimitives()
 {
 	AActor* Owner = GetOwner();
@@ -102,8 +128,17 @@ void UTunaSweeperVisionSubjectComponent::HideSubjectPrimitives()
 		return;
 	}
 
+	HideActorPrimitives(Owner);
+	LinkedActors.RemoveAll([](const TWeakObjectPtr<AActor>& Linked) { return !Linked.IsValid(); });
+	for (const TWeakObjectPtr<AActor>& Linked : LinkedActors) HideActorPrimitives(Linked.Get());
+	bVisionHidden = true;
+}
+
+void UTunaSweeperVisionSubjectComponent::HideActorPrimitives(AActor* Actor)
+{
+	if (!IsValid(Actor)) return;
 	TArray<UPrimitiveComponent*> PrimitiveComponents;
-	Owner->GetComponents<UPrimitiveComponent>(PrimitiveComponents);
+	Actor->GetComponents<UPrimitiveComponent>(PrimitiveComponents);
 	for (UPrimitiveComponent* PrimitiveComponent : PrimitiveComponents)
 	{
 		if (!PrimitiveComponent || !PrimitiveComponent->IsRegistered())
@@ -116,8 +151,6 @@ void UTunaSweeperVisionSubjectComponent::HideSubjectPrimitives()
 		PrimitiveComponent->SetRenderInDepthPass(false);
 		PrimitiveComponent->SetCastShadow(false);
 	}
-
-	bVisionHidden = true;
 }
 
 void UTunaSweeperVisionSubjectComponent::CachePrimitiveRenderState(UPrimitiveComponent* PrimitiveComponent)

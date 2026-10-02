@@ -40,6 +40,10 @@ public:
 	void ApplyVisionVisible(bool bVisible);
 	void ResetVisionVisibility();
 
+	/** Explicitly include a modular actor in this subject's render visibility. */
+	void AddLinkedActor(AActor* Actor);
+	void RemoveLinkedActor(AActor* Actor);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
 	bool bEnableVisionVisibility = true;
@@ -52,9 +56,11 @@ protected:
 
 private:
 	void HideSubjectPrimitives();
+	void HideActorPrimitives(AActor* Actor);
 	void CachePrimitiveRenderState(UPrimitiveComponent* PrimitiveComponent);
 	FTunaSweeperVisionSubjectPrimitiveRenderState* FindCachedRenderState(UPrimitiveComponent* PrimitiveComponent);
 
 	TArray<FTunaSweeperVisionSubjectPrimitiveRenderState> CachedPrimitiveRenderStates;
+	TArray<TWeakObjectPtr<AActor>> LinkedActors;
 	bool bVisionHidden = false;
 };
