@@ -7309,3 +7309,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 확인: BAT 자체는 위치 기준으로 리포 루트와 app_5158070.vdf를 찾지만 해당 VDF의 디폿 VDF 참조와 depot_5158071.vdf의 contentroot가 D:/github/extraction_shooter 쪽 절대경로로 고정되어 있다. 워크트리의 VDF도 같은 경로를 가리킨다. 따라서 워크트리 BAT를 실행해도 원래 리포 패키지가 업로드되는 구성이다.
 - 추가 확인: BAT의 steam_appid.txt 임시 제외 경로는 Builds/Demo/Windows로 현재 Builds/Steam/Demo/Windows와 불일치한다. 이번 패키지에는 해당 파일이 없었다. 수정/업로드는 수행하지 않았다.
 
+
+## 2026-10-03 00:40:25 (소요시간: 00:00:45)
+
+- 질문: Steam 데모는 언어 자동 인식 비활성이고 영어가 기본인가?
+- 확인: InitializeGlobalLanguageSetting은 저장된 언어를 최우선으로 복원한다. 저장값이 없고 배포 채널이 Steam이면 영어, 다른 채널이면 OS 언어를 감지한다. 원래 리포와 트래커 워크트리 코드가 동일하다. 따라서 Steam 데모 최초 실행 기본값은 영어이며 기존 사용자 선택을 영어로 강제하지 않는다. 제품 수정 없음.
+
