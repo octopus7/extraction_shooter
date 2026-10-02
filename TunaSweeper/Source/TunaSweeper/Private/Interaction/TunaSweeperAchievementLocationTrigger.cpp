@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Engine/GameInstance.h"
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
+#include "Subsystem/TunaSweeperProgressTrackerSubsystem.h"
 
 ATunaSweeperAchievementLocationTrigger::ATunaSweeperAchievementLocationTrigger()
 {
@@ -52,4 +53,5 @@ void ATunaSweeperAchievementLocationTrigger::HandleTriggerBeginOverlap(
 
 	bTriggeredThisInstance = true;
 	AchievementSubsystem->ReportLocationReached(LocationId);
+	if (auto* Tracker = GameInstance->GetSubsystem<UTunaSweeperProgressTrackerSubsystem>()) Tracker->ReportLocationReached(LocationId);
 }

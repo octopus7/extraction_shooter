@@ -9760,3 +9760,87 @@
 - 범위: UV 폭포 재제작, 이미지 생성 물줄기·포말 텍스처와 원본 프롬프트, 중앙 수면을 유지한 물보라·안개 강화, 검사·셰이더 소스·사용 안내 및 사용하지 않는 이전 물보라 메시 제거를 포함한다. 작업 트리의 7d4bdad0 및 9888903e 결과를 원본 main에 한 커밋으로 정리한다.
 - 검증: 원본 프로젝트의 폭포 관련 파일 20개가 작업 트리 커밋본과 SHA256으로 일치함을 재확인했다. 해당 에셋은 앞선 UE 5.7 에디터·PIE 확인과 최종 WATERFALL_ASSET_CHECKS_PASSED 검사를 마친 결과이며 이번에는 에셋을 재편집하거나 빌드를 실행하지 않았다. 일회성 생성 코드는 포함하지 않는다.
 - 제외: 기존 질문 기록, 다른 요청 기록, Intro UI 코드 변경은 보존하고 이번 커밋에서 제외한다.
+
+## 2026-09-30 20:52:04 (소요시간: 00:00:59)
+
+- 요청: 별도 워크트리에서 트래커 작업을 시작할 준비.
+- 수행: origin/demo의 665d90e0을 기준으로 demo-tracker 관리 워크트리를 생성하고 codex/demo-tracker 브랜치를 준비했다. 생성 직후 git status로 변경 사항이 없는 것을 확인했다.
+- 범위: 워크트리 준비만 완료했다. 트래커 기능과 변경 범위는 사용자 답변 대기 중이며 구현 및 빌드는 수행하지 않았다.
+
+
+## 2026-09-30 20:53:29 (소요시간: 00:01:34)
+- 요청: 데모 이용자의 도달 수준을 웹으로 수집하기 위한 Cloudflare Pages 및 Workers/D1 구성을 검토.
+- 결과: 정적 Pages 단독으로는 수집·저장이 불가능하며 Pages Functions + D1으로 구현할 수 있다. Functions는 Workers 런타임을 사용한다. 사용자 선호에 맞춰 Pages + Functions + D1을 제안하며, 신규 프로젝트에 대한 Cloudflare의 Workers Static Assets 권장도 안내한다.
+- 제안: 시작 및 주요 체크포인트를 수집하고 이용자별 중복 도달을 제거한다. 빌드/데이터셋별 도달률·최종 도달 지점·첫 도달 시간을 집계하며 전송 실패 재시도와 테스트 데이터 분리가 필요하다. 사용자가 주요 퀘스트 + 장소 도달 + 데모 완료를 수집 기준으로 선택했다.
+- 코드 확인: AchievementSubsystem의 장소 도달·퀘스트 보상 수령과 QuestSubsystem의 진행 변경 이벤트를 확인했다. 저장 불러오기에서도 보상 수령 보고가 발생하므로 재전송 중복과 과거 진행 복원을 구분해야 한다.
+- 범위: 공식 문서와 코드 검토만 수행했다. 제품 코드 변경, 외부 리소스 생성, 배포 및 빌드는 하지 않았다.
+- 근거: https://developers.cloudflare.com/pages/functions/ ; https://developers.cloudflare.com/pages/functions/bindings/ ; https://developers.cloudflare.com/workers/best-practices/workers-best-practices/
+
+## 2026-09-30 20:56:20 (소요시간: 00:00:41)
+- 요청: 트래커는 Workers로 구성하며 구현에 앞서 현재 Wrangler 권한 확인.
+- 확인: 기존 QuestStudio에 설치된 Wrangler 4.116.0을 재사용해 별도 트래커 워크트리에서 whoami 실행.
+- 결과: 종료 코드 1. 저장된 인증 토큰이 만료되어 갱신하지 못했고 비대화형 환경에서 Not logged in 오류가 발생했다. 현재 로그인 및 Workers/D1 권한 확인은 불가능하며 wrangler login 재인증이 필요하다.
+- 범위: 외부 Worker/D1 생성·수정·배포 및 제품 코드 변경 없이 인증 상태만 조회했다.
+
+## 2026-09-30 20:59:34 (소요시간: 00:00:53)
+
+- 요청 반영: 트래커 전송 실패 시 재시도·로컬 대기열·사용자 오류 표시를 두지 않는다. 앞 단계 미수신이어도 이후 도달 이벤트는 정상 표시하고 앞 단계 기록 미수신을 별도로 표시한다. 미수신과 실제 미도달을 동일시하거나 이전 단계 이벤트를 임의 생성하지 않는다.
+- 배포 제약: Wrangler를 사용하지 않는다. 제품 코드 구현은 아직 수행하지 않았다.
+
+## 2026-09-30 21:04:31 (소요시간: 00:20:41)
+- 요청: 최상위 독립 폴더에 GitHub 연동용 Worker를 구현하고 Unreal 트래커도 병렬 에이전트로 진행.
+- 구현: ProgressTrackerWorker에 의존성 없는 Worker 수집 API, 관리자 인증, D1 초기 SQL, 문자열 키 기반 한국어 통계 화면, 테스트·미리보기·이전 안내를 구성했다. 폴더 자체를 별도 리포 루트로 옮길 수 있다.
+- 통계: 주요 Demo 퀘스트 5개와 시작/완료 카탈로그, 장소 ID 수신, 빌드/진행 구분, 이벤트 중복·충돌 처리. 이전 단계 기록이 없어도 후속 도달은 정상 집계하고 필수 선행 기록 미수신만 별도 표시한다. 시작 누락을 포함한 관측 playerId 수를 비율 분모로 사용한다.
+- Unreal: 설치별 임의 GUID와 세이브별 run GUID·시도 체크포인트를 저장하고 새 게임, 실제 보상 수령, 이름 있는 장소 트리거, 엔딩 삭제 전 전송을 연결했다. 실패 시 재시도·큐·오류 UI 없음. Main/전투 테스트 차단, Development 기본 비활성. 저장 계약 문서 갱신.
+- 설정: 전송 기본 비활성, Endpoint/BuildId 비어 있음. 사용자가 Cloudflare에 D1·관리자 Secret을 준비하고 GitHub 연동 배포 후 게임 설정을 채워야 한다. 로컬 Wrangler 실행이나 외부 리소스 생성·배포·push는 하지 않았다.
+- 검증: Worker 테스트 19개 및 구문·문자열·바인딩 검사 통과. 폴더만 임시 위치로 복사한 동일 검증도 통과. 브라우저에서 로그인/실패/해제, 필터, 페이지 이동, 누락 상세, 모바일 배치 확인. 빈 데이터 API 확인.
+- Unreal 검증: UE5.7 Editor 빌드 성공, Contract/DemoEndingRetirementGuards/VersionPolicy 자동화 3개 성공(exit0). 계약 테스트에 실제 저장 직렬화/복원 포함. 별도 에이전트 코드 리뷰에서 blocking finding 없음. 기존 원래 프로젝트 Editor 유지.
+- 제한: 설치된 Miniflare/workerd 날짜 제한 및 응답 대기 때문에 추가 로컬 런타임 검증은 완료하지 못했으며 실제 Cloudflare 동작은 미확인. 장소 맵 배치 수정 없음. 현재 데모 범위를 넘는 단계/빌드 증가 시 조회·보관 정책 확장 필요.
+
+## 2026-09-30 21:25:50 (소요시간: 00:00:55)
+
+- 요청: 옮긴 리포의 에이전트가 읽을 수 있도록 Worker 폴더 안에 간략한 README 작성.
+- 수행: ProgressTrackerWorker/README.md를 목적, 누락 허용 규칙, 코드 위치, 이벤트 계약, 검증 명령과 남은 배포 설정 중심으로 요약했다. 기존 상세 내용은 docs/operations.md에 보존하고 상대 링크로 연결했다.
+- 검증: README 내부 문서 링크 대상과 git diff --check 확인. 문서만 변경하여 제품 테스트·빌드는 다시 실행하지 않았다.
+
+## 2026-09-30 22:02:24 (소요시간: 00:19:12)
+
+- 요청: 배포한 Worker와 기존 프로젝트 버전으로 트래커를 구성하고 Steam Demo를 패키징. 추가로 타이틀·엔딩 화면 진입 이벤트 수집.
+- 구현: ProjectVersion 0.2.9200을 buildId로 자동 사용. Steam Demo CustomConfig에서 수집 활성화, HTTPS /api/events 주소 설정. URL은 INI 주석 해석 방지를 위해 따옴표로 감쌌다.
+- 화면: location.title_screen은 실행 세션별 한 번, 임시 runId·시간 0, 세이브 생성/수정 없음. location.ending_screen은 진행별 한 번, 기존 demo.complete와 함께 저장 삭제 전 전송. Worker 카탈로그·한국어 키·인수인계 문서 갱신. 기존 배포 Worker도 미등록 location으로 수신 가능.
+- 검증: Worker19/19 및 check 통과. UE5.7 Editor 빌드와 Contract/ScreenAttempts/DemoEndingRetirementGuards/VersionPolicy 자동화4개 통과. 화면 테스트 구현 전 실패 확인. 코드 검토 차단 결함 없음.
+- 패키징: TunaSweeperDemo / Demo / Win64 Shipping 전체 BuildCookRun 최종 BUILD SUCCESSFUL, ExitCode=0. 최초 쿡 오류0·경고16(기존 BP_Morph None 참조 등). 주소 절단을 최종 BinaryConfig 검사에서 발견하여 수정 후 전체 재패키징 완료.
+- 산출물: TunaSweeper/Builds/Steam/Demo/Windows/ 전체. 실제 실행 파일과 최신 컴파일 산출물 SHA256 일치(2A4F8AF59541657D6C4616C0ECD3356F847E4209741104F58500A72CF773269E). VerifyDemo 통과. PAK에서 추출한 BinaryConfig와 최신 생성본 동일하며 Enabled=True, AllowDevelopment=False, 전체 Endpoint, 버전, Steam Demo ID 확인. 검증용 추출본 정리.
+- 에디터: 지침의 원래 TunaSweeper.uproject를 명시하여 열고 프로세스 확인.
+- 미확인: 패키지 실제 타이틀/엔딩 화면, Steam 계정 실행, 게임→운영 D1 수신. Worker 배포/push/스토어 업로드 미실시. 빌드/자동화 로그는 TunaSweeper/Saved/Logs에 보관.
+
+## 2026-10-01 00:10:17 (소요시간: 00:02:32)
+
+- 요청: 트래커 전송이 없는 것으로 보여 Steam 설치 경로와 작업 패키지 비교.
+- 확인: E:/Steam/steamapps/common/TunaSweeper Demo, 설치 BuildID25629493. 실행 파일 및 PAK/UCAS/UTOC 모두 트래커 워크트리 패키지와 불일치하며 D:/github/extraction_shooter/TunaSweeper/Builds/Steam/Demo/Windows의 같은 파일과는4개 모두 일치했다.
+- 원인: 설치본 PAK의 BinaryConfig에는 TunaSweeper.ProgressTracker 섹션과 수집 Endpoint가 없다. 버전은 두 패키지 모두0.2.9200이라 화면 버전으로 구별되지 않는다. 별도 워크트리의 트래커 패키지가 Steam에 적용되지 않은 상태다.
+- 조치: 올바른 워크트리 Windows 폴더를 탐색기로 열었다. 설치본/운영 데이터/Steam 배포는 변경하지 않았으며 검증용 추출본은 제거했다. 올바른 패키지로 업로드 및 default 빌드 적용 필요.
+
+
+## 2026-10-01 00:15:33 (소요시간: 00:01:43)
+
+- 요청: D 경로 파일을 건드리지 않고 워크트리의 Steam Demo 업로드 파일만 수정.
+- 변경: 워크트리 app_5158070.vdf의 디폿 참조를 같은 폴더 상대경로, buildoutput을 ../output으로 변경. depot_5158071.vdf의 contentroot를 현재 워크트리 TunaSweeper/Builds/Steam/Demo/Windows로 해석되는 상대경로로 변경. BAT의 steam_appid.txt 제외 경로도 Steam/Demo/Windows로 수정하고 패키지 존재 검사·경로 출력을 추가했다.
+- 검증: 상대경로 해석 결과 및 Shipping 실행 파일 존재 확인. D 원본 BAT/VDF3개의 변경 전후 SHA256 일치. git diff --check 통과. SteamCMD/로그인/업로드는 실행하지 않았다.
+- 저장: SDK 아래 VDF2개는 기존 Git 무시 대상이라 로컬 워크트리 설정으로 유지. 추적 대상 BAT와 작업 기록을 함께 커밋.
+
+
+## 2026-10-03 00:41:48 (소요시간: 00:02:21)
+
+- 요청: Steam도 STOVE처럼 OS 언어를 따르도록 복구.
+- 변경: 워크트리 InitializeGlobalLanguageSetting에서 Steam 채널 영어 기본값 분기와 불필요한 설정 헤더를 제거했다. 유효한 저장 언어는 우선 복원하고, 없거나 잘못된 값이면 모든 채널에서 OS 언어/로캘을 감지한다. 미지원 언어는 기존처럼 영어. 저장 정책 문서도 갱신했다.
+- 검증: UE5.7 Editor 빌드 성공, 기존 TunaSweeper.UI.Localization.RefreshesTitleAndGraphicsLabels 자동화 성공(exit0). 테스트 중 기존 UI 문자열 중복 키 경고 있음. OS 최초 선택은 코드 경로 확인이며 실제 Windows 언어 변경 테스트는 미실시.
+- 범위: D 원본 파일은 수정하지 않았다. 기존 사용자 언어 설정은 초기화하지 않았다. Shipping 패키징과 Steam 업로드는 수행하지 않았다. 빌드한 워크트리 프로젝트 에디터를 명시하여 실행했다.
+
+## 2026-10-03 00:51:22 (소요시간: 00:03:28)
+
+- 요청: 메인 작업 경로를 사용하지 않고 별도 경로에 클론하여 트래커를 demo 브랜치로 병합한 뒤 원격 demo에 푸시.
+- 수행: D:/github/extraction_shooter-demo에 원격 demo를 독립 클론했다. 기존 트래커 워크트리에서 codex/demo-tracker의23개 커밋을 가져와 최신 origin/demo(665d90e0)와 충돌 없이 병합했다. 메인 체크아웃은 명령 작업 경로로 사용하거나 변경하지 않았다.
+- 검증: 병합된 제품 소스가 기존 검증 완료 트래커 브랜치와 동일함을 git diff로 확인. 새 클론에서 Worker 테스트19/19와 check 통과. 문서 끝 빈 줄 정리 후 diff --check 확인. Unreal 소스가 동일하므로 이 병합에서 재빌드·재패키징은 하지 않았다.
+- 전달: 이후 데모 작업 경로는 D:/github/extraction_shooter-demo. SDK, 인증 파일, 무시된 로컬 VDF, 빌드 산출물은 복사하지 않았다. 기존 워크트리에는 업로드 설정·패키지가 남아 있으므로 보존한다.
+- 배포: 이 병합 커밋을 origin/demo에 일반 push로 반영하고 원격 HEAD 일치를 확인한다. Steam/Worker 배포는 수행하지 않는다.

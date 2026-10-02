@@ -7219,3 +7219,104 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: Windows 그림판을 Computer Use로 사용할 수 있는가?
 - 답변: 가능하다. 브러시·연필·도형·채우기·캔버스 드래그를 조작할 수 있으며, 현재는 앱 연결 문제를 Codex 재시작 후 다시 확인해야 한다.
+
+## 2026-09-30 20:53:29 (소요시간: 00:01:34)
+- 질문: Steam에서 이용자 도달 수준 통계를 제공하는가?
+- 답변: Steam Stats의 전역 합계와 업적 달성률을 제공하지만 게임 내 기록 연동이 필요하다. 체크포인트별 0/1 통계를 전역 합계로 모으는 단순 집계는 설계할 수 있다. 임의 빌드·유입 집단·도달시간별 상세 분석에는 자체 이벤트 저장이 적합하다. Valve는 데모 업적 비활성화를 권장하며, 데모 AppID의 실제 Stats 설정 가능 여부는 파트너 계정에서 확인하지 않았다.
+- 근거: https://partner.steamgames.com/doc/features/achievements ; https://partner.steamgames.com/doc/store/application/demos
+
+## 2026-09-30 20:59:34 (소요시간: 00:00:53)
+
+- 질문: Wrangler 없이 Worker에 폴더를 올리는 방식으로 진행할 수 있는가?
+- 답변: Wrangler 없이 Cloudflare 대시보드에서 Worker 코드 배포와 D1 생성·바인딩·SQL 실행이 가능하다. 정적 폴더 업로드만으로 수집 API와 D1 초기화까지 자동 완료된다고 볼 수는 없다. 확실한 수동 배포 경로는 Worker 편집기에 단일 JS를 반영하고 D1을 별도로 연결하는 방식이며 통계 HTML을 Worker 코드에 포함할 수 있다.
+- 근거: https://developers.cloudflare.com/d1/get-started/ ; https://developers.cloudflare.com/workers/static-assets/direct-upload/
+
+## 2026-09-30 21:01:50 (소요시간: 00:00:23)
+
+- 질문: Wrangler 인증은 Windows 계정 단위인가?
+- 답변: 기본 OAuth 로그인 정보는 OS 사용자별 전역 Wrangler 설정에 저장되어 같은 Windows 사용자와 설정 경로를 쓰는 프로젝트·워크트리에서 공유한다. 실제 Cloudflare 권한은 로그인한 Cloudflare 사용자·토큰에 따른다. 환경변수 API 토큰이나 별도 인증 프로필·설정 경로가 있으면 달라질 수 있으며 브라우저 로그인 세션과 CLI 인증은 별개다. 이번 만료 오류만으로 워크트리 생성이 원인이라고 볼 수 없다.
+- 근거: Wrangler 설치 코드의 사용자 설정 경로·OAuth 읽기와 https://developers.cloudflare.com/workers/wrangler/commands/general/ , https://developers.cloudflare.com/workers/wrangler/system-environment-variables/ 확인. 인증 상태 변경 없이 질문 기록만 추가.
+
+## 2026-09-30 21:58:29 (소요시간: 00:00:38)
+
+- 질문: tunatrack.oc7.workers.dev에 배포했는데 UE5에서 추가로 필요한 정보가 있는가?
+- 답변: 수신 Endpoint는 https://tunatrack.oc7.workers.dev/api/events이며 추가로 BuildId를 정하고 Enabled=True로 설정해야 한다. 관리자 토큰·Cloudflare 인증·D1 ID는 게임에 필요 없다. Editor/Development 시험에만 AllowDevelopment=True가 필요하다. 현재 워크트리 설정은 비활성·Endpoint/BuildId 공란이며 이번 질문에서는 변경하지 않았다.
+- 확인: 공개 /api/health GET이 HTTP200 및 ok=true, preview=false를 반환했다. 게임 이벤트 전송이나 D1 저장·집계 실연동은 시험하지 않았다.
+
+## 2026-09-30 22:01:25 (소요시간: 00:00:40)
+
+- 질문: 프로젝트에 기존 버전이 있는지 확인.
+- 답변: 원래 작업 폴더와 데모 트래커 워크트리 모두 DefaultGame.ini GeneralProjectSettings의 ProjectVersion=0.2.9200이다. 기존 타이틀 버전 표시도 이 값을 GConfig에서 읽는다. 별도 BuildId를 새로 정하는 대신 이 버전을 읽어 보내는 방식이 적합하며 현재 Worker 입력 규격도 허용한다. 현재 트래커는 별도 BuildId 설정을 읽는 상태로 자동 연결은 아직 하지 않았다.
+- 확인: 설정·타이틀 코드·Worker BuildId 검증을 읽었으며 제품 코드 변경 없이 질문 기록만 추가.
+
+## 2026-09-30 22:02:24 (소요시간: 00:19:12)
+
+- 질문: 이벤트는 화이트리스트 제한 없이 보내면 모두 받는가?
+- 답변: 서버는 규격에 맞는 미등록 quest/location ID를 받으며 카탈로그는 표시·선행 관계용이다. JSON 필드·ID·category/접두사 규칙은 검증한다. UE 퀘스트 전송은 현재 주요 데모 퀘스트5개로 제한하고 이름 있는 장소를 전송한다. 이후 요청한 타이틀/엔딩도 location 범주로 추가했다.
+
+## 2026-09-30 22:22:24 (소요시간: 00:00:25)
+
+- 질문: Steam 빌드는 최초 리뷰 이후 업데이트마다 추가 리뷰를 받는가?
+- 답변: 같은 앱의 일반적인 빌드 업데이트는 최초 승인 후 매번 재심사를 받지 않고 배포할 수 있다. 공식 문서는 심사 중·승인 후에도 빌드 변경이 가능하다고 안내한다. 이번 트래커 추가도 일반 업데이트에 해당한다.
+- 근거: https://partner.steamgames.com/doc/store/Review_Process 및 https://partner.steamgames.com/doc/store/releasing
+
+
+## 2026-09-30 22:23:02 (소요시간: 00:00:18)
+
+- 질문: 트래커 playerId는 누가 제공하는가?
+- 답변: Unreal 클라이언트가 추적 초기화 시 저장된 유효한 ID가 없으면 FGuid::NewGuid()로 생성하고 GGameUserSettingsIni의 TunaSweeper.ProgressTracker/PlayerId에 저장한다. 다음 실행과 새 게임에서도 재사용하며 Worker는 전달받은 ID를 저장한다. Steam 계정 ID나 서버 발급 ID가 아니다. 설정 파일을 삭제하거나 다른 PC에서 실행하면 별도 ID가 생성될 수 있다.
+
+
+## 2026-09-30 22:43:03 (소요시간: 00:01:04)
+
+- 질문: Steam 런처 미실행 시 게임 실행 차단·런처 실행 유도가 없는가? 직접 실행되는 것 같다.
+- 확인: Demo CustomConfig에 bRelaunchInSteam=true와 SteamDevAppId가 있고 게임 타겟에 Shipping ID가 정의돼 있다. 프로젝트 자체의 Steam 초기화 실패 시 실행 차단 코드는 없다. UE5.7 Steam OSS는 RestartAppIfNecessary가 true이면 종료하지만 API 초기화 실패 자체는 false를 반환하며 기본 OSS 로더가 Null로 폴백할 수 있다. 따라서 런처 미실행 시 반드시 게임을 차단하는 구조는 아니다. 패키지에서 steam_appid.txt는 발견되지 않았다.
+- 범위: 코드·설정 조사만 수행. 실제 사용자의 직접 실행 경로에서 재실행 호출이 생략/실패한 원인은 런타임 로그 미확인으로 확정하지 않았다. 제품 코드 변경 없음.
+- 근거: 로컬 UE5.7 OnlineSubsystemSteam.cpp 및 OnlineSubsystemModule.cpp, https://partner.steamgames.com/doc/sdk/api
+
+
+## 2026-09-30 22:48:16 (소요시간: 00:00:36)
+
+- 질문: 월요일에 보이던 Release Demo 버튼이 날짜가 지나서 사라졌는가?
+- 답변: 캡처의 Earliest possible release: 30 Sep는 출시 마감이 아닌 최초 가능일이다. 캡처는 상점/빌드 승인과 최초 앱 크레딧 구매 후 최소21일 조건을 안내하지만 어느 조건이 미충족인지는 판별할 수 없다. 버튼을 며칠 누르지 않아 만료됐다고 볼 근거는 없다. 오른쪽 승인 체크리스트와 대기기간 충족 시각을 확인해야 하며 날짜만으로 한국시간 자정 해제를 단정하지 않는다.
+- 근거: 사용자 첨부 화면 및 https://partner.steamgames.com/doc/store/application/demos / https://partner.steamgames.com/doc/store/types . 실제 Steamworks 계정 상태는 조회하지 않았다.
+
+
+## 2026-09-30 22:52:48 (소요시간: 00:00:22)
+
+- 질문: 상점 체크리스트의 라이브러리 자료가 다시 미완료이고4/5로 표시되는 이유는 무엇인가?
+- 답변: 첨부 화면에서 데모 빌드는 완료이고 상점의 라이브러리 자료만 미완료다. 사용자가 확인한4/5는 해당 검사 일부가 미충족임을 뜻하며 전체 이미지 삭제를 의미하지 않는다. 정확히 빠진 항목이나 이전 완료 상태가 바뀐 원인은 이 화면으로 확인할 수 없다. 라이브러리 자료 상세의 미완료 항목을 먼저 확인해야 한다. 날짜 경과보다는 현재 상점 체크리스트 미완료가 확인된 출시 차단 요인이다.
+- 근거: 사용자 첨부 화면 및 https://partner.steamgames.com/doc/store/assets/libraryassets . 공식 문서의 필수 이미지 목록만으로 화면의5개 검사를 임의 대응하지 않았다.
+
+
+## 2026-09-30 23:02:13 (소요시간: 00:00:20)
+
+- 질문: 업로드한 디폿을 포함하는 빌드를 라이브로 적용하는 메뉴 위치는?
+- 답변: 데모 앱의 Steamworks 설정 > SteamPipe > Builds에서 해당 BuildID의 Set build live on branch를 default로 선택하고 Preview Change > Set Build Live Now로 적용한다. 데모 AppID5158070의 페이지는 https://partner.steamgames.com/apps/builds/5158070 이다. 미출시 데모의 공개 출시는 별도 Release Demo 단계다.
+- 근거: https://partner.steamgames.com/doc/store/application/branches . 실제 빌드 적용 작업은 수행하지 않았다.
+
+
+## 2026-09-30 23:09:50 (소요시간: 00:00:11)
+
+- 질문: 데모 출시 후 부모 앱에서 데모를 켜려면?
+- 답변: 부모 앱5137900의 상점 페이지 편집 > Special Settings > Associated Demos에서 데모5158070 연결 및 표시 옵션을 확인하고 저장한 후 부모 상점 페이지 변경사항을 게시한다. 이미 연결돼 있어도 데모 출시 후 부모 상점 재게시가 필요하다. 부모 게임은 Coming Soon 상태여도 된다.
+- 근거: https://partner.steamgames.com/doc/store/application/demos . 외부 게시 작업은 수행하지 않았다.
+
+
+## 2026-10-01 00:12:58 (소요시간: 00:00:39)
+
+- 질문: 업로드 BAT가 상대경로가 아니었는가?
+- 확인: BAT 자체는 위치 기준으로 리포 루트와 app_5158070.vdf를 찾지만 해당 VDF의 디폿 VDF 참조와 depot_5158071.vdf의 contentroot가 D:/github/extraction_shooter 쪽 절대경로로 고정되어 있다. 워크트리의 VDF도 같은 경로를 가리킨다. 따라서 워크트리 BAT를 실행해도 원래 리포 패키지가 업로드되는 구성이다.
+- 추가 확인: BAT의 steam_appid.txt 임시 제외 경로는 Builds/Demo/Windows로 현재 Builds/Steam/Demo/Windows와 불일치한다. 이번 패키지에는 해당 파일이 없었다. 수정/업로드는 수행하지 않았다.
+
+
+## 2026-10-03 00:40:25 (소요시간: 00:00:45)
+
+- 질문: Steam 데모는 언어 자동 인식 비활성이고 영어가 기본인가?
+- 확인: InitializeGlobalLanguageSetting은 저장된 언어를 최우선으로 복원한다. 저장값이 없고 배포 채널이 Steam이면 영어, 다른 채널이면 OS 언어를 감지한다. 원래 리포와 트래커 워크트리 코드가 동일하다. 따라서 Steam 데모 최초 실행 기본값은 영어이며 기존 사용자 선택을 영어로 강제하지 않는다. 제품 수정 없음.
+
+
+## 2026-10-03 00:44:28 (소요시간: 00:00:19)
+
+- 질문: 커밋을 데모 원격 브랜치에 푸시하고 있는가?
+- 답변: 이 대화에서는 로컬 codex/demo-tracker 브랜치에만 커밋했으며 git push를 실행하지 않았다. 현재 이 브랜치의 upstream도 설정되어 있지 않다. origin/demo로 병합하거나 푸시하지 않았다. 원격 최신 상태를 fetch한 것은 아니다.

@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperProgressTrackerSubsystem.h"
 #include "Scenario/TunaSweeperDemoEndingActor.h"
 
 #include "Dom/JsonObject.h"
@@ -557,6 +558,10 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 
 	CoinBalance += FMath::Max(0, Definition->Rewards.Coins);
 	SetQuestState(QuestId, ETunaSweeperQuestState::RewardCompleted);
+	if (UGameInstance* Owner = GetGameInstance())
+	{
+		if (auto* Tracker = Owner->GetSubsystem<UTunaSweeperProgressTrackerSubsystem>()) Tracker->ReportQuestRewardClaimed(QuestId);
+	}
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =

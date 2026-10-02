@@ -263,6 +263,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 {
 	GENERATED_BODY()
 	friend class FTunaDemoSaveRetirementTest;
+	friend class UTunaSweeperProgressTrackerSubsystem;
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 
@@ -1157,6 +1158,9 @@ private:
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotIndex = 1;
 	int32 RetiredDemoSaveSlotIndex = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	FTunaSweeperProgressTrackerState ProgressTrackerState;
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotDifficultyStage = 1;
