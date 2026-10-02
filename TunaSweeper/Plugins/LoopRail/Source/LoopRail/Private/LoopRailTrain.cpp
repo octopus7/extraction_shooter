@@ -23,6 +23,7 @@ ALoopRailTrain::ALoopRailTrain()
     LocomotiveMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/LoopRail/Meshes/SM_Locomotive.SM_Locomotive")));
     CarriageMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/LoopRail/Meshes/SM_Carriage.SM_Carriage")));
     CarriageRoofMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/LoopRail/Meshes/SM_CarriageRoof.SM_CarriageRoof")));
+    ConnectionMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/LoopRail/Meshes/SM_CarriageConnection.SM_CarriageConnection")));
 }
 void ALoopRailTrain::OnConstruction(const FTransform& Transform)
 { Super::OnConstruction(Transform); RebuildTrain(); HeadDistance = StartDistance; UpdateVehicles(); }
@@ -34,6 +35,7 @@ void ALoopRailTrain::RebuildTrain()
     TInlineComponentArray<USceneComponent*> Existing(this);
     for (USceneComponent* C : Existing) if (C->ComponentHasTag(TEXT("LoopRailVehicle"))) C->DestroyComponent();
     Visuals.Reset(); Floors.Reset();
+    ConnectionFloors.Reset(); ConnectionGuards.Reset(); ConnectionVisuals.Reset(); ConnectionGuardVisuals.Reset();
     VehicleCount = FMath::Clamp(VehicleCount, 1, 16);
     VehicleGap = FMath::Max(0.f, VehicleGap);
     UStaticMesh* EngineMesh = LocomotiveMesh.LoadSynchronous();
@@ -75,6 +77,66 @@ void ALoopRailTrain::RebuildTrain()
             Roof->RegisterComponent(); Visuals.Add(Roof);
         }
     }
+    UStaticMesh* BridgeMesh = VehicleCount > 1 ? ConnectionMesh.LoadSynchronous() : nullptr;
+    bUsesFallbackConnectionMesh = BridgeMesh == nullptr;
+    if (VehicleCount > 1 && !BridgeMesh)
+        BridgeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+    for (int32 I = 0; I + 1 < VehicleCount; ++I)
+    {
+        auto* Floor = NewObject<UBoxComponent>(this, *FString::Printf(TEXT("ConnectionFloor_%02d"), I));
+        Floor->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+        Floor->ComponentTags.Add(TEXT("LoopRailVehicle"));
+        Floor->ComponentTags.Add(TEXT("LoopRailConnectionFloor"));
+        Floor->SetNetAddressable();
+        Floor->SetupAttachment(RootComponent);
+        Floor->SetMobility(EComponentMobility::Movable);
+        Floor->SetBoxExtent(FVector(20, 50, 10));
+        Floor->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+        Floor->SetCanEverAffectNavigation(false);
+        Floor->CanCharacterStepUpOn = ECB_Yes;
+        Floor->RegisterComponent(); ConnectionFloors.Add(Floor);
+
+        auto* Mesh = NewObject<UStaticMeshComponent>(this, *FString::Printf(TEXT("ConnectionMesh_%02d"), I));
+        Mesh->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+        Mesh->ComponentTags.Add(TEXT("LoopRailVehicle"));
+        Mesh->SetupAttachment(Floor);
+        Mesh->SetMobility(EComponentMobility::Movable);
+        Mesh->SetStaticMesh(BridgeMesh);
+        // Authored connection: 100cm long, deck top at local Z=0. Floor collision top is Z=10.
+        Mesh->SetRelativeLocation(FVector(0, 0, bUsesFallbackConnectionMesh ? 5 : 10));
+        Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Mesh->SetCanEverAffectNavigation(false);
+        Mesh->RegisterComponent(); ConnectionVisuals.Add(Mesh);
+
+        for (int32 Side = 0; Side < 2; ++Side)
+        {
+            auto* Guard = NewObject<UBoxComponent>(this, *FString::Printf(TEXT("ConnectionGuard_%02d_%d"), I, Side));
+            Guard->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+            Guard->ComponentTags.Add(TEXT("LoopRailVehicle"));
+            Guard->ComponentTags.Add(TEXT("LoopRailConnectionGuard"));
+            Guard->SetNetAddressable();
+            Guard->SetupAttachment(Floor);
+            Guard->SetMobility(EComponentMobility::Movable);
+            Guard->SetBoxExtent(FVector(20, 2, 45));
+            Guard->SetRelativeLocation(FVector(0, Side == 0 ? -48 : 48, 55));
+            Guard->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+            Guard->SetCanEverAffectNavigation(false);
+            Guard->CanCharacterStepUpOn = ECB_No;
+            Guard->RegisterComponent(); ConnectionGuards.Add(Guard);
+            if (bUsesFallbackConnectionMesh)
+            {
+                auto* Rail = NewObject<UStaticMeshComponent>(this, *FString::Printf(TEXT("ConnectionRail_%02d_%d"), I, Side));
+                Rail->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+                Rail->ComponentTags.Add(TEXT("LoopRailVehicle"));
+                Rail->SetupAttachment(Guard);
+                Rail->SetMobility(EComponentMobility::Movable);
+                Rail->SetStaticMesh(BridgeMesh);
+                Rail->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+                Rail->SetCanEverAffectNavigation(false);
+                Rail->RegisterComponent(); ConnectionGuardVisuals.Add(Rail);
+            }
+        }
+    }
     UpdateVehicles();
 }
 void ALoopRailTrain::ResetTrain()
@@ -97,6 +159,7 @@ double ALoopRailTrain::GetConsistLength() const
 bool ALoopRailTrain::HasUsableTrack() const
 { return IsValid(Track) && Track->IsUsableLoop() && Track->GetLength() > GetConsistLength() + 100; }
 UBoxComponent* ALoopRailTrain::GetVehicleFloor(int32 Index) const { return Floors.IsValidIndex(Index) ? Floors[Index].Get() : nullptr; }
+UBoxComponent* ALoopRailTrain::GetConnectionFloor(int32 Index) const { return ConnectionFloors.IsValidIndex(Index) ? ConnectionFloors[Index].Get() : nullptr; }
 void ALoopRailTrain::UpdateVehicles()
 {
     for (int32 I = 0; I < Floors.Num(); ++I)
@@ -114,6 +177,34 @@ void ALoopRailTrain::UpdateVehicles()
         else { Pose = GetActorTransform(); Pose.AddToTranslation(Pose.TransformVectorNoScale(FVector(-I*(VehicleLength+VehicleGap),0,0))); }
         Pose.AddToTranslation(Pose.GetRotation().RotateVector(FVector(0,0,50)));
         Floors[I]->SetWorldTransform(Pose, false, nullptr, ETeleportType::None);
+    }
+    UpdateConnections();
+}
+void ALoopRailTrain::UpdateConnections()
+{
+    for (int32 I = 0; I < ConnectionFloors.Num() && I + 1 < Floors.Num(); ++I)
+    {
+        const FTransform Leading = Floors[I]->GetComponentTransform();
+        const FTransform Following = Floors[I + 1]->GetComponentTransform();
+        const FVector RearEnd = Leading.TransformPosition(FVector(-VehicleLength * .5, 0, 0));
+        const FVector FrontEnd = Following.TransformPosition(FVector(VehicleLength * .5, 0, 0));
+        const FVector Span = RearEnd - FrontEnd;
+        FVector Forward = Span.GetSafeNormal();
+        if (Forward.IsNearlyZero()) Forward = Leading.GetUnitAxis(EAxis::X);
+        const FVector Up = (Leading.GetUnitAxis(EAxis::Z) + Following.GetUnitAxis(EAxis::Z)).GetSafeNormal();
+        const FQuat Rotation = FRotationMatrix::MakeFromXZ(Forward, Up).ToQuat();
+        // Overlap both decks by 20cm so changes in yaw/pitch do not expose a walkable seam.
+        const double HalfLength = Span.Size() * .5 + 20;
+        ConnectionFloors[I]->SetBoxExtent(FVector(HalfLength, 50, 10), false);
+        ConnectionFloors[I]->SetWorldTransform(FTransform(Rotation, (RearEnd + FrontEnd) * .5), false, nullptr, ETeleportType::None);
+        ConnectionVisuals[I]->SetRelativeScale3D(FVector(HalfLength * 2 / 100, 1, bUsesFallbackConnectionMesh ? .1 : 1));
+        for (int32 Side = 0; Side < 2; ++Side)
+        {
+            const int32 GuardIndex = I * 2 + Side;
+            ConnectionGuards[GuardIndex]->SetBoxExtent(FVector(HalfLength, 2, 45), false);
+            if (ConnectionGuardVisuals.IsValidIndex(GuardIndex))
+                ConnectionGuardVisuals[GuardIndex]->SetRelativeScale3D(FVector(HalfLength * 2 / 100, .04, .9));
+        }
     }
 }
 ALoopRailStation* ALoopRailTrain::FindNextStation(double& Distance) const

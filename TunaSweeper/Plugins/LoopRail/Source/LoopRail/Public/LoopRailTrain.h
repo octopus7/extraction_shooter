@@ -42,6 +42,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") TSoftObjectPtr<UStaticMesh> LocomotiveMesh;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") TSoftObjectPtr<UStaticMesh> CarriageMesh;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") TSoftObjectPtr<UStaticMesh> CarriageRoofMesh;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") TSoftObjectPtr<UStaticMesh> ConnectionMesh;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="LoopRail") bool bShowCarriageRoofs = false;
     UPROPERTY(BlueprintAssignable, Category="LoopRail") FLoopRailStationEvent OnStationArrived;
     UPROPERTY(BlueprintAssignable, Category="LoopRail") FLoopRailStationEvent OnStationDeparted;
@@ -54,17 +55,23 @@ public:
     UFUNCTION(BlueprintPure, Category="LoopRail") double GetConsistLength() const;
     UFUNCTION(BlueprintPure, Category="LoopRail") bool HasUsableTrack() const;
     UFUNCTION(BlueprintPure, Category="LoopRail") UBoxComponent* GetVehicleFloor(int32 Index) const;
+    UFUNCTION(BlueprintPure, Category="LoopRail") UBoxComponent* GetConnectionFloor(int32 Index) const;
     static constexpr double VehicleLength = 900;
     static constexpr double VehicleWidth = 220;
     static constexpr double FloorHeight = 60;
 private:
     UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> Floors;
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Visuals;
+    UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> ConnectionFloors;
+    UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> ConnectionGuards;
+    UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> ConnectionVisuals;
+    UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> ConnectionGuardVisuals;
     UPROPERTY(Transient) TObjectPtr<ALoopRailStation> CurrentStation;
     UPROPERTY(ReplicatedUsing=OnRep_State) FLoopRailRepState RepState;
     UFUNCTION() void OnRep_State();
     UFUNCTION() void OnRep_Configuration();
     void UpdateVehicles();
+    void UpdateConnections();
     void PublishState();
     ALoopRailStation* FindNextStation(double& Distance) const;
     double HeadDistance = 0;
@@ -72,4 +79,5 @@ private:
     float DwellRemaining = 0;
     double SinceDeparture = 100;
     bool bRunning = false;
+    bool bUsesFallbackConnectionMesh = false;
 };

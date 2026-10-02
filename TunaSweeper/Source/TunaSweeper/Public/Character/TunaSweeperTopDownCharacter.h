@@ -475,6 +475,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float CameraInterpSpeed = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Train", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float MovingTrainCameraDistanceMultiplier = 1.6f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Train", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float TrainCameraInterpSpeed = 3.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Modes")
 	FTunaSweeperPlayerCameraModeSettings TopDownCameraModeSettings;
 
@@ -654,6 +660,7 @@ private:
 	int32 AmmoSelectionFocusIndex = INDEX_NONE;
 	float DefaultCameraArmLength = 1200.0f;
 	float CurrentCameraArmLength = 1200.0f;
+	float CurrentTrainCameraDistanceMultiplier = 1.0f;
 	float ReloadStartWorldSeconds = 0.0f;
 	float ReloadDurationSeconds = 0.0f;
 	float ItemUseStartWorldSeconds = 0.0f;

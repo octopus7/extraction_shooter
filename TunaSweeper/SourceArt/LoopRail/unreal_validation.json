@@ -1,0 +1,51 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "verification": "fresh-process reload",
+  "meshes": [
+    {
+      "asset": "/LoopRail/Meshes/SM_Locomotive.SM_Locomotive",
+      "triangles": 4916,
+      "bounds_cm": [
+        900.0,
+        220.0000762939453,
+        277.5
+      ],
+      "collision_shapes": 3,
+      "material": "/LoopRail/Materials/M_LocomotiveDetail.M_LocomotiveDetail"
+    },
+    {
+      "asset": "/LoopRail/Meshes/SM_Carriage.SM_Carriage",
+      "triangles": 9012,
+      "bounds_cm": [
+        900.0,
+        220.0000762939453,
+        251.0
+      ],
+      "collision_shapes": 52,
+      "material": "/LoopRail/Materials/M_CarriageDetail.M_CarriageDetail"
+    },
+    {
+      "asset": "/LoopRail/Meshes/SM_CarriageRoof.SM_CarriageRoof",
+      "triangles": 188,
+      "bounds_cm": [
+        900.0,
+        220.0000762939453,
+        32.0
+      ],
+      "collision_shapes": 0,
+      "material": "/LoopRail/Materials/M_CarriageRoofDetail.M_CarriageRoofDetail"
+    },
+    {
+      "asset": "/LoopRail/Meshes/SM_CarriageConnection.SM_CarriageConnection",
+      "triangles": 396,
+      "bounds_cm": [
+        100.00000762939453,
+        100.00000762939453,
+        100.0
+      ],
+      "collision_shapes": 0,
+      "material": "/LoopRail/Materials/M_CarriageConnectionDetail.M_CarriageConnectionDetail"
+    }
+  ],
+  "passed": true
+}

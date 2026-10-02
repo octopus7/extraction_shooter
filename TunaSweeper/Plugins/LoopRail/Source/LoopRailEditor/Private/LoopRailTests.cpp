@@ -9,6 +9,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/Texture2D.h"
+#include "Materials/MaterialInterface.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
@@ -84,13 +86,14 @@ bool FLoopRailMeshTest::RunTest(const FString& Parameters)
         UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr,*FString::Printf(TEXT("/LoopRail/Meshes/SM_%s.SM_%s"),Name,Name));
         if (!TestNotNull(FString(Name)+TEXT(" saved mesh"),Mesh)) continue;
         if (!TestNotNull(TEXT("Render data"),Mesh->GetRenderData())) continue;
-        TestTrue(FString(Name)+TEXT(" under 500 triangles"),Mesh->GetRenderData()->LODResources[0].GetNumTriangles()<500);
+        const int32 TriangleBudget = FString(Name)==TEXT("Locomotive") ? 12000 : 16000;
+        TestTrue(FString(Name)+TEXT(" within detail triangle budget"),Mesh->GetRenderData()->LODResources[0].GetNumTriangles()<=TriangleBudget);
         TestTrue(TEXT("9m body scale"),FMath::Abs(Mesh->GetBoundingBox().GetSize().X-900)<1);
         if (FString(Name)==TEXT("Carriage"))
         {
             auto* Roof=LoadObject<UStaticMesh>(nullptr,TEXT("/LoopRail/Meshes/SM_CarriageRoof.SM_CarriageRoof"));
             if (TestNotNull(TEXT("Optional roof"),Roof))
-                TestTrue(TEXT("Carriage including roof stays under 500 triangles"),Mesh->GetRenderData()->LODResources[0].GetNumTriangles()+Roof->GetRenderData()->LODResources[0].GetNumTriangles()<500);
+                TestTrue(TEXT("Carriage including roof stays within 16000 triangles"),Mesh->GetRenderData()->LODResources[0].GetNumTriangles()+Roof->GetRenderData()->LODResources[0].GetNumTriangles()<=16000);
         }
     }
     FTestWorld T;
@@ -115,6 +118,49 @@ bool FLoopRailMeshTest::RunTest(const FString& Parameters)
             && Hit.ImpactPoint.Z>Floor->GetComponentLocation().Z+40) ++SeatHits;
     }
     TestEqual(TEXT("Sixteen solid seat positions"),SeatHits,16);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoopRailTextureTest,"LoopRail.Assets.DetailedSurfaceTextures",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FLoopRailTextureTest::RunTest(const FString& Parameters)
+{
+    for (const TCHAR* Name : {TEXT("Locomotive"),TEXT("Carriage"),TEXT("CarriageRoof"),TEXT("CarriageConnection")})
+    {
+        const FString MeshPath=FString::Printf(TEXT("/LoopRail/Meshes/SM_%s.SM_%s"),Name,Name);
+        auto* Mesh=LoadObject<UStaticMesh>(nullptr,*MeshPath);
+        if (!TestNotNull(TEXT("Detailed mesh exists"),Mesh) || !TestNotNull(TEXT("Detailed mesh render data"),Mesh->GetRenderData())) continue;
+        const int32 ExportedTriangles=FString(Name)==TEXT("Locomotive") ? 4916 : FString(Name)==TEXT("Carriage") ? 9012 : FString(Name)==TEXT("CarriageRoof") ? 188 : 396;
+        TestEqual(FString(Name)+TEXT(" matches the detailed FBX export"),Mesh->GetNumTriangles(0),ExportedTriangles);
+        auto* Material=Mesh->GetMaterial(0);
+        const FString MaterialPath=FString::Printf(TEXT("/LoopRail/Materials/M_%sDetail.M_%sDetail"),Name,Name);
+        TestTrue(FString(Name)+TEXT(" uses its dedicated texture material"),Material && Material->GetPathName()==MaterialPath);
+        const auto& Vertices=Mesh->GetRenderData()->LODResources[0].VertexBuffers.StaticMeshVertexBuffer;
+        if (TestTrue(TEXT("UV channel exists"),Vertices.GetNumTexCoords()>0))
+        {
+            bool bFiniteAndInAtlas=true;
+            FVector2f Minimum(1,1),Maximum(0,0);
+            for (uint32 I=0;I<Vertices.GetNumVertices();++I)
+            {
+                const FVector2f UV=Vertices.GetVertexUV(I,0);
+                bFiniteAndInAtlas &= FMath::IsFinite(UV.X) && FMath::IsFinite(UV.Y) && UV.X>=0 && UV.X<=1 && UV.Y>=0 && UV.Y<=1;
+                Minimum.X=FMath::Min(Minimum.X,UV.X); Minimum.Y=FMath::Min(Minimum.Y,UV.Y);
+                Maximum.X=FMath::Max(Maximum.X,UV.X); Maximum.Y=FMath::Max(Maximum.Y,UV.Y);
+            }
+            TestTrue(TEXT("Surface UVs stay inside the atlas"),bFiniteAndInAtlas);
+            TestTrue(TEXT("UVs span the painted atlas"),Maximum.X-Minimum.X>.5f && Maximum.Y-Minimum.Y>.5f);
+        }
+        for (const TCHAR* Channel : {TEXT("BaseColor"),TEXT("Roughness"),TEXT("Metallic")})
+        {
+            const FString TexturePath=FString::Printf(TEXT("/LoopRail/Textures/T_%s_%s.T_%s_%s"),Name,Channel,Name,Channel);
+            auto* Texture=LoadObject<UTexture2D>(nullptr,*TexturePath);
+            if (TestNotNull(TEXT("Dedicated surface texture exists"),Texture))
+            {
+                TestTrue(TEXT("Imported texture source retains 2K surface detail"),Texture->Source.GetSizeX()>=2048 && Texture->Source.GetSizeY()>=2048);
+                TestEqual(TEXT("Colour data is sRGB; physical masks are linear"),bool(Texture->SRGB),FString(Channel)==TEXT("BaseColor"));
+            }
+        }
+    }
     return true;
 }
 
@@ -192,8 +238,17 @@ bool FLoopRailPreviewMapTest::RunTest(const FString& Parameters)
     {
         ++Trains; TestTrue(TEXT("Saved train has usable track reference"),It->HasUsableTrack());
         It->RebuildTrain(); It->RebuildTrain();
-        TInlineComponentArray<UBoxComponent*> Floors(*It);
-        TestEqual(TEXT("Loading and rebuilding keeps exactly four floors"),Floors.Num(),4);
+        for (int32 Car=0;Car<4;++Car) TestNotNull(TEXT("Saved vehicle floor survives rebuilding"),It->GetVehicleFloor(Car));
+        TestNull(TEXT("Loading and rebuilding keeps exactly four vehicle floors"),It->GetVehicleFloor(4));
+        TInlineComponentArray<UBoxComponent*> Boxes(*It);
+        int32 VehicleFloors=0,ConnectionFloors=0;
+        for (const UBoxComponent* Box:Boxes)
+        {
+            VehicleFloors+=Box->GetName().StartsWith(TEXT("VehicleFloor_")) ? 1 : 0;
+            ConnectionFloors+=Box->ComponentHasTag(TEXT("LoopRailConnectionFloor")) ? 1 : 0;
+        }
+        TestEqual(TEXT("Rebuilding does not leave duplicate vehicle floors"),VehicleFloors,4);
+        TestEqual(TEXT("Saved four-car train has exactly three connection floors"),ConnectionFloors,3);
     }
     for(TActorIterator<ALoopRailStation> It(World);It;++It) { ++Stations; TestNotNull(TEXT("Saved station track reference"),It->Track.Get()); }
     for(TActorIterator<ALoopRailCrossing> It(World);It;++It) { ++Crossings; TestNotNull(TEXT("Saved crossing track reference"),It->Track.Get()); }
@@ -218,7 +273,8 @@ bool FLoopRailDependencyTest::RunTest(const FString& Parameters)
             TestTrue(FString::Printf(TEXT("%s has portable dependency %s"),*Asset.PackageName.ToString(),*Path),
                 Path.StartsWith(TEXT("/LoopRail/"))||Path.StartsWith(TEXT("/Engine/"))||Path==TEXT("/Script/Engine")
                 ||Path==TEXT("/Script/CoreUObject")||Path==TEXT("/Script/LoopRail")
-                ||Path==TEXT("/Script/NavigationSystem")||Path==TEXT("/Script/StaticMeshDescription"));
+                ||Path==TEXT("/Script/NavigationSystem")||Path==TEXT("/Script/StaticMeshDescription")
+                ||Path==TEXT("/Script/InterchangeEngine")); // Engine-owned editor import metadata.
         }
     }
     return true;

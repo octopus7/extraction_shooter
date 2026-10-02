@@ -5,7 +5,7 @@ public class LoopRailEditor : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bUseUnity = false;
-        PrivateDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "LoopRail", "UnrealEd", "RenderCore", "ImageCore",
+        PrivateDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "LoopRail", "UnrealEd", "RenderCore", "RHI", "ImageCore",
             "AssetRegistry" });
     }
 }

@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "LoopRailTrain.h"
 
 void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
 {
@@ -137,6 +138,33 @@ float ATunaSweeperTopDownCharacter::ResolveCameraCursorLeadRatio() const
 
 void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 {
+	const FTunaSweeperPlayerCameraModeSettings CameraModeSettings = ResolveCurrentCameraModeSettings();
+	// The train keeps moving while gameplay input is locked by inventory or dialogue.
+	if (CameraBoom)
+	{
+		float TargetTrainDistanceMultiplier = 1.0f;
+		if (Cast<APlayerController>(GetController()) && IsLocallyControlled())
+		{
+			const UPrimitiveComponent* MovementBase = GetMovementBase();
+			const ALoopRailTrain* RiddenTrain = MovementBase ? Cast<ALoopRailTrain>(MovementBase->GetOwner()) : nullptr;
+			if (RiddenTrain && !RiddenTrain->IsDwelling() && FMath::Abs(RiddenTrain->GetSpeed()) > 1.0f)
+			{
+				TargetTrainDistanceMultiplier = FMath::Max(1.0f, MovingTrainCameraDistanceMultiplier);
+			}
+		}
+		CurrentTrainCameraDistanceMultiplier = FMath::FInterpTo(
+			CurrentTrainCameraDistanceMultiplier,
+			TargetTrainDistanceMultiplier,
+			DeltaSeconds,
+			FMath::Max(0.01f, TrainCameraInterpSpeed));
+		CurrentCameraArmLength = FMath::FInterpTo(
+			CurrentCameraArmLength,
+			CameraModeSettings.TargetArmLength * CurrentTrainCameraDistanceMultiplier,
+			DeltaSeconds,
+			CameraInterpSpeed);
+		CameraBoom->TargetArmLength = CurrentCameraArmLength;
+	}
+
 	if (IsGameplayActionInputLocked())
 	{
 		return;
@@ -145,7 +173,6 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 	float HitReactionRollDegrees = 0.0f;
 	float HitReactionFOVDegrees = 0.0f;
 	const FVector HitReactionOffset = UpdateDamageCameraReaction(DeltaSeconds, HitReactionRollDegrees, HitReactionFOVDegrees);
-	const FTunaSweeperPlayerCameraModeSettings CameraModeSettings = ResolveCurrentCameraModeSettings();
 
 	if (!bIsRolling && !AimDirection.IsNearlyZero())
 	{
@@ -166,13 +193,6 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 
 	if (CameraBoom)
 	{
-		CurrentCameraArmLength = FMath::FInterpTo(
-			CurrentCameraArmLength,
-			CameraModeSettings.TargetArmLength,
-			DeltaSeconds,
-			CameraInterpSpeed);
-		CameraBoom->TargetArmLength = CurrentCameraArmLength;
-
 		CurrentCameraBoomRotation = FMath::RInterpTo(
 			CurrentCameraBoomRotation,
 			CameraModeSettings.BoomRotation,
