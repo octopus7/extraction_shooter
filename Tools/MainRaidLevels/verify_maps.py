@@ -16,6 +16,10 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "TunaSweeper/Saved/MainRaidLevels/verification.json"
 EXPECTED_MATERIAL = "/Game/Materials/Landscape/M_LandScape.M_LandScape"
 EXPECTED_LAYERS = {"Grass", "GrassDark", "Dirt", "Rock"}
+# Project convention: +X is north, +Y is east (Docs/game_conventions.md).
+BOUNDARY_SIDES = {"North": (0, 1), "South": (0, -1), "East": (1, 1), "West": (1, -1)}
+BOUNDARY_INNER_CM = 25000.0
+BOUNDARY_OUTER_CM = 26000.0
 MAPS = {
     "RaidForest": {
         "path": "/Game/MainRaid/RaidForest",
@@ -103,12 +107,144 @@ def blocking_hit(result):
     if result is None:
         return False, None
     if isinstance(result, unreal.HitResult):
-        return True, result
+        return bool(result.to_tuple()[0]), result
     if isinstance(result, tuple):
         hit = next((item for item in result if isinstance(item, unreal.HitResult)), None)
         flag = next((item for item in result if isinstance(item, bool)), hit is not None)
-        return bool(flag), hit
+        return bool(flag) and hit is not None and bool(hit.to_tuple()[0]), hit
     return bool(result), None
+
+
+def validate_boundaries(name, world, all_actors, landscape):
+    """Check saved brush geometry and exercise its registered Pawn collision."""
+    region = name.removeprefix("Raid")
+    expected = {f"TS_{region}_Boundary_{side}" for side in BOUNDARY_SIDES}
+    volumes = [actor for actor in all_actors if isinstance(actor, unreal.BlockingVolume)]
+    assert len(volumes) == 4, f"{name}: expected four BlockingVolumes, found {len(volumes)}"
+    by_label = {actor.get_actor_label(): actor for actor in volumes}
+    assert set(by_label) == expected, f"{name}: boundary labels {sorted(by_label)}"
+    ignore_except_boundaries = [actor for actor in all_actors if actor not in volumes]
+    ignore_except_landscape = [actor for actor in all_actors if actor != landscape]
+    land_origin, land_extent = landscape.get_actor_bounds(False)
+    floor = min(-5000.0, land_origin.z - land_extent.z - 5000.0)
+    ceiling = max(20000.0, land_origin.z + land_extent.z + 10000.0)
+    bounds = {}
+    volume_report = []
+
+    for side, (axis, sign) in BOUNDARY_SIDES.items():
+        label = f"TS_{region}_Boundary_{side}"
+        actor = by_label[label]
+        assert str(actor.get_folder_path()) == "MapBoundary", f"{label}: wrong Outliner folder"
+        assert not actor.get_editor_property("is_editor_only_actor"), f"{label}: editor-only actor"
+        assert actor.get_editor_property("hidden"), f"{label}: must be hidden in game"
+        assert actor.get_actor_enable_collision(), f"{label}: actor collision disabled"
+        brushes = actor.get_components_by_class(unreal.BrushComponent)
+        assert len(brushes) == 1, f"{label}: expected one BrushComponent"
+        brush = brushes[0]
+        assert not brush.get_editor_property("is_editor_only"), f"{label}: editor-only brush"
+        builder = actor.get_editor_property("brush_builder")
+        assert builder and builder.get_class().get_name() == "CubeBuilder", f"{label}: expected box brush"
+        assert all(builder.get_editor_property(axis_name) == 200.0 for axis_name in ("x", "y", "z")), (
+            f"{label}: unexpected source box dimensions"
+        )
+        assert str(brush.get_collision_profile_name()) == "InvisibleWall", f"{label}: wrong collision profile"
+        assert brush.get_collision_enabled() == unreal.CollisionEnabled.QUERY_AND_PHYSICS, f"{label}: wrong collision mode"
+        assert brush.get_collision_object_type() == unreal.CollisionChannel.ECC_WORLD_STATIC, f"{label}: wrong object type"
+        for channel, response in (
+            (unreal.CollisionChannel.ECC_PAWN, unreal.CollisionResponseType.ECR_BLOCK),
+            (unreal.CollisionChannel.ECC_VISIBILITY, unreal.CollisionResponseType.ECR_IGNORE),
+            (unreal.CollisionChannel.ECC_CAMERA, unreal.CollisionResponseType.ECR_BLOCK),
+        ):
+            assert brush.get_collision_response_to_channel(channel) == response, f"{label}: wrong {channel} response"
+
+        origin, extent, _radius = unreal.SystemLibrary.get_component_bounds(brush)
+        lower = [origin.x - extent.x, origin.y - extent.y, origin.z - extent.z]
+        upper = [origin.x + extent.x, origin.y + extent.y, origin.z + extent.z]
+        expected_lower = [-BOUNDARY_OUTER_CM, -BOUNDARY_OUTER_CM, floor]
+        expected_upper = [BOUNDARY_OUTER_CM, BOUNDARY_OUTER_CM, ceiling]
+        expected_lower[axis] = BOUNDARY_INNER_CM if sign > 0 else -BOUNDARY_OUTER_CM
+        expected_upper[axis] = BOUNDARY_OUTER_CM if sign > 0 else -BOUNDARY_INNER_CM
+        assert all(abs(actual - target) <= 1.0 for actual, target in zip(lower + upper, expected_lower + expected_upper)), (
+            f"{label}: brush bounds {lower}, {upper}; expected {expected_lower}, {expected_upper}"
+        )
+        bounds[side] = (lower, upper)
+        volume_report.append({
+            "label": label, "bounds_min_cm": lower, "bounds_max_cm": upper,
+            "brush_shape": "Box", "collision_profile": "InvisibleWall",
+            "pawn_response": "Block", "visibility_response": "Ignore", "camera_response": "Block",
+            "runtime_collision_enabled": True,
+        })
+
+    for x_side in ("North", "South"):
+        for y_side in ("East", "West"):
+            a_min, a_max = bounds[x_side]
+            b_min, b_max = bounds[y_side]
+            assert all(min(a_max[i], b_max[i]) - max(a_min[i], b_min[i]) >= 999.0 for i in range(3)), (
+                f"{name}: {x_side}/{y_side} corner does not have overlapping collision"
+            )
+
+    def ground_height(x, y):
+        result = unreal.SystemLibrary.line_trace_single(
+            world, unreal.Vector(x, y, ceiling), unreal.Vector(x, y, floor),
+            unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ignore_except_landscape,
+            unreal.DrawDebugTrace.NONE, True,
+        )
+        hit, detail = blocking_hit(result)
+        assert hit and detail is not None, f"{name}: no landscape collision near perimeter at {(x, y)}"
+        return detail.to_tuple()[5].z
+
+    def sweep(start, end, expected_labels):
+        result = unreal.SystemLibrary.capsule_trace_single_by_profile(
+            world, start, end, 42.0, 90.0, "Pawn", False,
+            ignore_except_boundaries, unreal.DrawDebugTrace.NONE, True,
+        )
+        hit, detail = blocking_hit(result)
+        if not expected_labels:
+            assert not hit, f"{name}: inner control sweep unexpectedly blocked"
+            return None
+        assert hit and detail is not None, f"{name}: escaped perimeter from {vector(start)} to {vector(end)}"
+        # Read bBlockingHit from the struct: a returned HitResult alone does not mean a hit.
+        assert detail.to_tuple()[0], f"{name}: perimeter returned a non-blocking hit"
+        broken = detail.to_tuple()
+        hit_actor = broken[9]
+        hit_label = hit_actor.get_actor_label() if hit_actor else None
+        assert hit_label in expected_labels, f"{name}: expected {expected_labels}, hit {hit_label}"
+        assert not broken[1], f"{name}: perimeter sweep began inside collision at {vector(start)}"
+        return hit_label
+
+    samples = []
+    offsets = [-24500.0] + list(range(-22500, 22501, 2500)) + [24500.0]
+    for side, (axis, sign) in BOUNDARY_SIDES.items():
+        expected_label = f"TS_{region}_Boundary_{side}"
+        for offset in offsets:
+            start_xy = [float(offset), float(offset)]
+            end_xy = list(start_xy)
+            start_xy[axis] = sign * (BOUNDARY_INNER_CM - 300.0)
+            end_xy[axis] = sign * (BOUNDARY_OUTER_CM + 300.0)
+            near_ground = ground_height(*start_xy) + 105.0
+            assert floor + 90.0 < near_ground < ceiling - 90.0, f"{name}: wall does not cover perimeter ground"
+            for height_name, z in (("near_ground", near_ground), ("high", ceiling - 200.0)):
+                start, end = unreal.Vector(*start_xy, z), unreal.Vector(*end_xy, z)
+                hit_label = sweep(start, end, {expected_label})
+                samples.append({"side": side, "height": height_name, "start_cm": vector(start), "hit_actor": hit_label})
+
+    for x_side, x_sign in (("North", 1), ("South", -1)):
+        for y_side, y_sign in (("East", 1), ("West", -1)):
+            x, y = x_sign * 24700.0, y_sign * 24700.0
+            for height_name, z in (("near_ground", ground_height(x, y) + 105.0), ("high", ceiling - 200.0)):
+                start, end = unreal.Vector(x, y, z), unreal.Vector(x_sign * 26300.0, y_sign * 26300.0, z)
+                hit_label = sweep(start, end, {f"TS_{region}_Boundary_{x_side}", f"TS_{region}_Boundary_{y_side}"})
+                samples.append({"corner": f"{x_side}{y_side}", "height": height_name, "start_cm": vector(start), "hit_actor": hit_label})
+
+    for z in (ground_height(0.0, 0.0) + 105.0, ceiling - 200.0):
+        sweep(unreal.Vector(0, 0, z), unreal.Vector(1000, 1000, z), set())
+    return {
+        "volume_count": len(volumes), "volumes": volume_report,
+        "inner_limit_cm": BOUNDARY_INNER_CM, "corner_overlap_verified": True,
+        "registered_collision_verified_by_pawn_sweeps": True,
+        "outward_capsule_sweep_count": len(samples), "outward_capsule_sweeps": samples,
+        "interior_control_sweep_count": 2, "interior_controls_clear": True,
+    }
 
 
 class MainRaidVerifier:
@@ -286,6 +422,7 @@ class MainRaidVerifier:
             f"{name}: sampled route slope {max_slope_degrees:.2f} degrees at {max_slope_segment}"
         )
 
+        boundary_report = validate_boundaries(name, world, all_actors, landscape)
         unreal.SystemLibrary.execute_console_command(world, "MAP CHECK")
         self.report["maps"][name] = {
             "path": spec["path"],
@@ -298,6 +435,7 @@ class MainRaidVerifier:
             "mesh_references": mesh_references,
             "route_samples": route,
             "max_sampled_route_slope_degrees": round(max_slope_degrees, 3),
+            "boundaries": boundary_report,
             "map_check_requested": True,
         }
 

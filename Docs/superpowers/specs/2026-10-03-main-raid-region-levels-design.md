@@ -18,6 +18,7 @@ Create three independently loadable UE 5.7 main-game raid levels: `/Game/MainRai
 - Use deterministic height and weight functions so props can be placed at the same evaluated ground height without a runtime generator.
 - Keep clear route corridors below the project's practical walkable slope and keep PlayerStart clear of blockers.
 - Reuse existing environment meshes through static-mesh or hierarchical-instanced components. A temporary editor generator may create the maps, but no completed generator, startup hook, command-line entry point, or generator-only module dependency may remain.
+- Each map has four saved `BlockingVolume` actors in the `MapBoundary` folder. North/south follow +/-X and east/west follow +/-Y. Their inner faces are at +/-250 m, 2 m inside the Landscape edge, with 10 m thickness and overlapping corners. The walls extend at least 50 m below the lowest terrain and 100 m above the highest terrain. Use the standard `InvisibleWall` collision profile and hide the brushes in game.
 
 ## RaidForest
 
@@ -44,6 +45,7 @@ Create three independently loadable UE 5.7 main-game raid levels: `/Game/MainRai
 - A fresh editor process must load each map and confirm: one real Landscape with components, the expected material and layer infos, PlayerStart, lighting, map-specific landmark actors, reusable-prop references, and no missing referenced assets.
 - Run Map Check and structural checks for every map.
 - Sample the primary routes against the deterministic terrain, confirm height continuity and slope limits, and use collision traces to ensure ground support and route clearance.
+- Verify saved boundary brush geometry and Pawn collision with outward capsule sweeps along all four sides and through the corners, at both terrain height and an elevated height. Include an interior sweep that must remain clear.
 - Capture at least one review image per map after reloading the saved maps and inspect it for gross placement, clipping, lighting, and visibility issues.
 - Rebuild after removing the temporary generator, then rerun the verifier to prove the saved assets do not depend on it.
 
