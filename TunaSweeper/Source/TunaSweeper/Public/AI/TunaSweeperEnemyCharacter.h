@@ -91,13 +91,13 @@ public:
 	bool FireProjectileAt(AActor* TargetActor);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
-	ETunaSweeperEnemyFireResult TryFireProjectileAt(AActor* TargetActor);
+	virtual ETunaSweeperEnemyFireResult TryFireProjectileAt(AActor* TargetActor);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
-	bool StartEnemyReload();
+	virtual bool StartEnemyReload();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
-	FTunaSweeperEnemyWeaponRuntimeStatus GetEnemyWeaponRuntimeStatus();
+	virtual FTunaSweeperEnemyWeaponRuntimeStatus GetEnemyWeaponRuntimeStatus();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
 	bool IsDead() const { return bIsDead; }
@@ -115,8 +115,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Patterns")
 	UTunaSweeperCombatPatternComponent* GetCombatPatternComponent() const { return CombatPatternComponent; }
 
-	bool AttackTarget(AActor* TargetActor);
-	bool UsesMeleeAttack() const;
+	virtual bool AttackTarget(AActor* TargetActor);
+	virtual bool UsesMeleeAttack() const;
 	float GetMeleeAttackRange() const;
 	float GetMeleeApproachStartRange() const;
 	float GetMeleeApproachStopRange() const;

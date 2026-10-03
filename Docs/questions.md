@@ -7264,3 +7264,18 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 브라질의 언어는 포르투갈어인가?
 - 답변: 브라질은 포르투갈어를 사용한다. 게임 번역에서는 브라질 포르투갈어(pt-BR)로 구분하며, 포르투갈에서 사용하는 포르투갈어(pt-PT)와 표현·어휘에 차이가 있다.
+
+## 2026-10-03 02:50:18 (소요시간: 00:00:39)
+- 질문: 호퍼를 테스트하려면 레벨 스폰 앵커에 어떤 ID를 할당해야 하는가?
+- 답변: 호퍼는 아직 EnemySpawns.json과 EnemySpawnProfiles.json에 등록하지 않아 할당된 스폰 앵커 ID가 없다. 현재 codex/hopper-combat 작업 폴더의 /Game/Maps/HopperCombatTestMap 또는 /Game/Characters/Hopper/BP_HopperEnemy 직접 배치로 확인할 수 있다. 기본 작업 폴더에는 호퍼 에셋을 아직 통합하지 않았다. 구현 작업은 사용자 요청에 따라 중단 상태를 유지한다.
+
+
+## 2026-10-03 02:53:53 (소요시간: 00:00:20)
+
+- 질문: 지금 브랜치는 무엇인가?
+- 답변: 호퍼 작업 폴더는 codex/hopper-combat, 기본 D:\github\extraction_shooter 폴더는 codex/guided-rocket-plugin이다. git branch --show-current로 각각 확인했다.
+
+
+## 2026-10-03 00:34:04 (소요시간: 02:24:50)
+- 질문: HOPPER_03_ArmModules_v5 폴더와 파일럿 토끼, 메카닉 몸통·팔다리를 구분할 수 있는가?
+- 답변: 원본 GLB와 부품 이름·형상을 확인해 토끼를 별도 파일럿으로 분리하고 메카닉 정적 부품 62개를 몸통·콕핏·좌우 팔·다리 단위로 구분했다. 원본 L/R 이름과 텍스처를 유지했다.
