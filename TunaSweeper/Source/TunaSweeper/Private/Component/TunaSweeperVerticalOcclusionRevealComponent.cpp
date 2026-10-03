@@ -14,6 +14,15 @@ namespace TunaSweeperVerticalOcclusionReveal
 	const FName RevealActiveName(TEXT("VerticalRevealActive"));
 	const FName RevealStartZName(TEXT("VerticalRevealStartZ"));
 	const FName RevealFadeHeightName(TEXT("VerticalRevealFadeHeightCm"));
+
+	bool SupportsVerticalReveal(const UMaterialInterface* Material)
+	{
+		float Value = 0.0f;
+		return Material &&
+			Material->GetScalarParameterValue(FMaterialParameterInfo(RevealActiveName), Value) &&
+			Material->GetScalarParameterValue(FMaterialParameterInfo(RevealStartZName), Value) &&
+			Material->GetScalarParameterValue(FMaterialParameterInfo(RevealFadeHeightName), Value);
+	}
 }
 
 UTunaSweeperVerticalOcclusionRevealComponent::UTunaSweeperVerticalOcclusionRevealComponent()
@@ -88,11 +97,24 @@ void UTunaSweeperVerticalOcclusionRevealComponent::ApplyVerticalRevealMaterial()
 		State.MeshComponent = MeshComponent;
 		for (int32 MaterialIndex = 0; MaterialIndex < MeshComponent->GetNumMaterials(); ++MaterialIndex)
 		{
-			State.OriginalMaterials.Add(MeshComponent->GetMaterial(MaterialIndex));
+			UMaterialInterface* OriginalMaterial = MeshComponent->GetMaterial(MaterialIndex);
+			State.OriginalMaterials.Add(OriginalMaterial);
 			if (bOverrideAllMaterialSlots || MaterialIndex == 0)
 			{
-				if (UMaterialInstanceDynamic* DynamicMaterial = MeshComponent->CreateDynamicMaterialInstance(MaterialIndex, Material))
+				const bool bPreserveMaterial = bPreserveSourceMaterials &&
+					TunaSweeperVerticalOcclusionReveal::SupportsVerticalReveal(OriginalMaterial);
+				UMaterialInterface* SourceMaterial = bPreserveMaterial ? OriginalMaterial : Material;
+				// MIDs cannot parent other MIDs. Copy their uniform values into a new sibling so
+				// reveal updates never mutate the authored source that RestoreOriginalMaterials keeps.
+				UMaterialInstanceDynamic* SourceDynamic = Cast<UMaterialInstanceDynamic>(SourceMaterial);
+				UMaterialInterface* ParentMaterial = SourceDynamic ? SourceDynamic->Parent.Get() : SourceMaterial;
+				if (UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(ParentMaterial, MeshComponent))
 				{
+					if (SourceDynamic)
+					{
+						DynamicMaterial->CopyMaterialUniformParameters(SourceDynamic);
+					}
+					MeshComponent->SetMaterial(MaterialIndex, DynamicMaterial);
 					State.DynamicMaterials.Add(DynamicMaterial);
 				}
 			}

@@ -1,5 +1,9 @@
 # 지역 개방 기준
 
+> **이전 본편 지역 설계 보관본 · 2026-10-03 기준 대체됨**
+>
+> 현재 본편의 공간·진행·해금·엔딩 기준은 [본편 설계 SSOT](../../TunaSweeper/External/MainPayload/Docs/SSOT/main_game_design.md)를 따른다. 아래 단일 레이드 맵과 M/S 퀘스트 연결은 이전 설계 기록이다. 현재 엔진의 맵 구성이나 구현 완료 상태를 이 기록으로 판단하지 않는다.
+
 이 문서는 TunaSweeper 단일 레이드 맵의 구역 개방과 이동 편의 해금 기준을 정리하는 SSOT 문서다.
 
 퀘스트 구조, 아이템 요구량, 대화 기준은 `TunaSweeper_SSOT_Quest_Item_v0.6.md`와 `TunaSweeper_Quest_Dialogue_v0.6.1.md`를 우선한다.

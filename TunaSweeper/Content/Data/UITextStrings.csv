@@ -501,3 +501,6 @@ ui.wardrobe.locked,잠김,Locked,未解放
 ui.wardrobe.locked_hint,의상을 해금하면 착용할 수 있습니다.,Unlock this outfit to wear it.,衣装を解放すると着用できます。
 ui.wardrobe.preview,미리보기,Preview,プレビュー
 ui.wardrobe.unavailable,이 의상은 현재 사용할 수 없습니다.,This outfit is currently unavailable.,この衣装は現在使用できません。
+ui.interaction.ladder_transfer,사다리 이용,Use Ladder,はしごを使う
+ui.interaction.ssto_enter,기내로 올라가기,Climb Aboard,機内へ上がる
+ui.interaction.ssto_exit,밖으로 내려가기,Climb Down,外へ降りる
