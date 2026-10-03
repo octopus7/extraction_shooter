@@ -11,6 +11,7 @@
 #include "Camera/CameraActor.h"
 #include "Editor.h"
 #include "AIController.h"
+#include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Settings/LevelEditorPlaySettings.h"
 #include "Engine/Engine.h"
@@ -57,6 +58,48 @@ namespace HopperPlayTest
   C->SetActorLocation(Pos); C->SetActorRotation((Look-Pos).Rotation()); PC->SetViewTarget(C);
  }
 }
+// PIE loading and navigation generation can outlast a wall-clock wait during a test suite.
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FHopperWaitForReady, FAutomationTestBase*, Test);
+bool FHopperWaitForReady::Update()
+{
+ UWorld* World=GEditor->PlayWorld;
+ ATunaSweeperHopperEnemyCharacter* Hopper=HopperPlayTest::Find(World);
+ UNavigationSystemV1* Navigation=World ? FNavigationSystem::GetCurrent<UNavigationSystemV1>(World) : nullptr;
+ FNavLocation Start, Destination;
+ const FVector Feet=Hopper ? Hopper->GetNavAgentLocation() : FVector::ZeroVector;
+ const bool bReady=Hopper && Hopper->GetCombatPhase()==EHopperCombatPhase::Mech && Navigation
+  && !Navigation->IsNavigationBuildInProgress()
+  && Navigation->ProjectPointToNavigation(Feet,Start,FVector(2,2,180))
+  && Navigation->ProjectPointToNavigation(Feet+Hopper->GetActorForwardVector()*150.f,Destination,FVector(2,2,180));
+ if(bReady) return true;
+ if(FPlatformTime::Seconds()-StartTime < 30.f) return false;
+ Test->AddError(FString::Printf(TEXT("Hopper PIE did not become ready: world=%s phase=%d navigation=%s building=%d feet=%s gameTime=%.2f"),
+  *GetNameSafe(World),Hopper ? static_cast<int32>(Hopper->GetCombatPhase()) : -1,*GetNameSafe(Navigation),
+  Navigation ? Navigation->IsNavigationBuildInProgress() : false,*Feet.ToCompactString(),World ? World->GetTimeSeconds() : 0.f));
+ return true;
+}
+
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FHopperWaitForWalk, FAutomationTestBase*, Test);
+bool FHopperWaitForWalk::Update()
+{
+ UWorld* World=GEditor->PlayWorld;
+ ATunaSweeperHopperEnemyCharacter* Hopper=HopperPlayTest::Find(World);
+ if(Hopper && FVector::Dist2D(HopperPlayTest::WalkStart,Hopper->GetActorLocation())>25.f) return true;
+ if(FPlatformTime::Seconds()-StartTime < 15.f) return false;
+ Test->AddError(TEXT("Hopper did not move 25 cm along its navigation request within 15 seconds"));
+ return true;
+}
+
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FHopperWaitForDismount, FAutomationTestBase*, Test);
+bool FHopperWaitForDismount::Update()
+{
+ ATunaSweeperHopperEnemyCharacter* Hopper=HopperPlayTest::Find(GEditor->PlayWorld);
+ if(Hopper && Hopper->GetCombatPhase()==EHopperCombatPhase::PilotRanged) return true;
+ if(FPlatformTime::Seconds()-StartTime < 15.f) return false;
+ Test->AddError(TEXT("Hopper did not finish a safe dismount within 15 seconds"));
+ return true;
+}
+
 DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FHopperPlayStep,FAutomationTestBase*,Test,int32,Step);
 bool FHopperPlayStep::Update()
 {
@@ -156,14 +199,14 @@ bool FHopperPlayablePresentationTest::RunTest(const FString& Parameters)
  Play.EditorPlaySettings->NewWindowWidth=1280;
  Play.EditorPlaySettings->NewWindowHeight=800;
  GEditor->RequestPlaySession(Play);
- ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(4.f));
+ ADD_LATENT_AUTOMATION_COMMAND(FHopperWaitForReady(this));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,0));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,6));
- ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(3.f));
+ ADD_LATENT_AUTOMATION_COMMAND(FHopperWaitForWalk(this));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,1));
  ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(.3f));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,5));
- ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(4.f));
+ ADD_LATENT_AUTOMATION_COMMAND(FHopperWaitForDismount(this));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,2));
  ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(.4f));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,3));

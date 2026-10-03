@@ -12,6 +12,7 @@ public class TunaSweeperEditor : ModuleRules
 		{
 			"InputCore",
             "AIModule", // Hopper PIE test issues real navigation requests.
+            "NavigationSystem", // Wait for navigation readiness before PIE movement checks.
 			"Core",
 			"CoreUObject",
 			"Engine",
