@@ -30,6 +30,9 @@ struct TUNASWEEPER_API FTunaSweeperLocalizedTextString
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Text")
 	FText Russian;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Text")
+	FText BrazilianPortuguese;
 };
 
 UCLASS()

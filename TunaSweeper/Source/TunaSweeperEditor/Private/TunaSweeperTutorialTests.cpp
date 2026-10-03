@@ -16,6 +16,8 @@
 #include "AssetCompilingManager.h"
 #include "RenderingThread.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Fonts/FontCache.h"
+#include "Rendering/SlateRenderer.h"
 #include "Misc/Paths.h"
 #include "HAL/FileManager.h"
 #include "UObject/StrongObjectPtr.h"
@@ -66,8 +68,8 @@ bool FTutorialAuthoredAssetTest::RunTest(const FString& Parameters)
     const FString Output=FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()/TEXT("../GeneratedImages/UI/Tutorial/WidgetPreviews"));
     IFileManager::Get().MakeDirectory(*Output,true);
     const ETunaSweeperItemTextLanguage Languages[]={ETunaSweeperItemTextLanguage::Korean,ETunaSweeperItemTextLanguage::English,ETunaSweeperItemTextLanguage::Japanese,
-        ETunaSweeperItemTextLanguage::SimplifiedChinese,ETunaSweeperItemTextLanguage::TraditionalChinese,ETunaSweeperItemTextLanguage::Russian};
-    const TCHAR* Tags[]={TEXT("ko"),TEXT("en"),TEXT("ja"),TEXT("zh-Hans"),TEXT("zh-Hant"),TEXT("ru")};
+        ETunaSweeperItemTextLanguage::SimplifiedChinese,ETunaSweeperItemTextLanguage::TraditionalChinese,ETunaSweeperItemTextLanguage::Russian,ETunaSweeperItemTextLanguage::BrazilianPortuguese};
+    const TCHAR* Tags[]={TEXT("ko"),TEXT("en"),TEXT("ja"),TEXT("zh-Hans"),TEXT("zh-Hant"),TEXT("ru"),TEXT("pt-BR")};
     const TCHAR* Pages[]={TEXT("Basics"),TEXT("Combat"),TEXT("Items")};
     for(int32 L=0;L<UE_ARRAY_COUNT(Languages);++L)
     {
@@ -93,6 +95,22 @@ bool FTutorialAuthoredAssetTest::RunTest(const FString& Parameters)
                     auto* Bold=Styles->FindRow<FRichTextStyleRow>(TEXT("key"),TEXT("TutorialTest"));
                     if(!TestNotNull(TEXT("Input emphasis style exists"),Bold)) return false;
                     TestEqual(TEXT("Input labels use bold face"),Bold->TextStyle.Font.TypefaceFontName,FName(TEXT("Bold")));
+                    if (Languages[L] == ETunaSweeperItemTextLanguage::BrazilianPortuguese)
+                    {
+                        const auto FontCache = FSlateApplication::Get().GetRenderer()->GetFontCache();
+                        for (const auto& Row : Styles->GetRowMap())
+                        {
+                            const FSlateFontInfo& Font = reinterpret_cast<const FRichTextStyleRow*>(Row.Value)->TextStyle.Font;
+                            for (const TCHAR Character : Actual.ToString())
+                            {
+                                if (Character < 0x00C0 || Character > 0x024F) continue;
+                                float Scale = 1.0f;
+                                const FFontData& FontData = FontCache->GetFontDataForCodepoint(Font, Character, Scale);
+                                TestTrue(TEXT("Tutorial styles cover Portuguese accents"),
+                                    FontCache->CanLoadCodepoint(FontData, Character, EFontFallback::FF_NoFallback));
+                            }
+                        }
+                    }
                 }
             }
         }

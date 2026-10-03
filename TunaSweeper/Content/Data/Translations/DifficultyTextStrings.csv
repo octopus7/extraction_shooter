@@ -1,7 +1,7 @@
-string_key,zh-Hans,zh-Hant,ru
-difficulty.stage.1.title,搜集,蒐集,Сбор ресурсов
-difficulty.stage.1.description,适合从容搜集物资与探索的入门难度。,適合從容蒐集物資與探索的入門難度。,Начальная сложность: больше времени на сбор припасов и исследование.
-difficulty.stage.2.title,普通,普通,Обычная
-difficulty.stage.2.description,生存与战斗较为均衡的标准难度。,生存與戰鬥較爲均衡的標準難度。,Стандартная сложность с балансом выживания и боя.
-difficulty.stage.3.title,困难,困難,Сложная
-difficulty.stage.3.description,资源更紧张、战斗压力更大的挑战难度。,資源更緊張、戰鬥壓力更大的挑戰難度。,Сложный режим с нехваткой ресурсов и более напряжёнными боями.
+string_key,zh-Hans,zh-Hant,ru,pt-BR
+difficulty.stage.1.title,搜集,蒐集,Сбор ресурсов,Coleta
+difficulty.stage.1.description,适合从容搜集物资与探索的入门难度。,適合從容蒐集物資與探索的入門難度。,Начальная сложность: больше времени на сбор припасов и исследование.,"Dificuldade inicial, com mais tranquilidade para saquear e explorar."
+difficulty.stage.2.title,普通,普通,Обычная,Normal
+difficulty.stage.2.description,生存与战斗较为均衡的标准难度。,生存與戰鬥較爲均衡的標準難度。,Стандартная сложность с балансом выживания и боя.,"Dificuldade padrão, com equilíbrio entre sobrevivência e combate."
+difficulty.stage.3.title,困难,困難,Сложная,Difícil
+difficulty.stage.3.description,资源更紧张、战斗压力更大的挑战难度。,資源更緊張、戰鬥壓力更大的挑戰難度。,Сложный режим с нехваткой ресурсов и более напряжёнными боями.,"Dificuldade desafiadora, com mais pressão sobre os recursos e nos combates."

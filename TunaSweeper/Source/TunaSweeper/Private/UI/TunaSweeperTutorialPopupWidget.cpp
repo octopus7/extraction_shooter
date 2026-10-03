@@ -4,6 +4,8 @@
 #include "Components/TextBlock.h"
 #include "Components/RichTextBlock.h"
 #include "Components/Button.h"
+#include "Engine/DataTable.h"
+#include "UI/TunaSweeperUIFont.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
@@ -73,10 +75,30 @@ void UTunaSweeperTutorialPopupWidget::RefreshLocalizedText()
 		if (UTextBlock* Label = Cast<UTextBlock>(WidgetTree->FindWidget(Pair.Key)))
 		{
 			Label->SetText(Text);
+			TunaSweeperUIFont::ApplyFont(Label, Label->GetFont().Size);
 		}
 		else if (URichTextBlock* RichLabel = Cast<URichTextBlock>(WidgetTree->FindWidget(Pair.Key)))
 		{
 			RichLabel->SetText(Text);
+			// Copy authored styles per widget so shared assets remain editable and unchanged.
+			UDataTable* SourceStyles = RichLabel->GetTextStyleSet();
+			if (SourceStyles && SourceStyles != LocalizedStyleTables.FindRef(RichLabel))
+			{
+				UDataTable* Styles = DuplicateObject<UDataTable>(SourceStyles, this);
+				Styles->SetFlags(RF_Transient);
+				for (const auto& Row : Styles->GetRowMap())
+				{
+					FSlateFontInfo& Font = reinterpret_cast<FRichTextStyleRow*>(Row.Value)->TextStyle.Font;
+					const auto Weight = Font.TypefaceFontName.ToString().Contains(TEXT("Bold"))
+						? ETunaSweeperUIFontWeight::Bold : ETunaSweeperUIFontWeight::Regular;
+					const FSlateFontInfo LocalizedFont = TunaSweeperUIFont::MakeFont(nullptr, Font.Size, Weight);
+					Font.FontObject = nullptr;
+					Font.CompositeFont = LocalizedFont.CompositeFont;
+					Font.TypefaceFontName = LocalizedFont.TypefaceFontName;
+				}
+				LocalizedStyleTables.Add(RichLabel, Styles);
+				RichLabel->SetTextStyleSet(Styles);
+			}
 		}
 	}
 }

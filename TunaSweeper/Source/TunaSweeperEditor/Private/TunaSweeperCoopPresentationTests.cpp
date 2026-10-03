@@ -140,7 +140,7 @@ bool FTunaSweeperCoopPresentationTest::RunTest(const FString&)
 	Menu->TickMenuTransitions(1.f);
 	FWidgetRenderer Renderer(false);
 	const ETunaSweeperItemTextLanguage Languages[] = { ETunaSweeperItemTextLanguage::Korean, ETunaSweeperItemTextLanguage::English, ETunaSweeperItemTextLanguage::Japanese,
-		ETunaSweeperItemTextLanguage::SimplifiedChinese, ETunaSweeperItemTextLanguage::TraditionalChinese, ETunaSweeperItemTextLanguage::Russian };
+		ETunaSweeperItemTextLanguage::SimplifiedChinese, ETunaSweeperItemTextLanguage::TraditionalChinese, ETunaSweeperItemTextLanguage::Russian, ETunaSweeperItemTextLanguage::BrazilianPortuguese };
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(Languages); ++Index)
 	{
 		Instance->SetCurrentTextLanguage(Languages[Index], false);
