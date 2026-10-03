@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperMemoSubsystem.h"
+#include "Raid/RaidLevelIdentity.h"
 
 #include "Dom/JsonObject.h"
 #include "Engine/World.h"
@@ -323,29 +324,18 @@ bool UTunaSweeperMemoSubsystem::EnsureMemosSpawnedForWorld(UWorld* World)
 
 	LastSpawnedWorld = World;
 	TMap<int32, ATunaSweeperRaidPlacementAnchor*> MemoAnchorsByPlacementId;
-	TSet<int32> AllPlacementIds;
-	TSet<int32> InvalidPlacementIds;
-	for (TActorIterator<ATunaSweeperRaidPlacementAnchor> It(World); It; ++It)
-	{
-		ATunaSweeperRaidPlacementAnchor* Anchor = *It;
-		const int32 PlacementId = Anchor->GetPlacementId();
-		if (PlacementId <= 0 || AllPlacementIds.Contains(PlacementId))
-		{
-			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Level %s has an invalid or duplicate placement id %d at '%s'."), *World->GetMapName(), PlacementId, *Anchor->GetPathName());
-			InvalidPlacementIds.Add(PlacementId);
-			continue;
-		}
-		AllPlacementIds.Add(PlacementId);
-		if (Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo)
-		{
-			MemoAnchorsByPlacementId.Add(PlacementId, Anchor);
-		}
-	}
-	for (int32 InvalidPlacementId : InvalidPlacementIds)
-	{
-		MemoAnchorsByPlacementId.Remove(InvalidPlacementId);
-	}
-
+    TArray<FRaidPlacementDescriptor> Descriptors;
+    for (TActorIterator<ATunaSweeperRaidPlacementAnchor> It(World); It; ++It)
+    {
+        Descriptors.Add({It->GetPlacementId(), It->GetAnchorKind(), It->AllowsDuplicatePlacementId()});
+        if (It->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo) MemoAnchorsByPlacementId.Add(It->GetPlacementId(), *It);
+    }
+    for (const auto& Issue : ValidateRaidPlacementStructure(Descriptors))
+    {
+        const int32 InvalidId = FCString::Atoi(*Issue.Arguments.FindRef(TEXT("PlacementId")));
+        UE_LOG(LogTunaSweeperMemo, Error, TEXT("Raid anchor validation %s: %s/%d"), *Issue.StringKey.ToString(), *World->GetMapName(), InvalidId);
+        MemoAnchorsByPlacementId.Remove(InvalidId);
+    }
 	int32 SpawnedMemoCount = 0;
 	TSet<int32> ConnectedMemoPlacementIds;
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());

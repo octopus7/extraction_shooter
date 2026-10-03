@@ -8,7 +8,7 @@ class UStaticMesh;
 
 /** One editor-only representative mesh choice for a placed loot placement anchor. */
 USTRUCT(BlueprintType)
-struct TUNASWEEPER_API FTunaSweeperLootAnchorPreviewDefinition
+struct RAIDLEVELRUNTIME_API FTunaSweeperLootAnchorPreviewDefinition
 {
 	GENERATED_BODY()
 
@@ -33,7 +33,7 @@ struct TUNASWEEPER_API FTunaSweeperLootAnchorPreviewDefinition
  * here to extend the combo choices shown on ATunaSweeperRaidPlacementAnchor instances.
  */
 UCLASS(BlueprintType)
-class TUNASWEEPER_API UTunaSweeperLootAnchorPreviewDataAsset : public UDataAsset
+class RAIDLEVELRUNTIME_API UTunaSweeperLootAnchorPreviewDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 

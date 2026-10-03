@@ -1,0 +1,21 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "Raid Level Kit",
+  "Description": "Game-independent raid placement contracts and editor tools.",
+  "Category": "Level Authoring",
+  "CanContainContent": true,
+  "Modules": [
+    {
+      "Name": "RaidLevelRuntime",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "RaidLevelEditor",
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit"
+    }
+  ]
+}
