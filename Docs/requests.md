@@ -10152,3 +10152,11 @@
 - 구현: RaidForest·RaidVillage·RaidPlains에 실제 BlockingVolume을 동서남북 4개씩 총 12개 저장했다. 지형 끝에서 2m 안쪽인 ±250m를 내부 경계로 삼고 벽 두께와 모서리 중첩을 10m로 설정했다. 지형 최저점보다 최소 50m 아래, 최고점보다 최소 100m 위까지 덮으며 MapBoundary 폴더로 정리했다. 기본 InvisibleWall 프로파일로 Pawn 이동을 막고 게임에서는 숨긴다.
 - 검증: 저장 맵 재로드 후 맵당 측면·모서리의 낮은 높이와 높은 높이에서 Pawn 캡슐 이탈 검사 176회, 내부 통과 검사 2회, 기존 주 동선 검사를 통과했다. 총 528회 경계 차단 확인, Map Check 오류 0건, 기존 기관차 메시 경고 1건 유지. 검증 중 맵 패키지 무변경 확인.
 - 정리: 일회성 배치 스크립트를 제거하고 동일 검증을 종료 코드 0으로 다시 통과했다. 검증 도구와 배치 규격 문서를 갱신했으며 C++·UI·저장 데이터 변경은 없다.
+
+
+## 2026-10-03 11:33:33 (소요시간: 00:20:56)
+
+- 요청: 마을맵의 구획별 항공뷰 배치 미리보기를 랜드스케이프 머터리얼 변경 없이 국소 투영하도록 구현.
+- 구현: 내장 imagegen으로 농장·작업장·창고 항공뷰 3종을 생성하고 /Game/MainRaid/EditorPreviews/VillageLayout에 텍스처, 공용 Deferred Decal 머터리얼, 구획별 인스턴스를 저장했다. RaidVillage에 독립 DecalActor 3개(각 60×60m)를 배치해 위치·회전·크기·이미지·불투명도를 조절하도록 했다. EditorPreviews/VillageLayout 폴더로 정리하고 에디터 전용 및 Hidden in Game을 설정했다.
+- 검증: 일회성 생성·보정 스크립트를 제거한 뒤 새 에디터 프로세스로 저장 맵을 재로드했다. 아래 방향 투영, 에셋 연결, 1m 간격 주 이동선 비중첩, 기존 액터 129개 보존, 검증 중 관련 패키지 무변경을 통과했다. 랜드스케이프 공용 머터리얼 해시 무변경 확인. 전체·구획별 1280×1280 렌더 4장을 검토했다. 임시 검증 카메라와 렌더 자원을 종료 전에 해제하도록 정리한 최종 검증은 종료 코드 0이다.
+- 산출물: 원본 PNG와 최종 프롬프트는 TunaSweeper/SourceArt/EditorPreviews/VillageLayout, 편집 안내는 Docs/village_layout_preview.md, 재검증 도구는 Tools/VillageLayoutPreview에 보관했다. 검증 보고서와 렌더는 TunaSweeper/Saved/VillageLayoutPreview에 저장했다. 기존 지형·프랍·철도 배치와 다른 작업의 변경을 보존했다.
