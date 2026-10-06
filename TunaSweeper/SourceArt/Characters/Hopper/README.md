@@ -1,4 +1,6 @@
 # Hopper source assets
+> Active pilot update (2026-10-07): use "Captain/CaptainPilot_UE.blend" and Captain/README.md for the current rigged rabbit with 512px textures. The original Rabbit section and the assembly Blender files below describe the initial pilot and are retained as historical source.
+
 
 `Hopper.blend` is the editable assembly source, containing the original textured mech split into 62 static components and the separately rigged Rabbit pilot. `HopperPilot_UE.blend` contains the exact centimeter-native pilot export rig, with positive unit object scales and the original mesh and bone handedness preserved. The GLB reference was read without modifying its source repository. Its SHA-256 is recorded in `HopperManifest.json`.
 

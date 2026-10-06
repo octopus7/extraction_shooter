@@ -47,3 +47,11 @@
 UE 5.7 에디터 빌드와 호퍼·기존 전투 54개 통합 검사를 통과했다(52개 정상 통과, 2개 기존 경고 포함 통과). PIE 검사는 고정 시간 대신 탑승 완료·내비게이션 생성 완료·시작/목적지 투영, 실제 25cm 이동, 안전한 하차 완료를 기다린다. 준비·이동·하차가 제한 시간 안에 완료되지 않으면 실패를 기록한다. 캐시 로딩으로 프레임이 지연되어도 준비 전에 이동 검사를 시작하지 않는다.
 
 레이드 스폰 프로필·앵커 ID는 아직 연결하지 않았다. BP_HopperEnemy를 레벨에 직접 배치하거나 HopperCombatTestMap에서 확인한다.
+
+## Captain 토끼 모델 교체 (2026-10-07)
+
+현재 파일럿은 사용자가 제공한 `Captain_Outfit_Refined.glb` 모델이다. `/Game/Characters/Hopper/Captain/SK_Captain_Pilot`의 18개 관절과 새 7개 클립을 `DA_HopperVisual`에 연결했다. 기존 탑승·몸통 부착·하차·유한 탄약 사격·근접 전환을 그대로 사용하며 총 부착 변환을 새 손 관절에 맞췄다.
+
+몸체와 군장의 BaseColor, Normal, Metallic/Roughness 6개 텍스처를 실제 512×512 PNG로 다운샘플한 뒤 UE에 임포트했다. 편집 원본은 `TunaSweeper/SourceArt/Characters/Hopper/Captain/CaptainPilot_UE.blend`다. 기존 `Hopper.blend`와 `HopperPilot_UE.blend`는 이전 파일럿이 포함된 초기 원본이므로 현재 토끼 편집에는 Captain 원본을 사용한다.
+
+메시 크기는 약 70cm로 유지했다. 새 무릎 관절, 어깨·발목 경계의 연속 가중치, 정상화된 노멀맵을 검증했다. 새 프로세스 에셋 검사 및 UE 5.7 빌드와 54개 전투 통합 검사가 통과했다(경고 포함 통과 2개, 실패 0개). 재임포트 시 필요한 루트 트랙 보정과 검증 방법은 Captain 폴더의 README를 참고한다.

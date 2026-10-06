@@ -1,0 +1,180 @@
+{
+  "source": "D:\\github\\extraction_shooter\\Blender\\Captain_Outfit_Refined\\models\\Captain_Outfit_Refined.glb",
+  "sha256": "a60c6ca965b9c40223e8d4dfe941c7fda4be1c1d321668e705cbda8cd873189e",
+  "vertices": 5075,
+  "triangles": 7850,
+  "bones": [
+    "root",
+    "pelvis",
+    "spine",
+    "head",
+    "ear_l",
+    "ear_r",
+    "upperarm_l",
+    "forearm_l",
+    "hand_l",
+    "thigh_l",
+    "calf_l",
+    "foot_l",
+    "upperarm_r",
+    "forearm_r",
+    "hand_r",
+    "thigh_r",
+    "calf_r",
+    "foot_r"
+  ],
+  "height_cm": 70,
+  "textures": [
+    {
+      "name": "T_Captain_Body_BaseColor_512",
+      "size": [
+        512,
+        512
+      ],
+      "kind": "BaseColor",
+      "source": "texture_pbr_20250901"
+    },
+    {
+      "name": "T_Captain_Body_MR_512",
+      "size": [
+        512,
+        512
+      ],
+      "kind": "MR",
+      "source": "texture_pbr_20250901_metallic-texture_pbr_20250901_roughness"
+    },
+    {
+      "name": "T_Captain_Body_Normal_512",
+      "size": [
+        512,
+        512
+      ],
+      "kind": "Normal",
+      "source": "texture_pbr_20250901_normal"
+    },
+    {
+      "name": "T_Captain_Outfit_BaseColor_512",
+      "size": [
+        512,
+        512
+      ],
+      "kind": "BaseColor",
+      "source": "Outfit_BaseColor_4K"
+    },
+    {
+      "name": "T_Captain_Outfit_MR_512",
+      "size": [
+        512,
+        512
+      ],
+      "kind": "MR",
+      "source": "Outfit_MetallicRoughness_4K"
+    },
+    {
+      "name": "T_Captain_Outfit_Normal_512",
+      "size": [
+        512,
+        512
+      ],
+      "kind": "Normal",
+      "source": "Outfit_Normal_4K"
+    }
+  ],
+  "clips": {
+    "Idle": 1.6,
+    "Boarding": 2.0,
+    "Seated": 2.0,
+    "Disembark": 1.4,
+    "Walk": 0.8,
+    "Fire": 0.5,
+    "Melee": 0.7
+  },
+  "animated_bounds_cm": {
+    "Idle": {
+      "min": [
+        -12.935,
+        -14.53,
+        -0.001
+      ],
+      "max": [
+        12.935,
+        11.646,
+        70.319
+      ]
+    },
+    "Boarding": {
+      "min": [
+        -15.438,
+        -19.145,
+        -2.865
+      ],
+      "max": [
+        15.442,
+        11.646,
+        71.2
+      ]
+    },
+    "Seated": {
+      "min": [
+        -15.477,
+        -19.145,
+        -2.865
+      ],
+      "max": [
+        15.481,
+        11.646,
+        61.019
+      ]
+    },
+    "Disembark": {
+      "min": [
+        -15.438,
+        -19.145,
+        -2.865
+      ],
+      "max": [
+        15.442,
+        11.646,
+        70.0
+      ]
+    },
+    "Walk": {
+      "min": [
+        -13.699,
+        -13.296,
+        0.164
+      ],
+      "max": [
+        13.7,
+        11.646,
+        71.139
+      ]
+    },
+    "Fire": {
+      "min": [
+        -13.651,
+        -14.513,
+        0.013
+      ],
+      "max": [
+        13.651,
+        11.646,
+        70.138
+      ]
+    },
+    "Melee": {
+      "min": [
+        -14.512,
+        -15.368,
+        0.013
+      ],
+      "max": [
+        14.51,
+        11.646,
+        70.139
+      ]
+    }
+  },
+  "unweighted_vertices": 0,
+  "max_weight_error": 2.9802322387695312e-08
+}
