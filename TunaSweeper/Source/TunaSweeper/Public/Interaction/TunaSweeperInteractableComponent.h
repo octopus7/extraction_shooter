@@ -41,7 +41,8 @@ enum class ETunaSweeperInteractionType : uint8
 	Research = 27 UMETA(DisplayName = "Research"),
 	VehicleMount = 28 UMETA(DisplayName = "Vehicle Mount"),
 	TutorialReview = 29 UMETA(DisplayName = "Tutorial Review"),
-	WardrobeOpen = 30 UMETA(DisplayName = "Wardrobe Open")
+	WardrobeOpen = 30 UMETA(DisplayName = "Wardrobe Open"),
+	LadderTransfer = 31 UMETA(DisplayName = "Ladder Transfer")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))

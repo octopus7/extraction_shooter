@@ -56,12 +56,16 @@ MAPS = {
         "required_labels": {
             "TS_Plains_Landscape",
             "TS_Plains_PlayerStart",
-            "TS_Plains_SSTOBlockout",
+            "TS_Plains_SSTOLander",
+            "TS_Plains_SSTO_Entry",
+            "TS_Plains_SSTO_Exit",
             "TS_Plains_LandingZone",
             "TS_Plains_ReviewCamera",
             "TS_Plains_Rocks",
         },
-        "route": [(-22000, -9000), (-15000, -6000), (-8000, -2500), (0, 500), (8500, 3500), (15500, 7000), (22000, 9000)],
+        # The cabin and ladder are checked by Tools/SSTOLander/verify_ssto.py;
+        # the primary landscape route passes around the landed craft.
+        "route": [(-22000, -9000), (-15000, -6000), (-8000, -2500), (-2200, 0), (0, 2200), (2200, 1800), (8500, 3500), (15500, 7000), (22000, 9000)],
         "min_mesh_references": 5,
     },
 }
@@ -358,9 +362,11 @@ class MainRaidVerifier:
             assert trains[0].get_editor_property("track") == tracks[0]
             assert all(station.get_editor_property("track") == tracks[0] for station in stations)
         elif name == "RaidPlains":
-            ssto = labels["TS_Plains_SSTOBlockout"]
+            ssto = labels["TS_Plains_SSTOLander"]
+            expected_ssto = unreal.load_class(None, "/Game/MainRaid/SSTO/BP_SSTOLander.BP_SSTOLander_C")
+            assert expected_ssto and ssto.get_class() == expected_ssto, f"{name}: wrong SSTO actor class"
             ssto_parts = [c for c in ssto.get_components_by_class(unreal.StaticMeshComponent) if mesh_path(c)]
-            assert len(ssto_parts) >= 7, f"{name}: SSTO blockout needs a readable multi-part silhouette"
+            assert len(ssto_parts) >= 7, f"{name}: SSTO must retain its permanent hull, wings and interior parts"
 
         player_start_location = starts[0].get_actor_location()
         start_ground_trace = unreal.SystemLibrary.line_trace_single(

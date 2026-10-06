@@ -15,6 +15,7 @@
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
+#include "Interaction/TunaSweeperLadderTransferActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperMemoActor.h"
@@ -141,6 +142,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("tutorial_review"));
 		case ETunaSweeperInteractionType::VehicleMount:
 			return FName(TEXT("vehicle_mount"));
+		case ETunaSweeperInteractionType::LadderTransfer:
+			return FName(TEXT("ladder_transfer"));
 		default:
 			return NAME_None;
 		}
@@ -297,6 +300,12 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::WarpPoint:
 		bHandled = HandleWarpPointInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::LadderTransfer:
+		if (auto* Ladder = Cast<ATunaSweeperLadderTransferActor>(Interactable->GetOwner()))
+		{
+			bHandled = Ladder->TryTransferPlayer(InstigatorPawn);
+		}
+		break;
 	case ETunaSweeperInteractionType::Memo:
 		bHandled = HandleMemoInteraction(Interactable, InstigatorPawn);
 		break;
@@ -411,6 +420,12 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	{
 		const auto* Mount = Cast<UTunaSweeperVehicleMountComponent>(Interactable);
 		return Mount && !Mount->GetRider() && (!Player || Mount->CanMount(Player));
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::LadderTransfer)
+	{
+		const auto* Ladder = Cast<ATunaSweeperLadderTransferActor>(Interactable->GetOwner());
+		return Ladder && Ladder->CanTransferPlayer(UGameplayStatics::GetPlayerPawn(this, 0));
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Memo)

@@ -45,6 +45,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vertical Occlusion Reveal")
 	bool bOverrideAllMaterialSlots = true;
 
+	/** Keep per-slot materials that expose the existing vertical reveal parameters. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vertical Occlusion Reveal")
+	bool bPreserveSourceMaterials = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vertical Occlusion Reveal")
 	bool bUsePlayerProximity = true;
 
