@@ -11,6 +11,7 @@ public class TunaSweeper : ModuleRules
 	public TunaSweeper(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		if (Target.bBuildEditor) PrivateDependencyModuleNames.Add("JsonUtilities");
 		PublicDependencyModuleNames.Add("ChaosVehicles");
 		PublicDependencyModuleNames.Add("AnimGraphRuntime");
 	
