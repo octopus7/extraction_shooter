@@ -28,6 +28,7 @@ class TUNASWEEPER_API ATunaSweeperWeapon : public AActor
 public:
 	ATunaSweeperWeapon();
 	bool ApplyVisualDefinition(const FTunaSweeperWeaponVisualDefinition& Definition);
+	int32 GetProjectileDamage(float Multiplier = 1.0f, int32 Bonus = 0) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	bool Fire(
@@ -114,6 +115,8 @@ public:
 	bool TryPlayEmptyFirePresentation();
 
 protected:
+	TSubclassOf<ATunaSweeperProjectile> ResolveProjectileClass() const;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USceneComponent> SceneRoot;
 

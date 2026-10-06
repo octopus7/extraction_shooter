@@ -70,16 +70,21 @@ bool UTunaSweeperGameInstance::TryGetEquipmentMeleeSlotItem(
 
 void UTunaSweeperGameInstance::SetRuntimeSelectedWeaponSlotNumber(int32 WeaponSlotNumber)
 {
+	const bool bSelectionChanged = !bHasRuntimeSelectedWeaponSelection || bRuntimeSelectedMeleeWeapon ||
+		RuntimeSelectedWeaponSlotNumber != FMath::Clamp(WeaponSlotNumber, 1, 2);
 	RuntimeSelectedWeaponSlotNumber = FMath::Clamp(WeaponSlotNumber, 1, 2);
 	bRuntimeSelectedMeleeWeapon = false;
 	bHasRuntimeSelectedWeaponSelection = true;
+	if (bSelectionChanged) OnSelectedInventoryItemChanged.Broadcast();
 }
 
 void UTunaSweeperGameInstance::SetRuntimeSelectedMeleeWeapon()
 {
+	const bool bSelectionChanged = !bHasRuntimeSelectedWeaponSelection || !bRuntimeSelectedMeleeWeapon;
 	RuntimeSelectedWeaponSlotNumber = 0;
 	bRuntimeSelectedMeleeWeapon = true;
 	bHasRuntimeSelectedWeaponSelection = true;
+	if (bSelectionChanged) OnSelectedInventoryItemChanged.Broadcast();
 }
 
 bool UTunaSweeperGameInstance::TryGetRuntimeSelectedWeaponSelection(

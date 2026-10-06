@@ -1,14 +1,22 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
+#include "UObject/UnrealType.h"
+#include "UI/TunaSweeperHudItemInfoPanelWidget.h"
+#include "Weapon/TunaSweeperProjectile.h"
+#include "Weapon/TunaSweeperWeapon.h"
 
 namespace TunaSweeperEquipmentDataTests
 {
@@ -218,6 +226,64 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	Game->StorageSlots[0].ItemUid = WeightedWeaponUid;
 	Game->PlayerInventorySlots[1].Clear();
 	TestEqual(TEXT("A loaded gun in storage does not contribute to player carry weight"), Game->CalculatePlayerCarryWeight(), 0.0f);
+
+	// Read the real information widget and fire real projectiles. A fractional
+	// Blueprint default catches both the wrong base class and premature rounding.
+	Game->ItemInstancesByUid.Reset();
+	Game->ResetPlayerSlotArrays();
+	const FString DamageLoadout = TEXT(R"({"selected_weapon_slot":1,
+		"equipment":[{"slot_index":0,"item_id":1002},{"slot_index":1,"item_id":1006}],
+		"inventory":[{"slot_index":0,"item_id":2011,"quantity":1}]})");
+	if (!TestTrue(TEXT("Damage preview loadout initializes"), Game->ApplyStartingLoadoutJson(DamageLoadout))) return false;
+	UClass* WeaponClass = LoadClass<ATunaSweeperWeapon>(nullptr,
+		TEXT("/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"));
+	if (!TestNotNull(TEXT("Authored weapon class"), WeaponClass)) return false;
+	const FSoftClassProperty* ProjectileProperty = FindFProperty<FSoftClassProperty>(WeaponClass, TEXT("ProjectileClass"));
+	if (!TestNotNull(TEXT("Weapon projectile configuration"), ProjectileProperty)) return false;
+	UClass* ProjectileClass = Cast<UClass>(ProjectileProperty->GetPropertyValue_InContainer(
+		WeaponClass->GetDefaultObject()).LoadSynchronous());
+	if (!TestNotNull(TEXT("Configured projectile class"), ProjectileClass)) return false;
+	ATunaSweeperProjectile* ProjectileDefaults = ProjectileClass->GetDefaultObject<ATunaSweeperProjectile>();
+	const float SavedBaseDamage = ProjectileDefaults->GetDamageAmount();
+	ProjectileDefaults->SetDamageAmount(12.49f);
+	ON_SCOPE_EXIT { ProjectileDefaults->SetDamageAmount(SavedBaseDamage); };
+	TStrongObjectPtr<UTunaSweeperHudItemInfoPanelWidget> Panel(CreateWidget<UTunaSweeperHudItemInfoPanelWidget>(Game.Get()));
+	if (!TestNotNull(TEXT("Item information widget"), Panel.Get())) return false;
+	Panel->WidgetTree->RootWidget = Panel->WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+	FTunaSweeperItemSlotReference AmmoSlot;
+	AmmoSlot.Source = ETunaSweeperItemSlotSource::Inventory;
+	AmmoSlot.SlotIndex = 0;
+	Game->SelectItemSlot(AmmoSlot);
+	ATunaSweeperWeapon* TestWeapon = World->SpawnActor<ATunaSweeperWeapon>(WeaponClass);
+	if (!TestNotNull(TEXT("Damage test weapon"), TestWeapon)) return false;
+	const int32 AmmoIds[] = {2011, 2012, 2001, 2032};
+	const int32 ExpectedDamage[] = {11, 17, 13, 18};
+	for (int32 CaseIndex = 0; CaseIndex < UE_ARRAY_COUNT(AmmoIds); ++CaseIndex)
+	{
+		const FTunaSweeperItemDefinition& Ammo = Items->ItemDefinitionsById.FindChecked(AmmoIds[CaseIndex]);
+		Game->ItemInstancesByUid.FindChecked(Game->PlayerInventorySlots[0].ItemUid).ItemId = Ammo.Id;
+		Panel->RefreshSelectedItemInfo();
+		UTextBlock* Value = Cast<UTextBlock>(Panel->WidgetTree->FindWidget(TEXT("SelectedItemSpecValueText")));
+		if (!TestNotNull(TEXT("Damage value text exists"), Value)) return false;
+		TestEqual(TEXT("Information panel shows the resolved per-projectile damage"),
+			Value->GetText().ToString(), FText::AsNumber(ExpectedDamage[CaseIndex]).ToString());
+		const bool bShotgun = Ammo.AmmoTypeTag == FName(TEXT("ammo.type.shotgun"));
+		if (!TestTrue(TEXT("Previewed ammunition fires"), TestWeapon->FireWithAimIntent(
+			FVector::ForwardVector, Character, NAME_None, NAME_None,
+			bShotgun ? FName(TEXT("weapon.type.shotgun")) : FName(TEXT("weapon.type.smg")),
+			static_cast<float>(Ammo.ProjectileDamageMultiplier) / 10000.0f, Ammo.ProjectileDamageBonus,
+			0.0f, FVector::ZeroVector, false, nullptr, nullptr, FVector::ZeroVector, false, 0.0f, true))) return false;
+		int32 ProjectileCount = 0;
+		for (TActorIterator<ATunaSweeperProjectile> It(World); It; ++It)
+		{
+			if (It->GetOwner() != TestWeapon || It->IsActorBeingDestroyed()) continue;
+			++ProjectileCount;
+			TestEqual(TEXT("Every fired projectile matches the information panel"),
+				It->GetDamageAmount(), static_cast<float>(ExpectedDamage[CaseIndex]));
+			It->Destroy();
+		}
+		TestTrue(TEXT("Fire produces the expected single shot or multiple pellets"), bShotgun ? ProjectileCount > 1 : ProjectileCount == 1);
+	}
 	return true;
 }
 

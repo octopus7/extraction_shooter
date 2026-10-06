@@ -1,4 +1,7 @@
 string_key,zh-Hans,zh-Hant,ru,pt-BR
+ui.item_info.ammo_specs,弹药属性,彈藥屬性,Характеристики боеприпасов,Especificações da munição
+ui.item_info.projectile_damage,弹丸伤害,彈丸傷害,Урон снаряда,Dano do projétil
+ui.item_info.ammo_damage_context,参考武器：{0} · 防御减伤前 · 霰弹按单颗计算,參考武器：{0} · 防禦減傷前 · 霰彈按單顆計算,Оружие: {0} · До защиты · Для дробовика — за дробину,Arma de referência: {0} · Antes da defesa · Por balim nas escopetas
 editor.anim.title_head_look.title,标题画面头部追踪,標題畫面頭部追蹤,Поворот головы на главном экране,Direção da cabeça na tela inicial
 editor.anim.title_head_look.tooltip,在物理计算前，将标题画面头部的目标方向应用于姿势。,在物理計算前，將標題畫面頭部的目標方向應用於姿勢。,Применяет целевое направление головы на главном экране к позе перед расчётом физики.,Aplica a direção desejada da cabeça na tela inicial à pose antes do cálculo de física.
 ui.vehicle.mount,乘坐,乘坐,Сесть,Subir

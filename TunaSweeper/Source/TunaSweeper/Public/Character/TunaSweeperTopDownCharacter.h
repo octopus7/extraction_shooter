@@ -223,6 +223,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	int32 GetSelectedWeaponSlotNumber() const { return SelectedWeaponSlotNumber; }
+	const ATunaSweeperWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	bool IsMeleeWeaponSelected() const { return bMeleeWeaponSelected; }

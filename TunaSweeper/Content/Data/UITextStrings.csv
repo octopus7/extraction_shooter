@@ -1,4 +1,7 @@
 string_key,ko,en,ja
+ui.item_info.ammo_specs,탄약 스펙,Ammunition Specs,弾薬性能
+ui.item_info.projectile_damage,투사체 피해,Projectile Damage,投射物ダメージ
+ui.item_info.ammo_damage_context,기준 무기: {0} · 방어 적용 전 · 산탄은 펠릿당,Reference weapon: {0} · Before defense · Per pellet for shotguns,基準武器: {0} · 防御適用前 · 散弾はペレットごと
 editor.anim.title_head_look.title,타이틀 머리 추적,Title Head Look,タイトルの頭追従
 editor.anim.title_head_look.tooltip,타이틀의 머리 목표 방향을 물리 계산 전 포즈에 적용합니다.,Applies the title head target direction to the pose before physics.,タイトルの頭の目標方向を物理計算前のポーズに適用します。
 ui.vehicle.mount,탑승하기,Mount,乗る
