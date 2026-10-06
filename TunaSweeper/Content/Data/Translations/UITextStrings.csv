@@ -41,6 +41,7 @@ ui.title.slot_select,选择存档,選擇存檔,Выбор сохранения,E
 ui.title.settings,设置,設置,Настройки,Configurações
 ui.title.quit,退出,退出,Выход,Sair
 ui.title.wishlist,加入愿望单,加入願望單,Добавить в список желаемого,Adicionar à lista de desejos
+ui.title.version_pattern,v{0}.{1},v{0}.{1},v{0}.{1},v{0}.{1}
 ui.title.primary_save_slot,选择存档栏位,選擇存檔欄位,Выберите ячейку сохранения,Selecionar espaço de salvamento
 ui.title.delete_hold,长按删除,長按刪除,"Удерживайте, чтобы удалить",Segure para excluir
 ui.title.delete_confirm_title,删除栏位,刪除欄位,Удалить ячейку,Excluir salvamento

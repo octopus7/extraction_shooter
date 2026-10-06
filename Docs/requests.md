@@ -10199,3 +10199,10 @@
 - 통합 확인: 실제 CLI 카탈로그·한글/공백 경로 조회, 미리보기 원본 불변, 방어구 지급, byte-for-byte 백업, stale hash 거부, 프리셋 내보내기/적용, validate/list 및 한국어 표 출력을 Smoke.ps1로 검증했다. 모든 쓰기는 Saved/Automation/SaveTool의 합성 세이브 복사본에만 수행했다. 실제 사용자 세이브는 수정하지 않았다.
 - 리뷰: 별도 리뷰에서 지적한 LastSavedAtTicks의 로컬 시각 규약과 사람용 조회 출력을 수정했고 회귀 테스트로 확인했다. 후속 리뷰에서 중요한 잔여 문제 없음. 장전 탄약이 독립 아이템 인스턴스 없이 총 안에만 있으면 사람 출력에서 이름 대신 ID가 표시될 수 있다.
 - 완료: 프로젝트를 명시해 Unreal Editor를 다시 실행했다. 구현·테스트·문서·이번 기록만 단일 작업 커밋에 포함하며 기존 미커밋 변경은 보존한다. 보고서는 TunaSweeper/Saved/Automation/SaveTool/Final에 있다.
+
+## 2026-10-07 01:23:04 (소요시간: 00:09:52)
+
+- 요청: 데모 표기 UI와 위시리스트 버튼 제거.
+- 완료: 타이틀의 데모 버전 리본과 버전 번호의 .demo 접미사를 제거했다. 위시리스트 버튼 생성, 클릭 처리, 전용 스타일 및 구분선을 제거했다. 버전 표시는 ui.title.version_pattern 문자열 키를 사용하며 지원 언어별 항목을 추가했다.
+- 검증: UE 5.7 Development Editor 빌드 성공. ScreenAssetsAndTransitions, LaboratoryNavigation, OnlineCoop.Presentation UI 자동화 검사 3개 모두 성공, 실패 0. 기존 ui.common.confirm 중복 문자열 경고는 남아 있다. 실제 UMG 렌더링 이미지에서 데모 표기와 위시리스트 버튼이 없고 버전 번호가 v0.2.9200.steam으로 표시됨을 확인했다. 코드 리뷰에서 추가 수정 사항 없음.
+- 처리: 실행 중인 에디터의 DLL 잠금으로 첫 빌드가 실패해 정상 종료 후 재빌드했다. 이번 수정과 기록만 단일 커밋에 포함하며 기존 미커밋 변경은 보존한다. 검증 후 프로젝트를 명시해 Unreal Editor를 다시 연다.

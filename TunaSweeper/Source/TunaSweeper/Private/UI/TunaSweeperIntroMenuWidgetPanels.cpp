@@ -12,10 +12,8 @@ namespace TunaSweeperDistribution
 {
 	const TCHAR* SectionName = TEXT("TunaSweeper.Distribution");
 	const TCHAR* ChannelKey = TEXT("DistributionChannel");
-	const TCHAR* BuildTypeKey = TEXT("BuildType");
 	const TCHAR* ProjectSettingsSectionName = TEXT("/Script/EngineSettings.GeneralProjectSettings");
 	const TCHAR* ProjectVersionKey = TEXT("ProjectVersion");
-	const TCHAR* SteamFullGameAppIdKey = TEXT("SteamFullGameAppId");
 }
 
 FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
@@ -32,18 +30,6 @@ FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
 	return DistributionChannel.IsEmpty() ? TEXT("Steam") : DistributionChannel;
 }
 
-bool UTunaSweeperIntroMenuWidget::IsSteamDemoDistribution() const
-{
-#if WITH_EDITOR
-	const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>();
-	return BuildTargetSettings && BuildTargetSettings->IsDemoBuild() &&
-		BuildTargetSettings->GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
-#else
-	return TUNASWEEPER_DEMO != 0 &&
-		GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
-#endif
-}
-
 void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 {
 	if (!WidgetTree) return;
@@ -51,14 +37,12 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 	GConfig->GetString(TunaSweeperDistribution::ProjectSettingsSectionName, TunaSweeperDistribution::ProjectVersionKey, ProjectVersion, GGameIni);
 	ProjectVersion.TrimStartAndEndInline();
 	if (ProjectVersion.IsEmpty()) ProjectVersion = TEXT("0.0.0");
-	const bool bIsDemoBuild = TunaSweeperBuildFlavor::IsDemo();
 	if (UTextBlock* VersionText = Cast<UTextBlock>(FindIntroWidget(TEXT("VersionText"))))
 	{
-		VersionText->SetText(FText::FromString(FString::Printf(
-			TEXT("v%s.%s%s"),
-			*ProjectVersion,
-			*GetDistributionChannel().ToLower(),
-			bIsDemoBuild ? TEXT(".demo") : TEXT(""))));
+		VersionText->SetText(FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.version_pattern")), FText::GetEmpty()),
+			FText::FromString(ProjectVersion),
+			FText::FromString(GetDistributionChannel().ToLower())));
 		VersionText->SetJustification(ETextJustify::Right);
 		VersionText->SetAutoWrapText(false);
 		if (UCanvasPanelSlot* VersionSlot = Cast<UCanvasPanelSlot>(VersionText->Slot))
@@ -69,80 +53,6 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 			VersionSlot->SetAutoSize(true);
 		}
 	}
-	if (!IsSteamDemoDistribution() && SteamDemoWishlistButtonContainer)
-	{
-		SteamDemoWishlistButtonContainer->RemoveFromParent();
-		SteamDemoWishlistButtonContainer = nullptr;
-		SteamDemoWishlistButton = nullptr;
-	}
-	EnsureSteamDemoWishlistButton();
-}
-
-void UTunaSweeperIntroMenuWidget::EnsureSteamDemoWishlistButton()
-{
-	if (SteamDemoWishlistButton || !IsSteamDemoDistribution() || !WidgetTree) return;
-	UVerticalBox* MainMenuStack = Cast<UVerticalBox>(FindIntroWidget(TEXT("MainMenuPanel")));
-	USizeBox* SettingsButtonContainer = Cast<USizeBox>(FindIntroWidget(TEXT("SettingsButtonBox")));
-	if (!MainMenuStack || !SettingsButtonContainer) return;
-
-	USizeBox* WishlistButtonBox = WidgetTree->ConstructWidget<USizeBox>(
-		USizeBox::StaticClass(),
-		TEXT("SteamDemoWishlistButtonBox"));
-	UButton* WishlistButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SteamDemoWishlistButton"));
-	UTextBlock* WishlistButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SteamDemoWishlistButtonText"));
-	if (!WishlistButtonBox || !WishlistButton || !WishlistButtonText) return;
-	WishlistButtonText->SetText(ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::GetEmpty()));
-	WishlistButtonText->SetJustification(ETextJustify::Center);
-	WishlistButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(WishlistButtonText, 17, ETunaSweeperUIFontWeight::Bold);
-	WishlistButton->SetContent(WishlistButtonText);
-	const FVector2D ButtonSize(SettingsButtonContainer->GetWidthOverride() * 0.8f, 44.0f);
-	WishlistButtonBox->SetWidthOverride(ButtonSize.X);
-	WishlistButtonBox->SetHeightOverride(ButtonSize.Y);
-	WishlistButtonBox->SetContent(WishlistButton);
-	WishlistButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSteamDemoWishlistClicked);
-
-	if (UVerticalBoxSlot* WishlistSlot = MainMenuStack->AddChildToVerticalBox(WishlistButtonBox))
-	{
-		WishlistSlot->SetHorizontalAlignment(HAlign_Left);
-		WishlistSlot->SetVerticalAlignment(VAlign_Center);
-		// The menu stack is wider than its buttons; center within the regular button width.
-		WishlistSlot->SetPadding(FMargin(SettingsButtonContainer->GetWidthOverride() * 0.1f, 20.0f, 0.0f, 12.0f));
-		SteamDemoWishlistButtonContainer = WishlistButtonBox;
-		SteamDemoWishlistButton = WishlistButton;
-	}
-}
-
-void UTunaSweeperIntroMenuWidget::HandleSteamDemoWishlistClicked()
-{
-	if (!IsSteamDemoDistribution())
-	{
-		return;
-	}
-
-	FString FullGameAppId;
-	GConfig->GetString(TunaSweeperDistribution::SectionName, TunaSweeperDistribution::SteamFullGameAppIdKey, FullGameAppId, GGameIni);
-	if (!FullGameAppId.IsNumeric() || FullGameAppId.IsEmpty())
-	{
-		return;
-	}
-
-	IOnlineSubsystem* SteamSubsystem = IOnlineSubsystem::Get(STEAM_SUBSYSTEM);
-	if (!SteamSubsystem)
-	{
-		return;
-	}
-
-	const IOnlineExternalUIPtr ExternalUI = SteamSubsystem->GetExternalUIInterface();
-	if (!ExternalUI.IsValid())
-	{
-		return;
-	}
-
-	FShowStoreParams StoreParams;
-	StoreParams.ProductId = FullGameAppId;
-	StoreParams.bAddToCart = false;
-	ExternalUI->ShowStoreUI(0, StoreParams);
 }
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()

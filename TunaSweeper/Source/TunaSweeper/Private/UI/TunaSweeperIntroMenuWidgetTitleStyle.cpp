@@ -72,16 +72,13 @@ namespace TunaSweeperTitleStyle
 		}
 	};
 
-	enum class EArtwork { Play, Settings, Quit, Save, Wishlist, Laboratory };
+	enum class EArtwork { Play, Settings, Quit, Save, Laboratory };
 	UTexture2D* ButtonArtwork(EArtwork Kind, int32 W, int32 H)
 	{
 		FArtwork Art(W, H);
 		const bool Primary = Kind == EArtwork::Play;
-		const bool Warm = Kind == EArtwork::Wishlist;
-		const FLinearColor Fill = Primary ? FLinearColor(0.018f, 0.37f, 0.43f) : Warm
-			? FLinearColor(0.43f, 0.21f, 0.085f) : FLinearColor(0.065f, 0.095f, 0.12f);
-		const FLinearColor Edge = Primary ? FLinearColor(0.04f, 0.9f, 0.94f, 0.95f) : Warm
-			? FLinearColor(0.84f, 0.48f, 0.22f, 0.8f) : FLinearColor(0.34f, 0.45f, 0.50f, 0.6f);
+		const FLinearColor Fill = Primary ? FLinearColor(0.018f, 0.37f, 0.43f) : FLinearColor(0.065f, 0.095f, 0.12f);
+		const FLinearColor Edge = Primary ? FLinearColor(0.04f, 0.9f, 0.94f, 0.95f) : FLinearColor(0.34f, 0.45f, 0.50f, 0.6f);
 		auto Distance = [=](FVector2D P)
 		{
 			const FVector2D Q = (P - FVector2D(W, H) * 0.5f).GetAbs() - (FVector2D(W, H) * 0.5f - FVector2D(28));
@@ -95,7 +92,7 @@ namespace TunaSweeperTitleStyle
 		Art.Paint(FVector2D::ZeroVector, FVector2D(W, H), Edge, [=](FVector2D P)
 			{ return FMath::Clamp(float((0.75 - FMath::Abs(Distance(P))) * 2), 0.0f, 1.0f); });
 		const FVector2D C(Primary ? 80 : 70, H * 0.5f);
-		const FLinearColor Ink = Warm ? FLinearColor(1.0f, 0.52f, 0.26f, 0.95f) : FLinearColor(0.82f, 0.92f, 0.93f, Primary ? 1.0f : 0.72f);
+		const FLinearColor Ink = FLinearColor(0.82f, 0.92f, 0.93f, Primary ? 1.0f : 0.72f);
 		if (Primary)
 		{
 			for (int32 I = 0; I < 14; ++I) Art.Line(C + FVector2D(I - 6, -10 + I * 0.75f), C + FVector2D(I - 6, 10 - I * 0.75f), 1.5f, Ink);
@@ -130,16 +127,6 @@ namespace TunaSweeperTitleStyle
 			Art.Line(C + FVector2D(4, -4), C + FVector2D(14, 13), 2, Ink);
 			Art.Line(C + FVector2D(-14, 13), C + FVector2D(14, 13), 2, Ink);
 			Art.Line(C + FVector2D(-9, 5), C + FVector2D(9, 5), 2, Ink);
-		}
-		else if (Kind == EArtwork::Wishlist)
-		{
-			Art.Paint(C - FVector2D(15), C + FVector2D(15), Ink, [=](FVector2D P)
-			{
-				const FVector2D Q = (P - C) / 12;
-				const double X = Q.X, Y = -Q.Y;
-				const double V = X * X + Y * Y - 0.7;
-				return float(FMath::Clamp(0.5 - (V * V * V - X * X * Y * Y * Y) * 30, 0.0, 1.0));
-			});
 		}
 		else
 		{
@@ -215,41 +202,6 @@ void UTunaSweeperIntroMenuWidget::ApplyReferenceTitleStyle()
 	Apply(OnlineCoopButton, TEXT("OnlineCoopButtonBox"), EArtwork::Play, 418, 98, 12, -4);
 	Apply(SettingsButton, TEXT("SettingsButtonBox"), EArtwork::Settings, 418, 98, 12, -4);
 	Apply(QuitButton, TEXT("QuitButtonBox"), EArtwork::Quit, 418, 98, 12, 0);
-	Apply(SteamDemoWishlistButton, TEXT("SteamDemoWishlistButtonBox"), EArtwork::Wishlist, 418, 94, 12, 0);
-
-	// The divider belongs to the optional Steam action, so distribution switches remove both together.
-	if (SteamDemoWishlistButton)
-	{
-		if (UVerticalBoxSlot* WishlistSlot = Cast<UVerticalBoxSlot>(SteamDemoWishlistButtonContainer->Slot)) WishlistSlot->SetPadding(FMargin(12, 50, 0, 0));
-		USizeBox* WishlistBox = Cast<USizeBox>(SteamDemoWishlistButtonContainer);
-		UOverlay* Content = WishlistBox ? Cast<UOverlay>(WishlistBox->GetContent()) : nullptr;
-		if (!Content && WishlistBox)
-		{
-			SteamDemoWishlistButton->RemoveFromParent();
-			Content = WidgetTree->ConstructWidget<UOverlay>();
-			UOverlaySlot* ButtonOverlaySlot = Content->AddChildToOverlay(SteamDemoWishlistButton);
-			ButtonOverlaySlot->SetHorizontalAlignment(HAlign_Fill);
-			ButtonOverlaySlot->SetVerticalAlignment(VAlign_Fill);
-			WishlistBox->SetContent(Content);
-			UImage* Divider = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("TitleWishlistDivider"));
-			TObjectPtr<UTexture2D>& Texture = TitleMenuStyleTextures.FindOrAdd(TEXT("Divider"));
-			if (!Texture)
-			{
-				FArtwork Art(350, 28);
-				const FLinearColor Ink(0.78f, 0.74f, 0.61f, 0.4f);
-				Art.Line(FVector2D(0, 14), FVector2D(142, 14), 0.8f, Ink);
-				Art.Line(FVector2D(208, 14), FVector2D(350, 14), 0.8f, Ink);
-				Art.Fish(FVector2D(178, 14), 1.0f, Ink);
-				Texture = Art.Texture();
-			}
-			Divider->SetBrushFromTexture(Texture);
-			FSlateBrush DividerBrush = Divider->GetBrush(); DividerBrush.ImageSize = FVector2D(350, 28); Divider->SetBrush(DividerBrush);
-			Divider->SetVisibility(ESlateVisibility::HitTestInvisible);
-			UOverlaySlot* DividerSlot = Content->AddChildToOverlay(Divider);
-			DividerSlot->SetHorizontalAlignment(HAlign_Center); DividerSlot->SetVerticalAlignment(VAlign_Center);
-			Divider->SetRenderTranslation(FVector2D(0, -72));
-		}
-	}
 
 	// The scrim is part of the menu: dissolve its right edge instead of dividing the scene with a panel.
 	if (UWidget* Scrim = FindIntroWidget(TEXT("LeftScrim")))
