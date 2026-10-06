@@ -729,6 +729,14 @@ float UTunaSweeperGameInstance::CalculateItemInstanceCarryWeight(
 		TotalWeight += FMath::Max(0.0f, ItemDefinition.WeightKg) * FMath::Max(1, ItemInstance->Quantity);
 	}
 
+	// Loaded rounds live on the weapon instance, not in a separate inventory stack.
+	FTunaSweeperItemDefinition LoadedAmmoDefinition;
+	if (ItemDataSubsystem && ItemInstance->LoadedAmmoCount > 0 &&
+		ItemDataSubsystem->TryGetItemDefinition(ItemInstance->LoadedAmmoItemId, LoadedAmmoDefinition))
+	{
+		TotalWeight += FMath::Max(0.0f, LoadedAmmoDefinition.WeightKg) * ItemInstance->LoadedAmmoCount;
+	}
+
 	for (const TPair<FName, FGuid>& AttachmentSlot : ItemInstance->AttachmentSlots)
 	{
 		TotalWeight += CalculateItemInstanceCarryWeight(AttachmentSlot.Value, VisitedItemUids);

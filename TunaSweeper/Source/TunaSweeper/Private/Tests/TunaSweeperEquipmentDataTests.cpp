@@ -166,6 +166,58 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	if (!TestNotNull(TEXT("Last-slot item exists in serialized instances"), SavedItem)) return false;
 	TestEqual(TEXT("Last-slot quantity survives serialization"), SavedItem->Quantity, 11);
 	TestEqual(TEXT("Loaded backpack still resolves 120 slots"), Game->CalculateInventoryCapacityForEquipmentSlots(Restored->EquipmentSlots), 120);
+
+	// Non-zero fixture weights exercise actual reload/fire/move operations without
+	// changing authored balancing data or touching any player save files.
+	Game->ItemInstancesByUid.Reset();
+	Game->ResetPlayerSlotArrays();
+	Items->ItemDefinitionsById.FindChecked(1002).WeightKg = 3.0f;
+	Items->ItemDefinitionsById.FindChecked(2006).WeightKg = 0.25f;
+	Items->ItemDefinitionsById.FindChecked(2002).WeightKg = 0.125f;
+	Items->ItemDefinitionsById.FindChecked(2001).WeightKg = 1.0f;
+	const FString WeightedLoadout = TEXT(R"({"selected_weapon_slot":1,
+		"equipment":[{"slot_index":0,"item_id":1002,"attachments":[2006],
+			"loaded_ammo":{"item_id":2002,"quantity":7}}],
+		"inventory":[{"slot_index":0,"item_id":2002,"quantity":11}]})");
+	if (!TestTrue(TEXT("Weighted ammunition fixture initializes"), Game->ApplyStartingLoadoutJson(WeightedLoadout))) return false;
+	const FGuid WeightedWeaponUid = Game->EquipmentSlots[0].ItemUid;
+	TestEqual(TEXT("Carried weight includes the gun, attachment and all eighteen rounds"), Game->CalculatePlayerCarryWeight(), 5.5f);
+	int32 ReloadedCount = 0;
+	if (!TestTrue(TEXT("Loose ammunition reloads into the weapon"), Game->TryReloadWeaponSlot(1, 2002, ReloadedCount))) return false;
+	TestEqual(TEXT("Reload transfers all eleven loose rounds"), ReloadedCount, 18);
+	TestEqual(TEXT("Reload leaves no loose ammunition"), Game->CountInventoryItemById(2002), 0);
+	TestEqual(TEXT("Reload conserves total carried weight"), Game->PlayerHudState.CurrentCarryWeight, 5.5f);
+	if (!TestTrue(TEXT("The loaded weapon can consume one round"), Game->TryConsumeLoadedAmmoForWeaponSlot(1))) return false;
+	TestEqual(TEXT("Firing reduces carried weight by exactly one round"), Game->PlayerHudState.CurrentCarryWeight, 5.375f);
+
+	FTunaSweeperItemSlotReference EquippedSlot;
+	EquippedSlot.Source = ETunaSweeperItemSlotSource::Equipment;
+	EquippedSlot.SlotIndex = 0;
+	FTunaSweeperItemSlotReference CarriedSlot;
+	CarriedSlot.Source = ETunaSweeperItemSlotSource::Inventory;
+	CarriedSlot.SlotIndex = 1;
+	if (!TestTrue(TEXT("A loaded gun can be moved into inventory"), Game->MoveItemBetweenSlots(EquippedSlot, CarriedSlot))) return false;
+	TestEqual(TEXT("An unequipped loaded gun retains its ammunition weight"), Game->PlayerHudState.CurrentCarryWeight, 5.375f);
+	FTunaSweeperItemInstance& WeightedWeapon = Game->ItemInstancesByUid.FindChecked(WeightedWeaponUid);
+	WeightedWeapon.SelectedAmmoItemId = 2001;
+	TestEqual(TEXT("Weight uses the loaded ammunition rather than the selected type"), Game->CalculatePlayerCarryWeight(), 5.375f);
+	WeightedWeapon.LoadedAmmoCount = 0;
+	TestEqual(TEXT("An empty magazine contributes no ammunition weight"), Game->CalculatePlayerCarryWeight(), 3.25f);
+	WeightedWeapon.LoadedAmmoCount = -1;
+	TestEqual(TEXT("An invalid negative count cannot subtract weight"), Game->CalculatePlayerCarryWeight(), 3.25f);
+	WeightedWeapon.LoadedAmmoCount = 17;
+	WeightedWeapon.LoadedAmmoItemId = 999999;
+	TestEqual(TEXT("Unknown loaded ammunition contributes no guessed weight"), Game->CalculatePlayerCarryWeight(), 3.25f);
+	WeightedWeapon.LoadedAmmoItemId = 2002;
+	Items->ItemDefinitionsById.FindChecked(2002).WeightKg = -1.0f;
+	TestEqual(TEXT("An invalid negative ammunition weight cannot reduce gun weight"), Game->CalculatePlayerCarryWeight(), 3.25f);
+	Items->ItemDefinitionsById.FindChecked(2002).WeightKg = 0.0f;
+	TestEqual(TEXT("Zero-weight ammunition preserves existing authored behavior"), Game->CalculatePlayerCarryWeight(), 3.25f);
+	Items->ItemDefinitionsById.FindChecked(2002).WeightKg = 0.125f;
+	Game->StorageSlots.SetNum(1);
+	Game->StorageSlots[0].ItemUid = WeightedWeaponUid;
+	Game->PlayerInventorySlots[1].Clear();
+	TestEqual(TEXT("A loaded gun in storage does not contribute to player carry weight"), Game->CalculatePlayerCarryWeight(), 0.0f);
 	return true;
 }
 

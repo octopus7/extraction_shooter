@@ -170,6 +170,7 @@ Each `FTunaSweeperItemInstance` must preserve:
 
 Weapon loaded ammo state is part of the weapon item instance, not player-global state.
 When a weapon is loaded from a save or equipped later, ammo type and loaded count must be read from that weapon instance.
+Carried weight is derived from item and attachment weights plus `LoadedAmmoCount` times the `weight_kg` of `LoadedAmmoItemId`, including guns carried unequipped in inventory. Reloading transfers weight from loose ammunition to the gun; firing removes the consumed round's weight. Storage contents remain excluded. Weight is recalculated from these existing saved fields and current item definitions, so no additional save field or version change is required.
 Weapon attachment slots are keyed by attachment slot tags. Rifle instances may persist `attachment.slot.magazine`, `attachment.slot.optic`, and `attachment.slot.tactical`; the tactical slot currently stores the laser sight item when equipped.
 
 ### Player Slot Layout
