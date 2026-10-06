@@ -14,6 +14,14 @@ All gameplay slots, selected-slot settings, achievements, previous generations, 
 
 Machine-specific settings, candidate files, corrupt archives, and cleanup audit logs are not Steam Cloud targets. Steam Cloud being disabled or the client being offline does not disable local saves. See [Steam cloud setup and verification](Steam/cloud_saves.md) for the required per-app portal configuration; local code tests do not prove live synchronization.
 
+## Offline Save Tool
+
+The editor-only `TunaSweeperEditor.TunaSweeperSaveTool` commandlet and .NET 10 wrapper inspect gameplay saves and add weapons/ammunition/armor or replace equipment from a versioned JSON preset. See [agent commandlet protocol](save_tool_commandlet.md) and [human CLI guide](../Tools/SaveTool/README.md).
+
+Reads never trigger recovery or migration. Mutations require current save version 22, explicit path/flavor/slot, and explicit commit; previews leave the file unchanged. The tool uses native serialization and the existing fail-closed writer after validating the complete mutation. A unique byte-for-byte `.tool-backup-*` original is retained in addition to `.previous`. Stop game/PIE before editing; the tool mutex does not coordinate gameplay or cloud writers.
+
+Added/replaced items use existing instance, ownership, loaded-ammo, attachment and acquisition-history fields. Replaced equipment moves to inventory; insufficient capacity aborts the entire edit. Quest/achievement events are not synthesized. Unrelated saved progress is preserved, and `LastSavedAtTicks` follows the existing local-time convention. No new gameplay save fields, versions, or bundled equipment presets are introduced.
+
 ## Current Save Container
 
 Interface language persists independently of gameplay slots in `GGameUserSettingsIni`, under `TunaSweeper.InterfaceSettings/Language`. Supported saved codes are `ko`, `en`, `ja`, `zh-Hans`, `zh-Hant`, `ru`, and `pt-BR`. Existing enum values 0–5 retain their meaning; Brazilian Portuguese uses 6. Startup restores a valid saved language. Chinese OS locales distinguish explicit Hans/Hant scripts, then TW/HK/MO (Traditional) from other regions (Simplified); region-qualified Russian locales resolve to Russian. `pt-BR` and bare `pt` resolve to Brazilian Portuguese (case-insensitive, with hyphens or underscores); `pt-PT` remains unsupported and follows the default-language fallback. If the value is missing or invalid, Steam selects and saves English (`en`); other distribution channels detect the OS language/locale, falling back to English when unsupported. Packaged builds read `TunaSweeper.Distribution/DistributionChannel` from `GGameIni`; editor runs use the selected build target, matching title-menu channel selection. Manual language selection continues to use the existing global setting. This setting remains shared across stores, so a valid language saved by another store also takes precedence over the first-launch default. No gameplay save-version change is required.
@@ -170,6 +178,7 @@ Each `FTunaSweeperItemInstance` must preserve:
 
 Weapon loaded ammo state is part of the weapon item instance, not player-global state.
 When a weapon is loaded from a save or equipped later, ammo type and loaded count must be read from that weapon instance.
+Carried weight is derived from item and attachment weights plus `LoadedAmmoCount` times the `weight_kg` of `LoadedAmmoItemId`, including guns carried unequipped in inventory. Reloading transfers weight from loose ammunition to the gun; firing removes the consumed round's weight. Storage contents remain excluded. Weight is recalculated from these existing saved fields and current item definitions, so no additional save field or version change is required.
 Weapon attachment slots are keyed by attachment slot tags. Rifle instances may persist `attachment.slot.magazine`, `attachment.slot.optic`, and `attachment.slot.tactical`; the tactical slot currently stores the laser sight item when equipped.
 
 ### Player Slot Layout

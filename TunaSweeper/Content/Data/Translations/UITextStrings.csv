@@ -1,4 +1,7 @@
 string_key,zh-Hans,zh-Hant,ru,pt-BR
+ui.item_info.ammo_specs,弹药属性,彈藥屬性,Характеристики боеприпасов,Especificações da munição
+ui.item_info.projectile_damage,弹丸伤害,彈丸傷害,Урон снаряда,Dano do projétil
+ui.item_info.ammo_damage_context,参考武器：{0} · 防御减伤前 · 霰弹按单颗计算,參考武器：{0} · 防禦減傷前 · 霰彈按單顆計算,Оружие: {0} · До защиты · Для дробовика — за дробину,Arma de referência: {0} · Antes da defesa · Por balim nas escopetas
 editor.anim.title_head_look.title,标题画面头部追踪,標題畫面頭部追蹤,Поворот головы на главном экране,Direção da cabeça na tela inicial
 editor.anim.title_head_look.tooltip,在物理计算前，将标题画面头部的目标方向应用于姿势。,在物理計算前，將標題畫面頭部的目標方向應用於姿勢。,Применяет целевое направление головы на главном экране к позе перед расчётом физики.,Aplica a direção desejada da cabeça na tela inicial à pose antes do cálculo de física.
 ui.vehicle.mount,乘坐,乘坐,Сесть,Subir
@@ -38,6 +41,7 @@ ui.title.slot_select,选择存档,選擇存檔,Выбор сохранения,E
 ui.title.settings,设置,設置,Настройки,Configurações
 ui.title.quit,退出,退出,Выход,Sair
 ui.title.wishlist,加入愿望单,加入願望單,Добавить в список желаемого,Adicionar à lista de desejos
+ui.title.version_pattern,v{0}.{1},v{0}.{1},v{0}.{1},v{0}.{1}
 ui.title.primary_save_slot,选择存档栏位,選擇存檔欄位,Выберите ячейку сохранения,Selecionar espaço de salvamento
 ui.title.delete_hold,长按删除,長按刪除,"Удерживайте, чтобы удалить",Segure para excluir
 ui.title.delete_confirm_title,删除栏位,刪除欄位,Удалить ячейку,Excluir salvamento

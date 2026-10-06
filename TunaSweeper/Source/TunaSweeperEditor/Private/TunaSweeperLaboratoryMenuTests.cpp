@@ -56,7 +56,6 @@ bool FTunaSweeperLaboratoryMenuTest::RunTest(const FString& Parameters)
 			{TEXT("SlotSelectButtonText"), TEXT("ui.title.slot_select")},
 			{TEXT("SettingsButtonText"), TEXT("ui.title.settings")},
 			{TEXT("QuitButtonText"), TEXT("ui.title.quit")},
-			{TEXT("SteamDemoWishlistButtonText"), TEXT("ui.title.wishlist")},
 			{TEXT("LaboratoryButtonText"), TEXT("ui.lab.title")},
 			{TEXT("LaboratoryTitleText"), TEXT("ui.lab.title")},
 			{TEXT("LaboratoryDescriptionText"), TEXT("ui.lab.description")},

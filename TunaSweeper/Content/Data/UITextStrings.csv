@@ -1,4 +1,46 @@
 string_key,ko,en,ja
+tool.save.code,오류 코드,Error code,エラーコード
+tool.save.hash,현재 파일 hash,Current file hash,現在のファイルhash
+tool.save.sourceHash,편집 전 파일 hash,Source file hash,編集前のファイルhash
+tool.save.validationCode,검증 결과,Validation result,検証結果
+tool.save.backupPath,원본 백업,Original backup,元のバックアップ
+tool.save.runDirectory,실행 로그 폴더,Run log directory,実行ログフォルダー
+tool.save.slots,슬롯 / 대상 / 버전 / 읽기 가능 / 경로,Slot / Flavor / Version / Readable / Path,スロット / 対象 / バージョン / 読取可 / パス
+tool.save.empty,비어 있음,Empty,空
+tool.save.saveSlotIndex,저장 슬롯,Save slot,セーブスロット
+tool.save.buildFlavor,대상,Build flavor,対象
+tool.save.saveVersion,저장 버전,Save version,セーブバージョン
+tool.save.difficultyStage,난이도 단계,Difficulty stage,難易度段階
+tool.save.totalPlaySeconds,플레이 시간(초),Play time (seconds),プレイ時間(秒)
+tool.save.questCoinBalance,코인,Coins,コイン
+tool.save.totalExperiencePoints,누적 경험치,Total experience,累積経験値
+tool.save.selectedOutfitId,선택 의상 ID,Selected outfit ID,選択衣装ID
+tool.save.inventoryCapacity,소지품 용량,Inventory capacity,所持品容量
+tool.save.equipmentSlots,장착 장비,Equipment,装備
+tool.save.inventorySlots,소지품,Inventory,所持品
+tool.save.auxiliaryBagSlots,보조 가방,Auxiliary bag,補助バッグ
+tool.save.usableQuickSlots,퀵 슬롯,Quick slots,クイックスロット
+tool.save.storageSlots,창고,Storage,倉庫
+tool.save.item_header,슬롯 / 아이템 ID / 이름 × 수량 / 장전 탄약,Slot / Item ID / Name × Quantity / Loaded ammo,スロット / アイテムID / 名前 × 数量 / 装填弾薬
+tool.save.questProgressStates,퀘스트 기록 수,Quest records,クエスト記録数
+tool.save.activeResearchStates,진행 연구 수,Active research records,進行研究数
+tool.save.appliedResearchNodeIds,적용 연구 수,Applied research nodes,適用研究数
+tool.save.completedScenarioFlags,완료 시나리오 플래그 수,Completed scenario flags,完了シナリオフラグ数
+tool.save.acquiredMemoIds,획득 메모 수,Acquired memos,獲得メモ数
+tool.save.worldProgressStates,월드 진행 기록 수,World progress records,ワールド進行記録数
+tool.save.json_hint,전체 진행 데이터와 UID는 --json으로 확인하세요.,Use --json for full progression data and UIDs.,完全な進行データとUIDは --json で確認できます。
+tool.save.presetCount,프리셋 장착 항목 수,Preset equipment entries,プリセット装備項目数
+tool.save.preset_hint,--output으로 파일을 저장하거나 --json으로 프리셋 내용을 확인하세요.,Use --output to save a file or --json to inspect the preset.,--output で保存するか --json でプリセット内容を確認してください。
+tool.save.exportPath,프리셋 저장 경로,Preset output path,プリセット保存先
+tool.save.help,"TunaSweeper 세이브 도구 | 명령: catalog / list / inspect / validate / add / preset-export / preset-apply | 공통: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 세이브 지정: --save <sav> --flavor Demo|Main --slot <번호> | 추가: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 또는 --items <JSON 파일> | 프리셋: --preset <JSON 파일> / 내보내기: --output <새 파일> | 목록: --directory <폴더> | 변경은 기본 미리보기. 저장: --commit [--expected-hash <조회 hash>] | 게임과 PIE 종료 후 편집. 자세한 사용법: Tools/SaveTool/README.md","TunaSweeper Save Tool | Commands: catalog / list / inspect / validate / add / preset-export / preset-apply | Common: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <seconds> | Save: --save <sav> --flavor Demo|Main --slot <number> | Add: --item <ID> --quantity <count> [--ammo <ID> --rounds <loaded count>] or --items <JSON file> | Preset: --preset <JSON file> / export: --output <new file> | List: --directory <folder> | Edits preview by default. Write: --commit [--expected-hash <inspection hash>] | Close game and PIE before editing. Guide: Tools/SaveTool/README.md","TunaSweeper セーブツール | コマンド: catalog / list / inspect / validate / add / preset-export / preset-apply | 共通: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | セーブ: --save <sav> --flavor Demo|Main --slot <番号> | 追加: --item <ID> --quantity <数量> [--ammo <ID> --rounds <装填数>] または --items <JSONファイル> | プリセット: --preset <JSONファイル> / 書き出し: --output <新規ファイル> | 一覧: --directory <フォルダー> | 既定はプレビュー。保存: --commit [--expected-hash <確認時のhash>] | ゲームとPIEを終了してから編集。詳細: Tools/SaveTool/README.md"
+tool.save.running,Unreal 커맨드렛 실행 중…,Running Unreal commandlet…,Unrealコマンドレット実行中…
+tool.save.success,완료,Complete,完了
+tool.save.failure,실패: 아래 오류 코드와 상세 정보를 확인하세요.,Failed: check the error code and details below.,失敗: 以下のエラーコードと詳細を確認してください。
+tool.save.preview,미리보기입니다. 원본 세이브는 변경하지 않았습니다.,Preview only. The original save was not changed.,プレビューです。元のセーブは変更されていません。
+tool.save.catalog_header,ID / 이름 / 분류 / 최대 중첩,ID / Name / Category / Max stack,ID / 名前 / 分類 / 最大スタック
+ui.item_info.ammo_specs,탄약 스펙,Ammunition Specs,弾薬性能
+ui.item_info.projectile_damage,투사체 피해,Projectile Damage,投射物ダメージ
+ui.item_info.ammo_damage_context,기준 무기: {0} · 방어 적용 전 · 산탄은 펠릿당,Reference weapon: {0} · Before defense · Per pellet for shotguns,基準武器: {0} · 防御適用前 · 散弾はペレットごと
 editor.anim.title_head_look.title,타이틀 머리 추적,Title Head Look,タイトルの頭追従
 editor.anim.title_head_look.tooltip,타이틀의 머리 목표 방향을 물리 계산 전 포즈에 적용합니다.,Applies the title head target direction to the pose before physics.,タイトルの頭の目標方向を物理計算前のポーズに適用します。
 ui.vehicle.mount,탑승하기,Mount,乗る
@@ -38,6 +80,7 @@ ui.title.slot_select,슬롯 선택,Save Slots,セーブスロット
 ui.title.settings,설정,Settings,設定
 ui.title.quit,종료,Quit,終了
 ui.title.wishlist,위시리스트에 추가,Add to Wishlist,ウィッシュリストに追加
+ui.title.version_pattern,v{0}.{1},v{0}.{1},v{0}.{1}
 ui.title.primary_save_slot,세이브 슬롯 선택,Select Save Slot,セーブスロット選択
 ui.title.delete_hold,길게 눌러 삭제하기,Hold to Delete,長押しで削除
 ui.title.delete_confirm_title,슬롯 삭제,Delete Slot,スロット削除

@@ -48,26 +48,10 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 		TestTrue(TEXT("Online co-op entry binds its open action"), CoopEntry->OnClicked.IsBound());
 		TestNotNull(TEXT("Online co-op entry has a label"), Menu->FindIntroWidget(TEXT("OnlineCoopButtonText")));
 	}
-	UTexture2D* DemoVersionRibbon = LoadObject<UTexture2D>(
-		nullptr,
-		TEXT("/Game/UI/Title/T_DemoVersionRibbon.T_DemoVersionRibbon"));
-	TestNotNull(TEXT("Demo version ribbon texture exists"), DemoVersionRibbon);
-	if (Menu->DemoBuildImage)
-	{
-		TestEqual(
-			TEXT("Demo marker uses the version ribbon texture"),
-			Menu->DemoBuildImage->GetBrush().GetResourceObject(),
-			static_cast<UObject*>(DemoVersionRibbon));
-		if (const UCanvasPanelSlot* DemoSlot = Cast<UCanvasPanelSlot>(Menu->DemoBuildImage->Slot))
-		{
-			TestEqual(TEXT("Demo ribbon position"), DemoSlot->GetPosition(), FVector2D(113.0f, 245.0f));
-			TestEqual(TEXT("Demo ribbon size"), DemoSlot->GetSize(), FVector2D(318.0f, 54.0f));
-		}
-		else
-		{
-			AddError(TEXT("Demo version ribbon must use a canvas slot"));
-		}
-	}
+	TestNull(TEXT("Demo version ribbon is absent from the title menu"), Menu->DemoBuildImage.Get());
+	TestNull(TEXT("Demo version ribbon has no attached widget"), Menu->FindIntroWidget(TEXT("DemoBuildImage")));
+	TestNull(TEXT("Wishlist button is absent from the title menu"), Menu->FindIntroWidget(TEXT("SteamDemoWishlistButton")));
+	TestNull(TEXT("Wishlist row is absent from the title menu"), Menu->FindIntroWidget(TEXT("SteamDemoWishlistButtonBox")));
 	for (const TPair<const TCHAR*, float>& Spacing : {
 		TPair<const TCHAR*, float>(TEXT("StartButtonBox"), 4.0f),
 		TPair<const TCHAR*, float>(TEXT("SettingsButtonBox"), -4.0f)})
@@ -84,12 +68,6 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 				ButtonSlot->GetPadding().Bottom,
 				Spacing.Value);
 		}
-	}
-	if (!DemoVersionRibbon)
-	{
-		Menu->NativeDestruct();
-		Menu->RemoveFromRoot();
-		return false;
 	}
 	for (const TCHAR* Name : { TEXT("MainMenuPanelView"), TEXT("SaveSlotPanelView"), TEXT("SettingsPanelView"), TEXT("DemoNoticePanelView"), TEXT("TitleGraphicsSettingsWidget") })
 		TestNotNull(FString::Printf(TEXT("Child WBP %s"), Name), Cast<UUserWidget>(Menu->FindIntroWidget(Name)));
@@ -164,8 +142,6 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	UTunaSweeperTextSubsystem* PreviewStrings = NewObject<UTunaSweeperTextSubsystem>(PreviewInstance);
 	Menu->SetNamedText(TEXT("SettingsTitleText"), PreviewStrings->ResolveText(
 		TEXT("ui.common.back"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
-	Menu->SetNamedText(TEXT("SteamDemoWishlistButtonText"), PreviewStrings->ResolveText(
-		TEXT("ui.title.wishlist"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	FAssetCompilingManager::Get().FinishAllCompilation();
 	FlushRenderingCommands();
 	FWidgetRenderer Renderer(false);

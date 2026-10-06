@@ -1,12 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
-#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Components/ButtonSlot.h"
-
-namespace TunaSweeperIntroMenuLayout
-{
-	constexpr const TCHAR* DemoVersionRibbonTexturePath =
-		TEXT("/Game/UI/Title/T_DemoVersionRibbon.T_DemoVersionRibbon");
-}
 
 void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
 {
@@ -288,15 +281,6 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	StyleButton(SlotSelectButton, EButtonRole::Secondary);
 	StyleButton(SettingsButton, EButtonRole::Secondary);
 	StyleButton(QuitButton, EButtonRole::Secondary);
-	StyleButton(SteamDemoWishlistButton, EButtonRole::Primary);
-	if (SteamDemoWishlistButton)
-	{
-		FButtonStyle WishlistStyle = SteamDemoWishlistButton->GetStyle();
-		WishlistStyle.Normal.TintColor = FLinearColor(0.55f, 0.24f, 0.10f);
-		WishlistStyle.Hovered.TintColor = FLinearColor(0.70f, 0.34f, 0.16f);
-		WishlistStyle.Pressed.TintColor = FLinearColor(0.38f, 0.15f, 0.06f);
-		SteamDemoWishlistButton->SetStyle(WishlistStyle);
-	}
 
 	// Save-slot cards retain their comparison presentation; only their actions adopt the shared language.
 	StyleButton(PrimarySaveSlotButton, EButtonRole::Primary);
@@ -659,70 +643,22 @@ void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
 	}
 }
 
-void UTunaSweeperIntroMenuWidget::EnsureDemoBuildImage()
+void UTunaSweeperIntroMenuWidget::RemoveDemoBuildImage()
 {
-	if (!WidgetTree)
-	{
-		return;
-	}
-
 	if (!DemoBuildImage)
 	{
 		DemoBuildImage = Cast<UImage>(FindIntroWidget(TEXT("DemoBuildImage")));
 	}
-
-	if (!TunaSweeperBuildFlavor::IsDemo())
+	if (DemoBuildImage)
 	{
-		if (DemoBuildImage)
-		{
-			DemoBuildImage->SetVisibility(ESlateVisibility::Collapsed);
-		}
-		return;
+		DemoBuildImage->RemoveFromParent();
+		DemoBuildImage = nullptr;
 	}
-
-	if (!DemoBuildImage)
-	{
-		UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
-		if (!RootCanvas)
-		{
-			return;
-		}
-
-		DemoBuildImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("DemoBuildImage"));
-		if (!DemoBuildImage)
-		{
-			return;
-		}
-
-		UTexture2D* DemoVersionRibbonTexture = LoadObject<UTexture2D>(
-			nullptr,
-			TunaSweeperIntroMenuLayout::DemoVersionRibbonTexturePath);
-		if (!DemoVersionRibbonTexture)
-		{
-			DemoBuildImage->RemoveFromParent();
-			DemoBuildImage = nullptr;
-			return;
-		}
-
-		DemoBuildImage->SetBrushFromTexture(DemoVersionRibbonTexture, false);
-		FSlateBrush RibbonBrush = DemoBuildImage->GetBrush();
-		RibbonBrush.SetImageSize(FVector2D(318.0f, 54.0f));
-		DemoBuildImage->SetBrush(RibbonBrush);
-		if (UCanvasPanelSlot* DemoSlot = RootCanvas->AddChildToCanvas(DemoBuildImage))
-		{
-			DemoSlot->SetAnchors(FAnchors(0.0f, 0.0f));
-			DemoSlot->SetPosition(FVector2D(113.0f, 245.0f));
-			DemoSlot->SetSize(FVector2D(318.0f, 54.0f));
-			DemoSlot->SetZOrder(4);
-		}
-	}
-
-	DemoBuildImage->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()
 {
-	EnsureDemoBuildImage();
+	RemoveDemoBuildImage();
 	if (TitleWindParticleOverlay || !WidgetTree)
 	{
 		return;

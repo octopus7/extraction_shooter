@@ -2,6 +2,7 @@
 
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetTree.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
@@ -23,7 +24,7 @@
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
-#include "Weapon/TunaSweeperProjectile.h"
+#include "Weapon/TunaSweeperWeapon.h"
 
 namespace TunaSweeperItemInfoPanel
 {
@@ -34,7 +35,6 @@ namespace TunaSweeperItemInfoPanel
 	constexpr float PanelWidth = 429.0f;
 	constexpr float DefaultMaxPanelHeight = 620.0f;
 	constexpr float PanelHorizontalPadding = 32.0f;
-	constexpr float DefaultProjectileDamageAmount = 10.0f;
 
 	struct FItemSpecInfo
 	{
@@ -48,11 +48,54 @@ namespace TunaSweeperItemInfoPanel
 
 	using TunaSweeperUiText::ResolveUiText;
 
-	float GetDefaultProjectileDamageAmount()
+	const ATunaSweeperWeapon* ResolveAmmoPreviewWeapon(
+		const FTunaSweeperItemDefinition& Ammo,
+		UTunaSweeperGameInstance* Game,
+		const ATunaSweeperTopDownCharacter* Character,
+		FTunaSweeperItemDefinition& OutWeapon)
 	{
-		const ATunaSweeperProjectile* DefaultProjectile =
-			ATunaSweeperProjectile::StaticClass()->GetDefaultObject<ATunaSweeperProjectile>();
-		return DefaultProjectile ? FMath::Max(0.0f, DefaultProjectile->GetDamageAmount()) : DefaultProjectileDamageAmount;
+		UTunaSweeperItemDataSubsystem* Items = Game ? Game->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+		if (!Items) return nullptr;
+		auto TryWeapon = [&](const FTunaSweeperItemDefinition& Definition, int32 Slot) -> const ATunaSweeperWeapon*
+		{
+			if (Definition.CategoryTag != TEXT("item.category.weapon.gun") ||
+				!Definition.CompatibleAmmoTypeTags.Contains(Ammo.AmmoTypeTag)) return nullptr;
+			if (Character && Slot > 0 && Slot == Character->GetSelectedWeaponSlotNumber() &&
+				!Character->IsMeleeWeaponSelected() && Character->GetEquippedWeapon())
+			{
+				OutWeapon = Definition;
+				return Character->GetEquippedWeapon();
+			}
+			FSoftObjectPath ClassPath;
+			if (!Items->TryGetWeaponActorClassPath(Definition.Id, ClassPath)) return nullptr;
+			const TSubclassOf<ATunaSweeperWeapon> WeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(ClassPath).LoadSynchronous();
+			if (!WeaponClass) return nullptr;
+			OutWeapon = Definition;
+			return WeaponClass->GetDefaultObject<ATunaSweeperWeapon>();
+		};
+		bool bMelee = false;
+		int32 SelectedSlot = 0;
+		Game->TryGetRuntimeSelectedWeaponSelection(bMelee, SelectedSlot);
+		if (Character) SelectedSlot = Character->IsMeleeWeaponSelected() ? 0 : Character->GetSelectedWeaponSlotNumber();
+		else if (bMelee) SelectedSlot = 0;
+		for (int32 Slot : {SelectedSlot, 1, 2})
+		{
+			FTunaSweeperItemInstance Instance;
+			FTunaSweeperItemDefinition Definition;
+			if (Slot > 0 && Game->TryGetEquipmentWeaponSlotItem(Slot, Instance, Definition))
+			{
+				if (const ATunaSweeperWeapon* Weapon = TryWeapon(Definition, Slot)) return Weapon;
+			}
+		}
+		// An unequipped ammo item uses a reproducible, explicitly named reference weapon.
+		TArray<FTunaSweeperItemDefinition> Definitions;
+		Items->GetAllItemDefinitions(Definitions);
+		Definitions.Sort([](const auto& A, const auto& B) { return A.Id < B.Id; });
+		for (const FTunaSweeperItemDefinition& Definition : Definitions)
+		{
+			if (const ATunaSweeperWeapon* Weapon = TryWeapon(Definition, 0)) return Weapon;
+		}
+		return nullptr;
 	}
 
 	FText BuildSignedIntegerText(int32 Value)
@@ -62,41 +105,27 @@ namespace TunaSweeperItemInfoPanel
 
 	FItemSpecInfo BuildItemSpecInfo(
 		const FTunaSweeperItemDefinition& ItemDefinition,
-		const UTunaSweeperGameInstance* TunaGameInstance)
+		UTunaSweeperGameInstance* TunaGameInstance,
+		const ATunaSweeperTopDownCharacter* Character)
 	{
 		FItemSpecInfo SpecInfo;
 		if (!ItemDefinition.AmmoTypeTag.IsNone())
 		{
-			const int32 BaseDamage = FMath::Max(0, FMath::RoundToInt(GetDefaultProjectileDamageAmount()));
-			const float DamageMultiplier = FMath::Max(
-				0.0f,
-				TunaSweeperDataValues::ToRatioFloat(ItemDefinition.ProjectileDamageMultiplier));
-			const int32 DamageBonus = ItemDefinition.ProjectileDamageBonus;
-			const int32 ResultDamage = FMath::Max(0, FMath::RoundToInt(BaseDamage * DamageMultiplier) + DamageBonus);
-			const int32 DamageDelta = ResultDamage - BaseDamage;
+			FTunaSweeperItemDefinition ReferenceDefinition;
+			const ATunaSweeperWeapon* Weapon = ResolveAmmoPreviewWeapon(ItemDefinition, TunaGameInstance, Character, ReferenceDefinition);
+			if (!Weapon) return SpecInfo;
+			const int32 ResultDamage = Weapon->GetProjectileDamage(
+				TunaSweeperDataValues::ToRatioFloat(ItemDefinition.ProjectileDamageMultiplier), ItemDefinition.ProjectileDamageBonus);
+			FText ReferenceName;
+			TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()->TryGetItemNameText(
+				ReferenceDefinition.Id, TunaGameInstance->GetCurrentTextLanguage(), ReferenceName);
 
-			SpecInfo.TitleText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.ammo_specs"), TEXT("\uD0C4\uC57D \uC2A4\uD399"));
-			SpecInfo.ValueText = BuildSignedIntegerText(DamageDelta);
+			SpecInfo.TitleText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.ammo_specs"), nullptr);
+			SpecInfo.LabelText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.projectile_damage"), nullptr);
+			SpecInfo.ValueText = FText::AsNumber(ResultDamage);
 			SpecInfo.SecondaryText = FText::Format(
-				ResolveUiText(TunaGameInstance, TEXT("ui.item_info.ammo_type_pattern"), TEXT("\uD0C4\uC885: {0}")),
-				FText::FromName(ItemDefinition.AmmoTypeTag));
+				ResolveUiText(TunaGameInstance, TEXT("ui.item_info.ammo_damage_context"), nullptr), ReferenceName);
 			SpecInfo.bVisible = true;
-
-			if (DamageDelta > 0)
-			{
-				SpecInfo.LabelText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.damage_increase"), TEXT("\uD53C\uD574\uB7C9 \uC99D\uAC00"));
-				SpecInfo.ValueColor = FLinearColor(0.66f, 0.95f, 0.70f, 1.0f);
-			}
-			else if (DamageDelta < 0)
-			{
-				SpecInfo.LabelText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.damage_decrease"), TEXT("\uD53C\uD574\uB7C9 \uAC10\uC18C"));
-				SpecInfo.ValueColor = FLinearColor(0.98f, 0.72f, 0.56f, 1.0f);
-			}
-			else
-			{
-				SpecInfo.LabelText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.damage_change"), TEXT("\uD53C\uD574\uB7C9 \uBCC0\uD654"));
-				SpecInfo.ValueColor = FLinearColor(0.72f, 0.84f, 0.88f, 1.0f);
-			}
 
 			return SpecInfo;
 		}
@@ -324,7 +353,8 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 	const TArray<FName>& AttachmentSlotTags = TunaGameInstance->GetSelectedWeaponAttachmentSlotTags();
 	SetSelectedItemInfo(DisplayName, Description, AttachmentSlots.Num() > 0);
 	const TunaSweeperItemInfoPanel::FItemSpecInfo SpecInfo =
-		TunaSweeperItemInfoPanel::BuildItemSpecInfo(SelectedItemDefinition, TunaGameInstance);
+		TunaSweeperItemInfoPanel::BuildItemSpecInfo(SelectedItemDefinition, TunaGameInstance,
+			Cast<ATunaSweeperTopDownCharacter>(GetOwningPlayerPawn()));
 	SetSelectedItemSpecInfo(
 		SpecInfo.TitleText,
 		SpecInfo.LabelText,

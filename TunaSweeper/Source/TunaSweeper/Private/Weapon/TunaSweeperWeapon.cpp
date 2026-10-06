@@ -1,4 +1,5 @@
 #include "Weapon/TunaSweeperWeapon.h"
+#include "Combat/TunaSweeperProjectileDamage.h"
 #include "Weapon/TunaSweeperWeaponConfiguration.h"
 #include "Engine/StaticMesh.h"
 
@@ -694,11 +695,7 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 		AimDirection,
 		GetActorForwardVector());
 
-	TSubclassOf<ATunaSweeperProjectile> LoadedProjectileClass = ProjectileClass.LoadSynchronous();
-	if (!LoadedProjectileClass)
-	{
-		LoadedProjectileClass = ATunaSweeperProjectile::StaticClass();
-	}
+	const TSubclassOf<ATunaSweeperProjectile> LoadedProjectileClass = ResolveProjectileClass();
 
 	// All pellets from this trigger pull can grant at most one burn stack per target.
 	const FGuid BurnApplicationId = FGuid::NewGuid();
@@ -947,10 +944,9 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 		ProjectileClassToSpawn, SpawnTransform, this, InstigatorPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (SpawnedProjectile)
 	{
-		const float BaseDamageAmount = SpawnedProjectile->GetDamageAmount();
-		const int32 ModifiedDamageAmount = FMath::Max(
-			0,
-			FMath::RoundToInt(BaseDamageAmount * FMath::Max(0.0f, ProjectileDamageMultiplier)) + ProjectileDamageBonus);
+		const float BaseDamageAmount = ProjectileClassToSpawn->GetDefaultObject<ATunaSweeperProjectile>()->GetDamageAmount();
+		const int32 ModifiedDamageAmount = TunaSweeperProjectileDamage::Calculate(
+			BaseDamageAmount, ProjectileDamageMultiplier, ProjectileDamageBonus);
 		SpawnedProjectile->SetDamageAmount(static_cast<float>(ModifiedDamageAmount));
 		SpawnedProjectile->SetBurnSpec(BurnSpec);
 		SpawnedProjectile->SetBurnApplicationId(BurnApplicationId);
@@ -966,6 +962,21 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	}
 
 	return SpawnedProjectile;
+}
+
+TSubclassOf<ATunaSweeperProjectile> ATunaSweeperWeapon::ResolveProjectileClass() const
+{
+	if (TSubclassOf<ATunaSweeperProjectile> LoadedClass = ProjectileClass.LoadSynchronous())
+	{
+		return LoadedClass;
+	}
+	return ATunaSweeperProjectile::StaticClass();
+}
+
+int32 ATunaSweeperWeapon::GetProjectileDamage(float Multiplier, int32 Bonus) const
+{
+	const ATunaSweeperProjectile* Defaults = ResolveProjectileClass()->GetDefaultObject<ATunaSweeperProjectile>();
+	return TunaSweeperProjectileDamage::Calculate(Defaults->GetDamageAmount(), Multiplier, Bonus);
 }
 
 bool ATunaSweeperWeapon::ApplyVisualDefinition(const FTunaSweeperWeaponVisualDefinition& Visual)

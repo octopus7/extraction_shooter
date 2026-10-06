@@ -134,8 +134,7 @@ bool FTunaSweeperCoopPresentationTest::RunTest(const FString&)
 	Menu->HandleOnlineCoopClicked();
 	TestNull(TEXT("Difficulty adjustment cannot open co-op"), Menu->OnlineCoopPanel.Get());
 	Menu->bDifficultyAdjustmentMode = false;
-	if (!TestNotNull(TEXT("Steam wishlist row is available for the tallest menu"), Menu->SteamDemoWishlistButtonContainer.Get()) ||
-		!TestNotNull(TEXT("Steam wishlist button exists"), Menu->SteamDemoWishlistButton.Get())) return false;
+	TestNull(TEXT("Wishlist row is absent from the title menu"), Menu->FindIntroWidget(TEXT("SteamDemoWishlistButtonBox")));
 	Menu->ShowMainMenu();
 	Menu->TickMenuTransitions(1.f);
 	FWidgetRenderer Renderer(false);
@@ -191,9 +190,6 @@ bool FTunaSweeperCoopPresentationTest::RunTest(const FString&)
 		TestTrue(TEXT("Host and join do not overlap"), HostGeometry.GetAbsolutePosition().Y + HostGeometry.GetAbsoluteSize().Y <= JoinGeometry.GetAbsolutePosition().Y);
 		TestEqual(TEXT("Language event updates visible title"), CastChecked<UTextBlock>(Widget->GetWidgetFromName(TEXT("TitleText")))->GetText().ToString(), Instance->ResolveLocalizedText(TEXT("ui.coop.title"), FText::GetEmpty()).ToString());
 
-		// Include the optional Steam action so the capture covers the tallest title menu.
-		Menu->SteamDemoWishlistButtonContainer->SetVisibility(ESlateVisibility::Visible);
-		Menu->SteamDemoWishlistButton->SetVisibility(ESlateVisibility::Visible);
 		Menu->ForceLayoutPrepass();
 		TStrongObjectPtr<UTextureRenderTarget2D> MenuTarget(Renderer.DrawWidget(MenuSlate, FVector2D(1920, 1080)));
 		FlushRenderingCommands();
@@ -203,7 +199,7 @@ bool FTunaSweeperCoopPresentationTest::RunTest(const FString&)
 		TestTrue(TEXT("Composed title render saved"), FImageUtils::SaveImageByExtension(
 			*(Directory / FString::Printf(TEXT("OnlineCoop_Title_%d.png"), Index)), MenuPixels));
 		for (const TCHAR* RowName : { TEXT("StartButtonBox"), TEXT("SlotSelectButtonBox"), TEXT("LaboratoryButtonBox"),
-			TEXT("OnlineCoopButtonBox"), TEXT("SettingsButtonBox"), TEXT("QuitButtonBox"), TEXT("SteamDemoWishlistButtonBox") })
+			TEXT("OnlineCoopButtonBox"), TEXT("SettingsButtonBox"), TEXT("QuitButtonBox") })
 		{
 			UWidget* Row = Menu->FindIntroWidget(RowName);
 			if (!Row && FName(RowName) == TEXT("LaboratoryButtonBox")) continue;

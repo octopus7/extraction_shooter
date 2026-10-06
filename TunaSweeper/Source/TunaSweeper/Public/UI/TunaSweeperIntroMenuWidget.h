@@ -92,12 +92,6 @@ protected:
 	TObjectPtr<UButton> QuitButton;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UButton> SteamDemoWishlistButton;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UWidget> SteamDemoWishlistButtonContainer;
-
-	UPROPERTY(Transient)
 	TObjectPtr<UButton> LaboratoryButton;
 
 	UPROPERTY(Transient)
@@ -370,9 +364,6 @@ private:
 	void HandleQuitClicked();
 
 	UFUNCTION()
-	void HandleSteamDemoWishlistClicked();
-
-	UFUNCTION()
 	void HandleDifficultyFarmingClicked();
 
 	UFUNCTION()
@@ -597,12 +588,10 @@ private:
 	void EnsureDeleteSaveSlotHoldProgressWidget();
 	void ConfigureDeleteSaveSlotHoldProgressFill();
 	void ResetTitleViewportLayoutState();
-	void EnsureDemoBuildImage();
+	void RemoveDemoBuildImage();
 	void EnsureTitleWindParticleOverlay();
 	void RefreshDistributionPresentation();
-	void EnsureSteamDemoWishlistButton();
 	FString GetDistributionChannel() const;
-	bool IsSteamDemoDistribution() const;
 	void EnsurePiggyBankToggleButton();
 	void EnsureAlwaysSlowPresentationToggleButton();
 	void EnsureSaveDataManagementSection();

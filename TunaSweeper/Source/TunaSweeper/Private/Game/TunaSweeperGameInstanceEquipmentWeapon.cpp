@@ -70,16 +70,21 @@ bool UTunaSweeperGameInstance::TryGetEquipmentMeleeSlotItem(
 
 void UTunaSweeperGameInstance::SetRuntimeSelectedWeaponSlotNumber(int32 WeaponSlotNumber)
 {
+	const bool bSelectionChanged = !bHasRuntimeSelectedWeaponSelection || bRuntimeSelectedMeleeWeapon ||
+		RuntimeSelectedWeaponSlotNumber != FMath::Clamp(WeaponSlotNumber, 1, 2);
 	RuntimeSelectedWeaponSlotNumber = FMath::Clamp(WeaponSlotNumber, 1, 2);
 	bRuntimeSelectedMeleeWeapon = false;
 	bHasRuntimeSelectedWeaponSelection = true;
+	if (bSelectionChanged) OnSelectedInventoryItemChanged.Broadcast();
 }
 
 void UTunaSweeperGameInstance::SetRuntimeSelectedMeleeWeapon()
 {
+	const bool bSelectionChanged = !bHasRuntimeSelectedWeaponSelection || !bRuntimeSelectedMeleeWeapon;
 	RuntimeSelectedWeaponSlotNumber = 0;
 	bRuntimeSelectedMeleeWeapon = true;
 	bHasRuntimeSelectedWeaponSelection = true;
+	if (bSelectionChanged) OnSelectedInventoryItemChanged.Broadcast();
 }
 
 bool UTunaSweeperGameInstance::TryGetRuntimeSelectedWeaponSelection(
@@ -727,6 +732,14 @@ float UTunaSweeperGameInstance::CalculateItemInstanceCarryWeight(
 	if (ItemDataSubsystem && ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, ItemDefinition))
 	{
 		TotalWeight += FMath::Max(0.0f, ItemDefinition.WeightKg) * FMath::Max(1, ItemInstance->Quantity);
+	}
+
+	// Loaded rounds live on the weapon instance, not in a separate inventory stack.
+	FTunaSweeperItemDefinition LoadedAmmoDefinition;
+	if (ItemDataSubsystem && ItemInstance->LoadedAmmoCount > 0 &&
+		ItemDataSubsystem->TryGetItemDefinition(ItemInstance->LoadedAmmoItemId, LoadedAmmoDefinition))
+	{
+		TotalWeight += FMath::Max(0.0f, LoadedAmmoDefinition.WeightKg) * ItemInstance->LoadedAmmoCount;
 	}
 
 	for (const TPair<FName, FGuid>& AttachmentSlot : ItemInstance->AttachmentSlots)
