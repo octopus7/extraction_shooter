@@ -411,14 +411,6 @@ void UTunaSweeperGameHudWidget::ShowDamageNumber(
 	Popup.DamageNumberType = DamageNumberType;
 	switch (DamageNumberType)
 	{
-	case ETunaSweeperDamageNumberType::Critical:
-		Popup.DurationSeconds = 0.92f;
-		Popup.RiseDistance = 76.0f;
-		Popup.PeakScale = 3.0f;
-		Popup.SettleScale = 1.5f;
-		Popup.FadeStartAlpha = 0.48f;
-		Popup.ScreenDrift = FVector2D(FMath::FRandRange(-24.0f, 24.0f), FMath::FRandRange(-8.0f, 2.0f));
-		break;
 	case ETunaSweeperDamageNumberType::Headshot:
 		Popup.DurationSeconds = 1.08f;
 		Popup.RiseDistance = 104.0f;
@@ -504,10 +496,9 @@ void UTunaSweeperGameHudWidget::TickDamageNumberPopups(float InDeltaTime)
 
 		FWidgetTransform Transform;
 		Transform.Scale = FVector2D(Scale, Scale);
-		if (Popup.DamageNumberType != ETunaSweeperDamageNumberType::Normal)
+		if (Popup.DamageNumberType == ETunaSweeperDamageNumberType::Headshot)
 		{
-			const float ShakeStrength = Popup.DamageNumberType == ETunaSweeperDamageNumberType::Headshot ? 3.2f : 1.6f;
-			Transform.Angle = FMath::Sin(Popup.ElapsedSeconds * 42.0f) * ShakeStrength * (1.0f - Alpha);
+			Transform.Angle = FMath::Sin(Popup.ElapsedSeconds * 42.0f) * 3.2f * (1.0f - Alpha);
 		}
 		TextWidget->SetRenderTransform(Transform);
 

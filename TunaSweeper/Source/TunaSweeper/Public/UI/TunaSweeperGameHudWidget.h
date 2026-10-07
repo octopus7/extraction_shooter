@@ -51,9 +51,9 @@ enum class ETunaSweeperHudTransitionEdge : uint8
 UENUM(BlueprintType)
 enum class ETunaSweeperDamageNumberType : uint8
 {
-	Normal UMETA(DisplayName = "Normal"),
-	Critical UMETA(DisplayName = "Critical"),
-	Headshot UMETA(DisplayName = "Headshot")
+	Normal = 0 UMETA(DisplayName = "Normal"),
+	// Preserve the serialized value used by existing Blueprint assets.
+	Headshot = 2 UMETA(DisplayName = "Headshot")
 };
 
 UCLASS(BlueprintType, Blueprintable)

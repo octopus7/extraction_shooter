@@ -11,7 +11,7 @@
 
 ## 공용 시스템 기준
 
-- [조제법과 설계도 해금](workbench_recipe_blueprint_unlocking.md), [데이터 작성 규칙](data_authoring_conventions.md), [헤드샷 판정](headshot_hit_zone_design.md), [원거리 적 전투 패턴](ranged_enemy_combat_pattern.md)은 각 공용 시스템의 기준으로 유지한다.
+- [조제법과 설계도 해금](workbench_recipe_blueprint_unlocking.md), [데이터 작성 규칙](data_authoring_conventions.md), [헤드샷 판정·피해 표시 및 크리티컬 미사용](headshot_hit_zone_design.md), [원거리 적 전투 패턴](ranged_enemy_combat_pattern.md)은 각 공용 시스템의 기준으로 유지한다.
 - 현재 본편 설계가 명시적으로 교체하지 않은 공용 규칙은 계속 적용한다. 본편의 미정 항목을 과거 기획으로 임의 확정하지 않는다.
 
 ## 이전 본편 기획 보관본

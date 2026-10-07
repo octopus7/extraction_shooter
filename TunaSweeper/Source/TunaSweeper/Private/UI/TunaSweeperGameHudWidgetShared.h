@@ -182,8 +182,6 @@ namespace
 	{
 		switch (DamageNumberType)
 		{
-		case ETunaSweeperDamageNumberType::Critical:
-			return FLinearColor(1.0f, 0.78f, 0.08f, 1.0f);
 		case ETunaSweeperDamageNumberType::Headshot:
 			return FLinearColor(1.0f, 0.18f, 0.06f, 1.0f);
 		default:
@@ -195,8 +193,6 @@ namespace
 	{
 		switch (DamageNumberType)
 		{
-		case ETunaSweeperDamageNumberType::Critical:
-			return 60.0f;
 		case ETunaSweeperDamageNumberType::Headshot:
 			return 72.0f;
 		default:
@@ -208,7 +204,6 @@ namespace
 	{
 		switch (DamageNumberType)
 		{
-		case ETunaSweeperDamageNumberType::Critical:
 		case ETunaSweeperDamageNumberType::Headshot:
 			return 4;
 		default:
