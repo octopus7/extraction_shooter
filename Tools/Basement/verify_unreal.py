@@ -87,9 +87,10 @@ def validate(world=None):
             assert labels[child].get_attach_parent_actor()==labels[parent],child
     for i,parent in enumerate(('ROOT_LadderHub','ROOT_North_RangeLink','ROOT_West_Expansion','ROOT_East_Expansion','ROOT_South_Expansion')):
         assert labels['Basement_Fill_'+str(i)].get_attach_parent_actor()==labels[parent]
-    assert 'Hub_Ladder300' in labels and 'Hub_HatchLanding200' in labels
-    assert len([a for a in actors if isinstance(a,u.PlayerStart)])==1
     sys.path.insert(0,str(ROOT/'Tools/Basement'))
+    from verify_hub_travel import validate_saved as validate_hub_travel
+    hub_travel_report=validate_hub_travel(labels)
+    assert len([a for a in actors if isinstance(a,u.PlayerStart)])==1
     from verify_stations import validate as validate_stations
     station_report=validate_stations(world)
     from verify_markers import validate as validate_markers
@@ -165,6 +166,7 @@ def validate(world=None):
     report['range_stations']=station_report
     report['range_markers']=marker_report
     report['range_monitor']=monitor_report
+    report['hub_travel']=hub_travel_report
     (SOURCE/'unreal_validation.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     u.log('BASEMENT_VERIFICATION_PASSED')
     return report
