@@ -7612,3 +7612,8 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 현재 자판기 시스템이 있는지.
 - 답변: ATunaSweeperShopActor와 ShopOpen 상호작용, 구매·판매 UI 및 거래 코드가 구현되어 있다. 현재 벙커에서만 이용 가능하며 코인 구매, 보유 아이템 판매, 제한 재고와 거래 저장을 지원한다. 상품·가격·초기 재고는 Content/Data/ShopDefinitions.json에서 설정한다. 이번 확인은 소스와 데이터 기준이며 실제 플레이 검증은 수행하지 않았다.
+
+## 2026-10-07 16:48:54 (소요시간: 00:00:17)
+
+- 질문: 자판기의 벙커 제한은 액터 배치 제한인지, 코드상 레벨 제한인지.
+- 답변: 코드상 레벨 제한이다. 상호작용 가능 판정, HandleShopOpenInteraction 실행, PlayerController의 OpenShopPanel에서 각각 IsBunkerMap을 검사한다. 판정은 현재 월드 맵 이름이 BunkerMap으로 끝나는지 확인하므로 다른 맵에 액터만 배치해도 일반 상호작용으로 상점을 열 수 없다. 소스는 수정하지 않았다.
