@@ -58,9 +58,20 @@ def validate(world):
         clear(f'lane_{i}_entry',(x,-5.2,.95),(x,-4.05,.95))
         shot=u.SystemLibrary.line_trace_single(world,pos(x,-4.05,1.25),pos(x,2.5,1.25),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[],u.DrawDebugTrace.NONE,True)
         assert not hit(shot),f'lane_{i} firing line obstructed'
-    barriers=[]
+    barriers=[];table_clearances=[]
     for i,x in enumerate(layout['partition_centers_m'],1):
         a=labels[f'LanePartition_{i:03}'];ignore=[other for other in actors if other!=a]
+        center,extent=a.get_actor_bounds(False)
+        bench_center,bench_extent=labels[f'FiringBench_{i:03}'].get_actor_bounds(False)
+        gap=(bench_center.x-bench_extent.x)-(center.x+extent.x)
+        assert gap>=5,('Partition overlaps table depth',i,gap)
+        assert abs(extent.x*2-layout['partition_length_m']*100)<.1,(i,extent.x)
+        # The entire tabletop depth stays open between adjacent benches.
+        for y in [-3.4,-3.07,-2.7]:
+            for z in [.7,1.4]:
+                result=u.SystemLibrary.line_trace_single(world,pos(x-.6,y,z),pos(x+.6,y,z),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,ignore,u.DrawDebugTrace.NONE,True)
+                assert not hit(result),('Partition blocks table gap',i,y,z)
+        table_clearances.append(round(gap,2))
         for z in [.7,1.4]:
             result=u.SystemLibrary.line_trace_single(world,pos(x-.6,-3.9,z),pos(x+.6,-3.9,z),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,ignore,u.DrawDebugTrace.NONE,True)
             assert hit(result),(i,z)
@@ -90,6 +101,8 @@ def validate(world):
             assert hit(ground) and abs(ground.to_tuple()[5].z)<.2,('Expansion floor gap',x,y)
     report={'passed':True,'lanes':len(layout['lane_centers_m']),'bench_target_alignment':True,'partition_collision_checks':barriers,'capsule_radius_cm':42,'capsule_half_height_cm':90,'clear_routes':routes,'clear_firing_lines':len(layout['lane_centers_m']),'side_aisle_clear_width_cm':140,'screen_on_separate_desk':True,'asset_triangles':{k:v['triangles'] for k,v in meta['assets'].items()}}
     report['render_only_ammo_boxes']=render_only
+    report['partition_table_clearance_cm']=table_clearances
+    report['partition_length_cm']=layout['partition_length_m']*100
     (SOURCE/'RangeStations/unreal_validation.json').write_text(json.dumps(report,indent=2))
     u.log('RANGE_STATIONS_VERIFIED')
     return report

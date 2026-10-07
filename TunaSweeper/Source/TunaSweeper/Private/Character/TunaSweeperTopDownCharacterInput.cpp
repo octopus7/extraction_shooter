@@ -1,5 +1,7 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
+#include "Camera/PlayerCameraManager.h"
+
 void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -135,15 +137,17 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 		return;
 	}
 
-	if (!FMath::IsNearlyZero(MoveVector.Y))
-	{
-		AddMovementInput(FVector::ForwardVector, MoveVector.Y);
-	}
+	AddMovementInput(ResolveCameraRelativeMoveInput(CurrentMoveInput));
+}
 
-	if (!FMath::IsNearlyZero(MoveVector.X))
-	{
-		AddMovementInput(FVector::RightVector, MoveVector.X);
-	}
+FVector ATunaSweeperTopDownCharacter::ResolveCameraRelativeMoveInput(const FVector2D& Input) const
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	const float CameraYaw = PlayerController && PlayerController->PlayerCameraManager
+		? PlayerController->PlayerCameraManager->GetCameraRotation().Yaw
+		: 0.0f;
+	// Use the rendered POV, including location-camera blends. Pitch must not reduce ground speed.
+	return FRotator(0.0f, CameraYaw, 0.0f).RotateVector(FVector(Input.Y, Input.X, 0.0f));
 }
 
 void ATunaSweeperTopDownCharacter::HandleMoveStopped(const FInputActionValue& Value)

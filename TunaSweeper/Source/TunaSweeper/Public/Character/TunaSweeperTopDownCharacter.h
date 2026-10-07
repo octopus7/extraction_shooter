@@ -529,6 +529,7 @@ private:
 	#if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperDemoStaminaTuningTest;
 	friend class FTunaSweeperEquipmentDataTest;
+	friend class FTunaSweeperCameraRelativeMovementTest;
 	#endif
 	bool bExternalAimControl = false;
 	friend class UTunaSweeperVehicleMountComponent;
@@ -618,6 +619,7 @@ private:
 	void ApplyTemporaryRollVisualRotation(float NormalizedRollTime);
 	void RestoreTemporaryRollVisualRotation();
 	FVector ResolveRollDirection() const;
+	FVector ResolveCameraRelativeMoveInput(const FVector2D& Input) const;
 	bool HasActiveMoveInput() const;
 	FTunaSweeperPlayerCameraModeSettings ResolveCurrentCameraModeSettings() const;
 	void TriggerDamageCameraReaction(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);

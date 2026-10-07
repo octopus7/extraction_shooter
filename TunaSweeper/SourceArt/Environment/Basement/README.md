@@ -30,13 +30,13 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 방은 오른쪽(UE +Y)으로 **사로 210cm + 별도 이동 공간 140cm = 350cm** 확장했다. 내부 폭은 10.8m에서 14.3m이며 기존 입구 위치·폭과 방 깊이는 유지한다. 오른쪽 통로를 따라 사격대 옆으로 돌아 표적 앞까지 걸어갈 수 있다. 우측 벽·수납품·배관·조명도 외곽으로 옮겼고, 다섯 번째 표적·바닥 패드·후면 방탄판·조명과 `05` 바닥 표시를 추가했다. 확장 바닥은 기존 1.2m 타일 크기를 유지한다. 편집 원본과 변경 배치는 `RangeExpansion/RangeExpansion.blend`, `Models/`, `layout_manifest.json`에 있다.
 
-`FiringBench_001`~`005`는 표적 01~05와 중심을 맞춘 5개 사수 자리다. 사로 간격은 210cm이며, `LanePartition_001`~`004`이 사수 사이를 구획한다. 칸막이는 높이 170cm, 본체 두께 10.5cm, 받침 포함 길이 208cm인 독립 메시다. 모서리는 3단 베벨로 마감했고 기존 `MI_Range_Props` 아틀라스를 사용한다. 탄환과 캐릭터 충돌을 모두 유지한다. 사격 방향과 평행하게 놓여 기본 카메라에서 사수 정면을 가리지 않는다.
+`FiringBench_001`~`005`는 표적 01~05와 중심을 맞춘 5개 사수 자리다. 사로 간격은 210cm이며, `LanePartition_001`~`004`이 사수 사이를 구획한다. 칸막이는 높이 170cm, 본체 두께 10.5cm, 받침 포함 길이 110cm인 독립 메시다. 중심을 원본 Y=-4.09m에 두어 서 있는 사수 자리만 보호하고, 앞쪽 받침도 테이블 뒤끝보다 8cm 뒤에서 끝나므로 테이블 사이를 가리지 않는다. 모서리는 3단 베벨로 마감했고 기존 `MI_Range_Props` 아틀라스를 사용한다. 탄환과 캐릭터 충돌을 모두 유지한다.
 
 사격대 위 장식 탄약 상자 `AmmoBox_001`~`003`은 렌더링을 유지하되 인스턴스 컴포넌트를 `NoCollision`으로 설정하고 overlap도 끈다. 탄환·조준 및 캐릭터 충돌에 관여하지 않는다. 공유 `SM_AmmoBox` 메시와 다른 위치의 상자, 사격대·칸막이 충돌은 유지한다.
 
-모니터 `ControlConsole_001`은 왼쪽 전용 책상 `RangeControlDesk_001`에 연결되어 책상을 옮기면 함께 이동한다. 책상은 기존 사격대와 같은 높이 93.5cm, 폭 120cm이며 공유 재질을 사용한다. 사로 뒤쪽에는 126cm 깊이의 진입 통로가 남는다. 칸막이·사격대는 각각 이동할 수 있고 모두 `ROOT_Range`에 속한다.
+모니터 `ControlConsole_001`은 왼쪽 전용 책상 `RangeControlDesk_001`에 연결되어 책상을 옮기면 함께 이동한다. 책상은 기존 사격대와 같은 높이 93.5cm, 폭 120cm이며 공유 재질을 사용한다. 사로 뒤쪽에는 116cm 깊이의 진입 통로가 남는다. 칸막이·사격대는 각각 이동할 수 있고 모두 `ROOT_Range`에 속한다.
 
-`RangeStations/RangeStations.blend`, `Models/`, 메시·배치 manifest가 편집 원본이다. 원래 `Range/Scene/placement_manifest.json`은 최초 사격장 자료이며 최신 사격대 배치는 `RangeStations/placement_manifest.json`을 참고한다. `Tools/Basement/verify_stations.py`를 별도 렌더 에디터의 `-ExecutePythonScript`로 실행하면 저장된 레벨의 10개 사로 진입 경로와 7개 표적 접근 경로, 5개 사격 시야, 칸막이 충돌, 표적 정렬과 모니터 받침을 검사한다.
+`RangeStations/RangeStations.blend`, `Models/`, 메시·배치 manifest가 편집 원본이다. 원래 `Range/Scene/placement_manifest.json`은 최초 사격장 자료이며 최신 사격대 배치는 `RangeStations/placement_manifest.json`을 참고한다. `Tools/Basement/verify_stations.py`를 별도 렌더 에디터의 `-ExecutePythonScript`로 실행하면 저장된 레벨의 10개 사로 진입 경로와 7개 표적 접근 경로, 5개 사격 시야, 칸막이 충돌, 테이블 구간 24개 투시선과 8cm 이격, 표적 정렬과 모니터 받침을 검사한다.
 
 ## 이동과 확장
 

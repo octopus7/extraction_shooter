@@ -527,7 +527,7 @@ void ATunaSweeperTopDownCharacter::RestoreTemporaryRollVisualRotation()
 
 FVector ATunaSweeperTopDownCharacter::ResolveRollDirection() const
 {
-	FVector ResolvedDirection(CurrentMoveInput.Y, CurrentMoveInput.X, 0.0f);
+	FVector ResolvedDirection = ResolveCameraRelativeMoveInput(CurrentMoveInput);
 	if (!ResolvedDirection.Normalize())
 	{
 		ResolvedDirection = AimDirection;

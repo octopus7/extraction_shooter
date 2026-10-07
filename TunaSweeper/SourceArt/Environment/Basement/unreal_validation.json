@@ -281,6 +281,13 @@
       "AmmoBox_001",
       "AmmoBox_002",
       "AmmoBox_003"
-    ]
+    ],
+    "partition_table_clearance_cm": [
+      8.0,
+      8.0,
+      8.0,
+      8.0
+    ],
+    "partition_length_cm": 110.00000000000001
   }
 }
