@@ -94,6 +94,8 @@ def validate(world=None):
     station_report=validate_stations(world)
     from verify_markers import validate as validate_markers
     marker_report=validate_markers()
+    from verify_monitor import validate as validate_monitor
+    monitor_report=validate_monitor()
     sweeps=[]
     # Capsule dimensions are deliberately larger than the 2.4 m entry needs.
     for name,start,end in [('hub_to_range',(0,0,.95),(0,10,.95)),('east',(0,0,.95),(9,0,.95)),('west',(0,0,.95),(-9,0,.95)),('south',(0,0,.95),(0,-7.4,.95))]:
@@ -162,6 +164,7 @@ def validate(world=None):
     report['module_group_movement']=moved_groups
     report['range_stations']=station_report
     report['range_markers']=marker_report
+    report['range_monitor']=monitor_report
     (SOURCE/'unreal_validation.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     u.log('BASEMENT_VERIFICATION_PASSED')
     return report

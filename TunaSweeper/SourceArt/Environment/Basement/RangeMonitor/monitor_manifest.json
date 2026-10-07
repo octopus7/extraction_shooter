@@ -1,0 +1,40 @@
+{
+  "lane_count": 5,
+  "rows": [
+    "01 READY",
+    "02 READY",
+    "03 READY",
+    "04 READY",
+    "05 READY"
+  ],
+  "screen_patch_xywh": [
+    512,
+    1024,
+    512,
+    512
+  ],
+  "source_resolution": [
+    512,
+    512
+  ],
+  "atlas_resolution": [
+    2048,
+    2048
+  ],
+  "channels": [
+    {
+      "channel": "BaseColor",
+      "outside_patch_sha256": "142f92af936f0f3da13ebefc65dcd53a8c5687bec479e9b631bffb9bafa814bc",
+      "patch_sha256": "fd6b6dfa8ef136ef74aaedbeb72fe69c000ab134c1851b40548fc51c9442e531"
+    },
+    {
+      "channel": "Emissive",
+      "outside_patch_sha256": "cfadd44a103cbd6d5726fa07b27d7aad2f67ed3930ff96901c486a5beaf7e723",
+      "patch_sha256": "fd6b6dfa8ef136ef74aaedbeb72fe69c000ab134c1851b40548fc51c9442e531"
+    }
+  ],
+  "other_atlas_regions_unchanged": true,
+  "normal_orm_unchanged": true,
+  "source": "Built-in image editing from existing monitor screenshot; resampled and packed into its existing UV patch.",
+  "prompt": "Preserve the existing RANGE CONTROL radar layout and blue/cyan style; display exactly five evenly spaced status rows 01 READY through 05 READY; keep SAFE / STANDBY and TS TRAINING SYSTEM."
+}

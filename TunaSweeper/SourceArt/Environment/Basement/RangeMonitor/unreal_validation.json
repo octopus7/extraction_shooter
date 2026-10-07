@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "monitor": "ControlConsole_001",
+  "display_rows": [
+    "01 READY",
+    "02 READY",
+    "03 READY",
+    "04 READY",
+    "05 READY"
+  ],
+  "placed_target_count": 5,
+  "screen_patch_resolution": [
+    512,
+    512
+  ],
+  "base_color_and_emissive_updated": true,
+  "shared_atlas_other_regions_unchanged": true,
+  "static_artwork": true
+}

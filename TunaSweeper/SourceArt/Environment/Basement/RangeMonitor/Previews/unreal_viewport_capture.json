@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "started_at_utc": "2026-10-07T14:50:46.217591+00:00",
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "level": "/Game/Environment/Basement/Maps/L_Basement",
+  "requested_cameras": [
+    "Basement_RangeCamera"
+  ],
+  "resolution": [
+    1600,
+    900
+  ],
+  "warmup_seconds": 15.0,
+  "warmup_frames": 90,
+  "captures": [
+    {
+      "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\RangeMonitor\\Previews\\UE_Basement_Range.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 1230190,
+      "sha256": "c5d48ef9f30fca9d5467c913d8fab3b5e2108d8e521ab1ad94169a97c865fb68",
+      "camera_label": "Basement_RangeCamera"
+    }
+  ],
+  "validation": "rendered editor viewport PNG; visual acceptance is separate",
+  "monitor_validation": {
+    "passed": true,
+    "monitor": "ControlConsole_001",
+    "display_rows": [
+      "01 READY",
+      "02 READY",
+      "03 READY",
+      "04 READY",
+      "05 READY"
+    ],
+    "placed_target_count": 5,
+    "screen_patch_resolution": [
+      512,
+      512
+    ],
+    "base_color_and_emissive_updated": true,
+    "shared_atlas_other_regions_unchanged": true,
+    "static_artwork": true
+  },
+  "camera_transforms": [
+    {
+      "label": "Basement_RangeCamera",
+      "actor_location": [
+        837.0,
+        -460.0,
+        193.5
+      ],
+      "actor_rotation": [
+        -13.245007255996091,
+        3.0664855011258925,
+        5.442438837667654e-09
+      ],
+      "component_location": [
+        837.0,
+        -460.0,
+        193.5
+      ],
+      "component_rotation": [
+        -13.245007255996091,
+        3.0664855011258925,
+        5.442438837667654e-09
+      ],
+      "fov": 35.0
+    }
+  ],
+  "asset_packages_checked": 70,
+  "asset_packages_unchanged": true,
+  "changed_asset_packages": [],
+  "elapsed_seconds": 18.406
+}
