@@ -43,7 +43,13 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 ## 카메라와 투명벽
 
-프로젝트 기본 카메라는 UE -X에서 +X 방향을 본다. 이 방향에서 캐릭터를 가리는 앞쪽 벽은 컴포넌트 Visibility를 끄고 Hidden In Game을 켰다. 그림자도 끄되 BlockAll과 QueryAndPhysics 충돌은 유지한다. `BasementCollisionOnly` 태그로 찾을 수 있다. 에디터에서도 해당 벽은 숨김 상태로 저장된다.
+사격장은 기존 `/Game/Camera/BP_LocationBlendCamera` 인스턴스 `Basement_RangeLocationBlend`가 `Basement_RangeCamera`를 참조한다. 플레이어가 UE (1590, 0, 0) 기준 반경 1250cm에 들어오면 기본 시점에서 부드럽게 전환하고, 800cm 안에서는 사선 카메라를 완전히 적용한다. 사격장 바닥 전체가 완료 반경에 포함된다. 사다리실 중심에서는 가중치 0이며 퇴장하면 플레이어 카메라로 복귀한다. 우선순위는 10이다. 카메라는 UE (290, -1200, 1950)에서 (1490, 0, 65)를 향하며 FOV 55°, yaw 45°로 사격장 전체를 보여 준다.
+
+촬영 카메라와 거리 판정 BP는 서로 독립적으로 조정할 수 있으며 둘 다 `ROOT_Range`의 자식이다. 구도만 바꿀 때는 `Basement_RangeCamera`를 Pilot하고, 전환 범위는 BP의 `Blend Start Distance`와 `Blend Complete Distance`에서 조정한다. `range_camera_manifest.json`에 최종 배치와 추가로 숨긴 벽·부착물 목록을 기록한다.
+
+기본 UE -X 방향의 앞쪽 벽에 더해 사선 카메라를 가리는 UE -Y 쪽 사격장 측벽과 입구 복도 서쪽 벽의 Visibility를 끄고 Hidden In Game을 켰다. 그림자도 끄되 BlockAll과 QueryAndPhysics 충돌은 유지한다. `BasementCollisionOnly` 태그로 찾을 수 있다. 해당 측벽의 배관·등기구·환기 패널도 숨겼으며, 광원과 독립 가구는 유지한다. 에디터에서도 숨김 상태로 저장된다.
+
+`Tools/Basement/verify_range_camera.py`는 저장된 범위·구도·투명벽 충돌과 실제 PIE 진입/접근/4개 사로/표적 측면/퇴장 위치의 카메라 가중치·시점·복귀를 확인한다. `range_camera_validation.json`과 `Previews/UE_Basement_RangeGameplay.png`가 검증 결과다.
 
 방 전체를 다른 방향으로 회전·재배치할 때는 새 카메라 방향에 맞게 앞쪽 벽의 표시 상태를 다시 지정한다. 자동 카메라 추적 숨김 로직은 사용하지 않는다. 충돌까지 제거하거나 액터를 삭제하면 투명벽 기능도 사라지므로 표시 설정만 변경한다.
 

@@ -200,7 +200,7 @@
         1
       ],
       "zone": "North_RangeLink",
-      "collision_only": false
+      "collision_only": true
     },
     {
       "id": "North_RangeLink_001",
@@ -221,7 +221,7 @@
         1
       ],
       "zone": "North_RangeLink",
-      "collision_only": false
+      "collision_only": true
     },
     {
       "id": "North_RangeLink_002",
@@ -242,7 +242,7 @@
         1
       ],
       "zone": "North_RangeLink",
-      "collision_only": false
+      "collision_only": true
     },
     {
       "id": "LadderHub_003",
@@ -4875,7 +4875,7 @@
       ]
     }
   ],
-  "camera_cutaway": "author -Y / UE -X facing walls invisible with BlockAll collision",
+  "camera_cutaway": "Default UE -X cutaway plus range-camera-facing UE -Y range walls and west entry-corridor walls; all retain BlockAll collision",
   "floor_z_cm": 0,
   "corridor_width_cm": 240,
   "wall_height_cm": 280,

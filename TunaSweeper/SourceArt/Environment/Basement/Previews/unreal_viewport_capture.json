@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "started_at_utc": "2026-10-07T09:25:25.266030+00:00",
+  "started_at_utc": "2026-10-07T09:35:38.406949+00:00",
   "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
   "level": "/Game/Environment/Basement/Maps/L_Basement",
   "requested_cameras": [
@@ -19,24 +19,24 @@
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Overview.png",
       "width": 1600,
       "height": 900,
-      "bytes": 450813,
-      "sha256": "a490998b6ef0089248545437ad98c43086a30b733da0f9d623e862acb799ef25",
+      "bytes": 440316,
+      "sha256": "ba41622f11b491a40ea26e6c12ff8fcfdc48f50c26d92b7c37904b306da3463c",
       "camera_label": "Basement_OverviewCamera"
     },
     {
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Range.png",
       "width": 1600,
       "height": 900,
-      "bytes": 1221015,
-      "sha256": "a3eb6e379def61b7013e80149fb15d79bcab2651f189009ee4873c14c6fa1790",
+      "bytes": 1066142,
+      "sha256": "5b3f33952c44a93b4cb8ef65b5f0ca4b3011a5ea8854895c35c2a6f6b8d2c113",
       "camera_label": "Basement_RangeCamera"
     },
     {
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Hub.png",
       "width": 1600,
       "height": 900,
-      "bytes": 1163524,
-      "sha256": "3cd606a919ed607bbaf208cb087600f7e4643cbcdb4e3854dec8c0f119c31b93",
+      "bytes": 1159884,
+      "sha256": "206419aa6f7643fb1227e9f820c16cb659f4c717d3f2143fef54cc8cd06060bc",
       "camera_label": "Basement_HubCamera"
     }
   ],
@@ -69,26 +69,26 @@
     {
       "label": "Basement_RangeCamera",
       "actor_location": [
-        300.0,
-        -1.8369701987210297e-14,
-        1500.0
+        290.0,
+        -1200.0,
+        1950.0
       ],
       "actor_rotation": [
-        -51.34019174590991,
-        0.0,
-        0.0
+        -48.003447256349865,
+        45.0,
+        2.5906428844328774e-07
       ],
       "component_location": [
-        300.0,
-        -1.8369701987210297e-14,
-        1500.0
+        290.0,
+        -1200.0,
+        1950.0
       ],
       "component_rotation": [
-        -51.34019174590991,
-        0.0,
-        -0.0
+        -48.003447256349865,
+        45.0,
+        2.5906428844328774e-07
       ],
-      "fov": 60.0
+      "fov": 55.0
     },
     {
       "label": "Basement_HubCamera",
@@ -118,5 +118,5 @@
   "asset_packages_checked": 64,
   "asset_packages_unchanged": true,
   "changed_asset_packages": [],
-  "elapsed_seconds": 50.704
+  "elapsed_seconds": 50.672
 }

@@ -1,0 +1,135 @@
+{
+  "passed": true,
+  "static_weights": [
+    {
+      "location_cm": [
+        0,
+        0,
+        95
+      ],
+      "weight": 0.0
+    },
+    {
+      "location_cm": [
+        340,
+        0,
+        95
+      ],
+      "weight": 0.0
+    },
+    {
+      "location_cm": [
+        790,
+        0,
+        95
+      ],
+      "weight": 1.0
+    },
+    {
+      "location_cm": [
+        1590,
+        0,
+        95
+      ],
+      "weight": 1.0
+    }
+  ],
+  "physical_cutaway_walls": [
+    "North_RangeLink_000",
+    "North_RangeLink_001",
+    "North_RangeLink_002",
+    "Wall_E07_00",
+    "Wall_E07_01",
+    "Wall_E07_02",
+    "Wall_E07_03",
+    "Wall_E07_04",
+    "WallCorner_06"
+  ],
+  "runtime_samples": [
+    {
+      "position": "hub",
+      "weight": 0.0,
+      "view_target": "BP_TunaSweeperPlayerCharacter0"
+    },
+    {
+      "position": "approach",
+      "weight": 0.28936073184013367,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "entrance",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "booth_1",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "booth_2",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "booth_3",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "booth_4",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "left_target_side",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "right_target_side",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
+      "position": "exit",
+      "weight": 0.0,
+      "view_target": "BP_TunaSweeperPlayerCharacter0"
+    }
+  ],
+  "range_floor_ndc_16_9": [
+    [
+      0.125,
+      -0.7926
+    ],
+    [
+      0.5323,
+      -0.1124
+    ],
+    [
+      0.501,
+      0.1172
+    ],
+    [
+      0.0503,
+      0.6086
+    ],
+    [
+      -0.0959,
+      0.6086
+    ],
+    [
+      -0.5042,
+      0.1704
+    ],
+    [
+      -0.5352,
+      -0.0523
+    ],
+    [
+      -0.0855,
+      -0.7926
+    ]
+  ],
+  "saved_map_unchanged": true
+}

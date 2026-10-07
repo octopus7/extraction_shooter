@@ -1,0 +1,46 @@
+{
+  "camera": "Basement_RangeCamera",
+  "blend_actor": "Basement_RangeLocationBlend",
+  "blueprint": "/Game/Camera/BP_LocationBlendCamera",
+  "camera_location_cm": [
+    290,
+    -1200,
+    1950
+  ],
+  "look_at_cm": [
+    1490,
+    0,
+    65
+  ],
+  "field_of_view": 55,
+  "blend_origin_cm": [
+    1590,
+    0,
+    0
+  ],
+  "start_radius_cm": 1250,
+  "complete_radius_cm": 800,
+  "priority": 10,
+  "additional_collision_only_walls": [
+    "North_RangeLink_000",
+    "North_RangeLink_001",
+    "North_RangeLink_002",
+    "Wall_E07_00",
+    "Wall_E07_01",
+    "Wall_E07_02",
+    "Wall_E07_03",
+    "Wall_E07_04",
+    "WallCorner_06"
+  ],
+  "hidden_wall_fixtures": [
+    "Conduit_160_006",
+    "Conduit_160_007",
+    "Conduit_160_008",
+    "Conduit_160_009",
+    "LEDBar_005",
+    "LEDBar_006",
+    "Conduit_160_010",
+    "JunctionBox_001",
+    "VentPanel_001"
+  ]
+}
