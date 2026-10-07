@@ -1,0 +1,219 @@
+{
+  "passed": true,
+  "map": "/Game/Environment/Basement/Maps/L_Basement",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "assets": [
+    {
+      "name": "SM_Basement_Wall40",
+      "triangles": 12,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_Wall80",
+      "triangles": 12,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_Wall160",
+      "triangles": 12,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_Wall240",
+      "triangles": 12,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_Floor80",
+      "triangles": 12,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_EndCap240",
+      "triangles": 12,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_CornerConvex",
+      "triangles": 28,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_CornerConcave",
+      "triangles": 28,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_Basement_FloorCornerFill",
+      "triangles": 16,
+      "uv_channels": 2
+    }
+  ],
+  "range_materials": [
+    {
+      "atlas": "Architecture",
+      "textures": {
+        "BaseColor": "T_Architecture_BaseColor",
+        "Normal": "T_Architecture_Normal",
+        "ORM": "T_Architecture_ORM",
+        "Emissive": "T_Architecture_Emissive"
+      }
+    },
+    {
+      "atlas": "Props",
+      "textures": {
+        "BaseColor": "T_Props_BaseColor",
+        "Normal": "T_Props_Normal",
+        "ORM": "T_Props_ORM",
+        "Emissive": "T_Props_Emissive"
+      }
+    },
+    {
+      "atlas": "Robot",
+      "textures": {
+        "BaseColor": "T_Robot_BaseColor",
+        "Normal": "T_Robot_Normal",
+        "ORM": "T_Robot_ORM",
+        "Emissive": "T_Robot_Emissive"
+      }
+    }
+  ],
+  "range_targets": 4,
+  "module_placements": 221,
+  "hidden_collision_actors": [
+    "Wall_E00_00",
+    "Wall_E00_01",
+    "Wall_E01_00",
+    "Wall_E01_01",
+    "Wall_E02_00",
+    "Wall_E08_00",
+    "WallCorner_00",
+    "WallCorner_01",
+    "WallCorner_02",
+    "WallCorner_07",
+    "West_Expansion_017",
+    "West_Expansion_018",
+    "West_Expansion_019",
+    "West_Expansion_020",
+    "LadderHub_021",
+    "LadderHub_025",
+    "LadderHub_026",
+    "LadderHub_027",
+    "LadderHub_028",
+    "LadderHub_037",
+    "LadderHub_039",
+    "LadderHub_040",
+    "LadderHub_041",
+    "LadderHub_044",
+    "East_Expansion_046",
+    "East_Expansion_047",
+    "East_Expansion_048",
+    "East_Expansion_049",
+    "South_Expansion_RemovableCap_033"
+  ],
+  "physical_invisible_wall_tests": [
+    "West_Expansion_017",
+    "West_Expansion_018",
+    "West_Expansion_019",
+    "West_Expansion_020",
+    "LadderHub_026",
+    "LadderHub_027",
+    "South_Expansion_RemovableCap_033",
+    "LadderHub_039",
+    "LadderHub_040",
+    "East_Expansion_046",
+    "East_Expansion_047",
+    "East_Expansion_048",
+    "East_Expansion_049",
+    "Wall_E00_00",
+    "Wall_E00_01",
+    "Wall_E01_00",
+    "Wall_E01_01",
+    "Wall_E02_00",
+    "Wall_E08_00",
+    "LadderHub_021_segment0",
+    "LadderHub_021_segment1",
+    "LadderHub_021_segment2",
+    "LadderHub_025_segment0",
+    "LadderHub_025_segment1",
+    "LadderHub_025_segment2",
+    "LadderHub_028_segment0",
+    "LadderHub_028_segment1",
+    "LadderHub_028_segment2",
+    "LadderHub_037_segment0",
+    "LadderHub_037_segment1",
+    "LadderHub_037_segment2",
+    "LadderHub_041_segment0",
+    "LadderHub_041_segment1",
+    "LadderHub_041_segment2",
+    "LadderHub_044_segment0",
+    "LadderHub_044_segment1",
+    "LadderHub_044_segment2"
+  ],
+  "capsule_routes": [
+    {
+      "route": "hub_to_range",
+      "capsule_radius_cm": 42,
+      "capsule_half_height_cm": 90,
+      "clear": true
+    },
+    {
+      "route": "east",
+      "capsule_radius_cm": 42,
+      "capsule_half_height_cm": 90,
+      "clear": true
+    },
+    {
+      "route": "west",
+      "capsule_radius_cm": 42,
+      "capsule_half_height_cm": 90,
+      "clear": true
+    },
+    {
+      "route": "south",
+      "capsule_radius_cm": 42,
+      "capsule_half_height_cm": 90,
+      "clear": true
+    }
+  ],
+  "floor_join_gap_cm": 0,
+  "expansion_connectors": 3,
+  "module_group_movement": [
+    {
+      "root": "LadderHub",
+      "descendants": 103,
+      "translation_verified": true,
+      "rotation_90_degrees_verified": true
+    },
+    {
+      "root": "Range",
+      "descendants": 117,
+      "translation_verified": true,
+      "rotation_90_degrees_verified": true
+    },
+    {
+      "root": "North_RangeLink",
+      "descendants": 31,
+      "translation_verified": true,
+      "rotation_90_degrees_verified": true
+    },
+    {
+      "root": "East_Expansion",
+      "descendants": 36,
+      "translation_verified": true,
+      "rotation_90_degrees_verified": true
+    },
+    {
+      "root": "West_Expansion",
+      "descendants": 36,
+      "translation_verified": true,
+      "rotation_90_degrees_verified": true
+    },
+    {
+      "root": "South_Expansion",
+      "descendants": 28,
+      "translation_verified": true,
+      "rotation_90_degrees_verified": true
+    }
+  ]
+}

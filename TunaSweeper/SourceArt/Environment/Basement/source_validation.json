@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "assets": [
+    {
+      "name": "SM_Basement_Wall40",
+      "closed_manifold": true,
+      "positive_volume_m3": 0.2911999886989593,
+      "uv_channels": 2,
+      "triangles": 12
+    },
+    {
+      "name": "SM_Basement_Wall80",
+      "closed_manifold": true,
+      "positive_volume_m3": 0.5823999773979186,
+      "uv_channels": 2,
+      "triangles": 12
+    },
+    {
+      "name": "SM_Basement_Wall160",
+      "closed_manifold": true,
+      "positive_volume_m3": 1.1647999547958372,
+      "uv_channels": 2,
+      "triangles": 12
+    },
+    {
+      "name": "SM_Basement_Wall240",
+      "closed_manifold": true,
+      "positive_volume_m3": 1.7471999755859347,
+      "uv_channels": 2,
+      "triangles": 12
+    },
+    {
+      "name": "SM_Basement_Floor80",
+      "closed_manifold": true,
+      "positive_volume_m3": 0.14080000343322754,
+      "uv_channels": 2,
+      "triangles": 12
+    },
+    {
+      "name": "SM_Basement_EndCap240",
+      "closed_manifold": true,
+      "positive_volume_m3": 1.7471999755859347,
+      "uv_channels": 2,
+      "triangles": 12
+    },
+    {
+      "name": "SM_Basement_CornerConvex",
+      "closed_manifold": true,
+      "positive_volume_m3": 0.578760039716213,
+      "uv_channels": 2,
+      "triangles": 28
+    },
+    {
+      "name": "SM_Basement_CornerConcave",
+      "closed_manifold": true,
+      "positive_volume_m3": 0.294839989011347,
+      "uv_channels": 2,
+      "triangles": 28
+    },
+    {
+      "name": "SM_Basement_FloorCornerFill",
+      "closed_manifold": true,
+      "positive_volume_m3": 0.008800001081800683,
+      "uv_channels": 2,
+      "triangles": 16
+    }
+  ],
+  "placements": 221,
+  "connectors": 3,
+  "range_join_gap_cm": 0,
+  "corner_segments": 3
+}

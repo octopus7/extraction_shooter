@@ -1,0 +1,143 @@
+{
+  "passed": true,
+  "references": [
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeFloor",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_RangeFloor.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_WallPanel_160",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_WallPanel_160.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_WallCorner_45",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_WallCorner_45.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_BackstopPanel",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_BackstopPanel.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RobotTarget",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_RobotTarget.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_TargetPad",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_TargetPad.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_LEDBar",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_LEDBar.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_Conduit_160",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_Conduit_160.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_ConduitElbow",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_ConduitElbow.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_JunctionBox",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_JunctionBox.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_VentPanel",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_VentPanel.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_SafetySign",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_SafetySign.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_FiringBench",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_FiringBench.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_Stool",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_Stool.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_ControlConsole",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_ControlConsole.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_SupplyCrate",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_SupplyCrate.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_UtilityCase",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_UtilityCase.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_AmmoBox",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_AmmoBox.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_WeaponRack",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_WeaponRack.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_DisplayRifle.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_StorageCabinet",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_StorageCabinet.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_ServiceDrum",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_ServiceDrum.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_CableReel",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_CableReel.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_Clipboard",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_Clipboard.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_FloorMarkings",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_FloorMarkings.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_Wall40",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_Wall40.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_Wall80",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_Wall80.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_Wall160",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_Wall160.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_Wall240",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_Wall240.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_Floor80",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_Floor80.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_EndCap240",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_EndCap240.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_CornerConvex",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_CornerConvex.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_CornerConcave",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_CornerConcave.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Meshes/SM_Basement_FloorCornerFill",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_FloorCornerFill.glb"
+    }
+  ],
+  "temporary_sources": 0,
+  "calibration_asset_removed": true
+}

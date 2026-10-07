@@ -1,0 +1,4884 @@
+{
+  "assets": {
+    "SM_Basement_Wall40": {
+      "file": "Models/SM_Basement_Wall40.glb",
+      "bounds_m": [
+        [
+          0.0,
+          -0.25999999046325684,
+          0.0
+        ],
+        [
+          0.4000000059604645,
+          0.0,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 12,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    },
+    "SM_Basement_Wall80": {
+      "file": "Models/SM_Basement_Wall80.glb",
+      "bounds_m": [
+        [
+          0.0,
+          -0.25999999046325684,
+          0.0
+        ],
+        [
+          0.800000011920929,
+          0.0,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 12,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    },
+    "SM_Basement_Wall160": {
+      "file": "Models/SM_Basement_Wall160.glb",
+      "bounds_m": [
+        [
+          0.0,
+          -0.25999999046325684,
+          0.0
+        ],
+        [
+          1.600000023841858,
+          0.0,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 12,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    },
+    "SM_Basement_Wall240": {
+      "file": "Models/SM_Basement_Wall240.glb",
+      "bounds_m": [
+        [
+          0.0,
+          -0.25999999046325684,
+          0.0
+        ],
+        [
+          2.4000000953674316,
+          0.0,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 12,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    },
+    "SM_Basement_Floor80": {
+      "file": "Models/SM_Basement_Floor80.glb",
+      "bounds_m": [
+        [
+          0.0,
+          0.0,
+          -0.2199999988079071
+        ],
+        [
+          0.800000011920929,
+          0.800000011920929,
+          0.0
+        ]
+      ],
+      "triangles": 12,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    },
+    "SM_Basement_EndCap240": {
+      "file": "Models/SM_Basement_EndCap240.glb",
+      "bounds_m": [
+        [
+          0.0,
+          -0.25999999046325684,
+          0.0
+        ],
+        [
+          2.4000000953674316,
+          0.0,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 12,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    },
+    "SM_Basement_CornerConvex": {
+      "file": "Models/SM_Basement_CornerConvex.glb",
+      "bounds_m": [
+        [
+          -0.4000000059604645,
+          -0.2600000202655792,
+          0.0
+        ],
+        [
+          0.2600000202655792,
+          0.4000000059604645,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 28,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete",
+      "corner_segments": 3,
+      "inner_radius_cm": 40,
+      "wall_thickness_cm": 26,
+      "turn_degrees": 90
+    },
+    "SM_Basement_CornerConcave": {
+      "file": "Models/SM_Basement_CornerConcave.glb",
+      "bounds_m": [
+        [
+          -0.4000000059604645,
+          -0.4000000059604645,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          2.799999952316284
+        ]
+      ],
+      "triangles": 28,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete",
+      "corner_segments": 3,
+      "inner_radius_cm": 40,
+      "wall_thickness_cm": 26,
+      "turn_degrees": -90
+    },
+    "SM_Basement_FloorCornerFill": {
+      "file": "Models/SM_Basement_FloorCornerFill.glb",
+      "bounds_m": [
+        [
+          -0.4000000059604645,
+          -0.4000000059604645,
+          -0.2199999988079071
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "triangles": 16,
+      "collision": "complex",
+      "lightmap_resolution": 128,
+      "material": "Concrete"
+    }
+  },
+  "instances": [
+    {
+      "id": "North_RangeLink_000",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -1.2000000476837158,
+        9.199999809265137,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_001",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -1.2000000476837158,
+        6.799999713897705,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_002",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -1.2000000476837158,
+        4.399999618530273,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_003",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        -1.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_004",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        -1.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_005",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -1.600000023841858,
+        3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_006",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -2.4000000953674316,
+        3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_007",
+      "asset": "SM_Basement_CornerConvex",
+      "location_m": [
+        -3.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_008",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -3.200000047683716,
+        2.799999952316284,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_009",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -3.200000047683716,
+        2.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_010",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        -3.2,
+        1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_011",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        -3.2,
+        1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_012",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -3.6000001430511475,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_013",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -6.0,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_014",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -8.40000057220459,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_015",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -9.199999809265137,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_RemovableCap_016",
+      "asset": "SM_Basement_EndCap240",
+      "location_m": [
+        -9.6,
+        1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion_RemovableCap",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_017",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -9.600000381469727,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "West_Expansion_018",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -7.200000286102295,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "West_Expansion_019",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -4.800000190734863,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "West_Expansion_020",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -4.000000476837158,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_021",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        -3.2,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_022",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        -3.2,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_023",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -3.200000047683716,
+        -1.600000023841858,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_024",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -3.200000047683716,
+        -2.4000000953674316,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_025",
+      "asset": "SM_Basement_CornerConvex",
+      "location_m": [
+        -3.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_026",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        -2.799999952316284,
+        -3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_027",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -2.0,
+        -3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_028",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        -1.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_029",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        -1.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_030",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        -1.2000000476837158,
+        -3.6000001430511475,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_031",
+      "asset": "SM_Basement_Wall160",
+      "location_m": [
+        -1.2000000476837158,
+        -6.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_032",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        -1.2000000476837158,
+        -7.600000381469727,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        -90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_RemovableCap_033",
+      "asset": "SM_Basement_EndCap240",
+      "location_m": [
+        -1.2,
+        -8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion_RemovableCap",
+      "collision_only": true
+    },
+    {
+      "id": "South_Expansion_034",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        1.2000000476837158,
+        -8.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_035",
+      "asset": "SM_Basement_Wall160",
+      "location_m": [
+        1.2000000476837158,
+        -5.599999904632568,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_036",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        1.2000000476837158,
+        -4.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_037",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        1.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_038",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        1.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_039",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        1.600000023841858,
+        -3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_040",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        2.4000000953674316,
+        -3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_041",
+      "asset": "SM_Basement_CornerConvex",
+      "location_m": [
+        3.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_042",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        3.200000047683716,
+        -2.799999952316284,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_043",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        3.200000047683716,
+        -2.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_044",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        3.2,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": true
+    },
+    {
+      "id": "LadderHub_045",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        3.2,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_046",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        3.6000001430511475,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "East_Expansion_047",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        6.0,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "East_Expansion_048",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        8.40000057220459,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "East_Expansion_049",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        9.199999809265137,
+        -1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": true
+    },
+    {
+      "id": "East_Expansion_RemovableCap_050",
+      "asset": "SM_Basement_EndCap240",
+      "location_m": [
+        9.6,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion_RemovableCap",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_051",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        9.600000381469727,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_052",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        7.200000286102295,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_053",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        4.800000190734863,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_054",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        4.000000476837158,
+        1.2000000476837158,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_055",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        3.2,
+        1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_056",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        3.2,
+        1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_057",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        3.200000047683716,
+        1.600000023841858,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_058",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        3.200000047683716,
+        2.4000000953674316,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_059",
+      "asset": "SM_Basement_CornerConvex",
+      "location_m": [
+        3.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_060",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        2.799999952316284,
+        3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_061",
+      "asset": "SM_Basement_Wall40",
+      "location_m": [
+        2.0,
+        3.200000047683716,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_062",
+      "asset": "SM_Basement_CornerConcave",
+      "location_m": [
+        1.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_063",
+      "asset": "SM_Basement_FloorCornerFill",
+      "location_m": [
+        1.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        180.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_064",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        1.2000000476837158,
+        3.6000001430511475,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_065",
+      "asset": "SM_Basement_Wall240",
+      "location_m": [
+        1.2000000476837158,
+        6.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_066",
+      "asset": "SM_Basement_Wall80",
+      "location_m": [
+        1.2000000476837158,
+        8.40000057220459,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        90.0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_067",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_068",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_069",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_070",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_071",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_072",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_073",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_074",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -3.2,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_075",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_076",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_077",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_078",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_079",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_080",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_081",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_082",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.4000000000000004,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_083",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_084",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_085",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_086",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_087",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_088",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_089",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_090",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.6000000000000003,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_091",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_092",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_093",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_094",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_095",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_096",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_097",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_098",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.8000000000000003,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_099",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_100",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_101",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_102",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_103",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_104",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_105",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_106",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -2.220446049250313e-16,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_107",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_108",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_109",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_110",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_111",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_112",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_113",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_114",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.7999999999999998,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_115",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_116",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_117",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_118",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_119",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_120",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_121",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_122",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        1.5999999999999999,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_123",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        -3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_124",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        -2.4000000000000004,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_125",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        -1.6000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_126",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        -0.8000000000000003,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_127",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        -2.220446049250313e-16,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_128",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        0.7999999999999998,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_129",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        1.5999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "LadderHub_130",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        2.4,
+        2.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "LadderHub",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_131",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_132",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        4.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_133",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        4.8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_134",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        5.6,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_135",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        6.3999999999999995,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_136",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        7.199999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_137",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        7.999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_138",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        8.799999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.5000000000000004,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_139",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_140",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        4.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_141",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        4.8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_142",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        5.6,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_143",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        6.3999999999999995,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_144",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        7.199999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_145",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        7.999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_146",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        8.799999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.5000000000000004,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_147",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        3.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_148",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        4.0,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_149",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        4.8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_150",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        5.6,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_151",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        6.3999999999999995,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_152",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        7.199999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_153",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        7.999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "North_RangeLink_154",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        8.799999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        0.5000000000000004,
+        1
+      ],
+      "zone": "North_RangeLink",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_155",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        -8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_156",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        -7.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_157",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        -6.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_158",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        -5.6000000000000005,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_159",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        -4.800000000000001,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_160",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -1.2,
+        -4.000000000000001,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_161",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        -8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_162",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        -7.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_163",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        -6.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_164",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        -5.6000000000000005,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_165",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        -4.800000000000001,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_166",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -0.3999999999999999,
+        -4.000000000000001,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_167",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        -8,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_168",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        -7.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_169",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        -6.4,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_170",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        -5.6000000000000005,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_171",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        -4.800000000000001,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "South_Expansion_172",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        0.40000000000000013,
+        -4.000000000000001,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "South_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_173",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -9.6,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_174",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -9.6,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_175",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -9.6,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_176",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -8.799999999999999,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_177",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -8.799999999999999,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_178",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -8.799999999999999,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_179",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -7.999999999999999,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_180",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -7.999999999999999,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_181",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -7.999999999999999,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_182",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -7.199999999999999,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_183",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -7.199999999999999,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_184",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -7.199999999999999,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_185",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -6.3999999999999995,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_186",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -6.3999999999999995,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_187",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -6.3999999999999995,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_188",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -5.6,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_189",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -5.6,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_190",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -5.6,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_191",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -4.8,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_192",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -4.8,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_193",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -4.8,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_194",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -4.0,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_195",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -4.0,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        1.0,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "West_Expansion_196",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        -4.0,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.9999999999999998,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "West_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_197",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        3.2,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_198",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        3.2,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_199",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        3.2,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_200",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        4.0,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_201",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        4.0,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_202",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        4.0,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_203",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        4.8,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_204",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        4.8,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_205",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        4.8,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_206",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        5.6,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_207",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        5.6,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_208",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        5.6,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_209",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        6.3999999999999995,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_210",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        6.3999999999999995,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_211",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        6.3999999999999995,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_212",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        7.199999999999999,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_213",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        7.199999999999999,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_214",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        7.199999999999999,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_215",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        7.999999999999999,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_216",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        7.999999999999999,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_217",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        7.999999999999999,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_218",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        8.799999999999999,
+        -1.2,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_219",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        8.799999999999999,
+        -0.3999999999999999,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    },
+    {
+      "id": "East_Expansion_220",
+      "asset": "SM_Basement_Floor80",
+      "location_m": [
+        8.799999999999999,
+        0.40000000000000013,
+        0
+      ],
+      "rotation_xyz_deg": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        0.9999999999999998,
+        1
+      ],
+      "zone": "East_Expansion",
+      "collision_only": false
+    }
+  ],
+  "author_to_world": "author +Y maps to UE +X; author +X maps to UE +Y",
+  "range_origin_m": [
+    0,
+    15,
+    0
+  ],
+  "range_entrance_m": [
+    0,
+    9.2,
+    0
+  ],
+  "connectors": [
+    {
+      "id": "East",
+      "position_m": [
+        9.6,
+        0,
+        0
+      ],
+      "outward_author": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "West",
+      "position_m": [
+        -9.6,
+        0,
+        0
+      ],
+      "outward_author": [
+        -1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "South",
+      "position_m": [
+        0,
+        -8,
+        0
+      ],
+      "outward_author": [
+        0,
+        -1,
+        0
+      ]
+    }
+  ],
+  "camera_cutaway": "author -Y / UE -X facing walls invisible with BlockAll collision",
+  "floor_z_cm": 0,
+  "corridor_width_cm": 240,
+  "wall_height_cm": 280,
+  "wall_thickness_cm": 26,
+  "grid_cm": 40
+}

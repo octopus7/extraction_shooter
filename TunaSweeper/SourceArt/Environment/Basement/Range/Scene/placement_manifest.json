@@ -1,0 +1,3025 @@
+{
+  "schema_version": 1,
+  "kit": "TunaSweeper Indoor Range",
+  "units": "metres",
+  "author_axes": {
+    "X": "right across range",
+    "Y": "forward from entrance to targets",
+    "Z": "up"
+  },
+  "gltf_axes": {
+    "X": "author X",
+    "Y": "author Z",
+    "Z": "negative author Y"
+  },
+  "dimensions": {
+    "interior_width_m": 10.8,
+    "interior_depth_m": 11.6,
+    "wall_height_m": 2.8,
+    "wall_thickness_m": 0.26,
+    "clear_entrance_width_m": 2.4,
+    "entrance_center_m": [
+      0,
+      -5.8,
+      0
+    ]
+  },
+  "boundary_xy_m": [
+    [
+      -3.8,
+      -5.8
+    ],
+    [
+      3.8,
+      -5.8
+    ],
+    [
+      5.4,
+      -4.2
+    ],
+    [
+      5.4,
+      4.2
+    ],
+    [
+      3.8,
+      5.8
+    ],
+    [
+      -3.8,
+      5.8
+    ],
+    [
+      -5.4,
+      4.2
+    ],
+    [
+      -5.4,
+      -4.2
+    ]
+  ],
+  "assets": {
+    "SM_RangeFloor": {
+      "file": "Assets/GLB/SM_RangeFloor.glb",
+      "material": "Architecture",
+      "vertices": 300,
+      "triangles": 142,
+      "instances": 1,
+      "bounds_m": [
+        [
+          -5.4,
+          -5.8,
+          -0.22
+        ],
+        [
+          5.4,
+          5.8,
+          0.0
+        ]
+      ],
+      "collision": "complex",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Octagonal concrete/metal floor shell; tiled UV0, uniquely packed UV1. Top surface at Z=0.",
+      "bytes": 455124
+    },
+    "SM_WallPanel_160": {
+      "file": "Assets/GLB/SM_WallPanel_160.glb",
+      "material": "Architecture",
+      "vertices": 96,
+      "triangles": 108,
+      "instances": 23,
+      "bounds_m": [
+        [
+          -0.8,
+          -0.13,
+          0.0
+        ],
+        [
+          0.8,
+          0.13,
+          2.8
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Plain poured concrete wall, 1.6 m nominal length, 0.26 m thick, 2.8 m tall. No wall cap or coping.",
+      "bytes": 443500
+    },
+    "SM_WallCorner_45": {
+      "file": "Assets/GLB/SM_WallCorner_45.glb",
+      "material": "Architecture",
+      "vertices": 24,
+      "triangles": 12,
+      "instances": 8,
+      "bounds_m": [
+        [
+          0.0,
+          -0.26,
+          0.0
+        ],
+        [
+          0.18384776310850234,
+          0.0,
+          2.8
+        ]
+      ],
+      "collision": "complex",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Shared solid 45-degree outside corner infill; same concrete finish, no coping.",
+      "bytes": 438868
+    },
+    "SM_BackstopPanel": {
+      "file": "Assets/GLB/SM_BackstopPanel.glb",
+      "material": "Architecture",
+      "vertices": 192,
+      "triangles": 216,
+      "instances": 4,
+      "bounds_m": [
+        [
+          -0.96,
+          -0.16499999999999998,
+          0.01999999999999999
+        ],
+        [
+          0.96,
+          0.135,
+          2.25
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Replaceable painted impact surface; panel joints, fasteners and hit wear are texture.",
+      "bytes": 449524
+    },
+    "SM_RobotTarget": {
+      "file": "Assets/GLB/SM_RobotTarget.glb",
+      "material": "Robot",
+      "vertices": 2472,
+      "triangles": 2776,
+      "instances": 4,
+      "bounds_m": [
+        [
+          -0.6803469862291297,
+          -0.675,
+          0.0
+        ],
+        [
+          0.6803469862291297,
+          0.675,
+          1.925459231360939
+        ]
+      ],
+      "collision": "complex",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "One static quadrupedal rabbit-like robotic training dummy; exactly four legs. Red target is painted UV texture. Reused four times. No rig/damage behaviour.",
+      "bytes": 261916
+    },
+    "SM_TargetPad": {
+      "file": "Assets/GLB/SM_TargetPad.glb",
+      "material": "Architecture",
+      "vertices": 96,
+      "triangles": 108,
+      "instances": 4,
+      "bounds_m": [
+        [
+          -0.94,
+          -1.0,
+          0.0
+        ],
+        [
+          0.94,
+          1.0,
+          0.014
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Thin, non-colliding target-position marker. Safety border is texture.",
+      "bytes": 443436
+    },
+    "SM_LEDBar": {
+      "file": "Assets/GLB/SM_LEDBar.glb",
+      "material": "Architecture",
+      "vertices": 384,
+      "triangles": 432,
+      "instances": 8,
+      "bounds_m": [
+        [
+          -0.69,
+          -0.14,
+          -0.135
+        ],
+        [
+          0.69,
+          0.185,
+          0.135
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Shared light housing. Emissive is a texture; actual lights are placed separately.",
+      "bytes": 461572
+    },
+    "SM_Conduit_160": {
+      "file": "Assets/GLB/SM_Conduit_160.glb",
+      "material": "Architecture",
+      "vertices": 132,
+      "triangles": 120,
+      "instances": 15,
+      "bounds_m": [
+        [
+          -0.8,
+          -0.054,
+          -0.0513570518799383
+        ],
+        [
+          0.8,
+          0.054,
+          0.0513570518799383
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "One 1.6 m conduit asset, reused horizontally and vertically with transforms.",
+      "bytes": 445620
+    },
+    "SM_ConduitElbow": {
+      "file": "Assets/GLB/SM_ConduitElbow.glb",
+      "material": "Architecture",
+      "vertices": 216,
+      "triangles": 192,
+      "instances": 0,
+      "bounds_m": [
+        [
+          -0.004829469112141913,
+          -0.004829469112141902,
+          -0.037000000000000005
+        ],
+        [
+          0.196683459870831,
+          0.196683459870831,
+          0.037000000000000005
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 450720
+    },
+    "SM_JunctionBox": {
+      "file": "Assets/GLB/SM_JunctionBox.glb",
+      "material": "Architecture",
+      "vertices": 96,
+      "triangles": 108,
+      "instances": 2,
+      "bounds_m": [
+        [
+          -0.195,
+          -0.065,
+          -0.255
+        ],
+        [
+          0.195,
+          0.065,
+          0.255
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 443420
+    },
+    "SM_VentPanel": {
+      "file": "Assets/GLB/SM_VentPanel.glb",
+      "material": "Architecture",
+      "vertices": 96,
+      "triangles": 108,
+      "instances": 2,
+      "bounds_m": [
+        [
+          -0.44000000000000006,
+          -0.0375,
+          -0.285
+        ],
+        [
+          0.44000000000000006,
+          0.0375,
+          0.285
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Vent slats and screws are normal-map and base-colour details, not geometry.",
+      "bytes": 443488
+    },
+    "SM_SafetySign": {
+      "file": "Assets/GLB/SM_SafetySign.glb",
+      "material": "Architecture",
+      "vertices": 96,
+      "triangles": 108,
+      "instances": 2,
+      "bounds_m": [
+        [
+          -0.285,
+          -0.015,
+          -0.285
+        ],
+        [
+          0.285,
+          0.015,
+          0.285
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 443416
+    },
+    "SM_FiringBench": {
+      "file": "Assets/GLB/SM_FiringBench.glb",
+      "material": "Props",
+      "vertices": 672,
+      "triangles": 756,
+      "instances": 3,
+      "bounds_m": [
+        [
+          -0.75,
+          -0.39,
+          0.0
+        ],
+        [
+          0.75,
+          0.39,
+          0.935
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "1.5 m repeatable bench module; each top has its own directional service-mat UV chart.",
+      "bytes": 489836
+    },
+    "SM_Stool": {
+      "file": "Assets/GLB/SM_Stool.glb",
+      "material": "Props",
+      "vertices": 300,
+      "triangles": 272,
+      "instances": 2,
+      "bounds_m": [
+        [
+          -0.275,
+          -0.275,
+          0.01
+        ],
+        [
+          0.275,
+          0.275,
+          0.57
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 466044
+    },
+    "SM_ControlConsole": {
+      "file": "Assets/GLB/SM_ControlConsole.glb",
+      "material": "Props",
+      "vertices": 288,
+      "triangles": 324,
+      "instances": 1,
+      "bounds_m": [
+        [
+          -0.325,
+          -0.185,
+          0.0
+        ],
+        [
+          0.325,
+          0.185,
+          0.6304097972181903
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Compact range-control screen; graphics and small buttons are atlas texture, not live gameplay UI.",
+      "bytes": 465784
+    },
+    "SM_SupplyCrate": {
+      "file": "Assets/GLB/SM_SupplyCrate.glb",
+      "material": "Props",
+      "vertices": 384,
+      "triangles": 432,
+      "instances": 4,
+      "bounds_m": [
+        [
+          -0.48600000000000004,
+          -0.345,
+          0.0
+        ],
+        [
+          0.48600000000000004,
+          0.345,
+          0.7575
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 471704
+    },
+    "SM_UtilityCase": {
+      "file": "Assets/GLB/SM_UtilityCase.glb",
+      "material": "Props",
+      "vertices": 384,
+      "triangles": 432,
+      "instances": 4,
+      "bounds_m": [
+        [
+          -0.42500000000000004,
+          -0.35500000000000004,
+          0.0
+        ],
+        [
+          0.42500000000000004,
+          0.32000000000000006,
+          0.5375
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 471708
+    },
+    "SM_AmmoBox": {
+      "file": "Assets/GLB/SM_AmmoBox.glb",
+      "material": "Props",
+      "vertices": 192,
+      "triangles": 216,
+      "instances": 6,
+      "bounds_m": [
+        [
+          -0.1875,
+          -0.132,
+          0.0
+        ],
+        [
+          0.1875,
+          0.132,
+          0.3085
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 459624
+    },
+    "SM_WeaponRack": {
+      "file": "Assets/GLB/SM_WeaponRack.glb",
+      "material": "Props",
+      "vertices": 1056,
+      "triangles": 1188,
+      "instances": 1,
+      "bounds_m": [
+        [
+          -1.3099999999999998,
+          -0.38,
+          0.0
+        ],
+        [
+          1.3099999999999998,
+          0.20500000000000002,
+          2.06
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Open display rack; peg holes and fasteners are surface textures. Rifles are separate reusable props.",
+      "bytes": 513976
+    },
+    "SM_DisplayRifle": {
+      "file": "Assets/GLB/SM_DisplayRifle.glb",
+      "material": "Props",
+      "vertices": 414,
+      "triangles": 416,
+      "instances": 6,
+      "bounds_m": [
+        [
+          -0.66,
+          -0.065,
+          -0.175
+        ],
+        [
+          0.71,
+          0.065,
+          0.286
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "Non-functional decorative game prop: simplified silhouette only, not a manufacturing model.",
+      "bytes": 473400
+    },
+    "SM_StorageCabinet": {
+      "file": "Assets/GLB/SM_StorageCabinet.glb",
+      "material": "Props",
+      "vertices": 288,
+      "triangles": 324,
+      "instances": 1,
+      "bounds_m": [
+        [
+          -0.565,
+          -0.31,
+          0.0
+        ],
+        [
+          0.565,
+          0.31,
+          1.82
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 465684
+    },
+    "SM_ServiceDrum": {
+      "file": "Assets/GLB/SM_ServiceDrum.glb",
+      "material": "Props",
+      "vertices": 252,
+      "triangles": 240,
+      "instances": 2,
+      "bounds_m": [
+        [
+          -0.315,
+          -0.315,
+          0.04
+        ],
+        [
+          0.315,
+          0.315,
+          0.87
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 463176
+    },
+    "SM_CableReel": {
+      "file": "Assets/GLB/SM_CableReel.glb",
+      "material": "Props",
+      "vertices": 236,
+      "triangles": 224,
+      "instances": 1,
+      "bounds_m": [
+        [
+          -0.34,
+          -0.34,
+          0.065
+        ],
+        [
+          0.34,
+          0.34,
+          0.647
+        ]
+      ],
+      "collision": "box",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 462176
+    },
+    "SM_Clipboard": {
+      "file": "Assets/GLB/SM_Clipboard.glb",
+      "material": "Props",
+      "vertices": 192,
+      "triangles": 216,
+      "instances": 2,
+      "bounds_m": [
+        [
+          -0.135,
+          -0.185,
+          0.0
+        ],
+        [
+          0.135,
+          0.185,
+          0.042499999999999996
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "",
+      "bytes": 459652
+    },
+    "SM_FloorMarkings": {
+      "file": "Assets/GLB/SM_FloorMarkings.glb",
+      "material": "Architecture",
+      "vertices": 24,
+      "triangles": 12,
+      "instances": 1,
+      "bounds_m": [
+        [
+          -4.2,
+          -4.05,
+          0.006
+        ],
+        [
+          4.2,
+          5.11,
+          0.008
+        ]
+      ],
+      "collision": "none",
+      "lightmap_resolution": 512,
+      "uv_channels": 2,
+      "notes": "One very-low-triangle marking sheet: firing line, numbered positions, and back grates.",
+      "bytes": 438884
+    }
+  },
+  "instances": [
+    {
+      "id": "FloorShell",
+      "asset": "SM_RangeFloor",
+      "location_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture"
+    },
+    {
+      "id": "Wall_E00_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -3.15,
+        -5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": [
+        0.8124999999999999,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E00_01",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -1.85,
+        -5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": [
+        0.8124999999999999,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E01_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        1.8499999999999999,
+        -5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": [
+        0.8124999999999999,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E01_01",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        3.1499999999999995,
+        -5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": [
+        0.8124999999999999,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E02_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        4.691923881554251,
+        -5.091923881554251,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        225.0
+      ],
+      "scale": [
+        1.4142135623730951,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E03_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        5.53,
+        -3.3600000000000003,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E03_01",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        5.53,
+        -1.6799999999999997,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E03_02",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        5.53,
+        0.0,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E03_03",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        5.53,
+        1.6800000000000006,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E03_04",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        5.53,
+        3.3600000000000003,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        270.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E04_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        4.691923881554251,
+        5.091923881554251,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        315.0
+      ],
+      "scale": [
+        1.4142135623730951,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E05_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        3.04,
+        5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        360.0
+      ],
+      "scale": [
+        0.95,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E05_01",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        1.52,
+        5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        360.0
+      ],
+      "scale": [
+        0.95,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E05_02",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        0.0,
+        5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        360.0
+      ],
+      "scale": [
+        0.95,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E05_03",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -1.5199999999999996,
+        5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        360.0
+      ],
+      "scale": [
+        0.95,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E05_04",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -3.039999999999999,
+        5.93,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        360.0
+      ],
+      "scale": [
+        0.95,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E06_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -4.691923881554251,
+        5.091923881554251,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        44.99999999999997
+      ],
+      "scale": [
+        1.4142135623730951,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E07_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -5.53,
+        3.3600000000000003,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E07_01",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -5.53,
+        1.6799999999999997,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E07_02",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -5.53,
+        0.0,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E07_03",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -5.53,
+        -1.6800000000000006,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E07_04",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -5.53,
+        -3.3600000000000003,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.05,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "Wall_E08_00",
+      "asset": "SM_WallPanel_160",
+      "location_m": [
+        -4.691923881554251,
+        -5.091923881554251,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        135.0
+      ],
+      "scale": [
+        1.4142135623730951,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_00",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        -3.8,
+        -5.8,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -44.999999999999986
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_01",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        3.8,
+        -5.8,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_02",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        5.4,
+        -4.2,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        44.999999999999986
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_03",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        5.4,
+        4.2,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_04",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        3.8,
+        5.8,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        135.00000000000003
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_05",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        -3.8,
+        5.8,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        180.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_06",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        -5.4,
+        4.2,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -135.00000000000003
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "WallCorner_07",
+      "asset": "SM_WallCorner_45",
+      "location_m": [
+        -5.4,
+        -4.2,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Walls"
+    },
+    {
+      "id": "BackstopPanel_001",
+      "asset": "SM_BackstopPanel",
+      "location_m": [
+        -3.15,
+        5.52,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Backstops"
+    },
+    {
+      "id": "TargetPad_001",
+      "asset": "SM_TargetPad",
+      "location_m": [
+        -3.15,
+        3.47,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Pads"
+    },
+    {
+      "id": "Target_01",
+      "asset": "SM_RobotTarget",
+      "location_m": [
+        -3.15,
+        3.42,
+        0.016
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets"
+    },
+    {
+      "id": "LEDBar_001",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        -3.15,
+        5.6,
+        2.43
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "BackstopPanel_002",
+      "asset": "SM_BackstopPanel",
+      "location_m": [
+        -1.05,
+        5.52,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Backstops"
+    },
+    {
+      "id": "TargetPad_002",
+      "asset": "SM_TargetPad",
+      "location_m": [
+        -1.05,
+        3.47,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Pads"
+    },
+    {
+      "id": "Target_02",
+      "asset": "SM_RobotTarget",
+      "location_m": [
+        -1.05,
+        3.42,
+        0.016
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets"
+    },
+    {
+      "id": "LEDBar_002",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        -1.05,
+        5.6,
+        2.43
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "BackstopPanel_003",
+      "asset": "SM_BackstopPanel",
+      "location_m": [
+        1.05,
+        5.52,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Backstops"
+    },
+    {
+      "id": "TargetPad_003",
+      "asset": "SM_TargetPad",
+      "location_m": [
+        1.05,
+        3.47,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Pads"
+    },
+    {
+      "id": "Target_03",
+      "asset": "SM_RobotTarget",
+      "location_m": [
+        1.05,
+        3.42,
+        0.016
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets"
+    },
+    {
+      "id": "LEDBar_003",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        1.05,
+        5.6,
+        2.43
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "BackstopPanel_004",
+      "asset": "SM_BackstopPanel",
+      "location_m": [
+        3.15,
+        5.52,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Backstops"
+    },
+    {
+      "id": "TargetPad_004",
+      "asset": "SM_TargetPad",
+      "location_m": [
+        3.15,
+        3.47,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets/Pads"
+    },
+    {
+      "id": "Target_04",
+      "asset": "SM_RobotTarget",
+      "location_m": [
+        3.15,
+        3.42,
+        0.016
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Targets"
+    },
+    {
+      "id": "LEDBar_004",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        3.15,
+        5.6,
+        2.43
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "Conduit_160_001",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -3.2,
+        5.6,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_002",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -1.6,
+        5.6,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_003",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        0.0,
+        5.6,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_004",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        1.6,
+        5.6,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_005",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        3.2,
+        5.6,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_006",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -5.18,
+        -2.4,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_007",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -5.18,
+        -0.8,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_008",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -5.18,
+        0.8,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_009",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -5.18,
+        2.4,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "LEDBar_005",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        -5.14,
+        -1.75,
+        2.39
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "LEDBar_006",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        -5.14,
+        1.75,
+        2.39
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "Conduit_160_010",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        -5.17,
+        -2.85,
+        1.88
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "JunctionBox_001",
+      "asset": "SM_JunctionBox",
+      "location_m": [
+        -5.11,
+        -2.85,
+        0.89
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "VentPanel_001",
+      "asset": "SM_VentPanel",
+      "location_m": [
+        -5.17,
+        3.25,
+        2.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Fixtures"
+    },
+    {
+      "id": "Conduit_160_011",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        5.18,
+        -2.4,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_012",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        5.18,
+        -0.8,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_013",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        5.18,
+        0.8,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "Conduit_160_014",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        5.18,
+        2.4,
+        2.68
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "LEDBar_007",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        5.14,
+        -1.75,
+        2.39
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "LEDBar_008",
+      "asset": "SM_LEDBar",
+      "location_m": [
+        5.14,
+        1.75,
+        2.39
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "Conduit_160_015",
+      "asset": "SM_Conduit_160",
+      "location_m": [
+        5.17,
+        -2.85,
+        1.88
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Conduits"
+    },
+    {
+      "id": "JunctionBox_002",
+      "asset": "SM_JunctionBox",
+      "location_m": [
+        5.11,
+        -2.85,
+        0.89
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Lighting/Fixtures"
+    },
+    {
+      "id": "VentPanel_002",
+      "asset": "SM_VentPanel",
+      "location_m": [
+        5.17,
+        3.25,
+        2.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Fixtures"
+    },
+    {
+      "id": "SafetySign_001",
+      "asset": "SM_SafetySign",
+      "location_m": [
+        -4.71,
+        4.47,
+        1.76
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        45.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Fixtures"
+    },
+    {
+      "id": "SafetySign_002",
+      "asset": "SM_SafetySign",
+      "location_m": [
+        4.72,
+        4.47,
+        1.76
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -45.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Fixtures"
+    },
+    {
+      "id": "SafetyFloorGraphics",
+      "asset": "SM_FloorMarkings",
+      "location_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Architecture/Markings"
+    },
+    {
+      "id": "FiringBench_001",
+      "asset": "SM_FiringBench",
+      "location_m": [
+        -1.58,
+        -3.07,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Benches"
+    },
+    {
+      "id": "FiringBench_002",
+      "asset": "SM_FiringBench",
+      "location_m": [
+        0.0,
+        -3.07,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Benches"
+    },
+    {
+      "id": "FiringBench_003",
+      "asset": "SM_FiringBench",
+      "location_m": [
+        1.58,
+        -3.07,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Benches"
+    },
+    {
+      "id": "Stool_001",
+      "asset": "SM_Stool",
+      "location_m": [
+        -1.62,
+        -4.57,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Seating"
+    },
+    {
+      "id": "Stool_002",
+      "asset": "SM_Stool",
+      "location_m": [
+        1.62,
+        -4.57,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Seating"
+    },
+    {
+      "id": "ControlConsole_001",
+      "asset": "SM_ControlConsole",
+      "location_m": [
+        0.0,
+        -3.0,
+        0.935
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Control"
+    },
+    {
+      "id": "AmmoBox_001",
+      "asset": "SM_AmmoBox",
+      "location_m": [
+        -1.86,
+        -3.0,
+        0.935
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        10.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Supplies"
+    },
+    {
+      "id": "AmmoBox_002",
+      "asset": "SM_AmmoBox",
+      "location_m": [
+        -1.43,
+        -3.05,
+        0.935
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -8.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Supplies"
+    },
+    {
+      "id": "AmmoBox_003",
+      "asset": "SM_AmmoBox",
+      "location_m": [
+        1.74,
+        -3.0,
+        0.935
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -8.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Supplies"
+    },
+    {
+      "id": "Clipboard_001",
+      "asset": "SM_Clipboard",
+      "location_m": [
+        0.9,
+        -3.19,
+        0.939
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        15.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Supplies"
+    },
+    {
+      "id": "Clipboard_002",
+      "asset": "SM_Clipboard",
+      "location_m": [
+        -0.77,
+        -3.19,
+        0.939
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -8.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "FiringLine/Supplies"
+    },
+    {
+      "id": "WeaponRack_001",
+      "asset": "SM_WeaponRack",
+      "location_m": [
+        -5.05,
+        0.28,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack"
+    },
+    {
+      "id": "DisplayRifle_001",
+      "asset": "SM_DisplayRifle",
+      "location_m": [
+        -4.91,
+        -0.34,
+        0.5800000000000001
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack/DisplayProps"
+    },
+    {
+      "id": "DisplayRifle_002",
+      "asset": "SM_DisplayRifle",
+      "location_m": [
+        -4.91,
+        0.92,
+        0.5800000000000001
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack/DisplayProps"
+    },
+    {
+      "id": "DisplayRifle_003",
+      "asset": "SM_DisplayRifle",
+      "location_m": [
+        -4.91,
+        -0.34,
+        1.17
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack/DisplayProps"
+    },
+    {
+      "id": "DisplayRifle_004",
+      "asset": "SM_DisplayRifle",
+      "location_m": [
+        -4.91,
+        0.92,
+        1.17
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack/DisplayProps"
+    },
+    {
+      "id": "DisplayRifle_005",
+      "asset": "SM_DisplayRifle",
+      "location_m": [
+        -4.91,
+        -0.34,
+        1.76
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack/DisplayProps"
+    },
+    {
+      "id": "DisplayRifle_006",
+      "asset": "SM_DisplayRifle",
+      "location_m": [
+        -4.91,
+        0.92,
+        1.76
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Rack/DisplayProps"
+    },
+    {
+      "id": "SupplyCrate_001",
+      "asset": "SM_SupplyCrate",
+      "location_m": [
+        -4.64,
+        2.55,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Crates"
+    },
+    {
+      "id": "SupplyCrate_002",
+      "asset": "SM_SupplyCrate",
+      "location_m": [
+        -4.63,
+        3.37,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        8.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Crates"
+    },
+    {
+      "id": "SupplyCrate_003",
+      "asset": "SM_SupplyCrate",
+      "location_m": [
+        -4.63,
+        2.98,
+        0.76
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -8.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Crates"
+    },
+    {
+      "id": "SupplyCrate_004",
+      "asset": "SM_SupplyCrate",
+      "location_m": [
+        -4.19,
+        -2.85,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        17.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Crates"
+    },
+    {
+      "id": "UtilityCase_001",
+      "asset": "SM_UtilityCase",
+      "location_m": [
+        4.62,
+        -1.79,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Cases"
+    },
+    {
+      "id": "UtilityCase_002",
+      "asset": "SM_UtilityCase",
+      "location_m": [
+        4.6,
+        -2.49,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -84.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Cases"
+    },
+    {
+      "id": "UtilityCase_003",
+      "asset": "SM_UtilityCase",
+      "location_m": [
+        4.61,
+        -2.13,
+        0.55
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -98.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Cases"
+    },
+    {
+      "id": "UtilityCase_004",
+      "asset": "SM_UtilityCase",
+      "location_m": [
+        -4.2,
+        -2.85,
+        0.765
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        20.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Cases"
+    },
+    {
+      "id": "StorageCabinet_001",
+      "asset": "SM_StorageCabinet",
+      "location_m": [
+        4.93,
+        0.05,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Cabinet"
+    },
+    {
+      "id": "ServiceDrum_001",
+      "asset": "SM_ServiceDrum",
+      "location_m": [
+        4.57,
+        1.67,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -85.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Drums"
+    },
+    {
+      "id": "ServiceDrum_002",
+      "asset": "SM_ServiceDrum",
+      "location_m": [
+        4.48,
+        2.55,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -55.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Drums"
+    },
+    {
+      "id": "CableReel_001",
+      "asset": "SM_CableReel",
+      "location_m": [
+        4.41,
+        3.62,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        20.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/Drums"
+    },
+    {
+      "id": "AmmoBox_004",
+      "asset": "SM_AmmoBox",
+      "location_m": [
+        -4.58,
+        2.65,
+        1.52
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        5.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/LooseSupplies"
+    },
+    {
+      "id": "AmmoBox_005",
+      "asset": "SM_AmmoBox",
+      "location_m": [
+        4.58,
+        -2.17,
+        1.1
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        -90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/LooseSupplies"
+    },
+    {
+      "id": "AmmoBox_006",
+      "asset": "SM_AmmoBox",
+      "location_m": [
+        -4.24,
+        -1.29,
+        0.0
+      ],
+      "rotation_xyz_deg": [
+        0.0,
+        0.0,
+        5.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "folder": "Storage/LooseSupplies"
+    }
+  ],
+  "lights": [
+    {
+      "id": "BlueWash_1",
+      "type": "point",
+      "location_m": [
+        -3.15,
+        5.1,
+        2.4
+      ],
+      "color_linear": [
+        0.2,
+        0.46,
+        1.0
+      ],
+      "intensity_lumens": 430,
+      "attenuation_m": 4.0,
+      "source_radius_m": 0.2,
+      "cast_shadows": true
+    },
+    {
+      "id": "BlueWash_2",
+      "type": "point",
+      "location_m": [
+        -1.05,
+        5.1,
+        2.4
+      ],
+      "color_linear": [
+        0.2,
+        0.46,
+        1.0
+      ],
+      "intensity_lumens": 430,
+      "attenuation_m": 4.0,
+      "source_radius_m": 0.2,
+      "cast_shadows": true
+    },
+    {
+      "id": "BlueWash_3",
+      "type": "point",
+      "location_m": [
+        1.05,
+        5.1,
+        2.4
+      ],
+      "color_linear": [
+        0.2,
+        0.46,
+        1.0
+      ],
+      "intensity_lumens": 430,
+      "attenuation_m": 4.0,
+      "source_radius_m": 0.2,
+      "cast_shadows": true
+    },
+    {
+      "id": "BlueWash_4",
+      "type": "point",
+      "location_m": [
+        3.15,
+        5.1,
+        2.4
+      ],
+      "color_linear": [
+        0.2,
+        0.46,
+        1.0
+      ],
+      "intensity_lumens": 430,
+      "attenuation_m": 4.0,
+      "source_radius_m": 0.2,
+      "cast_shadows": true
+    },
+    {
+      "id": "SideWash_-1_-1.75",
+      "type": "point",
+      "location_m": [
+        -4.75,
+        -1.75,
+        2.3
+      ],
+      "color_linear": [
+        0.36,
+        0.57,
+        0.85
+      ],
+      "intensity_lumens": 210,
+      "attenuation_m": 3.7,
+      "source_radius_m": 0.22,
+      "cast_shadows": false
+    },
+    {
+      "id": "SideWash_-1_1.75",
+      "type": "point",
+      "location_m": [
+        -4.75,
+        1.75,
+        2.3
+      ],
+      "color_linear": [
+        0.36,
+        0.57,
+        0.85
+      ],
+      "intensity_lumens": 210,
+      "attenuation_m": 3.7,
+      "source_radius_m": 0.22,
+      "cast_shadows": false
+    },
+    {
+      "id": "SideWash_1_-1.75",
+      "type": "point",
+      "location_m": [
+        4.75,
+        -1.75,
+        2.3
+      ],
+      "color_linear": [
+        0.36,
+        0.57,
+        0.85
+      ],
+      "intensity_lumens": 210,
+      "attenuation_m": 3.7,
+      "source_radius_m": 0.22,
+      "cast_shadows": false
+    },
+    {
+      "id": "SideWash_1_1.75",
+      "type": "point",
+      "location_m": [
+        4.75,
+        1.75,
+        2.3
+      ],
+      "color_linear": [
+        0.36,
+        0.57,
+        0.85
+      ],
+      "intensity_lumens": 210,
+      "attenuation_m": 3.7,
+      "source_radius_m": 0.22,
+      "cast_shadows": false
+    },
+    {
+      "id": "CeilingFill_Center",
+      "type": "point",
+      "location_m": [
+        0,
+        0.4,
+        4.8
+      ],
+      "color_linear": [
+        0.55,
+        0.67,
+        0.86
+      ],
+      "intensity_lumens": 1700,
+      "attenuation_m": 9.0,
+      "source_radius_m": 1.8,
+      "cast_shadows": false
+    },
+    {
+      "id": "CeilingFill_Bench",
+      "type": "point",
+      "location_m": [
+        -0.3,
+        -3.2,
+        3.5
+      ],
+      "color_linear": [
+        0.59,
+        0.69,
+        0.82
+      ],
+      "intensity_lumens": 850,
+      "attenuation_m": 5.0,
+      "source_radius_m": 0.9,
+      "cast_shadows": false
+    }
+  ],
+  "cameras": {
+    "game_view": {
+      "position_m": [
+        12,
+        -17,
+        20
+      ],
+      "target_m": [
+        0,
+        0.2,
+        0.5
+      ],
+      "orthographic_width_m": 17.3
+    },
+    "top_down": {
+      "position_m": [
+        0,
+        0,
+        24
+      ],
+      "target_m": [
+        0,
+        0,
+        0
+      ],
+      "orthographic_width_m": 13.5
+    }
+  },
+  "exclusions": [
+    "Door",
+    "Doorframe",
+    "Threshold",
+    "Wall coping",
+    "Wallpaper",
+    "Mole character",
+    "Humanoid target"
+  ],
+  "runtime_included": false
+}

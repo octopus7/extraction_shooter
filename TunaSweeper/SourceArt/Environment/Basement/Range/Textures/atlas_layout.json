@@ -1,0 +1,446 @@
+{
+  "Architecture": {
+    "size": 2048,
+    "patches": {
+      "concrete": {
+        "rect": [
+          0,
+          0,
+          768,
+          1024
+        ],
+        "padding": 8
+      },
+      "floor": {
+        "rect": [
+          768,
+          0,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "backstop": {
+        "rect": [
+          1280,
+          0,
+          768,
+          1024
+        ],
+        "padding": 8
+      },
+      "concrete_plain": {
+        "rect": [
+          768,
+          512,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "concrete_top": {
+        "rect": [
+          1024,
+          512,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "metal": {
+        "rect": [
+          768,
+          768,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "dark_metal": {
+        "rect": [
+          1024,
+          768,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "vent": {
+        "rect": [
+          0,
+          1024,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "safety": {
+        "rect": [
+          512,
+          1024,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "hazard": {
+        "rect": [
+          1024,
+          1024,
+          512,
+          256
+        ],
+        "padding": 8
+      },
+      "led": {
+        "rect": [
+          1536,
+          1024,
+          512,
+          128
+        ],
+        "padding": 8
+      },
+      "light_housing": {
+        "rect": [
+          1536,
+          1152,
+          512,
+          256
+        ],
+        "padding": 8
+      },
+      "junction": {
+        "rect": [
+          1024,
+          1280,
+          512,
+          256
+        ],
+        "padding": 8
+      },
+      "lane_pad": {
+        "rect": [
+          0,
+          1536,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "firing_line": {
+        "rect": [
+          512,
+          1536,
+          1024,
+          256
+        ],
+        "padding": 8
+      },
+      "numbers": {
+        "rect": [
+          512,
+          1792,
+          1024,
+          256
+        ],
+        "padding": 8
+      },
+      "grate": {
+        "rect": [
+          1536,
+          1536,
+          512,
+          512
+        ],
+        "padding": 8
+      }
+    },
+    "files": {
+      "BaseColor": "Textures/T_Architecture_BaseColor.png",
+      "Normal": "Textures/T_Architecture_Normal.png",
+      "ORM": "Textures/T_Architecture_ORM.png",
+      "Emissive": "Textures/T_Architecture_Emissive.png"
+    },
+    "normal_convention": "OpenGL +Y; UE script flips green on import",
+    "lighting_baked": false
+  },
+  "Props": {
+    "size": 2048,
+    "patches": {
+      "bench_top": {
+        "rect": [
+          0,
+          0,
+          1024,
+          512
+        ],
+        "padding": 8
+      },
+      "bench_side": {
+        "rect": [
+          0,
+          512,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "crate_front": {
+        "rect": [
+          1024,
+          0,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "crate_top": {
+        "rect": [
+          1536,
+          0,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "crate_side": {
+        "rect": [
+          1024,
+          512,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "case_blue": {
+        "rect": [
+          1536,
+          512,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "metal": {
+        "rect": [
+          512,
+          512,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "rubber": {
+        "rect": [
+          768,
+          512,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "ammo_front": {
+        "rect": [
+          512,
+          768,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "ammo_top": {
+        "rect": [
+          768,
+          768,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "rack": {
+        "rect": [
+          0,
+          1024,
+          512,
+          1024
+        ],
+        "padding": 8
+      },
+      "screen": {
+        "rect": [
+          512,
+          1024,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "console_back": {
+        "rect": [
+          1024,
+          1024,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "rifle": {
+        "rect": [
+          1536,
+          1024,
+          512,
+          256
+        ],
+        "padding": 8
+      },
+      "drum_side": {
+        "rect": [
+          1536,
+          1280,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "drum_top": {
+        "rect": [
+          1024,
+          1536,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "cabinet": {
+        "rect": [
+          512,
+          1536,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "paper": {
+        "rect": [
+          1536,
+          1792,
+          512,
+          256
+        ],
+        "padding": 8
+      }
+    },
+    "files": {
+      "BaseColor": "Textures/T_Props_BaseColor.png",
+      "Normal": "Textures/T_Props_Normal.png",
+      "ORM": "Textures/T_Props_ORM.png",
+      "Emissive": "Textures/T_Props_Emissive.png"
+    },
+    "normal_convention": "OpenGL +Y; UE script flips green on import",
+    "lighting_baked": false
+  },
+  "Robot": {
+    "size": 1024,
+    "patches": {
+      "body_top": {
+        "rect": [
+          0,
+          0,
+          512,
+          256
+        ],
+        "padding": 8
+      },
+      "target": {
+        "rect": [
+          0,
+          256,
+          512,
+          512
+        ],
+        "padding": 8
+      },
+      "side": {
+        "rect": [
+          512,
+          0,
+          256,
+          384
+        ],
+        "padding": 8
+      },
+      "back": {
+        "rect": [
+          768,
+          0,
+          256,
+          384
+        ],
+        "padding": 8
+      },
+      "metal": {
+        "rect": [
+          512,
+          384,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "joint": {
+        "rect": [
+          768,
+          384,
+          256,
+          256
+        ],
+        "padding": 8
+      },
+      "ear": {
+        "rect": [
+          512,
+          640,
+          256,
+          384
+        ],
+        "padding": 8
+      },
+      "rubber": {
+        "rect": [
+          768,
+          640,
+          256,
+          128
+        ],
+        "padding": 8
+      },
+      "face": {
+        "rect": [
+          768,
+          768,
+          256,
+          128
+        ],
+        "padding": 8
+      },
+      "plain": {
+        "rect": [
+          768,
+          896,
+          256,
+          128
+        ],
+        "padding": 8
+      }
+    },
+    "files": {
+      "BaseColor": "Textures/T_Robot_BaseColor.png",
+      "Normal": "Textures/T_Robot_Normal.png",
+      "ORM": "Textures/T_Robot_ORM.png",
+      "Emissive": "Textures/T_Robot_Emissive.png"
+    },
+    "normal_convention": "OpenGL +Y; UE script flips green on import",
+    "lighting_baked": false
+  }
+}
