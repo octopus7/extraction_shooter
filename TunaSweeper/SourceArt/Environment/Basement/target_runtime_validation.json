@@ -1,0 +1,108 @@
+{
+  "blueprint": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget",
+  "parent": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
+  "components": {
+    "body_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Body.SM_RangePracticeTarget_Body",
+    "head_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Head.SM_RangePracticeTarget_Head",
+    "headshot_plate_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Plate.SM_RangePracticeTarget_Plate"
+  },
+  "health": 100,
+  "minimum_health": 1,
+  "recovery_seconds": 2,
+  "passed": true,
+  "collision_rays": [
+    {
+      "target": "Target_01",
+      "zone": "sensor_lens",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_01",
+      "zone": "sensor_housing",
+      "component": "HeadshotPlateMesh"
+    },
+    {
+      "target": "Target_01",
+      "zone": "body",
+      "component": "BodyMesh"
+    },
+    {
+      "target": "Target_01",
+      "zone": "former_ears",
+      "component": null
+    },
+    {
+      "target": "Target_02",
+      "zone": "sensor_lens",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_02",
+      "zone": "sensor_housing",
+      "component": "HeadshotPlateMesh"
+    },
+    {
+      "target": "Target_02",
+      "zone": "body",
+      "component": "BodyMesh"
+    },
+    {
+      "target": "Target_02",
+      "zone": "former_ears",
+      "component": null
+    },
+    {
+      "target": "Target_03",
+      "zone": "sensor_lens",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_03",
+      "zone": "sensor_housing",
+      "component": "HeadshotPlateMesh"
+    },
+    {
+      "target": "Target_03",
+      "zone": "body",
+      "component": "BodyMesh"
+    },
+    {
+      "target": "Target_03",
+      "zone": "former_ears",
+      "component": null
+    },
+    {
+      "target": "Target_04",
+      "zone": "sensor_lens",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_04",
+      "zone": "sensor_housing",
+      "component": "HeadshotPlateMesh"
+    },
+    {
+      "target": "Target_04",
+      "zone": "body",
+      "component": "BodyMesh"
+    },
+    {
+      "target": "Target_04",
+      "zone": "former_ears",
+      "component": null
+    }
+  ],
+  "damage": {
+    "input": 25,
+    "returned_damage": 25.0,
+    "health_after": 75,
+    "minimum_health_after_overkill": 0.9999999776482582,
+    "health_widgets": 4,
+    "other_targets_unchanged": true
+  },
+  "recovery": {
+    "native_tick": true,
+    "game_seconds": 2.1030898988246918,
+    "final_health": 100.0
+  }
+}

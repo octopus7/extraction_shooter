@@ -136,6 +136,18 @@
     {
       "asset": "/Game/Environment/Basement/Meshes/SM_Basement_FloorCornerFill",
       "source": "TunaSweeper/SourceArt/Environment/Basement/Models/SM_Basement_FloorCornerFill.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Body",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeTarget/Models/SM_RangePracticeTarget_Body.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Head",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeTarget/Models/SM_RangePracticeTarget_Head.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Plate",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeTarget/Models/SM_RangePracticeTarget_Plate.glb"
     }
   ],
   "temporary_sources": 0,

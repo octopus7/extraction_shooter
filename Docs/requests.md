@@ -10436,3 +10436,14 @@
 - 처리: 허수아비의 CriticalPlateMesh와 3배 분기, 액터별 크리티컬·헤드샷 배율 및 설정 인자를 제거. 헤드샷 배율을 TunaSweeperProjectileDamage::HeadshotDamageMultiplier = 2.0f로 통합하고 기존 조준 대상·실제 머리 명중 조건은 유지. 투사체 피해 숫자는 피해 비율 추정 대신 같은 실제 헤드샷 판정을 사용. 게임 규칙 문서 갱신.
 - 검증: 수정 전 자동화 검사에서 일반 판 명중 30(기대 10), 머리 명중 60(기대 20)을 재현. 수정 후 UE 5.7 TunaSweeperEditor Win64 Development 빌드 성공, TunaSweeper.Combat.PracticeDummy.HitDamage / TunaSweeper.Combat.Burn.ProjectileImpactRouting / TunaSweeper.Difficulty.EnemyIncomingDamageScaling 3개 통과. 읽기 전용 코드 리뷰에서 차단 이슈 없음. 빌드 환경 캐시 및 미리보기 에디터 DLL 잠금 문제를 해결한 뒤 검증 완료.
 - 정리: 구현·회귀 검사·규칙 문서·요청 기록을 단일 작업 커밋으로 묶음. 별도 작업의 Basement 변경은 포함하지 않음.
+
+## 2026-10-07 17:19:10 (소요시간: 00:21:55)
+
+기존 연습용 더미 액터를 기반으로 사격장 표적 BP를 만들고, 토끼 귀가 없는 드론 외형과 전면 센서 헤드 부위를 적용해 달라는 요청을 처리했다.
+
+- `ATunaSweeperShootingPracticeDummyActor`를 상속하는 `/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget`을 생성하고 `L_Basement`의 표적 4개를 교체했다. 위치와 `ROOT_Range` 부모 관계를 유지했다.
+- 원본의 귀·머리·과녁판을 제거하고 전면 사각 센서 하우징, 중앙 렌즈와 보조 렌즈로 교체했다. 몸체·다리는 원래 메시/공유 아틀라스를 유지했다. 센서 렌즈는 `HeadMesh`, 하우징은 `HeadshotPlateMesh`, 몸체는 `BodyMesh`에 연결했다.
+- 체력 100, 최저 1, 최대 2초 회복과 체력바를 상속하고 높이가 낮아진 드론에 맞춰 체력바를 조정했다. 센서 전용 재질은 부모 클래스의 디버그 색상 변경에 영향을 받지 않는다.
+- 저장된 BP 상속·메시·재질·충돌 검증, 4개 배치의 렌즈/하우징/몸체 및 제거된 귀 위치 충돌 검사, PIE 피해·최저 체력·체력바·자동 회복이 통과했다. 기존 네이티브 `TunaSweeper.Combat.PracticeDummy.HitDamage` 테스트 1개가 통과했다. 실제 BP 투사체 발사 통합 테스트와는 구분한다.
+- 지하실 통로·투명벽·바닥과 6개 묶음의 이동/회전을 재검증하고 실제 UE 뷰포트 3장을 갱신했다. 일회성 모델링/임포트 도구 및 자동 임포트 미사용 재질을 제거한 뒤 새 UE 프로세스에서 재검증했다. BP 에디터를 열어 두었다.
+- 편집 가능한 Blender/GLB 원본, 영구 임포트 경로, 검증 도구와 보고서, 관련 문서를 같은 작업 커밋에 포함한다. C++ 변경이 없어 재빌드는 수행하지 않았다.

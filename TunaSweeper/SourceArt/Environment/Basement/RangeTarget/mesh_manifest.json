@@ -1,0 +1,72 @@
+{
+  "source": "Range/Assets/GLB/SM_RobotTarget.glb",
+  "design": "Earless drone with front optical sensor head zone. Original bullseye plate and rabbit head removed.",
+  "parts": {
+    "Body": {
+      "name": "SM_RangePracticeTarget_Body",
+      "triangles": 2056,
+      "bounds_m": [
+        [
+          -0.6803469657897949,
+          -0.675000011920929,
+          0.0
+        ],
+        [
+          0.6803469657897949,
+          0.675000011920929,
+          1.2699999809265137
+        ]
+      ],
+      "uv_channels": 2,
+      "file": "Models/SM_RangePracticeTarget_Body.glb",
+      "materials": [
+        "M_Robot"
+      ]
+    },
+    "Head": {
+      "name": "SM_RangePracticeTarget_Head",
+      "triangles": 1908,
+      "bounds_m": [
+        [
+          -0.2680000066757202,
+          -0.6664999723434448,
+          0.9650000333786011
+        ],
+        [
+          0.2680000066757202,
+          -0.6269999742507935,
+          1.1950000524520874
+        ]
+      ],
+      "uv_channels": 2,
+      "file": "Models/SM_RangePracticeTarget_Head.glb",
+      "materials": [
+        "SensorGlass",
+        "SensorLight"
+      ]
+    },
+    "Plate": {
+      "name": "SM_RangePracticeTarget_Plate",
+      "triangles": 188,
+      "bounds_m": [
+        [
+          -0.33000001311302185,
+          -0.6299999952316284,
+          0.9100000262260437
+        ],
+        [
+          0.33000001311302185,
+          -0.3700000047683716,
+          1.25
+        ]
+      ],
+      "uv_channels": 2,
+      "file": "Models/SM_RangePracticeTarget_Plate.glb",
+      "materials": [
+        "SensorHousing"
+      ]
+    }
+  },
+  "original_triangles": 2776,
+  "removed_original_triangles": 720
+}

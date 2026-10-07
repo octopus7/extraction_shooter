@@ -1,0 +1,13 @@
+{
+  "blueprint": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget",
+  "parent": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
+  "components": {
+    "body_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Body.SM_RangePracticeTarget_Body",
+    "head_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Head.SM_RangePracticeTarget_Head",
+    "headshot_plate_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Plate.SM_RangePracticeTarget_Plate"
+  },
+  "health": 100,
+  "minimum_health": 1,
+  "recovery_seconds": 2,
+  "passed": true
+}

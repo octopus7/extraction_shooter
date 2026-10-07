@@ -76,7 +76,9 @@ def validate(world=None):
     assert len(hidden)>20
     ranges=[a for a in actors if 'TS_RangeTarget' in [str(t) for t in a.tags]]
     assert len(ranges)==4
-    assert len({a.static_mesh_component.static_mesh for a in ranges})==1
+    target_bp=u.load_asset(DEST+'/Range/Blueprints/BP_RangePracticeTarget')
+    assert all(a.get_class()==target_bp.generated_class() for a in ranges)
+    assert len({a.get_editor_property('body_mesh').static_mesh for a in ranges})==1
     connectors=[a for a in actors if 'BasementExpansionConnector' in [str(t) for t in a.tags]]
     assert len(connectors)==3
     for side in ('East','West','South'):

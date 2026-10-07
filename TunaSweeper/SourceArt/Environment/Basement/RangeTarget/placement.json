@@ -1,0 +1,45 @@
+{
+  "blueprint": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget",
+  "targets": [
+    {
+      "label": "Target_01",
+      "class": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget.BP_RangePracticeTarget_C",
+      "location": [
+        1842.0,
+        -315.0000000000001,
+        1.6
+      ],
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "Target_02",
+      "class": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget.BP_RangePracticeTarget_C",
+      "location": [
+        1842.0,
+        -105.00000000000011,
+        1.6
+      ],
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "Target_03",
+      "class": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget.BP_RangePracticeTarget_C",
+      "location": [
+        1842.0,
+        104.9999999999999,
+        1.6
+      ],
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "Target_04",
+      "class": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget.BP_RangePracticeTarget_C",
+      "location": [
+        1842.0,
+        314.9999999999999,
+        1.6
+      ],
+      "parent": "ROOT_Range"
+    }
+  ]
+}
