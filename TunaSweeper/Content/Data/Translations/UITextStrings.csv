@@ -508,3 +508,17 @@ ui.language.brazilian_portuguese,Português (Brasil),Português (Brasil),Portugu
 ui.interaction.ladder_transfer,使用梯子,使用梯子,Использовать лестницу,Usar escada
 ui.interaction.ssto_enter,登上飞船,登上飛船,Подняться на борт,Subir a bordo
 ui.interaction.ssto_exit,下到外面,下到外面,Спуститься наружу,Descer para fora
+ui.interaction.debug_armory_open,军械库,軍械庫,Арсенал,Arsenal
+ui.debug_armory.title,军械库,軍械庫,Арсенал,Arsenal
+ui.debug_armory.subtitle,选择装备和数量即可免费领取。,選擇裝備和數量即可免費領取。,Выберите снаряжение и количество для бесплатного получения.,Escolha o equipamento e a quantidade para receber gratuitamente.
+ui.debug_armory.category,分类,分類,Категория,Categoria
+ui.debug_armory.weapons,武器与配件,武器與配件,Оружие и модификации,Armas e acessórios
+ui.debug_armory.ammo,弹药,彈藥,Боеприпасы,Munição
+ui.debug_armory.protection,防护装备,防護裝備,Защитное снаряжение,Equipamento de proteção
+ui.debug_armory.quantity,数量,數量,Количество,Quantidade
+ui.debug_armory.supply,免费领取,免費領取,Получить бесплатно,Receber gratuitamente
+ui.debug_armory.close,关闭,關閉,Закрыть,Fechar
+ui.debug_armory.success,物品已发放。,物品已發放。,Предметы получены.,Itens recebidos.
+ui.debug_armory.failed,无法发放物品。请检查背包空间和军械库是否可用。,無法發放物品。請檢查背包空間和軍械庫是否可用。,Не удалось получить предметы. Проверьте место в инвентаре и доступ к арсеналу.,Não foi possível receber os itens. Verifique o espaço no inventário e o acesso ao arsenal.
+ui.debug_armory.empty,此分类暂无可领取的物品。,此分類暫無可領取的物品。,В этой категории нет доступных предметов.,Não há itens disponíveis nesta categoria.
+ui.debug_armory.unnamed_item,未命名物品,未命名物品,Предмет без названия,Item sem nome

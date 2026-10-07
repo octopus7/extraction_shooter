@@ -15,6 +15,14 @@
 - `RangeTarget/RangePracticeTarget.blend`와 `RangeTarget/Models/`에 편집 원본과 부위별 GLB를 보관한다. `RangeTarget/mesh_manifest.json`에 메시·부위별 재질·범위 정보를 기록했다. `Range/Assets/GLB/SM_RobotTarget.glb`는 수정 전 원본 보관용이며 레벨 표적에서는 사용하지 않는다.
 - 센서의 전용 재질은 부모의 디버그 색상 파라미터를 사용하지 않으므로 PIE에서도 드론 외형을 유지한다.
 
+## 디버깅용 무기고
+
+`WeaponRack_001`은 `/Game/Blueprints/Debug/BP_DebugArmory` 인스턴스다. 원래 `SM_WeaponRack` 메시와 위치·회전·`ROOT_Range` 부모 관계를 유지한다. 개발 빌드에서는 200cm 안에서 **무기고** 상호작용으로 창을 열어 무기(근접 무기·부착물 포함), 탄약, 보호장비(머리·몸통·얼굴·귀)를 선택하고 1~999개씩 무료로 지급받을 수 있다. 재고나 비용은 없으며 가방·음식·재료·화폐·설계도는 목록에서 제외한다. 지급 아이템은 인벤토리에 들어가며 공간이 부족하면 요청 전체를 취소한다.
+
+Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌트/마커가 제거되고, 상호작용 후보·무기고 창·카탈로그·직접 지급 함수도 각각 차단한다. BP에서 표시 설정을 바꿔 Shipping 차단을 해제할 수 없다. 창 상태는 저장하지 않으며 지급된 아이템은 기존 인벤토리 저장 규칙을 따른다.
+
+`Tools/Basement/verify_armory.py`가 저장 BP·메시·상호작용 키·배치를 확인한다. 네이티브 `TunaSweeper.DebugArmory.InteractionAndSupply` 자동화는 실제 상호작용과 UI, 무료 지급, 수량/종류 제한, 공간 부족 시 원상 복구, 거리·사망·탑승·닫기 검증을 수행한다.
+
 ## 이동과 확장
 
 - Outliner `Basement/` 아래의 `ROOT_Range`, `ROOT_LadderHub`, 각 통로 `ROOT_*`를 이동하면 연결된 자식 액터가 함께 이동한다. 공유 Static Mesh를 사용하므로 개별 부품도 교체할 수 있다.

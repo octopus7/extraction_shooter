@@ -29,6 +29,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperShopActor.h"
+#include "Interaction/TunaSweeperDebugArmoryActor.h"
 #include "Interaction/TunaSweeperStorageActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorkbenchActor.h"
@@ -321,6 +322,15 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::ShopOpen:
 		bHandled = HandleShopOpenInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::DebugArmoryOpen:
+#if !UE_BUILD_SHIPPING
+		if (auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner()))
+		{
+			auto* Controller = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+			bHandled = Controller && Controller->OpenDebugArmoryPanel(Armory);
+		}
+#endif
+		break;
 	case ETunaSweeperInteractionType::WorkbenchOpen:
 		bHandled = HandleWorkbenchOpenInteraction(Interactable, InstigatorPawn);
 		break;
@@ -409,6 +419,14 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (!IsValid(Interactable->GetOwner()) || Interactable->GetOwner()->IsHidden())
 	{
 		return false;
+	}
+
+	const auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner());
+	if (Armory && !ATunaSweeperDebugArmoryActor::IsArmoryEnabled()) return false;
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DebugArmoryOpen)
+	{
+		return Armory && ATunaSweeperDebugArmoryActor::IsArmoryEnabled() &&
+			!TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld());
 	}
 
 	if (TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld()))

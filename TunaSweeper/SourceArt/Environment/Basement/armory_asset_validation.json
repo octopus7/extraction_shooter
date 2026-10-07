@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "blueprint": "/Game/Blueprints/Debug/BP_DebugArmory",
+  "parent": "/Script/TunaSweeper.TunaSweeperDebugArmoryActor",
+  "mesh": "/Game/Environment/Basement/Range/Meshes/SM_WeaponRack.SM_WeaponRack",
+  "actor": "WeaponRack_001",
+  "parent_actor": "ROOT_Range",
+  "interaction_key": "ui.interaction.debug_armory_open",
+  "interaction_distance_cm": 200,
+  "location_cm": [
+    1528.0,
+    -505.0000000000001,
+    0.0
+  ]
+}

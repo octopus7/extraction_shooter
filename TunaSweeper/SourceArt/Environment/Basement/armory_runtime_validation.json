@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "builds": [
+    "TunaSweeperEditor Win64 Development",
+    "TunaSweeperDemo Win64 Shipping"
+  ],
+  "tests": [
+    {
+      "suite": "DebugArmory",
+      "passed_tests": 1,
+      "failed_tests": 0,
+      "tests_with_warnings": 1,
+      "report_created": "2026.10.07-09.07.14"
+    },
+    {
+      "suite": "DebugArmoryWardrobeRegression",
+      "passed_tests": 3,
+      "failed_tests": 0,
+      "tests_with_warnings": 2,
+      "report_created": "2026.10.07-09.02.28"
+    }
+  ],
+  "shipping_validation": "Compilation and source guard review. Packaged Shipping runtime was not launched.",
+  "warning": "Pre-existing duplicate ui.common.confirm localization key; unrelated entries unchanged.",
+  "ui_capture": "Previews/UE_DebugArmory.png",
+  "ui_validation": "Actual UMG category, quantity, supply and close controls; rendered 1280x720 panel visually inspected.",
+  "generator_removed": true
+}

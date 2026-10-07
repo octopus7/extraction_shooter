@@ -196,6 +196,21 @@ void UTunaSweeperGameHudWidget::ShowWorkbenchPanel(int32 WorkbenchId, ETunaSweep
 	HandleSelectedInventoryItemChanged();
 }
 
+bool UTunaSweeperGameHudWidget::ShowDebugArmoryPanel()
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	if (!Controller || !Controller->IsDebugArmoryInteractionValid()) return false;
+	EnsureDebugArmoryPanelWidget();
+	if (!DebugArmoryPanelWidget) return false;
+	SetHudMode(ETunaSweeperHudMode::DebugArmory);
+	DebugArmoryPanelWidget->OpenArmory();
+	return ActiveHudMode == ETunaSweeperHudMode::DebugArmory;
+#endif
+}
+
 bool UTunaSweeperGameHudWidget::ShowWardrobePanel()
 {
 	const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
@@ -322,6 +337,15 @@ void UTunaSweeperGameHudWidget::HideHousingFacilityContextMenu()
 
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
+	if (InHudMode == ETunaSweeperHudMode::DebugArmory)
+	{
+#if UE_BUILD_SHIPPING
+		return;
+#else
+		const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+		if (!Controller || !Controller->IsDebugArmoryInteractionValid()) return;
+#endif
+	}
 	if (InHudMode != ETunaSweeperHudMode::None)
 	{
 		HideHousingFacilityContextMenu();

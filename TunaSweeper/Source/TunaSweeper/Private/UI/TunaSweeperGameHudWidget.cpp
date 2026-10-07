@@ -191,6 +191,14 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 
 FReply UTunaSweeperGameHudWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
+	if (InKeyEvent.GetKey() == EKeys::Escape && ActiveHudMode == ETunaSweeperHudMode::DebugArmory)
+	{
+		if (ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+		{
+			Controller->CloseDebugArmoryPanel();
+		}
+		return FReply::Handled();
+	}
 	if (InKeyEvent.GetKey() == EKeys::Tab && IsHousingModeActive())
 	{
 		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()

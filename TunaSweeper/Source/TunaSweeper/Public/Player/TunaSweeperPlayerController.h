@@ -21,6 +21,7 @@ class UTunaSweeperScreenFadeWidget;
 class UInputAction;
 class ATunaSweeperPickupItemActor;
 class ATunaSweeperWardrobeActor;
+class ATunaSweeperDebugArmoryActor;
 struct FInputActionValue;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -34,6 +35,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PlayerTick(float DeltaTime) override;
+	virtual void OnUnPossess() override;
 	virtual void SetupInputComponent() override;
 	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
@@ -121,6 +123,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Wardrobe")
 	bool IsWardrobeInteractionValid() const;
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|DebugArmory")
+	bool OpenDebugArmoryPanel(ATunaSweeperDebugArmoryActor* ArmoryActor);
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|DebugArmory")
+	bool TrySupplyDebugArmoryItem(int32 ItemId, int32 Quantity);
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|DebugArmory")
+	void CloseDebugArmoryPanel();
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|DebugArmory")
+	bool IsDebugArmoryInteractionValid() const;
+	bool GetDebugArmoryCatalog(TArray<FTunaSweeperItemDefinition>& OutItems) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 
@@ -177,6 +189,10 @@ public:
 protected:
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaWardrobeInteractionTest;
+	friend class FTunaDebugArmoryTest;
+	void UpdateDebugArmoryInteraction();
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ATunaSweeperDebugArmoryActor> ActiveDebugArmoryActor;
 	void UpdateWardrobeInteraction();
 
 	UPROPERTY(Transient)

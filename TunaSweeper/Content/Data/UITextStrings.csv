@@ -547,3 +547,17 @@ ui.wardrobe.unavailable,이 의상은 현재 사용할 수 없습니다.,This ou
 ui.interaction.ladder_transfer,사다리 이용,Use Ladder,はしごを使う
 ui.interaction.ssto_enter,기내로 올라가기,Climb Aboard,機内へ上がる
 ui.interaction.ssto_exit,밖으로 내려가기,Climb Down,外へ降りる
+ui.interaction.debug_armory_open,무기고,Armory,武器庫
+ui.debug_armory.title,무기고,Armory,武器庫
+ui.debug_armory.subtitle,필요한 장비와 수량을 선택해 무료로 지급받으세요.,Choose equipment and quantity to receive supplies for free.,装備と数量を選んで無料で受け取れます。
+ui.debug_armory.category,분류,Category,分類
+ui.debug_armory.weapons,무기 · 부착물,Weapons and attachments,武器・アタッチメント
+ui.debug_armory.ammo,탄약,Ammunition,弾薬
+ui.debug_armory.protection,보호 장비,Protective equipment,防具
+ui.debug_armory.quantity,수량,Quantity,数量
+ui.debug_armory.supply,무료 지급,Receive supplies,無料で受け取る
+ui.debug_armory.close,닫기,Close,閉じる
+ui.debug_armory.success,아이템을 지급했습니다.,Items supplied.,アイテムを支給しました。
+ui.debug_armory.failed,지급하지 못했습니다. 인벤토리 공간과 무기고 이용 가능 여부를 확인하세요.,Unable to supply items. Check inventory space and armory access.,支給できませんでした。インベントリの空きと武器庫の利用可否を確認してください。
+ui.debug_armory.empty,이 분류에는 지급 가능한 아이템이 없습니다.,No items are available in this category.,この分類に支給可能なアイテムはありません。
+ui.debug_armory.unnamed_item,이름 없는 아이템,Unnamed item,名称未設定のアイテム

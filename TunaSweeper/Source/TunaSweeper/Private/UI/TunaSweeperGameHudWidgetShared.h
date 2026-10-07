@@ -50,6 +50,7 @@
 #include "UI/TunaSweeperReloadRingWidget.h"
 #include "UI/TunaSweeperResearchWidgets.h"
 #include "UI/TunaSweeperWardrobePanelWidget.h"
+#include "UI/TunaSweeperDebugArmoryPanelWidget.h"
 #include "UI/TunaSweeperShopSellPanelWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"

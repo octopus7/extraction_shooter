@@ -57,6 +57,8 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.storage_open"));
 		case ETunaSweeperInteractionType::ShopOpen:
 			return FName(TEXT("ui.interaction.shop_open"));
+		case ETunaSweeperInteractionType::DebugArmoryOpen:
+			return FName(TEXT("ui.interaction.debug_armory_open"));
 		case ETunaSweeperInteractionType::WorkbenchOpen:
 			return FName(TEXT("ui.interaction.workbench_open"));
 		case ETunaSweeperInteractionType::WorkbenchCraft:

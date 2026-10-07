@@ -1,5 +1,9 @@
 # Save/Load Persistence Contract
 
+## Debug armory
+
+The development-only `BP_DebugArmory` uses the existing atomic inventory-add transaction for free weapon, ammunition, attachment, and protective-equipment supplies. Granted items follow normal inventory save/load, acquisition notifications, and inventory-capacity rules; insufficient space rolls the entire request back. Opening the panel, its selected category/quantity, and the active rack reference are transient and are never saved. There is no armory currency, stock, unlock state, or new save format. Shipping removes the interaction component and rejects panel opening, catalog access, and supply calls; the rack remains scenery.
+
 This file tracks gameplay/runtime state that must survive gameplay-slot or account-global save/load.
 Update it whenever a new state field is expected to persist across save slots, level travel saves, death saves, or intro-menu reloads.
 
