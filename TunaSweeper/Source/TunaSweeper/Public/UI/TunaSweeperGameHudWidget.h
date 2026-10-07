@@ -375,10 +375,12 @@ protected:
 
 private:
 	friend class FTunaSweeperPauseHudTransitionTest;
+	friend class FTunaSweeperHeadshotFeedbackTest;
 	friend class FTunaSweeperWardrobePanelTest;
 	struct FDamageNumberPopup
 	{
 		TWeakObjectPtr<UTextBlock> TextWidget;
+		TWeakObjectPtr<UUserWidget> BurstWidget;
 		FVector WorldLocation = FVector::ZeroVector;
 		FVector2D ScreenDrift = FVector2D::ZeroVector;
 		float ElapsedSeconds = 0.0f;
@@ -484,6 +486,7 @@ private:
 		FSlateWindowElementList& OutDrawElements,
 		int32& InOutLayerId) const;
 	void TickDamageNumberPopups(float InDeltaTime);
+	void UpdateDamageNumberPresentation(FDamageNumberPopup& Popup, const FVector2D& ScreenPosition);
 	void RemoveDamageNumberPopupAt(int32 PopupIndex);
 
 	UFUNCTION()

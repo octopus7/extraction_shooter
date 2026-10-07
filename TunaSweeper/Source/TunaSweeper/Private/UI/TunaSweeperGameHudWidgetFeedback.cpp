@@ -1,4 +1,6 @@
 #include "TunaSweeperGameHudWidgetShared.h"
+#include "UI/TunaSweeperHeadshotBurstWidget.h"
+#include "UI/TunaSweeperHeadshotFeedback.h"
 
 void UTunaSweeperGameHudWidget::AddHeadphoneNoiseRipple(const FVector& DirectionFromListener, float Strength)
 {
@@ -412,6 +414,19 @@ void UTunaSweeperGameHudWidget::ShowDamageNumber(
 	switch (DamageNumberType)
 	{
 	case ETunaSweeperDamageNumberType::Headshot:
+	{
+		UTunaSweeperHeadshotBurstWidget* Burst = WidgetTree->ConstructWidget<UTunaSweeperHeadshotBurstWidget>(
+			UTunaSweeperHeadshotBurstWidget::StaticClass(),
+			MakeUniqueObjectName(WidgetTree, UTunaSweeperHeadshotBurstWidget::StaticClass(), TEXT("DamageNumberBurst")));
+		Burst->SetVisibility(ESlateVisibility::HitTestInvisible);
+		Burst->SetRenderTransformPivot(FVector2D(.5, .5));
+		DamageText->ForceLayoutPrepass();
+		const FVector2D TextSize = DamageText->GetDesiredSize();
+		UCanvasPanelSlot* BurstSlot = RootCanvas->AddChildToCanvas(Burst);
+		BurstSlot->SetAlignment(FVector2D(.5, .5));
+		BurstSlot->SetSize(FVector2D(FMath::Max(168.0, TextSize.X * 1.65 + 32.0), FMath::Max(126.0, TextSize.Y * 1.5)));
+		BurstSlot->SetZOrder(949);
+		Popup.BurstWidget = Burst;
 		Popup.DurationSeconds = 1.08f;
 		Popup.RiseDistance = 104.0f;
 		Popup.PeakScale = 3.0f;
@@ -419,6 +434,7 @@ void UTunaSweeperGameHudWidget::ShowDamageNumber(
 		Popup.FadeStartAlpha = 0.56f;
 		Popup.ScreenDrift = FVector2D(FMath::FRandRange(-34.0f, 34.0f), FMath::FRandRange(-14.0f, 0.0f));
 		break;
+	}
 	default:
 		Popup.DurationSeconds = 0.72f;
 		Popup.RiseDistance = 46.0f;
@@ -436,24 +452,22 @@ void UTunaSweeperGameHudWidget::ShowDamageNumber(
 void UTunaSweeperGameHudWidget::TickDamageNumberPopups(float InDeltaTime)
 {
 	APlayerController* PlayerController = GetOwningPlayer();
-	if (!PlayerController)
-	{
-		return;
-	}
 
 	for (int32 Index = DamageNumberPopups.Num() - 1; Index >= 0; --Index)
 	{
 		FDamageNumberPopup& Popup = DamageNumberPopups[Index];
 		UTextBlock* TextWidget = Popup.TextWidget.Get();
+		UUserWidget* BurstWidget = Popup.BurstWidget.Get();
 		if (!TextWidget)
 		{
-			DamageNumberPopups.RemoveAt(Index);
+			RemoveDamageNumberPopupAt(Index);
 			continue;
 		}
 
 		if (IsPauseMenuOpen())
 		{
 			TextWidget->SetRenderOpacity(0.0f);
+			if (BurstWidget) BurstWidget->SetRenderOpacity(0.0f);
 			continue;
 		}
 		Popup.ElapsedSeconds += FMath::Max(0.0f, InDeltaTime);
@@ -466,48 +480,74 @@ void UTunaSweeperGameHudWidget::TickDamageNumberPopups(float InDeltaTime)
 		}
 
 		FVector2D ScreenPosition = FVector2D::ZeroVector;
-		if (!UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+		if (!PlayerController || !UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
 			PlayerController,
 			Popup.WorldLocation,
 			ScreenPosition,
 			false))
 		{
 			TextWidget->SetRenderOpacity(0.0f);
+			if (BurstWidget) BurstWidget->SetRenderOpacity(0.0f);
 			continue;
 		}
 
-		if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TextWidget->Slot))
-		{
-			const float Rise = EaseOutCubic(Alpha) * Popup.RiseDistance;
-			CanvasSlot->SetPosition(ScreenPosition + Popup.ScreenDrift * Alpha + FVector2D(0.0f, -Rise));
-		}
-
-		float Scale = Popup.SettleScale;
-		if (Alpha <= DamageNumberGrowDurationAlpha)
-		{
-			Scale = FMath::Lerp(0.72f, Popup.PeakScale, EaseOutCubic(Alpha / DamageNumberGrowDurationAlpha));
-		}
-		else
-		{
-			const float SettleAlpha = SmoothTransitionAlpha(
-				(Alpha - DamageNumberGrowDurationAlpha) / DamageNumberSettleDurationAlpha);
-			Scale = FMath::Lerp(Popup.PeakScale, Popup.SettleScale, SettleAlpha);
-		}
-
-		FWidgetTransform Transform;
-		Transform.Scale = FVector2D(Scale, Scale);
-		if (Popup.DamageNumberType == ETunaSweeperDamageNumberType::Headshot)
-		{
-			Transform.Angle = FMath::Sin(Popup.ElapsedSeconds * 42.0f) * 3.2f * (1.0f - Alpha);
-		}
-		TextWidget->SetRenderTransform(Transform);
-
-		const float FadeStartAlpha = FMath::Clamp(Popup.FadeStartAlpha, 0.0f, 0.95f);
-		const float Opacity = Alpha <= FadeStartAlpha
-			? 1.0f
-			: 1.0f - FMath::Clamp((Alpha - FadeStartAlpha) / (1.0f - FadeStartAlpha), 0.0f, 1.0f);
-		TextWidget->SetRenderOpacity(Opacity);
+		UpdateDamageNumberPresentation(Popup, ScreenPosition);
 	}
+}
+
+void UTunaSweeperGameHudWidget::UpdateDamageNumberPresentation(FDamageNumberPopup& Popup, const FVector2D& ScreenPosition)
+{
+	UTextBlock* TextWidget = Popup.TextWidget.Get();
+	if (!TextWidget) return;
+	UUserWidget* BurstWidget = Popup.BurstWidget.Get();
+	const float Alpha = FMath::Clamp(Popup.ElapsedSeconds / FMath::Max(.01f, Popup.DurationSeconds), 0.0f, 1.0f);
+	const float Rise = EaseOutCubic(Alpha) * Popup.RiseDistance;
+	const FVector2D PopupPosition = ScreenPosition + Popup.ScreenDrift * Alpha + FVector2D(0.0f, -Rise);
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TextWidget->Slot))
+	{
+		CanvasSlot->SetPosition(PopupPosition);
+	}
+	if (BurstWidget)
+		if (UCanvasPanelSlot* BurstSlot = Cast<UCanvasPanelSlot>(BurstWidget->Slot))
+			BurstSlot->SetPosition(PopupPosition + FVector2D(0, 4));
+
+	float Scale = Popup.SettleScale;
+	if (Alpha <= DamageNumberGrowDurationAlpha)
+	{
+		Scale = FMath::Lerp(0.72f, Popup.PeakScale, EaseOutCubic(Alpha / DamageNumberGrowDurationAlpha));
+	}
+	else
+	{
+		const float SettleAlpha = SmoothTransitionAlpha(
+			(Alpha - DamageNumberGrowDurationAlpha) / DamageNumberSettleDurationAlpha);
+		Scale = FMath::Lerp(Popup.PeakScale, Popup.SettleScale, SettleAlpha);
+	}
+
+	FWidgetTransform Transform;
+	Transform.Scale = FVector2D(Scale, Scale);
+	float IntroOpacity = 1.0f;
+	if (Popup.DamageNumberType == ETunaSweeperDamageNumberType::Headshot)
+	{
+		const auto Frame = TunaSweeperHeadshotFeedback::Evaluate(Popup.ElapsedSeconds, Popup.PeakScale, Popup.SettleScale);
+		Transform.Scale = Frame.NumberScale;
+		Transform.Angle = Frame.NumberAngle;
+		IntroOpacity = Frame.NumberOpacity;
+		if (BurstWidget)
+		{
+			FWidgetTransform BurstTransform;
+			BurstTransform.Scale = Frame.BurstScale;
+			BurstTransform.Angle = Frame.BurstAngle;
+			BurstWidget->SetRenderTransform(BurstTransform);
+			BurstWidget->SetRenderOpacity(Frame.BurstOpacity);
+		}
+	}
+	TextWidget->SetRenderTransform(Transform);
+
+	const float FadeStartAlpha = FMath::Clamp(Popup.FadeStartAlpha, 0.0f, 0.95f);
+	const float Opacity = Alpha <= FadeStartAlpha
+		? 1.0f
+		: 1.0f - FMath::Clamp((Alpha - FadeStartAlpha) / (1.0f - FadeStartAlpha), 0.0f, 1.0f);
+	TextWidget->SetRenderOpacity(Opacity * IntroOpacity);
 }
 
 void UTunaSweeperGameHudWidget::RemoveDamageNumberPopupAt(int32 PopupIndex)
@@ -520,6 +560,10 @@ void UTunaSweeperGameHudWidget::RemoveDamageNumberPopupAt(int32 PopupIndex)
 	if (UTextBlock* TextWidget = DamageNumberPopups[PopupIndex].TextWidget.Get())
 	{
 		TextWidget->RemoveFromParent();
+	}
+	if (UUserWidget* BurstWidget = DamageNumberPopups[PopupIndex].BurstWidget.Get())
+	{
+		BurstWidget->RemoveFromParent();
 	}
 	DamageNumberPopups.RemoveAt(PopupIndex);
 }

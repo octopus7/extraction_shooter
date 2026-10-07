@@ -163,6 +163,7 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 	}
 
 	UpdateMouseCursorForReloadGauge(false);
+	while (!DamageNumberPopups.IsEmpty()) RemoveDamageNumberPopupAt(DamageNumberPopups.Num() - 1);
 
 	Super::NativeDestruct();
 }
