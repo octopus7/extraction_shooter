@@ -1,0 +1,210 @@
+{
+  "placements": [
+    {
+      "label": "FiringBench_001",
+      "mesh": "SM_FiringBench",
+      "author_location_m": [
+        -3.15,
+        -3.07,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "FiringBench_002",
+      "mesh": "SM_FiringBench",
+      "author_location_m": [
+        -1.05,
+        -3.07,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "FiringBench_003",
+      "mesh": "SM_FiringBench",
+      "author_location_m": [
+        1.05,
+        -3.07,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "FiringBench_004",
+      "mesh": "SM_FiringBench",
+      "author_location_m": [
+        3.15,
+        -3.07,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "LanePartition_001",
+      "mesh": "SM_RangeLanePartition",
+      "author_location_m": [
+        -2.1,
+        -3.5,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "LanePartition_002",
+      "mesh": "SM_RangeLanePartition",
+      "author_location_m": [
+        0,
+        -3.5,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "LanePartition_003",
+      "mesh": "SM_RangeLanePartition",
+      "author_location_m": [
+        2.1,
+        -3.5,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "RangeControlDesk_001",
+      "mesh": "SM_RangeControlDesk",
+      "author_location_m": [
+        -4.45,
+        -3.9,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "ControlConsole_001",
+      "mesh": "SM_ControlConsole",
+      "author_location_m": [
+        -4.45,
+        -3.83,
+        0.935
+      ],
+      "yaw_deg": 90,
+      "parent": "RangeControlDesk_001"
+    },
+    {
+      "label": "Stool_001",
+      "mesh": "SM_Stool",
+      "author_location_m": [
+        -4.45,
+        -4.7,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "Stool_002",
+      "mesh": "SM_Stool",
+      "author_location_m": [
+        4.65,
+        -3.85,
+        0
+      ],
+      "yaw_deg": 90,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "SupplyCrate_004",
+      "mesh": "SM_SupplyCrate",
+      "author_location_m": [
+        -4.65,
+        -1.5,
+        0
+      ],
+      "yaw_deg": 73,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "UtilityCase_004",
+      "mesh": "SM_UtilityCase",
+      "author_location_m": [
+        -4.66,
+        -1.5,
+        0.765
+      ],
+      "yaw_deg": 70,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "AmmoBox_001",
+      "mesh": "SM_AmmoBox",
+      "author_location_m": [
+        -3.45,
+        -3,
+        0.935
+      ],
+      "yaw_deg": 80,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "AmmoBox_002",
+      "mesh": "SM_AmmoBox",
+      "author_location_m": [
+        -1.25,
+        -3.05,
+        0.935
+      ],
+      "yaw_deg": 98,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "AmmoBox_003",
+      "mesh": "SM_AmmoBox",
+      "author_location_m": [
+        3.35,
+        -3,
+        0.935
+      ],
+      "yaw_deg": 98,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "Clipboard_001",
+      "mesh": "SM_Clipboard",
+      "author_location_m": [
+        1.35,
+        -3.19,
+        0.939
+      ],
+      "yaw_deg": 75,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "Clipboard_002",
+      "mesh": "SM_Clipboard",
+      "author_location_m": [
+        -0.75,
+        -3.19,
+        0.939
+      ],
+      "yaw_deg": 98,
+      "parent": "ROOT_Range"
+    }
+  ],
+  "lane_centers_m": [
+    -3.15,
+    -1.05,
+    1.05,
+    3.15
+  ],
+  "rear_walkway_clear_depth_m": 1.26,
+  "partition_height_m": 1.7
+}

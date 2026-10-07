@@ -148,6 +148,14 @@
     {
       "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Plate",
       "source": "TunaSweeper/SourceArt/Environment/Basement/RangeTarget/Models/SM_RangePracticeTarget_Plate.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeControlDesk",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeStations/Models/SM_RangeControlDesk.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeLanePartition",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeStations/Models/SM_RangeLanePartition.glb"
     }
   ],
   "temporary_sources": 0,

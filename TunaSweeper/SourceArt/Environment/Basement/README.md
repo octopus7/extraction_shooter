@@ -23,6 +23,14 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 `Tools/Basement/verify_armory.py`가 저장 BP·메시·상호작용 키·배치를 확인한다. 네이티브 `TunaSweeper.DebugArmory.InteractionAndSupply` 자동화는 실제 상호작용과 UI, 무료 지급, 수량/종류 제한, 공간 부족 시 원상 복구, 거리·사망·탑승·닫기 검증을 수행한다.
 
+## 사격대와 안전 칸막이
+
+`FiringBench_001`~`004`는 표적 01~04와 중심을 맞춘 4개 사수 자리다. 사로 간격은 210cm이며, `LanePartition_001`~`003`이 사수 사이를 구획한다. 칸막이는 높이 170cm, 본체 두께 10.5cm, 받침 포함 길이 208cm인 독립 메시다. 모서리는 3단 베벨로 마감했고 기존 `MI_Range_Props` 아틀라스를 사용한다. 탄환과 캐릭터 충돌을 모두 유지한다. 사격 방향과 평행하게 놓여 기본 카메라에서 사수 정면을 가리지 않는다.
+
+모니터 `ControlConsole_001`은 왼쪽 전용 책상 `RangeControlDesk_001`에 연결되어 책상을 옮기면 함께 이동한다. 책상은 기존 사격대와 같은 높이 93.5cm, 폭 120cm이며 공유 재질을 사용한다. 사로 뒤쪽에는 126cm 깊이의 진입 통로가 남는다. 칸막이·사격대는 각각 이동할 수 있고 모두 `ROOT_Range`에 속한다.
+
+`RangeStations/RangeStations.blend`, `Models/`, 메시·배치 manifest가 편집 원본이다. 원래 `Range/Scene/placement_manifest.json`은 최초 사격장 자료이며 최신 사격대 배치는 `RangeStations/placement_manifest.json`을 참고한다. `Tools/Basement/verify_stations.py`를 별도 렌더 에디터의 `-ExecutePythonScript`로 실행하면 저장된 레벨의 8개 캐릭터 진입 경로, 4개 사격 시야, 칸막이 충돌, 표적 정렬과 모니터 받침을 검사한다.
+
 ## 이동과 확장
 
 - Outliner `Basement/` 아래의 `ROOT_Range`, `ROOT_LadderHub`, 각 통로 `ROOT_*`를 이동하면 연결된 자식 액터가 함께 이동한다. 공유 Static Mesh를 사용하므로 개별 부품도 교체할 수 있다.

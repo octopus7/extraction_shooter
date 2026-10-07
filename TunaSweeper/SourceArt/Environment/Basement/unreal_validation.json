@@ -187,7 +187,7 @@
     },
     {
       "root": "Range",
-      "descendants": 117,
+      "descendants": 122,
       "translation_verified": true,
       "rotation_90_degrees_verified": true
     },
@@ -215,5 +215,33 @@
       "translation_verified": true,
       "rotation_90_degrees_verified": true
     }
-  ]
+  ],
+  "range_stations": {
+    "passed": true,
+    "lanes": 4,
+    "bench_target_alignment": true,
+    "partition_collision_checks": [
+      "LanePartition_001",
+      "LanePartition_002",
+      "LanePartition_003"
+    ],
+    "capsule_radius_cm": 42,
+    "capsule_half_height_cm": 90,
+    "clear_routes": [
+      "lane_1_rear_walkway",
+      "lane_1_entry",
+      "lane_2_rear_walkway",
+      "lane_2_entry",
+      "lane_3_rear_walkway",
+      "lane_3_entry",
+      "lane_4_rear_walkway",
+      "lane_4_entry"
+    ],
+    "clear_firing_lines": 4,
+    "screen_on_separate_desk": true,
+    "asset_triangles": {
+      "SM_RangeControlDesk": 756,
+      "SM_RangeLanePartition": 1692
+    }
+  }
 }
