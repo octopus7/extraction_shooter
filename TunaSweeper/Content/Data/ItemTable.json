@@ -100,7 +100,8 @@
     "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 10000,
-    "projectile_damage_bonus": 1
+    "projectile_damage_bonus": 1,
+    "penetration_tier": 2
   },
   {
     "id": 2002,
@@ -115,7 +116,8 @@
     "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 10000,
-    "projectile_damage_bonus": 2
+    "projectile_damage_bonus": 2,
+    "penetration_tier": 2
   },
   {
     "id": 2003,
@@ -130,7 +132,8 @@
     "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 10000,
-    "projectile_damage_bonus": 1
+    "projectile_damage_bonus": 1,
+    "penetration_tier": 2
   },
   {
     "id": 2011,
@@ -145,7 +148,8 @@
     "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 8500,
-    "projectile_damage_bonus": 0
+    "projectile_damage_bonus": 0,
+    "penetration_tier": 1
   },
   {
     "id": 2012,
@@ -160,7 +164,8 @@
     "impact_profile_id": "DA_Impact_BallisticAP",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 11000,
-    "projectile_damage_bonus": 3
+    "projectile_damage_bonus": 3,
+    "penetration_tier": 3
   },
   {
     "id": 2021,
@@ -175,7 +180,8 @@
     "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 8500,
-    "projectile_damage_bonus": 1
+    "projectile_damage_bonus": 1,
+    "penetration_tier": 1
   },
   {
     "id": 2022,
@@ -190,7 +196,8 @@
     "impact_profile_id": "DA_Impact_BallisticAP",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 11500,
-    "projectile_damage_bonus": 5
+    "projectile_damage_bonus": 5,
+    "penetration_tier": 3
   },
   {
     "id": 2031,
@@ -205,7 +212,8 @@
     "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 8500,
-    "projectile_damage_bonus": 0
+    "projectile_damage_bonus": 0,
+    "penetration_tier": 1
   },
   {
     "id": 2032,
@@ -220,7 +228,8 @@
     "impact_profile_id": "DA_Impact_BallisticAP",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 11000,
-    "projectile_damage_bonus": 4
+    "projectile_damage_bonus": 4,
+    "penetration_tier": 3
   },
   {
     "id": 2004,
@@ -412,7 +421,8 @@
     "icon_file_name": "T_UIIcon_BodyArmor.uasset",
     "category_tag": "item.category.body",
     "equipment_slot_tag": "equipment.slot.body",
-    "defense_value": 3
+    "defense_value": 4,
+    "armor_tier": 2
   },
   {
     "id": 5002,
@@ -489,7 +499,8 @@
     "icon_file_name": "T_UIIcon_BallisticHelmet.uasset",
     "category_tag": "item.category.head",
     "equipment_slot_tag": "equipment.slot.head",
-    "defense_value": 2
+    "defense_value": 2,
+    "armor_tier": 2
   },
   {
     "id": 5007,
@@ -540,7 +551,8 @@
     "icon_file_name": "T_UIIcon_TacticalJacket.uasset",
     "category_tag": "item.category.body",
     "equipment_slot_tag": "equipment.slot.body",
-    "defense_value": 1
+    "defense_value": 2,
+    "armor_tier": 1
   },
   {
     "id": 6001,
@@ -644,6 +656,120 @@
     "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 2,
     "burn_damage_per_tick": 2,
-    "burn_tick_count": 5
+    "burn_tick_count": 5,
+    "penetration_tier": 2
+  },
+  {
+    "id": 2013,
+    "name_string_key": "item.pistol_advanced_ap_ammo",
+    "description_string_key": "item.pistol_advanced_ap_ammo.desc",
+    "shop_sell_price": 48,
+    "experience_value": 10,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_PistolAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.pistol",
+    "impact_profile_id": "DA_Impact_BallisticAP",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11000,
+    "projectile_damage_bonus": 3,
+    "penetration_tier": 4
+  },
+  {
+    "id": 2024,
+    "name_string_key": "item.rifle_advanced_ap_ammo",
+    "description_string_key": "item.rifle_advanced_ap_ammo.desc",
+    "shop_sell_price": 72,
+    "experience_value": 10,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_RifleAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.rifle",
+    "impact_profile_id": "DA_Impact_BallisticAP",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11500,
+    "projectile_damage_bonus": 5,
+    "penetration_tier": 4
+  },
+  {
+    "id": 2033,
+    "name_string_key": "item.shotgun_advanced_ap_ammo",
+    "description_string_key": "item.shotgun_advanced_ap_ammo.desc",
+    "shop_sell_price": 68,
+    "experience_value": 10,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_ShotgunAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.shotgun",
+    "impact_profile_id": "DA_Impact_BallisticAP",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11000,
+    "projectile_damage_bonus": 4,
+    "penetration_tier": 4
+  },
+  {
+    "id": 5021,
+    "name_string_key": "item.ballistic_helmet_tier1",
+    "description_string_key": "item.ballistic_helmet_tier1.desc",
+    "shop_sell_price": 100,
+    "experience_value": 25,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_BallisticHelmet.uasset",
+    "category_tag": "item.category.head",
+    "equipment_slot_tag": "equipment.slot.head",
+    "defense_value": 1,
+    "armor_tier": 1
+  },
+  {
+    "id": 5022,
+    "name_string_key": "item.body_armor_tier3",
+    "description_string_key": "item.body_armor_tier3.desc",
+    "shop_sell_price": 360,
+    "experience_value": 75,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_BodyArmor.uasset",
+    "category_tag": "item.category.body",
+    "equipment_slot_tag": "equipment.slot.body",
+    "defense_value": 6,
+    "armor_tier": 3
+  },
+  {
+    "id": 5023,
+    "name_string_key": "item.ballistic_helmet_tier3",
+    "description_string_key": "item.ballistic_helmet_tier3.desc",
+    "shop_sell_price": 440,
+    "experience_value": 75,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_BallisticHelmet.uasset",
+    "category_tag": "item.category.head",
+    "equipment_slot_tag": "equipment.slot.head",
+    "defense_value": 3,
+    "armor_tier": 3
+  },
+  {
+    "id": 5024,
+    "name_string_key": "item.body_armor_tier4",
+    "description_string_key": "item.body_armor_tier4.desc",
+    "shop_sell_price": 720,
+    "experience_value": 100,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_BodyArmor.uasset",
+    "category_tag": "item.category.body",
+    "equipment_slot_tag": "equipment.slot.body",
+    "defense_value": 8,
+    "armor_tier": 4
+  },
+  {
+    "id": 5025,
+    "name_string_key": "item.ballistic_helmet_tier4",
+    "description_string_key": "item.ballistic_helmet_tier4.desc",
+    "shop_sell_price": 880,
+    "experience_value": 100,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_BallisticHelmet.uasset",
+    "category_tag": "item.category.head",
+    "equipment_slot_tag": "equipment.slot.head",
+    "defense_value": 4,
+    "armor_tier": 4
   }
 ]

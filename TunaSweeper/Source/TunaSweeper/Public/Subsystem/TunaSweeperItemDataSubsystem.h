@@ -87,6 +87,12 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 DefenseValue = 0;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 ArmorTier = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "0", ClampMax = "4"))
+	int32 PenetrationTier = 0;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName WeaponTypeTag;
 

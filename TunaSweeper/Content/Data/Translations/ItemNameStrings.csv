@@ -111,3 +111,19 @@ container.developer_crate,开发者箱,開發者箱,Ящик разработч�
 container.north_crate,北侧箱子,北側箱子,Северный ящик,Caixa ao norte
 item.rifle_incendiary_ammo,步枪燃烧弹,步槍燃燒彈,Зажигательные патроны для винтовки,Munição incendiária de fuzil
 item.rifle_incendiary_ammo.desc,点燃敌人，每秒造成 2 点伤害，共触发 5 次。武器和弹药研究可提高持续时间与伤害。,點燃敵人，每秒造成 2 點傷害，共觸發 5 次。武器和彈藥研究可提高持續時間與傷害。,Поджигает врага и наносит по 2 урона раз в секунду 5 раз. Исследования оружия и патронов увеличивают длительность и урон.,"Incendeia inimigos, causando 2 de dano a cada segundo, 5 vezes. Pesquisas de armas e munição aumentam a duração e o dano."
+item.pistol_advanced_ap_ammo,高级穿甲手枪弹,高級穿甲手槍彈,Улучшенные бронебойные пистолетные патроны,Munição perfurante avançada de pistola
+item.pistol_advanced_ap_ammo.desc,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня.",Penetração de nível 4. Mesmo dano base da munição perfurante com maior penetração contra armaduras de nível alto.
+item.rifle_advanced_ap_ammo,高级穿甲步枪弹,高級穿甲步槍彈,Улучшенные бронебойные винтовочные патроны,Munição perfurante avançada de fuzil
+item.rifle_advanced_ap_ammo.desc,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня.",Penetração de nível 4. Mesmo dano base da munição perfurante com maior penetração contra armaduras de nível alto.
+item.shotgun_advanced_ap_ammo,高级穿甲霰弹,高級穿甲霰彈,Улучшенные бронебойные патроны для дробовика,Munição perfurante avançada de escopeta
+item.shotgun_advanced_ap_ammo.desc,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня.",Penetração de nível 4. Mesmo dano base da munição perfurante com maior penetração contra armaduras de nível alto.
+item.ballistic_helmet_tier1,1级防弹头盔,1級防彈頭盔,Баллистический шлем 1-го уровня,Capacete balístico de nível 1
+item.ballistic_helmet_tier1.desc,护甲等级1 · 基础防御1。实际防御取决于弹药穿透等级。,護甲等級1 · 基礎防禦1。實際防禦取決於彈藥穿透等級。,Броня 1-го уровня · Базовая защита 1. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 1 · Defesa base 1. A defesa efetiva depende do nível de penetração da munição.
+item.body_armor_tier3,3级防弹衣,3級防彈衣,Бронежилет 3-го уровня,Colete balístico de nível 3
+item.body_armor_tier3.desc,护甲等级3 · 基础防御6。实际防御取决于弹药穿透等级。,護甲等級3 · 基礎防禦6。實際防禦取決於彈藥穿透等級。,Броня 3-го уровня · Базовая защита 6. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 3 · Defesa base 6. A defesa efetiva depende do nível de penetração da munição.
+item.ballistic_helmet_tier3,3级防弹头盔,3級防彈頭盔,Баллистический шлем 3-го уровня,Capacete balístico de nível 3
+item.ballistic_helmet_tier3.desc,护甲等级3 · 基础防御3。实际防御取决于弹药穿透等级。,護甲等級3 · 基礎防禦3。實際防禦取決於彈藥穿透等級。,Броня 3-го уровня · Базовая защита 3. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 3 · Defesa base 3. A defesa efetiva depende do nível de penetração da munição.
+item.body_armor_tier4,4级防弹衣,4級防彈衣,Бронежилет 4-го уровня,Colete balístico de nível 4
+item.body_armor_tier4.desc,护甲等级4 · 基础防御8。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦8。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 8. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 4 · Defesa base 8. A defesa efetiva depende do nível de penetração da munição.
+item.ballistic_helmet_tier4,4级防弹头盔,4級防彈頭盔,Баллистический шлем 4-го уровня,Capacete balístico de nível 4
+item.ballistic_helmet_tier4.desc,护甲等级4 · 基础防御4。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦4。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 4. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 4 · Defesa base 4. A defesa efetiva depende do nível de penetração da munição.

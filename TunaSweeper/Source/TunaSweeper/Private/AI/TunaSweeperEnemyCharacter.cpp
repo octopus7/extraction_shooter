@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "Combat/TunaSweeperArmor.h"
 #include "Component/TunaSweeperBurnComponent.h"
 #include "Component/TunaSweeperCombatPatternComponent.h"
 #include "Component/TunaSweeperDebuffComponent.h"
@@ -266,8 +267,13 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 		}
 	}
 
-	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
-	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
+	UTunaSweeperItemDataSubsystem* ArmorItems = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+	const int32 PenetrationTier = TunaSweeperArmor::ResolvePenetrationTier(DamageEvent, DamageCauser);
+	const float Defense = TunaSweeperArmor::ItemDefense(ArmorItems, BodyArmorItemId, TEXT("equipment.slot.body"), PenetrationTier) +
+		TunaSweeperArmor::ItemDefense(ArmorItems, HeadArmorItemId, TEXT("equipment.slot.head"), PenetrationTier);
+	const float AppliedDamage = FMath::Min(CurrentHealth, TunaSweeperArmor::ApplyDefense(DamageAmount, Defense));
+	if (AppliedDamage <= 0.0f) return 0.0f;
+	CurrentHealth = FMath::Max(0.0f, CurrentHealth - AppliedDamage);
 	if (CurrentHealth > 0.0f)
 	{
 		if (EventInstigator && EventInstigator->GetPawn())
@@ -405,6 +411,7 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 	EnemyProjectileHitEffectId = ProjectileHitEffectId;
 	EnemyProjectileDamageMultiplier = 1.0f;
 	EnemyProjectileDamageBonus = 0;
+	EnemyPenetrationTier = 0;
 	EnemyMagazineCapacity = 0;
 	EnemyLoadedAmmoCount = 0;
 	PendingEnemyReloadAmmoCount = 0;
@@ -445,6 +452,7 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 	EnemyProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
 	EnemyProjectileDamageMultiplier = TunaSweeperDataValues::ToRatioFloat(AmmoDefinition.ProjectileDamageMultiplier);
 	EnemyProjectileDamageBonus = AmmoDefinition.ProjectileDamageBonus;
+	EnemyPenetrationTier = AmmoDefinition.PenetrationTier;
 
 	if (EnsureEnemyWeaponActor() && TunaGameInstance)
 	{
@@ -1061,7 +1069,9 @@ ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AAct
 		true,
 		FireCooldownOverrideSeconds,
 		// TEMP_VIDEO_BULLET_STORM: Capture footage uses replacement audio in editing.
-		bTemporaryVideoBulletStorm);
+		bTemporaryVideoBulletStorm,
+		FTunaSweeperBurnSpec(),
+		EnemyPenetrationTier);
 	if (!bFired)
 	{
 		return ETunaSweeperEnemyFireResult::Cooldown;

@@ -258,7 +258,8 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		bHasAimIntent,
 		-1.0f,
 		false,
-		BurnSpec);
+		BurnSpec,
+		AmmoDefinition.PenetrationTier);
 	if (!bFired)
 	{
 		return;

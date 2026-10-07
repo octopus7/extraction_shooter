@@ -1,5 +1,9 @@
 # Save/Load Persistence Contract
 
+## Armor and ammunition penetration
+
+Armor tier, base defense, and ammunition penetration tier are item-definition data resolved from the existing saved item IDs. Existing IDs, equipment slots, loaded-ammo IDs/counts, and save version remain unchanged; old tactical jackets and body armor receive the updated definition values on load. New tiered armor and advanced AP ammunition use the normal item-instance persistence. Each projectile snapshots penetration tier when fired; projectiles and enemy profile armor references are transient and are not new save fields. Enemy armor references provide stats only and do not add inventory or loot instances.
+
 ## Debug armory
 
 The development-only `BP_DebugArmory` uses the existing atomic inventory-add transaction for free weapon, ammunition, attachment, and protective-equipment supplies. Granted items follow normal inventory save/load, acquisition notifications, and inventory-capacity rules; insufficient space rolls the entire request back. Opening the panel, its selected category/quantity, and the active rack reference are transient and are never saved. There is no armory currency, stock, unlock state, or new save format. Shipping removes the interaction component and rejects panel opening, catalog access, and supply calls; the rack remains scenery.

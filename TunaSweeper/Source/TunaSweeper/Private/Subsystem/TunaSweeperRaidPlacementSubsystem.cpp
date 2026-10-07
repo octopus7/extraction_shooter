@@ -15,6 +15,7 @@
 #include "Serialization/JsonSerializer.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperRaidPlacement, Log, All);
 
@@ -238,6 +239,8 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 			SpawnedEnemy->ConfigureCombatProfile(CombatProfile, Profile->FactionId, Profile->SquadId, Profile->SquadSlot);
 			SpawnedEnemy->ConfigureSpawnData(Profile->BodyMaterial, MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId), Profile->DropContainerDefinitionId, Profile->DropContentsId, Profile->MaxHealth, Profile->ExperienceValue, Profile->BleedingChanceBonus, Profile->BleedingDurationBonusSeconds, Profile->WeaponItemId, Profile->AmmoItemId, Profile->ReserveAmmoCount, Profile->LootLoadedAmmoDeductionRatio, Profile->LootLoadedAmmoFlatDeduction);
 			SpawnedEnemy->Tags.AddUnique(MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId));
+			if (Profile->BodyArmorItemId != INDEX_NONE) SpawnedEnemy->BodyArmorItemId = Profile->BodyArmorItemId;
+			if (Profile->HeadArmorItemId != INDEX_NONE) SpawnedEnemy->HeadArmorItemId = Profile->HeadArmorItemId;
 			UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 			++SpawnedEnemies;
 		}
@@ -369,6 +372,23 @@ bool UTunaSweeperRaidPlacementSubsystem::LoadEnemyProfiles(const FString& JsonPa
 		if (JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericValue)) { Profile.DropContentsId = FMath::RoundToInt(NumericValue); }
 		if (JsonObject->TryGetNumberField(TEXT("weapon_item_id"), NumericValue)) { Profile.WeaponItemId = FMath::RoundToInt(NumericValue); }
 		if (JsonObject->TryGetNumberField(TEXT("ammo_item_id"), NumericValue)) { Profile.AmmoItemId = FMath::RoundToInt(NumericValue); }
+		UTunaSweeperItemDataSubsystem* Items = GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+		for (const auto& ArmorField : {TPair<const TCHAR*, int32*>(TEXT("body_armor_item_id"), &Profile.BodyArmorItemId),
+			TPair<const TCHAR*, int32*>(TEXT("head_armor_item_id"), &Profile.HeadArmorItemId)})
+		{
+			if (!JsonObject->HasField(ArmorField.Key)) continue;
+			FTunaSweeperItemDefinition ArmorItem;
+			const FName RequiredSlot = ArmorField.Value == &Profile.BodyArmorItemId ? TEXT("equipment.slot.body") : TEXT("equipment.slot.head");
+			if (!JsonObject->TryGetNumberField(ArmorField.Key, NumericValue) || !FMath::IsFinite(NumericValue) ||
+				NumericValue < 0.0 || NumericValue > MAX_int32 || NumericValue != FMath::FloorToDouble(NumericValue) ||
+				(NumericValue > 0.0 && (!Items || !Items->TryGetItemDefinition(static_cast<int32>(NumericValue), ArmorItem) ||
+					ArmorItem.EquipmentSlotTag != RequiredSlot || ArmorItem.DefenseValue <= 0)))
+			{
+				UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy profile %s has invalid %s."), *ProfileIdString, ArmorField.Key);
+				return false;
+			}
+			*ArmorField.Value = static_cast<int32>(NumericValue);
+		}
 		if (JsonObject->TryGetNumberField(TEXT("reserve_ammo_count"), NumericValue)) { Profile.ReserveAmmoCount = FMath::RoundToInt(NumericValue); }
 		if (JsonObject->TryGetNumberField(TEXT("loot_loaded_ammo_deduction_ratio"), NumericValue)) { Profile.LootLoadedAmmoDeductionRatio = FMath::Clamp(static_cast<float>(NumericValue), 0.0f, 1.0f); }
 		if (JsonObject->TryGetNumberField(TEXT("loot_loaded_ammo_flat_deduction"), NumericValue)) { Profile.LootLoadedAmmoFlatDeduction = FMath::Max(0, FMath::RoundToInt(NumericValue)); }

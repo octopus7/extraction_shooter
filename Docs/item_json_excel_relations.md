@@ -6,6 +6,8 @@ Generated CSV tables live under:
 
 The existing `TunaSweeper/Content/Data/ItemNameStrings.csv` remains the text table. Do not duplicate it into the export; join by `string_key` when display text is needed.
 
+`item_definitions.csv` includes `armor_tier` and `penetration_tier` alongside `defense_value`. These 0–4 gameplay tiers are independent of `item_grade`; see [armor and penetration](armor_penetration.md).
+
 ## Tables
 
 | CSV | Source | Key | Notes |

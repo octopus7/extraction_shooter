@@ -1,4 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Combat/TunaSweeperArmor.h"
 
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
 {
@@ -30,6 +31,11 @@ int32 UTunaSweeperGameInstance::GetEquippedBackpackSlotBonus()
 
 int32 UTunaSweeperGameInstance::GetEquippedDefenseValue()
 {
+	return FMath::RoundToInt(GetEquippedEffectiveDefense(0));
+}
+
+float UTunaSweeperGameInstance::GetEquippedEffectiveDefense(int32 PenetrationTier)
+{
 	EnsureInventoryStateInitialized();
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
@@ -38,7 +44,7 @@ int32 UTunaSweeperGameInstance::GetEquippedDefenseValue()
 		return 0;
 	}
 
-	int32 DefenseValue = 0;
+	float DefenseValue = 0.0f;
 	for (const FTunaSweeperInventorySlot& EquipmentSlot : EquipmentSlots)
 	{
 		FTunaSweeperItemInstance ItemInstance;
@@ -50,7 +56,7 @@ int32 UTunaSweeperGameInstance::GetEquippedDefenseValue()
 		FTunaSweeperItemDefinition ItemDefinition;
 		if (ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
 		{
-			DefenseValue += FMath::Max(0, ItemDefinition.DefenseValue);
+			DefenseValue += TunaSweeperArmor::EffectiveDefense(ItemDefinition.DefenseValue, ItemDefinition.ArmorTier, PenetrationTier);
 		}
 	}
 

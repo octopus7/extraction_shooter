@@ -1,4 +1,6 @@
 string_key,ko,en,ja
+ui.item_info.defense_specs,방어구 스펙,Armor Specs,防具性能
+ui.item_info.defense,기본 방어력,Base Defense,基本防御力
 tool.save.code,오류 코드,Error code,エラーコード
 tool.save.hash,현재 파일 hash,Current file hash,現在のファイルhash
 tool.save.sourceHash,편집 전 파일 hash,Source file hash,編集前のファイルhash
@@ -561,3 +563,11 @@ ui.debug_armory.success,아이템을 지급했습니다.,Items supplied.,アイ�
 ui.debug_armory.failed,지급하지 못했습니다. 인벤토리 공간과 무기고 이용 가능 여부를 확인하세요.,Unable to supply items. Check inventory space and armory access.,支給できませんでした。インベントリの空きと武器庫の利用可否を確認してください。
 ui.debug_armory.empty,이 분류에는 지급 가능한 아이템이 없습니다.,No items are available in this category.,この分類に支給可能なアイテムはありません。
 ui.debug_armory.unnamed_item,이름 없는 아이템,Unnamed item,名称未設定のアイテム
+ui.item_info.penetration_context,"관통 {0}등급
+{1}","Penetration tier {0}
+{1}","貫通等級{0}
+{1}"
+ui.item_info.armor_context,"방어 {0}등급
+탄종별 피해 감소 — 녹슨 {1} / 일반 {2} / 철갑 {3} / 고급 철갑 {4}","Armor tier {0}
+Damage reduction — Rusty {1} / Standard {2} / AP {3} / Advanced AP {4}","防御等級{0}
+ダメージ軽減 — 錆びた弾{1} / 通常弾{2} / 徹甲弾{3} / 高性能徹甲弾{4}"

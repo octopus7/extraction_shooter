@@ -25,6 +25,8 @@ public:
 
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
 	float GetDamageAmount() const { return DamageAmount; }
+	void SetPenetrationTier(int32 InTier) { PenetrationTier = FMath::Clamp(InTier, 0, 4); }
+	int32 GetPenetrationTier() const { return PenetrationTier; }
 	UFUNCTION(BlueprintCallable, Category = "Projectile|Burn")
 	void SetBurnSpec(const FTunaSweeperBurnSpec& InBurnSpec) { BurnSpec = InBurnSpec; BurnSpec.Normalize(); }
 	const FTunaSweeperBurnSpec& GetBurnSpec() const { return BurnSpec; }
@@ -122,6 +124,10 @@ protected:
 
 	// Native per-instance default also gives projectiles spawned outside a weapon distinct applications.
 	FGuid BurnApplicationId = FGuid::NewGuid();
+
+	// Snapshot at firing time, including each shotgun pellet; never read the owner's current ammo on impact.
+	UPROPERTY(Transient)
+	int32 PenetrationTier = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float CameraHitReactionScale = 1.0f;

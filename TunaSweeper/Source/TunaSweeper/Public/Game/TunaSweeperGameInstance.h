@@ -268,6 +268,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
 	friend class FTunaSweeperEquipmentDataTest;
+	friend class FTunaSweeperArmorPenetrationTest;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperOutfitSaveTest;
 	friend class FTunaSweeperOutfitSaveFailureTest;
@@ -568,6 +569,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Inventory")
 	int32 GetEquippedDefenseValue();
+	float GetEquippedEffectiveDefense(int32 PenetrationTier);
 
 	const TArray<FTunaSweeperInventorySlot>& GetInventorySlots();
 	const TArray<FTunaSweeperInventorySlot>& GetEquipmentSlots();

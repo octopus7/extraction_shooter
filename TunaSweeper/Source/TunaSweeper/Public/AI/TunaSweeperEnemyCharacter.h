@@ -79,6 +79,12 @@ class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
 public:
 	ATunaSweeperEnemyCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Armor")
+	int32 BodyArmorItemId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Armor")
+	int32 HeadArmorItemId = INDEX_NONE;
+
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
@@ -365,6 +371,7 @@ private:
 	float EnemyProjectileDamageMultiplier = 1.0f;
 	float EnemyReloadSeconds = 1.8f;
 	int32 EnemyProjectileDamageBonus = 0;
+	int32 EnemyPenetrationTier = 0;
 	int32 EnemyMagazineCapacity = 0;
 	int32 EnemyLoadedAmmoCount = 0;
 	int32 PendingEnemyReloadAmmoCount = 0;

@@ -56,7 +56,8 @@ public:
 		float FireCooldownOverrideSeconds = -1.0f,
 		// TEMP_VIDEO_BULLET_STORM: Only the temporary capture mode passes true; normal fire remains audible.
 		bool bSuppressFireSound = false,
-		const FTunaSweeperBurnSpec& BurnSpec = FTunaSweeperBurnSpec());
+		const FTunaSweeperBurnSpec& BurnSpec = FTunaSweeperBurnSpec(),
+		int32 PenetrationTier = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void ConfigureGunVisual();
@@ -182,7 +183,8 @@ protected:
 		const FVector& AimIntentWorldPoint,
 		bool bHasAimIntentWorldPoint,
 		const FTunaSweeperBurnSpec& BurnSpec,
-		const FGuid& BurnApplicationId);
+		const FGuid& BurnApplicationId,
+		int32 PenetrationTier);
 
 	void PlayFirePresentation(bool bSuppressFireSound = false);
 	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);

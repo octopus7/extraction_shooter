@@ -43,6 +43,8 @@ namespace TunaSweeperSaveTool::Internal
 		Row->SetNumberField(TEXT("maxStack"), Data.ResolveItemMaxStackQuantity(D));
 		Row->SetNumberField(TEXT("magazineCapacity"), D.MagazineCapacity);
 		Row->SetNumberField(TEXT("defense"), D.DefenseValue);
+		Row->SetNumberField(TEXT("armor_tier"), D.ArmorTier);
+		Row->SetNumberField(TEXT("penetration_tier"), D.PenetrationTier);
 		Row->SetBoolField(TEXT("canAdd"), AllowedItem(D));
 		auto Names = MakeShared<FJsonObject>();
 		for (const auto& Language : { TPair<const TCHAR*, ETunaSweeperItemTextLanguage>(TEXT("ko"), ETunaSweeperItemTextLanguage::Korean),

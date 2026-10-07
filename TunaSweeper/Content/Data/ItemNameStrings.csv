@@ -111,3 +111,19 @@ container.developer_crate,개발상자,Developer Crate,開発箱
 container.north_crate,북쪽 상자,North Crate,北側の箱
 item.rifle_incendiary_ammo,소총 소이탄,Rifle Incendiary Ammo,ライフル焼夷弾
 item.rifle_incendiary_ammo.desc,적을 발화시켜 1초마다 2의 피해를 5회 줍니다. 무기와 탄약 연구로 지속시간과 피해가 증가합니다.,Ignites enemies for 2 damage every second for 5 ticks. Weapon and ammunition research improve duration and damage.,敵を発火させて1秒ごとに2ダメージを5回与えます。武器と弾薬の研究で持続時間とダメージが増加します。
+item.pistol_advanced_ap_ammo,권총용 고급 철갑탄,Advanced AP Pistol Ammo,拳銃用高性能徹甲弾
+item.pistol_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。
+item.rifle_advanced_ap_ammo,소총용 고급 철갑탄,Advanced AP Rifle Ammo,ライフル用高性能徹甲弾
+item.rifle_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。
+item.shotgun_advanced_ap_ammo,산탄총용 고급 철갑탄,Advanced AP Shotgun Ammo,ショットガン用高性能徹甲弾
+item.shotgun_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。
+item.ballistic_helmet_tier1,1등급 방탄 헬멧,Tier 1 Ballistic Helmet,等級1の防弾ヘルメット
+item.ballistic_helmet_tier1.desc,방어 1등급 · 기본 방어력 1. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 1 · Base defense 1. Effective defense depends on ammunition penetration tier.,防御等級1・基本防御力1。弾薬の貫通等級に応じて実効防御力が変わる。
+item.body_armor_tier3,3등급 방탄복,Tier 3 Body Armor,等級3の防弾ベスト
+item.body_armor_tier3.desc,방어 3등급 · 기본 방어력 6. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 3 · Base defense 6. Effective defense depends on ammunition penetration tier.,防御等級3・基本防御力6。弾薬の貫通等級に応じて実効防御力が変わる。
+item.ballistic_helmet_tier3,3등급 방탄 헬멧,Tier 3 Ballistic Helmet,等級3の防弾ヘルメット
+item.ballistic_helmet_tier3.desc,방어 3등급 · 기본 방어력 3. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 3 · Base defense 3. Effective defense depends on ammunition penetration tier.,防御等級3・基本防御力3。弾薬の貫通等級に応じて実効防御力が変わる。
+item.body_armor_tier4,4등급 방탄복,Tier 4 Body Armor,等級4の防弾ベスト
+item.body_armor_tier4.desc,방어 4등급 · 기본 방어력 8. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 8. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力8。弾薬の貫通等級に応じて実効防御力が変わる。
+item.ballistic_helmet_tier4,4등급 방탄 헬멧,Tier 4 Ballistic Helmet,等級4の防弾ヘルメット
+item.ballistic_helmet_tier4.desc,방어 4등급 · 기본 방어력 4. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 4. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力4。弾薬の貫通等級に応じて実効防御力が変わる。

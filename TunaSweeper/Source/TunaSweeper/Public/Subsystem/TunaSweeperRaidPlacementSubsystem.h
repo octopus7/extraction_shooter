@@ -47,6 +47,8 @@ private:
 		int32 DropContentsId = INDEX_NONE;
 		int32 WeaponItemId = INDEX_NONE;
 		int32 AmmoItemId = INDEX_NONE;
+		int32 BodyArmorItemId = INDEX_NONE;
+		int32 HeadArmorItemId = INDEX_NONE;
 		int32 ReserveAmmoCount = INDEX_NONE;
 		float LootLoadedAmmoDeductionRatio = 0.35f;
 		int32 LootLoadedAmmoFlatDeduction = 0;

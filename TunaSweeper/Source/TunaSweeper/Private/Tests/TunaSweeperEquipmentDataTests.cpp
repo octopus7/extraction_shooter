@@ -62,6 +62,22 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	Game->ResetPlayerSlotArrays();
 	UTunaSweeperItemDataSubsystem* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	if (!TestTrue(TEXT("Production item definitions load"), Items && Items->LoadItemData())) return false;
+	TArray<FTunaSweeperItemDefinition> ArmorCatalog;
+	Items->GetAllItemDefinitions(ArmorCatalog);
+	for (const FName ArmorSlot : {FName(TEXT("equipment.slot.head")), FName(TEXT("equipment.slot.body"))})
+	{
+		const int32 ArmorCount = ArmorCatalog.FilterByPredicate([ArmorSlot](const auto& Item)
+		{
+			return Item.EquipmentSlotTag == ArmorSlot && Item.DefenseValue > 0;
+		}).Num();
+		TestEqual(FString::Printf(TEXT("Four armor tiers for %s"), *ArmorSlot.ToString()), ArmorCount, 4);
+	}
+	for (const int32 AdvancedAmmoId : {2013, 2024, 2033})
+	{
+		FTunaSweeperItemDefinition AdvancedAmmo;
+		TestTrue(FString::Printf(TEXT("Advanced AP ammunition %d exists"), AdvancedAmmoId),
+			Items->TryGetItemDefinition(AdvancedAmmoId, AdvancedAmmo));
+	}
 	if (!TestTrue(TEXT("Starting equipment initializes"), Game->InitializeDemoStartingLoadout())) return false;
 	ATunaSweeperTopDownCharacter* Character = World->SpawnActor<ATunaSweeperTopDownCharacter>();
 	if (!TestNotNull(TEXT("Character"), Character)) return false;
@@ -256,8 +272,8 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	Game->SelectItemSlot(AmmoSlot);
 	ATunaSweeperWeapon* TestWeapon = World->SpawnActor<ATunaSweeperWeapon>(WeaponClass);
 	if (!TestNotNull(TEXT("Damage test weapon"), TestWeapon)) return false;
-	const int32 AmmoIds[] = {2011, 2012, 2001, 2032};
-	const int32 ExpectedDamage[] = {11, 17, 13, 18};
+	const int32 AmmoIds[] = {2011, 2012, 2001, 2032, 2013, 2024, 2033};
+	const int32 ExpectedDamage[] = {11, 17, 13, 18, 17, 19, 18};
 	for (int32 CaseIndex = 0; CaseIndex < UE_ARRAY_COUNT(AmmoIds); ++CaseIndex)
 	{
 		const FTunaSweeperItemDefinition& Ammo = Items->ItemDefinitionsById.FindChecked(AmmoIds[CaseIndex]);
@@ -272,7 +288,8 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 			FVector::ForwardVector, Character, NAME_None, NAME_None,
 			bShotgun ? FName(TEXT("weapon.type.shotgun")) : FName(TEXT("weapon.type.smg")),
 			static_cast<float>(Ammo.ProjectileDamageMultiplier) / 10000.0f, Ammo.ProjectileDamageBonus,
-			0.0f, FVector::ZeroVector, false, nullptr, nullptr, FVector::ZeroVector, false, 0.0f, true))) return false;
+			0.0f, FVector::ZeroVector, false, nullptr, nullptr, FVector::ZeroVector, false, 0.0f, true,
+			FTunaSweeperBurnSpec(), Ammo.PenetrationTier))) return false;
 		int32 ProjectileCount = 0;
 		for (TActorIterator<ATunaSweeperProjectile> It(World); It; ++It)
 		{
@@ -280,6 +297,7 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 			++ProjectileCount;
 			TestEqual(TEXT("Every fired projectile matches the information panel"),
 				It->GetDamageAmount(), static_cast<float>(ExpectedDamage[CaseIndex]));
+			TestEqual(TEXT("Every projectile and pellet retains the fired ammunition penetration"), It->GetPenetrationTier(), Ammo.PenetrationTier);
 			It->Destroy();
 		}
 		TestTrue(TEXT("Fire produces the expected single shot or multiple pellets"), bShotgun ? ProjectileCount > 1 : ProjectileCount == 1);

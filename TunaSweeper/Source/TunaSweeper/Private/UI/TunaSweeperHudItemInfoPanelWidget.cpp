@@ -3,6 +3,7 @@
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetTree.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Combat/TunaSweeperArmor.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
@@ -125,6 +126,11 @@ namespace TunaSweeperItemInfoPanel
 			SpecInfo.ValueText = FText::AsNumber(ResultDamage);
 			SpecInfo.SecondaryText = FText::Format(
 				ResolveUiText(TunaGameInstance, TEXT("ui.item_info.ammo_damage_context"), nullptr), ReferenceName);
+			if (ItemDefinition.PenetrationTier > 0)
+			{
+				SpecInfo.SecondaryText = FText::Format(ResolveUiText(TunaGameInstance, TEXT("ui.item_info.penetration_context"), nullptr),
+					FText::AsNumber(ItemDefinition.PenetrationTier), SpecInfo.SecondaryText);
+			}
 			SpecInfo.bVisible = true;
 
 			return SpecInfo;
@@ -133,10 +139,19 @@ namespace TunaSweeperItemInfoPanel
 		if (ItemDefinition.DefenseValue > 0)
 		{
 			const int32 DefenseValue = FMath::Max(0, ItemDefinition.DefenseValue);
-			SpecInfo.TitleText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.defense_specs"), TEXT("\uBC29\uC5B4 \uC2A4\uD399"));
-			SpecInfo.LabelText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.defense"), TEXT("\uBC29\uC5B4"));
+			SpecInfo.TitleText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.defense_specs"), nullptr);
+			SpecInfo.LabelText = ResolveUiText(TunaGameInstance, TEXT("ui.item_info.defense"), nullptr);
 			SpecInfo.ValueText = BuildSignedIntegerText(DefenseValue);
 			SpecInfo.ValueColor = FLinearColor(0.68f, 0.88f, 1.0f, 1.0f);
+			if (ItemDefinition.ArmorTier > 0)
+			{
+				SpecInfo.SecondaryText = FText::Format(ResolveUiText(TunaGameInstance, TEXT("ui.item_info.armor_context"), nullptr),
+					FText::AsNumber(ItemDefinition.ArmorTier),
+					FText::AsNumber(TunaSweeperArmor::EffectiveDefense(DefenseValue, ItemDefinition.ArmorTier, 1)),
+					FText::AsNumber(TunaSweeperArmor::EffectiveDefense(DefenseValue, ItemDefinition.ArmorTier, 2)),
+					FText::AsNumber(TunaSweeperArmor::EffectiveDefense(DefenseValue, ItemDefinition.ArmorTier, 3)),
+					FText::AsNumber(TunaSweeperArmor::EffectiveDefense(DefenseValue, ItemDefinition.ArmorTier, 4)));
+			}
 			SpecInfo.bVisible = true;
 			return SpecInfo;
 		}

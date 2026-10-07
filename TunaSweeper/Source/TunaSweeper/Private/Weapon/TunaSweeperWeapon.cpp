@@ -669,7 +669,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	bool bHasAimIntentWorldPoint,
 	float FireCooldownOverrideSeconds,
 	bool bSuppressFireSound,
-	const FTunaSweeperBurnSpec& BurnSpec)
+	const FTunaSweeperBurnSpec& BurnSpec,
+	int32 PenetrationTier)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -722,7 +723,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 				AimIntentWorldPoint,
 				bHasAimIntentWorldPoint,
 				BurnSpec,
-				BurnApplicationId) != nullptr;
+				BurnApplicationId,
+				PenetrationTier) != nullptr;
 		}
 		if (!bSpawnedAnyProjectile)
 		{
@@ -746,7 +748,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 			AimIntentWorldPoint,
 			bHasAimIntentWorldPoint,
 			BurnSpec,
-			BurnApplicationId))
+			BurnApplicationId,
+			PenetrationTier))
 		{
 			return false;
 		}
@@ -936,7 +939,8 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	const FVector& AimIntentWorldPoint,
 	bool bHasAimIntentWorldPoint,
 	const FTunaSweeperBurnSpec& BurnSpec,
-	const FGuid& BurnApplicationId)
+	const FGuid& BurnApplicationId,
+	int32 PenetrationTier)
 {
 	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
 	const FTransform SpawnTransform(ShotDirection.Rotation(), SpawnLocation);
@@ -948,6 +952,7 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 		const int32 ModifiedDamageAmount = TunaSweeperProjectileDamage::Calculate(
 			BaseDamageAmount, ProjectileDamageMultiplier, ProjectileDamageBonus);
 		SpawnedProjectile->SetDamageAmount(static_cast<float>(ModifiedDamageAmount));
+		SpawnedProjectile->SetPenetrationTier(PenetrationTier);
 		SpawnedProjectile->SetBurnSpec(BurnSpec);
 		SpawnedProjectile->SetBurnApplicationId(BurnApplicationId);
 		SpawnedProjectile->SetImpactProfileId(ImpactProfileId);

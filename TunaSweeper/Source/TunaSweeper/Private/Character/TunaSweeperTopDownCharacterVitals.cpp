@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Combat/TunaSweeperArmor.h"
 
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Subsystem/TunaSweeperDifficultySubsystem.h"
@@ -51,14 +52,16 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 				TunaGameInstance->GetActiveSaveSlotDifficultyStage());
 		}
 	}
-	const int32 DefenseValue = TunaGameInstance ? TunaGameInstance->GetEquippedDefenseValue() : 0;
+	const int32 PenetrationTier = TunaSweeperArmor::ResolvePenetrationTier(DamageEvent, DamageCauser);
+	const float DefenseValue = TunaGameInstance ? TunaGameInstance->GetEquippedEffectiveDefense(PenetrationTier) : 0.0f;
 	// Enemy difficulty is applied exactly once, rounded to a whole health point, and then
-	// integer defense is subtracted. Non-enemy sources retain their original raw damage.
-	const float AppliedDamage = UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(
+	// effective armor is subtracted. Non-enemy sources retain their original raw damage.
+	const float DamageBeforeDefense = UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(
 		DamageAmount,
-		DefenseValue,
+		0,
 		bEnemyAttributed,
 		EnemyIncomingDamageMultiplier);
+	const float AppliedDamage = TunaSweeperArmor::ApplyDefense(DamageBeforeDefense, DefenseValue);
 	if (AppliedDamage <= 0.0f)
 	{
 		return 0.0f;

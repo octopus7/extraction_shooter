@@ -1,4 +1,6 @@
 string_key,zh-Hans,zh-Hant,ru,pt-BR
+ui.item_info.defense_specs,护甲属性,護甲屬性,Характеристики брони,Especificações da armadura
+ui.item_info.defense,基础防御,基礎防禦,Базовая защита,Defesa base
 ui.item_info.ammo_specs,弹药属性,彈藥屬性,Характеристики боеприпасов,Especificações da munição
 ui.item_info.projectile_damage,弹丸伤害,彈丸傷害,Урон снаряда,Dano do projétil
 ui.item_info.ammo_damage_context,参考武器：{0} · 防御减伤前 · 霰弹按单颗计算,參考武器：{0} · 防禦減傷前 · 霰彈按單顆計算,Оружие: {0} · До защиты · Для дробовика — за дробину,Arma de referência: {0} · Antes da defesa · Por balim nas escopetas
@@ -522,3 +524,13 @@ ui.debug_armory.success,物品已发放。,物品已發放。,Предметы �
 ui.debug_armory.failed,无法发放物品。请检查背包空间和军械库是否可用。,無法發放物品。請檢查背包空間和軍械庫是否可用。,Не удалось получить предметы. Проверьте место в инвентаре и доступ к арсеналу.,Não foi possível receber os itens. Verifique o espaço no inventário e o acesso ao arsenal.
 ui.debug_armory.empty,此分类暂无可领取的物品。,此分類暫無可領取的物品。,В этой категории нет доступных предметов.,Não há itens disponíveis nesta categoria.
 ui.debug_armory.unnamed_item,未命名物品,未命名物品,Предмет без названия,Item sem nome
+ui.item_info.penetration_context,"穿透等级 {0}
+{1}","穿透等級 {0}
+{1}","Уровень пробития: {0}
+{1}","Penetração de nível {0}
+{1}"
+ui.item_info.armor_context,"护甲等级 {0}
+伤害减免 — 锈蚀弹 {1} / 普通弹 {2} / 穿甲弹 {3} / 高级穿甲弹 {4}","護甲等級 {0}
+傷害減免 — 鏽蝕彈 {1} / 普通彈 {2} / 穿甲彈 {3} / 高級穿甲彈 {4}","Броня: уровень {0}
+Снижение урона — Ржавые {1} / Обычные {2} / Бронебойные {3} / Улучшенные ББ {4}","Armadura de nível {0}
+Redução de dano — Enferrujada {1} / Comum {2} / Perfurante {3} / Perfurante avançada {4}"

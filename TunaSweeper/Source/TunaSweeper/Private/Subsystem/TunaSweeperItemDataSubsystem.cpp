@@ -768,6 +768,19 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		{
 			ItemDefinition.DefenseValue = FMath::Max(0, FMath::RoundToInt(NumericDefenseValue));
 		}
+		for (const auto& TierField : {TPair<const TCHAR*, int32*>(TEXT("armor_tier"), &ItemDefinition.ArmorTier),
+			TPair<const TCHAR*, int32*>(TEXT("penetration_tier"), &ItemDefinition.PenetrationTier)})
+		{
+			if (!(*JsonObject)->HasField(TierField.Key)) continue;
+			double Tier = 0.0;
+			if (!(*JsonObject)->TryGetNumberField(TierField.Key, Tier) || !FMath::IsFinite(Tier) ||
+				Tier < 0.0 || Tier > 4.0 || Tier != FMath::FloorToDouble(Tier))
+			{
+				UE_LOG(LogTemp, Error, TEXT("Item %d: %s must be an integer from 0 to 4."), ItemDefinition.Id, TierField.Key);
+				return false;
+			}
+			*TierField.Value = static_cast<int32>(Tier);
+		}
 		if ((*JsonObject)->TryGetStringField(TEXT("attachment_slot_tag"), AttachmentSlotTag))
 		{
 			ItemDefinition.AttachmentSlotTag = FName(*AttachmentSlotTag.TrimStartAndEnd());

@@ -69,6 +69,8 @@ internal static class ItemDataCsvExporter
 		"blueprint_recipe_id",
 		"equipment_slot_tag",
 		"defense_value",
+		"armor_tier",
+		"penetration_tier",
 		"weapon_type_tag",
 		"fire_mode",
 		"attachment_slot_tag",
