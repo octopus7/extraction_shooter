@@ -46,18 +46,20 @@ def tick(dt):
             report['collision_rays']=[]
             for a in targets:
                 tm=a.get_actor_transform()
-                # Lens, uncovered bezel, bare chassis and now-empty former ears.
+                # Sensor, chassis, both half-height ears and empty old tall tips.
                 for name,start,end,expected in [
                     ('sensor_lens',(0,200,108),(0,0,108),'HeadMesh'),
                     ('sensor_housing',(29,200,108),(29,0,108),'HeadshotPlateMesh'),
                     ('body',(0,200,80),(0,0,80),'BodyMesh'),
-                    ('former_ears',(18,200,170),(18,-100,170),None)]:
+                    ('short_ear_left',(-18,200,140),(-18,-100,140),'HeadMesh'),
+                    ('short_ear_right',(18,200,140),(18,-100,140),'HeadMesh'),
+                    ('former_tall_tips',(18,200,170),(18,-100,170),None)]:
                     p=u.MathLibrary.transform_location(tm,u.Vector(*start));q=u.MathLibrary.transform_location(tm,u.Vector(*end))
                     hit=u.SystemLibrary.line_trace_single(world,p,q,u.TraceTypeQuery.TRACE_TYPE_QUERY1,False,[o for o in actors if o!=a],u.DrawDebugTrace.NONE,True)
                     if expected:
                         assert hit and hit.to_tuple()[0],(a.get_actor_label(),name,'no collision')
                         component=hit.to_tuple()[10];assert component.get_name()==expected,(name,component.get_name())
-                    else:assert hit is None or not hit.to_tuple()[0],'Former ear geometry still collides'
+                    else:assert hit is None or not hit.to_tuple()[0],'Original tall ear tips still collide'
                     report['collision_rays'].append({'target':a.get_actor_label(),'zone':name,'component':expected})
             levels.editor_play_simulate();state='pie_wait';ticks=0
         elif state=='pie_wait' and ticks>=40:

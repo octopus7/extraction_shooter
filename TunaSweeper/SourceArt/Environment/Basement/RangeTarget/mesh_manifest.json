@@ -1,6 +1,6 @@
 {
   "source": "Range/Assets/GLB/SM_RobotTarget.glb",
-  "design": "Earless drone with front optical sensor head zone. Original bullseye plate and rabbit head removed.",
+  "design": "Front-sensor drone with a pair of short rounded rabbit ears, exactly half the original ear height. Original bullseye and rabbit face remain removed.",
   "parts": {
     "Body": {
       "name": "SM_RangePracticeTarget_Body",
@@ -25,24 +25,25 @@
     },
     "Head": {
       "name": "SM_RangePracticeTarget_Head",
-      "triangles": 1908,
+      "triangles": 2028,
       "bounds_m": [
         [
-          -0.2680000066757202,
+          -0.2963486611843109,
           -0.6664999723434448,
           0.9650000333786011
         ],
         [
-          0.2680000066757202,
-          -0.6269999742507935,
-          1.1950000524520874
+          0.2963486611843109,
+          -0.1574999988079071,
+          1.5204591751098633
         ]
       ],
       "uv_channels": 2,
       "file": "Models/SM_RangePracticeTarget_Head.glb",
       "materials": [
         "SensorGlass",
-        "SensorLight"
+        "SensorLight",
+        "M_Robot"
       ]
     },
     "Plate": {
@@ -68,5 +69,16 @@
     }
   },
   "original_triangles": 2776,
-  "removed_original_triangles": 720
+  "removed_original_triangles": 600,
+  "ears": {
+    "count": 2,
+    "original_height_m": 0.5409184694290161,
+    "height_scale": 0.5,
+    "height_m": 0.27045923471450806,
+    "base_z_m": 1.25,
+    "tip_z_m": 1.520459234714508,
+    "component": "HeadMesh",
+    "source": "Original SM_RobotTarget ear shells and atlas UVs; front sensor retained."
+  },
+  "restored_ear_triangles": 120
 }

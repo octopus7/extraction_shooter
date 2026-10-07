@@ -9,6 +9,9 @@
   "health": 100,
   "minimum_health": 1,
   "recovery_seconds": 2,
+  "ear_height_cm": 27.045923471450806,
+  "ear_height_scale": 0.5,
+  "health_bar_height_cm": 180,
   "passed": true,
   "collision_rays": [
     {
@@ -28,7 +31,17 @@
     },
     {
       "target": "Target_01",
-      "zone": "former_ears",
+      "zone": "short_ear_left",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_01",
+      "zone": "short_ear_right",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_01",
+      "zone": "former_tall_tips",
       "component": null
     },
     {
@@ -48,7 +61,17 @@
     },
     {
       "target": "Target_02",
-      "zone": "former_ears",
+      "zone": "short_ear_left",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_02",
+      "zone": "short_ear_right",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_02",
+      "zone": "former_tall_tips",
       "component": null
     },
     {
@@ -68,7 +91,17 @@
     },
     {
       "target": "Target_03",
-      "zone": "former_ears",
+      "zone": "short_ear_left",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_03",
+      "zone": "short_ear_right",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_03",
+      "zone": "former_tall_tips",
       "component": null
     },
     {
@@ -88,7 +121,17 @@
     },
     {
       "target": "Target_04",
-      "zone": "former_ears",
+      "zone": "short_ear_left",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_04",
+      "zone": "short_ear_right",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_04",
+      "zone": "former_tall_tips",
       "component": null
     }
   ],
@@ -102,7 +145,7 @@
   },
   "recovery": {
     "native_tick": true,
-    "game_seconds": 2.1030898988246918,
+    "game_seconds": 2.1062365993857384,
     "final_health": 100.0
   }
 }

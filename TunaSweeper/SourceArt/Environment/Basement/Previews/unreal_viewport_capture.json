@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "started_at_utc": "2026-10-07T09:35:38.406949+00:00",
+  "started_at_utc": "2026-10-07T09:48:50.684746+00:00",
   "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
   "level": "/Game/Environment/Basement/Maps/L_Basement",
   "requested_cameras": [
@@ -19,24 +19,24 @@
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Overview.png",
       "width": 1600,
       "height": 900,
-      "bytes": 440316,
-      "sha256": "ba41622f11b491a40ea26e6c12ff8fcfdc48f50c26d92b7c37904b306da3463c",
+      "bytes": 440570,
+      "sha256": "870a5179448e3b90a1fe2c43c95569666f8fe4872a9ed1e1b5724a8166ec5935",
       "camera_label": "Basement_OverviewCamera"
     },
     {
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Range.png",
       "width": 1600,
       "height": 900,
-      "bytes": 1066142,
-      "sha256": "5b3f33952c44a93b4cb8ef65b5f0ca4b3011a5ea8854895c35c2a6f6b8d2c113",
+      "bytes": 1049691,
+      "sha256": "edf52b449181f2f2f7e65b8a621d152541162ad7645faa2d736eed30a9b1e02c",
       "camera_label": "Basement_RangeCamera"
     },
     {
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Hub.png",
       "width": 1600,
       "height": 900,
-      "bytes": 1159884,
-      "sha256": "206419aa6f7643fb1227e9f820c16cb659f4c717d3f2143fef54cc8cd06060bc",
+      "bytes": 1160239,
+      "sha256": "50b2b3dcc23ed66d5167da8983cf70f4e11446b79f07e36761789d21ee870634",
       "camera_label": "Basement_HubCamera"
     }
   ],
@@ -118,5 +118,5 @@
   "asset_packages_checked": 64,
   "asset_packages_unchanged": true,
   "changed_asset_packages": [],
-  "elapsed_seconds": 50.672
+  "elapsed_seconds": 51.907
 }

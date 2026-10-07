@@ -22,8 +22,8 @@ def verify_asset():
         assert c.get_collision_enabled()==u.CollisionEnabled.QUERY_AND_PHYSICS
         assert c.static_mesh.get_num_triangles(0)==spec['parts'][suffix]['triangles']
         assert c.static_mesh.get_editor_property('body_setup').get_editor_property('collision_trace_flag')==u.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE
-        assert c.static_mesh.get_bounding_box().max.z<=127.01,'Rabbit geometry remains'
-        expected={'Body':['MI_Range_Robot'],'Head':['M_Range_SensorGlass','M_Range_SensorLight'],'Plate':['M_Range_SensorHousing']}[suffix]
+        assert abs(c.static_mesh.get_bounding_box().max.z-spec['parts'][suffix]['bounds_m'][1][2]*100)<.1,'Unexpected head/body height'
+        expected={'Body':['MI_Range_Robot'],'Head':['M_Range_SensorGlass','M_Range_SensorLight','MI_Range_Robot'],'Plate':['M_Range_SensorHousing']}[suffix]
         assert [c.get_material(i).get_name() for i in range(c.get_num_materials())]==expected
         entries[prop]=c.static_mesh.get_path_name()
     assert cdo.get_editor_property('max_health')==100
@@ -31,8 +31,9 @@ def verify_asset():
     assert cdo.get_editor_property('health_recovery_seconds')==2
     w=cdo.get_editor_property('health_bar_widget_component')
     assert w.get_editor_property('widget_class')
-    assert w.get_editor_property('relative_location').z==155
-    return {'blueprint':BP_PATH,'parent':parent.get_path_name(),'components':entries,'health':100,'minimum_health':1,'recovery_seconds':2}
+    assert w.get_editor_property('relative_location').z==180
+    ears=spec['ears'];assert ears['count']==2 and abs(ears['height_m']/ears['original_height_m']-.5)<.0001
+    return {'blueprint':BP_PATH,'parent':parent.get_path_name(),'components':entries,'health':100,'minimum_health':1,'recovery_seconds':2,'ear_height_cm':ears['height_m']*100,'ear_height_scale':.5,'health_bar_height_cm':180}
 
 if __name__=='__main__':
     result=verify_asset();result['passed']=True

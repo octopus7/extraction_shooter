@@ -8,10 +8,10 @@
 
 `/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget`은 `ATunaSweeperShootingPracticeDummyActor`를 상속한다. 레벨의 `Target_01`~`04`는 이 BP 인스턴스이며, `ROOT_Range`에 연결되어 방과 함께 이동·회전한다.
 
-- 토끼 귀, 머리와 전면 과녁판을 제거하고 드론 전면 광학 센서로 교체했다. 몸체와 다리는 원래 공유 아틀라스를 유지한다.
-- `BodyMesh`: 몸체·다리의 일반 피격 부위. `HeadMesh`: 중앙·보조 렌즈. `HeadshotPlateMesh`: 렌즈를 감싸는 사각 센서 하우징. 두 센서 컴포넌트는 부모 클래스의 헤드 판정을 사용한다.
+- 원래 토끼 얼굴과 전면 과녁판을 드론 전면 광학 센서로 교체했다. 머리 위에는 원래 높이 54.09cm의 절반인 27.05cm 토끼 귀 두 개를 다시 붙였다. 귀 밑면은 Z=125cm, 끝은 Z=152.05cm이며, 짧고 둥근 비율과 기존 흰색·청회색 아틀라스를 유지한다. 몸체와 다리는 변경하지 않았다.
+- `BodyMesh`: 몸체·다리의 일반 피격 부위. `HeadMesh`: 중앙·보조 렌즈와 짧은 귀 두 개. `HeadshotPlateMesh`: 렌즈를 감싸는 사각 센서 하우징. 두 헤드 컴포넌트는 부모 클래스의 헤드 판정을 사용한다.
 - 센서를 조준한 투사체가 같은 표적의 센서에 실제 명중하면 기존 공통 헤드샷 배율(현재 2배)을 적용한다. 단순히 센서에 우연히 맞은 경우는 부모 클래스 규칙대로 처리한다.
-- 체력 100, 최저 체력 1, 초당 50 회복(최대 회복 시간 2초), 화면 공간 체력바를 상속한다. 체력바는 낮아진 외형에 맞춰 Z=155cm에 배치했다.
+- 체력 100, 최저 체력 1, 초당 50 회복(최대 회복 시간 2초), 화면 공간 체력바를 상속한다. 체력바는 짧은 귀와 겹치지 않게 Z=180cm에 배치했다.
 - `RangeTarget/RangePracticeTarget.blend`와 `RangeTarget/Models/`에 편집 원본과 부위별 GLB를 보관한다. `RangeTarget/mesh_manifest.json`에 메시·부위별 재질·범위 정보를 기록했다. `Range/Assets/GLB/SM_RobotTarget.glb`는 수정 전 원본 보관용이며 레벨 표적에서는 사용하지 않는다.
 - 센서의 전용 재질은 부모의 디버그 색상 파라미터를 사용하지 않으므로 PIE에서도 드론 외형을 유지한다.
 
@@ -68,4 +68,4 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 `source_validation.json`은 메시 연결·체적·UV·코너 분할 검증 결과다. `Tools/Basement/verify_unreal.py`는 저장된 레벨을 다시 열어 재질·메시·부모 관계·캐릭터 크기 통로·투명벽 충돌·바닥 연결을 검사한다. `Tools/Basement/capture_unreal.py`는 실제 에디터 뷰포트를 캡처한다. 임포트와 생성 스크립트는 일회성 작업 후 제거하며, 시작 시 자동 생성하는 코드는 없다.
 
-`Tools/Basement/verify_target.py`는 저장된 BP의 상속·부위·재질·충돌 기본값을, `verify_target_runtime.py`는 4개 배치의 부위별 충돌과 귀 제거, PIE 피해·체력바·최저 체력·회복을 검증한다. 결과는 `target_asset_validation.json`, `target_runtime_validation.json`에 저장한다. 헤드샷 조준 의도 규칙은 기존 네이티브 자동화 테스트 `TunaSweeper.Combat.PracticeDummy.HitDamage`로 함께 검증한다.
+`Tools/Basement/verify_target.py`는 저장된 BP의 상속·부위·재질·충돌 기본값과 절반 높이 귀를, `verify_target_runtime.py`는 4개 배치의 센서·몸체·양쪽 짧은 귀 충돌, 원래 긴 귀 끝 위치의 빈 공간, PIE 피해·체력바·최저 체력·회복을 검증한다. 결과는 `target_asset_validation.json`, `target_runtime_validation.json`에 저장한다. 헤드샷 조준 의도 규칙은 기존 네이티브 자동화 테스트 `TunaSweeper.Combat.PracticeDummy.HitDamage`로 함께 검증한다.

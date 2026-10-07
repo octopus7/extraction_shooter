@@ -9,5 +9,8 @@
   "health": 100,
   "minimum_health": 1,
   "recovery_seconds": 2,
+  "ear_height_cm": 27.045923471450806,
+  "ear_height_scale": 0.5,
+  "health_bar_height_cm": 180,
   "passed": true
 }
