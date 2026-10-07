@@ -40,7 +40,7 @@ C++ 소스, 아이템 JSON/문자열 CSV, 기존 문서를 대조했다. 에디�
 
 | 영역 | 구현 |
 | --- | --- |
-| 정의 | `ItemTable.json`: 무기의 `attachment_slot_tags`, 부품의 `attachment_slot_tag`, `compatible_weapon_type_tags`, `magazine_capacity_bonus` |
+| 정의 | `WeaponDefinitions.json`: 무기의 `attachment_slot_tags`. `ItemTable.json`: 부품의 `attachment_slot_tag`, `compatible_weapon_type_tags`, `magazine_capacity_bonus` |
 | 소유 관계 | `FTunaSweeperItemInstance::AttachmentSlots`: 슬롯 태그 → 부품 UID. 부품도 `ItemInstancesByUid`의 독립 인스턴스 |
 | UI 진입 | `SelectItemSlot` → 선택 변경 이벤트 → `RefreshSelectedItemInfo` |
 | UI 편집 상태 | 현재 선택한 무기의 맵을 `SelectedWeaponAttachmentSlots` 배열로 투영하고, 이동 후 원래 무기 맵에 기록 |

@@ -76,24 +76,6 @@ namespace TunaSweeperItemDataFiles
 		return ETunaSweeperItemGrade::Common;
 	}
 
-	ETunaSweeperWeaponFireMode ResolveWeaponFireModeFromString(const FString& FireModeString)
-	{
-		FString NormalizedFireMode = FireModeString.TrimStartAndEnd().ToLower();
-		NormalizedFireMode.ReplaceInline(TEXT("-"), TEXT("_"));
-		NormalizedFireMode.ReplaceInline(TEXT(" "), TEXT("_"));
-
-		if (NormalizedFireMode == TEXT("semi_automatic") || NormalizedFireMode == TEXT("semi_auto"))
-		{
-			return ETunaSweeperWeaponFireMode::SemiAutomatic;
-		}
-		if (NormalizedFireMode == TEXT("automatic") || NormalizedFireMode == TEXT("auto"))
-		{
-			return ETunaSweeperWeaponFireMode::Automatic;
-		}
-
-		return ETunaSweeperWeaponFireMode::NotApplicable;
-	}
-
 	FName ResolveDefaultMaxStackCategoryKey(FName ItemCategoryTag)
 	{
 		static const TMap<FName, FName> DefaultStackCategoryKeysByItemCategory =
@@ -694,9 +676,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericHeadphoneHearingRange = 0.0;
 		double NumericHeadphoneSensitivity = 0.0;
 		double NumericHeadphoneMinStrength = 0.0;
-		double NumericMagazineCapacity = 0.0;
 		double NumericMagazineCapacityBonus = 0.0;
-		double NumericReloadSeconds = 0.0;
 		double NumericProjectileDamageMultiplier = TunaSweeperDataValues::RatioIdentity;
 		double NumericProjectileDamageBonus = 0.0;
 		double NumericBurnDamagePerTick = 0.0;
@@ -714,8 +694,6 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString MaxStackCategoryKey;
 		FString BlueprintRecipeId;
 		FString EquipmentSlotTag;
-		FString WeaponTypeTag;
-		FString FireModeString;
 		FString AttachmentSlotTag;
 		FString AmmoTypeTag;
 		FString ImpactProfileId;
@@ -731,6 +709,15 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		}
 
 		FTunaSweeperItemDefinition ItemDefinition;
+		for (const TCHAR* WeaponField : {TEXT("weapon_type_tag"), TEXT("fire_mode"), TEXT("compatible_ammo_type_tags"),
+			TEXT("magazine_capacity"), TEXT("reload_seconds"), TEXT("attachment_slot_tags")})
+		{
+			if ((*JsonObject)->HasField(WeaponField))
+			{
+				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Item table row %d: %s belongs in WeaponDefinitions.json."), RowIndex, WeaponField);
+				return false;
+			}
+		}
 		ItemDefinition.Id = static_cast<int32>(NumericId);
 		(*JsonObject)->TryGetBoolField(TEXT("provides_laser_sight"), ItemDefinition.bProvidesLaserSight);
 		ItemDefinition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
@@ -781,14 +768,6 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		{
 			ItemDefinition.DefenseValue = FMath::Max(0, FMath::RoundToInt(NumericDefenseValue));
 		}
-		if ((*JsonObject)->TryGetStringField(TEXT("weapon_type_tag"), WeaponTypeTag))
-		{
-			ItemDefinition.WeaponTypeTag = FName(*WeaponTypeTag.TrimStartAndEnd());
-		}
-		if ((*JsonObject)->TryGetStringField(TEXT("fire_mode"), FireModeString))
-		{
-			ItemDefinition.FireMode = TunaSweeperItemDataFiles::ResolveWeaponFireModeFromString(FireModeString);
-		}
 		if ((*JsonObject)->TryGetStringField(TEXT("attachment_slot_tag"), AttachmentSlotTag))
 		{
 			ItemDefinition.AttachmentSlotTag = FName(*AttachmentSlotTag.TrimStartAndEnd());
@@ -827,20 +806,6 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		{
 			ItemDefinition.BurnTickCount = FMath::RoundToInt(FMath::Clamp(NumericBurnTickCount, 1.0, static_cast<double>(FTunaSweeperBurnSpec::MaxTickCount)));
 		}
-		const TArray<TSharedPtr<FJsonValue>>* AttachmentSlotTagsArray = nullptr;
-		if ((*JsonObject)->TryGetArrayField(TEXT("attachment_slot_tags"), AttachmentSlotTagsArray) && AttachmentSlotTagsArray)
-		{
-			for (const TSharedPtr<FJsonValue>& AttachmentSlotTagValue : *AttachmentSlotTagsArray)
-			{
-				const FString AttachmentSlotTagString = AttachmentSlotTagValue.IsValid()
-					? AttachmentSlotTagValue->AsString().TrimStartAndEnd()
-					: FString();
-				if (!AttachmentSlotTagString.IsEmpty())
-				{
-					ItemDefinition.AttachmentSlotTags.Add(FName(*AttachmentSlotTagString));
-				}
-			}
-		}
 		const TArray<TSharedPtr<FJsonValue>>* CompatibleWeaponTypeTagsArray = nullptr;
 		if ((*JsonObject)->TryGetArrayField(TEXT("compatible_weapon_type_tags"), CompatibleWeaponTypeTagsArray) && CompatibleWeaponTypeTagsArray)
 		{
@@ -855,31 +820,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 				}
 			}
 		}
-		const TArray<TSharedPtr<FJsonValue>>* CompatibleAmmoTypeTagsArray = nullptr;
-		if ((*JsonObject)->TryGetArrayField(TEXT("compatible_ammo_type_tags"), CompatibleAmmoTypeTagsArray) && CompatibleAmmoTypeTagsArray)
-		{
-			for (const TSharedPtr<FJsonValue>& AmmoTypeTagValue : *CompatibleAmmoTypeTagsArray)
-			{
-				const FString AmmoTypeTagString = AmmoTypeTagValue.IsValid()
-					? AmmoTypeTagValue->AsString().TrimStartAndEnd()
-					: FString();
-				if (!AmmoTypeTagString.IsEmpty())
-				{
-					ItemDefinition.CompatibleAmmoTypeTags.Add(FName(*AmmoTypeTagString));
-				}
-			}
-		}
-		if ((*JsonObject)->TryGetNumberField(TEXT("magazine_capacity"), NumericMagazineCapacity))
-		{
-			ItemDefinition.MagazineCapacity = FMath::Max(0, static_cast<int32>(NumericMagazineCapacity));
-		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("magazine_capacity_bonus"), NumericMagazineCapacityBonus))
 		{
 			ItemDefinition.MagazineCapacityBonus = FMath::Max(0, static_cast<int32>(NumericMagazineCapacityBonus));
-		}
-		if ((*JsonObject)->TryGetNumberField(TEXT("reload_seconds"), NumericReloadSeconds))
-		{
-			ItemDefinition.ReloadSeconds = FMath::Max(0.0f, static_cast<float>(NumericReloadSeconds));
 		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("inventory_slot_capacity"), NumericInventorySlotCapacity))
 		{

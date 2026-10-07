@@ -1,0 +1,83 @@
+[
+  {
+    "item_id": 1001,
+    "weapon_type_tag": "weapon.type.pistol",
+    "fire_mode": "semi_automatic",
+    "compatible_ammo_type_tags": [
+      "ammo.type.pistol"
+    ],
+    "magazine_capacity": 12,
+    "reload_seconds": 1.6,
+    "attachment_slot_tags": []
+  },
+  {
+    "item_id": 1002,
+    "weapon_type_tag": "weapon.type.rifle",
+    "fire_mode": "automatic",
+    "compatible_ammo_type_tags": [
+      "ammo.type.rifle"
+    ],
+    "magazine_capacity": 30,
+    "reload_seconds": 2.2,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.optic",
+      "attachment.slot.tactical"
+    ]
+  },
+  {
+    "item_id": 1003,
+    "weapon_type_tag": "weapon.type.shotgun",
+    "fire_mode": "semi_automatic",
+    "compatible_ammo_type_tags": [
+      "ammo.type.shotgun"
+    ],
+    "magazine_capacity": 6,
+    "reload_seconds": 2.6,
+    "attachment_slot_tags": []
+  },
+  {
+    "item_id": 1006,
+    "weapon_type_tag": "weapon.type.smg",
+    "fire_mode": "automatic",
+    "compatible_ammo_type_tags": [
+      "ammo.type.pistol"
+    ],
+    "magazine_capacity": 32,
+    "reload_seconds": 1.9,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.tactical"
+    ]
+  },
+  {
+    "item_id": 1007,
+    "weapon_type_tag": "weapon.type.rifle",
+    "fire_mode": "automatic",
+    "compatible_ammo_type_tags": [
+      "ammo.type.rifle"
+    ],
+    "magazine_capacity": 36,
+    "reload_seconds": 2.0,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.optic",
+      "attachment.slot.tactical"
+    ]
+  },
+  {
+    "item_id": 1008,
+    "weapon_type_tag": "weapon.type.smg",
+    "fire_mode": "automatic",
+    "compatible_ammo_type_tags": [
+      "ammo.type.pistol"
+    ],
+    "magazine_capacity": 40,
+    "reload_seconds": 1.7,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.optic",
+      "attachment.slot.tactical"
+    ]
+  }
+]

@@ -10,10 +10,10 @@ The existing `TunaSweeper/Content/Data/ItemNameStrings.csv` remains the text tab
 
 | CSV | Source | Key | Notes |
 | --- | --- | --- | --- |
-| `item_definitions.csv` | `ItemTable.json` | `id` | One row per item. Array fields are moved to relation tables. `resolved_*` columns are derived from stack rules. |
-| `item_attachment_slot_tags.csv` | `ItemTable.json` | `item_id`, `sort_order` | Weapon attachment slots accepted by an item. |
+| `item_definitions.csv` | `ItemTable.json` + `WeaponDefinitions.json` | `id` / `item_id` | Joined read-only view of item metadata and weapon specs. Array fields are moved to relation tables. `resolved_*` columns are derived from stack rules. |
+| `item_attachment_slot_tags.csv` | `WeaponDefinitions.json` | `item_id`, `sort_order` | Weapon attachment slots accepted by an item. |
 | `item_compatible_weapon_type_tags.csv` | `ItemTable.json` | `item_id`, `sort_order` | Attachment compatibility by weapon type. |
-| `item_compatible_ammo_type_tags.csv` | `ItemTable.json` | `item_id`, `sort_order` | Gun compatibility by ammo type. |
+| `item_compatible_ammo_type_tags.csv` | `WeaponDefinitions.json` | `item_id`, `sort_order` | Gun compatibility by ammo type. |
 | `item_clears_debuff_ids.csv` | `ItemTable.json` | `item_id`, `sort_order` | Consumable debuffs cleared on use. |
 | `item_stack_definitions.csv` | `ItemStackDefinitions.json` | `stack_category_key` | Max stack size per stack category. |
 | `loot_container_definitions.csv` | `LootContainerTable.json` | `id` | Container display and mesh data. `mesh_scale` is split into X/Y/Z columns. |

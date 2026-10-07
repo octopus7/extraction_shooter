@@ -31,6 +31,22 @@ namespace
 		return true;
 	}
 
+	bool ReadTags(const TSharedPtr<FJsonObject>& Object, const TCHAR* Key, const TCHAR* Prefix, TArray<FName>& Out)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+		if (!Object->TryGetArrayField(Key, Values)) return false;
+		for (const auto& Value : *Values)
+		{
+			FString Tag;
+			if (!Value || !Value->TryGetString(Tag)) return false;
+			Tag.TrimStartAndEndInline();
+			const FName Name(*Tag);
+			if (!Tag.StartsWith(Prefix) || Tag.Len() <= FCString::Strlen(Prefix) || Out.Contains(Name)) return false;
+			Out.Add(Name);
+		}
+		return true;
+	}
+
 	bool IsGun(const FTunaSweeperItemDefinition* Item)
 	{
 		return Item && Item->CategoryTag == FName(TEXT("item.category.weapon.gun")) && !Item->WeaponTypeTag.IsNone();
@@ -43,10 +59,68 @@ namespace
 	}
 }
 
+bool UTunaSweeperItemDataSubsystem::ParseWeaponDefinitions(const FString& Json)
+{
+	TArray<TSharedPtr<FJsonValue>> Rows;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Rows)) return false;
+	TMap<int32, FTunaSweeperItemDefinition> Parsed;
+	for (const auto& Row : Rows)
+	{
+		const TSharedPtr<FJsonObject>* Object = nullptr;
+		int32 Id = INDEX_NONE;
+		if (!Row || !Row->TryGetObject(Object) || !ReadInt(*Object, TEXT("item_id"), 1, Id) || Parsed.Contains(Id)) return false;
+		const FTunaSweeperItemDefinition* Item = ItemDefinitionsById.Find(Id);
+		if (!Item || Item->CategoryTag != FName(TEXT("item.category.weapon.gun"))) return false;
+		FTunaSweeperItemDefinition Weapon = *Item;
+		FString Type, Mode;
+		double Reload = 0.0;
+		if (!(*Object)->TryGetStringField(TEXT("weapon_type_tag"), Type) ||
+			!(*Object)->TryGetStringField(TEXT("fire_mode"), Mode) ||
+			!ReadInt(*Object, TEXT("magazine_capacity"), 1, Weapon.MagazineCapacity) ||
+			!(*Object)->TryGetNumberField(TEXT("reload_seconds"), Reload) ||
+			!FMath::IsFinite(Reload) || Reload <= 0.0 || Reload > MAX_flt) return false;
+		Type.TrimStartAndEndInline();
+		if (!Type.StartsWith(TEXT("weapon.type.")) || Type.Len() <= 12) return false;
+		Weapon.WeaponTypeTag = FName(*Type);
+		Weapon.ReloadSeconds = static_cast<float>(Reload);
+		if (Weapon.ReloadSeconds <= 0.0f) return false;
+		if (Mode == TEXT("automatic")) Weapon.FireMode = ETunaSweeperWeaponFireMode::Automatic;
+		else if (Mode == TEXT("semi_automatic")) Weapon.FireMode = ETunaSweeperWeaponFireMode::SemiAutomatic;
+		else return false;
+		Weapon.CompatibleAmmoTypeTags.Reset();
+		Weapon.AttachmentSlotTags.Reset();
+		if (!ReadTags(*Object, TEXT("compatible_ammo_type_tags"), TEXT("ammo.type."), Weapon.CompatibleAmmoTypeTags) ||
+			Weapon.CompatibleAmmoTypeTags.IsEmpty() ||
+			!ReadTags(*Object, TEXT("attachment_slot_tags"), TEXT("attachment.slot."), Weapon.AttachmentSlotTags)) return false;
+		for (const FName AmmoType : Weapon.CompatibleAmmoTypeTags)
+		{
+			bool bFoundAmmo = false;
+			for (const auto& Pair : ItemDefinitionsById)
+			{
+				if (Pair.Value.CategoryTag == FName(TEXT("item.category.ammo")) && Pair.Value.AmmoTypeTag == AmmoType)
+				{
+					bFoundAmmo = true;
+					break;
+				}
+			}
+			if (!bFoundAmmo) return false;
+		}
+		Parsed.Add(Id, MoveTemp(Weapon));
+	}
+	for (const auto& Pair : ItemDefinitionsById)
+	{
+		if (Pair.Value.CategoryTag == FName(TEXT("item.category.weapon.gun")) && !Parsed.Contains(Pair.Key)) return false;
+	}
+	// Commit only after every row and every gun reference has passed validation.
+	for (auto& Pair : Parsed) ItemDefinitionsById.FindChecked(Pair.Key) = MoveTemp(Pair.Value);
+	return true;
+}
+
 bool UTunaSweeperItemDataSubsystem::LoadWeaponConfigurationJson()
 {
 	struct FFileLoader { const TCHAR* File; bool (UTunaSweeperItemDataSubsystem::*Parse)(const FString&); };
 	const FFileLoader Files[] = {
+		{ TEXT("WeaponDefinitions.json"), &UTunaSweeperItemDataSubsystem::ParseWeaponDefinitions },
 		{ TEXT("WeaponVisualDefinitions.json"), &UTunaSweeperItemDataSubsystem::ParseWeaponVisualDefinitions },
 		{ TEXT("EnemyDefaultLoadout.json"), &UTunaSweeperItemDataSubsystem::ParseEnemyDefaultLoadout },
 		{ TEXT("CombatLabEnemyLoadout.json"), &UTunaSweeperItemDataSubsystem::ParseCombatLabEnemyLoadout }

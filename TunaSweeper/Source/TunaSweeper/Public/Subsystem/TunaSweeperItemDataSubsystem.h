@@ -536,6 +536,8 @@ public:
 
 private:
 	friend class FTunaSweeperWeaponConfigurationDataTest;
+	friend class FTunaSweeperWeaponDefinitionsTest;
+	bool ParseWeaponDefinitions(const FString& Json);
 	bool LoadWeaponConfigurationJson();
 	bool ParseWeaponVisualDefinitions(const FString& Json);
 	bool ParseEnemyDefaultLoadout(const FString& Json);

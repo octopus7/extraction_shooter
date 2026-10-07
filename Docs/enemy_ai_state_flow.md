@@ -145,7 +145,7 @@ stateDiagram-v2
 ## 재장전과 상태 말풍선
 
 - 마지막 탄 발사 또는 빈 탄창 결과를 확인한 컨트롤러가 명시적으로 `Reload`에 들어간다. 캐릭터 내부의 숨은 자동 재장전은 없다.
-- 탄창 크기, 장탄, 예비 탄, 재장전 시간은 `ItemTable.json`의 실제 무기 값을 사용한다.
+- 탄창 크기와 재장전 시간은 `WeaponDefinitions.json`의 실제 무기 값을 사용하며, 장탄·예비 탄 계산에도 같은 정의를 사용한다.
 - 재장전 시작부터 완료까지 기존 진행 링과 `WBP_SpeechBubble`의 `재장전` 문구를 함께 표시한다.
 - 상태 말풍선 우선순위는 `재장전 > !`이다. revision을 확인하는 타이머를 사용하므로 이전 `!` 타이머가 새 `재장전` 메시지를 지우지 못한다. 기존 3D 느낌표 메시는 비활성화되어 있다.
 - 재장전 완료 뒤 0.35~0.55초의 준비 시간을 거치고 짧은 `Observe` 뒤에야 다시 조준한다.
@@ -230,7 +230,7 @@ Suppress가 Aim 후 첫 탄 발사
 
 - 전투 프로필: `TunaSweeper/Content/Data/EnemyCombatProfiles.json`
 - 스폰별 프로필·팩션·분대: `TunaSweeper/Content/Data/EnemySpawns.json`
-- 무기 `fire_mode`, 탄창, 재장전 시간: `TunaSweeper/Content/Data/ItemTable.json`
+- 무기 `fire_mode`, 탄창, 재장전 시간: `TunaSweeper/Content/Data/WeaponDefinitions.json`
 - 전투 FSM: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyAIController.cpp`
 - 근접 공격 거리 전역 상수: `TunaSweeper/Source/TunaSweeper/Public/AI/TunaSweeperEnemyCombatProfile.h`
 - 무기 런타임·말풍선: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyCharacter.cpp`

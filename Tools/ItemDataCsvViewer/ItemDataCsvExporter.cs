@@ -70,6 +70,7 @@ internal static class ItemDataCsvExporter
 		"equipment_slot_tag",
 		"defense_value",
 		"weapon_type_tag",
+		"fire_mode",
 		"attachment_slot_tag",
 		"provides_laser_sight",
 		"ammo_type_tag",
@@ -103,6 +104,7 @@ internal static class ItemDataCsvExporter
 		List<string> warnings = [];
 
 		JsonArray itemRows = ReadArray(Path.Combine(dataDirectory, "ItemTable.json"));
+		MergeWeaponDefinitions(itemRows, ReadArray(Path.Combine(dataDirectory, "WeaponDefinitions.json")));
 		JsonObject stackDefinitions = ReadObject(Path.Combine(dataDirectory, "ItemStackDefinitions.json"));
 		JsonArray lootContainerRows = ReadArray(Path.Combine(dataDirectory, "LootContainerTable.json"));
 		JsonArray lootContentRows = ReadArray(Path.Combine(dataDirectory, "LootContainerContents.json"), repairLootContents: true, warnings);
@@ -123,6 +125,37 @@ internal static class ItemDataCsvExporter
 		WriteRelationDocument(projectRoot, relationDocumentPath, warnings);
 
 		return new ItemDataCsvExportResult(exportDirectory, relationDocumentPath, writtenFiles, warnings);
+	}
+
+	private static void MergeWeaponDefinitions(JsonArray itemRows, JsonArray weaponRows)
+	{
+		string[] fields = ["weapon_type_tag", "fire_mode", "compatible_ammo_type_tags",
+			"magazine_capacity", "reload_seconds", "attachment_slot_tags"];
+		Dictionary<int, JsonObject> items = itemRows.OfType<JsonObject>()
+			.ToDictionary(item => item["id"]!.GetValue<int>());
+		HashSet<int> loaded = [];
+		foreach (JsonNode? node in weaponRows)
+		{
+			if (node is not JsonObject weapon || weapon["item_id"] is not JsonValue idValue ||
+				!idValue.TryGetValue<int>(out int id) || !loaded.Add(id) ||
+				!items.TryGetValue(id, out JsonObject? item) ||
+				ReadString(item, "category_tag") != "item.category.weapon.gun")
+			{
+				throw new InvalidDataException("WeaponDefinitions.json: invalid or duplicate item_id.");
+			}
+			foreach (string field in fields)
+			{
+				if (weapon[field] is null || item.ContainsKey(field))
+				{
+					throw new InvalidDataException($"WeaponDefinitions.json: missing or duplicated field {field} for item {id}.");
+				}
+				item[field] = weapon[field]!.DeepClone();
+			}
+		}
+		if (items.Any(pair => ReadString(pair.Value, "category_tag") == "item.category.weapon.gun" && !loaded.Contains(pair.Key)))
+		{
+			throw new InvalidDataException("WeaponDefinitions.json: missing gun definition.");
+		}
 	}
 
 	private static Dictionary<string, int> BuildStackDefinitionRows(JsonObject stackDefinitions, string exportDirectory, List<string> writtenFiles)
@@ -493,10 +526,10 @@ internal static class ItemDataCsvExporter
 		builder.AppendLine();
 		builder.AppendLine("| CSV | Source | Key | Notes |");
 		builder.AppendLine("| --- | --- | --- | --- |");
-		builder.AppendLine("| `item_definitions.csv` | `ItemTable.json` | `id` | One row per item. Array fields are moved to relation tables. `resolved_*` columns are derived from stack rules. |");
-		builder.AppendLine("| `item_attachment_slot_tags.csv` | `ItemTable.json` | `item_id`, `sort_order` | Weapon attachment slots accepted by an item. |");
+		builder.AppendLine("| `item_definitions.csv` | `ItemTable.json` + `WeaponDefinitions.json` | `id` / `item_id` | Joined read-only view of item metadata and weapon specs. Array fields are moved to relation tables. `resolved_*` columns are derived from stack rules. |");
+		builder.AppendLine("| `item_attachment_slot_tags.csv` | `WeaponDefinitions.json` | `item_id`, `sort_order` | Weapon attachment slots accepted by an item. |");
 		builder.AppendLine("| `item_compatible_weapon_type_tags.csv` | `ItemTable.json` | `item_id`, `sort_order` | Attachment compatibility by weapon type. |");
-		builder.AppendLine("| `item_compatible_ammo_type_tags.csv` | `ItemTable.json` | `item_id`, `sort_order` | Gun compatibility by ammo type. |");
+		builder.AppendLine("| `item_compatible_ammo_type_tags.csv` | `WeaponDefinitions.json` | `item_id`, `sort_order` | Gun compatibility by ammo type. |");
 		builder.AppendLine("| `item_clears_debuff_ids.csv` | `ItemTable.json` | `item_id`, `sort_order` | Consumable debuffs cleared on use. |");
 		builder.AppendLine("| `item_stack_definitions.csv` | `ItemStackDefinitions.json` | `stack_category_key` | Max stack size per stack category. |");
 		builder.AppendLine("| `loot_container_definitions.csv` | `LootContainerTable.json` | `id` | Container display and mesh data. `mesh_scale` is split into X/Y/Z columns. |");

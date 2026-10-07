@@ -141,4 +141,53 @@ bool FTunaSweeperWeaponConfigurationDataTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperWeaponDefinitionsTest,
+	"TunaSweeper.Data.WeaponConfiguration.WeaponSpecs",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperWeaponDefinitionsTest::RunTest(const FString& Parameters)
+{
+	auto* Items = NewObject<UTunaSweeperItemDataSubsystem>(NewObject<UGameInstance>());
+	if (!TestTrue(TEXT("Item and weapon definitions load together"), Items->LoadItemData())) return false;
+	FString Json;
+	if (!TestTrue(TEXT("Weapon definitions are authored separately"), FFileHelper::LoadFileToString(Json,
+		*FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/WeaponDefinitions.json"))))) return false;
+	const FString Custom = Json.Replace(TEXT("\"magazine_capacity\": 30"), TEXT("\"magazine_capacity\": 45"))
+		.Replace(TEXT("\"reload_seconds\": 2.2"), TEXT("\"reload_seconds\": 0.75"));
+	TestTrue(TEXT("Standalone weapon specs replace runtime values"), Items->ParseWeaponDefinitions(Custom));
+	const auto& Rifle = Items->ItemDefinitionsById.FindChecked(1002);
+	TestEqual(TEXT("Rifle capacity follows standalone data"), Rifle.MagazineCapacity, 45);
+	TestEqual(TEXT("Rifle reload follows standalone data"), Rifle.ReloadSeconds, 0.75f);
+	TestEqual(TEXT("Generic item price survives weapon spec loading"), Rifle.ShopSellPrice, 360);
+	TestEqual(TEXT("Weapon fire mode is preserved"), Rifle.FireMode, ETunaSweeperWeaponFireMode::Automatic);
+	TestTrue(TEXT("Ammo compatibility is preserved"), Rifle.CompatibleAmmoTypeTags.Contains(TEXT("ammo.type.rifle")));
+	TestTrue(TEXT("Attachment compatibility is preserved"), Rifle.AttachmentSlotTags.Contains(TEXT("attachment.slot.tactical")));
+	FTunaSweeperEnemyWeaponLoadout Loadout;
+	TestTrue(TEXT("Enemy equipment uses merged specs"), Items->TryResolveEnemyLoadout(1002, 2002, INDEX_NONE, Loadout));
+	TestEqual(TEXT("Two configured magazines use new capacity"), Loadout.ReserveAmmoCount, 90);
+	for (const FString& Invalid : {
+		FString(TEXT("[]")), FString(TEXT("{}")),
+		Custom.Replace(TEXT("\"item_id\": 1002"), TEXT("\"item_id\": 999999")),
+		Custom.Replace(TEXT("\"item_id\": 1002"), TEXT("\"item_id\": 3001")),
+		Custom.Replace(TEXT("\"item_id\": 1002"), TEXT("\"item_id\": 1001")),
+		Custom.Replace(TEXT("\"magazine_capacity\": 45"), TEXT("\"magazine_capacity\": 1.5")),
+		Custom.Replace(TEXT("\"magazine_capacity\": 45"), TEXT("\"magazine_capacity\": 0")),
+		Custom.Replace(TEXT("\"reload_seconds\": 0.75"), TEXT("\"reload_seconds\": -1")),
+		Custom.Replace(TEXT("\"reload_seconds\": 0.75"), TEXT("\"reload_seconds\": 0")),
+		Custom.Replace(TEXT("\"magazine_capacity\": 45"), TEXT("\"missing_capacity\": 45")),
+		Custom.Replace(TEXT("\"magazine_capacity\": 45"), TEXT("\"magazine_capacity\": 46"))
+			.Replace(TEXT("\"magazine_capacity\": 40"), TEXT("\"magazine_capacity\": -1")),
+		Custom.Replace(TEXT("\"fire_mode\": \"automatic\""), TEXT("\"fire_mode\": \"invalid\"")),
+		Custom.Replace(TEXT("ammo.type.rifle"), TEXT("ammo.type.unknown")) })
+	{
+		TestFalse(TEXT("Invalid or incomplete weapon specs reject replacement"), Items->ParseWeaponDefinitions(Invalid));
+		TestEqual(TEXT("Invalid replacement preserves prior capacity"), Items->ItemDefinitionsById.FindChecked(1002).MagazineCapacity, 45);
+		TestEqual(TEXT("Invalid replacement preserves prior reload"), Items->ItemDefinitionsById.FindChecked(1002).ReloadSeconds, 0.75f);
+	}
+	TestTrue(TEXT("Force reload restores authored weapon specs"), Items->LoadItemData(true));
+	TestEqual(TEXT("Authored rifle capacity restored"), Items->ItemDefinitionsById.FindChecked(1002).MagazineCapacity, 30);
+	TestEqual(TEXT("Authored rifle reload restored"), Items->ItemDefinitionsById.FindChecked(1002).ReloadSeconds, 2.2f);
+	return true;
+}
+
 #endif
