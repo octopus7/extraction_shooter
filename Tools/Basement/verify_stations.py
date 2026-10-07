@@ -58,6 +58,17 @@ def validate(world):
         clear(f'lane_{i}_entry',(x,-5.2,.95),(x,-4.05,.95))
         shot=u.SystemLibrary.line_trace_single(world,pos(x,-4.05,1.25),pos(x,2.5,1.25),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[],u.DrawDebugTrace.NONE,True)
         assert not hit(shot),f'lane_{i} firing line obstructed'
+    side_layout=json.loads((SOURCE/'side_furniture_placement.json').read_text())
+    swapped=[]
+    for p in side_layout['placements']:
+        a=labels[p['label']];c=a.get_component_by_class(u.StaticMeshComponent)
+        assert (a.get_actor_location()-u.Vector(*p['location_cm'])).length()<.1,p['label']
+        assert abs((a.get_actor_rotation().yaw-p['yaw_deg']+180)%360-180)<.1,p['label']
+        assert abs(abs((p['yaw_deg']-p['before']['yaw_deg']+180)%360-180)-180)<.1,p['label']
+        assert (p['location_cm'][1]-175)*(p['before']['location_cm'][1]-175)<0,p['label']
+        assert c.static_mesh.get_path_name()==p['mesh'] and str(c.get_collision_profile_name())==p['collision_profile']
+        assert a.get_attach_parent_actor().get_actor_label()==p['parent']
+        swapped.append(p['label'])
     barriers=[];table_clearances=[]
     for i,x in enumerate(layout['partition_centers_m'],1):
         a=labels[f'LanePartition_{i:03}'];ignore=[other for other in actors if other!=a]
@@ -93,6 +104,10 @@ def validate(world):
     # A 140cm diameter sweep establishes usable aisle width, beyond pawn clearance.
     wide=u.SystemLibrary.capsule_trace_single_by_profile(world,pos(aisle,-4.5,.95),pos(aisle,4.3,.95),70,90,'Pawn',False,[],u.DrawDebugTrace.NONE,True)
     assert not hit(wide),('140cm side aisle obstructed',str(wide.to_tuple()) if wide else '')
+    clear('side_aisle_to_armory',(aisle,.28,.95),(7.45,.28,.95))
+    armory=labels['WeaponRack_001']
+    assert armory.get_interaction_type()==u.TunaSweeperInteractionType.DEBUG_ARMORY_OPEN
+    assert (armory.get_actor_location()-pos(7.45,.28,0)).length()<armory.get_interactable_component().get_editor_property('interaction_distance')
     for p in expansion['changed_actors']:
         assert (labels[p['label']].get_actor_location()-u.Vector(*p['location_cm'])).length()<.1,p['label']
     for x in [5.5,6.95,8.2]:
@@ -103,6 +118,8 @@ def validate(world):
     report['render_only_ammo_boxes']=render_only
     report['partition_table_clearance_cm']=table_clearances
     report['partition_length_cm']=layout['partition_length_m']*100
+    report['swapped_side_furniture']=swapped
+    report['armory_approach_in_interaction_range']=True
     (SOURCE/'RangeStations/unreal_validation.json').write_text(json.dumps(report,indent=2))
     u.log('RANGE_STATIONS_VERIFIED')
     return report

@@ -1,0 +1,445 @@
+{
+  "mirror_center_ue_y_cm": 175,
+  "placements": [
+    {
+      "label": "WeaponRack_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_WeaponRack.SM_WeaponRack",
+      "before": {
+        "location_cm": [
+          1528.0,
+          -505.0000000000001,
+          0.0
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1528.0,
+        855.0000000000001,
+        0.0
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "DisplayRifle_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle.SM_DisplayRifle",
+      "before": {
+        "location_cm": [
+          1466.0,
+          -491.0000000000001,
+          58.00000000000001
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1466.0,
+        841.0000000000001,
+        58.00000000000001
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
+    },
+    {
+      "label": "DisplayRifle_002",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle.SM_DisplayRifle",
+      "before": {
+        "location_cm": [
+          1592.0,
+          -491.0000000000001,
+          58.00000000000001
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1592.0,
+        841.0000000000001,
+        58.00000000000001
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
+    },
+    {
+      "label": "DisplayRifle_003",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle.SM_DisplayRifle",
+      "before": {
+        "location_cm": [
+          1466.0,
+          -491.0000000000001,
+          117.0
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1466.0,
+        841.0000000000001,
+        117.0
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
+    },
+    {
+      "label": "DisplayRifle_004",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle.SM_DisplayRifle",
+      "before": {
+        "location_cm": [
+          1592.0,
+          -491.0000000000001,
+          117.0
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1592.0,
+        841.0000000000001,
+        117.0
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
+    },
+    {
+      "label": "DisplayRifle_005",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle.SM_DisplayRifle",
+      "before": {
+        "location_cm": [
+          1466.0,
+          -491.0000000000001,
+          176.0
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1466.0,
+        841.0000000000001,
+        176.0
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
+    },
+    {
+      "label": "DisplayRifle_006",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_DisplayRifle.SM_DisplayRifle",
+      "before": {
+        "location_cm": [
+          1592.0,
+          -491.0000000000001,
+          176.0
+        ],
+        "yaw_deg": 0.0
+      },
+      "location_cm": [
+        1592.0,
+        841.0000000000001,
+        176.0
+      ],
+      "yaw_deg": 180.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
+    },
+    {
+      "label": "SupplyCrate_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_SupplyCrate.SM_SupplyCrate",
+      "before": {
+        "location_cm": [
+          1755.0,
+          -464.00000000000006,
+          0.0
+        ],
+        "yaw_deg": 89.99999803884897
+      },
+      "location_cm": [
+        1755.0,
+        824.0,
+        0.0
+      ],
+      "yaw_deg": -90.00000000000001,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "SupplyCrate_002",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_SupplyCrate.SM_SupplyCrate",
+      "before": {
+        "location_cm": [
+          1837.0,
+          -463.0000000000001,
+          0.0
+        ],
+        "yaw_deg": 81.99999985590513
+      },
+      "location_cm": [
+        1837.0,
+        823.0000000000001,
+        0.0
+      ],
+      "yaw_deg": -98.00000000000007,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "SupplyCrate_003",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_SupplyCrate.SM_SupplyCrate",
+      "before": {
+        "location_cm": [
+          1798.0,
+          -463.0000000000001,
+          76.0
+        ],
+        "yaw_deg": 98.00000343345056
+      },
+      "location_cm": [
+        1798.0,
+        823.0000000000001,
+        76.0
+      ],
+      "yaw_deg": -82.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "SupplyCrate_004",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_SupplyCrate.SM_SupplyCrate",
+      "before": {
+        "location_cm": [
+          1350.0,
+          -465.00000000000006,
+          0.0
+        ],
+        "yaw_deg": 72.99999626548845
+      },
+      "location_cm": [
+        1350.0,
+        825.0,
+        0.0
+      ],
+      "yaw_deg": -107.00000000000009,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "UtilityCase_004",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_UtilityCase.SM_UtilityCase",
+      "before": {
+        "location_cm": [
+          1350.0,
+          -466.0,
+          76.5
+        ],
+        "yaw_deg": 70.00000246792995
+      },
+      "location_cm": [
+        1350.0,
+        826.0,
+        76.5
+      ],
+      "yaw_deg": -110.00000000000007,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "AmmoBox_004",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_AmmoBox.SM_AmmoBox",
+      "before": {
+        "location_cm": [
+          1765.0,
+          -458.0000000000001,
+          152.0
+        ],
+        "yaw_deg": 85.00000148201394
+      },
+      "location_cm": [
+        1765.0,
+        818.0000000000001,
+        152.0
+      ],
+      "yaw_deg": -95.00000000000001,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "AmmoBox_006",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_AmmoBox.SM_AmmoBox",
+      "before": {
+        "location_cm": [
+          1371.0,
+          -424.0000000000001,
+          0.0
+        ],
+        "yaw_deg": 85.00000148201394
+      },
+      "location_cm": [
+        1371.0,
+        819.0000000000001,
+        0.0
+      ],
+      "yaw_deg": -95.00000000000001,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "UtilityCase_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_UtilityCase.SM_UtilityCase",
+      "before": {
+        "location_cm": [
+          1321.0,
+          811.9999999999999,
+          0.0
+        ],
+        "yaw_deg": 180.0
+      },
+      "location_cm": [
+        1321.0,
+        -461.9999999999999,
+        0.0
+      ],
+      "yaw_deg": 0.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "UtilityCase_002",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_UtilityCase.SM_UtilityCase",
+      "before": {
+        "location_cm": [
+          1251.0,
+          809.9999999999998,
+          0.0
+        ],
+        "yaw_deg": 173.99999968106758
+      },
+      "location_cm": [
+        1251.0,
+        -459.9999999999998,
+        0.0
+      ],
+      "yaw_deg": -6.000000000000001,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "UtilityCase_003",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_UtilityCase.SM_UtilityCase",
+      "before": {
+        "location_cm": [
+          1287.0,
+          811.0,
+          55.00000000000001
+        ],
+        "yaw_deg": -172.00000100176098
+      },
+      "location_cm": [
+        1287.0,
+        -461.0,
+        55.00000000000001
+      ],
+      "yaw_deg": 7.999999046325686,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "AmmoBox_005",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_AmmoBox.SM_AmmoBox",
+      "before": {
+        "location_cm": [
+          1283.0,
+          807.9999999999999,
+          110.00000000000001
+        ],
+        "yaw_deg": 180.0
+      },
+      "location_cm": [
+        1283.0,
+        -457.9999999999999,
+        110.00000000000001
+      ],
+      "yaw_deg": 0.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "StorageCabinet_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_StorageCabinet.SM_StorageCabinet",
+      "before": {
+        "location_cm": [
+          1505.0,
+          842.9999999999999,
+          0.0
+        ],
+        "yaw_deg": 180.0
+      },
+      "location_cm": [
+        1505.0,
+        -492.9999999999999,
+        0.0
+      ],
+      "yaw_deg": 0.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "ServiceDrum_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_ServiceDrum.SM_ServiceDrum",
+      "before": {
+        "location_cm": [
+          1667.0,
+          832.0,
+          0.0
+        ],
+        "yaw_deg": 175.00000023005185
+      },
+      "location_cm": [
+        1667.0,
+        -482.0,
+        0.0
+      ],
+      "yaw_deg": -5.000000000000002,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "ServiceDrum_002",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_ServiceDrum.SM_ServiceDrum",
+      "before": {
+        "location_cm": [
+          1755.0,
+          823.0,
+          0.0
+        ],
+        "yaw_deg": 144.99999915085561
+      },
+      "location_cm": [
+        1755.0,
+        -473.0,
+        0.0
+      ],
+      "yaw_deg": -35.0,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    },
+    {
+      "label": "CableReel_001",
+      "mesh": "/Game/Environment/Basement/Range/Meshes/SM_CableReel.SM_CableReel",
+      "before": {
+        "location_cm": [
+          1862.0,
+          816.0,
+          0.0
+        ],
+        "yaw_deg": 70.00000246792995
+      },
+      "location_cm": [
+        1862.0,
+        -466.0,
+        0.0
+      ],
+      "yaw_deg": -110.00000000000007,
+      "parent": "ROOT_Range",
+      "collision_profile": "BlockAll"
+    }
+  ]
+}

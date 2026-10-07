@@ -24,7 +24,10 @@ a=found[0]
 assert a.get_attach_parent_actor().get_actor_label()=='ROOT_Range'
 assert a.get_editor_property('visual_mesh').static_mesh==visual.static_mesh
 assert a.get_interaction_type()==u.TunaSweeperInteractionType.DEBUG_ARMORY_OPEN
-assert (a.get_actor_location()-u.Vector(1528,-505,0)).length()<.1
+placement=json.loads((ROOT/'TunaSweeper/SourceArt/Environment/Basement/side_furniture_placement.json').read_text())
+expected=next(p for p in placement['placements'] if p['label']=='WeaponRack_001')
+assert (a.get_actor_location()-u.Vector(*expected['location_cm'])).length()<.1
+assert abs((a.get_actor_rotation().yaw-expected['yaw_deg']+180)%360-180)<.1
 report={'passed':True,'blueprint':BP,'parent':cdo.get_class().get_super_class().get_path_name() if hasattr(cdo.get_class(),'get_super_class') else '/Script/TunaSweeper.TunaSweeperDebugArmoryActor','mesh':visual.static_mesh.get_path_name(),'actor':'WeaponRack_001','parent_actor':'ROOT_Range','interaction_key':'ui.interaction.debug_armory_open','interaction_distance_cm':200,'location_cm':[a.get_actor_location().x,a.get_actor_location().y,a.get_actor_location().z]}
 (ROOT/'TunaSweeper/SourceArt/Environment/Basement/armory_asset_validation.json').write_text(json.dumps(report,indent=2))
 u.log('DEBUG_ARMORY_ASSET_VERIFIED')

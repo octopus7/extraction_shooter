@@ -27,7 +27,8 @@
     "walk_to_target_2",
     "walk_to_target_3",
     "walk_to_target_4",
-    "walk_to_target_5"
+    "walk_to_target_5",
+    "side_aisle_to_armory"
   ],
   "clear_firing_lines": 5,
   "side_aisle_clear_width_cm": 140,
@@ -47,5 +48,30 @@
     8.0,
     8.0
   ],
-  "partition_length_cm": 110.00000000000001
+  "partition_length_cm": 110.00000000000001,
+  "swapped_side_furniture": [
+    "WeaponRack_001",
+    "DisplayRifle_001",
+    "DisplayRifle_002",
+    "DisplayRifle_003",
+    "DisplayRifle_004",
+    "DisplayRifle_005",
+    "DisplayRifle_006",
+    "SupplyCrate_001",
+    "SupplyCrate_002",
+    "SupplyCrate_003",
+    "SupplyCrate_004",
+    "UtilityCase_004",
+    "AmmoBox_004",
+    "AmmoBox_006",
+    "UtilityCase_001",
+    "UtilityCase_002",
+    "UtilityCase_003",
+    "AmmoBox_005",
+    "StorageCabinet_001",
+    "ServiceDrum_001",
+    "ServiceDrum_002",
+    "CableReel_001"
+  ],
+  "armory_approach_in_interaction_range": true
 }

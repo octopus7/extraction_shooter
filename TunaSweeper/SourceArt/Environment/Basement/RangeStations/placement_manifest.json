@@ -125,22 +125,22 @@
       "label": "SupplyCrate_004",
       "mesh": "SM_SupplyCrate",
       "author_location_m": [
-        -4.65,
+        8.25,
         -1.5,
         0.0
       ],
-      "yaw_deg": 73,
+      "yaw_deg": -107.00000000000009,
       "parent": "ROOT_Range"
     },
     {
       "label": "UtilityCase_004",
       "mesh": "SM_UtilityCase",
       "author_location_m": [
-        -4.66,
+        8.26,
         -1.5,
         0.765
       ],
-      "yaw_deg": 70,
+      "yaw_deg": -110.00000000000007,
       "parent": "ROOT_Range"
     },
     {
