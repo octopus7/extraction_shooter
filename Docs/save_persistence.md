@@ -2,6 +2,8 @@
 
 ## Armor and ammunition penetration
 
+Combat health and state gauges (health, food, hydration, stamina and scratch) now normalize current/max values to whole points while retaining existing float storage. Imported/restored vitals and ratio-based level transitions round at the normal state setters; no save format/version change or direct save-file rewrite is required. Continuous vitals depletion, stamina changes and practice-dummy recovery keep sub-point remainders only in transient runtime memory. Setting/restoring vitals or resetting the corresponding state clears its remainder; unchanged max-stat refreshes preserve it. Excess changes beyond full/empty are discarded, while opposite-direction pending changes remain. Weight, timers and progress ratios retain their existing fractional units.
+
 Armor tier, base defense, and ammunition penetration tier are item-definition data resolved from the existing saved item IDs. Existing IDs, equipment slots, loaded-ammo IDs/counts, and save version remain unchanged; old tactical jackets and body armor receive the updated definition values on load. New tiered armor and advanced AP ammunition use the normal item-instance persistence. Each projectile snapshots penetration tier when fired; projectiles and enemy profile armor references are transient and are not new save fields. Enemy armor references provide stats only and do not add inventory or loot instances.
 
 ## Debug armory

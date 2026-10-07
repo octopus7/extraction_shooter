@@ -54,14 +54,13 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 	}
 	const int32 PenetrationTier = TunaSweeperArmor::ResolvePenetrationTier(DamageEvent, DamageCauser);
 	const float DefenseValue = TunaGameInstance ? TunaGameInstance->GetEquippedEffectiveDefense(PenetrationTier) : 0.0f;
-	// Enemy difficulty is applied exactly once, rounded to a whole health point, and then
-	// effective armor is subtracted. Non-enemy sources retain their original raw damage.
-	const float DamageBeforeDefense = UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(
+	// Keep difficulty and per-item armor fractions until the one final rounding step.
+	const float AppliedDamage = FMath::Min(VitalsComponent->GetVitalsState().Health,
+		UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(
 		DamageAmount,
-		0,
+		DefenseValue,
 		bEnemyAttributed,
-		EnemyIncomingDamageMultiplier);
-	const float AppliedDamage = TunaSweeperArmor::ApplyDefense(DamageBeforeDefense, DefenseValue);
+		EnemyIncomingDamageMultiplier));
 	if (AppliedDamage <= 0.0f)
 	{
 		return 0.0f;

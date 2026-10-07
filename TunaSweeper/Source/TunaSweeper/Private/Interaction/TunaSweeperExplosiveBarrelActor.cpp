@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
@@ -125,7 +126,7 @@ ATunaSweeperExplosiveBarrelActor::ATunaSweeperExplosiveBarrelActor()
 void ATunaSweeperExplosiveBarrelActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	ExplosionVisualRadiusCm = FMath::Max(1.0f, ExplosionVisualRadiusCm);
 	ExplosionDamageStrong = FMath::Max(0.0f, ExplosionDamageStrong);
 	ExplosionDamageWeak = FMath::Clamp(ExplosionDamageWeak, 0.0f, ExplosionDamageStrong);
@@ -224,6 +225,7 @@ void ATunaSweeperExplosiveBarrelActor::PostEditChangeProperty(FPropertyChangedEv
 
 float ATunaSweeperExplosiveBarrelActor::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	DamageAmount = TunaSweeperCombatValue::Round(DamageAmount);
 	if (bBarrelDestroyed || bChainDetonationPending || DamageAmount <= 0.0f)
 	{
 		return 0.0f;
@@ -260,7 +262,7 @@ void ATunaSweeperExplosiveBarrelActor::SetDamageStageCount(int32 InDamageStageCo
 void ATunaSweeperExplosiveBarrelActor::ConfigureExplosiveBarrelDefaults(FName InBarrelId, float InMaxHealth, const TSoftObjectPtr<UStaticMesh>& InIntactMesh, const TSoftObjectPtr<UStaticMesh>& InDestroyedMesh, const TSoftObjectPtr<UNiagaraSystem>& InDestroyedLoopEffect, const TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>& InExplosionEffectActorClass, float InExplosionVisualRadiusCm, float InExplosionDurationSeconds)
 {
 	BarrelId = InBarrelId;
-	MaxHealth = FMath::Max(1.0f, InMaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(InMaxHealth));
 	CurrentHealth = MaxHealth;
 	if (VisualStates.Num() < 2) VisualStates.SetNum(2);
 	if (VisualStates.Num() >= 4)

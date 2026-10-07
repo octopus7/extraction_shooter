@@ -420,8 +420,8 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 
 	const UWorld* World = GetWorld();
 	const bool bIsBunkerMap = World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
-	const float EffectiveRollStaminaCost = bIsBunkerMap ? 0.0f : FMath::Max(0.0f, RollStaminaCost);
-	CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, FMath::Max(0.0f, MaxStamina));
+	const float EffectiveRollStaminaCost = bIsBunkerMap ? 0.0f : TunaSweeperCombatValue::Round(RollStaminaCost);
+	CurrentStamina = TunaSweeperCombatValue::ClampGauge(CurrentStamina, MaxStamina);
 	if (CurrentStamina < EffectiveRollStaminaCost)
 	{
 		return;
@@ -435,6 +435,7 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 	bIsAiming = false;
 	RollElapsedSeconds = 0.0f;
 	CurrentStamina = FMath::Max(0.0f, CurrentStamina - EffectiveRollStaminaCost);
+	TunaSweeperCombatValue::DiscardOutwardRemainder(CurrentStamina, MaxStamina, StaminaRemainder);
 	DefaultSkeletalMeshRelativeRotation = GetMesh() ? GetMesh()->GetRelativeRotation() : DefaultSkeletalMeshRelativeRotation;
 	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : DefaultVisualMeshRelativeRotation;
 

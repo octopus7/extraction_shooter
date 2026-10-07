@@ -1,5 +1,6 @@
 #include "Weapon/TunaSweeperWeapon.h"
 #include "Combat/TunaSweeperProjectileDamage.h"
+#include "Combat/TunaSweeperCombatValue.h"
 #include "Weapon/TunaSweeperWeaponConfiguration.h"
 #include "Engine/StaticMesh.h"
 
@@ -949,9 +950,9 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	if (SpawnedProjectile)
 	{
 		const float BaseDamageAmount = ProjectileClassToSpawn->GetDefaultObject<ATunaSweeperProjectile>()->GetDamageAmount();
-		const int32 ModifiedDamageAmount = TunaSweeperProjectileDamage::Calculate(
+		const float ModifiedDamageAmount = TunaSweeperProjectileDamage::Calculate(
 			BaseDamageAmount, ProjectileDamageMultiplier, ProjectileDamageBonus);
-		SpawnedProjectile->SetDamageAmount(static_cast<float>(ModifiedDamageAmount));
+		SpawnedProjectile->SetDamageAmount(ModifiedDamageAmount);
 		SpawnedProjectile->SetPenetrationTier(PenetrationTier);
 		SpawnedProjectile->SetBurnSpec(BurnSpec);
 		SpawnedProjectile->SetBurnApplicationId(BurnApplicationId);
@@ -981,7 +982,8 @@ TSubclassOf<ATunaSweeperProjectile> ATunaSweeperWeapon::ResolveProjectileClass()
 int32 ATunaSweeperWeapon::GetProjectileDamage(float Multiplier, int32 Bonus) const
 {
 	const ATunaSweeperProjectile* Defaults = ResolveProjectileClass()->GetDefaultObject<ATunaSweeperProjectile>();
-	return TunaSweeperProjectileDamage::Calculate(Defaults->GetDamageAmount(), Multiplier, Bonus);
+	return static_cast<int32>(TunaSweeperCombatValue::Round(
+		TunaSweeperProjectileDamage::Calculate(Defaults->GetDamageAmount(), Multiplier, Bonus)));
 }
 
 bool ATunaSweeperWeapon::ApplyVisualDefinition(const FTunaSweeperWeaponVisualDefinition& Visual)

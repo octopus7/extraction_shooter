@@ -1,4 +1,5 @@
 #include "Vehicle/TunaSweeperATVActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -62,7 +63,8 @@ float ATunaSweeperATVActor::TakeDamage(float DamageAmount, const FDamageEvent& D
 {
 	if (bVehicleDestroyed || bProcessingDamage || !CanBeDamaged() || !FMath::IsFinite(DamageAmount) || DamageAmount <= 0) return 0;
 	TGuardValue<bool> Guard(bProcessingDamage, true);
-	const float Applied = FMath::Min(DamageAmount, CurrentDurability);
+	const float Applied = FMath::Min(TunaSweeperCombatValue::Round(DamageAmount), CurrentDurability);
+	if (Applied <= 0) return 0;
 	CurrentDurability = FMath::Max(0.0f, CurrentDurability - Applied);
 	HitSmokeRemaining = FMath::Max(0.0f, HitSmokeDuration);
 	if (CurrentDurability <= 0) DestroyVehicle();

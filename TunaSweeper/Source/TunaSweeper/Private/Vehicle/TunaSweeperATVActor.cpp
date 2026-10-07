@@ -1,4 +1,5 @@
 #include "Vehicle/TunaSweeperATVActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Vehicle/TunaSweeperATVWheel.h"
 #include "Vehicle/TunaSweeperATVAnimInstance.h"
@@ -93,7 +94,7 @@ void ATunaSweeperATVActor::BeginPlay()
 	{
 		DestructionExplosion->SetAsset(DestructionExplosionSystem.LoadSynchronous());
 	}
-	MaxDurability = FMath::IsFinite(MaxDurability) ? FMath::Max(1.0f, MaxDurability) : 300.0f;
+	MaxDurability = FMath::IsFinite(MaxDurability) ? FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxDurability)) : 300.0f;
 	CurrentDurability = MaxDurability;
 	SmokeDurabilityRatio = FMath::Clamp(SmokeDurabilityRatio, 0.0f, 1.0f);
 	HeavySmokeDurabilityRatio = FMath::Clamp(HeavySmokeDurabilityRatio, 0.0f, SmokeDurabilityRatio);

@@ -40,7 +40,7 @@ public:
 	static float ScaleEnemyIncomingDamage(float RawDamage, int32 RawMultiplier);
 	static float ResolveAppliedPlayerDamage(
 		float RawDamage,
-		int32 DefenseValue,
+		float DefenseValue,
 		bool bEnemyAttributed,
 		int32 EnemyIncomingDamageMultiplier);
 

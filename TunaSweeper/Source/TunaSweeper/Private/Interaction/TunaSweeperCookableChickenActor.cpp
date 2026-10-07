@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperCookableChickenActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
@@ -49,6 +50,7 @@ float ATunaSweeperCookableChickenActor::TakeDamage(
 	AController* EventInstigator,
 	AActor* DamageCauser)
 {
+	DamageAmount = TunaSweeperCombatValue::Round(DamageAmount);
 	if (bCooked || DamageAmount <= 0.0f || !Cast<ATunaSweeperExplosiveBarrelActor>(DamageCauser))
 	{
 		return 0.0f;

@@ -36,6 +36,7 @@ bool FTunaSweeperArmorPenetrationTest::RunTest(const FString& Parameters)
 		{1.5f, 0.75f, 0.0f, 0.0f}, {4.5f, 3.0f, 1.5f, 0.0f},
 		{9.0f, 6.75f, 4.5f, 2.25f}, {12.0f, 12.0f, 9.0f, 6.0f}};
 	const int32 BodyIds[] = {5010, 5001, 5022, 5024};
+	const float ExpectedDamage[4][4] = {{19, 19, 20, 20}, {16, 17, 19, 20}, {11, 13, 16, 18}, {8, 8, 11, 14}};
 	const int32 HeadIds[] = {5021, 5006, 5023, 5025};
 	TestEqual(TEXT("Legacy armor keeps flat defense"), TunaSweeperArmor::EffectiveDefense(8, 0, 4), 8.0f);
 	TestEqual(TEXT("Non-ballistic damage has no penetration"), TunaSweeperArmor::EffectiveDefense(8, 4, 0), 8.0f);
@@ -94,11 +95,11 @@ bool FTunaSweeperArmorPenetrationTest::RunTest(const FString& Parameters)
 			const float Defense = ExpectedDefense[Tier-1][Penetration-1];
 			TestEqual(TEXT("Per-item defense matches four-by-four balance table"), Game->GetEquippedEffectiveDefense(Penetration), Defense);
 			const float EnemyHealthBefore = Enemy->GetHealth();
-			TestEqual(TEXT("Enemy takes damage after penetration"), Enemy->TakeDamage(20.0f, BulletHit, nullptr, Projectile), 20.0f - Defense);
-			TestEqual(TEXT("Enemy health actually changes"), EnemyHealthBefore - Enemy->GetHealth(), 20.0f - Defense);
+			TestEqual(TEXT("Enemy takes rounded final damage after penetration"), Enemy->TakeDamage(20.0f, BulletHit, nullptr, Projectile), ExpectedDamage[Tier-1][Penetration-1]);
+			TestEqual(TEXT("Enemy health actually changes"), EnemyHealthBefore - Enemy->GetHealth(), ExpectedDamage[Tier-1][Penetration-1]);
 			const float PlayerHealthBefore = Player->GetVitalsComponent()->GetVitalsState().Health;
-			TestEqual(TEXT("Player uses the same armor calculation"), Player->TakeDamage(20.0f, BulletHit, nullptr, Projectile), 20.0f - Defense);
-			TestEqual(TEXT("Player health actually changes"), PlayerHealthBefore - Player->GetVitalsComponent()->GetVitalsState().Health, 20.0f - Defense);
+			TestEqual(TEXT("Player uses the same armor calculation"), Player->TakeDamage(20.0f, BulletHit, nullptr, Projectile), ExpectedDamage[Tier-1][Penetration-1]);
+			TestEqual(TEXT("Player health actually changes"), PlayerHealthBefore - Player->GetVitalsComponent()->GetVitalsState().Health, ExpectedDamage[Tier-1][Penetration-1]);
 		}
 		TestEqual(TEXT("A non-point event cannot borrow projectile penetration"),
 			TunaSweeperArmor::ResolvePenetrationTier(FDamageEvent(), Projectile), 0);

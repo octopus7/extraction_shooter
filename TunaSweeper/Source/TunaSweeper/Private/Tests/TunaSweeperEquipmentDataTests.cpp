@@ -1,6 +1,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
+#include "Engine/DamageEvents.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -284,6 +286,9 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	if (!TestNotNull(TEXT("Damage test weapon"), TestWeapon)) return false;
 	const int32 AmmoIds[] = {2011, 2012, 2001, 2032, 2013, 2024, 2033};
 	const int32 ExpectedDamage[] = {11, 17, 13, 18, 17, 19, 18};
+	const float ExpectedRawDamage[] = {10.6165f, 16.739f, 13.49f, 17.739f, 16.739f, 19.3635f, 17.739f};
+	ATunaSweeperShootingPracticeDummyActor* DamageTarget = World->SpawnActor<ATunaSweeperShootingPracticeDummyActor>();
+	if (!TestNotNull(TEXT("Unarmored preview target"), DamageTarget)) return false;
 	for (int32 CaseIndex = 0; CaseIndex < UE_ARRAY_COUNT(AmmoIds); ++CaseIndex)
 	{
 		const FTunaSweeperItemDefinition& Ammo = Items->ItemDefinitionsById.FindChecked(AmmoIds[CaseIndex]);
@@ -305,8 +310,10 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 		{
 			if (It->GetOwner() != TestWeapon || It->IsActorBeingDestroyed()) continue;
 			++ProjectileCount;
-			TestEqual(TEXT("Every fired projectile matches the information panel"),
-				It->GetDamageAmount(), static_cast<float>(ExpectedDamage[CaseIndex]));
+			TestEqual(TEXT("Every fired projectile keeps unrounded ammo damage"),
+				It->GetDamageAmount(), ExpectedRawDamage[CaseIndex]);
+			TestEqual(TEXT("Actual unarmored hit matches the information panel"),
+				DamageTarget->TakeDamage(It->GetDamageAmount(), FPointDamageEvent(), nullptr, *It), static_cast<float>(ExpectedDamage[CaseIndex]));
 			TestEqual(TEXT("Every projectile and pellet retains the fired ammunition penetration"), It->GetPenetrationTier(), Ammo.PenetrationTier);
 			It->Destroy();
 		}

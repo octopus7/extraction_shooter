@@ -1,4 +1,5 @@
 #include "AI/TunaSweeperMissileTurret.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "AI/TunaSweeperAttackTelegraph.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
@@ -70,7 +71,8 @@ ATunaSweeperMissileTurret::ATunaSweeperMissileTurret()
 void ATunaSweeperMissileTurret::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
+	CurrentHealth = MaxHealth;
 }
 
 void ATunaSweeperMissileTurret::InitializeTurret(AActor* Source, AActor* Target)
@@ -385,7 +387,8 @@ float ATunaSweeperMissileTurret::TakeDamage(float DamageAmount, const FDamageEve
 			return 0.0f;
 		}
 	}
-	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
+	const float AppliedDamage = FMath::Min(CurrentHealth, TunaSweeperCombatValue::Round(DamageAmount));
+	if (AppliedDamage <= 0.0f) return 0.0f;
 	CurrentHealth -= AppliedDamage;
 	Super::TakeDamage(AppliedDamage, DamageEvent, EventInstigator, DamageCauser);
 	if (CurrentHealth <= 0.0f)

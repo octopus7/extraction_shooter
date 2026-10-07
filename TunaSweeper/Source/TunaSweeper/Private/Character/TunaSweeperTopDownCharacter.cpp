@@ -156,7 +156,9 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	CacheBaseSurvivalStats();
 	ApplyProgressionStatBonuses();
 	ApplyBunkerPeaceZoneVitalsRules();
-	CurrentStamina = FMath::Max(0.0f, MaxStamina);
+	MaxStamina = TunaSweeperCombatValue::Round(MaxStamina);
+	CurrentStamina = MaxStamina;
+	StaminaRemainder = 0.0;
 	StaminaGaugeOpacity = 0.0f;
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())

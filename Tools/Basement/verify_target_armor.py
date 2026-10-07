@@ -48,6 +48,7 @@ defense_table = [[0, 0, 0, 0], [1.5, .75, 0, 0], [4.5, 3, 1.5, 0],
                  [9, 6.75, 4.5, 2.25], [12, 12, 9, 6]]
 state = 'settle'
 ticks = 0
+integer_recovery_samples = 0
 busy = False
 started = time.monotonic()
 u.EditorPythonScripting.set_keep_python_script_alive(True)
@@ -68,7 +69,7 @@ def finish(error=None):
 
 
 def tick(dt):
-    global ticks, busy, state, game, live, recovery_started
+    global ticks, busy, state, game, live, recovery_started, integer_recovery_samples
     if busy:
         return
     busy = True
@@ -102,6 +103,14 @@ def tick(dt):
                     'tier': tier, 'body_item_id': body_ids[tier], 'head_item_id': head_ids[tier],
                     'defense_by_penetration_1_to_4': defenses, 'generic_input_damage': 20,
                     'returned_damage': damage, 'health_after': actor.get_health_fraction() * 100})
+                before = actor.get_health_fraction() * 100
+                fractional_damage = u.GameplayStatics.apply_damage(actor, 20.5, None, None, u.DamageType)
+                assert fractional_damage == 21 - tier * 3, (tier, fractional_damage)
+                after = actor.get_health_fraction() * 100
+                assert abs(before - after - fractional_damage) < .001
+                report['runtime_equipment_and_damage'][-1].update({
+                    'fractional_input_damage': 20.5, 'rounded_damage': fractional_damage,
+                    'health_after_rounded_damage': round(after)})
             # Runtime BP changes do not change the saved preset or other targets.
             live[4].configure_practice_dummy_armor(2, 3)
             assert live[4].get_effective_defense(2) == 4.25
@@ -118,10 +127,15 @@ def tick(dt):
             recovery_started = u.GameplayStatics.get_time_seconds(game)
             state = 'recovery'
         elif state == 'recovery':
+            for actor in live:
+                health = actor.get_health_fraction() * 100
+                assert abs(health - round(health)) < .001, health
+                integer_recovery_samples += 1
             elapsed = u.GameplayStatics.get_time_seconds(game) - recovery_started
             if elapsed >= 2.1:
                 assert all(abs(a.get_health_fraction() - 1) < .001 for a in live)
-                report['recovery'] = {'targets': len(live), 'game_seconds': elapsed, 'final_health': 100}
+                report['recovery'] = {'targets': len(live), 'game_seconds': elapsed, 'final_health': 100,
+                                      'integer_health_samples': integer_recovery_samples}
                 levels.editor_request_end_play()
                 state, ticks = 'end', 0
         elif state == 'end' and ticks >= 15:

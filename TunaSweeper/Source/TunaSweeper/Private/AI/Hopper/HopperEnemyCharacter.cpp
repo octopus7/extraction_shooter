@@ -1,4 +1,5 @@
 #include "AI/Hopper/HopperEnemyCharacter.h"
+#include "Combat/TunaSweeperCombatValue.h"
 #include "AI/Hopper/HopperArmModule.h"
 #include "AI/Hopper/HopperPresentationComponent.h"
 #include "AI/Hopper/HopperVisualData.h"
@@ -73,7 +74,8 @@ void ATunaSweeperHopperEnemyCharacter::BeginPlay()
     bInitializingBase = false;
     InitializePresentation();
     PreviousGaitYaw = GetActorRotation().Yaw;
-    MechHealth = FMath::Max(1.f, MechMaxHealth);
+    MechMaxHealth = FMath::Max(1.f, TunaSweeperCombatValue::Round(MechMaxHealth));
+    MechHealth = MechMaxHealth;
     PilotAmmo = FMath::Max(0, PilotAmmoCapacity);
     FTunaSweeperEnemyCombatProfile Profile = GetCombatProfile();
     Profile.AttackMode = ETunaSweeperEnemyAttackMode::Ranged;
@@ -162,7 +164,8 @@ float ATunaSweeperHopperEnemyCharacter::TakeDamage(float Amount, const FDamageEv
     AActor* Source = Causer ? Causer : (InstigatorController ? InstigatorController->GetPawn() : nullptr);
     if (UTunaSweeperFactionSubsystem* Factions = GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>();
         Factions && !Factions->CanApplyCombatEffect(Source, this)) return 0;
-    const float Applied = FMath::Min(MechHealth, Amount);
+    const float Applied = FMath::Min(MechHealth, TunaSweeperCombatValue::Round(Amount));
+    if (Applied <= 0.f) return 0.f;
     MechHealth = FMath::Max(0.f, MechHealth - Applied);
     if (ATunaSweeperEnemyAIController* AI = Cast<ATunaSweeperEnemyAIController>(GetController()))
     {

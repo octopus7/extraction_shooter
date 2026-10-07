@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperBreakableTomatoActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
@@ -77,6 +78,7 @@ float ATunaSweeperBreakableTomatoActor::TakeDamage(
 	AController* EventInstigator,
 	AActor* DamageCauser)
 {
+	DamageAmount = TunaSweeperCombatValue::Round(DamageAmount);
 	if (!BreakableTomatoComponent || IsCrateBroken() || DamageAmount <= 0.0f)
 	{
 		return 0.0f;

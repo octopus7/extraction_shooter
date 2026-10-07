@@ -96,8 +96,8 @@ void ATunaSweeperShootingPracticeDummyActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
-	MinimumHealth = FMath::Clamp(MinimumHealth, 0.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
+	MinimumHealth = TunaSweeperCombatValue::ClampGauge(MinimumHealth, MaxHealth);
 	CurrentHealth = MaxHealth;
 	ConfigurePracticeDummyArmor(BodyArmorTier, HeadArmorTier);
 	ApplyHitZoneColors();
@@ -110,11 +110,13 @@ void ATunaSweeperShootingPracticeDummyActor::Tick(float DeltaSeconds)
 
 	if (CurrentHealth >= MaxHealth)
 	{
+		HealthRecoveryRemainder = 0.0;
 		return;
 	}
 
 	const float RecoveryPerSecond = MaxHealth / FMath::Max(0.05f, HealthRecoverySeconds);
-	CurrentHealth = FMath::Min(MaxHealth, CurrentHealth + RecoveryPerSecond * FMath::Max(0.0f, DeltaSeconds));
+	CurrentHealth = TunaSweeperCombatValue::Accumulate(CurrentHealth, MaxHealth,
+		RecoveryPerSecond * FMath::Max(0.0f, DeltaSeconds), HealthRecoveryRemainder);
 	RefreshHealthBar();
 }
 
@@ -140,9 +142,10 @@ void ATunaSweeperShootingPracticeDummyActor::ConfigurePracticeDummyDefaults(
 	float InMaxHealth,
 	float InHealthRecoverySeconds)
 {
-	MaxHealth = FMath::Max(1.0f, InMaxHealth);
-	MinimumHealth = FMath::Clamp(MinimumHealth, 0.0f, MaxHealth);
-	CurrentHealth = FMath::Clamp(CurrentHealth, MinimumHealth, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(InMaxHealth));
+	MinimumHealth = TunaSweeperCombatValue::ClampGauge(MinimumHealth, MaxHealth);
+	CurrentHealth = FMath::Clamp(TunaSweeperCombatValue::Round(CurrentHealth), MinimumHealth, MaxHealth);
+	HealthRecoveryRemainder = 0.0;
 	HealthRecoverySeconds = FMath::Max(0.05f, InHealthRecoverySeconds);
 	RefreshHealthBar();
 }

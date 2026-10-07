@@ -40,12 +40,27 @@ bool FTunaSweeperDemoStaminaTuningTest::RunTest(const FString& Parameters)
 	Character->bSprintInputHeld = true;
 	Character->CurrentMoveInput = FVector2D(1.0f, 0.0f);
 	Character->UpdateSprintAndStamina(1.0f);
-	TestEqual(TEXT("One second of demo sprint spends one quarter of the previous stamina rate"), Character->CurrentStamina, 93.75f);
+	TestEqual(TEXT("One second of sprint applies six whole stamina points"), Character->CurrentStamina, 94.0f);
+	Character->UpdateSprintAndStamina(3.0f);
+	TestEqual(TEXT("Four seconds preserve the exact 6.25 per-second depletion rate"), Character->CurrentStamina, 75.0f);
 
 	Character->CurrentStamina = 0.0f;
+	Character->StaminaRemainder = 0.0;
 	Character->bSprintInputHeld = false;
 	Character->UpdateSprintAndStamina(1.0f);
 	TestEqual(TEXT("One second of demo recovery restores three times the previous stamina rate"), Character->CurrentStamina, 54.0f);
+	for (const int32 FPS : {30, 60, 144})
+	{
+		Character->CurrentStamina = 100;
+		Character->StaminaRemainder = 0;
+		Character->bSprintInputHeld = true;
+		for (int32 Frame = 0; Frame < FPS * 4; ++Frame)
+		{
+			Character->UpdateSprintAndStamina(1.f / FPS);
+			TestEqual(TEXT("Stamina stays integer every frame"), Character->CurrentStamina, FMath::RoundToFloat(Character->CurrentStamina));
+		}
+		TestEqual(TEXT("Sprint rate is independent of frame rate"), Character->CurrentStamina, 75.f);
+	}
 
 	return true;
 }

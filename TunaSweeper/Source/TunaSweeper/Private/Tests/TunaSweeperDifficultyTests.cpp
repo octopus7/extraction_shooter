@@ -24,9 +24,10 @@ bool FTunaSweeperDifficultyDamageScalingTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Stage 1 raw multiplier halves enemy damage"), UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(10.0f, 5000), 5.0f);
 	TestEqual(TEXT("Stage 2 raw multiplier preserves enemy damage"), UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(10.0f, 10000), 10.0f);
 	TestEqual(TEXT("Stage 3 raw multiplier doubles enemy damage"), UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(10.0f, 20000), 20.0f);
-	TestEqual(TEXT("Scaled damage rounds once before defense"), UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(11.0f, 5000), 6.0f);
+	TestEqual(TEXT("Scaled damage keeps precision until defense"), UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(11.0f, 5000), 5.5f);
 	TestEqual(TEXT("Multiplier is not probability-clamped"), UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(10.0f, 35000), 35.0f);
-	TestEqual(TEXT("Enemy multiplier is rounded before defense"), UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(11.0f, 2, true, 5000), 4.0f);
+	TestEqual(TEXT("Enemy final damage rounds after defense"), UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(11.0f, 2, true, 5000), 4.0f);
+	TestEqual(TEXT("Fractional defense cannot receive already-rounded difficulty damage"), UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(10.8f, .75f, true, 5000), 5.0f);
 	TestEqual(TEXT("Enemy defense can absorb the scaled result"), UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(10.0f, 6, true, 5000), 0.0f);
 	TestEqual(TEXT("Player friendly and environmental damage is not difficulty-scaled"), UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(11.0f, 2, false, 20000), 9.0f);
 

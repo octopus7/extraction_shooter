@@ -38,7 +38,7 @@ UTunaSweeperScratchComponent::UTunaSweeperScratchComponent()
 void UTunaSweeperScratchComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentScratch = FMath::Clamp(CurrentScratch, 0.0f, GetMaxScratch());
+	CurrentScratch = TunaSweeperCombatValue::ClampGauge(CurrentScratch, GetMaxScratch());
 	OnScratchChanged.Broadcast(CurrentScratch, GetMaxScratch());
 	SetDeveloperAlwaysSlowPresentationEnabled(
 		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference());
@@ -77,7 +77,7 @@ void UTunaSweeperScratchComponent::TickComponent(
 
 bool UTunaSweeperScratchComponent::TryConsumeScratch(float Amount)
 {
-	const float SafeAmount = FMath::Max(0.0f, Amount);
+	const float SafeAmount = TunaSweeperCombatValue::Round(Amount);
 	if (SafeAmount <= 0.0f || CurrentScratch + KINDA_SMALL_NUMBER < SafeAmount)
 	{
 		return false;
@@ -149,7 +149,7 @@ bool UTunaSweeperScratchComponent::TryRegisterNearMiss(
 		? MeleeScratchGain
 		: ProjectileScratchGain;
 	const float Gain = BaseGain * (bWouldHaveHit ? FMath::Max(1.0f, PerfectDodgeGainMultiplier) : 1.0f);
-	SetCurrentScratch(CurrentScratch + Gain);
+	SetCurrentScratch(CurrentScratch + TunaSweeperCombatValue::Round(Gain));
 
 	OnNearMiss.Broadcast(AttackSource, AttackType, bWouldHaveHit, ClearanceCm);
 	const double RealTimeSeconds = FPlatformTime::Seconds();
@@ -162,7 +162,7 @@ bool UTunaSweeperScratchComponent::TryRegisterNearMiss(
 
 void UTunaSweeperScratchComponent::SetCurrentScratch(float NewValue)
 {
-	const float ClampedValue = FMath::Clamp(NewValue, 0.0f, GetMaxScratch());
+	const float ClampedValue = TunaSweeperCombatValue::ClampGauge(NewValue, GetMaxScratch());
 	if (FMath::IsNearlyEqual(CurrentScratch, ClampedValue))
 	{
 		return;

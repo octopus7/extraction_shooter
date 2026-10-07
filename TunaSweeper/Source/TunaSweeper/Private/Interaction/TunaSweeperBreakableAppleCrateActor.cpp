@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
@@ -96,7 +97,7 @@ void ATunaSweeperBreakableAppleCrateActor::OnConstruction(const FTransform& Tran
 {
 	Super::OnConstruction(Transform);
 
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	CurrentHealth = bCrateBroken ? 0.0f : MaxHealth;
 	CollisionExtent = MakeSafeCrateExtent(CollisionExtent);
 	AppleSpawnExtent = MakeSafeCrateExtent(AppleSpawnExtent);
@@ -143,7 +144,7 @@ void ATunaSweeperBreakableAppleCrateActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	CurrentHealth = MaxHealth;
 	bCrateBroken = false;
 	SetCanBeDamaged(true);
@@ -157,6 +158,7 @@ float ATunaSweeperBreakableAppleCrateActor::TakeDamage(
 	AController* EventInstigator,
 	AActor* DamageCauser)
 {
+	DamageAmount = TunaSweeperCombatValue::Round(DamageAmount);
 	if (bCrateBroken || DamageAmount <= 0.0f)
 	{
 		return 0.0f;
@@ -193,7 +195,7 @@ void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	const TSoftObjectPtr<UStaticMesh>& InCrateFragmentMesh)
 {
 	CrateId = InCrateId;
-	MaxHealth = FMath::Max(1.0f, InMaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(InMaxHealth));
 	CurrentHealth = bCrateBroken ? 0.0f : MaxHealth;
 	if (!InCrateMesh.IsNull())
 	{

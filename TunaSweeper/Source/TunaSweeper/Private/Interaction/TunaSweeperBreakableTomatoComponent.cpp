@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperBreakableTomatoComponent.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 UTunaSweeperBreakableTomatoComponent::UTunaSweeperBreakableTomatoComponent()
 {
@@ -13,6 +14,7 @@ void UTunaSweeperBreakableTomatoComponent::BeginPlay()
 
 bool UTunaSweeperBreakableTomatoComponent::ApplyTomatoDamage(float DamageAmount)
 {
+	DamageAmount = TunaSweeperCombatValue::Round(DamageAmount);
 	if (bBroken || DamageAmount <= 0.0f)
 	{
 		return false;
@@ -25,13 +27,13 @@ bool UTunaSweeperBreakableTomatoComponent::ApplyTomatoDamage(float DamageAmount)
 
 void UTunaSweeperBreakableTomatoComponent::ResetTomatoHealth()
 {
-	MaxHealth = FMath::Max(0.01f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	CurrentHealth = MaxHealth;
 	bBroken = false;
 }
 
 void UTunaSweeperBreakableTomatoComponent::SetMaxHealth(float InMaxHealth)
 {
-	MaxHealth = FMath::Max(0.01f, InMaxHealth);
+	MaxHealth = InMaxHealth;
 	ResetTomatoHealth();
 }

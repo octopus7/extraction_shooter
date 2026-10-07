@@ -124,8 +124,8 @@ bool FTunaSweeperPracticeDummyArmorTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Non-armor slot has no armor preset"), Items->FindArmorItemId(TEXT("equipment.slot.weapon"), 1), INDEX_NONE);
 	const int32 BodyIds[] = {INDEX_NONE, 5010, 5001, 5022, 5024};
 	const int32 HeadIds[] = {INDEX_NONE, 5021, 5006, 5023, 5025};
-	const float ExpectedDefense[5][4] = {{0, 0, 0, 0}, {1.5f, .75f, 0, 0},
-		{4.5f, 3, 1.5f, 0}, {9, 6.75f, 4.5f, 2.25f}, {12, 12, 9, 6}};
+	const float ExpectedDamage[5][4] = {{20, 20, 20, 20}, {19, 19, 20, 20},
+		{16, 17, 19, 20}, {11, 13, 16, 18}, {8, 8, 11, 14}};
 	ATunaSweeperProjectile* Projectile = World->SpawnActor<ATunaSweeperProjectile>();
 	if (!TestNotNull(TEXT("Actual projectile causer"), Projectile)) return false;
 	FPointDamageEvent BulletHit;
@@ -140,7 +140,7 @@ bool FTunaSweeperPracticeDummyArmorTest::RunTest(const FString& Parameters)
 		for (int32 Penetration = 1; Penetration <= 4; ++Penetration)
 		{
 			Projectile->SetPenetrationTier(Penetration);
-			const float Expected = 20 - ExpectedDefense[Tier][Penetration - 1];
+			const float Expected = ExpectedDamage[Tier][Penetration - 1];
 			const float HealthBefore = Dummy->GetHealthFraction() * 100;
 			TestEqual(TEXT("Returned damage uses actual armor penetration"), Dummy->TakeDamage(20, BulletHit, nullptr, Projectile), Expected);
 			TestTrue(TEXT("Visible health loses the same damage"), FMath::IsNearlyEqual(HealthBefore - Dummy->GetHealthFraction() * 100, Expected, .001f));
@@ -156,7 +156,8 @@ bool FTunaSweeperPracticeDummyArmorTest::RunTest(const FString& Parameters)
 	if (!TestNotNull(TEXT("Headshot zone"), Head)) return false;
 	BulletHit.HitInfo.Component = Head;
 	Projectile->SetAimIntent(Mixed, Head, FVector::ZeroVector, true);
-	TestEqual(TEXT("Armor is subtracted after aimed headshot multiplier"), Mixed->TakeDamage(20, BulletHit, nullptr, Projectile), 35.75f);
+	TestEqual(TEXT("Final damage rounds after aimed headshot and armor"), Mixed->TakeDamage(20, BulletHit, nullptr, Projectile), 36.0f);
+	TestEqual(TEXT("Fractional projectile damage survives until after headshot and armor"), Mixed->TakeDamage(10.3f, BulletHit, nullptr, Projectile), 16.0f);
 	TestEqual(TEXT("Generic damage cannot borrow penetration or headshot"), Mixed->TakeDamage(20, FDamageEvent(), nullptr, Projectile), 13.0f);
 	Mixed->ConfigurePracticeDummyArmor(-1, 9);
 	TestEqual(TEXT("Negative tier removes body"), Mixed->BodyArmorTier, 0);

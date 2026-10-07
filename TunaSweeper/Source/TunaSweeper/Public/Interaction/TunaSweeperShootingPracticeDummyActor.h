@@ -90,4 +90,5 @@ private:
 	void RefreshHealthBar();
 
 	float CurrentHealth = 100.0f;
+	double HealthRecoveryRemainder = 0.0;
 };

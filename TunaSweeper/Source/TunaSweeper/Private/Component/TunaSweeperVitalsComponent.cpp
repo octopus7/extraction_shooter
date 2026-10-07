@@ -1,16 +1,17 @@
 #include "Component/TunaSweeperVitalsComponent.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 
 void FTunaSweeperVitalsState::Normalize()
 {
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
-	MaxFood = FMath::Max(1.0f, MaxFood);
-	MaxHydration = FMath::Max(1.0f, MaxHydration);
-	Health = FMath::Clamp(Health, 0.0f, MaxHealth);
-	Food = FMath::Clamp(Food, 0.0f, MaxFood);
-	Hydration = FMath::Clamp(Hydration, 0.0f, MaxHydration);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
+	MaxFood = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxFood));
+	MaxHydration = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHydration));
+	Health = TunaSweeperCombatValue::ClampGauge(Health, MaxHealth);
+	Food = TunaSweeperCombatValue::ClampGauge(Food, MaxFood);
+	Hydration = TunaSweeperCombatValue::ClampGauge(Hydration, MaxHydration);
 }
 
 void FTunaSweeperVitalsDepletionRates::ClampNonNegative()
@@ -66,9 +67,12 @@ void UTunaSweeperVitalsComponent::TickComponent(
 	}
 
 	FTunaSweeperVitalsDelta Delta;
-	Delta.Health = -EffectiveRates.HealthPerSecond * DeltaTime;
-	Delta.Food = -EffectiveRates.FoodPerSecond * DeltaTime;
-	Delta.Hydration = -EffectiveRates.HydrationPerSecond * DeltaTime;
+	Delta.Health = TunaSweeperCombatValue::Accumulate(VitalsState.Health, VitalsState.MaxHealth,
+		-EffectiveRates.HealthPerSecond * DeltaTime, HealthDepletionRemainder) - VitalsState.Health;
+	Delta.Food = TunaSweeperCombatValue::Accumulate(VitalsState.Food, VitalsState.MaxFood,
+		-EffectiveRates.FoodPerSecond * DeltaTime, FoodDepletionRemainder) - VitalsState.Food;
+	Delta.Hydration = TunaSweeperCombatValue::Accumulate(VitalsState.Hydration, VitalsState.MaxHydration,
+		-EffectiveRates.HydrationPerSecond * DeltaTime, HydrationDepletionRemainder) - VitalsState.Hydration;
 	ApplyVitalsDeltaInternal(Delta);
 }
 
@@ -131,6 +135,7 @@ void UTunaSweeperVitalsComponent::SetVitalsState(const FTunaSweeperVitalsState& 
 	const FTunaSweeperVitalsState PreviousState = VitalsState;
 	VitalsState = NewVitalsState;
 	VitalsState.Normalize();
+	HealthDepletionRemainder = FoodDepletionRemainder = HydrationDepletionRemainder = 0.0;
 	if (!FMath::IsNearlyEqual(PreviousState.Health, VitalsState.Health) ||
 		!FMath::IsNearlyEqual(PreviousState.MaxHealth, VitalsState.MaxHealth) ||
 		!FMath::IsNearlyEqual(PreviousState.Food, VitalsState.Food) ||
@@ -168,9 +173,11 @@ void UTunaSweeperVitalsComponent::SetMaxVitals(
 		? FMath::Clamp(VitalsState.Hydration / VitalsState.MaxHydration, 0.0f, 1.0f)
 		: 1.0f;
 
-	NewState.MaxHealth = FMath::Max(1.0f, NewMaxHealth);
-	NewState.MaxFood = FMath::Max(1.0f, NewMaxFood);
-	NewState.MaxHydration = FMath::Max(1.0f, NewMaxHydration);
+	NewState.MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(NewMaxHealth));
+	NewState.MaxFood = FMath::Max(1.0f, TunaSweeperCombatValue::Round(NewMaxFood));
+	NewState.MaxHydration = FMath::Max(1.0f, TunaSweeperCombatValue::Round(NewMaxHydration));
+	if (NewState.MaxHealth == VitalsState.MaxHealth && NewState.MaxFood == VitalsState.MaxFood &&
+		NewState.MaxHydration == VitalsState.MaxHydration) return;
 	if (bPreserveCurrentPercent)
 	{
 		NewState.Health = NewState.MaxHealth * HealthPercent;
@@ -254,10 +261,13 @@ bool UTunaSweeperVitalsComponent::HasAuthority() const
 void UTunaSweeperVitalsComponent::ApplyVitalsDeltaInternal(const FTunaSweeperVitalsDelta& Delta)
 {
 	const FTunaSweeperVitalsState PreviousState = VitalsState;
-	VitalsState.Health += Delta.Health;
-	VitalsState.Food += Delta.Food;
-	VitalsState.Hydration += Delta.Hydration;
+	VitalsState.Health += TunaSweeperCombatValue::RoundDelta(Delta.Health);
+	VitalsState.Food += TunaSweeperCombatValue::RoundDelta(Delta.Food);
+	VitalsState.Hydration += TunaSweeperCombatValue::RoundDelta(Delta.Hydration);
 	VitalsState.Normalize();
+	TunaSweeperCombatValue::DiscardOutwardRemainder(VitalsState.Health, VitalsState.MaxHealth, HealthDepletionRemainder);
+	TunaSweeperCombatValue::DiscardOutwardRemainder(VitalsState.Food, VitalsState.MaxFood, FoodDepletionRemainder);
+	TunaSweeperCombatValue::DiscardOutwardRemainder(VitalsState.Hydration, VitalsState.MaxHydration, HydrationDepletionRemainder);
 
 	if (!FMath::IsNearlyEqual(PreviousState.Health, VitalsState.Health) ||
 		!FMath::IsNearlyEqual(PreviousState.Food, VitalsState.Food) ||

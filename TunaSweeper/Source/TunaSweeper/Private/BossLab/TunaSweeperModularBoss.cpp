@@ -1,4 +1,5 @@
 #include "BossLab/TunaSweeperModularBoss.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "AI/TunaSweeperAttackTelegraph.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -85,7 +86,7 @@ bool ATunaSweeperModularBoss::InitializeBoss(const FTunaSweeperBossDefinition& D
 		Mesh->RegisterComponent();
 		PartMeshes.Add(Mesh);
 		FRuntimePart Runtime;
-		Runtime.Definition = Part; Runtime.Mesh = Mesh; Runtime.Health = Module->Health;
+		Runtime.Definition = Part; Runtime.Mesh = Mesh; Runtime.Health = FMath::Max(1.f, TunaSweeperCombatValue::Round(Module->Health));
 		Parts.Add(Runtime);
 		AssemblyBounds += FBox(-Module->HalfExtent, Module->HalfExtent).TransformBy(*Transform);
 	}
@@ -392,7 +393,8 @@ float ATunaSweeperModularBoss::TakeDamage(float DamageAmount, const FDamageEvent
 	}
 	if (!Victim || !Victim->bOperational) return 0.f;
 	const float Adjusted = Victim->Definition.ModuleId == TEXT("armor") ? FMath::Max(1.f, DamageAmount - 3.f) : DamageAmount;
-	const float Applied = FMath::Min(Victim->Health, Adjusted);
+	const float Applied = FMath::Min(Victim->Health, TunaSweeperCombatValue::Round(Adjusted));
+	if (Applied <= 0.f) return 0.f;
 	Victim->Health -= Applied;
 	if (Victim->Health <= 0.f)
 	{

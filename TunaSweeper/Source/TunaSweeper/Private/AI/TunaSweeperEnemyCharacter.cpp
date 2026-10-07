@@ -193,7 +193,7 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	CurrentHealth = MaxHealth;
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
 	ApplyVoxelVisualMeshes();
@@ -328,7 +328,7 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 
 	if (InMaxHealth > 0.0f)
 	{
-		MaxHealth = InMaxHealth;
+		MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(InMaxHealth));
 		CurrentHealth = MaxHealth;
 	}
 

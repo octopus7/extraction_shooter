@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/TunaSweeperGameHudWidget.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
@@ -217,13 +218,10 @@ namespace
 
 	FString FormatDamageNumber(float DamageAmount)
 	{
-		const float RoundedDamage = FMath::RoundToFloat(DamageAmount);
-		if (FMath::IsNearlyEqual(DamageAmount, RoundedDamage, 0.05f))
-		{
-			return FString::Printf(TEXT("%d"), FMath::RoundToInt(DamageAmount));
-		}
-
-		return FString::Printf(TEXT("%.1f"), DamageAmount);
+		FNumberFormattingOptions Format;
+		Format.MinimumFractionalDigits = 0;
+		Format.MaximumFractionalDigits = 0;
+		return FText::AsNumber(TunaSweeperCombatValue::Round(DamageAmount), &Format).ToString();
 	}
 
 	FLinearColor GetCursorDistanceTextColor(int32 DistanceMeters)

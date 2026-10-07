@@ -1,4 +1,5 @@
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
@@ -13,11 +14,13 @@ namespace TunaSweeperHudStatus
 		FNumberFormattingOptions NumberFormat;
 		NumberFormat.MinimumFractionalDigits = 0;
 		NumberFormat.MaximumFractionalDigits = 0;
-		return FText::AsNumber(FMath::FloorToFloat(Value), &NumberFormat);
+		return FText::AsNumber(TunaSweeperCombatValue::Round(Value), &NumberFormat);
 	}
 
 	float MakeVitalsPercent(float Value, float MaxValue)
 	{
+		MaxValue = TunaSweeperCombatValue::Round(MaxValue);
+		Value = TunaSweeperCombatValue::ClampGauge(Value, MaxValue);
 		return MaxValue > 0.0f
 			? FMath::Clamp(Value / MaxValue, 0.0f, 1.0f)
 			: 0.0f;
@@ -64,9 +67,7 @@ void UTunaSweeperHudBottomStatusWidget::SetHudState(const FTunaSweeperPlayerHudS
 
 void UTunaSweeperHudBottomStatusWidget::SetScratchState(float CurrentScratch, float MaxScratch)
 {
-	ScratchPercent = MaxScratch > 0.0f
-		? FMath::Clamp(CurrentScratch / MaxScratch, 0.0f, 1.0f)
-		: 0.0f;
+	ScratchPercent = TunaSweeperHudStatus::MakeVitalsPercent(CurrentScratch, MaxScratch);
 	if (ScratchGauge)
 	{
 		ScratchGauge->SetPercent(ScratchPercent);

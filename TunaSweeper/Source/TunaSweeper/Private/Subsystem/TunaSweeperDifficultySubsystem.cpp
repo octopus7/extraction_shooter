@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperDifficultySubsystem.h"
+#include "Combat/TunaSweeperArmor.h"
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperDataValueTypes.h"
@@ -116,17 +117,17 @@ float UTunaSweeperDifficultySubsystem::ScaleEnemyIncomingDamage(float RawDamage,
 {
 	const float ScaledDamage = FMath::Max(0.0f, RawDamage) *
 		TunaSweeperDataValues::ToRatioFloat(FMath::Max(0, RawMultiplier));
-	return static_cast<float>(FMath::Max(0, FMath::RoundToInt(ScaledDamage)));
+	return ScaledDamage;
 }
 
 float UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(
 	float RawDamage,
-	int32 DefenseValue,
+	float DefenseValue,
 	bool bEnemyAttributed,
 	int32 EnemyIncomingDamageMultiplier)
 {
 	const float DamageBeforeDefense = bEnemyAttributed
 		? ScaleEnemyIncomingDamage(RawDamage, EnemyIncomingDamageMultiplier)
 		: FMath::Max(0.0f, RawDamage);
-	return FMath::Max(0.0f, DamageBeforeDefense - static_cast<float>(FMath::Max(0, DefenseValue)));
+	return TunaSweeperArmor::ApplyDefense(DamageBeforeDefense, DefenseValue);
 }

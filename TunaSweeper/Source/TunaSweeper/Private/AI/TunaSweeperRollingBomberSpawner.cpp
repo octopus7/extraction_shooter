@@ -1,4 +1,5 @@
 #include "AI/TunaSweeperRollingBomberSpawner.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "AI/TunaSweeperRollingBomber.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -186,7 +187,8 @@ void ATunaSweeperRollingBomberSpawner::BeginPlay()
 
 	bSpawnerDestroyed = false;
 	bSpawnerActivated = false;
-	CurrentHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
+	CurrentHealth = MaxHealth;
 	InitialSpawnCount = FMath::Max(1, InitialSpawnCount);
 	MaxSpawnCount = FMath::Max(InitialSpawnCount, MaxSpawnCount);
 	WaveIntervalSeconds = FMath::Max(0.01f, WaveIntervalSeconds);
@@ -237,8 +239,9 @@ float ATunaSweeperRollingBomberSpawner::TakeDamage(
 		}
 	}
 
-	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
-	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
+	const float AppliedDamage = FMath::Min(CurrentHealth, TunaSweeperCombatValue::Round(DamageAmount));
+	if (AppliedDamage <= 0.0f) return 0.0f;
+	CurrentHealth = FMath::Max(0.0f, CurrentHealth - AppliedDamage);
 	if (CurrentHealth <= 0.0f)
 	{
 		if (EventInstigator && EventInstigator->IsPlayerController())
@@ -293,7 +296,7 @@ void ATunaSweeperRollingBomberSpawner::ConfigureSpawnerDefaults(
 		InLaunchPitchMaxDegrees * TunaSweeperRollingBomberSpawner::LaunchPitchScale,
 		LaunchPitchMinDegrees,
 		89.0f);
-	MaxHealth = FMath::Max(1.0f, InMaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(InMaxHealth));
 	CurrentHealth = MaxHealth;
 	ExperienceValue = FMath::Max(0, InExperienceValue);
 	CurrentWaveSpawnCount = FMath::Clamp(InitialSpawnCount, 1, MaxSpawnCount);

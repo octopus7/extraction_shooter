@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
@@ -90,7 +91,7 @@ void ATunaSweeperSandbagCoverActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	BoxExtent = MakeSafeBoxExtent(BoxExtent);
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	CurrentHealth = MaxHealth;
 	PassthroughRadius = FMath::Max(0.0f, PassthroughRadius);
 	PassthroughVerticalTolerance = FMath::Max(0.0f, PassthroughVerticalTolerance);
@@ -111,7 +112,7 @@ void ATunaSweeperSandbagCoverActor::BeginPlay()
 	Super::BeginPlay();
 
 	BoxExtent = MakeSafeBoxExtent(BoxExtent);
-	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxHealth));
 	CurrentHealth = MaxHealth;
 
 	ResetCollapseState();
@@ -141,6 +142,7 @@ float ATunaSweeperSandbagCoverActor::TakeDamage(
 	AController* EventInstigator,
 	AActor* DamageCauser)
 {
+	DamageAmount = TunaSweeperCombatValue::Round(DamageAmount);
 	if (bCoverDestroyed || DamageAmount <= 0.0f)
 	{
 		return 0.0f;
@@ -166,7 +168,7 @@ void ATunaSweeperSandbagCoverActor::ConfigureCoverDefaults(
 {
 	CoverId = InCoverId;
 	BoxExtent = MakeSafeBoxExtent(InBoxExtent);
-	MaxHealth = FMath::Max(1.0f, InMaxHealth);
+	MaxHealth = FMath::Max(1.0f, TunaSweeperCombatValue::Round(InMaxHealth));
 	CurrentHealth = MaxHealth;
 	PassthroughRadius = FMath::Max(0.0f, InPassthroughRadius);
 	PassthroughVerticalTolerance = FMath::Max(0.0f, BoxExtent.Z);

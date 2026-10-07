@@ -126,8 +126,9 @@ void ATunaSweeperTopDownCharacter::ApplyProgressionStatBonuses()
 
 	const float OldMaxStamina = FMath::Max(1.0f, MaxStamina);
 	const float StaminaRatio = FMath::Clamp(CurrentStamina / OldMaxStamina, 0.0f, 1.0f);
-	MaxStamina = FMath::Max(1.0f, BaseMaxStamina + Bonuses.MaxStaminaBonus + ResearchBonuses.MaxStamina);
-	CurrentStamina = FMath::Clamp(MaxStamina * StaminaRatio, 0.0f, MaxStamina);
+	MaxStamina = FMath::Max(1.0f, TunaSweeperCombatValue::Round(BaseMaxStamina + Bonuses.MaxStaminaBonus + ResearchBonuses.MaxStamina));
+	CurrentStamina = TunaSweeperCombatValue::ClampGauge(MaxStamina * StaminaRatio, MaxStamina);
+	if (OldMaxStamina != MaxStamina) StaminaRemainder = 0.0;
 	RefreshCarryWeightConditionDebuffs();
 }
 

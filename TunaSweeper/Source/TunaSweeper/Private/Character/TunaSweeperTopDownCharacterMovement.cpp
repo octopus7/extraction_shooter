@@ -35,15 +35,17 @@ void ATunaSweeperTopDownCharacter::UpdateRoll(float DeltaSeconds)
 void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 {
 	const float ClampedDeltaSeconds = FMath::Max(0.0f, DeltaSeconds);
-	const float EffectiveMaxStamina = FMath::Max(0.0f, MaxStamina);
+	MaxStamina = TunaSweeperCombatValue::Round(MaxStamina);
+	const float EffectiveMaxStamina = MaxStamina;
 	if (EffectiveMaxStamina <= 0.0f)
 	{
 		CurrentStamina = 0.0f;
+		StaminaRemainder = 0.0;
 		bIsSprinting = false;
 		return;
 	}
 
-	CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, EffectiveMaxStamina);
+	CurrentStamina = TunaSweeperCombatValue::ClampGauge(CurrentStamina, EffectiveMaxStamina);
 	if (bIsRolling)
 	{
 		bIsSprinting = false;
@@ -60,7 +62,8 @@ void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 
 	if (bIsSprinting)
 	{
-		CurrentStamina = FMath::Max(0.0f, CurrentStamina - FMath::Max(0.0f, SprintStaminaDrainPerSecond) * ClampedDeltaSeconds);
+		CurrentStamina = TunaSweeperCombatValue::Accumulate(CurrentStamina, EffectiveMaxStamina,
+			-FMath::Max(0.0f, SprintStaminaDrainPerSecond) * ClampedDeltaSeconds, StaminaRemainder);
 		if (CurrentStamina <= KINDA_SMALL_NUMBER)
 		{
 			CurrentStamina = 0.0f;
@@ -70,7 +73,8 @@ void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 	}
 	else
 	{
-		CurrentStamina = FMath::Min(EffectiveMaxStamina, CurrentStamina + FMath::Max(0.0f, StaminaRegenPerSecond) * ClampedDeltaSeconds);
+		CurrentStamina = TunaSweeperCombatValue::Accumulate(CurrentStamina, EffectiveMaxStamina,
+			FMath::Max(0.0f, StaminaRegenPerSecond) * ClampedDeltaSeconds, StaminaRemainder);
 	}
 }
 

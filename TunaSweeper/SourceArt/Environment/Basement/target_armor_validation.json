@@ -53,7 +53,10 @@
       ],
       "generic_input_damage": 20,
       "returned_damage": 20.0,
-      "health_after": 80.0000011920929
+      "health_after": 80.0000011920929,
+      "fractional_input_damage": 20.5,
+      "rounded_damage": 21.0,
+      "health_after_rounded_damage": 59
     },
     {
       "tier": 1,
@@ -67,7 +70,10 @@
       ],
       "generic_input_damage": 20,
       "returned_damage": 17.0,
-      "health_after": 82.99999833106995
+      "health_after": 82.99999833106995,
+      "fractional_input_damage": 20.5,
+      "rounded_damage": 18.0,
+      "health_after_rounded_damage": 65
     },
     {
       "tier": 2,
@@ -81,7 +87,10 @@
       ],
       "generic_input_damage": 20,
       "returned_damage": 14.0,
-      "health_after": 86.00000143051147
+      "health_after": 86.00000143051147,
+      "fractional_input_damage": 20.5,
+      "rounded_damage": 15.0,
+      "health_after_rounded_damage": 71
     },
     {
       "tier": 3,
@@ -95,7 +104,10 @@
       ],
       "generic_input_damage": 20,
       "returned_damage": 11.0,
-      "health_after": 88.99999856948853
+      "health_after": 88.99999856948853,
+      "fractional_input_damage": 20.5,
+      "rounded_damage": 12.0,
+      "health_after_rounded_damage": 77
     },
     {
       "tier": 4,
@@ -109,12 +121,16 @@
       ],
       "generic_input_damage": 20,
       "returned_damage": 8.0,
-      "health_after": 92.00000166893005
+      "health_after": 92.00000166893005,
+      "fractional_input_damage": 20.5,
+      "rounded_damage": 9.0,
+      "health_after_rounded_damage": 83
     }
   ],
   "recovery": {
     "targets": 5,
-    "game_seconds": 2.104187298566103,
-    "final_health": 100
+    "game_seconds": 2.102553501725197,
+    "final_health": 100,
+    "integer_health_samples": 1110
   }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Combat/TunaSweeperCombatValue.h"
 
 class AActor;
 class UTunaSweeperItemDataSubsystem;
@@ -18,7 +19,7 @@ namespace TunaSweeperArmor
 
 	inline float ApplyDefense(float Damage, float Defense)
 	{
-		return FMath::Max(0.0f, Damage - FMath::Max(0.0f, Defense));
+		return TunaSweeperCombatValue::Round(Damage - FMath::Max(0.0f, Defense));
 	}
 
 	TUNASWEEPER_API int32 ResolvePenetrationTier(const FDamageEvent& Event, const AActor* Causer);

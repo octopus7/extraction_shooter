@@ -59,7 +59,7 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	const auto* Current = FindFProperty<FFloatProperty>(ATVClass, TEXT("CurrentDurability"));
 	const auto* Destroyed = FindFProperty<FBoolProperty>(ATVClass, TEXT("bVehicleDestroyed"));
 	if (!TestNotNull(TEXT("Editable maximum durability"), Maximum) || !TestNotNull(TEXT("Readable current durability"), Current) || !TestNotNull(TEXT("Readable destroyed state"), Destroyed)) return false;
-	Maximum->SetPropertyValue_InContainer(ATV, 300);
+	Maximum->SetPropertyValue_InContainer(ATV, 300.4f);
 #if WITH_EDITOR
 	// Imported static fragments must occupy exactly their original rigid skinned part.
 	const FName PartBones[] = {TEXT("wheel_FL"), TEXT("wheel_RR"), TEXT("handlebar")};
@@ -141,6 +141,8 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Starts at configured maximum"), Current->GetPropertyValue_InContainer(ATV), 300.0f);
 	TArray<UNiagaraComponent*> Smoke;
 	ATV->GetComponents(Smoke);
+	// The independently authored explosion is not a damage-smoke stage.
+	Smoke.Remove(ATV->DestructionExplosion.Get());
 	if (!TestEqual(TEXT("Bounded pair of smoke components"), Smoke.Num(), 2)) return false;
 	for (const auto* Component : Smoke)
 	{
@@ -158,7 +160,8 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	Hit.HitInfo = FHitResult(ATV, ATV->VehicleMesh, ATV->GetActorLocation() + FVector(0,0,60), FVector::UpVector);
 	Hit.HitInfo.BoneName = TEXT("root");
 	Hit.ShotDirection = FVector::RightVector;
-	TestEqual(TEXT("Point hit applies once"), ATV->TakeDamage(10, Hit, nullptr, nullptr), 10.0f);
+	TestEqual(TEXT("Sub-half damage leaves durability unchanged"), ATV->TakeDamage(.49f, Hit, nullptr, nullptr), 0.0f);
+	TestEqual(TEXT("Point hit rounds once"), ATV->TakeDamage(10.49f, Hit, nullptr, nullptr), 10.0f);
 	TestEqual(TEXT("Durability decreases by hit amount"), Current->GetPropertyValue_InContainer(ATV), 290.0f);
 	TestEqual(TEXT("Even a light hit emits smoke"), ActiveSmoke(), 1);
 	Step(121);

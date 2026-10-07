@@ -670,6 +670,7 @@ private:
 	float ItemUseDurationSeconds = 0.0f;
 	float CurrentCameraBaseFOV = 0.0f;
 	float CurrentStamina = 100.0f;
+	double StaminaRemainder = 0.0;
 	float BaseMaxHealth = 100.0f;
 	float BaseMaxFood = 100.0f;
 	float BaseMaxHydration = 100.0f;

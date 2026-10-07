@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Combat/TunaSweeperCombatValue.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 
 #include "Camera/CameraComponent.h"

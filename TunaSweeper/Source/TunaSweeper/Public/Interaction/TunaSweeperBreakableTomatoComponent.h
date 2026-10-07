@@ -30,7 +30,7 @@ public:
 	bool IsBroken() const { return bBroken; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tomato|Break", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tomato|Break", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 1.0f;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Tomato|Break")

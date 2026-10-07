@@ -152,6 +152,10 @@ protected:
 	void OnRep_DepletionSettings();
 
 private:
+	double HealthDepletionRemainder = 0.0;
+	double FoodDepletionRemainder = 0.0;
+	double HydrationDepletionRemainder = 0.0;
+
 	bool HasAuthority() const;
 	void ApplyVitalsDeltaInternal(const FTunaSweeperVitalsDelta& Delta);
 	void BroadcastVitalsChanged();

@@ -2,6 +2,7 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+#include "Combat/TunaSweeperCombatValue.h"
 #include "TunaSweeperScratchComponent.generated.h"
 
 class ATunaSweeperTopDownCharacter;
@@ -40,6 +41,7 @@ class TUNASWEEPER_API UTunaSweeperScratchComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	friend class FTunaSweeperOutfitRuntimeTest;
+	friend class FTunaSweeperIntegerGaugeTest;
 
 public:
 	UTunaSweeperScratchComponent();
@@ -52,7 +54,7 @@ public:
 	float GetCurrentScratch() const { return CurrentScratch; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Scratch")
-	float GetMaxScratch() const { return FMath::Max(1.0f, MaxScratch); }
+	float GetMaxScratch() const { return FMath::Max(1.0f, TunaSweeperCombatValue::Round(MaxScratch)); }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Scratch")
 	float GetScratchPercent() const { return FMath::Clamp(CurrentScratch / GetMaxScratch(), 0.0f, 1.0f); }
