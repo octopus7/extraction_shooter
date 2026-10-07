@@ -3,23 +3,23 @@
   "blend_actor": "Basement_RangeLocationBlend",
   "blueprint": "/Game/Camera/BP_LocationBlendCamera",
   "camera_location_cm": [
-    290,
-    -1200,
-    1950
+    90,
+    -1225,
+    2265
   ],
   "look_at_cm": [
     1490,
-    0,
+    175,
     65
   ],
   "field_of_view": 55,
   "blend_origin_cm": [
-    1590,
-    0,
+    1700,
+    175,
     0
   ],
-  "start_radius_cm": 1250,
-  "complete_radius_cm": 800,
+  "start_radius_cm": 1400,
+  "complete_radius_cm": 1000,
   "priority": 10,
   "additional_collision_only_walls": [
     "North_RangeLink_000",

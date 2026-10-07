@@ -24,11 +24,12 @@ def static_checks():
     assert rig.get_attach_parent_actor()==camera.get_attach_parent_actor()==labels['ROOT_Range']
     assert (camera.get_actor_location()-u.Vector(*meta['camera_location_cm'])).length()<.01
     assert abs(camera.camera_component.field_of_view-meta['field_of_view'])<.01
-    for p,expected in [((0,0,95),0),((340,0,95),0),((790,0,95),1),((1590,0,95),1)]:
+    ox,oy,oz=meta['blend_origin_cm']
+    for p,expected in [((0,0,95),0),((ox-meta['start_radius_cm'],oy,95),0),((ox-meta['complete_radius_cm'],oy,95),1),((ox,oy,95),1)]:
         w=rig.get_blend_weight_at_location(u.Vector(*p));assert abs(w-expected)<.0001,(p,w)
         report['static_weights'].append({'location_cm':p,'weight':w})
     # The entire octagonal range footprint stays inside the complete-blend zone.
-    original=json.loads((SOURCE/'Range/Scene/placement_manifest.json').read_text())
+    original=json.loads((SOURCE/'RangeExpansion/layout_manifest.json').read_text())
     cam=camera.camera_component;fwd=cam.get_forward_vector();right=cam.get_right_vector();up=cam.get_up_vector()
     tan=math.tan(math.radians(cam.field_of_view/2));screen=[]
     for x,y in original['boundary_xy_m']:
@@ -51,8 +52,8 @@ def static_checks():
         report['physical_cutaway_walls'].append(name)
 
 samples=[('hub',(0,0,95)),('approach',(500,0,95)),('entrance',(930,0,95))]
-samples += [(f'booth_{i}',(1095,y,95)) for i,y in enumerate([-315,-105,105,315],1)]
-samples += [('left_target_side',(1780,-420,95)),('right_target_side',(1780,420,95)),('exit',(0,0,95))]
+samples += [(f'booth_{i}',(1095,y,95)) for i,y in enumerate([-315,-105,105,315,525],1)]
+samples += [('left_target_side',(1780,-420,95)),('right_target_side',(1780,695,95)),('exit',(0,0,95))]
 started=time.monotonic();state='settle';ticks=0;busy=False;index=0
 def finish(error=None):
     report['passed']=error is None

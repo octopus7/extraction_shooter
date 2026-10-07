@@ -6,7 +6,7 @@
 
 ## 연습용 드론 표적
 
-`/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget`은 `ATunaSweeperShootingPracticeDummyActor`를 상속한다. 레벨의 `Target_01`~`04`는 이 BP 인스턴스이며, `ROOT_Range`에 연결되어 방과 함께 이동·회전한다.
+`/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget`은 `ATunaSweeperShootingPracticeDummyActor`를 상속한다. 레벨의 `Target_01`~`05`는 이 BP 인스턴스이며, `ROOT_Range`에 연결되어 방과 함께 이동·회전한다.
 
 - 원래 토끼 얼굴과 전면 과녁판을 드론 전면 광학 센서로 교체했다. 머리 위에는 원래 높이 54.09cm의 절반인 27.05cm 토끼 귀 두 개를 다시 붙였다. 귀 밑면은 Z=125cm, 끝은 Z=152.05cm이며, 짧고 둥근 비율과 기존 흰색·청회색 아틀라스를 유지한다. 몸체와 다리는 변경하지 않았다.
 - `BodyMesh`: 몸체·다리의 일반 피격 부위. `HeadMesh`: 중앙·보조 렌즈와 짧은 귀 두 개. `HeadshotPlateMesh`: 렌즈를 감싸는 사각 센서 하우징. 두 헤드 컴포넌트는 부모 클래스의 헤드 판정을 사용한다.
@@ -25,13 +25,15 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 ## 사격대와 안전 칸막이
 
-`FiringBench_001`~`004`는 표적 01~04와 중심을 맞춘 4개 사수 자리다. 사로 간격은 210cm이며, `LanePartition_001`~`003`이 사수 사이를 구획한다. 칸막이는 높이 170cm, 본체 두께 10.5cm, 받침 포함 길이 208cm인 독립 메시다. 모서리는 3단 베벨로 마감했고 기존 `MI_Range_Props` 아틀라스를 사용한다. 탄환과 캐릭터 충돌을 모두 유지한다. 사격 방향과 평행하게 놓여 기본 카메라에서 사수 정면을 가리지 않는다.
+방은 오른쪽(UE +Y)으로 **사로 210cm + 별도 이동 공간 140cm = 350cm** 확장했다. 내부 폭은 10.8m에서 14.3m이며 기존 입구 위치·폭과 방 깊이는 유지한다. 오른쪽 통로를 따라 사격대 옆으로 돌아 표적 앞까지 걸어갈 수 있다. 우측 벽·수납품·배관·조명도 외곽으로 옮겼고, 다섯 번째 표적·바닥 패드·후면 방탄판·조명과 `05` 바닥 표시를 추가했다. 확장 바닥은 기존 1.2m 타일 크기를 유지한다. 편집 원본과 변경 배치는 `RangeExpansion/RangeExpansion.blend`, `Models/`, `layout_manifest.json`에 있다.
+
+`FiringBench_001`~`005`는 표적 01~05와 중심을 맞춘 5개 사수 자리다. 사로 간격은 210cm이며, `LanePartition_001`~`004`이 사수 사이를 구획한다. 칸막이는 높이 170cm, 본체 두께 10.5cm, 받침 포함 길이 208cm인 독립 메시다. 모서리는 3단 베벨로 마감했고 기존 `MI_Range_Props` 아틀라스를 사용한다. 탄환과 캐릭터 충돌을 모두 유지한다. 사격 방향과 평행하게 놓여 기본 카메라에서 사수 정면을 가리지 않는다.
 
 사격대 위 장식 탄약 상자 `AmmoBox_001`~`003`은 렌더링을 유지하되 인스턴스 컴포넌트를 `NoCollision`으로 설정하고 overlap도 끈다. 탄환·조준 및 캐릭터 충돌에 관여하지 않는다. 공유 `SM_AmmoBox` 메시와 다른 위치의 상자, 사격대·칸막이 충돌은 유지한다.
 
 모니터 `ControlConsole_001`은 왼쪽 전용 책상 `RangeControlDesk_001`에 연결되어 책상을 옮기면 함께 이동한다. 책상은 기존 사격대와 같은 높이 93.5cm, 폭 120cm이며 공유 재질을 사용한다. 사로 뒤쪽에는 126cm 깊이의 진입 통로가 남는다. 칸막이·사격대는 각각 이동할 수 있고 모두 `ROOT_Range`에 속한다.
 
-`RangeStations/RangeStations.blend`, `Models/`, 메시·배치 manifest가 편집 원본이다. 원래 `Range/Scene/placement_manifest.json`은 최초 사격장 자료이며 최신 사격대 배치는 `RangeStations/placement_manifest.json`을 참고한다. `Tools/Basement/verify_stations.py`를 별도 렌더 에디터의 `-ExecutePythonScript`로 실행하면 저장된 레벨의 8개 캐릭터 진입 경로, 4개 사격 시야, 칸막이 충돌, 표적 정렬과 모니터 받침을 검사한다.
+`RangeStations/RangeStations.blend`, `Models/`, 메시·배치 manifest가 편집 원본이다. 원래 `Range/Scene/placement_manifest.json`은 최초 사격장 자료이며 최신 사격대 배치는 `RangeStations/placement_manifest.json`을 참고한다. `Tools/Basement/verify_stations.py`를 별도 렌더 에디터의 `-ExecutePythonScript`로 실행하면 저장된 레벨의 10개 사로 진입 경로와 7개 표적 접근 경로, 5개 사격 시야, 칸막이 충돌, 표적 정렬과 모니터 받침을 검사한다.
 
 ## 이동과 확장
 
@@ -45,13 +47,13 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 ## 카메라와 투명벽
 
-사격장은 기존 `/Game/Camera/BP_LocationBlendCamera` 인스턴스 `Basement_RangeLocationBlend`가 `Basement_RangeCamera`를 참조한다. 플레이어가 UE (1590, 0, 0) 기준 반경 1250cm에 들어오면 기본 시점에서 부드럽게 전환하고, 800cm 안에서는 사선 카메라를 완전히 적용한다. 사격장 바닥 전체가 완료 반경에 포함된다. 사다리실 중심에서는 가중치 0이며 퇴장하면 플레이어 카메라로 복귀한다. 우선순위는 10이다. 카메라는 UE (290, -1200, 1950)에서 (1490, 0, 65)를 향하며 FOV 55°, yaw 45°로 사격장 전체를 보여 준다.
+사격장은 기존 `/Game/Camera/BP_LocationBlendCamera` 인스턴스 `Basement_RangeLocationBlend`가 `Basement_RangeCamera`를 참조한다. 플레이어가 UE (1700, 175, 0) 기준 반경 1400cm에 들어오면 기본 시점에서 부드럽게 전환하고, 1000cm 안에서는 사선 카메라를 완전히 적용한다. 사격장 바닥 전체가 완료 반경에 포함된다. 사다리실 중심에서는 가중치 0이며 퇴장하면 플레이어 카메라로 복귀한다. 우선순위는 10이다. 카메라는 UE (90, -1225, 2265)에서 (1490, 175, 65)를 향하며 FOV 55°, yaw 45°로 사격장 전체를 보여 준다.
 
 촬영 카메라와 거리 판정 BP는 서로 독립적으로 조정할 수 있으며 둘 다 `ROOT_Range`의 자식이다. 구도만 바꿀 때는 `Basement_RangeCamera`를 Pilot하고, 전환 범위는 BP의 `Blend Start Distance`와 `Blend Complete Distance`에서 조정한다. `range_camera_manifest.json`에 최종 배치와 추가로 숨긴 벽·부착물 목록을 기록한다.
 
 기본 UE -X 방향의 앞쪽 벽에 더해 사선 카메라를 가리는 UE -Y 쪽 사격장 측벽과 입구 복도 서쪽 벽의 Visibility를 끄고 Hidden In Game을 켰다. 그림자도 끄되 BlockAll과 QueryAndPhysics 충돌은 유지한다. `BasementCollisionOnly` 태그로 찾을 수 있다. 해당 측벽의 배관·등기구·환기 패널도 숨겼으며, 광원과 독립 가구는 유지한다. 에디터에서도 숨김 상태로 저장된다.
 
-`Tools/Basement/verify_range_camera.py`는 저장된 범위·구도·투명벽 충돌과 실제 PIE 진입/접근/4개 사로/표적 측면/퇴장 위치의 카메라 가중치·시점·복귀를 확인한다. `range_camera_validation.json`과 `Previews/UE_Basement_RangeGameplay.png`가 검증 결과다.
+`Tools/Basement/verify_range_camera.py`는 저장된 범위·구도·투명벽 충돌과 실제 PIE 진입/접근/5개 사로/표적 측면/퇴장 위치의 카메라 가중치·시점·복귀를 확인한다. `range_camera_validation.json`과 `Previews/UE_Basement_RangeGameplay.png`가 검증 결과다.
 
 방 전체를 다른 방향으로 회전·재배치할 때는 새 카메라 방향에 맞게 앞쪽 벽의 표시 상태를 다시 지정한다. 자동 카메라 추적 숨김 로직은 사용하지 않는다. 충돌까지 제거하거나 액터를 삭제하면 투명벽 기능도 사라지므로 표시 설정만 변경한다.
 
@@ -68,4 +70,4 @@ Shipping에서는 선반 메시와 충돌만 남는다. 상호작용 컴포넌�
 
 `source_validation.json`은 메시 연결·체적·UV·코너 분할 검증 결과다. `Tools/Basement/verify_unreal.py`는 저장된 레벨을 다시 열어 재질·메시·부모 관계·캐릭터 크기 통로·투명벽 충돌·바닥 연결을 검사한다. `Tools/Basement/capture_unreal.py`는 실제 에디터 뷰포트를 캡처한다. 임포트와 생성 스크립트는 일회성 작업 후 제거하며, 시작 시 자동 생성하는 코드는 없다.
 
-`Tools/Basement/verify_target.py`는 저장된 BP의 상속·부위·재질·충돌 기본값과 절반 높이 귀를, `verify_target_runtime.py`는 4개 배치의 센서·몸체·양쪽 짧은 귀 충돌, 원래 긴 귀 끝 위치의 빈 공간, PIE 피해·체력바·최저 체력·회복을 검증한다. 결과는 `target_asset_validation.json`, `target_runtime_validation.json`에 저장한다. 헤드샷 조준 의도 규칙은 기존 네이티브 자동화 테스트 `TunaSweeper.Combat.PracticeDummy.HitDamage`로 함께 검증한다.
+`Tools/Basement/verify_target.py`는 저장된 BP의 상속·부위·재질·충돌 기본값과 절반 높이 귀를, `verify_target_runtime.py`는 5개 배치의 센서·몸체·양쪽 짧은 귀 충돌, 원래 긴 귀 끝 위치의 빈 공간, PIE 피해·체력바·최저 체력·회복을 검증한다. 결과는 `target_asset_validation.json`, `target_runtime_validation.json`에 저장한다. 헤드샷 조준 의도 규칙은 기존 네이티브 자동화 테스트 `TunaSweeper.Combat.PracticeDummy.HitDamage`로 함께 검증한다.

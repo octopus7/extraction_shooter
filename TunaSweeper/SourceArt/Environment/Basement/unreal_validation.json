@@ -78,7 +78,7 @@
       }
     }
   ],
-  "range_targets": 4,
+  "range_targets": 5,
   "module_placements": 221,
   "hidden_collision_actors": [
     "Wall_E00_00",
@@ -118,6 +118,9 @@
     "East_Expansion_047",
     "East_Expansion_048",
     "East_Expansion_049",
+    "Wall_RangeFrontExtension_001",
+    "Wall_RangeFrontExtension_002",
+    "Wall_RangeFrontExtension_003",
     "South_Expansion_RemovableCap_033"
   ],
   "physical_invisible_wall_tests": [
@@ -148,6 +151,9 @@
     "Wall_E07_03",
     "Wall_E07_04",
     "Wall_E08_00",
+    "Wall_RangeFrontExtension_001",
+    "Wall_RangeFrontExtension_002",
+    "Wall_RangeFrontExtension_003",
     "LadderHub_021_segment0",
     "LadderHub_021_segment1",
     "LadderHub_021_segment2",
@@ -204,7 +210,7 @@
     },
     {
       "root": "Range",
-      "descendants": 124,
+      "descendants": 142,
       "translation_verified": true,
       "rotation_90_degrees_verified": true
     },
@@ -235,12 +241,13 @@
   ],
   "range_stations": {
     "passed": true,
-    "lanes": 4,
+    "lanes": 5,
     "bench_target_alignment": true,
     "partition_collision_checks": [
       "LanePartition_001",
       "LanePartition_002",
-      "LanePartition_003"
+      "LanePartition_003",
+      "LanePartition_004"
     ],
     "capsule_radius_cm": 42,
     "capsule_half_height_cm": 90,
@@ -252,9 +259,19 @@
       "lane_3_rear_walkway",
       "lane_3_entry",
       "lane_4_rear_walkway",
-      "lane_4_entry"
+      "lane_4_entry",
+      "lane_5_rear_walkway",
+      "lane_5_entry",
+      "rear_to_side_aisle",
+      "side_aisle_to_targets",
+      "walk_to_target_1",
+      "walk_to_target_2",
+      "walk_to_target_3",
+      "walk_to_target_4",
+      "walk_to_target_5"
     ],
-    "clear_firing_lines": 4,
+    "clear_firing_lines": 5,
+    "side_aisle_clear_width_cm": 140,
     "screen_on_separate_desk": true,
     "asset_triangles": {
       "SM_RangeControlDesk": 756,

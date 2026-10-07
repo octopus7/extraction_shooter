@@ -40,6 +40,16 @@
         1.6
       ],
       "parent": "ROOT_Range"
+    },
+    {
+      "label": "Target_05",
+      "class": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget.BP_RangePracticeTarget_C",
+      "location": [
+        1842.0000000000002,
+        525.0,
+        1.6
+      ],
+      "parent": "ROOT_Range"
     }
   ]
 }

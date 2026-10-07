@@ -75,7 +75,7 @@ def validate(world=None):
             hidden.append(a.get_actor_label())
     assert len(hidden)>20
     ranges=[a for a in actors if 'TS_RangeTarget' in [str(t) for t in a.tags]]
-    assert len(ranges)==4
+    assert len(ranges)==5
     target_bp=u.load_asset(DEST+'/Range/Blueprints/BP_RangePracticeTarget')
     assert all(a.get_class()==target_bp.generated_class() for a in ranges)
     assert len({a.get_editor_property('body_mesh').static_mesh for a in ranges})==1
@@ -156,7 +156,7 @@ def validate(world=None):
             assert (a.get_actor_location()-expected).length()<.2,(name,a.get_actor_label(),'rotation',str(rotation),str(root.get_actor_rotation()),str(before[a]),str(a.get_actor_location()),str(expected))
         root.set_actor_rotation(rotation,True);root.static_mesh_component.set_mobility(u.ComponentMobility.STATIC)
         moved_groups.append({'root':name,'descendants':len(children),'translation_verified':True,'rotation_90_degrees_verified':True})
-    report={'passed':True,'map':MAP,'engine':u.SystemLibrary.get_engine_version(),'assets':assets,'range_materials':material_report,'range_targets':4,'module_placements':len(layout['instances']),'hidden_collision_actors':hidden,'physical_invisible_wall_tests':wall_hits,'capsule_routes':sweeps,'floor_join_gap_cm':0,'expansion_connectors':3}
+    report={'passed':True,'map':MAP,'engine':u.SystemLibrary.get_engine_version(),'assets':assets,'range_materials':material_report,'range_targets':len(ranges),'module_placements':len(layout['instances']),'hidden_collision_actors':hidden,'physical_invisible_wall_tests':wall_hits,'capsule_routes':sweeps,'floor_join_gap_cm':0,'expansion_connectors':3}
     report['module_group_movement']=moved_groups
     report['range_stations']=station_report
     (SOURCE/'unreal_validation.json').write_text(json.dumps(report,indent=2),encoding='utf8')

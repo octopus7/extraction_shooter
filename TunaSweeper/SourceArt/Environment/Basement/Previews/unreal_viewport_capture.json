@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "started_at_utc": "2026-10-07T09:48:50.684746+00:00",
+  "started_at_utc": "2026-10-07T10:07:28.180587+00:00",
   "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
   "level": "/Game/Environment/Basement/Maps/L_Basement",
   "requested_cameras": [
@@ -19,24 +19,24 @@
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Overview.png",
       "width": 1600,
       "height": 900,
-      "bytes": 440570,
-      "sha256": "870a5179448e3b90a1fe2c43c95569666f8fe4872a9ed1e1b5724a8166ec5935",
+      "bytes": 488021,
+      "sha256": "9c95d337e5d70cb0879d194ad9a61bbb60908c6b3c217e4cf2f4cbd578d595ae",
       "camera_label": "Basement_OverviewCamera"
     },
     {
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Range.png",
       "width": 1600,
       "height": 900,
-      "bytes": 1049691,
-      "sha256": "edf52b449181f2f2f7e65b8a621d152541162ad7645faa2d736eed30a9b1e02c",
+      "bytes": 1031566,
+      "sha256": "1281ba1c4afc0bfd24af655c75ab662a782e4272efc3cb730968ff55efbce929",
       "camera_label": "Basement_RangeCamera"
     },
     {
       "path": "D:\\github\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\Basement\\Previews\\UE_Basement_Hub.png",
       "width": 1600,
       "height": 900,
-      "bytes": 1160239,
-      "sha256": "50b2b3dcc23ed66d5167da8983cf70f4e11446b79f07e36761789d21ee870634",
+      "bytes": 1171416,
+      "sha256": "c091d50208560b01abe9c49ea2a9be850fb8ad19343ed41a584189d3e13a3f8d",
       "camera_label": "Basement_HubCamera"
     }
   ],
@@ -69,24 +69,24 @@
     {
       "label": "Basement_RangeCamera",
       "actor_location": [
-        290.0,
-        -1200.0,
-        1950.0
+        90.0,
+        -1225.0,
+        2265.0
       ],
       "actor_rotation": [
-        -48.003447256349865,
-        45.0,
-        2.5906428844328774e-07
+        -48.01424097787589,
+        44.99999999999997,
+        2.591082197085009e-07
       ],
       "component_location": [
-        290.0,
-        -1200.0,
-        1950.0
+        90.0,
+        -1225.0,
+        2265.0
       ],
       "component_rotation": [
-        -48.003447256349865,
-        45.0,
-        2.5906428844328774e-07
+        -48.01424097787589,
+        44.99999999999997,
+        2.591082197085009e-07
       ],
       "fov": 55.0
     },
@@ -115,8 +115,8 @@
       "fov": 60.0
     }
   ],
-  "asset_packages_checked": 64,
+  "asset_packages_checked": 66,
   "asset_packages_unchanged": true,
   "changed_asset_packages": [],
-  "elapsed_seconds": 51.907
+  "elapsed_seconds": 50.75
 }

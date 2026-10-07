@@ -5,8 +5,8 @@
       "mesh": "SM_FiringBench",
       "author_location_m": [
         -3.15,
-        -3.07,
-        0
+        -3.0700000000000003,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -16,8 +16,8 @@
       "mesh": "SM_FiringBench",
       "author_location_m": [
         -1.05,
-        -3.07,
-        0
+        -3.0700000000000003,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -27,8 +27,8 @@
       "mesh": "SM_FiringBench",
       "author_location_m": [
         1.05,
-        -3.07,
-        0
+        -3.0700000000000003,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -38,8 +38,8 @@
       "mesh": "SM_FiringBench",
       "author_location_m": [
         3.15,
-        -3.07,
-        0
+        -3.0700000000000003,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -50,7 +50,7 @@
       "author_location_m": [
         -2.1,
         -3.5,
-        0
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -59,9 +59,9 @@
       "label": "LanePartition_002",
       "mesh": "SM_RangeLanePartition",
       "author_location_m": [
-        0,
+        0.0,
         -3.5,
-        0
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -72,7 +72,7 @@
       "author_location_m": [
         2.1,
         -3.5,
-        0
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -82,8 +82,8 @@
       "mesh": "SM_RangeControlDesk",
       "author_location_m": [
         -4.45,
-        -3.9,
-        0
+        -3.9000000000000004,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -104,8 +104,8 @@
       "mesh": "SM_Stool",
       "author_location_m": [
         -4.45,
-        -4.7,
-        0
+        -4.699999999999999,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -114,9 +114,9 @@
       "label": "Stool_002",
       "mesh": "SM_Stool",
       "author_location_m": [
-        4.65,
-        -3.85,
-        0
+        8.15,
+        -3.8499999999999996,
+        0.0
       ],
       "yaw_deg": 90,
       "parent": "ROOT_Range"
@@ -127,7 +127,7 @@
       "author_location_m": [
         -4.65,
         -1.5,
-        0
+        0.0
       ],
       "yaw_deg": 73,
       "parent": "ROOT_Range"
@@ -148,7 +148,7 @@
       "mesh": "SM_AmmoBox",
       "author_location_m": [
         -3.45,
-        -3,
+        -3.0,
         0.935
       ],
       "yaw_deg": 80,
@@ -160,7 +160,7 @@
       "mesh": "SM_AmmoBox",
       "author_location_m": [
         -1.25,
-        -3.05,
+        -3.0500000000000007,
         0.935
       ],
       "yaw_deg": 98,
@@ -172,7 +172,7 @@
       "mesh": "SM_AmmoBox",
       "author_location_m": [
         3.35,
-        -3,
+        -3.0,
         0.935
       ],
       "yaw_deg": 98,
@@ -184,7 +184,7 @@
       "mesh": "SM_Clipboard",
       "author_location_m": [
         1.35,
-        -3.19,
+        -3.1899999999999995,
         0.939
       ],
       "yaw_deg": 75,
@@ -195,10 +195,32 @@
       "mesh": "SM_Clipboard",
       "author_location_m": [
         -0.75,
-        -3.19,
+        -3.1899999999999995,
         0.939
       ],
       "yaw_deg": 98,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "FiringBench_005",
+      "mesh": "SM_FiringBench",
+      "author_location_m": [
+        5.25,
+        -3.0700000000000003,
+        0.0
+      ],
+      "yaw_deg": 90.00000000000001,
+      "parent": "ROOT_Range"
+    },
+    {
+      "label": "LanePartition_004",
+      "mesh": "SM_RangeLanePartition",
+      "author_location_m": [
+        4.2,
+        -3.5,
+        0.0
+      ],
+      "yaw_deg": 90.00000000000001,
       "parent": "ROOT_Range"
     }
   ],
@@ -206,8 +228,15 @@
     -3.15,
     -1.05,
     1.05,
-    3.15
+    3.15,
+    5.25
   ],
   "rear_walkway_clear_depth_m": 1.26,
-  "partition_height_m": 1.7
+  "partition_height_m": 1.7,
+  "partition_centers_m": [
+    -2.1,
+    0,
+    2.1,
+    4.2
+  ]
 }

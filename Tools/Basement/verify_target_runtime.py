@@ -18,7 +18,7 @@ levels=u.get_editor_subsystem(u.LevelEditorSubsystem)
 assert levels.load_level('/Game/Environment/Basement/Maps/L_Basement')
 actors=u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors()
 targets=[a for a in actors if 'TS_RangeTarget' in [str(t) for t in a.tags]]
-assert len(targets)==4
+assert len(targets)==5
 cls=u.load_asset(BP_PATH).generated_class()
 assert all(a.get_class()==cls for a in targets)
 assert all(a.get_attach_parent_actor().get_actor_label()=='ROOT_Range' for a in targets)
@@ -64,7 +64,7 @@ def tick(dt):
             levels.editor_play_simulate();state='pie_wait';ticks=0
         elif state=='pie_wait' and ticks>=40:
             game=u.get_editor_subsystem(u.UnrealEditorSubsystem).get_game_world();assert game
-            live=list(u.GameplayStatics.get_all_actors_of_class(game,cls));assert len(live)==4
+            live=list(u.GameplayStatics.get_all_actors_of_class(game,cls));assert len(live)==5
             for a in live:
                 assert abs(a.get_health_fraction()-1)<.0001
                 widget=a.get_editor_property('health_bar_widget_component').get_user_widget_object();assert widget
@@ -74,7 +74,7 @@ def tick(dt):
             u.GameplayStatics.apply_damage(a,10000,None,None,u.DamageType)
             lowest=a.get_health_fraction();assert abs(lowest-.01)<.001
             assert all(abs(o.get_health_fraction()-1)<.001 for o in live[1:])
-            report['damage']={'input':25,'returned_damage':damage,'health_after':75,'minimum_health_after_overkill':lowest*100,'health_widgets':4,'other_targets_unchanged':True}
+            report['damage']={'input':25,'returned_damage':damage,'health_after':75,'minimum_health_after_overkill':lowest*100,'health_widgets':len(live),'other_targets_unchanged':True}
             recovery_started=u.GameplayStatics.get_time_seconds(game);state='recovery'
         elif state=='recovery':
             elapsed=u.GameplayStatics.get_time_seconds(game)-recovery_started

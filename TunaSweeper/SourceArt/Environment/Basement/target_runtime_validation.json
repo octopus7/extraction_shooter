@@ -133,6 +133,36 @@
       "target": "Target_04",
       "zone": "former_tall_tips",
       "component": null
+    },
+    {
+      "target": "Target_05",
+      "zone": "sensor_lens",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_05",
+      "zone": "sensor_housing",
+      "component": "HeadshotPlateMesh"
+    },
+    {
+      "target": "Target_05",
+      "zone": "body",
+      "component": "BodyMesh"
+    },
+    {
+      "target": "Target_05",
+      "zone": "short_ear_left",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_05",
+      "zone": "short_ear_right",
+      "component": "HeadMesh"
+    },
+    {
+      "target": "Target_05",
+      "zone": "former_tall_tips",
+      "component": null
     }
   ],
   "damage": {
@@ -140,12 +170,12 @@
     "returned_damage": 25.0,
     "health_after": 75,
     "minimum_health_after_overkill": 0.9999999776482582,
-    "health_widgets": 4,
+    "health_widgets": 5,
     "other_targets_unchanged": true
   },
   "recovery": {
     "native_tick": true,
-    "game_seconds": 2.1062365993857384,
+    "game_seconds": 2.1064244024455547,
     "final_health": 100.0
   }
 }

@@ -1,11 +1,12 @@
 {
   "passed": true,
-  "lanes": 4,
+  "lanes": 5,
   "bench_target_alignment": true,
   "partition_collision_checks": [
     "LanePartition_001",
     "LanePartition_002",
-    "LanePartition_003"
+    "LanePartition_003",
+    "LanePartition_004"
   ],
   "capsule_radius_cm": 42,
   "capsule_half_height_cm": 90,
@@ -17,9 +18,19 @@
     "lane_3_rear_walkway",
     "lane_3_entry",
     "lane_4_rear_walkway",
-    "lane_4_entry"
+    "lane_4_entry",
+    "lane_5_rear_walkway",
+    "lane_5_entry",
+    "rear_to_side_aisle",
+    "side_aisle_to_targets",
+    "walk_to_target_1",
+    "walk_to_target_2",
+    "walk_to_target_3",
+    "walk_to_target_4",
+    "walk_to_target_5"
   ],
-  "clear_firing_lines": 4,
+  "clear_firing_lines": 5,
+  "side_aisle_clear_width_cm": 140,
   "screen_on_separate_desk": true,
   "asset_triangles": {
     "SM_RangeControlDesk": 756,

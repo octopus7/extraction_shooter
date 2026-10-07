@@ -59,7 +59,7 @@ def validate(world):
         shot=u.SystemLibrary.line_trace_single(world,pos(x,-4.05,1.25),pos(x,2.5,1.25),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[],u.DrawDebugTrace.NONE,True)
         assert not hit(shot),f'lane_{i} firing line obstructed'
     barriers=[]
-    for i,x in enumerate([-2.1,0,2.1],1):
+    for i,x in enumerate(layout['partition_centers_m'],1):
         a=labels[f'LanePartition_{i:03}'];ignore=[other for other in actors if other!=a]
         for z in [.7,1.4]:
             result=u.SystemLibrary.line_trace_single(world,pos(x-.6,-3.9,z),pos(x+.6,-3.9,z),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,ignore,u.DrawDebugTrace.NONE,True)
@@ -73,7 +73,22 @@ def validate(world):
     assert screen.get_actor_location().y < labels['FiringBench_001'].get_actor_location().y-100
     floor=u.SystemLibrary.line_trace_single(world,pos(-4.45,-3.9,1.0),pos(-4.45,-3.9,.8),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[screen],u.DrawDebugTrace.NONE,True)
     assert hit(floor) and abs(floor.to_tuple()[5].z-93.5)<.2,'Desk does not support monitor'
-    report={'passed':True,'lanes':4,'bench_target_alignment':True,'partition_collision_checks':barriers,'capsule_radius_cm':42,'capsule_half_height_cm':90,'clear_routes':routes,'clear_firing_lines':4,'screen_on_separate_desk':True,'asset_triangles':{k:v['triangles'] for k,v in meta['assets'].items()}}
+    # Walk around the last booth, down the dedicated side aisle and up to each target.
+    expansion=json.loads((SOURCE/'RangeExpansion/layout_manifest.json').read_text())
+    aisle=expansion['aisle_center_author_x_m']
+    clear('rear_to_side_aisle',(0,-5.2,.95),(aisle,-5.2,.95))
+    clear('side_aisle_to_targets',(aisle,-5.2,.95),(aisle,2.1,.95))
+    for i,x in enumerate(layout['lane_centers_m'],1):clear(f'walk_to_target_{i}',(aisle,2.1,.95),(x,2.1,.95))
+    # A 140cm diameter sweep establishes usable aisle width, beyond pawn clearance.
+    wide=u.SystemLibrary.capsule_trace_single_by_profile(world,pos(aisle,-4.5,.95),pos(aisle,4.3,.95),70,90,'Pawn',False,[],u.DrawDebugTrace.NONE,True)
+    assert not hit(wide),('140cm side aisle obstructed',str(wide.to_tuple()) if wide else '')
+    for p in expansion['changed_actors']:
+        assert (labels[p['label']].get_actor_location()-u.Vector(*p['location_cm'])).length()<.1,p['label']
+    for x in [5.5,6.95,8.2]:
+        for y in [-3,0,3]:
+            ground=u.SystemLibrary.line_trace_single(world,pos(x,y,.2),pos(x,y,-.2),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[],u.DrawDebugTrace.NONE,True)
+            assert hit(ground) and abs(ground.to_tuple()[5].z)<.2,('Expansion floor gap',x,y)
+    report={'passed':True,'lanes':len(layout['lane_centers_m']),'bench_target_alignment':True,'partition_collision_checks':barriers,'capsule_radius_cm':42,'capsule_half_height_cm':90,'clear_routes':routes,'clear_firing_lines':len(layout['lane_centers_m']),'side_aisle_clear_width_cm':140,'screen_on_separate_desk':True,'asset_triangles':{k:v['triangles'] for k,v in meta['assets'].items()}}
     report['render_only_ammo_boxes']=render_only
     (SOURCE/'RangeStations/unreal_validation.json').write_text(json.dumps(report,indent=2))
     u.log('RANGE_STATIONS_VERIFIED')

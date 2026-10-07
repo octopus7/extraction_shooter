@@ -11,24 +11,24 @@
     },
     {
       "location_cm": [
-        340,
-        0,
+        300,
+        175,
         95
       ],
       "weight": 0.0
     },
     {
       "location_cm": [
-        790,
-        0,
+        700,
+        175,
         95
       ],
       "weight": 1.0
     },
     {
       "location_cm": [
-        1590,
-        0,
+        1700,
+        175,
         95
       ],
       "weight": 1.0
@@ -53,7 +53,7 @@
     },
     {
       "position": "approach",
-      "weight": 0.28936073184013367,
+      "weight": 0.4524642527103424,
       "view_target": "Basement_RangeLocationBlend"
     },
     {
@@ -82,6 +82,11 @@
       "view_target": "Basement_RangeLocationBlend"
     },
     {
+      "position": "booth_5",
+      "weight": 1.0,
+      "view_target": "Basement_RangeLocationBlend"
+    },
+    {
       "position": "left_target_side",
       "weight": 1.0,
       "view_target": "Basement_RangeLocationBlend"
@@ -99,36 +104,36 @@
   ],
   "range_floor_ndc_16_9": [
     [
-      0.125,
-      -0.7926
+      0.0085,
+      -0.811
     ],
     [
-      0.5323,
-      -0.1124
+      0.5215,
+      0.0142
     ],
     [
-      0.501,
-      0.1172
+      0.4959,
+      0.1999
     ],
     [
-      0.0503,
-      0.6086
+      0.1113,
+      0.6104
     ],
     [
-      -0.0959,
-      0.6086
+      -0.0137,
+      0.6104
     ],
     [
-      -0.5042,
-      0.1704
+      -0.5265,
+      0.0445
     ],
     [
-      -0.5352,
-      -0.0523
+      -0.5549,
+      -0.1581
     ],
     [
-      -0.0855,
-      -0.7926
+      -0.1722,
+      -0.811
     ]
   ],
   "saved_map_unchanged": true

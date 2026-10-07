@@ -1,0 +1,473 @@
+{
+  "width_before_m": 10.8,
+  "width_after_m": 14.3,
+  "added_lane_width_m": 2.1,
+  "added_walkway_width_m": 1.4,
+  "boundary_xy_m": [
+    [
+      -3.8,
+      -5.8
+    ],
+    [
+      7.3,
+      -5.8
+    ],
+    [
+      8.9,
+      -4.2
+    ],
+    [
+      8.9,
+      4.2
+    ],
+    [
+      7.3,
+      5.8
+    ],
+    [
+      -3.8,
+      5.8
+    ],
+    [
+      -5.4,
+      4.2
+    ],
+    [
+      -5.4,
+      -4.2
+    ]
+  ],
+  "aisle_center_author_x_m": 6.95,
+  "aisle_clear_edges_author_x_m": [
+    6.25,
+    7.65
+  ],
+  "assets": {
+    "SM_RangeFloor_Expanded": {
+      "triangles": 266,
+      "material": "MI_Range_Architecture"
+    },
+    "SM_RangeLane05Marking": {
+      "triangles": 172,
+      "material": "MI_Range_Architecture"
+    }
+  },
+  "changed_actors": [
+    {
+      "label": "AmmoBox_005",
+      "location_cm": [
+        1283.0,
+        807.9999999999999,
+        110.00000000000001
+      ]
+    },
+    {
+      "label": "BackstopPanel_005",
+      "location_cm": [
+        2052.0,
+        525.0,
+        0.0
+      ]
+    },
+    {
+      "label": "BlueWash_5",
+      "location_cm": [
+        2010.0000000000002,
+        525.0,
+        240.0
+      ]
+    },
+    {
+      "label": "CableReel_001",
+      "location_cm": [
+        1862.0,
+        816.0,
+        0.0
+      ]
+    },
+    {
+      "label": "CeilingFill_FifthLane",
+      "location_cm": [
+        1180.0,
+        500.0,
+        350.0
+      ]
+    },
+    {
+      "label": "Conduit_160_011",
+      "location_cm": [
+        1260.0,
+        867.9999999999999,
+        268.0
+      ]
+    },
+    {
+      "label": "Conduit_160_012",
+      "location_cm": [
+        1420.0,
+        867.9999999999999,
+        268.0
+      ]
+    },
+    {
+      "label": "Conduit_160_013",
+      "location_cm": [
+        1580.0,
+        867.9999999999999,
+        268.0
+      ]
+    },
+    {
+      "label": "Conduit_160_014",
+      "location_cm": [
+        1740.0,
+        867.9999999999999,
+        268.0
+      ]
+    },
+    {
+      "label": "Conduit_160_015",
+      "location_cm": [
+        1215.0,
+        866.9999999999999,
+        188.0
+      ]
+    },
+    {
+      "label": "Conduit_BackExtension_001",
+      "location_cm": [
+        2060.0,
+        480.0,
+        268.0
+      ]
+    },
+    {
+      "label": "Conduit_BackExtension_002",
+      "location_cm": [
+        2060.0,
+        640.0,
+        268.0
+      ]
+    },
+    {
+      "label": "FiringBench_005",
+      "location_cm": [
+        1193.0,
+        525.0,
+        0.0
+      ]
+    },
+    {
+      "label": "FloorShell",
+      "location_cm": [
+        1500.0,
+        -9.18485099360515e-14,
+        0.0
+      ]
+    },
+    {
+      "label": "JunctionBox_002",
+      "location_cm": [
+        1215.0,
+        861.0,
+        89.0
+      ]
+    },
+    {
+      "label": "LEDBar_007",
+      "location_cm": [
+        1325.0,
+        863.9999999999999,
+        239.0
+      ]
+    },
+    {
+      "label": "LEDBar_008",
+      "location_cm": [
+        1675.0,
+        863.9999999999999,
+        239.0
+      ]
+    },
+    {
+      "label": "LEDBar_009",
+      "location_cm": [
+        2060.0,
+        525.0,
+        243.00000000000003
+      ]
+    },
+    {
+      "label": "LaneNumber_05",
+      "location_cm": [
+        1725.0,
+        525.0,
+        1.7999999999999998
+      ]
+    },
+    {
+      "label": "LanePartition_004",
+      "location_cm": [
+        1150.0,
+        420.0,
+        0.0
+      ]
+    },
+    {
+      "label": "Light_CeilingFill_Center",
+      "location_cm": [
+        1540.0,
+        175.0,
+        480.0
+      ]
+    },
+    {
+      "label": "Light_SideWash_1_-1.75",
+      "location_cm": [
+        1325.0,
+        824.9999999999999,
+        229.99999999999997
+      ]
+    },
+    {
+      "label": "Light_SideWash_1_1.75",
+      "location_cm": [
+        1675.0,
+        824.9999999999999,
+        229.99999999999997
+      ]
+    },
+    {
+      "label": "SafetySign_002",
+      "location_cm": [
+        1947.0,
+        821.9999999999999,
+        176.0
+      ]
+    },
+    {
+      "label": "ServiceDrum_001",
+      "location_cm": [
+        1667.0,
+        832.0,
+        0.0
+      ]
+    },
+    {
+      "label": "ServiceDrum_002",
+      "location_cm": [
+        1755.0,
+        823.0,
+        0.0
+      ]
+    },
+    {
+      "label": "Stool_002",
+      "location_cm": [
+        1115.0,
+        815.0,
+        0.0
+      ]
+    },
+    {
+      "label": "StorageCabinet_001",
+      "location_cm": [
+        1505.0,
+        842.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "TargetPad_005",
+      "location_cm": [
+        1847.0,
+        525.0,
+        0.0
+      ]
+    },
+    {
+      "label": "Target_05",
+      "location_cm": [
+        1842.0000000000002,
+        525.0,
+        1.6
+      ]
+    },
+    {
+      "label": "UtilityCase_001",
+      "location_cm": [
+        1321.0,
+        811.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "UtilityCase_002",
+      "location_cm": [
+        1251.0,
+        809.9999999999998,
+        0.0
+      ]
+    },
+    {
+      "label": "UtilityCase_003",
+      "location_cm": [
+        1287.0,
+        811.0,
+        55.00000000000001
+      ]
+    },
+    {
+      "label": "VentPanel_002",
+      "location_cm": [
+        1825.0,
+        866.9999999999999,
+        200.0
+      ]
+    },
+    {
+      "label": "WallCorner_01",
+      "location_cm": [
+        920.0,
+        729.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "WallCorner_02",
+      "location_cm": [
+        1080.0,
+        889.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "WallCorner_03",
+      "location_cm": [
+        1920.0,
+        889.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "WallCorner_04",
+      "location_cm": [
+        2080.0,
+        729.9999999999998,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E02_00",
+      "location_cm": [
+        990.8076118445749,
+        819.192388155425,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E03_00",
+      "location_cm": [
+        1164.0,
+        902.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E03_01",
+      "location_cm": [
+        1332.0,
+        902.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E03_02",
+      "location_cm": [
+        1500.0,
+        902.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E03_03",
+      "location_cm": [
+        1668.0,
+        902.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E03_04",
+      "location_cm": [
+        1836.0,
+        902.9999999999999,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_E04_00",
+      "location_cm": [
+        2009.192388155425,
+        819.192388155425,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_RangeBackExtension_001",
+      "location_cm": [
+        2093.0,
+        438.33333333333326,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_RangeBackExtension_002",
+      "location_cm": [
+        2093.0,
+        555.0,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_RangeBackExtension_003",
+      "location_cm": [
+        2093.0,
+        671.6666666666666,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_RangeFrontExtension_001",
+      "location_cm": [
+        907.0,
+        438.33333333333326,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_RangeFrontExtension_002",
+      "location_cm": [
+        907.0,
+        555.0,
+        0.0
+      ]
+    },
+    {
+      "label": "Wall_RangeFrontExtension_003",
+      "location_cm": [
+        907.0,
+        671.6666666666666,
+        0.0
+      ]
+    },
+    {
+      "label": "LaneNumber_05Backing",
+      "location_cm": [
+        1725,
+        525,
+        1.2
+      ]
+    }
+  ]
+}

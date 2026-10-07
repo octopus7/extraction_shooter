@@ -156,6 +156,14 @@
     {
       "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeLanePartition",
       "source": "TunaSweeper/SourceArt/Environment/Basement/RangeStations/Models/SM_RangeLanePartition.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeFloor_Expanded",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeExpansion/Models/SM_RangeFloor_Expanded.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeLane05Marking",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeExpansion/Models/SM_RangeLane05Marking.glb"
     }
   ],
   "temporary_sources": 0,
