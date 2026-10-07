@@ -27,12 +27,25 @@ def validate(world):
         assert not sm.get_nanite_settings(mesh).enabled,name
         assert mesh.get_editor_property('body_setup').get_editor_property('collision_trace_flag')==u.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE
         assert Path(mesh.get_editor_property('asset_import_data').get_first_filename()).resolve()==(SOURCE/'RangeStations/Models'/f'{name}.glb').resolve()
+    render_only=[]
     for p in layout['placements']:
         a=labels[p['label']]
         assert (a.get_actor_location()-pos(*p['author_location_m'])).length()<.1,p['label']
         assert a.static_mesh_component.static_mesh.get_name()==p['mesh']
         assert a.get_attach_parent_actor().get_actor_label()==p['parent']
-        assert str(a.static_mesh_component.get_collision_profile_name())=='BlockAll'
+        c=a.static_mesh_component
+        profile=p.get('collision_profile','BlockAll')
+        assert str(c.get_collision_profile_name())==profile
+        if profile=='NoCollision':
+            assert c.get_collision_enabled()==u.CollisionEnabled.NO_COLLISION
+            assert c.get_editor_property('visible') and not c.get_editor_property('hidden_in_game')
+            assert not c.get_editor_property('generate_overlap_events')
+            center,extent=a.get_actor_bounds(False)
+            delta=u.Vector(extent.x+30,0,0)
+            trace=u.SystemLibrary.line_trace_single(world,center-delta,center+delta,u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[o for o in actors if o!=a],u.DrawDebugTrace.NONE,True)
+            assert not hit(trace),p['label']+' still blocks shots'
+            render_only.append(p['label'])
+    assert sorted(render_only)==['AmmoBox_001','AmmoBox_002','AmmoBox_003']
     routes=[]
     def clear(name,start,end):
         result=u.SystemLibrary.capsule_trace_single_by_profile(world,pos(*start),pos(*end),42,90,'Pawn',False,[],u.DrawDebugTrace.NONE,True)
@@ -61,6 +74,7 @@ def validate(world):
     floor=u.SystemLibrary.line_trace_single(world,pos(-4.45,-3.9,1.0),pos(-4.45,-3.9,.8),u.TraceTypeQuery.TRACE_TYPE_QUERY1,True,[screen],u.DrawDebugTrace.NONE,True)
     assert hit(floor) and abs(floor.to_tuple()[5].z-93.5)<.2,'Desk does not support monitor'
     report={'passed':True,'lanes':4,'bench_target_alignment':True,'partition_collision_checks':barriers,'capsule_radius_cm':42,'capsule_half_height_cm':90,'clear_routes':routes,'clear_firing_lines':4,'screen_on_separate_desk':True,'asset_triangles':{k:v['triangles'] for k,v in meta['assets'].items()}}
+    report['render_only_ammo_boxes']=render_only
     (SOURCE/'RangeStations/unreal_validation.json').write_text(json.dumps(report,indent=2))
     u.log('RANGE_STATIONS_VERIFIED')
     return report

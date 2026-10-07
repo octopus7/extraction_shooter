@@ -152,7 +152,8 @@
         0.935
       ],
       "yaw_deg": 80,
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
     },
     {
       "label": "AmmoBox_002",
@@ -163,7 +164,8 @@
         0.935
       ],
       "yaw_deg": 98,
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
     },
     {
       "label": "AmmoBox_003",
@@ -174,7 +176,8 @@
         0.935
       ],
       "yaw_deg": 98,
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "collision_profile": "NoCollision"
     },
     {
       "label": "Clipboard_001",

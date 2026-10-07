@@ -259,6 +259,11 @@
     "asset_triangles": {
       "SM_RangeControlDesk": 756,
       "SM_RangeLanePartition": 1692
-    }
+    },
+    "render_only_ammo_boxes": [
+      "AmmoBox_001",
+      "AmmoBox_002",
+      "AmmoBox_003"
+    ]
   }
 }
