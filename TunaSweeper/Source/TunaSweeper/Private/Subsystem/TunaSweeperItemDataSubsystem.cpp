@@ -287,6 +287,22 @@ bool UTunaSweeperItemDataSubsystem::GetAllItemDefinitions(TArray<FTunaSweeperIte
 	return true;
 }
 
+int32 UTunaSweeperItemDataSubsystem::FindArmorItemId(FName EquipmentSlot, int32 ArmorTier)
+{
+	if (ArmorTier < 1 || ArmorTier > 4 ||
+		(EquipmentSlot != TEXT("equipment.slot.body") && EquipmentSlot != TEXT("equipment.slot.head")) ||
+		!EnsureItemDataLoaded()) return INDEX_NONE;
+
+	int32 ItemId = INDEX_NONE;
+	for (const auto& Entry : ItemDefinitionsById)
+	{
+		const FTunaSweeperItemDefinition& Item = Entry.Value;
+		if (Item.EquipmentSlotTag == EquipmentSlot && Item.ArmorTier == ArmorTier && Item.DefenseValue > 0 &&
+			(ItemId == INDEX_NONE || Item.Id < ItemId)) ItemId = Item.Id;
+	}
+	return ItemId;
+}
+
 bool UTunaSweeperItemDataSubsystem::TryGetLootContainerDefinition(
 	int32 ContainerDefinitionId,
 	FTunaSweeperLootContainerDefinition& OutDefinition)

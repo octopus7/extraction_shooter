@@ -478,6 +478,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool GetAllItemDefinitions(TArray<FTunaSweeperItemDefinition>& OutItemDefinitions);
 
+	// Deterministic representative equipment for a training preset; INDEX_NONE for naked/missing tiers.
+	int32 FindArmorItemId(FName EquipmentSlot, int32 ArmorTier);
+
 	bool TryGetWeaponActorClassPath(int32 ItemId, FSoftObjectPath& OutWeaponClassPath);
 	bool TryGetWeaponVisualDefinition(int32 ItemId, FTunaSweeperWeaponVisualDefinition& OutDefinition);
 	bool TryResolveEnemyLoadout(int32 WeaponItemId, int32 AmmoItemId, int32 ReserveAmmoCount, FTunaSweeperEnemyWeaponLoadout& OutLoadout);

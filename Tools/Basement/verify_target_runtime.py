@@ -64,7 +64,7 @@ def tick(dt):
             levels.editor_play_simulate();state='pie_wait';ticks=0
         elif state=='pie_wait' and ticks>=40:
             game=u.get_editor_subsystem(u.UnrealEditorSubsystem).get_game_world();assert game
-            live=list(u.GameplayStatics.get_all_actors_of_class(game,cls));assert len(live)==5
+            live=sorted(u.GameplayStatics.get_all_actors_of_class(game,cls),key=lambda a:a.get_editor_property('body_armor_tier'));assert len(live)==5
             for a in live:
                 assert abs(a.get_health_fraction()-1)<.0001
                 widget=a.get_editor_property('health_bar_widget_component').get_user_widget_object();assert widget

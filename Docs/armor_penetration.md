@@ -52,4 +52,16 @@ Armor references provide combat stats, not an inventory instance or an automatic
 
 ## Verification
 
+### Practice dummy authoring
+
+`ATunaSweeperShootingPracticeDummyActor` (including `BP_RangePracticeTarget`) exposes `BodyArmorTier` and `HeadArmorTier` under **Practice Dummy > Armor** in BP defaults and placed instances. Set each independently from 0 (empty slot) through 4. `ConfigurePracticeDummyArmor` also supports runtime changes; out-of-range values are clamped during configuration and resolution.
+
+The item subsystem selects the lowest item ID matching that slot and tier with positive defense. `GetBodyArmorItemId` and `GetHeadArmorItemId` expose the actual equipped definitions during play; no catalog or no matching item returns `INDEX_NONE`. Damage reads the definitions' defense values through the same `TunaSweeperArmor::ItemDefense` path as enemies. Mixed tiers resolve independently and add together, retaining whole-character protection. Headshot damage is doubled before armor is subtracted; generic damage receives full defense with no penetration.
+
+`GetEffectiveDefense(PenetrationTier)` exposes the same defense used by `TakeDamage`. Existing immortal minimum health and two-second recovery remain. Returned damage is the post-armor hit damage for comparison, even if minimum health prevents the full health loss on overkill. These settings are authored in BP/map assets; session health and runtime armor changes do not enter player saves.
+
+`TunaSweeper.Combat.PracticeDummy.ArmorEquipment` covers tier properties, all 20 naked/armor–ammo combinations, real equipped item IDs, mixed tiers, health deltas, headshots, generic damage, zero-damage absorption, missing catalogs and runtime clamping/removal. `HitDamage` protects the original hit-zone rules.
+
+In `/Game/Environment/Basement/Maps/L_Basement`, the five existing `BP_RangePracticeTarget` instances `Target_01` through `Target_05` use paired body/head tiers **0, 1, 2, 3, 4** respectively. Their meshes, positions and `ROOT_Range` attachment are preserved. `RangeTarget/placement.json` records both tier values; `Tools/Basement/verify_target_armor.py` reloads the saved map and verifies all presets, equipped IDs, the penetration defense table, actual generic damage, minimum health and recovery in PIE. `target_armor_validation.json` records the latest result.
+
 `TunaSweeper.Combat.Armor.FourTiersAndActualDamage` checks the complete 4×4 balance table against real player and enemy damage calls, mixed armor tiers, authored item tiers, and legacy/non-point damage behavior. `TunaSweeper.Inventory.EquipmentData.LaserAndStartingLoadout` verifies the four armor tiers, all three advanced AP items, information-panel damage, and projectile/pellet snapshots. Existing projectile/burn snapshot tests protect the unchanged status-effect path.

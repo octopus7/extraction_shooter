@@ -1,13 +1,16 @@
 #include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
 #include "Combat/TunaSweeperProjectileDamage.h"
+#include "Combat/TunaSweeperArmor.h"
 
 #include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/DamageEvents.h"
+#include "Engine/GameInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperPracticeDummyHealthBarWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -96,6 +99,7 @@ void ATunaSweeperShootingPracticeDummyActor::BeginPlay()
 	MaxHealth = FMath::Max(1.0f, MaxHealth);
 	MinimumHealth = FMath::Clamp(MinimumHealth, 0.0f, MaxHealth);
 	CurrentHealth = MaxHealth;
+	ConfigurePracticeDummyArmor(BodyArmorTier, HeadArmorTier);
 	ApplyHitZoneColors();
 	RefreshHealthBar();
 }
@@ -125,7 +129,9 @@ float ATunaSweeperShootingPracticeDummyActor::TakeDamage(
 		return 0.0f;
 	}
 
-	const float AdjustedDamage = DamageAmount * ResolveDamageMultiplier(DamageEvent, DamageCauser);
+	const float AdjustedDamage = TunaSweeperArmor::ApplyDefense(
+		DamageAmount * ResolveDamageMultiplier(DamageEvent, DamageCauser),
+		GetEffectiveDefense(TunaSweeperArmor::ResolvePenetrationTier(DamageEvent, DamageCauser)));
 	ApplyDummyDamage(AdjustedDamage);
 	return AdjustedDamage;
 }
@@ -139,6 +145,31 @@ void ATunaSweeperShootingPracticeDummyActor::ConfigurePracticeDummyDefaults(
 	CurrentHealth = FMath::Clamp(CurrentHealth, MinimumHealth, MaxHealth);
 	HealthRecoverySeconds = FMath::Max(0.05f, InHealthRecoverySeconds);
 	RefreshHealthBar();
+}
+
+void ATunaSweeperShootingPracticeDummyActor::ConfigurePracticeDummyArmor(int32 InBodyArmorTier, int32 InHeadArmorTier)
+{
+	BodyArmorTier = FMath::Clamp(InBodyArmorTier, 0, 4);
+	HeadArmorTier = FMath::Clamp(InHeadArmorTier, 0, 4);
+}
+
+int32 ATunaSweeperShootingPracticeDummyActor::GetBodyArmorItemId() const
+{
+	UTunaSweeperItemDataSubsystem* Items = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+	return Items ? Items->FindArmorItemId(TEXT("equipment.slot.body"), FMath::Clamp(BodyArmorTier, 0, 4)) : INDEX_NONE;
+}
+
+int32 ATunaSweeperShootingPracticeDummyActor::GetHeadArmorItemId() const
+{
+	UTunaSweeperItemDataSubsystem* Items = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+	return Items ? Items->FindArmorItemId(TEXT("equipment.slot.head"), FMath::Clamp(HeadArmorTier, 0, 4)) : INDEX_NONE;
+}
+
+float ATunaSweeperShootingPracticeDummyActor::GetEffectiveDefense(int32 PenetrationTier) const
+{
+	UTunaSweeperItemDataSubsystem* Items = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+	return TunaSweeperArmor::ItemDefense(Items, GetBodyArmorItemId(), TEXT("equipment.slot.body"), PenetrationTier) +
+		TunaSweeperArmor::ItemDefense(Items, GetHeadArmorItemId(), TEXT("equipment.slot.head"), PenetrationTier);
 }
 
 float ATunaSweeperShootingPracticeDummyActor::GetHealthFraction() const

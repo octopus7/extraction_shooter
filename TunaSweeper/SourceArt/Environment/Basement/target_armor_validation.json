@@ -1,0 +1,120 @@
+{
+  "blueprint": "/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget",
+  "parent": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
+  "components": {
+    "body_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Body.SM_RangePracticeTarget_Body",
+    "head_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Head.SM_RangePracticeTarget_Head",
+    "headshot_plate_mesh": "/Game/Environment/Basement/Range/Meshes/SM_RangePracticeTarget_Plate.SM_RangePracticeTarget_Plate"
+  },
+  "health": 100,
+  "minimum_health": 1,
+  "recovery_seconds": 2,
+  "ear_height_cm": 27.045923471450806,
+  "ear_height_scale": 0.5,
+  "health_bar_height_cm": 180,
+  "passed": true,
+  "saved_presets": [
+    {
+      "label": "Target_01",
+      "body_tier": 0,
+      "head_tier": 0
+    },
+    {
+      "label": "Target_02",
+      "body_tier": 1,
+      "head_tier": 1
+    },
+    {
+      "label": "Target_03",
+      "body_tier": 2,
+      "head_tier": 2
+    },
+    {
+      "label": "Target_04",
+      "body_tier": 3,
+      "head_tier": 3
+    },
+    {
+      "label": "Target_05",
+      "body_tier": 4,
+      "head_tier": 4
+    }
+  ],
+  "runtime_equipment_and_damage": [
+    {
+      "tier": 0,
+      "body_item_id": -1,
+      "head_item_id": -1,
+      "defense_by_penetration_1_to_4": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "generic_input_damage": 20,
+      "returned_damage": 20.0,
+      "health_after": 80.0000011920929
+    },
+    {
+      "tier": 1,
+      "body_item_id": 5010,
+      "head_item_id": 5021,
+      "defense_by_penetration_1_to_4": [
+        1.5,
+        0.75,
+        0.0,
+        0.0
+      ],
+      "generic_input_damage": 20,
+      "returned_damage": 17.0,
+      "health_after": 82.99999833106995
+    },
+    {
+      "tier": 2,
+      "body_item_id": 5001,
+      "head_item_id": 5006,
+      "defense_by_penetration_1_to_4": [
+        4.5,
+        3.0,
+        1.5,
+        0.0
+      ],
+      "generic_input_damage": 20,
+      "returned_damage": 14.0,
+      "health_after": 86.00000143051147
+    },
+    {
+      "tier": 3,
+      "body_item_id": 5022,
+      "head_item_id": 5023,
+      "defense_by_penetration_1_to_4": [
+        9.0,
+        6.75,
+        4.5,
+        2.25
+      ],
+      "generic_input_damage": 20,
+      "returned_damage": 11.0,
+      "health_after": 88.99999856948853
+    },
+    {
+      "tier": 4,
+      "body_item_id": 5024,
+      "head_item_id": 5025,
+      "defense_by_penetration_1_to_4": [
+        12.0,
+        12.0,
+        9.0,
+        6.0
+      ],
+      "generic_input_damage": 20,
+      "returned_damage": 8.0,
+      "health_after": 92.00000166893005
+    }
+  ],
+  "recovery": {
+    "targets": 5,
+    "game_seconds": 2.104187298566103,
+    "final_health": 100
+  }
+}

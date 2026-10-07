@@ -34,6 +34,25 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Practice Dummy")
 	float GetHealthFraction() const;
 
+	// Zero removes the slot. Both slots follow the same whole-character defense rule as actual equipment.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Practice Dummy|Armor", meta = (ClampMin = "0", ClampMax = "4", UIMin = "0", UIMax = "4"))
+	int32 BodyArmorTier = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Practice Dummy|Armor", meta = (ClampMin = "0", ClampMax = "4", UIMin = "0", UIMax = "4"))
+	int32 HeadArmorTier = 0;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Practice Dummy|Armor")
+	void ConfigurePracticeDummyArmor(int32 InBodyArmorTier, int32 InHeadArmorTier);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Practice Dummy|Armor")
+	int32 GetBodyArmorItemId() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Practice Dummy|Armor")
+	int32 GetHeadArmorItemId() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Practice Dummy|Armor")
+	float GetEffectiveDefense(int32 PenetrationTier = 0) const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

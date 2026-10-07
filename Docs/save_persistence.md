@@ -349,6 +349,10 @@ When adding a field that should survive save/load:
 3. Add migration/default handling for older saves.
 4. Update this document in the same change.
 
+## Practice dummy armor
+
+Practice dummy body/head armor tiers are authored in Blueprint defaults and map instances. Current health, regeneration and any armor changes made during play are transient; loading a level restores the authored tiers and full health. No player save fields or version change are introduced.
+
 ## Enemy Burn
 
 - Active enemy burn timers, tick phase, stack count, shot/application IDs, damage snapshots, damage-source references, and flame effects are transient combat state. They end with enemy death, EndPlay, or level travel and are not restored by save/load.

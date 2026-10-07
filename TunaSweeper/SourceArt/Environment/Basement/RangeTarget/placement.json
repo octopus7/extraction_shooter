@@ -9,7 +9,9 @@
         -315.0000000000001,
         1.6
       ],
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "body_armor_tier": 0,
+      "head_armor_tier": 0
     },
     {
       "label": "Target_02",
@@ -19,7 +21,9 @@
         -105.00000000000011,
         1.6
       ],
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "body_armor_tier": 1,
+      "head_armor_tier": 1
     },
     {
       "label": "Target_03",
@@ -29,7 +33,9 @@
         104.9999999999999,
         1.6
       ],
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "body_armor_tier": 2,
+      "head_armor_tier": 2
     },
     {
       "label": "Target_04",
@@ -39,7 +45,9 @@
         314.9999999999999,
         1.6
       ],
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "body_armor_tier": 3,
+      "head_armor_tier": 3
     },
     {
       "label": "Target_05",
@@ -49,7 +57,9 @@
         525.0,
         1.6
       ],
-      "parent": "ROOT_Range"
+      "parent": "ROOT_Range",
+      "body_armor_tier": 4,
+      "head_armor_tier": 4
     }
   ]
 }

@@ -6,6 +6,9 @@
 
 ## 연습용 드론 표적
 
+- `Target_01`~`Target_05`의 몸/머리 방어 등급은 각각 **맨몸(0) / 1 / 2 / 3 / 4**다. BP 기본값 및 각 배치 인스턴스의 `Practice Dummy > Armor`에서 `Body Armor Tier`, `Head Armor Tier`를 독립적으로 조절한다. 0은 해당 장비 해제다.
+- 등급별 실제 방어구 아이템의 방어력·관통 계산을 사용하며, 현재 플레이어와 적처럼 두 부위의 유효 방어력을 합산한다. `RangeTarget/placement.json`이 배치 등급을 기록하고, `Tools/Basement/verify_target_armor.py`가 저장 맵과 PIE의 장착 아이템·피해·체력·회복을 검증한다. 결과는 `target_armor_validation.json`에 저장한다.
+
 `/Game/Environment/Basement/Range/Blueprints/BP_RangePracticeTarget`은 `ATunaSweeperShootingPracticeDummyActor`를 상속한다. 레벨의 `Target_01`~`05`는 이 BP 인스턴스이며, `ROOT_Range`에 연결되어 방과 함께 이동·회전한다.
 
 - 원래 토끼 얼굴과 전면 과녁판을 드론 전면 광학 센서로 교체했다. 머리 위에는 원래 높이 54.09cm의 절반인 27.05cm 토끼 귀 두 개를 다시 붙였다. 귀 밑면은 Z=125cm, 끝은 Z=152.05cm이며, 짧고 둥근 비율과 기존 흰색·청회색 아틀라스를 유지한다. 몸체와 다리는 변경하지 않았다.
