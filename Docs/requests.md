@@ -10429,3 +10429,10 @@
 - 편집: 사격장·사다리실·통로를 루트별로 묶고 벽·조명·끝벽·스냅 기준점의 부모 관계를 검토·보완하여 함께 이동·회전하도록 구성했다. 앞쪽 가림벽 29개는 표시·그림자를 끄고 BlockAll 충돌을 유지했다. 사다리와 사격 표적은 시각 모델이며 별도 이동 상호작용이나 표적 게임 로직은 추가하지 않았다.
 - 원본: 내장 이미지 생성으로 청회색 콘크리트 텍스처를 생성하고 벽/바닥 재질 인스턴스에 적용했다. Blender 모듈 원본, GLB, 사격장 원본, 배치 매니페스트, 실제 UE 캡처 3장을 SourceArt/Environment/Basement에 보관했다. 재임포트 경로를 영구 원본으로 바꾸고 임시 생성·임포트 스크립트 및 보정 에셋을 제거했다.
 - 검증: TunaSweeperEditor Win64 Development 빌드 성공. 정리 후 UE 5.7.4 새 프로세스에서 재질·UV·부모 관계, 통로 4개 캐릭터 캡슐 이동, 투명벽/코너 37건 충돌, 바닥 접합, 모듈 묶음 6개의 이동·90도 회전을 통과했다. 소스 메시 폐곡면·양의 체적·3분할 코너 검증과 실제 UE 화면 검수를 완료했다. .gitignore, 결과 에셋, 검증 도구, 기록을 단일 작업 커밋에 포함한다.
+
+## 2026-10-07 16:57:48 (소요시간: 00:09:04)
+
+- 요청: 부위 기반 크리티컬 판정을 제거하고 헤드샷 피해를 2배(100% 증가)로 변경하며 배율을 전역 값으로 관리.
+- 처리: 허수아비의 CriticalPlateMesh와 3배 분기, 액터별 크리티컬·헤드샷 배율 및 설정 인자를 제거. 헤드샷 배율을 TunaSweeperProjectileDamage::HeadshotDamageMultiplier = 2.0f로 통합하고 기존 조준 대상·실제 머리 명중 조건은 유지. 투사체 피해 숫자는 피해 비율 추정 대신 같은 실제 헤드샷 판정을 사용. 게임 규칙 문서 갱신.
+- 검증: 수정 전 자동화 검사에서 일반 판 명중 30(기대 10), 머리 명중 60(기대 20)을 재현. 수정 후 UE 5.7 TunaSweeperEditor Win64 Development 빌드 성공, TunaSweeper.Combat.PracticeDummy.HitDamage / TunaSweeper.Combat.Burn.ProjectileImpactRouting / TunaSweeper.Difficulty.EnemyIncomingDamageScaling 3개 통과. 읽기 전용 코드 리뷰에서 차단 이슈 없음. 빌드 환경 캐시 및 미리보기 에디터 DLL 잠금 문제를 해결한 뒤 검증 완료.
+- 정리: 구현·회귀 검사·규칙 문서·요청 기록을 단일 작업 커밋으로 묶음. 별도 작업의 Basement 변경은 포함하지 않음.

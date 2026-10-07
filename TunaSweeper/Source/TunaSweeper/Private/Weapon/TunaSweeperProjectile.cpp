@@ -34,26 +34,6 @@
 
 namespace
 {
-	ETunaSweeperDamageNumberType ResolveDamageNumberType(float BaseDamage, float AppliedDamage)
-	{
-		if (BaseDamage <= KINDA_SMALL_NUMBER || AppliedDamage <= 0.0f)
-		{
-			return ETunaSweeperDamageNumberType::Normal;
-		}
-
-		const float DamageRatio = AppliedDamage / BaseDamage;
-		if (DamageRatio >= 5.5f)
-		{
-			return ETunaSweeperDamageNumberType::Headshot;
-		}
-		if (DamageRatio >= 2.5f)
-		{
-			return ETunaSweeperDamageNumberType::Critical;
-		}
-
-		return ETunaSweeperDamageNumberType::Normal;
-	}
-
 	FVector ResolveDamageNumberLocation(const FHitResult& Hit, const AActor* OtherActor)
 	{
 		if (!OtherActor)
@@ -546,6 +526,7 @@ void ATunaSweeperProjectile::HandleHit(
 	}
 
 	float AppliedDamage = 0.0f;
+	ETunaSweeperDamageNumberType DamageNumberType = ETunaSweeperDamageNumberType::Normal;
 	const bool bAttemptedDamage = DamageAmount > 0.0f;
 	if (bAttemptedDamage)
 	{
@@ -553,6 +534,11 @@ void ATunaSweeperProjectile::HandleHit(
 		if (OtherComp)
 		{
 			DamageHit.Component = OtherComp;
+		}
+		if (const ATunaSweeperShootingPracticeDummyActor* Dummy = Cast<ATunaSweeperShootingPracticeDummyActor>(OtherActor);
+			Dummy && Dummy->IsHeadshotHit(DamageHit.GetComponent(), this))
+		{
+			DamageNumberType = ETunaSweeperDamageNumberType::Headshot;
 		}
 		const FVector HitFromDirection = GetVelocity().GetSafeNormal();
 		AppliedDamage = UGameplayStatics::ApplyPointDamage(
@@ -601,7 +587,7 @@ void ATunaSweeperProjectile::HandleHit(
 						GameHudWidget->ShowDamageNumber(
 							AppliedDamage,
 							ResolveDamageNumberLocation(Hit, OtherActor),
-							ResolveDamageNumberType(DamageAmount, AppliedDamage));
+							DamageNumberType);
 					}
 				}
 			}

@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
+#include "Combat/TunaSweeperProjectileDamage.h"
 
 #include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
@@ -47,11 +48,6 @@ ATunaSweeperShootingPracticeDummyActor::ATunaSweeperShootingPracticeDummyActor()
 	BodyMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 92.0f));
 	BodyMesh->SetRelativeScale3D(FVector(0.55f, 0.55f, 1.34f));
 
-	CriticalPlateMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CriticalPlateMesh"));
-	CriticalPlateMesh->SetupAttachment(RootComponent);
-	CriticalPlateMesh->SetRelativeLocation(FVector(37.0f, 0.0f, 44.0f));
-	CriticalPlateMesh->SetRelativeScale3D(FVector(0.08f, 0.42f, 0.24f));
-
 	HeadshotPlateMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeadshotPlateMesh"));
 	HeadshotPlateMesh->SetupAttachment(RootComponent);
 	HeadshotPlateMesh->SetRelativeLocation(FVector(46.0f, 0.0f, 44.0f));
@@ -81,7 +77,6 @@ ATunaSweeperShootingPracticeDummyActor::ATunaSweeperShootingPracticeDummyActor()
 	}
 	if (CubeMesh.Succeeded())
 	{
-		CriticalPlateMesh->SetStaticMesh(CubeMesh.Object);
 		HeadshotPlateMesh->SetStaticMesh(CubeMesh.Object);
 	}
 	if (SphereMesh.Succeeded())
@@ -90,7 +85,6 @@ ATunaSweeperShootingPracticeDummyActor::ATunaSweeperShootingPracticeDummyActor()
 	}
 
 	ConfigureHitComponent(BodyMesh);
-	ConfigureHitComponent(CriticalPlateMesh);
 	ConfigureHitComponent(HeadshotPlateMesh);
 	ConfigureHitComponent(HeadMesh);
 }
@@ -138,15 +132,11 @@ float ATunaSweeperShootingPracticeDummyActor::TakeDamage(
 
 void ATunaSweeperShootingPracticeDummyActor::ConfigurePracticeDummyDefaults(
 	float InMaxHealth,
-	float InCriticalDamageMultiplier,
-	float InHeadshotDamageMultiplier,
 	float InHealthRecoverySeconds)
 {
 	MaxHealth = FMath::Max(1.0f, InMaxHealth);
 	MinimumHealth = FMath::Clamp(MinimumHealth, 0.0f, MaxHealth);
 	CurrentHealth = FMath::Clamp(CurrentHealth, MinimumHealth, MaxHealth);
-	CriticalDamageMultiplier = FMath::Max(1.0f, InCriticalDamageMultiplier);
-	HeadshotDamageMultiplier = FMath::Max(CriticalDamageMultiplier, InHeadshotDamageMultiplier);
 	HealthRecoverySeconds = FMath::Max(0.05f, InHealthRecoverySeconds);
 	RefreshHealthBar();
 }
@@ -176,7 +166,6 @@ void ATunaSweeperShootingPracticeDummyActor::ConfigureHitComponent(UStaticMeshCo
 void ATunaSweeperShootingPracticeDummyActor::ApplyHitZoneColors()
 {
 	SetMaterialColor(BodyMesh, FLinearColor(0.36f, 0.42f, 0.48f, 1.0f));
-	SetMaterialColor(CriticalPlateMesh, FLinearColor(1.0f, 0.55f, 0.08f, 1.0f));
 	SetMaterialColor(HeadshotPlateMesh, FLinearColor(1.0f, 0.04f, 0.02f, 1.0f));
 	SetMaterialColor(HeadMesh, FLinearColor(0.95f, 0.16f, 0.10f, 1.0f));
 }
@@ -192,33 +181,21 @@ float ATunaSweeperShootingPracticeDummyActor::ResolveDamageMultiplier(
 		HitComponent = PointDamageEvent ? PointDamageEvent->HitInfo.GetComponent() : nullptr;
 	}
 
-	const ATunaSweeperProjectile* ProjectileCauser = Cast<ATunaSweeperProjectile>(DamageCauser);
-	const bool bHeadIntent =
-		ProjectileCauser &&
-		ProjectileCauser->IsAimIntentFor(this) &&
-		IsHeadshotComponent(ProjectileCauser->GetAimIntentComponent());
-	const bool bHeadCore = IsHeadshotComponent(HitComponent);
+	return IsHeadshotHit(HitComponent, Cast<ATunaSweeperProjectile>(DamageCauser))
+		? TunaSweeperProjectileDamage::HeadshotDamageMultiplier
+		: 1.0f;
+}
 
-	if (bHeadIntent && bHeadCore)
-	{
-		return HeadshotDamageMultiplier;
-	}
-	if (IsCriticalComponent(HitComponent))
-	{
-		return CriticalDamageMultiplier;
-	}
-
-	return 1.0f;
+bool ATunaSweeperShootingPracticeDummyActor::IsHeadshotHit(
+	const UPrimitiveComponent* HitComponent, const ATunaSweeperProjectile* Projectile) const
+{
+	return Projectile && Projectile->IsAimIntentFor(this) &&
+		IsHeadshotComponent(Projectile->GetAimIntentComponent()) && IsHeadshotComponent(HitComponent);
 }
 
 bool ATunaSweeperShootingPracticeDummyActor::IsHeadshotComponent(const UPrimitiveComponent* Component) const
 {
 	return Component && (Component == HeadMesh || Component == HeadshotPlateMesh);
-}
-
-bool ATunaSweeperShootingPracticeDummyActor::IsCriticalComponent(const UPrimitiveComponent* Component) const
-{
-	return Component && Component == CriticalPlateMesh;
 }
 
 void ATunaSweeperShootingPracticeDummyActor::ApplyDummyDamage(float DamageAmount)
