@@ -2,6 +2,18 @@
   "passed": true,
   "references": [
     {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeFloorMarkings_NoNumbers",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeMarkers/Models/SM_RangeFloorMarkings_NoNumbers.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeLaneTriangle",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeMarkers/Models/SM_RangeLaneTriangle.glb"
+    },
+    {
+      "asset": "/Game/Environment/Basement/Range/Textures/T_RangeLaneTriangle",
+      "source": "TunaSweeper/SourceArt/Environment/Basement/RangeMarkers/Textures/T_RangeLaneTriangle.png"
+    },
+    {
       "asset": "/Game/Environment/Basement/Range/Meshes/SM_RangeFloor",
       "source": "TunaSweeper/SourceArt/Environment/Basement/Range/Assets/GLB/SM_RangeFloor.glb"
     },

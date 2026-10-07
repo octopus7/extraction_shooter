@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "markers": 5,
+  "texture_resolution": [
+    256,
+    256
+  ],
+  "visible_width_cm": 45,
+  "shared_mesh_material_texture": true,
+  "tips_face_targets": true,
+  "old_number_geometry_removed": true,
+  "collision": "NoCollision"
+}

@@ -210,7 +210,7 @@
     },
     {
       "root": "Range",
-      "descendants": 142,
+      "descendants": 145,
       "translation_verified": true,
       "rotation_90_degrees_verified": true
     },
@@ -315,5 +315,18 @@
       "CableReel_001"
     ],
     "armory_approach_in_interaction_range": true
+  },
+  "range_markers": {
+    "passed": true,
+    "markers": 5,
+    "texture_resolution": [
+      256,
+      256
+    ],
+    "visible_width_cm": 45,
+    "shared_mesh_material_texture": true,
+    "tips_face_targets": true,
+    "old_number_geometry_removed": true,
+    "collision": "NoCollision"
   }
 }

@@ -92,6 +92,8 @@ def validate(world=None):
     sys.path.insert(0,str(ROOT/'Tools/Basement'))
     from verify_stations import validate as validate_stations
     station_report=validate_stations(world)
+    from verify_markers import validate as validate_markers
+    marker_report=validate_markers()
     sweeps=[]
     # Capsule dimensions are deliberately larger than the 2.4 m entry needs.
     for name,start,end in [('hub_to_range',(0,0,.95),(0,10,.95)),('east',(0,0,.95),(9,0,.95)),('west',(0,0,.95),(-9,0,.95)),('south',(0,0,.95),(0,-7.4,.95))]:
@@ -159,6 +161,7 @@ def validate(world=None):
     report={'passed':True,'map':MAP,'engine':u.SystemLibrary.get_engine_version(),'assets':assets,'range_materials':material_report,'range_targets':len(ranges),'module_placements':len(layout['instances']),'hidden_collision_actors':hidden,'physical_invisible_wall_tests':wall_hits,'capsule_routes':sweeps,'floor_join_gap_cm':0,'expansion_connectors':3}
     report['module_group_movement']=moved_groups
     report['range_stations']=station_report
+    report['range_markers']=marker_report
     (SOURCE/'unreal_validation.json').write_text(json.dumps(report,indent=2),encoding='utf8')
     u.log('BASEMENT_VERIFICATION_PASSED')
     return report
