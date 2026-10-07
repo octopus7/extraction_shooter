@@ -109,6 +109,7 @@ FGuid UTunaSweeperGameInstance::CreateItemInstanceFromTemplate(const FTunaSweepe
 	}
 
 	FTunaSweeperItemInstance ItemInstance = ItemInstanceTemplate;
+	TunaSweeperInventory::MigrateRetiredAmmoReferences(ItemInstance);
 	ItemInstance.Uid = FGuid::NewGuid();
 	ItemInstance.Quantity = FMath::Max(1, ItemInstance.Quantity);
 	ItemInstance.LoadedAmmoCount = FMath::Max(0, ItemInstance.LoadedAmmoCount);

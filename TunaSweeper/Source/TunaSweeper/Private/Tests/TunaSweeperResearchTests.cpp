@@ -366,25 +366,36 @@ bool FTunaSweeperResearchBurnProgressionTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FTunaSweeperIncendiaryAmmoDataTest,
-	"TunaSweeper.Research.IncendiaryAmmoData",
+	FTunaSweeperStandardAmmoCatalogTest,
+	"TunaSweeper.Data.Ammo.FourVariantsOnly",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
-bool FTunaSweeperIncendiaryAmmoDataTest::RunTest(const FString& Parameters)
+bool FTunaSweeperStandardAmmoCatalogTest::RunTest(const FString& Parameters)
 {
 	(void)Parameters;
 	UGameInstance* GameInstance = NewObject<UGameInstance>();
 	UTunaSweeperItemDataSubsystem* Items = NewObject<UTunaSweeperItemDataSubsystem>(GameInstance);
 	FTunaSweeperItemDefinition Incendiary;
 	FTunaSweeperItemDefinition Standard;
-	if (!TestTrue(TEXT("Incendiary rifle ammunition is authored"), Items->TryGetItemDefinition(2023, Incendiary)) ||
-		!TestTrue(TEXT("Standard rifle ammunition remains authored"), Items->TryGetItemDefinition(2002, Standard))) return false;
-	TestEqual(TEXT("Incendiary ammunition enables burn damage"), Incendiary.BurnDamagePerTick, 2.0f);
-	TestEqual(TEXT("Incendiary ammunition defaults to five burn ticks"), Incendiary.BurnTickCount, 5);
-	TestEqual(TEXT("Incendiary and standard ammunition fit the same rifles"), Incendiary.AmmoTypeTag, Standard.AmmoTypeTag);
-	TestEqual(TEXT("Ordinary ammunition does not ignite enemies"), Standard.BurnDamagePerTick, 0.0f);
-	TestEqual(TEXT("Incendiary ammunition retains standard direct damage multiplier"), Incendiary.ProjectileDamageMultiplier, Standard.ProjectileDamageMultiplier);
-	TestEqual(TEXT("Incendiary ammunition retains standard direct damage bonus"), Incendiary.ProjectileDamageBonus, Standard.ProjectileDamageBonus);
+	TestFalse(TEXT("Retired utility ammunition is not in the item catalog"), Items->TryGetItemDefinition(2023, Incendiary));
+	if (!TestTrue(TEXT("Standard rifle ammunition remains authored"), Items->TryGetItemDefinition(2002, Standard))) return false;
+	TArray<FTunaSweeperItemDefinition> Definitions;
+	Items->GetAllItemDefinitions(Definitions);
+	TMap<FName, TSet<int32>> Tiers;
+	int32 AmmoCount = 0;
+	for (const FTunaSweeperItemDefinition& Item : Definitions)
+	{
+		if (Item.CategoryTag != FName(TEXT("item.category.ammo"))) continue;
+		++AmmoCount;
+		TestEqual(TEXT("Authored ammunition has no utility burn payload"), Item.BurnDamagePerTick, 0.0f);
+		TestTrue(TEXT("Each ammunition variant has a penetration tier"), Item.PenetrationTier >= 1 && Item.PenetrationTier <= 4);
+		Tiers.FindOrAdd(Item.AmmoTypeTag).Add(Item.PenetrationTier);
+	}
+	TestEqual(TEXT("Exactly twelve ammunition items"), AmmoCount, 12);
+	for (const FName Caliber : {FName(TEXT("ammo.type.pistol")), FName(TEXT("ammo.type.rifle")), FName(TEXT("ammo.type.shotgun"))})
+	{
+		TestEqual(TEXT("Each caliber has four distinct tiers"), Tiers.FindRef(Caliber).Num(), 4);
+	}
 	return true;
 }
 

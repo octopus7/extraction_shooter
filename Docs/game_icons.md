@@ -52,7 +52,7 @@
 | ![T_UIIcon_RedDotOptic](Images/icons/T_UIIcon_RedDotOptic.png) | `/Game/UI/Icons/T_UIIcon_RedDotOptic`<br>아이템: 2005 (`item.red_dot_optic`), 2006 (`item.laser_sight`) | 256 × 256 |
 | ![T_UIIcon_ReplacementValveHandle](Images/icons/T_UIIcon_ReplacementValveHandle.png) | `/Game/UI/Icons/T_UIIcon_ReplacementValveHandle`<br>아이템: 6004 (`item.replacement_valve_handle`) | 256 × 256 |
 | ![T_UIIcon_Rifle](Images/icons/T_UIIcon_Rifle.png) | `/Game/UI/Icons/T_UIIcon_Rifle`<br>아이템: 1002 (`item.rifle`) | 256 × 256 |
-| ![T_UIIcon_RifleAmmo](Images/icons/T_UIIcon_RifleAmmo.png) | `/Game/UI/Icons/T_UIIcon_RifleAmmo`<br>아이템: 2002 (`item.rifle_ammo`), 2023 (`item.rifle_incendiary_ammo`) | 256 × 256 |
+| ![T_UIIcon_RifleAmmo](Images/icons/T_UIIcon_RifleAmmo.png) | `/Game/UI/Icons/T_UIIcon_RifleAmmo`<br>아이템: 2002 (`item.rifle_ammo`) | 256 × 256 |
 | ![T_UIIcon_RifleAPAmmo](Images/icons/T_UIIcon_RifleAPAmmo.png) | `/Game/UI/Icons/T_UIIcon_RifleAPAmmo`<br>아이템: 2022 (`item.rifle_ap_ammo`) | 256 × 256 |
 | ![T_UIIcon_RifleExtendedMagazine](Images/icons/T_UIIcon_RifleExtendedMagazine.png) | `/Game/UI/Icons/T_UIIcon_RifleExtendedMagazine`<br>아이템: 2004 (`item.rifle_extended_magazine`) | 256 × 256 |
 | ![T_UIIcon_RustyPistolAmmo](Images/icons/T_UIIcon_RustyPistolAmmo.png) | `/Game/UI/Icons/T_UIIcon_RustyPistolAmmo`<br>아이템: 2011 (`item.rusty_pistol_ammo`) | 256 × 256 |

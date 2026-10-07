@@ -600,7 +600,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	{
 		if (ItemId != INDEX_NONE)
 		{
-			EverAcquiredItemIds.Add(ItemId);
+			EverAcquiredItemIds.Add(TunaSweeperInventory::MigrateRetiredAmmoId(ItemId));
 		}
 	}
 	MapMarkers.Reset();
@@ -753,6 +753,14 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		}
 
 		FTunaSweeperShopStockSaveData LoadedShopStockState = SavedShopStockState;
+		if (SavedShopStockState.ItemId == 2023) continue;
+		FTunaSweeperShopDefinition CurrentShop;
+		if (UTunaSweeperItemDataSubsystem* Items = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+			Items && Items->TryGetShopDefinition(LoadedShopStockState.ShopId, CurrentShop))
+		{
+			LoadedShopStockState.SlotIndex = TunaSweeperShop::ResolveSavedStockSlot(LoadedShopStockState, CurrentShop);
+			if (LoadedShopStockState.SlotIndex == INDEX_NONE) continue;
+		}
 		LoadedShopStockState.StockQuantity = FMath::Max(0, LoadedShopStockState.StockQuantity);
 		ShopStockStatesByKey.Add(
 			TunaSweeperShop::MakeStockKey(

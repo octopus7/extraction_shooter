@@ -62,6 +62,16 @@ bool FTunaSweeperEquipmentDataTest::RunTest(const FString& Parameters)
 	Game->ResetPlayerSlotArrays();
 	UTunaSweeperItemDataSubsystem* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	if (!TestTrue(TEXT("Production item definitions load"), Items && Items->LoadItemData())) return false;
+	FTunaSweeperItemInstance RetiredLoot;
+	RetiredLoot.ItemId = 1002;
+	RetiredLoot.LoadedAmmoItemId = 2023;
+	RetiredLoot.SelectedAmmoItemId = 2023;
+	RetiredLoot.LoadedAmmoCount = 9;
+	const FGuid ConvertedLootUid = Game->CreateItemInstanceFromTemplate(RetiredLoot);
+	FTunaSweeperItemInstance ConvertedLoot;
+	TestTrue(TEXT("Retired ammo loot template restores"), Game->TryGetItemInstance(ConvertedLootUid, ConvertedLoot));
+	TestEqual(TEXT("Restored loot uses ordinary rifle ammunition"), ConvertedLoot.LoadedAmmoItemId, 2002);
+	TestEqual(TEXT("Restored loot preserves its loaded count"), ConvertedLoot.LoadedAmmoCount, 9);
 	TArray<FTunaSweeperItemDefinition> ArmorCatalog;
 	Items->GetAllItemDefinitions(ArmorCatalog);
 	for (const FName ArmorSlot : {FName(TEXT("equipment.slot.head")), FName(TEXT("equipment.slot.body"))})

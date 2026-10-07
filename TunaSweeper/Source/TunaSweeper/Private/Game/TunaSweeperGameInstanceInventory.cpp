@@ -1341,7 +1341,7 @@ FGuid UTunaSweeperGameInstance::CreateItemInstance(int32 ItemId, int32 Quantity)
 {
 	FTunaSweeperItemInstance ItemInstance;
 	ItemInstance.Uid = FGuid::NewGuid();
-	ItemInstance.ItemId = ItemId;
+	ItemInstance.ItemId = TunaSweeperInventory::MigrateRetiredAmmoId(ItemId);
 	ItemInstance.Quantity = FMath::Max(1, Quantity);
 	ItemInstancesByUid.Add(ItemInstance.Uid, ItemInstance);
 	return ItemInstance.Uid;

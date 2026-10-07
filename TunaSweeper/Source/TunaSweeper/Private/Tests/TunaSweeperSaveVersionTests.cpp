@@ -13,6 +13,64 @@ namespace TunaSweeperSaveVersionTests
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperRetiredAmmoMigrationTest,
+	"TunaSweeper.Save.RetiredUtilityAmmoMigration",
+	TunaSweeperSaveVersionTests::TestFlags)
+
+bool FTunaSweeperRetiredAmmoMigrationTest::RunTest(const FString& Parameters)
+{
+	FTunaSweeperItemInstance Stack;
+	Stack.Uid = FGuid::NewGuid();
+	Stack.ItemId = 2023;
+	Stack.Quantity = 73;
+	const FTunaSweeperItemInstance SavedStack = TunaSweeperInventory::MakeItemInstanceForSave(Stack);
+	TestEqual(TEXT("Retired ammunition is saved as standard rifle ammunition"), SavedStack.ItemId, 2002);
+	TestEqual(TEXT("Migration preserves stack quantity"), SavedStack.Quantity, 73);
+	TestEqual(TEXT("Migration preserves slot identity"), SavedStack.Uid, Stack.Uid);
+	TestEqual(TEXT("Serializing a migrated copy does not mutate the source"), Stack.ItemId, 2023);
+	TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(Stack);
+	TestEqual(TEXT("Inventory and storage load converts retired ammunition"), Stack.ItemId, 2002);
+	FTunaSweeperItemInstance Weapon;
+	Weapon.Uid = FGuid::NewGuid();
+	Weapon.ItemId = 1002;
+	Weapon.LoadedAmmoItemId = 2023;
+	Weapon.SelectedAmmoItemId = 2023;
+	Weapon.LoadedAmmoCount = 17;
+	const FGuid Attachment = FGuid::NewGuid();
+	Weapon.AttachmentSlots.Add(TEXT("attachment.slot.tactical"), Attachment);
+	TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(Weapon);
+	TestEqual(TEXT("Loaded rounds become ordinary rifle rounds"), Weapon.LoadedAmmoItemId, 2002);
+	TestEqual(TEXT("Selected ammo follows the converted loaded rounds"), Weapon.SelectedAmmoItemId, 2002);
+	TestEqual(TEXT("Loaded round count is retained"), Weapon.LoadedAmmoCount, 17);
+	TestEqual(TEXT("Weapon itself is retained"), Weapon.ItemId, 1002);
+	TestEqual(TEXT("Attachments are retained"), Weapon.AttachmentSlots.FindChecked(TEXT("attachment.slot.tactical")), Attachment);
+	Weapon.LoadedAmmoItemId = INDEX_NONE;
+	Weapon.SelectedAmmoItemId = 2023;
+	TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(Weapon);
+	TestEqual(TEXT("Old selected-only ammo state migrates before normalization"), Weapon.LoadedAmmoItemId, 2002);
+	TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(Weapon);
+	TestEqual(TEXT("Migration is idempotent"), Weapon.LoadedAmmoItemId, 2002);
+	FTunaSweeperShopDefinition Shop;
+	FTunaSweeperShopItemDefinition RemainingOffer;
+	RemainingOffer.ItemId = 7002;
+	Shop.Items.Add(RemainingOffer);
+	FTunaSweeperShopStockSaveData Stock;
+	Stock.ItemId = 7002;
+	Stock.SlotIndex = 1;
+	Stock.StockQuantity = 3;
+	TestEqual(TEXT("Removing an offer preserves subsequent item stock under its new slot"),
+		TunaSweeperShop::ResolveSavedStockSlot(Stock, Shop), 0);
+	TestEqual(TEXT("Stock quantity is untouched"), Stock.StockQuantity, 3);
+	Stock.ItemId = 2023;
+	TestEqual(TEXT("Retired shop stock has no replacement offer"), TunaSweeperShop::ResolveSavedStockSlot(Stock, Shop), INDEX_NONE);
+	Stock.ItemId = 7002;
+	Stock.SlotIndex = 5;
+	Shop.Items.Add(RemainingOffer);
+	TestEqual(TEXT("Ambiguous duplicate offers do not transfer stock"), TunaSweeperShop::ResolveSavedStockSlot(Stock, Shop), INDEX_NONE);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperSaveVersionPolicyTest,
 	"TunaSweeper.Save.VersionPolicy",
 	TunaSweeperSaveVersionTests::TestFlags)

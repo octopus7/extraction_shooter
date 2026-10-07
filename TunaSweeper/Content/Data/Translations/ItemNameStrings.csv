@@ -109,8 +109,6 @@ item.waterproof_tape.desc,可暂时封住地堡漏水管道的厚实防水胶带
 container.lumber_crate,木材箱,木材箱,Ящик с древесиной,Caixa de madeira bruta
 container.developer_crate,开发者箱,開發者箱,Ящик разработчика,Caixa de desenvolvedor
 container.north_crate,北侧箱子,北側箱子,Северный ящик,Caixa ao norte
-item.rifle_incendiary_ammo,步枪燃烧弹,步槍燃燒彈,Зажигательные патроны для винтовки,Munição incendiária de fuzil
-item.rifle_incendiary_ammo.desc,点燃敌人，每秒造成 2 点伤害，共触发 5 次。武器和弹药研究可提高持续时间与伤害。,點燃敵人，每秒造成 2 點傷害，共觸發 5 次。武器和彈藥研究可提高持續時間與傷害。,Поджигает врага и наносит по 2 урона раз в секунду 5 раз. Исследования оружия и патронов увеличивают длительность и урон.,"Incendeia inimigos, causando 2 de dano a cada segundo, 5 vezes. Pesquisas de armas e munição aumentam a duração e o dano."
 item.pistol_advanced_ap_ammo,高级穿甲手枪弹,高級穿甲手槍彈,Улучшенные бронебойные пистолетные патроны,Munição perfurante avançada de pistola
 item.pistol_advanced_ap_ammo.desc,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня.",Penetração de nível 4. Mesmo dano base da munição perfurante com maior penetração contra armaduras de nível alto.
 item.rifle_advanced_ap_ammo,高级穿甲步枪弹,高級穿甲步槍彈,Улучшенные бронебойные винтовочные патроны,Munição perfurante avançada de fuzil

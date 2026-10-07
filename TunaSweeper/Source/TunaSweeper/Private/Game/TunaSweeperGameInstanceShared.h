@@ -77,6 +77,19 @@ namespace TunaSweeperShop
 	{
 		return ShopId > 0 && SlotIndex != INDEX_NONE && ItemId != INDEX_NONE;
 	}
+
+	inline int32 ResolveSavedStockSlot(const FTunaSweeperShopStockSaveData& Stock, const FTunaSweeperShopDefinition& Shop)
+	{
+		if (Shop.Items.IsValidIndex(Stock.SlotIndex) && Shop.Items[Stock.SlotIndex].ItemId == Stock.ItemId) return Stock.SlotIndex;
+		int32 Match = INDEX_NONE;
+		for (int32 Index = 0; Index < Shop.Items.Num(); ++Index)
+		{
+			if (Shop.Items[Index].ItemId != Stock.ItemId) continue;
+			if (Match != INDEX_NONE) return INDEX_NONE; // Ambiguous duplicate offers must not inherit arbitrary stock.
+			Match = Index;
+		}
+		return Match;
+	}
 }
 
 namespace TunaSweeperScenario
@@ -346,8 +359,22 @@ namespace TunaSweeperInventory
 		return NAME_None;
 	}
 
+	// Retired utility ammunition ID; never reuse it for another item.
+	inline int32 MigrateRetiredAmmoId(int32 ItemId)
+	{
+		return ItemId == 2023 ? 2002 : ItemId;
+	}
+
+	inline void MigrateRetiredAmmoReferences(FTunaSweeperItemInstance& ItemInstance)
+	{
+		ItemInstance.ItemId = MigrateRetiredAmmoId(ItemInstance.ItemId);
+		ItemInstance.LoadedAmmoItemId = MigrateRetiredAmmoId(ItemInstance.LoadedAmmoItemId);
+		ItemInstance.SelectedAmmoItemId = MigrateRetiredAmmoId(ItemInstance.SelectedAmmoItemId);
+	}
+
 	inline void NormalizeLoadedAmmoPersistenceFields(FTunaSweeperItemInstance& ItemInstance)
 	{
+		MigrateRetiredAmmoReferences(ItemInstance);
 		ItemInstance.LoadedAmmoCount = FMath::Max(0, ItemInstance.LoadedAmmoCount);
 
 		if (ItemInstance.LoadedAmmoItemId == INDEX_NONE)

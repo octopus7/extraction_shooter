@@ -22,7 +22,7 @@ Existing item IDs remain valid. The old jacket and vest now use defense 2 and 4 
 | 3 | AP | 2012 | 2022 | 2032 |
 | 4 | Advanced AP | 2013 | 2024 | 2033 |
 
-Incendiary rifle ammunition 2023 remains available as a special round with penetration tier 2. Existing projectile multipliers and bonuses are preserved. Advanced AP uses the same base projectile damage as its AP counterpart and doubles its sell price; the upgrade is penetration. New items reuse the matching existing icons and appear automatically in the development armory. Shop and world-loot distribution are not changed.
+These are the complete ammunition catalog: four variants for each of three calibers, twelve items total. Utility ammunition such as incendiary rounds is not available. Retired item ID 2023 is reserved for migration to standard rifle ammunition 2002. Advanced AP uses the same base projectile damage as its AP counterpart and doubles its sell price; the upgrade is penetration. New items reuse the matching existing icons and appear automatically in the development armory.
 
 ## Damage rule
 

@@ -353,7 +353,8 @@ When adding a field that should survive save/load:
 
 - Active enemy burn timers, tick phase, stack count, shot/application IDs, damage snapshots, damage-source references, and flame effects are transient combat state. They end with enemy death, EndPlay, or level travel and are not restored by save/load.
 - Weapon/ammunition burn research uses the existing AppliedResearchNodeIds and ActiveResearchStates fields. Only claimed nodes contribute; no new save field or version is required.
-- Incendiary ammunition (item 2023) and loaded incendiary rounds use existing inventory item instances and LoadedAmmoItemId/LoadedAmmoCount. Burn strength is derived from static item definitions and applied research at fire time, not serialized into each item.
+- Utility ammunition is retired. Item ID 2023 migrates to standard rifle ammunition 2002 for inventory/storage instances, loaded/selected rounds, restored item templates, and acquisition history. UID, quantity, loaded-round count, and attachments are retained. Save normalization applies the same conversion, so subsequent saves no longer write the retired item ID in item instances. ID 2023 must not be reused. The save version remains 22. Common burn effect and research state remain independent of the removed ammo item.
+- The retired shop offer's stock is discarded. Remaining offers retain their saved quantity after row removal by resolving the current slot for their item ID; ambiguous duplicate offers are not reassigned.
 
 ## Boss Combat Lab
 
