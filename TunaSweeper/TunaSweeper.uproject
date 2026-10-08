@@ -5,6 +5,11 @@
 	"Description": "",
 	"Modules": [
 		{
+			"Name": "CanopyRim",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		},
+		{
 			"Name": "TunaSweeperAnimGraph",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"

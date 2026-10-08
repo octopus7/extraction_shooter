@@ -18,6 +18,8 @@ public:
 	ATunaSweeperAnimeTreeActor();
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void PostRegisterAllComponents() override;
+	virtual void PostUnregisterAllComponents() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree", meta=(ClampMin="0", ClampMax="1.5", UIMin="0", UIMax="1.5"))
 	float WindStrength = 0.75f;
@@ -47,19 +49,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Gradient", meta=(ClampMin="0", ClampMax="1"))
 	float ClumpShadingStrength = .7f;
 
-	/** Soft paint near the projected outer canopy; all clumps share one envelope. Zero disables it. */
+	/** Soft paint from the shared visible canopy mask. Zero skips the extra mask draw. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Rim", meta=(ClampMin="0", ClampMax="1"))
 	float RimStrength = .7f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Rim")
 	FLinearColor RimColor = FLinearColor(.45f, 1.f, .025f);
-	/** Fraction of the shared canopy radius occupied by the soft edge band. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Rim", meta=(ClampMin="0.01", ClampMax="0.8"))
-	float RimWidth = .3f;
+	/** Interior band width in render pixels, before temporal upscaling. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Rim", meta=(ClampMin="1", ClampMax="128", UIMin="4", UIMax="64"))
+	float RimWidthPixels = 28.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Rim", meta=(ClampMin="0", ClampMax="4"))
 	float RimBrightness = 1.5f;
-	/** Fit the shared ellipsoid to the crown. Smaller values move the color band inward. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tree|Rim", meta=(ClampMin="0.25", ClampMax="2"))
-	float RimEnvelopeScale = .85f;
 
 	/** Editor property changes refresh automatically. Call after runtime BP property changes. */
 	UFUNCTION(BlueprintCallable, Category="Tree")
@@ -72,7 +71,7 @@ public:
 
 private:
 	void UpdateGradientData();
-	void UpdateRimData();
+	void UpdateRimMask();
 	void OnTreeComponentTransformUpdated(USceneComponent* Component, EUpdateTransformFlags Flags, ETeleportType Teleport);
 	bool bRefreshingTree = false;
 	UPROPERTY(Transient, DuplicateTransient) TObjectPtr<UMaterialInstanceDynamic> LeafInstance;

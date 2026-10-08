@@ -40,6 +40,7 @@ public class TunaSweeperEditor : ModuleRules
 			"ToolMenus",
 			"UATHelper",
 			"TunaSweeper",
+			"CanopyRim",
 		});
 	}
 }

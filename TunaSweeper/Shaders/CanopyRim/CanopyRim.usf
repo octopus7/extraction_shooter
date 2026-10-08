@@ -1,0 +1,125 @@
+#include "/Engine/Private/Common.ush"
+
+int2 MaskSize;
+int2 SourceMin;
+int2 SourceSize;
+int Radius;
+int Jump;
+int DebugMode;
+Texture2D CustomDepth;
+Texture2D SceneDepth;
+Texture2D SceneColor;
+Texture2D<uint2> Stencil;
+StructuredBuffer<float4> Styles;
+Texture2D<float4> MaskInput;
+Texture2D<float4> ClosedMask;
+Texture2D<float4> Seeds;
+RWTexture2D<float4> MaskOutput;
+
+bool Inside(int2 P) { return all(P >= 0) && all(P < MaskSize); }
+uint TreeId(int2 P)
+{
+    uint Id = Stencil.Load(int3(P,0)) STENCIL_COMPONENT_SWIZZLE;
+    return Id >= 16 && Styles[Id].a > 0 ? Id : 0;
+}
+float4 ReadMask(int2 P) { return MaskInput.Load(int3(clamp(P,0,MaskSize-1),0)); }
+
+[numthreads(8,8,1)]
+void MaskCS(uint3 DispatchId : SV_DispatchThreadID)
+{
+    int2 P = DispatchId.xy;
+    if (!Inside(P)) return;
+    float4 Result = 0;
+#if MASK_STAGE == 0
+    // Cover every source pixel, including partial blocks at odd viewport dimensions.
+    float Nearest = -1;
+    [unroll] for (int Y=0; Y<4; ++Y) [unroll] for (int X=0; X<4; ++X)
+    {
+        int2 Q = P*4+int2(X,Y);
+        if (any(Q >= SourceSize)) continue;
+        Q += SourceMin;
+        uint Id = TreeId(Q);
+        float Depth = CustomDepth.Load(int3(Q,0)).r;
+        if (Id && Depth > Nearest) { Nearest = Depth; Result.r = Id; }
+    }
+#elif MASK_STAGE == 1
+    Result = ReadMask(P);
+    // Preserve every existing ID; extend only into empty pixels, choosing the closest donor.
+    if (Result.r == 0)
+    {
+        int Best = 10000;
+        for (int Y=-Radius; Y<=Radius; ++Y) for (int X=-Radius; X<=Radius; ++X)
+        {
+            float4 V = ReadMask(P+int2(X,Y));
+            int D = X*X+Y*Y;
+            if (V.r > 0 && D < Best) { Best=D; Result=V; }
+        }
+    }
+#elif MASK_STAGE == 2
+    Result = ReadMask(P);
+    // Erode background expansion without deleting real input coverage or neighboring trees.
+    if (ClosedMask.Load(int3(P,0)).r == 0)
+        for (int Y=-Radius; Y<=Radius; ++Y) for (int X=-Radius; X<=Radius; ++X)
+            if (ReadMask(P+int2(X,Y)).r == 0) Result=0;
+#elif MASK_STAGE == 3
+    uint Id = uint(ReadMask(P).r);
+    bool Edge = false;
+    [unroll] for (int Y=-1; Y<=1; ++Y) [unroll] for (int X=-1; X<=1; ++X)
+        Edge = Edge || (Inside(P+int2(X,Y)) && uint(ReadMask(P+int2(X,Y)).r) != Id);
+    Result = Id && Edge ? float4(P,Id,1) : float4(0,0,Id,0);
+#elif MASK_STAGE == 4
+    uint Id = uint(ClosedMask.Load(int3(P,0)).r);
+    float Best = 1e20;
+    Result = float4(0,0,Id,0);
+    [unroll] for (int Y=-1; Y<=1; ++Y) [unroll] for (int X=-1; X<=1; ++X)
+    {
+        int2 Q = P+int2(X,Y)*Jump;
+        if (!Inside(Q)) continue;
+        float4 V = ReadMask(Q);
+        float D = dot(V.xy-P,V.xy-P);
+        if (Id && V.w > 0 && uint(V.z)==Id && D < Best) { Best=D; Result=V; }
+    }
+#endif
+    MaskOutput[P] = Result;
+}
+
+float WeightAt(int2 P, float2 Pixel, uint Id, float Width)
+{
+    if (!Inside(P)) return 0;
+    float4 Seed = Seeds.Load(int3(P,0));
+    if (Seed.w == 0 || uint(Seed.z) != Id) return 0;
+    float Distance = length(Seed.xy-Pixel)*4;
+    return 1-smoothstep(0,Width,Distance);
+}
+
+void CompositePS(noperspective float4 UVAndScreenPos : TEXCOORD0, out float4 OutColor : SV_Target0)
+{
+    uint2 Extent;
+    SceneColor.GetDimensions(Extent.x,Extent.y);
+    int2 P = int2(UVAndScreenPos.xy*Extent);
+    int2 Local = P-SourceMin;
+    float4 Base = SceneColor.Load(int3(P,0));
+    uint Id = TreeId(P);
+    float2 MP = (float2(Local)+.5)/4-.5;
+    if (DebugMode == 2) Id = uint(ClosedMask.Load(int3(clamp(int2(MP+.5),0,MaskSize-1),0)).r);
+    if (DebugMode == 1 || DebugMode == 2)
+    {
+        OutColor = float4(Id ? frac(float3(.618,.381,.173)*Id) : 0,1);
+        return;
+    }
+    OutColor = Base;
+    if (!Id) return;
+    // Only visible leaf surfaces: never paint a wall, trunk, ground, or the filled gap itself.
+    float CD = ConvertFromDeviceZ(CustomDepth.Load(int3(P,0)).r);
+    float SD = ConvertFromDeviceZ(SceneDepth.Load(int3(P,0)).r);
+    if (abs(CD-SD) > max(.5,SD*.0001)) return;
+    float Width = Styles[Id+256].x;
+    int2 Q = int2(floor(MP));
+    float2 T = frac(MP);
+    float Weight = lerp(lerp(WeightAt(Q,MP,Id,Width),WeightAt(Q+int2(1,0),MP,Id,Width),T.x),
+        lerp(WeightAt(Q+int2(0,1),MP,Id,Width),WeightAt(Q+1,MP,Id,Width),T.x),T.y)*Styles[Id].a;
+    if (DebugMode == 3) { OutColor = float4(Weight.xxx,1); return; }
+    float Luma = dot(Base.rgb,float3(.2126,.7152,.0722));
+    float3 Paint = Styles[Id].rgb*max(Luma,.02*View.PreExposure);
+    OutColor.rgb = lerp(Base.rgb,Paint,Weight);
+}

@@ -19,8 +19,10 @@
 #include "ImageUtils.h"
 #include "RenderingThread.h"
 #include "ContentStreaming.h"
+#include "CanopyRimSubsystem.h"
 #include "Misc/Paths.h"
 #include "HAL/FileManager.h"
+#include "HAL/IConsoleManager.h"
 
 namespace AnimeTreeTests
 {
@@ -41,85 +43,61 @@ UStaticMeshComponent* Shadow(ATunaSweeperAnimeTreeActor* Tree)
 }
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeRimTest, "TunaSweeper.AnimeTree.WholeCanopyRim",
-	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-bool FAnimeTreeRimTest::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeSharedMaskTest, "TunaSweeper.AnimeTree.SharedMask",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAnimeTreeSharedMaskTest::RunTest(const FString& Parameters)
 {
-	UClass* Class = AnimeTreeTests::TreeClass();
-	if (!TestNotNull(TEXT("Tree BP"), Class)) return false;
-	auto* Tree = FAutomationEditorCommonUtils::CreateNewMap()->SpawnActor<ATunaSweeperAnimeTreeActor>(Class);
-	auto CheckSharedFrame = [this, Tree]()
-	{
-		const auto Clumps = Tree->GetLeafClumps();
-		if (Clumps.IsEmpty()) return false;
-		// A point in space has one rim coordinate, regardless of the leaf component sampling it.
-		for (const FVector Point : {FVector(0,0,330), FVector(120,-80,400)})
-		{
-			FVector Reference = FVector::ZeroVector;
-			for (int32 I = 0; I < Clumps.Num(); ++I)
-			{
-				auto* C = Clumps[I]; const auto& Data = C->GetCustomPrimitiveData().Data;
-				if (!TestTrue(TEXT("Whole-canopy rim frame is supplied to each component"), Data.Num() >= 16)) return false;
-				const FVector P = C->GetComponentTransform().InverseTransformPosition(Tree->GetActorTransform().TransformPosition(Point));
-				FVector Normalized;
-				for (int32 Axis = 0; Axis < 3; ++Axis)
-				{
-					const int32 J = 4 + Axis * 4;
-					Normalized[Axis] = P.X*Data[J]+P.Y*Data[J+1]+P.Z*Data[J+2]+Data[J+3];
-				}
-				if (I == 0) Reference = Normalized;
-				else TestTrue(TEXT("Rim does not restart at clump boundaries"), Normalized.Equals(Reference, .0001));
-				TestFalse(TEXT("Rim coordinates remain finite"), Normalized.ContainsNaN());
-			}
-		}
-		// Independent route: transform a world ray through a clump, then its shared
-		// coordinate mapping. It must match the MID's direct camera-ray transform.
-		const auto& Data = Clumps[0]->GetCustomPrimitiveData().Data;
-		auto* MID = CastChecked<UMaterialInstanceDynamic>(Clumps[0]->GetMaterial(0));
-		const FName Names[] = {TEXT("RimViewX"), TEXT("RimViewY"), TEXT("RimViewZ")};
-		for (const FVector WorldRay : {FVector(.3,-.5,.8), FVector(-.7,.6,.2)})
-		{
-			const FVector LocalRay = Clumps[0]->GetComponentTransform().InverseTransformVector(WorldRay);
-			for (int32 Axis = 0; Axis < 3; ++Axis)
-			{
-				const int32 J = 4 + Axis*4;
-				const double Expected = LocalRay.X*Data[J]+LocalRay.Y*Data[J+1]+LocalRay.Z*Data[J+2];
-				const FLinearColor Row = MID->K2_GetVectorParameterValue(Names[Axis]);
-				const double Actual = WorldRay.X*Row.R+WorldRay.Y*Row.G+WorldRay.Z*Row.B;
-				TestTrue(TEXT("Camera rays stay in the same rim frame after rotated nonuniform scaling"), FMath::IsNearlyEqual(Actual,Expected,.000001));
-			}
-		}
-		return true;
-	};
-	if (!CheckSharedFrame()) { Tree->Destroy(); return false; }
-	auto* Leaf = AnimeTreeTests::Leaf(Tree);
-	const auto Before = Leaf->GetCustomPrimitiveData().Data;
-	Tree->GetLeafClumps().Last()->SetRelativeLocation(FVector(380,-180,490));
-	CheckSharedFrame();
-	TestFalse(TEXT("Moving an outer clump updates the shared rim envelope"), Before == Leaf->GetCustomPrimitiveData().Data);
-	Tree->SetActorTransform(FTransform(FRotator(15,40,5), FVector(500,-200,50), FVector(.75,1.2,.85)));
-	CheckSharedFrame();
-	Tree->GradientGuide->SetRelativeScale3D(FVector::ZeroVector);
-	CheckSharedFrame(); // Gradient-guide collapse must not invalidate the separate rim frame.
-	auto* Material = CastChecked<UMaterialInstanceDynamic>(Leaf->GetMaterial(0));
-	Tree->RimStrength = 0;
-	Tree->RimWidth = .45f;
-	Tree->RimBrightness = 2;
-	Tree->RimColor = FLinearColor(.8f,.3f,.1f);
-	Tree->RefreshTree();
-	TestEqual(TEXT("Rim can be fully disabled"), Material->K2_GetScalarParameterValue(TEXT("RimStrength")), 0.f);
-	TestEqual(TEXT("Rim width reaches the material"), Material->K2_GetScalarParameterValue(TEXT("RimWidth")), .45f);
-	TestEqual(TEXT("Rim brightness reaches the material"), Material->K2_GetScalarParameterValue(TEXT("RimBrightness")), 2.f);
-	TestEqual(TEXT("Rim color reaches the material"), Material->K2_GetVectorParameterValue(TEXT("RimColor")), Tree->RimColor);
-	Tree->SetActorScale3D(FVector::ZeroVector);
-	CheckSharedFrame();
-	for (FName Name : {FName(TEXT("RimViewX")), FName(TEXT("RimViewY")), FName(TEXT("RimViewZ"))})
-	{
-		const FLinearColor Row = Material->K2_GetVectorParameterValue(Name);
-		TestTrue(TEXT("Collapsed actor has a safe disabled rim frame"), Row.R == 0 && Row.G == 0 && Row.B == 0);
-	}
-	Tree->Destroy();
-	return true;
+    UClass* Class = AnimeTreeTests::TreeClass();
+    if (!TestNotNull(TEXT("Tree BP"), Class)) return false;
+    UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+    auto* A = World->SpawnActor<ATunaSweeperAnimeTreeActor>(Class);
+    auto* B = World->SpawnActor<ATunaSweeperAnimeTreeActor>(Class);
+    const auto Leaves = A->GetLeafClumps();
+    const int32 Id = Leaves[0]->CustomDepthStencilValue;
+    TestTrue(TEXT("Foliage uses its reserved mask ID range"), Id >= 16 && Id <= 255);
+    for (auto* Leaf : Leaves)
+    {
+        TestTrue(TEXT("Visible wind-deformed leaves participate in shared mask"), Leaf->bRenderCustomDepth);
+        TestEqual(TEXT("All clumps of one tree share one mask ID"), Leaf->CustomDepthStencilValue, Id);
+    }
+    TestTrue(TEXT("Different trees have different mask IDs"), B->GetLeafClumps()[0]->CustomDepthStencilValue != Id);
+    TestFalse(TEXT("Trunk is not part of leaf paint mask"), A->Trunk->bRenderCustomDepth);
+    TestFalse(TEXT("Fixed-basis shadow proxy is not the visible silhouette"), AnimeTreeTests::Shadow(A)->bRenderCustomDepth);
+    A->RimStrength = 0; A->RefreshTree();
+    for (auto* Leaf : A->GetLeafClumps()) TestFalse(TEXT("Disabled rim skips extra mask draw"), Leaf->bRenderCustomDepth);
+    TestEqual(TEXT("Quarter resolution rounds up odd dimensions"), UCanopyRimSubsystem::MaskExtent(FIntPoint(1921,1081)), FIntPoint(481,271));
+    TestEqual(TEXT("Small viewport never creates an empty texture"), UCanopyRimSubsystem::MaskExtent(FIntPoint(1,1)), FIntPoint(1,1));
+    A->RimStrength=1; A->RefreshTree();
+    TestTrue(TEXT("Re-enabled tree receives a live ID"), A->GetLeafClumps()[0]->bRenderCustomDepth);
+    A->LeafDensity=0; A->RefreshTree();
+    TestFalse(TEXT("Empty canopy skips mask draws"), A->GetLeafClumps()[0]->bRenderCustomDepth);
+    A->Destroy(); B->Destroy();
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeMaskRegistryTest, "TunaSweeper.AnimeTree.MaskRegistry",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAnimeTreeMaskRegistryTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+    auto* Registry = World->GetSubsystem<UCanopyRimSubsystem>();
+    if (!TestNotNull(TEXT("Shared world renderer"), Registry)) return false;
+    TArray<UObject*> Owners;
+    TSet<uint8> Ids;
+    for (int32 I=0; I<240; ++I)
+    {
+        UObject* Owner = World->SpawnActor<AActor>(); Owners.Add(Owner);
+        const uint8 Id = Registry->UpdateTree(Owner,FLinearColor::Green,1,28,1);
+        TestTrue(TEXT("All foliage IDs avoid existing outlines"), Id>=16);
+        TestFalse(TEXT("Live trees never share an ID"), Ids.Contains(Id)); Ids.Add(Id);
+        TestEqual(TEXT("Refreshing preserves an owner's ID"), Registry->UpdateTree(Owner,FLinearColor::Red,1,64,2),Id);
+    }
+    UObject* Overflow = World->SpawnActor<AActor>();
+    TestEqual(TEXT("Exhaustion disables instead of merging crowns"), Registry->UpdateTree(Overflow,FLinearColor::Green,1,28,1),uint8(0));
+    Registry->RemoveTree(Owners[42]);
+    TestEqual(TEXT("Released slot is reusable"),Registry->UpdateTree(Overflow,FLinearColor::Green,1,28,1),uint8(58));
+    Registry->RemoveTree(Overflow); CastChecked<AActor>(Overflow)->Destroy();
+    for (UObject* Owner : Owners) { Registry->RemoveTree(Owner); CastChecked<AActor>(Owner)->Destroy(); }
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeModularTest, "TunaSweeper.AnimeTree.Modular",
@@ -298,6 +276,8 @@ public:
 	FAutomationTestBase* Test;
 	UWorld* World;
 	ATunaSweeperAnimeTreeActor* Tree;
+	ATunaSweeperAnimeTreeActor* Other = nullptr;
+	AStaticMeshActor* Occluder = nullptr;
 	ADirectionalLight* Light;
 	AStaticMeshActor* Ground;
 	USceneCaptureComponent2D* Capture;
@@ -306,7 +286,7 @@ public:
 	TArray<int32> GreenPixels;
 	TArray<uint8> WindMask, CalmMask;
 	TArray<FColor> ForwardGradient;
-	TArray<FColor> RimReference;
+	TArray<FColor> RimReference, PairReference, BlockReference, MovingMask;
 	FString Directory = FPaths::ProjectSavedDir()/TEXT("AnimeTreeQA");
 
 	virtual bool Update() override
@@ -322,8 +302,31 @@ public:
             if (View == 12) Tree->GradientGuide->SetRelativeRotation(FRotator(0,180,0));
             if (View == 13) { Tree->GradientStrength=0; Tree->RefreshTree(); }
             if (View == 14) { Tree->GradientStrength=.65f; Tree->ClumpShadingStrength=.7f; Tree->GradientWidth=400; Tree->GradientGuide->SetRelativeRotation(FVector(.32,-.54,.78).Rotation()); Tree->GetLeafClumps()[0]->SetRelativeLocation(FVector(100,-90,380)); Tree->RefreshTree(); }
-			if (View == 15) Tree->RerunConstructionScripts();
+			if (View == 15) { Tree->RerunConstructionScripts(); Ground->SetActorHiddenInGame(true); }
 			if (View >= 15) { Tree->RimStrength = View == 15 || View == 17 ? 0.f : 1.f; Tree->RefreshTree(); }
+			if (View == 19)
+			{
+				Other = World->SpawnActor<ATunaSweeperAnimeTreeActor>(AnimeTreeTests::TreeClass());
+				Tree->SetActorTransform(FTransform(FRotator::ZeroRotator,FVector(0,-100,0),FVector(.8)));
+				Other->SetActorTransform(FTransform(FRotator(0,70,0),FVector(-80,145,20),FVector(.8)));
+				Tree->RimColor=FLinearColor(1,.04,.01); Other->RimColor=FLinearColor(.01,.08,1);
+				Tree->RimWidthPixels=Other->RimWidthPixels=32;
+			}
+			if (View >= 19)
+			{
+				Tree->SetActorTransform(FTransform(FRotator::ZeroRotator,FVector(0,-100,0),FVector(.8)));
+				Tree->RimStrength=Other->RimStrength=(View==19 || View==24) ? 0.f : 1.f;
+				Tree->SetTreeParameters(View>=26 ? 1.5f : 0.f,.8f,.45f);
+				Other->SetTreeParameters(View>=26 ? 1.5f : 0.f,.8f,.45f);
+				IConsoleManager::Get().FindConsoleVariable(TEXT("r.CanopyRim.Debug"))->Set(View==21 || View>=26 ? 1 : View==22 ? 2 : View==23 ? 3 : 0);
+			}
+			if (View==24)
+			{
+				Occluder=World->SpawnActor<AStaticMeshActor>();
+				Occluder->GetStaticMeshComponent()->SetStaticMesh(LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Cube.Cube")));
+				Occluder->SetActorLocation(FVector(430,0,400)); Occluder->SetActorScale3D(FVector(1.2,1.6,1.7));
+				Occluder->GetStaticMeshComponent()->SetCastShadow(false);
+			}
 			const FVector ViewFocus = View >= 15 ? FVector(0,0,340) : Focus;
             const FVector Camera = ViewFocus + (View >= 17 ? FVector(1050,0,520) : View >= 10 ? FVector(0,0,1200) : FRotator(0,Angle,0).RotateVector(FVector(1050,0,520)));
 			Capture->SetWorldLocationAndRotation(Camera,(ViewFocus-Camera).Rotation());
@@ -364,6 +367,41 @@ public:
 				Test->TestTrue(TEXT("Rim paints the visible outer canopy"), Changed > 500);
 				Test->TestTrue(TEXT("Rim leaves the common crown center unchanged"), CentralLeaves > 100 && CentralChanged < CentralLeaves*.05f);
 			}
+			if (View == 19) PairReference=TArray<FColor>(Pixels.AsBGRA8());
+			if (View == 24) BlockReference=TArray<FColor>(Pixels.AsBGRA8());
+			if (View == 26) MovingMask=TArray<FColor>(Pixels.AsBGRA8());
+			if (View == 20)
+			{
+				int32 Red=0,Blue=0;
+				for (int32 I=0;I<Mask.Num();++I)
+				{
+					FColor A=PairReference[I],B=Pixels.AsBGRA8()[I];
+					Red += int32(B.R)-A.R>20 && int32(A.G)-B.G>10;
+					Blue += int32(B.B)-A.B>20 && int32(A.G)-B.G>10;
+				}
+				Test->AddInfo(FString::Printf(TEXT("Shared two-tree paint: red %d, blue %d pixels"),Red,Blue));
+				Test->TestTrue(TEXT("Overlapping trees keep independent red/blue styles"),Red>200 && Blue>200);
+			}
+			if (View == 25)
+			{
+				int32 Opaque=0,Changed=0,Painted=0;
+				for (int32 I=0;I<Mask.Num();++I)
+				{
+					FColor A=BlockReference[I],B=Pixels.AsBGRA8()[I];
+					bool Diff=FMath::Abs(int32(A.R)-B.R)+FMath::Abs(int32(A.G)-B.G)+FMath::Abs(int32(A.B)-B.B)>6;
+					Painted+=Diff;
+					if (A.R>50 && FMath::Abs(int32(A.R)-A.G)<2 && FMath::Abs(int32(A.R)-A.B)<2) { ++Opaque; Changed+=Diff; }
+				}
+				Test->AddInfo(FString::Printf(TEXT("Foreground mask: changed %d/%d gray pixels; %d leaf paint pixels"),Changed,Opaque,Painted));
+				Test->TestTrue(TEXT("Foreground geometry is unchanged while leaves still receive paint"),Opaque>1000 && Changed==0 && Painted>200);
+			}
+			if (View == 27)
+			{
+				int32 Changed=0;
+				for (int32 I=0;I<Mask.Num();++I) Changed += MovingMask[I] != Pixels.AsBGRA8()[I];
+				Test->TestTrue(TEXT("Shared stencil mask follows actual wind-deformed cards each frame"),Changed>50);
+				Test->AddInfo(FString::Printf(TEXT("Wind mask changed pixels: %d"),Changed));
+			}
 			if (View == 12 && ForwardGradient.Num() == Mask.Num())
 			{
 				double ReversedSlope = 0;
@@ -382,17 +420,19 @@ public:
 			}
 			GreenPixels.Add(Green);
 			Test->AddInfo(FString::Printf(TEXT("View %d: %d green leaf pixels"), View, Green));
-			if (View < 3 || View >= 6) Test->TestTrue(TEXT("Colored alpha-masked canopy visible across views/transforms"), Green > 5000);
+			if (View < 3 || (View >= 6 && View <= 20)) Test->TestTrue(TEXT("Colored alpha-masked canopy visible across views/transforms"), Green > 5000);
 			IFileManager::Get().MakeDirectory(*Directory, true);
 			Test->TestTrue(TEXT("Tree render saved"), FImageUtils::SaveImageByExtension(*(Directory/FString::Printf(TEXT("tree_%d.png"),View)), Pixels));
 		}
 		ReadyAt = 0;
-		if (++View < 19) return false;
-		if (GreenPixels.Num() == 19)
+		if (++View < 28) return false;
+		if (GreenPixels.Num() >= 19)
 		{
 			Test->TestTrue(TEXT("Larger, denser canopy increases visible leaf coverage"), GreenPixels[4] > GreenPixels[3] + 5000);
 			Test->TestEqual(TEXT("Zero density hides all leaves in rendered image"), GreenPixels[5], 0);
 		}
+		IConsoleManager::Get().FindConsoleVariable(TEXT("r.CanopyRim.Debug"))->Set(0);
+		if (Other) Other->Destroy(); if (Occluder) Occluder->Destroy();
 		Capture->DestroyComponent(); Tree->Destroy(); Light->Destroy(); Ground->Destroy();
 		return true;
 	}
