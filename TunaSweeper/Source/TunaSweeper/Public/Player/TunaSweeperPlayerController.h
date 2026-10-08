@@ -13,6 +13,7 @@
 class ACameraActor;
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
+class UTunaSweeperStartupLogoWidget;
 class UTunaSweeperPauseMenuWidget;
 class UTunaSweeperTutorialPopupWidget;
 class UTunaSweeperQuestWidget;
@@ -238,6 +239,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro")
 	TObjectPtr<UTunaSweeperIntroMenuWidget> IntroMenuWidget;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperStartupLogoWidget> StartupLogoWidget;
+
 	UPROPERTY(BlueprintReadOnly, Category = "HUD")
 	TObjectPtr<UTunaSweeperIntroMenuWidget> DifficultyAdjustmentWidget;
 
@@ -277,6 +281,8 @@ protected:
 private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
+	bool TryStartDeveloperLogo();
+	void HandleDeveloperLogoFinished(bool bVideoCompleted);
 	void EnsureScenarioPresentationWidget();
 	void BindHousingStateChanged();
 	void HandleHousingStateChanged();

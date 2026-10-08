@@ -34,6 +34,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "UI/TunaSweeperStartupLogoWidget.h"
 #include "UI/TunaSweeperPauseMenuWidget.h"
 #include "UI/TunaSweeperTutorialPopupWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
@@ -475,7 +476,11 @@ void ATunaSweeperPlayerController::BeginPlay()
 	if (IsIntroMap())
 	{
 		ApplyInitialTitleDisplaySettings();
-		if (GetWorld())
+		if (TryStartDeveloperLogo())
+		{
+			// The logo owns the black startup frame and releases the title only after completion.
+		}
+		else if (GetWorld())
 		{
 			GetWorldTimerManager().SetTimerForNextTick(
 				FTimerDelegate::CreateUObject(this, &ATunaSweeperPlayerController::EnsureIntroMenuWidget));
@@ -504,6 +509,13 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (StartupLogoWidget)
+	{
+		StartupLogoWidget->OnFinished.Unbind();
+		StartupLogoWidget->Stop();
+		StartupLogoWidget->RemoveFromParent();
+		StartupLogoWidget = nullptr;
+	}
 	ActiveWardrobeActor.Reset();
 	ActiveDebugArmoryActor.Reset();
 	if (TutorialPopupWidget)
@@ -780,7 +792,7 @@ void ATunaSweeperPlayerController::EnsureGameHudWidget()
 
 void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 {
-	if (IntroMenuWidget || !IsLocalController())
+	if (IntroMenuWidget || StartupLogoWidget || !IsLocalController())
 	{
 		return;
 	}

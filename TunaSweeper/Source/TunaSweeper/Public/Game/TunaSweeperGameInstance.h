@@ -298,6 +298,13 @@ public:
 	bool bUnlockAllOutfitsOverride = true;
 
 	virtual void Init() override;
+
+	// Session guard is separate from the optional, currently disabled calendar-day policy.
+	bool TryBeginDeveloperLogo();
+	void RecordDeveloperLogoCompleted();
+	UPROPERTY(Config, EditDefaultsOnly, Category="TunaSweeper|Startup")
+	bool bDeveloperLogoOncePerDay = false;
+	bool bDeveloperLogoAttemptedThisSession = false;
 	virtual UTunaWarpTransitionProfile* GetWarpTransitionProfile_Implementation() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Settings")

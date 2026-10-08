@@ -14,6 +14,7 @@ public class TunaSweeper : ModuleRules
 		if (Target.bBuildEditor) PrivateDependencyModuleNames.Add("JsonUtilities");
 		PublicDependencyModuleNames.Add("ChaosVehicles");
 		PublicDependencyModuleNames.Add("AnimGraphRuntime");
+		PrivateDependencyModuleNames.Add("AudioMixer"); // Startup developer movie audio (UMediaSoundComponent).
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "UMG", "Slate", "SlateCore", "MediaAssets", "Niagara", "GameplayTags", "PhysicsCore", "ProceduralMeshComponent", "Chaos", "GeometryCollectionEngine", "FieldSystemEngine", "RaidLevelRuntime", "TunaWarpTransition", "MiyakovCharacterSystem" });
 
