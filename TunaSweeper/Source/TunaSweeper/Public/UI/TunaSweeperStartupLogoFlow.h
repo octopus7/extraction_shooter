@@ -14,8 +14,8 @@ namespace TunaSweeperStartupLogo
 	{
 		EPhase Phase = EPhase::Opening;
 		float Elapsed = 0.0f;
-		float FadeSeconds = 0.7f;
-		float StillSeconds = 1.5f;
+		float FadeSeconds = 0.25f;
+		float StillSeconds = 1.0f;
 		float BlackSeconds = 0.2f;
 		float OpeningTimeoutSeconds = 10.0f;
 		float VideoTimeoutSeconds = 30.0f;
@@ -26,6 +26,12 @@ namespace TunaSweeperStartupLogo
 
 		void Enter(EPhase Next) { Phase = Next; Elapsed = 0.0f; }
 		void Opened() { if (Phase == EPhase::Opening) Enter(EPhase::VideoFadeIn); }
+		bool SkipStill()
+		{
+			if (Phase != EPhase::Still) return false;
+			Enter(EPhase::FadeOut);
+			return true;
+		}
 		void EndVideo(bool Completed)
 		{
 			if (Phase != EPhase::Opening && Phase != EPhase::VideoFadeIn && Phase != EPhase::Video) return;

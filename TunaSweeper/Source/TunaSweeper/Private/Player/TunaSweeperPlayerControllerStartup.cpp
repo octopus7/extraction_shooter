@@ -12,8 +12,10 @@ bool ATunaSweeperPlayerController::TryStartDeveloperLogo()
 	StartupLogoWidget->OnFinished.BindUObject(this, &ThisClass::HandleDeveloperLogoFinished);
 	StartupLogoWidget->AddToViewport(2000);
 	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(StartupLogoWidget->TakeWidget());
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
+	StartupLogoWidget->SetKeyboardFocus();
 	bShowMouseCursor = false;
 	StartupLogoWidget->Start();
 	return true;
