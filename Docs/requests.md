@@ -10646,3 +10646,12 @@
 - 원본: SourceArt/Environment/AnimeTree에 생성 패턴, 베이크 PNG, 정확한 생성 프롬프트, 편집 가능한 trunk_stylized.blend와 사용 설명을 저장했다. Blender 파일은 원본 형상/UV, 투영 속성·셰이더, 패킹된 이미지와 미리보기 조명을 포함하며 내장 스크립트는 없다.
 - 검증: UE 5.7 TunaSweeper.AnimeTree.Assets/Modular/Parameters/Rendering 4종 모두 성공. 전후면 및 줄기 확대 GPU 캡처 확인. 원본 형상 일치, UV 최대 오차 2.98e-8, 패킹 이미지와 2048px 베이크 확인. 생성 스크립트 제거 후 새 UE 프로세스에서 저장된 텍스처/BP 재로드 및 BaseColor·Normal·Roughness·Specular 연결 검증 성공(0 errors, 0 warnings). C++ 변경이나 재빌드는 없었다. git diff --check 통과.
 - 정리: 일회성 투영·베이크·임포트·검증 스크립트와 중간 투영 데이터를 제거했다. 에디터 시작 시 생성 경로는 없다. TunaSweeper 프로젝트 에디터에서 나무 BP를 열었다. 기존 RaidMap.umap 변경은 본 작업에서 제외했다. 확인 범위에 데모 전용 구현 없음. UI/세이브 데이터 변경 없음.
+
+## 2026-10-09 04:13:59 (소요시간: 00:11:05)
+
+- 요청: 기존 나무의 잎 뭉치를 작게 재사용해 형태가 조금씩 다른 A/B/C 관목 BP를 만들고 줄기는 잎 틈으로만 조금 보이도록 구성.
+- 구현: /Game/Environment/AnimeBush에 BP_Bush_A(둥근 5뭉치), BP_Bush_B(낮고 넓은 6뭉치), BP_Bush_C(조금 높은 비대칭 5뭉치)를 저장했다. 기존 TunaSweeperAnimeTreeActor와 Round/Wide/Small 메시·잎 머티리얼을 재사용하며 각 BP의 LeafClump 컴포넌트를 복제/삭제/이동/회전/스케일 편집할 수 있다. 기존 나무 BP와 메시/텍스처는 변경하지 않았다.
+- 조절: 바람 0.75, 잎 크기 0.8, 표시량 0.45와 나무별 독립 MID/안정 그림자 프록시를 유지했다. 뭉치 컴포넌트 크기를 줄이고 GradientGuide를 관목 높이로 옮겼으며 공통 GradientWidth는 A/C 125cm, B 150cm다. 전체 그라데이션과 개별 뭉치 편집은 기존 기능을 그대로 사용한다.
+- 줄기: 공유 SM_Bush_Stems는 짧고 가는 336삼각형 가지 메시다. 단순 갈색 M_Bush_Stems(Roughness 0.92/Specular 0.1)를 사용하며 잎 사이로 조금만 드러난다. 작은 장식 관목으로 줄기/잎 모두 충돌·내비게이션 영향을 끄고 Blender/FBX 원본, 사용 설명, 실제 UE A/B/C 비교 캡처를 SourceArt/Environment/AnimeBush에 보관했다.
+- 검증: 새 프로세스에서 세 BP 재로드/생성, 5·6·5개 편집 컴포넌트, 기존 메시 공유, 작은 스케일, 파라미터 전달, 액터별 MID 독립성, 반복 갱신 후 그림자 수, 충돌 설정을 확인했다. 실제 GPU 앞·뒤·위 캡처로 입체적인 배치와 줄기 노출을 확인했다. 캡처 초기화 API와 명시적 화면 갱신 문제를 수정한 후 최종 캡처 프로세스는 정상 종료했다. 생성 코드 제거 후 동일 검증 재실행 성공(0 errors, 0 warnings). Blender 원본 336삼각형 및 내장 스크립트 없음 확인. git diff --check 통과.
+- 정리: 일회성 메시/BP 생성·검증·캡처 스크립트를 모두 제거했다. 시작 시 재생성 경로, C++ 변경, 빌드, UI/세이브 변경은 없다. 기존 RaidMap.umap 변경은 본 작업에서 제외했다. 확인 범위에서 데모 전용 구현 없음.
