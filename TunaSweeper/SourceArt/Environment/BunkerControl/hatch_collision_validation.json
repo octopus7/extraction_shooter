@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "hidden_pawn_only_collision": true,
+  "swept_directions": [
+    {
+      "approach": "north",
+      "stopped_cm_from_center": 116.16
+    },
+    {
+      "approach": "south",
+      "stopped_cm_from_center": 116.16
+    },
+    {
+      "approach": "east",
+      "stopped_cm_from_center": 101.04
+    },
+    {
+      "approach": "west",
+      "stopped_cm_from_center": 101.04
+    }
+  ],
+  "basement_interaction_reachable": true,
+  "actual_destination": "L_Basement",
+  "map_and_regular_saves_unchanged": true
+}
