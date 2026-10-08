@@ -5,10 +5,11 @@
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "Framework/Application/SlateApplication.h"
 
+// 연구실과 온라인 협동 버튼은 쓰지 않는다.
+
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
 	BindScreenWidgets();
-	EnsureLaboratoryMenu();
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyDemoNoticeVisualStyle();
@@ -26,7 +27,6 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	BindScreenWidgets();
-	EnsureLaboratoryMenu();
 	ResetTitleViewportLayoutState();
 	ApplyDemoNoticeVisualStyle();
 	HideLegacyDeleteHoldGaugeWidgets();
@@ -37,7 +37,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	BindScreenWidgets();
-	EnsureLaboratoryMenu();
 	ResetTitleViewportLayoutState();
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
@@ -61,7 +60,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		AlwaysSlowPresentationToggleButton,
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
 		FName(TEXT("AlwaysSlowPresentationToggleIndicator")));
-	EnsureOnlineCoopEntry();
 	EnsureSaveDataManagementSection();
 	EnsureLanguageOptionRows();
 	ApplyUnifiedControlStyles();

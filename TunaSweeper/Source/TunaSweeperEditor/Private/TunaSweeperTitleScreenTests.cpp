@@ -38,16 +38,9 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->AddToRoot();
 	TSharedRef<SWidget> Slate = Menu->TakeWidget();
 	Menu->BindScreenWidgets();
-	UButton* CoopEntry = Cast<UButton>(Menu->FindIntroWidget(TEXT("OnlineCoopButton")));
-	TestNotNull(TEXT("Online co-op entry is present in the composed title menu"), CoopEntry);
-	if (CoopEntry)
-	{
-		const USizeBox* CoopBox = Cast<USizeBox>(Menu->FindIntroWidget(TEXT("OnlineCoopButtonBox")));
-		TestTrue(TEXT("Online co-op entry has a sized vertical menu row"),
-			CoopBox && CoopEntry->GetParent() == CoopBox && Cast<UVerticalBoxSlot>(CoopBox->Slot));
-		TestTrue(TEXT("Online co-op entry binds its open action"), CoopEntry->OnClicked.IsBound());
-		TestNotNull(TEXT("Online co-op entry has a label"), Menu->FindIntroWidget(TEXT("OnlineCoopButtonText")));
-	}
+	for (const TCHAR* Name : { TEXT("LaboratoryButton"), TEXT("LaboratoryButtonBox"),
+		TEXT("OnlineCoopButton"), TEXT("OnlineCoopButtonBox") })
+		TestNull(FString::Printf(TEXT("Unused title entry is absent: %s"), Name), Menu->FindIntroWidget(Name));
 	TestNull(TEXT("Demo version ribbon is absent from the title menu"), Menu->DemoBuildImage.Get());
 	TestNull(TEXT("Demo version ribbon has no attached widget"), Menu->FindIntroWidget(TEXT("DemoBuildImage")));
 	TestNull(TEXT("Wishlist button is absent from the title menu"), Menu->FindIntroWidget(TEXT("SteamDemoWishlistButton")));
@@ -175,11 +168,6 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->TickMenuTransitions(1.0f);
 	TestEqual(TEXT("Settings closes after exit fade"), Menu->SettingsPanel->GetVisibility(), ESlateVisibility::Collapsed);
 	TestEqual(TEXT("Main menu visible after exit"), Menu->MainMenuPanel->GetVisibility(), ESlateVisibility::Visible);
-	Menu->SetNamedText(TEXT("OnlineCoopButtonText"), PreviewStrings->ResolveText(
-		TEXT("ui.coop.title"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
-	if (Menu->FindIntroWidget(TEXT("LaboratoryButtonText")))
-		Menu->SetNamedText(TEXT("LaboratoryButtonText"), PreviewStrings->ResolveText(
-			TEXT("ui.lab.title"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	Menu->InvalidateLayoutAndVolatility();
 	FSlateApplication::Get().InvalidateAllWidgets(true);
 	Slate->Invalidate(EInvalidateWidgetReason::Layout | EInvalidateWidgetReason::Paint);
@@ -189,12 +177,6 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	if (Target)
 	{
 		SaveCapture(Target, TEXT("TitleMain.png"));
-		if (CoopEntry)
-		{
-			const FGeometry& Geometry = CoopEntry->GetCachedGeometry();
-			TestTrue(TEXT("Online co-op entry is laid out"), Geometry.GetLocalSize().X > 100.f && Geometry.GetLocalSize().Y > 10.f);
-			TestTrue(TEXT("Online co-op entry fits the title viewport"), Geometry.GetAbsolutePosition().Y >= 0.f && Geometry.GetAbsolutePosition().Y + Geometry.GetAbsoluteSize().Y <= 1080.f);
-		}
 	}
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(1.0f);

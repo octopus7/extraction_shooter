@@ -96,6 +96,9 @@ bool FTunaSweeperCoopPresentationTest::RunTest(const FString&)
 	TStrongObjectPtr<UTunaSweeperIntroMenuWidget> Menu(CreateWidget<UTunaSweeperIntroMenuWidget>(Controller, MenuClass));
 	if (!TestNotNull(TEXT("Localized composed title menu"), Menu.Get())) return false;
 	TSharedRef<SWidget> MenuSlate = Menu->TakeWidget();
+	TestNull(TEXT("Unused co-op entry is absent by default"), Menu->FindIntroWidget(TEXT("OnlineCoopButton")));
+	TestNull(TEXT("Unused laboratory entry is absent by default"), Menu->FindIntroWidget(TEXT("LaboratoryButton")));
+	Menu->EnsureOnlineCoopEntry();
 	UTextBlock* EntryLabel = Cast<UTextBlock>(Menu->FindIntroWidget(TEXT("OnlineCoopButtonText")));
 	if (!TestNotNull(TEXT("Runtime title co-op label exists"), EntryLabel)) return false;
 	UVerticalBox* MainStack = Cast<UVerticalBox>(Menu->FindIntroWidget(TEXT("MainMenuPanel")));

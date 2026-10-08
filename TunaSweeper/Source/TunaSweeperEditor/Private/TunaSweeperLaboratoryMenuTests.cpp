@@ -31,6 +31,8 @@ bool FTunaSweeperLaboratoryMenuTest::RunTest(const FString& Parameters)
 	Menu->BindScreenWidgets();
 	UVerticalBox* Stack = Cast<UVerticalBox>(Menu->FindIntroWidget(TEXT("MainMenuPanel")));
 	TestNotNull(TEXT("Main menu button stack exists"), Stack);
+	TestNull(TEXT("Unused laboratory entry is absent by default"), Menu->LaboratoryButton.Get());
+	Menu->EnsureLaboratoryMenu();
 	TestNotNull(TEXT("Laboratory menu button exists"), Menu->LaboratoryButton.Get());
 	UGameInstance* PreviewInstance = NewObject<UGameInstance>();
 	UTunaSweeperTextSubsystem* Strings = NewObject<UTunaSweeperTextSubsystem>(PreviewInstance);
