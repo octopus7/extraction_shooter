@@ -7,12 +7,13 @@
 class UMediaSource;
 class UTunaSweeperLevelTransitionWidget;
 
-/** The two gameplay destinations available in the current demo. */
+/** Shared gameplay destinations selected by placed travel actors. */
 UENUM(BlueprintType)
 enum class ETunaSweeperLevelTravelDestination : uint8
 {
 	Bunker UMETA(DisplayName = "Bunker"),
-	Raid UMETA(DisplayName = "Raid")
+	Raid UMETA(DisplayName = "Raid"),
+	Basement UMETA(DisplayName = "Basement")
 };
 
 /** Shared transition presentation selected by a logical level-travel destination. */

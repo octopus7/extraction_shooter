@@ -1,0 +1,4 @@
+Generator: built-in imagegen; opaque background; new image.
+Final prompt: A square flat material atlas for a temporary low-poly bunker control room. Four equal quadrants with clean boundaries: top left warm ivory painted plaster with a muted sage lower strip; top right muted teal steel panels; bottom left warm timber floor planks; bottom right cyan abstract monitor diagrams on dark teal. Soft hand-painted game texture, broad details, minimal noise, no readable text, no perspective, no objects or borders beyond the quadrant division.
+Output: Textures/T_BunkerControl_Atlas.png
+The atlas is shared by wall, steel, timber and emissive screen materials using UV quadrants.

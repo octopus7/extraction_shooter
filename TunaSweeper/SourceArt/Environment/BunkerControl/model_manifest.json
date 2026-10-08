@@ -1,0 +1,94 @@
+{
+  "texture": "Textures/T_BunkerControl_Atlas.png",
+  "texture_generation": "built-in imagegen",
+  "wall_count": 3,
+  "roof": false,
+  "room_size_cm": [
+    700,
+    600,
+    240
+  ],
+  "spiral_steps": 16,
+  "spiral_rise_cm": 300,
+  "materials": {
+    "Wall": {
+      "name": "M_BunkerControl_Wall",
+      "metallic": 0,
+      "roughness": 0.85,
+      "emission": 0
+    },
+    "Steel": {
+      "name": "M_BunkerControl_Steel",
+      "metallic": 0.65,
+      "roughness": 0.55,
+      "emission": 0
+    },
+    "Floor": {
+      "name": "M_BunkerControl_Floor",
+      "metallic": 0,
+      "roughness": 0.75,
+      "emission": 0
+    },
+    "Screen": {
+      "name": "M_BunkerControl_Screen",
+      "metallic": 0.05,
+      "roughness": 0.35,
+      "emission": 1.2
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_BunkerControl_RoomShell",
+      "triangles": 84,
+      "collision_boxes": 4,
+      "materials": [
+        "M_BunkerControl_Floor",
+        "M_BunkerControl_Wall",
+        "M_BunkerControl_Steel"
+      ],
+      "blender_bounds_cm": [
+        -358.99999141693115,
+        -311.9999885559082,
+        -20.000000298023224,
+        358.99999141693115,
+        300.0,
+        245.00000476837158
+      ]
+    },
+    {
+      "name": "SM_BunkerControl_Consoles",
+      "triangles": 288,
+      "collision_boxes": 4,
+      "materials": [
+        "M_BunkerControl_Steel",
+        "M_BunkerControl_Floor",
+        "M_BunkerControl_Screen"
+      ],
+      "blender_bounds_cm": [
+        -122.50000238418579,
+        -256.9999933242798,
+        0.0,
+        301.99999809265137,
+        -53.999996185302734,
+        175.99999904632568
+      ]
+    },
+    {
+      "name": "SM_BunkerControl_SpiralStair",
+      "triangles": 920,
+      "collision_boxes": 1,
+      "materials": [
+        "M_BunkerControl_Steel"
+      ],
+      "blender_bounds_cm": [
+        -107.66992568969727,
+        -107.66992568969727,
+        0.0,
+        107.66992568969727,
+        107.66992568969727,
+        409.47790145874023
+      ]
+    }
+  ],
+  "total_triangles": 1292
+}

@@ -1,0 +1,73 @@
+{
+  "meshes": [
+    {
+      "name": "SM_BunkerControl_RoomShell",
+      "uv": 2,
+      "collisions": 4,
+      "center": [
+        0.0,
+        6.0,
+        112.5
+      ],
+      "extent": [
+        359.0000305175781,
+        306.0000305175781,
+        132.5
+      ]
+    },
+    {
+      "name": "SM_BunkerControl_Consoles",
+      "uv": 2,
+      "collisions": 4,
+      "center": [
+        89.7500228881836,
+        155.49999618530273,
+        88.0
+      ],
+      "extent": [
+        212.25000762939453,
+        101.50000381469727,
+        88.0
+      ]
+    },
+    {
+      "name": "SM_BunkerControl_SpiralStair",
+      "uv": 2,
+      "collisions": 1,
+      "center": [
+        0.0,
+        0.0,
+        204.73895263671875
+      ],
+      "extent": [
+        107.66992950439453,
+        107.66992950439453,
+        204.73895263671875
+      ]
+    }
+  ],
+  "passed": true,
+  "original_actors_unchanged": 105,
+  "map": "/Game/Maps/BunkerMap",
+  "room_origin_cm": [
+    -2800,
+    -2200,
+    0
+  ],
+  "entry_cm": [
+    -705,
+    -230,
+    6
+  ],
+  "stair_cm": [
+    -720,
+    -175,
+    6
+  ],
+  "basement_cm": [
+    -90,
+    615,
+    12
+  ],
+  "stair_scale": 0.65
+}

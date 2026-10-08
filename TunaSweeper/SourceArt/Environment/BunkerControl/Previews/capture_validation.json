@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "captures": [
+    {
+      "view": "Room",
+      "bytes": 1500612
+    },
+    {
+      "view": "Entrances",
+      "bytes": 1442711
+    }
+  ],
+  "saved_map_unchanged": true
+}

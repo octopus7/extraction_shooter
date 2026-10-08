@@ -56,11 +56,11 @@ void UTunaSweeperScreenFadeWidget::NativeTick(const FGeometry& MyGeometry, float
 	}
 }
 
-void UTunaSweeperScreenFadeWidget::StartFadeFromBlack(float DurationSeconds)
+void UTunaSweeperScreenFadeWidget::StartFadeFromBlack(float DurationSeconds, FSimpleDelegate InFadeFinishedDelegate)
 {
 	BuildFadeWidget();
 	FadeDirection = EFadeDirection::FromBlack;
-	FadeFinishedDelegate.Unbind();
+	FadeFinishedDelegate = InFadeFinishedDelegate;
 	FadeDurationSeconds = FMath::Max(0.01f, DurationSeconds);
 	FadeElapsedSeconds = 0.0f;
 	bFadeActive = true;

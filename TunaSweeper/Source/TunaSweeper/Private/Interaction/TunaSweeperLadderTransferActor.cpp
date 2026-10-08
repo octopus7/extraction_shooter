@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
+#include "UI/TunaSweeperScreenFadeWidget.h"
 
 ATunaSweeperLadderTransferActor::ATunaSweeperLadderTransferActor()
 {
@@ -85,12 +87,74 @@ bool ATunaSweeperLadderTransferActor::ResolveTransferDestination(
 
 bool ATunaSweeperLadderTransferActor::CanTransferPlayer(APawn* InstigatorPawn) const
 {
+	const APlayerController* Controller = IsValid(InstigatorPawn)
+		? Cast<APlayerController>(InstigatorPawn->GetController()) : nullptr;
 	FVector Location;
 	FRotator Rotation;
-	return ResolveTransferDestination(InstigatorPawn, Location, Rotation);
+	return !bTransferActive && Controller && !Controller->IsMoveInputIgnored() &&
+		ResolveTransferDestination(InstigatorPawn, Location, Rotation);
 }
 
 bool ATunaSweeperLadderTransferActor::TryTransferPlayer(APawn* InstigatorPawn)
+{
+	if (!CanTransferPlayer(InstigatorPawn)) return false;
+	if (!bUseScreenFade) return ExecuteTransfer(InstigatorPawn);
+	auto* Controller = Cast<APlayerController>(InstigatorPawn->GetController());
+	if (!Controller || !Controller->IsLocalController() || !Controller->GetLocalPlayer()) return false;
+	TransferFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(Controller, UTunaSweeperScreenFadeWidget::StaticClass());
+	if (!TransferFadeWidget) return false;
+	PendingPawn = InstigatorPawn;
+	PendingController = Controller;
+	bTransferActive = true;
+	CastChecked<ATunaSweeperTopDownCharacter>(InstigatorPawn)->CancelActiveGameplayActions();
+	CastChecked<ATunaSweeperTopDownCharacter>(InstigatorPawn)->GetCharacterMovement()->StopMovementImmediately();
+	InstigatorPawn->ConsumeMovementInputVector();
+	Controller->StopMovement();
+	Controller->SetIgnoreMoveInput(true);
+	Controller->SetIgnoreLookInput(true);
+	TransferFadeWidget->AddToViewport(10000);
+	TransferFadeWidget->StartFadeToBlack(ScreenFadeSeconds,
+		FSimpleDelegate::CreateUObject(this, &ThisClass::CompleteFadedTransfer));
+	return true;
+}
+
+void ATunaSweeperLadderTransferActor::CompleteFadedTransfer()
+{
+	if (ExecuteTransfer(PendingPawn.Get()))
+	{
+		if (APlayerController* Controller = PendingController.Get())
+			if (Controller->PlayerCameraManager) Controller->PlayerCameraManager->SetGameCameraCutThisFrame();
+	}
+	if (TransferFadeWidget)
+		TransferFadeWidget->StartFadeFromBlack(ScreenFadeSeconds,
+			FSimpleDelegate::CreateUObject(this, &ThisClass::FinishFadedTransfer));
+	else FinishFadedTransfer();
+}
+
+void ATunaSweeperLadderTransferActor::FinishFadedTransfer()
+{
+	if (bTransferActive)
+	{
+		if (APlayerController* Controller = PendingController.Get())
+		{
+			Controller->SetIgnoreMoveInput(false);
+			Controller->SetIgnoreLookInput(false);
+		}
+	}
+	if (TransferFadeWidget) TransferFadeWidget->RemoveFromParent();
+	TransferFadeWidget = nullptr;
+	PendingPawn.Reset();
+	PendingController.Reset();
+	bTransferActive = false;
+}
+
+void ATunaSweeperLadderTransferActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	FinishFadedTransfer();
+	Super::EndPlay(EndPlayReason);
+}
+
+bool ATunaSweeperLadderTransferActor::ExecuteTransfer(APawn* InstigatorPawn)
 {
 	FVector Location;
 	FRotator Rotation;

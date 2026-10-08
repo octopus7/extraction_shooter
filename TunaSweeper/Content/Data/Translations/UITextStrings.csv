@@ -1,4 +1,7 @@
 string_key,zh-Hans,zh-Hant,ru,pt-BR
+ui.interaction.travel_basement,前往地下室,前往地下室,Перейти в подвал,Ir para o porão
+ui.interaction.travel_control_room,进入控制室,進入控制室,Войти в диспетчерскую,Entrar na sala de controle
+ui.interaction.return_bunker,返回地堡,返回地堡,Вернуться в бункер,Voltar ao bunker
 ui.item_info.defense_specs,护甲属性,護甲屬性,Характеристики брони,Especificações da armadura
 ui.item_info.defense,基础防御,基礎防禦,Базовая защита,Defesa base
 ui.item_info.ammo_specs,弹药属性,彈藥屬性,Характеристики боеприпасов,Especificações da munição

@@ -5,6 +5,8 @@
 #include "TunaSweeperLadderTransferActor.generated.h"
 
 class ATunaSweeperTopDownCharacter;
+class APlayerController;
+class UTunaSweeperScreenFadeWidget;
 
 /** A paired, same-world ladder endpoint. ArrivalPoint is authored at the walkable floor. */
 UCLASS(BlueprintType, Blueprintable)
@@ -39,6 +41,27 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Ladder", meta = (ClampMin = "0.0", Units = "cm"))
 	float ArrivalClearanceCm = 2.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Ladder|Presentation")
+	bool bUseScreenFade = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Ladder|Presentation", meta = (ClampMin = "0.01", Units = "s"))
+	float ScreenFadeSeconds = 0.2f;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Ladder")
+	bool IsTransferActive() const { return bTransferActive; }
+
+protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
 	bool ResolveTransferDestination(APawn* InstigatorPawn, FVector& OutLocation, FRotator& OutRotation) const;
+	bool ExecuteTransfer(APawn* InstigatorPawn);
+	void CompleteFadedTransfer();
+	void FinishFadedTransfer();
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperScreenFadeWidget> TransferFadeWidget;
+	TWeakObjectPtr<APawn> PendingPawn;
+	TWeakObjectPtr<APlayerController> PendingController;
+	bool bTransferActive = false;
 };

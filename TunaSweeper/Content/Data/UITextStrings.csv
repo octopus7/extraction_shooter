@@ -1,4 +1,7 @@
 string_key,ko,en,ja
+ui.interaction.travel_basement,지하실로 이동,Go to basement,地下室へ移動
+ui.interaction.travel_control_room,관제실로 이동,Enter control room,管制室へ移動
+ui.interaction.return_bunker,벙커로 돌아가기,Return to bunker,バンカーに戻る
 ui.item_info.defense_specs,방어구 스펙,Armor Specs,防具性能
 ui.item_info.defense,기본 방어력,Base Defense,基本防御力
 tool.save.code,오류 코드,Error code,エラーコード

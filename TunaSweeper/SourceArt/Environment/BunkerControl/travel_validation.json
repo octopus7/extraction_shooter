@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "saved_pairing_and_fade": true,
+  "meshless_interactions": true,
+  "mesh_uv_collision_materials": true,
+  "three_wall_room_same_level": true,
+  "outbound_fade_same_world_and_input_restore": true,
+  "return_fade_and_safe_floor": true,
+  "target_removed_mid_fade_recovers": true,
+  "source_destroyed_mid_fade_releases_input": true,
+  "actual_basement_destination": "L_Basement",
+  "saved_assets_and_regular_saves_unchanged": true
+}

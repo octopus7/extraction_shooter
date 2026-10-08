@@ -12,7 +12,7 @@ class TUNASWEEPER_API UTunaSweeperScreenFadeWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void StartFadeFromBlack(float DurationSeconds = 1.0f);
+	void StartFadeFromBlack(float DurationSeconds = 1.0f, FSimpleDelegate InFadeFinishedDelegate = FSimpleDelegate());
 	void StartFadeToBlack(float DurationSeconds = 1.0f, FSimpleDelegate InFadeFinishedDelegate = FSimpleDelegate());
 
 protected:
