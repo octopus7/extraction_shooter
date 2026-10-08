@@ -30,6 +30,7 @@ public class TunaSweeperEditor : ModuleRules
 			"UMGEditor",
 			"PropertyEditor",
 			"RenderCore",
+			"RHI", // Anime-tree render validation checks the active shader platform.
 			"MeshDescription",
 			"SkeletalMeshDescription",
 			"AnimGraph",

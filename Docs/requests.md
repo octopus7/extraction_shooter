@@ -10618,3 +10618,13 @@
 - 원인/수정: 이전 본편 미리보기에 사용한 NoStoreFull 명령줄 인자가 에디터 시작 시 SelectBuildTarget을 통해 패키징 설정에만 저장되어, 저장된 SteamDemo 미리보기 설정과 불일치했다. Startup/RegisterMenus는 ApplyBuildTarget(..., false)로 메모리 상태만 적용하고, 사용자의 명시적인 메뉴 선택만 두 대상을 함께 저장한다. 같은 값을 다시 선택해도 저장하며 자동 패키징은 명시 선택 경로에서만 실행한다. 기본 저장 설정은 NoStoreFull/TunaSweeperNoStore로 일치시켰다. 기본 배포 ini의 Steam 값은 타깃별 CustomConfig가 덮는 공통 기본값이며, NoStore CustomConfig는 None/Full, Steam은 Steam/Full, Stove는 Stove/Full로 유지한다.
 - 검증: 설정 불일치를 읽기 전용 Python 테스트에서 먼저 재현한 뒤 6개 타깃/채널/판본 및 저장 설정 일치 테스트 2개 통과. UE 5.7 Editor Development 빌드 성공. TunaSweeper.StartupLogo.PolicyAndAssets에 본편 3개/데모 3개 조합을 추가해 성공. SteamDemo 임시 명령줄 설정으로 실행한 전후 DefaultGame.ini SHA256 동일(EditorTestExit=0, DefaultGameUnchanged=True). 별도 코드 검토에서 추가 결함 없음. git diff --check 통과. 패키징은 수행하지 않았다.
 - 문서: Docs/save_persistence.md에 판본/채널 독립성과 설정 저장 규칙을 명시. 관련 없는 다른 작업의 UI 및 에디터 테스트 변경은 포함하지 않았다.
+
+
+## 2026-10-09 00:55:33 (소요시간: 00:42:54)
+
+- 요청: astra-prochat-models/foliage_tree_web_v06의 웹 애니스타일 나무를 분석·이식하고 조절 가능한 BP 에셋을 만들기. 첨부 화면의 바람 75%, 잎 카드 크기 0.80, 표시량 45%를 중간 수준 기본값으로 사용.
+- 구현: /Game/Environment/AnimeTree/BP_AnimeFoliageTree와 줄기/잎 메시, 머티리얼 2개, 원본 텍스처 4개를 생성했다. 웹의 줄기 39,876삼각형과 잎 카드 2,880장/5,760삼각형을 유지했다. 미터 단위 Y-up 원본을 UE 센티미터로 변환하고 카드 중심점·회전 위상·초기 오프셋·수관 그룹·고정 음영을 보존했다. SourceArt/Environment/AnimeTree에 원본 JSON/PNG와 사용 설명을 보관했다.
+- 조절/움직임: WindStrength 0.75(0–1.5), LeafCardScale 0.80(0.2–1.4), LeafDensity 0.45(0–1). 에디터 Details에서 즉시 갱신되며 런타임 BP에서는 SetTreeParameters 또는 RefreshTree를 사용한다. 웹 v06의 카메라 방향 빌보드, 중심점 기준 흔들림, 그룹별 미세 이동, 결정적인 카드 표시량을 GPU WPO/마스크로 이식했다. 개별·복제 BP는 독립적인 MID를 사용한다.
+- 렌더링: 잎은 원본 고정 음영을 유지하는 양면 Masked/Unlit, 알파 기준 0.48. 카메라에 따른 그림자 변화를 막기 위해 같은 카드 데이터와 파라미터를 쓰는 별도 ShadowProxy를 사용했다. 줄기는 원본 BaseColor/DX Normal/Roughness와 UE 조명에 연결했다. 빌보드/바람용 bounds 여유를 적용했으며 충돌은 줄기에만 있다. 런타임 저장 데이터나 데모/스토어 채널 분기는 추가하지 않았다.
+- 검증: UE 5.7 Editor Development 최종 빌드 성공. TunaSweeper.AnimeTree.Assets/Parameters/Rendering 3개 자동화 검사 모두 통과. 저장된 BP 재로드, 5개 UV 채널/원본 형상, 기본값과 범위, 복제 독립성, 앞·옆·뒤 및 회전/비균등 스케일 실제 GPU 렌더를 확인했다. 시간 경과 시 기본 바람은 잎 픽셀이 변하고 바람 0은 변화가 없으며, 표시량 0은 잎 픽셀이 0임을 확인했다. 검증 캡처는 GPU 프레임 갱신을 기다리고 sRGB 중복 변환을 방지한다. 캡처 위치는 Saved/AnimeTreeQA. 별도 읽기 전용 코드 검토에서 추가 결함 없음.
+- 정리: 일회성 에셋 생성 commandlet과 전용 StaticMeshDescription 의존성을 제거한 뒤 재빌드·전체 검증을 다시 통과했다. 에디터 시작 시 재생성 경로는 없다. 기존 게임플레이 맵은 변경하지 않았으며 원본 형상을 유지하는 BP이므로 대량 숲 배치용 거리 LOD는 별도 작업이다. TunaSweeper 프로젝트와 나무 BP를 에디터로 열었다.

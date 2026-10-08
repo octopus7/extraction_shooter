@@ -1,0 +1,241 @@
+#if WITH_DEV_AUTOMATION_TESTS
+#include "Misc/AutomationTest.h"
+#include "Environment/TunaSweeperAnimeTreeActor.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/Blueprint.h"
+#include "Engine/StaticMesh.h"
+#include "Materials/Material.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "MaterialShared.h"
+#include "MeshDescription.h"
+#include "Editor.h"
+#include "Tests/AutomationEditorCommon.h"
+#include "AssetCompilingManager.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Components/DirectionalLightComponent.h"
+#include "Engine/DirectionalLight.h"
+#include "Engine/StaticMeshActor.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "RenderingThread.h"
+#include "ContentStreaming.h"
+#include "Misc/Paths.h"
+#include "HAL/FileManager.h"
+
+namespace AnimeTreeTests
+{
+UClass* TreeClass()
+{
+	return LoadClass<ATunaSweeperAnimeTreeActor>(nullptr, TEXT("/Game/Environment/AnimeTree/BP_AnimeFoliageTree.BP_AnimeFoliageTree_C"));
+}
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeAssetTest, "TunaSweeper.AnimeTree.Assets",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAnimeTreeAssetTest::RunTest(const FString& Parameters)
+{
+	UClass* Class = AnimeTreeTests::TreeClass();
+	if (!TestNotNull(TEXT("Placeable tree BP exists"), Class)) return false;
+	FAssetCompilingManager::Get().FinishAllCompilation();
+	auto* Tree = CastChecked<ATunaSweeperAnimeTreeActor>(Class->GetDefaultObject());
+	TestEqual(TEXT("Requested wind default"), Tree->WindStrength, .75f);
+	TestEqual(TEXT("Requested card scale default"), Tree->LeafCardScale, .8f);
+	TestEqual(TEXT("Requested density default"), Tree->LeafDensity, .45f);
+	TestFalse(TEXT("No per-frame CPU actor work"), Tree->PrimaryActorTick.bCanEverTick);
+	if (!TestNotNull(TEXT("Trunk mesh"), Tree->Trunk->GetStaticMesh().Get()) ||
+		!TestNotNull(TEXT("Foliage mesh"), Tree->Leaves->GetStaticMesh().Get()) ||
+		!TestNotNull(TEXT("Leaf material"), Tree->LeafMaterial.Get())) return false;
+	TestEqual(TEXT("Shadow uses same card data"), Tree->ShadowProxy->GetStaticMesh(), Tree->Leaves->GetStaticMesh());
+	TestFalse(TEXT("Camera billboards do not cast unstable shadows"), bool(Tree->Leaves->CastShadow));
+	TestTrue(TEXT("Stable proxy casts shadows"), bool(Tree->ShadowProxy->CastShadow));
+	TestFalse(TEXT("Shadow proxy is absent from main pass"), bool(Tree->ShadowProxy->bRenderInMainPass));
+	TestTrue(TEXT("Bounds account for billboard expansion"), Tree->Leaves->BoundsScale >= 2.f);
+	TestEqual(TEXT("No foliage collision"), Tree->Leaves->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
+	const UMaterial* Material = Tree->LeafMaterial->GetMaterial();
+	TestNotNull(TEXT("Leaf color graph survives serialization"), Material->GetEditorOnlyData()->EmissiveColor.Expression);
+	TestNotNull(TEXT("Leaf mask graph survives serialization"), Material->GetEditorOnlyData()->OpacityMask.Expression);
+	TestNotNull(TEXT("Leaf motion graph survives serialization"), Material->GetEditorOnlyData()->WorldPositionOffset.Expression);
+	TestFalse(TEXT("Color graph is active"), bool(Material->GetEditorOnlyData()->EmissiveColor.UseConstant));
+	TestFalse(TEXT("Mask graph is active"), bool(Material->GetEditorOnlyData()->OpacityMask.UseConstant));
+	AddInfo(FString::Printf(TEXT("Leaf graph has %d expressions"), Material->GetExpressions().Num()));
+	TestEqual(TEXT("Leaf silhouette uses masking"), Material->BlendMode, BLEND_Masked);
+	TestTrue(TEXT("Cards are double sided"), bool(Material->TwoSided));
+	TestEqual(TEXT("Source alpha threshold retained"), Material->OpacityMaskClipValue, .48f);
+	TestTrue(TEXT("Canopy shading is independent of camera and sun"), Material->GetShadingModels().HasShadingModel(MSM_Unlit));
+	const UStaticMesh* Mesh = Tree->Leaves->GetStaticMesh();
+	const FMeshDescription* Data = Mesh->GetMeshDescription(0);
+	if (!TestNotNull(TEXT("Card source attributes retained"), Data)) return false;
+	TestEqual(TEXT("All 2880 source cards retained"), Data->Triangles().Num(), 5760);
+	TestTrue(TEXT("Custom pivot values are not quantized to half floats"), Mesh->GetSourceModel(0).BuildSettings.bUseFullPrecisionUVs);
+	TestFalse(TEXT("Lightmap generation cannot replace card attribute UVs"), Mesh->GetSourceModel(0).BuildSettings.bGenerateLightmapUVs);
+	const auto UV = Data->VertexInstanceAttributes().GetAttributesRef<FVector2f>(TEXT("TextureCoordinate"));
+	if (!TestEqual(TEXT("Five UV channels carry atlas, pivot, phase, offsets and density"), UV.GetNumChannels(), 5)) return false;
+	const auto Position = Data->GetVertexPositions();
+	TSet<int32> Bunches;
+	for (FVertexInstanceID I : Data->VertexInstances().GetElementIDs())
+	{
+		const FVector2f XY = UV.Get(I, 1), ZPhase = UV.Get(I, 2), Offset = UV.Get(I, 3), Card = UV.Get(I, 4);
+		const FVector3f P = Position[Data->GetVertexInstanceVertex(I)];
+		if (!TestTrue(TEXT("Card pivot reconstructs original rest position"), (FVector3f(XY.X, XY.Y + Offset.X, ZPhase.X + Offset.Y) - P).Size() < .001f)) return false;
+		if (!TestTrue(TEXT("Density hash is a valid deterministic threshold"), Card.Y >= 0 && Card.Y < 1)) return false;
+		Bunches.Add(FMath::RoundToInt(Card.X));
+	}
+	TestEqual(TEXT("All source bunches retained"), Bunches.Num(), 10);
+	TestEqual(TEXT("Trunk topology retained"), Tree->Trunk->GetStaticMesh()->GetMeshDescription(0)->Triangles().Num(), 39876);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeParametersTest, "TunaSweeper.AnimeTree.Parameters",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAnimeTreeParametersTest::RunTest(const FString& Parameters)
+{
+	UClass* Class = AnimeTreeTests::TreeClass();
+	if (!Class) return false;
+	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+	auto* Tree = World->SpawnActor<ATunaSweeperAnimeTreeActor>(Class);
+	auto* Other = World->SpawnActor<ATunaSweeperAnimeTreeActor>(Class);
+	if (!Tree || !Other) return false;
+	Tree->SetTreeParameters(1.5f, 1.4f, 1.f);
+	auto* Leaves = Cast<UMaterialInstanceDynamic>(Tree->Leaves->GetMaterial(0));
+	auto* Shadow = Cast<UMaterialInstanceDynamic>(Tree->ShadowProxy->GetMaterial(0));
+	if (!TestNotNull(TEXT("Visible material instance"), Leaves) || !TestNotNull(TEXT("Shadow material instance"), Shadow)) return false;
+	for (auto* Material : {Leaves, Shadow})
+	{
+		TestEqual(TEXT("Upper wind reaches GPU"), Material->K2_GetScalarParameterValue(TEXT("WindStrength")), 1.5f);
+		TestEqual(TEXT("Upper card scale reaches GPU"), Material->K2_GetScalarParameterValue(TEXT("LeafCardScale")), 1.4f);
+		TestEqual(TEXT("Full canopy reaches GPU"), Material->K2_GetScalarParameterValue(TEXT("LeafDensity")), 1.f);
+	}
+	TestEqual(TEXT("Visible billboards use camera basis"), Leaves->K2_GetScalarParameterValue(TEXT("StableShadowProxy")), 0.f);
+	TestEqual(TEXT("Shadow uses tree basis"), Shadow->K2_GetScalarParameterValue(TEXT("StableShadowProxy")), 1.f);
+	FActorSpawnParameters CopyParams;
+	CopyParams.Template = Tree;
+	auto* Copy = World->SpawnActor<ATunaSweeperAnimeTreeActor>(Class, FTransform::Identity, CopyParams);
+	if (!TestNotNull(TEXT("Duplicated tree"), Copy)) return false;
+	Copy->SetTreeParameters(.25f, .4f, .2f);
+	TestTrue(TEXT("Duplicated tree owns its material"), Copy->Leaves->GetMaterial(0)->GetOuter() == Copy);
+	TestEqual(TEXT("Changing a duplicate does not change the source"), Leaves->K2_GetScalarParameterValue(TEXT("LeafDensity")), 1.f);
+	Tree->SetTreeParameters(-1.f, 0.f, -1.f);
+	TestEqual(TEXT("Wind clamps at calm"), Leaves->K2_GetScalarParameterValue(TEXT("WindStrength")), 0.f);
+	TestEqual(TEXT("Minimum size is below screenshot default"), Leaves->K2_GetScalarParameterValue(TEXT("LeafCardScale")), .2f);
+	TestEqual(TEXT("Zero density supported"), Shadow->K2_GetScalarParameterValue(TEXT("LeafDensity")), 0.f);
+	TestEqual(TEXT("Another placed tree retains its defaults"), CastChecked<UMaterialInstanceDynamic>(Other->Leaves->GetMaterial(0))->K2_GetScalarParameterValue(TEXT("LeafDensity")), .45f);
+	Tree->Destroy(); Other->Destroy(); Copy->Destroy();
+	return true;
+}
+
+class FAnimeTreeCaptureCommand : public IAutomationLatentCommand
+{
+public:
+	FAutomationTestBase* Test;
+	UWorld* World;
+	ATunaSweeperAnimeTreeActor* Tree;
+	ADirectionalLight* Light;
+	AStaticMeshActor* Ground;
+	USceneCaptureComponent2D* Capture;
+	int32 View = 0;
+	double ReadyAt = 0;
+	TArray<int32> GreenPixels;
+	TArray<uint8> WindMask, CalmMask;
+	FString Directory = FPaths::ProjectSavedDir()/TEXT("AnimeTreeQA");
+
+	virtual bool Update() override
+	{
+		if (ReadyAt == 0)
+		{
+			const float Angle = View == 1 ? 90.f : View == 2 ? 180.f : 0.f;
+			Tree->SetTreeParameters(View == 7 || View == 8 ? 0.f : View == 4 ? 1.5f : .75f, View == 3 ? .2f : View == 4 ? 1.4f : .8f, View == 3 ? .15f : View == 4 ? 1.f : View == 5 ? 0.f : .45f);
+			if (View == 9) Tree->SetActorTransform(FTransform(FRotator(10,45,5), FVector(30,20,0), FVector(.75,1.2,.85)));
+			const FVector Focus(0,0,240);
+			const FVector Camera = Focus + FRotator(0,Angle,0).RotateVector(FVector(1050,0,520));
+			Capture->SetWorldLocationAndRotation(Camera,(Focus-Camera).Rotation());
+			// Let real renderer frames initialize GPU scene/material uniform buffers.
+			ReadyAt = FPlatformTime::Seconds() + .6;
+			return false;
+		}
+		if (FPlatformTime::Seconds() < ReadyAt) return false;
+		World->SendAllEndOfFrameUpdates(); FlushRenderingCommands();
+		Capture->CaptureScene(); FlushRenderingCommands();
+		FImage Pixels;
+		if (Test->TestTrue(TEXT("Tree render readable"), FImageUtils::GetRenderTargetImage(Capture->TextureTarget, Pixels)))
+		{
+			int32 Green = 0;
+			TArray<uint8> Mask;
+			for (const FColor& P : Pixels.AsBGRA8())
+			{
+				const bool bLeaf = P.G > 20 && P.G > P.R * 1.15f && P.G > P.B * 1.05f;
+				Green += bLeaf; Mask.Add(bLeaf);
+			}
+			if (View == 0) WindMask = Mask;
+			if (View == 7) CalmMask = Mask;
+			if (View == 6 || View == 8)
+			{
+				const TArray<uint8>& Before = View == 6 ? WindMask : CalmMask;
+				int32 Changed = 0;
+				for (int32 I = 0; I < Mask.Num(); ++I) Changed += Before[I] != Mask[I];
+				Test->AddInfo(FString::Printf(TEXT("View %d: %d changed leaf pixels over time"), View, Changed));
+				if (View == 6) Test->TestTrue(TEXT("Default wind animates the rendered leaves over time"), Changed > 50);
+				else Test->TestEqual(TEXT("Zero wind keeps leaf geometry still over time"), Changed, 0);
+			}
+			GreenPixels.Add(Green);
+			Test->AddInfo(FString::Printf(TEXT("View %d: %d green leaf pixels"), View, Green));
+			if (View < 3 || View >= 6) Test->TestTrue(TEXT("Colored alpha-masked canopy visible across views/transforms"), Green > 5000);
+			IFileManager::Get().MakeDirectory(*Directory, true);
+			Test->TestTrue(TEXT("Tree render saved"), FImageUtils::SaveImageByExtension(*(Directory/FString::Printf(TEXT("tree_%d.png"),View)), Pixels));
+		}
+		ReadyAt = 0;
+		if (++View < 10) return false;
+		if (GreenPixels.Num() == 10)
+		{
+			Test->TestTrue(TEXT("Larger, denser canopy increases visible leaf coverage"), GreenPixels[4] > GreenPixels[3] + 5000);
+			Test->TestEqual(TEXT("Zero density hides all leaves in rendered image"), GreenPixels[5], 0);
+		}
+		Capture->DestroyComponent(); Tree->Destroy(); Light->Destroy(); Ground->Destroy();
+		return true;
+	}
+};
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAnimeTreeRenderTest, "TunaSweeper.AnimeTree.Rendering",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAnimeTreeRenderTest::RunTest(const FString& Parameters)
+{
+	if (!FApp::CanEverRender()) { AddInfo(TEXT("Render capture requires a real RHI; data tests remain available under NullRHI.")); return true; }
+	UClass* Class = AnimeTreeTests::TreeClass();
+	if (!TestNotNull(TEXT("Tree BP"), Class)) return false;
+	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+	auto* Tree = World->SpawnActor<ATunaSweeperAnimeTreeActor>(Class);
+	auto* Light = World->SpawnActor<ADirectionalLight>();
+	Light->SetActorRotation(FRotator(-50, 121, 0));
+	Light->GetLightComponent()->SetIntensity(4.f);
+	auto* Ground = World->SpawnActor<AStaticMeshActor>();
+	Ground->GetStaticMeshComponent()->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane")));
+	Ground->SetActorScale3D(FVector(200, 200, 1)); Ground->SetActorLocation(FVector(0,0,-2));
+	auto* Capture = NewObject<USceneCaptureComponent2D>(Tree);
+	Tree->AddInstanceComponent(Capture);
+	auto* Target = NewObject<UTextureRenderTarget2D>();
+	Target->InitCustomFormat(1024,1024,PF_B8G8R8A8,false);
+	// The sRGB render target handles encoding; avoid a second gamma-only pass.
+	Target->TargetGamma = 1.0f;
+	Capture->TextureTarget = Target; Capture->CaptureSource = SCS_FinalColorLDR;
+	Capture->bCaptureEveryFrame = false; Capture->bCaptureOnMovement = false;
+	Capture->FOVAngle = 40; Capture->RegisterComponentWithWorld(World);
+	Capture->PostProcessSettings.bOverride_AutoExposureMethod = true;
+	Capture->PostProcessSettings.AutoExposureMethod = AEM_Manual;
+	Capture->PostProcessSettings.bOverride_AutoExposureBias = true;
+	Capture->PostProcessSettings.AutoExposureBias = 0;
+	Capture->PostProcessSettings.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
+	Capture->PostProcessSettings.AutoExposureApplyPhysicalCameraExposure = false;
+	Capture->ShowFlags.SetTonemapper(false);
+	Capture->ShowFlags.SetEyeAdaptation(false);
+	Capture->ShowFlags.SetAntiAliasing(false);
+	FAssetCompilingManager::Get().FinishAllCompilation();
+	IStreamingManager::Get().StreamAllResources(10.f);
+	const FMaterialResource* LeafResource = Tree->LeafMaterial->GetMaterialResource(GMaxRHIShaderPlatform);
+	if (!TestNotNull(TEXT("Leaf GPU material"), LeafResource) || !TestNotNull(TEXT("Leaf shader compiled"), LeafResource->GetGameThreadShaderMap())) return false;
+	AddInfo(FString::Printf(TEXT("Compiled leaf UV scalars: %u"), LeafResource->GetGameThreadShaderMap()->GetNumUsedUVScalars()));
+	auto Command = MakeShared<FAnimeTreeCaptureCommand>();
+	Command->Test = this; Command->World = World; Command->Tree = Tree;
+	Command->Light = Light; Command->Ground = Ground; Command->Capture = Capture;
+	FAutomationTestFramework::Get().EnqueueLatentCommand(Command);
+	return true;
+}
+#endif
