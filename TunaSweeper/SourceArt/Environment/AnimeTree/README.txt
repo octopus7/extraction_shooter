@@ -1,7 +1,7 @@
 Anime foliage tree — modular canopy / web v06 port
 
 Origin: astra-prochat-models/foliage_tree_web_v06 (user-provided local source).
-scene.json, cards.json, meta.json and PNG textures remain unchanged references.
+scene.json, cards.json, meta.json and original PNG textures remain unchanged references.
 The source geometry/meta version is 05; the billboard/wind runtime is v06.
 
 Place /Game/Environment/AnimeTree/BP_AnimeFoliageTree in a level.
@@ -46,8 +46,19 @@ transform leaves the gradient attached to the tree. Each tree owns independent
 visible/shadow MIDs. Preview wind in a realtime viewport or PIE.
 
 Coordinate conversion: source metres (x,y,z) -> Unreal centimetres (z,x,y)*100.
-Trunk: unchanged 39,876 triangles, supplied DX normal map (strength 0.48), roughness
-and UE lighting. Leaves: masked, two-sided, unlit, alpha cutoff 0.48. The source
+Trunk: unchanged 39,876 triangles and original UVs. The active material now uses
+T_AnimeTree_TrunkStylizedBaseColor, a 2048px atlas baked from image-generated
+bark_stylized_source.png. Broad warm brown planes replace the photographic grain.
+The original 15-branch skeleton guides the painted grain; nearby projections
+blend at forks so roots and branches have no abrupt projection boundaries.
+Normal mapping is disabled; BarkRoughness is 0.92 and BarkSpecular is 0.1.
+Geometry normals and UE scene lighting still shade the trunk. The original bark,
+normal and roughness textures are retained as references, not active inputs.
+trunk_stylized.blend contains editable mesh/UVs, projection attributes/material,
+packed source and baked images, and neutral preview lighting. The shader bakes
+color only. See bark_stylized_prompt.txt for both built-in imagegen prompts and
+projection details. No startup asset generator is needed.
+Leaves: masked, two-sided, unlit, alpha cutoff 0.48. The source
 atlas and baked vertex colors are multiplied in gamma space then converted to
 linear. The whole-tree color multiplier is applied after that conversion.
 Exposure and tonemapping in the destination level still affect the final image.

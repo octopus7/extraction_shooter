@@ -10637,3 +10637,12 @@
 - 기존 동작: 바람 0.75, 잎 크기 0.8, 표시량 0.45 기본값을 유지했다. 나무별 독립 MID를 뭉치들이 공유하고 뭉치별 고정 방향 그림자 프록시를 자동 관리한다. 변형 알림으로 좌표를 갱신하며 매 프레임 액터 Tick은 없다. 런타임 속성/메시/수량 변경 후 RefreshTree 호출 방식과 편집법을 SourceArt/Environment/AnimeTree/README.txt에 정리했다.
 - 검증: 기능 추가 전 Modular 실패를 확인했고 구현 후 통과했다. 독립 코드 검토에서 지적된 비균일 스케일 오차를 실패 테스트로 재현한 뒤 수정했다. 생성기 제거 후 UE 5.7 TunaSweeperEditor Win64 Development 빌드 성공 및 TunaSweeper.AnimeTree.Assets/Modular/Parameters/Rendering 4종 모두 성공. GPU 15개 시점/설정 캡처로 상면·측면·후면, 그라데이션 반전, 이동한 뭉치, 크기/표시량/바람을 검증했다. 바람 0에서는 시간 경과에 따른 잎 실루엣 변화 0픽셀. 최종 로그 Saved/Logs/AnimeTreeModularFinalQA.log 종료 코드 0.
 - 정리: 일회성 AnimeTreeModularCommandlet과 전용 StaticMeshDescription 의존성을 제거하고 재빌드·재검증했다. 생성된 에셋은 시작 시 재생성 없이 로드된다. 프로젝트 에디터에서 수정한 BP를 열었다. 기존 RaidMap.umap 변경은 본 작업 커밋에서 제외했다. 분석·변경 범위에서 Demo 전용 분기 없음. 플레이어 UI/세이브 데이터 변경 없음.
+
+## 2026-10-09 03:49:58 (소요시간: 00:23:24)
+
+- 요청: 기존 줄기와 뿌리를 첨부 참고보다 더 단순한 애니 화풍으로 바꾸기. 승인한 이미지 생성 및 전체 표면 투영·UV 베이크 방식으로 적용.
+- 아트: 내장 imagegen으로 현재 시점 스타일 시안과 넓은 갈색 면 위주의 무광 나무껍질 패턴을 생성했다. 15개 원본 가지 골격을 따라 패턴을 투영하고 주변 가지 투영을 거리 가중치로 섞어 분기점 경계를 완화한 뒤 기존 UV에 2048x2048 BaseColor만 베이크했다. 원본 메시 26,100정점/39,876삼각형과 UV는 보존했다.
+- 적용: T_AnimeTree_TrunkStylizedBaseColor를 추가하고 기존 M_AnimeTree_Trunk의 BaseColor에 연결했다. 세부 노멀 입력을 해제하고 BarkRoughness=0.92, BarkSpecular=0.1로 설정했다. 기존 BP와 배치가 같은 머티리얼을 통해 새 표면을 사용한다. 원래 텍스처는 참고용으로 보존했다.
+- 원본: SourceArt/Environment/AnimeTree에 생성 패턴, 베이크 PNG, 정확한 생성 프롬프트, 편집 가능한 trunk_stylized.blend와 사용 설명을 저장했다. Blender 파일은 원본 형상/UV, 투영 속성·셰이더, 패킹된 이미지와 미리보기 조명을 포함하며 내장 스크립트는 없다.
+- 검증: UE 5.7 TunaSweeper.AnimeTree.Assets/Modular/Parameters/Rendering 4종 모두 성공. 전후면 및 줄기 확대 GPU 캡처 확인. 원본 형상 일치, UV 최대 오차 2.98e-8, 패킹 이미지와 2048px 베이크 확인. 생성 스크립트 제거 후 새 UE 프로세스에서 저장된 텍스처/BP 재로드 및 BaseColor·Normal·Roughness·Specular 연결 검증 성공(0 errors, 0 warnings). C++ 변경이나 재빌드는 없었다. git diff --check 통과.
+- 정리: 일회성 투영·베이크·임포트·검증 스크립트와 중간 투영 데이터를 제거했다. 에디터 시작 시 생성 경로는 없다. TunaSweeper 프로젝트 에디터에서 나무 BP를 열었다. 기존 RaidMap.umap 변경은 본 작업에서 제외했다. 확인 범위에 데모 전용 구현 없음. UI/세이브 데이터 변경 없음.

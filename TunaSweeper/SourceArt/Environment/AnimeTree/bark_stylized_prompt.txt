@@ -1,0 +1,58 @@
+Stylized bark image generation / 2026-10-09
+
+Built-in image_gen was used for both generations (no CLI/API fallback).
+The generated bark source was projected along the original 15-branch skeleton
+and baked in Blender to the existing UV atlas. No image filtering, recoloring,
+or normal extraction was used to create the painted style.
+
+1. Look-development preview prompt
+Inputs: current game-view screenshot (edit target), user tree reference (style).
+Use case: precise-object-edit / style-transfer. Image 1 is the exact game-view
+edit target; image 2 is only the tree-bark style reference. Create a material
+look-development preview of image 1, keeping its camera, framing, tree geometry
+silhouette, six angular root tips, leaf canopy, ground, and all object positions
+unchanged. Change ONLY the exposed trunk and root surface appearance. Make the
+bark MUCH SIMPLER than image 2: clean anime background painting, broad calm warm
+taupe-brown color planes in only 3 to 4 main tones, just a few wide elongated
+gently curving brush shapes following the trunk and roots. Eliminate photoreal
+bark grain, small cracks, speckles, tiny ridges, scratchy texture, outlines around
+grooves, high frequency detail and mottling. Very matte, restrained contrast,
+diffuse soft form shading, no shiny edges or deep black creases. It should
+harmonize with the simplified painted leaf canopy. Preserve the actual shape;
+do not sculpt, round, shorten, or replace the root geometry. Do not add foliage,
+moss, flowers, text, labels or any other object. Output a single clean preview
+image, no comparison layout.
+
+2. Final bark-source prompt
+Input: the generated look-development preview, as style reference.
+Derive a game-ready flat bark BASE COLOR texture sheet from the very simplified
+painted trunk in the reference. Output ONLY a square, edge-to-edge, orthographic
+2D bark pattern, preferably 2048 by 2048, that can wrap continuously around a
+game tree. There must be NO recognizable tree, roots, leaves, ground, cylinder,
+object silhouette, perspective, lighting gradient, cast shadows, border, text
+or presentation scene. This is a clean diffuse albedo texture, not a shaded
+material render. Match the trunk's calm warm taupe-brown paint style with only
+four low-contrast color families, approximate sRGB base #95764F, light #AD9068,
+mid #846546, restrained dark #745A41. Across the entire width place about six
+very broad, elongated, gently meandering vertical shapes. Very few tapering
+forks, a few blunt brush-plane edges, large calm untextured interiors. The shapes
+predominantly run top-to-bottom. Even illumination and evenly distributed colors,
+repeatable tile edges. EXTREMELY SIMPLE anime background painting, simpler than
+ordinary hand-painted bark textures. NO fine wood grain, pores, speckles, noise,
+scratches, tiny cracks, small ridges, hairlines, photoreal detail, grunge, tiny
+highlights, black outlines, narrow black grooves, glossy bevels, 3D relief or
+dense striping. Preserve broad low-frequency painted color variation only. The
+texture should stay readable at small game-screen size.
+
+Saved art:
+  bark_stylized_source.png — final generated pattern, unchanged output.
+  trunk_basecolor_stylized.png — 2048 x 2048 emission bake into original UVs.
+  trunk_stylized.blend — original mesh, atlas UVs, branch projection attributes,
+    weighted projection shader, packed source/baked images and preview lighting.
+The blend file is editable art data; it contains no startup/generation script.
+Projection details: original branch skeleton, shape-preserving cubic sampling
+at approximately 0.1 m, transported transverse frames; angular scale 0.68,
+longitudinal scale 0.38; mirrored sampling; normalized exp(-(d-min(d))/0.065)
+weights blend signed-distance projections at forks. Atlas bake uses 6 px margin.
+Normals and lighting are not baked into BaseColor. Geometry and original UVs
+are preserved; roughness 0.92 and specular 0.1 are set in the UE material.
