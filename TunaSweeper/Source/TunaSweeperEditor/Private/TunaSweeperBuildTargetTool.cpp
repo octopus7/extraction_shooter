@@ -161,7 +161,7 @@ void FTunaSweeperBuildTargetTool::Startup()
 {
 	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
 	{
-		SelectBuildTarget(BuildTargetSettings->BuildTarget);
+		ApplyBuildTarget(BuildTargetSettings->BuildTarget, false);
 	}
 
 	UToolMenus::RegisterStartupCallback(
@@ -199,7 +199,7 @@ void FTunaSweeperBuildTargetTool::RegisterMenus()
 
 	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
 	{
-		SelectBuildTarget(BuildTargetSettings->BuildTarget);
+		ApplyBuildTarget(BuildTargetSettings->BuildTarget, false);
 	}
 }
 
@@ -274,10 +274,21 @@ void FTunaSweeperBuildTargetTool::PopulateBuildTargetMenu(UToolMenu* Menu)
 }
 void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget BuildTarget)
 {
-	UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetMutableDefault<UTunaSweeperBuildTargetSettings>();
-	if (BuildTargetSettings->BuildTarget != BuildTarget)
+	ApplyBuildTarget(BuildTarget, true);
+	if (bPackagingEnabled)
 	{
-		BuildTargetSettings->BuildTarget = BuildTarget;
+		StartPackaging(BuildTarget);
+	}
+}
+
+void FTunaSweeperBuildTargetTool::ApplyBuildTarget(ETunaSweeperBuildTarget BuildTarget, bool bPersistSelection)
+{
+	// Startup can use a command-line preview override. Apply it in memory, but only
+	// an explicit menu selection may persist the preview and packaging target together.
+	UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetMutableDefault<UTunaSweeperBuildTargetSettings>();
+	BuildTargetSettings->BuildTarget = BuildTarget;
+	if (bPersistSelection)
+	{
 		BuildTargetSettings->UpdateSinglePropertyInConfigFile(
 			BuildTargetSettings->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UTunaSweeperBuildTargetSettings, BuildTarget)),
 			BuildTargetSettings->GetDefaultConfigFilename());
@@ -285,9 +296,9 @@ void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget Buil
 
 	UProjectPackagingSettings* PackagingSettings = GetMutableDefault<UProjectPackagingSettings>();
 	const FString TargetName = TunaSweeperBuildTargetTool::ResolveTargetName(BuildTarget);
-	if (PackagingSettings->BuildTarget != TargetName)
+	PackagingSettings->BuildTarget = TargetName;
+	if (bPersistSelection)
 	{
-		PackagingSettings->BuildTarget = TargetName;
 		PackagingSettings->UpdateSinglePropertyInConfigFile(
 			PackagingSettings->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UProjectPackagingSettings, BuildTarget)),
 			PackagingSettings->GetDefaultConfigFilename());
@@ -295,6 +306,10 @@ void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget Buil
 	UPlatformsMenuSettings* PlatformsMenuSettings = GetMutableDefault<UPlatformsMenuSettings>();
 	PlatformsMenuSettings->PackageBuildTarget = TargetName;
 	PlatformsMenuSettings->StagingDirectory.Path = TunaSweeperBuildTargetTool::ResolveOutputDirectory(BuildTarget);
+	if (!bPersistSelection)
+	{
+		return;
+	}
 	IFileManager::Get().MakeDirectory(*PlatformsMenuSettings->StagingDirectory.Path, true);
 	const FString SerializedStagingDirectory = FString::Printf(
 		TEXT("(Path=\"%s\")"),
@@ -310,11 +325,6 @@ void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget Buil
 		*SerializedStagingDirectory,
 		GGameIni);
 	GConfig->Flush(false, GGameIni);
-
-	if (bPackagingEnabled)
-	{
-		StartPackaging(BuildTarget);
-	}
 
 }
 

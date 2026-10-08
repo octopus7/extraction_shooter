@@ -10610,3 +10610,11 @@
 - 타이밍/입력: FadeSeconds=0.25, StillSeconds=1.0. 대기 상태에서 키보드·패드 버튼/키 해제, 마우스 클릭/해제/이동/휠, 터치 시작, 데드존 0.2를 넘는 패드 축 입력이 들어오면 즉시 페이드아웃을 시작한다. 영상/크로스페이드 중 입력을 대기 생략으로 예약하지 않으며 반복 입력은 페이드를 재시작하지 않는다. UI 포커스를 시작 위젯에 지정하고 입력을 소비한다.
 - 보존: chatgpt/devTuna_logo_white.png와 /Game/UI/Title/T_DevTunaLogoWhite 원본 바이트 변경 없음. 본편 전용 및 하루 제한 OFF 유지. 새 데모 전용 구현은 추가하지 않았다.
 - 검증: 변경 타이밍 테스트가 기존 구현에서 실패함을 확인한 뒤 수정. Tools/StartupLogoTests/RunTests.bat 0 failures(1초 경계, 입력 생략, 반복 입력, 0.25초 페이드 포함). UE 5.7 Editor Development 빌드 성공. TunaSweeper.StartupLogo.PolicyAndAssets 성공. 실제 렌더링 실행 로그에서 영상 종료/스틸/검정/타이틀 전환 확인. 별도 코드 검토에서 추가 결함 없음. git diff --check 통과. 화면 직접 검증은 이전 Computer Use 접근 거절로 수행하지 않았으므로 테두리의 시각적 부드러움은 사용자 확인이 필요하다.
+
+## 2026-10-09 00:16:12 (소요시간: 00:05:08)
+
+- 요청: NoStore를 Demo와 같은 분류로 취급하지 말고, Demo 접미사 유무에 따른 본편/데모와 NoStore/Steam/Stove 채널 분기를 다시 분석해 조정.
+- 분석: 기존 IsDemoBuild/BuildFlavor와 6개 Target.cs 및 CustomConfig는 이미 두 축을 올바르게 분리한다. 본편은 TunaSweeperNoStore/TunaSweeper/TunaSweeperStove, 데모는 각각 Demo 접미사가 붙은 대상이며 각 매크로는 TUNASWEEPER_DEMO=0/1이다. 개발사 로고도 채널이 아닌 IsDemo로 분기하므로 본편 3개 채널 모두 대상이다.
+- 원인/수정: 이전 본편 미리보기에 사용한 NoStoreFull 명령줄 인자가 에디터 시작 시 SelectBuildTarget을 통해 패키징 설정에만 저장되어, 저장된 SteamDemo 미리보기 설정과 불일치했다. Startup/RegisterMenus는 ApplyBuildTarget(..., false)로 메모리 상태만 적용하고, 사용자의 명시적인 메뉴 선택만 두 대상을 함께 저장한다. 같은 값을 다시 선택해도 저장하며 자동 패키징은 명시 선택 경로에서만 실행한다. 기본 저장 설정은 NoStoreFull/TunaSweeperNoStore로 일치시켰다. 기본 배포 ini의 Steam 값은 타깃별 CustomConfig가 덮는 공통 기본값이며, NoStore CustomConfig는 None/Full, Steam은 Steam/Full, Stove는 Stove/Full로 유지한다.
+- 검증: 설정 불일치를 읽기 전용 Python 테스트에서 먼저 재현한 뒤 6개 타깃/채널/판본 및 저장 설정 일치 테스트 2개 통과. UE 5.7 Editor Development 빌드 성공. TunaSweeper.StartupLogo.PolicyAndAssets에 본편 3개/데모 3개 조합을 추가해 성공. SteamDemo 임시 명령줄 설정으로 실행한 전후 DefaultGame.ini SHA256 동일(EditorTestExit=0, DefaultGameUnchanged=True). 별도 코드 검토에서 추가 결함 없음. git diff --check 통과. 패키징은 수행하지 않았다.
+- 문서: Docs/save_persistence.md에 판본/채널 독립성과 설정 저장 규칙을 명시. 관련 없는 다른 작업의 UI 및 에디터 테스트 변경은 포함하지 않았다.

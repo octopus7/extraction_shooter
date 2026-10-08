@@ -15,6 +15,7 @@ private:
 	void RegisterMenus();
 	void PopulateBuildTargetMenu(UToolMenu* Menu);
 	void SelectBuildTarget(ETunaSweeperBuildTarget BuildTarget);
+	void ApplyBuildTarget(ETunaSweeperBuildTarget BuildTarget, bool bPersistSelection);
 	bool IsBuildTargetSelected(ETunaSweeperBuildTarget BuildTarget) const;
 	bool CanSelectBuildTarget() const;
 	void TogglePackaging();

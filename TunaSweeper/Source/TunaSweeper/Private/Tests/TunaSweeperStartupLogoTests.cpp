@@ -4,6 +4,7 @@
 #include "Misc/DateTime.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Settings/TunaSweeperBuildTargetSettings.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Engine/Texture2D.h"
 #include "FileMediaSource.h"
 
@@ -42,6 +43,25 @@ bool FTunaSweeperStartupLogoPolicyTest::RunTest(const FString&)
 	Instance->bDeveloperLogoAttemptedThisSession = false;
 	Instance->bDeveloperLogoOncePerDay = false;
 	TestFalse(TEXT("Demo bypasses the Main-only intro"), Instance->TryBeginDeveloperLogo());
+	// Edition must be identical across all three channels, independently of distribution.
+	struct FTargetCase { ETunaSweeperBuildTarget Target; const TCHAR* Channel; bool bDemo; };
+	const FTargetCase Cases[] = {
+		{ETunaSweeperBuildTarget::NoStoreFull, TEXT("None"), false},
+		{ETunaSweeperBuildTarget::SteamFull, TEXT("Steam"), false},
+		{ETunaSweeperBuildTarget::StoveFull, TEXT("Stove"), false},
+		{ETunaSweeperBuildTarget::NoStoreDemo, TEXT("None"), true},
+		{ETunaSweeperBuildTarget::SteamDemo, TEXT("Steam"), true},
+		{ETunaSweeperBuildTarget::StoveDemo, TEXT("Stove"), true},
+	};
+	for (const FTargetCase& Case : Cases)
+	{
+		Settings->BuildTarget = Case.Target;
+		Instance->bDeveloperLogoAttemptedThisSession = false;
+		const FString Label = StaticEnum<ETunaSweeperBuildTarget>()->GetNameStringByValue(static_cast<int64>(Case.Target));
+		TestEqual(Label + TEXT(" channel"), Settings->GetDistributionChannel(), FString(Case.Channel));
+		TestEqual(Label + TEXT(" edition"), TunaSweeperBuildFlavor::IsDemo(), Case.bDemo);
+		TestEqual(Label + TEXT(" startup logo follows edition only"), Instance->TryBeginDeveloperLogo(), !Case.bDemo);
+	}
 	Settings->BuildTarget = OriginalTarget;
 	if (bHadDate) GConfig->SetString(Section, Key, *OriginalDate, GGameUserSettingsIni);
 	else GConfig->RemoveKey(Section, Key, GGameUserSettingsIni);
