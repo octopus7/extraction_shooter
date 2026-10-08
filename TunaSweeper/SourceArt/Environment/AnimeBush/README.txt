@@ -24,6 +24,9 @@ GradientGuide is near the center of the bush; its +X axis points toward the
 light color. Move/rotate/scale it to shape one continuous whole-bush gradient.
 Gradient Width is 125 cm for A/C and 150 cm for B; Strength is 0.65.
 See ../AnimeTree/README.txt for material, gradient and runtime RefreshTree rules.
+Tree / Rim also controls a soft saturated paint band around the whole bush:
+color, strength, width, brightness and envelope scale. Every clump shares the
+same canopy frame. Set Rim Strength to zero for the original unpainted look.
 
 SM_Bush_Stems is a shared low-detail, tapered branching mesh: 336 triangles,
 about 57 cm high before each BP's adjustment. It stays mostly inside the leaves.
@@ -39,7 +42,8 @@ No new distance LODs or foliage batching are supplied by these Blueprints.
 
 Editable art source: Bush_Stems.blend; import source: SM_Bush_Stems.fbx.
 The Blender scene uses centimetres and includes no generation scripts.
-Previews/Bush_ABC.png is an actual UE GPU capture: A, B, C from left to right.
+Previews/Bush_ABC.png is an actual UE GPU capture before the shared rim was
+added (equivalent to Rim Strength 0): A, B, C from left to right.
 
 Validation: fresh Blueprint reload/spawn, editable tagged clumps, shared source
 meshes, independent actor materials, parameter propagation, no duplicate shadow

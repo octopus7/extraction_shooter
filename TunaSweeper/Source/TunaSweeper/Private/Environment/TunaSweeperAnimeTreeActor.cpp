@@ -1,5 +1,6 @@
 #include "Environment/TunaSweeperAnimeTreeActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 namespace
@@ -61,6 +62,10 @@ void ATunaSweeperAnimeTreeActor::RefreshTree()
 	GradientStrength = FMath::Clamp(GradientStrength, 0.f, 1.f);
 	GradientExponent = FMath::Clamp(GradientExponent, .1f, 4.f);
 	ClumpShadingStrength = FMath::Clamp(ClumpShadingStrength, 0.f, 1.f);
+	RimStrength = FMath::Clamp(RimStrength, 0.f, 1.f);
+	RimWidth = FMath::Clamp(RimWidth, .01f, .8f);
+	RimBrightness = FMath::Clamp(RimBrightness, 0.f, 4.f);
+	RimEnvelopeScale = FMath::Clamp(RimEnvelopeScale, .25f, 2.f);
 
 	// Rebuild only on edits/construction, never per frame. Remove stale proxies after deletions too.
 	TArray<UStaticMeshComponent*> Components;
@@ -80,6 +85,10 @@ void ATunaSweeperAnimeTreeActor::RefreshTree()
 		Instance->SetScalarParameterValue(TEXT("GradientStrength"), GradientStrength);
 		Instance->SetScalarParameterValue(TEXT("GradientExponent"), GradientExponent);
 		Instance->SetScalarParameterValue(TEXT("ClumpShadingStrength"), ClumpShadingStrength);
+		Instance->SetScalarParameterValue(TEXT("RimStrength"), RimStrength);
+		Instance->SetScalarParameterValue(TEXT("RimWidth"), RimWidth);
+		Instance->SetScalarParameterValue(TEXT("RimBrightness"), RimBrightness);
+		Instance->SetVectorParameterValue(TEXT("RimColor"), RimColor);
 		Instance->SetVectorParameterValue(TEXT("GradientDarkColor"), GradientDarkColor);
 		Instance->SetVectorParameterValue(TEXT("GradientLightColor"), GradientLightColor);
 	}
@@ -137,5 +146,39 @@ void ATunaSweeperAnimeTreeActor::UpdateGradientData()
 		const FVector4 Coefficients = bValid ? FVector4(Mapping.M[0][0]/Width, Mapping.M[1][0]/Width,
 			Mapping.M[2][0]/Width, Mapping.M[3][0]/Width) : FVector4(0,0,0,0);
 		Clump->SetCustomPrimitiveDataVector4(0, Coefficients);
+	}
+	UpdateRimData();
+}
+
+void ATunaSweeperAnimeTreeActor::UpdateRimData()
+{
+	const auto Clumps = GetLeafClumps();
+	const FMatrix ActorMatrix = GetActorTransform().ToMatrixWithScale();
+	const bool bValidActor = FMath::Abs(ActorMatrix.Determinant()) > UE_SMALL_NUMBER;
+	const FMatrix WorldToTree = bValidActor ? ActorMatrix.Inverse() : FMatrix::Identity;
+	FBox Crown(ForceInit);
+	for (auto* Clump : Clumps)
+	{
+		if (const UStaticMesh* Mesh = Clump->GetStaticMesh())
+			Crown += Mesh->GetBoundingBox().TransformBy(Clump->GetComponentTransform().ToMatrixWithScale() * WorldToTree);
+	}
+	const FVector Center = Crown.IsValid ? Crown.GetCenter() : FVector::ZeroVector;
+	const FVector Extent = Crown.IsValid ? (Crown.GetExtent() * RimEnvelopeScale).ComponentMax(FVector(1)) : FVector(1);
+	const TCHAR* ViewParameters[] = {TEXT("RimViewX"), TEXT("RimViewY"), TEXT("RimViewZ")};
+	for (int32 Axis = 0; Axis < 3; ++Axis)
+	{
+		// Transform the shader's camera ray into the same normalized crown space.
+		const double Scale = bValidActor && Crown.IsValid ? 1.0 / Extent[Axis] : 0.0;
+		const FLinearColor ViewRow(WorldToTree.M[0][Axis]*Scale, WorldToTree.M[1][Axis]*Scale, WorldToTree.M[2][Axis]*Scale, 0);
+		for (UMaterialInstanceDynamic* Instance : {LeafInstance.Get(), ShadowInstance.Get()})
+			if (Instance) Instance->SetVectorParameterValue(ViewParameters[Axis], ViewRow);
+		for (auto* Clump : Clumps)
+		{
+			const FMatrix LocalToTree = Clump->GetComponentTransform().ToMatrixWithScale() * WorldToTree;
+			// CPD 0-3 remain the gradient; 4-15 map any clump-local rest pivot to one crown.
+			Clump->SetCustomPrimitiveDataVector4(4 + Axis*4, FVector4(
+				LocalToTree.M[0][Axis]*Scale, LocalToTree.M[1][Axis]*Scale,
+				LocalToTree.M[2][Axis]*Scale, (LocalToTree.M[3][Axis]-Center[Axis])*Scale));
+		}
 	}
 }

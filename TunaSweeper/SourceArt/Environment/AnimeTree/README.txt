@@ -38,6 +38,25 @@ One whole-canopy gradient:
   or moving a clump does not restart the gradient. A collapsed guide gives the
   same midpoint to every card instead of invalid shader values.
 
+Soft whole-canopy rim (Tree / Rim in the Blueprint defaults or actor Details):
+  Rim Strength: 0-1, default 0.7; 0 restores the previous leaf colors.
+  Rim Color: saturated yellow-green by default; use the color picker to adjust.
+  Rim Width: 0.01-0.8, default 0.30; fraction of the canopy radius for the band.
+  Rim Brightness: 0-4, default 1.5; keeps underlying leaf luminance variation.
+  Rim Envelope Scale: 0.25-2, default 0.85; lower moves paint toward the center.
+All tagged clumps share one fitted ellipsoid from their combined rest bounds.
+The shader projects it along the camera ray and blends paint into outer leaves.
+It does not use individual clump/card normals or restart at clump boundaries.
+The middle of the crown retains the original gradient and clump shading.
+This is broad soft paint, not a pixel-exact outline: deeply recessed perimeter
+segments and separate protrusions do not get a constant screen-space rim width.
+Use Envelope Scale/Width to fit a substantially edited or irregular canopy.
+The frame updates on clump/actor transform edits and RefreshTree, with no actor
+tick or extra rendering pass. Rest-card pivots keep paint steady under wind.
+Bush A/B/C use the same actor/material and expose the same per-actor controls.
+Previews/Rim_Off.png and Rim_On.png compare strength 0 and the default 0.7 in
+the same UE view, with wind paused for a stable comparison.
+
 Editor changes refresh immediately. Runtime SetTreeParameters applies the
 wind/size/density controls; call RefreshTree after changing other BP properties,
 adding/removing clumps or replacing their meshes. Clump/guide transforms update
@@ -76,6 +95,9 @@ Custom Primitive Data slots 0–3 are reserved for the tree's gradient equation:
   final = clumpColor * lerp(1, lerp(darkColor, lightColor, t), GradientStrength)
 Coefficients map each component into the same GradientGuide space relative to
 TreeRoot. Using rest pivots avoids color swimming with billboarding and wind.
+Slots 4-15 are three float4 rows mapping local card pivots into the shared rim
+ellipsoid. RimViewX/Y/Z in the actor-owned MID transform world camera rays into
+the same normalized space, including actor rotation and nonuniform scaling.
 
 M_AnimeTree_Leaves retains the v06 WPO wind/billboard behavior. Visible cards do
 not cast shadows; one transient proxy per clump uses StableShadowProxy=1 with a
@@ -87,7 +109,10 @@ The old monolithic SM_AnimeTree_Leaves is retained as a source reference and is
 not used by this Blueprint. No distance LODs are supplied; masking density does
 not reduce vertex count. Clump count also increases draw calls and shadow work.
 
-Validation: TunaSweeper.AnimeTree.Assets / Modular / Parameters / Rendering.
+Validation: TunaSweeper.AnimeTree.Assets / Modular / Parameters / Rendering /
+WholeCanopyRim. Rim checks cover shared coordinates, transformed/moved clumps,
+controls, collapsed frames, and real top/oblique off/on renders with an unchanged
+central crown. Saved/AnimeTreeQA/tree_15..18.png are off/on render pairs.
 Rendering uses a real RHI; captures in Saved/AnimeTreeQA include front/side/back,
 top, reversed gradient, zero-strength gradient and a moved clump. The one-off
 asset commandlet and its dependency are removed before the final build/commit.
