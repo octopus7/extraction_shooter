@@ -10907,3 +10907,9 @@
 - 애셋: BP_BabyBoar, SM_BabyBoar, 팔레트 텍스처와 단일 머터리얼. 2cm 복셀, 64×24×46cm, 4,384 삼각형, 머터리얼 슬롯 및 UV 각 1개. 맵 배치 없음. 원본 blend/FBX/팔레트·미리보기 보관, 일회성 생성기 제거.
 - 검증: UE5.7 Editor Development 최종 빌드 성공. TunaSweeper.Quest 자동화 7개 성공(실패 0; 1개 기존 중복 문자열/헤드리스 뷰포트 경고). 저장 로드로 실제 NPC 표시·충돌 전환, 제공/완료 권한과 대체 번호 경로 검증. 새 프로세스 애셋 재로딩 및 생성기 제거 후 읽기 전용 애셋 검사 통과. 수동 플레이 검수는 별도.
 - 문서: Docs/quest_npc_roles.md 배치 방법, Docs/save_persistence.md 파생 상태 규칙 기록. 작업 외 질문 로그와 RaidMap 편집은 보존.
+
+## 2026-10-11 05:49:43 (소요시간: 00:00:21)
+
+- 요청: 완료 NPC에서 보상 수령 시 기지용 NPC가 즉시 나타나야 함.
+- 확인: ClaimQuestReward는 RewardCompleted 설정 후 저장보다 먼저 OnQuestProgressChanged를 동기 호출하며, 배치된 QuestPresenceNpcActor는 해당 콜백에서 표시·충돌을 즉시 활성화한다. 재진입 대기가 없는 기존 구현 확인으로 런타임 수정 없음.
+- 처리: Docs/quest_npc_roles.md에 즉시 표시 및 화면 닫기·맵 재로드 불필요를 명시. 이번 확인은 코드 경로 점검이며 추가 빌드·실제 플레이 검수는 하지 않음.
