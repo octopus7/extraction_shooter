@@ -7,6 +7,7 @@
   import { downloadPrintGraph } from './print-graph';
   import { snapPosition } from './snap';
   import { questText } from './state';
+  import { resolveCardColor } from './card-colors';
 
   let { pack, chapter, selectedId, onselect, onmove, onconnect, onarrange, disabled = false, snapEnabled = $bindable(true) }: { pack: QuestPack; chapter: string; selectedId: number | null; onselect: (id: number) => void; onmove: (id: number, x: number, y: number) => void; onconnect: (dependentId: number, prerequisiteId: number) => void; onarrange: () => void; disabled?: boolean; snapEnabled?: boolean } = $props();
   const projection = $derived(projectChapter(pack, chapter));
@@ -138,8 +139,9 @@
       </svg>
       {#each renderedNodes as node (node.id)}
         {@const definition = pack.nodes.find(item => item.definition.quest_id === node.questId)}
+        {@const color = resolveCardColor(definition?.authoring.cardColor)}
         {@const noPrerequisites = !node.external && node.questId !== 1 && definition?.definition.required_completed_quest_ids.length === 0}
-        <button data-quest-id={node.questId} class:link-target={linkDrag?.target === node.questId} class="quest-card" class:moving={nodeDrag?.id === node.id && nodeDrag.moved} class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardSize(node).width}px`} style:height={`${cardSize(node).height}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onpointerdown={(event) => startNode(event, node.id, node.x, node.y, node.external)} title={node.external ? t('graph.legendExternal') : t('graph.moveHint')} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: formatQuestId(node.questId) })} aria-pressed={selectedId === node.questId}>
+        <button data-quest-id={node.questId} class:link-target={linkDrag?.target === node.questId} class="quest-card" class:tinted={color.id !== 'default'} style:--card-tint={color.background} class:moving={nodeDrag?.id === node.id && nodeDrag.moved} class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardSize(node).width}px`} style:height={`${cardSize(node).height}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onpointerdown={(event) => startNode(event, node.id, node.x, node.y, node.external)} title={node.external ? t('graph.legendExternal') : t('graph.moveHint')} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: formatQuestId(node.questId) })} aria-pressed={selectedId === node.questId}>
           <span class="card-top"><span class="quest-id">{formatQuestId(node.questId)}</span><span class="node-dot"></span></span>
           <strong>{questText(pack, node.titleKey)}</strong>
           {#if node.external}<span class="card-bottom">{t('graph.legendExternal')}</span>{:else if noPrerequisites}<span class="card-bottom">{t('graph.noPrerequisites')}</span>{/if}

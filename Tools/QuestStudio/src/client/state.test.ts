@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { markSnapshotSaved, detachSnapshot, addPrerequisite, connectPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
+import { setCardColor, markSnapshotSaved, detachSnapshot, addPrerequisite, connectPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
 import type { QuestPack, SnapshotMetadata } from '../shared/types';
 
 // Synthetic exchange data: never copy an authoring dataset into public tests.
@@ -20,6 +20,35 @@ function fixture(): QuestPack {
 }
 
 describe('manual editor document', () => {
+  it('preserves a card tint through file and snapshot loading without changing runtime definitions or other nodes', () => {
+    const original = loadDocument(fixture());
+    const tinted = setCardColor(original, 'green');
+    expect(tinted.dirty).toBe(true);
+    expect(tinted.pack!.nodes[0]!.authoring).toEqual({ ...original.pack!.nodes[0]!.authoring, cardColor: 'green' });
+    expect(tinted.pack!.nodes.map(node => node.definition)).toEqual(original.pack!.nodes.map(node => node.definition));
+    expect(tinted.pack!.nodes[1]).toBe(original.pack!.nodes[1]);
+    expect(original.pack!.nodes[0]!.authoring).not.toHaveProperty('cardColor');
+    const reloaded = importDocument(exportDocument(tinted));
+    expect(loadDocument(reloaded.pack).pack!.nodes[0]!.authoring.cardColor).toBe('green');
+    expect(setCardColor(tinted, 'green')).toBe(tinted);
+    const reset = setCardColor(reloaded, 'default');
+    expect(reset.pack!.nodes[0]!.authoring).not.toHaveProperty('cardColor');
+    expect(reset.pack!.nodes[0]!.authoring.customNote).toBe('synthetic');
+    expect(reset.dirty).toBe(true);
+  });
+  it('leaves existing untinted snapshots clean and unchanged when choosing the default gray', () => {
+    const original = loadDocument(fixture());
+    expect(setCardColor(original, 'default')).toBe(original);
+    expect(original.dirty).toBe(false);
+    expect(JSON.parse(exportDocument(original))).toEqual(fixture());
+  });
+  it('rejects unsupported tint edits and editing boundary cards', () => {
+    const original = loadDocument(fixture());
+    expect(() => setCardColor(original, '#ff0000')).toThrow('validation.cardColor');
+    expect(() => setCardColor(selectQuest(original, 21), 'blue')).toThrow('client.externalReadOnly');
+    expect(() => setCardColor(selectQuest(original, 999), 'blue')).toThrow('client.noSelection');
+    expect(original.dirty).toBe(false);
+  });
   it('tracks snapshot identity and file provenance independently of display origin', () => {
     const sourceFile = { name: 'source.json', lastModified: 1700000000000 };
     const imported = importDocument(JSON.stringify(fixture()), sourceFile.name, sourceFile);

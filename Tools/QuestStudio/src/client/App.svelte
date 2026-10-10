@@ -7,6 +7,8 @@
   import { apiRequest, errorMessage } from './api';
   import { markSnapshotSaved, detachSnapshot, addPrerequisite, connectPrerequisite, arrangeChapter, moveQuest, chapters, emptyDocument, exportDocument, importDocument, loadDocument, questText, removePrerequisite, selectChapter, selectedNode, selectQuest } from './state';
   import Graph from './Graph.svelte';
+  import { CARD_COLORS, resolveCardColor } from './card-colors';
+  import { setCardColor } from './state';
 
   let document = $state(emptyDocument());
   let snapEnabled = $state(true);
@@ -78,6 +80,9 @@
   function changeSelection(id: number) { document = selectQuest(document, id); prerequisite = ''; error = ''; }
   function moveNode(id: number, x: number, y: number) {
     void run(() => { document = moveQuest(document, id, x, y); });
+  }
+  function changeCardColor(color: string) {
+    void run(() => { document = setCardColor(document, color); });
   }
   function arrangeNodes() {
     void run(() => { document = arrangeChapter(document); notice = t('graph.arranged'); });
@@ -209,6 +214,11 @@
       </section>
       <aside class="inspector"><div class="inspector-heading"><span class="eyebrow">{t('inspector.heading')}</span>{#if node}<span class="inspector-id">{formatQuestId(node.definition.quest_id)}</span>{/if}</div>
         {#if node}<div class="inspector-body"><h2>{questText(document.pack, node.definition.title_string_key)}</h2><span class="status-pill" class:unspecified={node.authoring.prerequisitesStatus === 'unspecified'}>{external ? t('graph.legendExternal') : node.authoring.prerequisitesStatus === 'unspecified' ? t('inspector.unspecified') : t('inspector.confirmed')}</span>
+          <section class="detail-section"><h3 id="card-color-heading">{t('inspector.cardColor')}</h3><div class="card-color-palette" role="group" aria-labelledby="card-color-heading">
+            {#each CARD_COLORS as color}
+              <button type="button" class="card-color-option" class:chosen={resolveCardColor(node.authoring.cardColor).id === color.id} aria-pressed={resolveCardColor(node.authoring.cardColor).id === color.id} disabled={busy || external} onclick={() => changeCardColor(color.id)}><span class="card-color-swatch" style:background={color.background} aria-hidden="true"></span>{t(color.labelKey)}</button>
+            {/each}
+          </div></section>
           <section class="detail-section"><h3>{t('inspector.description')}</h3><p class="quest-description">{questText(document.pack, node.definition.description_string_key)}</p>{#each detailKeys(node.authoring.detail_string_key) as key}<p class="quest-description">{questText(document.pack, key)}</p>{/each}{#each detailKeys(node.authoring.context_string_keys) as key}<p class="quest-description secondary-copy">{questText(document.pack, key)}</p>{/each}</section>
           <section class="detail-section"><div class="section-heading"><h3>{t('inspector.prerequisites')}</h3><span class="count-badge">{node.definition.required_completed_quest_ids.length}</span></div>
             {#if node.authoring.prerequisitesStatus === 'unspecified'}<p class="inline-note">{t('inspector.unspecifiedHelp')}</p>{/if}

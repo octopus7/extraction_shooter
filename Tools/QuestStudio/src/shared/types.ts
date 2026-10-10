@@ -13,6 +13,8 @@ export interface QuestNode {
   authoring: {
     prerequisitesStatus: 'confirmed' | 'unspecified';
     sourceReference?: string;
+    /** QuestStudio-only palette ID; absent means the original gray. Never used by runtime. */
+    cardColor?: string;
     [key: string]: unknown;
   };
   [key: string]: unknown;

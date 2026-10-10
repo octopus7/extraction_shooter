@@ -18,3 +18,10 @@
 .quest-card,.quest-card *{-webkit-user-select:none;user-select:none}
 
 .quest-card.external{padding:12px 14px}.quest-card.external strong{font-size:12px}.quest-card.external .card-bottom{font-size:10px}
+
+.quest-card.tinted,.quest-card.tinted:hover,.quest-card.tinted.selected{background:var(--card-tint)}
+.card-color-palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:14px}
+.card-color-option{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 5px;min-height:36px;border:1px solid #414957;border-radius:6px;background:#20242d;color:#bac3d3;font-size:11px}
+.card-color-option:hover:not(:disabled){border-color:#7d8daa;color:#e5e9f1}
+.card-color-option.chosen{border-color:#acbaff;color:#e5e9f1;box-shadow:0 0 0 1px #acbaff}
+.card-color-swatch{width:16px;height:16px;border:1px solid #6e7888;border-radius:4px;flex-shrink:0}

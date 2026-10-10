@@ -3,6 +3,7 @@ import { getChapter, resolveQuestId, updatePrerequisites } from '../shared/graph
 import { normalizeLoadedPack, validatePack, ValidationError } from '../shared/validation';
 import { arrangeChapterNodes } from '../shared/layout';
 import { ClientError } from './api';
+import { CARD_COLORS } from './card-colors';
 
 export interface EditorDocument {
   pack: QuestPack | null;
@@ -59,6 +60,16 @@ function editableNode(document: EditorDocument): QuestNode {
   if (!document.pack || !node) throw new ClientError('client.noSelection');
   if (getChapter(node) !== document.chapter) throw new ClientError('client.externalReadOnly');
   return node;
+}
+export function setCardColor(document: EditorDocument, color: string): EditorDocument {
+  const node = editableNode(document);
+  if (!CARD_COLORS.some(preset => preset.id === color)) throw new ValidationError('validation.cardColor');
+  const next = color === 'default' ? undefined : color;
+  if (node.authoring.cardColor === next) return document;
+  const authoring = { ...node.authoring };
+  if (next === undefined) delete authoring.cardColor;
+  else authoring.cardColor = next;
+  return { ...document, dirty: true, pack: { ...document.pack!, nodes: document.pack!.nodes.map(candidate => candidate === node ? { ...node, authoring } : candidate) } };
 }
 export function addPrerequisite(document: EditorDocument, input: string): EditorDocument {
   const node = editableNode(document);
