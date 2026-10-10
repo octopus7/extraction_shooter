@@ -70,3 +70,8 @@ export function removePrerequisite(document: EditorDocument, id: number): Editor
 export function questText(pack: QuestPack | null, key: string): string {
   return pack?.strings.find(entry => entry.key === key && (entry.locale === 'ko' || entry.locale === 'ko-KR'))?.value ?? key;
 }
+
+/** Handle owner is the dependent; dropped card is its prerequisite. */
+export function connectPrerequisite(document: EditorDocument, dependentId: number, prerequisiteId: number): EditorDocument {
+  return addPrerequisite(selectQuest(document, dependentId), String(prerequisiteId));
+}

@@ -10,3 +10,5 @@
 .quest-card:not(.external){cursor:grab}.quest-card.moving{cursor:grabbing;z-index:2}.quest-card.external{cursor:pointer}
 
 .snap-toggle{display:flex;align-items:center;gap:6px;margin:0;padding:0 10px;white-space:nowrap;font-size:11px;color:#d9e1f3;cursor:pointer}.snap-toggle input{width:14px;height:14px;margin:0;padding:0;accent-color:var(--accent)}.edges .snap-guide{stroke:#7bdfd4;stroke-width:1;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}.zoom-controls{flex-shrink:0}@media(max-width:420px){.graph-bottom{left:8px;right:8px}.snap-toggle{padding:0 6px}.zoom-controls button.fit-button{padding:0 7px}}
+
+.prerequisite-port{position:absolute;width:22px;height:22px;border:2px solid #f28b8b;border-radius:6px;background:#202630;display:grid;place-items:center;padding:0;z-index:3;pointer-events:auto;cursor:crosshair}.prerequisite-port span{width:6px;height:8px;border-left:2px solid #f28b8b;border-right:2px solid #f28b8b}.prerequisite-port:hover{background:#563b45}.quest-card.link-target{outline:2px solid #7bdfd4;outline-offset:3px}.edges .link-preview{stroke:#7bdfd4;stroke-width:2;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
+import { addPrerequisite, connectPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
 import type { QuestPack } from '../shared/types';
 
 // Synthetic exchange data: never copy an authoring dataset into public tests.
@@ -20,6 +20,20 @@ function fixture(): QuestPack {
 }
 
 describe('manual editor document', () => {
+  it('connects the dropped card as prerequisite of the handle owner regardless of selection', () => {
+    const original = selectQuest(loadDocument(fixture()), 1);
+    const linked = connectPrerequisite(original, 2, 1);
+    expect(linked.pack!.nodes[1]!.definition.required_completed_quest_ids).toEqual([1]);
+    expect(linked.pack!.nodes[0]!.definition.required_completed_quest_ids).toEqual([]);
+    expect(linked.selectedQuestId).toBe(2);
+    expect(linked.pack!.nodes[1]!.x).toBe(original.pack!.nodes[1]!.x);
+    expect(original.dirty).toBe(false);
+    expect(() => connectPrerequisite(original, 2, 2)).toThrow('validation.self_reference');
+    expect(() => connectPrerequisite(linked, 1, 2)).toThrow('validation.cycle');
+    expect(() => connectPrerequisite(linked, 2, 1)).toThrow('validation.duplicate_prerequisite');
+    expect(() => connectPrerequisite(original, 21, 2)).toThrow('client.externalReadOnly');
+    expect(connectPrerequisite(original, 2, 21).pack!.nodes[1]!.definition.required_completed_quest_ids).toEqual([21]);
+  });
   it('moves only the addressed local card and preserves coordinates through editing and full exchange', () => {
     const original = loadDocument(fixture());
     const moved = moveQuest(original, 2, -25.5, 0);

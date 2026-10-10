@@ -41,6 +41,8 @@ const ko: Record<string, string> = {
   'graph.legendLocal': '선택 챕터',
   'graph.legendExternal': '다른 지역',
   'graph.noPrerequisites': '선행 없음',
+  'graph.linkHandle': '{id} 선행 연결 핸들',
+  'graph.linkHelp': '선행으로 지정할 카드에 끌어 놓으세요. Esc로 취소합니다. 숫자 입력도 사용할 수 있습니다.',
   'graph.moveHint': '카드를 드래그해 배치 · Esc로 취소',
   'graph.snapMode': '스냅 모드',
   'graph.snapHelp': '드래그 중 가까운 카드와 가로·세로 위치를 맞춥니다.',
