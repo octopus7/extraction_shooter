@@ -109,7 +109,7 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 	}
 	SetTitleLogoVisible(false);
 
-	SelectedDifficultyStage = INDEX_NONE;
+	SelectedDifficultyStage = 2;
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		if (TunaGameInstance->IsActiveSaveSlotDifficultySelected())

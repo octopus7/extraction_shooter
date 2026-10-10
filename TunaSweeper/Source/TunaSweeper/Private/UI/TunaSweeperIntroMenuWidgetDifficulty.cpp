@@ -449,7 +449,14 @@ void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 
 void UTunaSweeperIntroMenuWidget::SelectDifficultyStage(int32 DifficultyStage)
 {
-	SelectedDifficultyStage = FMath::Clamp(DifficultyStage, 1, 3);
+	if (bStartTravelPending || bClosingDifficultyAdjustment || !IsDifficultySelectionVisible()) return;
+	const int32 ClickedStage = FMath::Clamp(DifficultyStage, 1, 3);
+	if (SelectedDifficultyStage == ClickedStage)
+	{
+		HandleDifficultyStartClicked();
+		return;
+	}
+	SelectedDifficultyStage = ClickedStage;
 	RefreshDifficultySelectionPanel();
 }
 
