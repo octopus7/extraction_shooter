@@ -71,7 +71,7 @@
       </svg>
       {#each projection.nodes as node (node.id)}
         {@const definition = pack.nodes.find(item => item.definition.quest_id === node.questId)}
-        {@const noPrerequisites = !node.external && definition?.definition.required_completed_quest_ids.length === 0}
+        {@const noPrerequisites = !node.external && node.questId !== '1' && definition?.definition.required_completed_quest_ids.length === 0}
         <button class="quest-card" class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardWidth}px`} style:height={`${cardHeight}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: node.questId })} aria-pressed={selectedId === node.questId}>
           <span class="card-top"><span class="quest-id">{node.questId}</span><span class="node-dot"></span></span>
           <strong>{questText(pack, node.titleKey)}</strong>
