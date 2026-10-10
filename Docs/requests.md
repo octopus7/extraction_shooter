@@ -10714,3 +10714,9 @@
 - 반영: 운영 D1에 0005_queststudio_snapshots.sql 마이그레이션 적용 성공(8개 명령). 기존 ADMIN_PASSWORD 존재를 확인하고 wrangler deploy --keep-vars로 기존 설정을 유지하며 Worker와 정적 자산을 배포했다. 배포 버전은 4694484e-3c06-4c67-909a-2535ca3133f2, 주소는 https://quest.oc7.workers.dev 다.
 - 기본 확인: 미적용 마이그레이션 없음, 신규 snapshots/quest_nodes/localization_strings 각 0행, 홈페이지 HTTP 200, 세션 API authenticated=false 및 authConfigured=true 응답을 확인했다. 퀘스트 콘텐츠 임포트나 기존 데이터 삭제는 실행하지 않았다.
 - 범위: 배포 명령과 기본 응답만 확인했으며 실제 로그인·편집·저장 동작의 최종 운영 수용은 사용자에게 남긴다. 다른 작업의 RaidMap 변경은 포함하지 않는다.
+
+## 2026-10-10 22:33:01 (소요시간: 00:00:21)
+
+- 요청: Cloudflare 계정 ID를 Git에 올라가는 파일에 기록하지 말 것.
+- 처리: AGENTS.md에 계정 ID 원문을 설정·문서·작업 기록·예제·커밋 메시지에 기록하지 않고 프로세스 환경변수로 전달하는 영구 지침을 추가했다. 이 기록에도 ID 원문은 포함하지 않는다.
+- 검증: 공개 및 접근 제한 저장소의 추적 파일 모두에 해당 ID가 없음을 확인했다. 앞선 배포에서도 프로세스 환경변수로만 전달했다.
