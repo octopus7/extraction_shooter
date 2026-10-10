@@ -62,18 +62,27 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Game->ResetPlayerSlotArrays();
 	auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>();
 	if (!TestNotNull(TEXT("Quest subsystem"), Quests)) return false;
+	// Submission behavior is tested against a synthetic quest, independent of authored content.
+	Quests->LoadQuestData(false);
+	Quests->QuestDefinitions.Reset();
+	FTunaSweeperQuestDefinition Delivery;
+	Delivery.QuestId = TEXT("test.delivery.single");
+	Delivery.ProviderId = TEXT("provider.mole");
+	FTunaSweeperObjectiveDefinition DeliveryObjective;
+	DeliveryObjective.ObjectiveId = TEXT("deliver_canned_tuna");
+	DeliveryObjective.Type = ETunaSweeperObjectiveType::ItemSubmitted;
+	DeliveryObjective.ItemId = 3004;
+	DeliveryObjective.RequiredCount = 1;
+	DeliveryObjective.TargetProviderId = TEXT("provider.mole");
+	Delivery.Objectives.Add(DeliveryObjective);
+	Quests->QuestDefinitions.Add(Delivery.QuestId, Delivery);
 	FTunaSweeperQuestProgressSaveData Progress;
-	Progress.QuestId = TEXT("demo_q4_todays_reward");
+	Progress.QuestId = Delivery.QuestId;
 	Progress.State = ETunaSweeperQuestState::Accepted;
 	Quests->LoadQuestProgressFromSave({Progress}, NAME_None, 0);
 	Quests->NotifyInteractionCompleted(TEXT("demo.canned_tuna.deliver"), TEXT("world_progress"));
 	TestEqual(TEXT("An interaction event without submitted items cannot finish delivery"),
 		Quests->GetQuestState(Progress.QuestId), ETunaSweeperQuestState::Accepted);
-	FTunaSweeperQuestDefinition Demo;
-	TestTrue(TEXT("Demo definition loads"), Quests->TryGetQuestDefinition(Progress.QuestId, Demo));
-	TestEqual(TEXT("Demo retains existing objective ID"), Demo.Objectives[0].ObjectiveId, FName(TEXT("deliver_canned_tuna")));
-	TestEqual(TEXT("Demo requires submitted can"), Demo.Objectives[0].ItemId, 3004);
-	TestEqual(TEXT("Demo targets mole provider"), Demo.Objectives[0].TargetProviderId, FName(TEXT("provider.mole")));
 	FName Submitted;
 	TestFalse(TEXT("Missing can cannot submit"), Quests->TrySubmitItemsToProvider(TEXT("provider.mole"), Submitted, false));
 	TestTrue(TEXT("Test inventory receives can"), Game->AddItemToFirstAvailableInventorySlot(3004, 1));

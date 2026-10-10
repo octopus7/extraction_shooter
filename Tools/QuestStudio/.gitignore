@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.wrangler/
+
+# Local development secrets
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+
+# Local logs
+*.log
+
+# Generated runtime types
+worker-configuration.d.ts

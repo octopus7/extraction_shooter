@@ -65,43 +65,7 @@ bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
             }
         }
     }
-    TestNotNull(TEXT("Dinner ending scenario is authored in ScenarioDefinitions"), EndingScenario.Get());
-    if (EndingScenario.IsValid())
-    {
-        const TArray<TSharedPtr<FJsonValue>>* Triggers = nullptr;
-        const TArray<TSharedPtr<FJsonValue>>* QuestConditions = nullptr;
-        const TArray<TSharedPtr<FJsonValue>>* Lines = nullptr;
-        FString CompletionFlag;
-        bool bOneShot = false;
-        TestTrue(TEXT("Dinner ending has the direct trigger"), EndingScenario->TryGetArrayField(TEXT("triggers"), Triggers) &&
-            Triggers && Triggers->ContainsByPredicate([](const TSharedPtr<FJsonValue>& Value)
-            {
-                return Value.IsValid() && Value->AsString() == TEXT("demo.ending.dinner");
-            }));
-        TestTrue(TEXT("Dinner ending requires the final quest reward"), EndingScenario->TryGetArrayField(TEXT("required_quest_states"), QuestConditions));
-        TestTrue(TEXT("Dinner ending has eight scenario lines"), EndingScenario->TryGetArrayField(TEXT("lines"), Lines) && Lines && Lines->Num() == 8);
-        TestTrue(TEXT("Dinner ending has a completion flag"), EndingScenario->TryGetStringField(TEXT("completion_flag"), CompletionFlag));
-        TestEqual(TEXT("Dinner ending completion flag"), CompletionFlag, FString(TEXT("dialogue.demo.ending.dinner")));
-        TestTrue(TEXT("Dinner ending is one-shot"), EndingScenario->TryGetBoolField(TEXT("one_shot"), bOneShot) && bOneShot);
-        if (QuestConditions)
-        {
-            bool bFoundFinalQuestCondition = false;
-            for (const TSharedPtr<FJsonValue>& ConditionValue : *QuestConditions)
-            {
-                const TSharedPtr<FJsonObject> Condition = ConditionValue.IsValid() ? ConditionValue->AsObject() : nullptr;
-                FString QuestId;
-                FString State;
-                if (Condition.IsValid() && Condition->TryGetStringField(TEXT("quest_id"), QuestId) &&
-                    Condition->TryGetStringField(TEXT("state"), State) &&
-                    QuestId == TEXT("demo_q4_todays_reward") && State == TEXT("reward_completed"))
-                {
-                    bFoundFinalQuestCondition = true;
-                    break;
-                }
-            }
-            TestTrue(TEXT("Dinner ending quest condition is reward_completed"), bFoundFinalQuestCondition);
-        }
-    }
+    TestNull(TEXT("Retired dinner ending scenario is absent"), EndingScenario.Get());
 
     TSet<FString> ScenarioTextKeys;
     TSet<FString> UiTextKeys;
@@ -111,8 +75,8 @@ bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
         FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/UITextStrings.csv")), UiTextKeys));
     for (int32 LineIndex = 1; LineIndex <= 8; ++LineIndex)
     {
-        TestTrue(
-            FString::Printf(TEXT("Dinner ending line %d has a ScenarioTextStrings key"), LineIndex),
+        TestFalse(
+            FString::Printf(TEXT("Retired dinner line %d is removed"), LineIndex),
             ScenarioTextKeys.Contains(FString::Printf(TEXT("scenario.demo.ending.dinner.line%d"), LineIndex)));
     }
     TestTrue(TEXT("Farewell title uses a UI text key"), UiTextKeys.Contains(TEXT("ui.demo_ending.farewell_title")));

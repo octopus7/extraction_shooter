@@ -46,24 +46,3 @@ quest.rescue_cart_return.objective.return_by_rescue_cart,乘救护车返回地�
 quest.warp_point_used_test.title,测试传送点,測試傳送點,Проверка точки телепортации,Verificação do uso de ponto de teletransporte
 quest.warp_point_used_test.description,用于验证传送点目标的数据，未连接实际任务提供者或流程。,用於驗證傳送點目標的數據，未連接實際任務提供者或流程。,Тестовые данные для цели с точкой телепортации. Не связаны с действующим заданием.,Dados de validação do objetivo de usar um ponto de teletransporte. Não estão vinculados a um personagem que ofereça missões nem ao fluxo real de progressão.
 quest.warp_point_used_test.objective.use_raid_warp_point_a,使用传送点,使用傳送點,Использовать точку телепортации,Usar um ponto de teletransporte
-quest.demo_q1.title,检查取水设施,檢查取水設施,Проверить водозабор,Confira a instalação de captação de água
-quest.demo_q1.description,包括厕所在内，所有生活设施都停水了。去调查外部取水设施吧。,包括廁所在內，所有生活設施都停水了。去調查外部取水設施吧。,"Подача воды ко всем бытовым объектам, включая туалет, прекратилась. Осмотрим внешний водозабор.","O abastecimento de água de todas as instalações essenciais, incluindo o banheiro, foi interrompido. Vamos investigar a instalação de captação de água lá fora."
-quest.demo_q1.accept.line1,地堡里几乎没水了。得先去看看取水设施。,地堡裏幾乎沒水了。得先去看看取水設施。,В бункере почти нет воды. Сначала нужно проверить водозабор.,Quase não sai água no bunker. Precisamos conferir a instalação de captação primeiro.
-quest.demo_q1.accept.line2,外面很危险，小心点。发现异常就马上回来告诉我。,外面很危險，小心點。發現異常就馬上回來告訴我。,"Снаружи опасно. Если заметишь что-то странное, сразу возвращайся и расскажи мне.","Tome cuidado lá fora. Se encontrar algo estranho, volte logo e me conte."
-quest.demo_q1.objective.inspect,调查取水设施,調查取水設施,Осмотреть водозабор,Investigar a instalação de captação de água
-quest.demo_q2.title,撬棍与滤网清理,撬棍與濾網清理,Лом и очистка сетки,Um pé de cabra para limpar a grade
-quest.demo_q2.description,带上撬棍，清除取水滤网上的水草和杂物。,帶上撬棍，清除取水濾網上的水草和雜物。,Возьмите лом и очистите водозаборную сетку от водорослей и мусора.,Traga um pé de cabra e remova as plantas aquáticas e os detritos da grade de captação.
-quest.demo_q2.accept.line1,取水滤网被垃圾堵死了。有撬棍就能清开。,取水濾網被垃圾堵死了。有撬棍就能清開。,Водозаборная сетка забита мусором. Лом поможет её расчистить.,A grade de captação está entupida de lixo. Um pé de cabra deve dar conta de limpar isso.
-quest.demo_q2.accept.line2,从工具架拿上撬棍，别太用力挥。,從工具架拿上撬棍，別太用力揮。,Возьми лом со стойки для инструментов. Только не размахивай им слишком сильно.,Pegue o pé de cabra no suporte de ferramentas. Só não exagere na força.
-quest.demo_q2.objective.clear,清理取水滤网,清理取水濾網,Очистить водозаборную сетку,Limpar a grade de captação
-quest.demo_q3a.title,损坏的阀门手柄,損壞的閥門手柄,Сломанная рукоятка клапана,Manopla de válvula quebrada
-quest.demo_q3a.description,找到备用阀门手柄，修理取水设施。,找到備用閥門手柄，修理取水設施。,Найдите запасную рукоятку клапана и почините водозабор.,Encontre uma manopla de válvula de reposição e conserte a instalação de captação de água.
-quest.demo_q3a.objective.repair,修理取水设施,修理取水設施,Починить водозабор,Consertar a instalação de captação de água
-quest.demo_q3b.title,地堡管道漏水,地堡管道漏水,Протечка трубы в бункере,Vazamento no encanamento do bunker
-quest.demo_q3b.description,找到防水胶带，修理地堡内受损的管道。,找到防水膠帶，修理地堡內受損的管道。,Найдите водостойкую ленту и почините повреждённую трубу в бункере.,Encontre fita impermeável e conserte o encanamento danificado dentro do bunker.
-quest.demo_q3b.objective.repair,修理地堡管道,修理地堡管道,Починить трубу в бункере,Consertar o encanamento do bunker
-quest.demo_q4.title,今天的奖励,今天的獎勵,Сегодняшняя награда,A recompensa de hoje
-quest.demo_q4.description,从外部食品仓库带回金枪鱼罐头，交给鼹鼠。,從外部食品倉庫帶回金槍魚罐頭，交給鼴鼠。,Принесите банку тунца с внешнего продовольственного склада и отдайте Кроту.,Traga uma lata de atum do armazém de alimentos lá fora e entregue à Toupeira.
-quest.demo_q4.accept.line1,水通了，管道也不漏了。你辛苦了。,水通了，管道也不漏了。你辛苦了。,"Вода снова течёт, трубы больше не протекают. Ты отлично справился.",Agora a água está saindo direitinho e os canos pararam de vazar. Você mandou muito bem.
-quest.demo_q4.accept.line2,外面的食品仓库里还剩一罐金枪鱼。带回来，我们一起吃。,外面的食品倉庫裏還剩一罐金槍魚。帶回來，我們一起喫。,"На внешнем продовольственном складе осталась банка тунца. Принеси её, и поедим вместе.",Sobrou uma lata de atum no armazém de alimentos lá fora. Traga para cá e vamos comer juntos.
-quest.demo_q4.objective.deliver,交付金枪鱼罐头,交付金槍魚罐頭,Передать банку тунца,Entregar a lata de atum

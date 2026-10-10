@@ -8,7 +8,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
-#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperScenarioSubsystem.h"
 #include "UI/TunaSweeperDemoFarewellWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
@@ -17,7 +16,6 @@
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 namespace
 {
-const FName FinalQuest(TEXT("demo_q4_todays_reward"));
 const FName EndingSeen(TEXT("demo.ending.farewell_seen"));
 }
 ATunaSweeperDemoEndingActor::ATunaSweeperDemoEndingActor()
@@ -42,24 +40,6 @@ ATunaSweeperDemoEndingActor* ATunaSweeperDemoEndingActor::Find(UWorld* World)
     if (World) for (TActorIterator<ATunaSweeperDemoEndingActor> It(World); It; ++It) return *It;
     return nullptr;
 }
-void ATunaSweeperDemoEndingActor::BeginPlay()
-{
-    Super::BeginPlay();
-    GetWorldTimerManager().SetTimer(StageTimer, this, &ThisClass::ResumePendingEnding, 1.f, false);
-}
-void ATunaSweeperDemoEndingActor::ResumePendingEnding()
-{
-    // Main is unlimited play: the demo's ending/title-return flow must never run there.
-    if (!TunaSweeperBuildFlavor::IsDemo()) return;
-    auto* GI = GetGameInstance<UTunaSweeperGameInstance>();
-    auto* Quests = GI ? GI->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
-    if (Quests && Quests->GetQuestState(FinalQuest) == ETunaSweeperQuestState::RewardCompleted && !GI->IsScenarioProgressFlagSet(EndingSeen))
-        StartEnding();
-}
-void ATunaSweeperDemoEndingActor::QueueEnding()
-{
-    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ThisClass::ResumePendingEnding));
-}
 bool ATunaSweeperDemoEndingActor::StartEnding()
 {
     if (!TunaSweeperBuildFlavor::IsDemo()) return false;
@@ -75,7 +55,6 @@ bool ATunaSweeperDemoEndingActor::StartEnding()
     DinnerDialogueCompletionFlag = Presentation.CompletionFlag;
     if (Player->IsDialogueSequenceActive())
     {
-        GetWorldTimerManager().SetTimer(StageTimer,this,&ThisClass::ResumePendingEnding,.25f,false);
         return false;
     }
     Fade = CreateWidget<UTunaSweeperScreenFadeWidget>(Player);

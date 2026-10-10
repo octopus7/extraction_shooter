@@ -1,7 +1,6 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Settings/TunaSweeperLanguage.h"
 #include "Subsystem/TunaSweeperAdditionalTranslations.h"
-#include "Scenario/TunaSweeperDemoEndingActor.h"
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -475,31 +474,6 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(FName QuestId)
 	return true;
 }
 
-bool UTunaSweeperQuestSubsystem::AutoAcceptQuestForScenario(FName CompletionFlag)
-{
-	if (!TunaSweeperBuildFlavor::IsDemo() || CompletionFlag != TEXT("dialogue.demo.toilet_intro"))
-	{
-		return false;
-	}
-
-	// Resolve a fixed quest, not the provider's next quest, so a replay cannot advance the chain.
-	const FName QuestId(TEXT("demo_q1_water_intake_check"));
-	if (!AcceptQuest(QuestId))
-	{
-		return false;
-	}
-
-	FTunaSweeperQuestDefinition Definition;
-	if (TryGetQuestDefinition(QuestId, Definition))
-	{
-		if (auto* Toasts = GetGameInstance()->GetSubsystem<UTunaSweeperToastSubsystem>())
-		{
-			Toasts->ShowQuestAcceptedToast(Definition.Title);
-		}
-	}
-	return true;
-}
-
 bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(FName QuestId) const
 {
 	return FindQuestDefinition(QuestId) && GetQuestState(QuestId) == ETunaSweeperQuestState::RewardAvailable;
@@ -571,10 +545,6 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 	}
 
 	BroadcastQuestProgressChanged(true);
-	if (QuestId == FName(TEXT("demo_q4_todays_reward")))
-	{
-		if (auto* Ending = ATunaSweeperDemoEndingActor::Find(GetWorld())) Ending->QueueEnding();
-	}
 	return true;
 }
 

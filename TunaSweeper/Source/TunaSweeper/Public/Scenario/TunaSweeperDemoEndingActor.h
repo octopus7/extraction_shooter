@@ -16,10 +16,8 @@ class TUNASWEEPER_API ATunaSweeperDemoEndingActor : public AActor
     GENERATED_BODY()
 public:
     ATunaSweeperDemoEndingActor();
-    virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     static ATunaSweeperDemoEndingActor* Find(UWorld* World);
-    void QueueEnding();
     UFUNCTION(BlueprintCallable, Category="Demo Ending")
     bool StartEnding();
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
@@ -37,7 +35,6 @@ public:
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="Demo Ending")
     bool bEndingActive = false;
 private:
-    void ResumePendingEnding();
     void ShowDinner();
     void StartDinnerDialogue();
     void DinnerFinished();

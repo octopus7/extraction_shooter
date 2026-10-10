@@ -1093,13 +1093,7 @@ void ATunaSweeperPlayerController::HandleDialogueFinished()
 	{
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{
-			// AcceptQuest saves both the completed dialogue and its newly accepted quest together.
-			TunaGameInstance->MarkScenarioProgressFlag(ActiveDialogueCompletionFlag, false);
-			auto* Quests = TunaGameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>();
-			if (!Quests || !Quests->AutoAcceptQuestForScenario(ActiveDialogueCompletionFlag))
-			{
-				TunaGameInstance->SaveGameState();
-			}
+			TunaGameInstance->MarkScenarioProgressFlag(ActiveDialogueCompletionFlag, true);
 		}
 	}
 

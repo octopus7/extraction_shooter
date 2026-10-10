@@ -1,0 +1,45 @@
+{
+  "name": "tunasweeper-quest-studio",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Chapter-based quest flow editor with manually managed complete snapshots.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "npm run worker:types && npm run check && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:typecheck": "npm run worker:types && tsc -p test/tsconfig.json --noEmit",
+    "worker:types": "wrangler types worker-configuration.d.ts",
+    "db:migrate:local": "wrangler d1 migrations apply quest-flow-simulator --local",
+    "db:migrate:remote": "wrangler d1 migrations apply quest-flow-simulator --remote",
+    "verify": "npm run test:project && npm test && npm run test:typecheck && npm run build && wrangler deploy --dry-run",
+    "deploy:dry": "npm run build && wrangler deploy --dry-run",
+    "deploy": "npm run build && wrangler deploy",
+    "test:project": "node --test test/*.node.mjs",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "d1",
+    "quest-authoring",
+    "quest-flow"
+  ],
+  "license": "UNLICENSED",
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.49.0",
+    "@cloudflare/vitest-pool-workers": "^0.19.1",
+    "@cloudflare/workers-types": "^5.20260731.1",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@types/node": "^26.1.2",
+    "csv-parse": "^7.0.1",
+    "svelte-check": "^4.7.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.116.0"
+  },
+  "dependencies": {
+    "svelte": "^5.56.8"
+  }
+}

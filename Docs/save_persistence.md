@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Retired demo quest catalog (2026-10-10)
+
+The five former demo quests are removed from the public quest catalog. Existing save files are not rewritten by this content change. The existing quest loader discards saved quest progress and tracking whose IDs are absent from the active catalog; subsequent saves therefore omit that retired progress. Quest coins and unrelated inventory, scenario flags, and world progress remain intact. Completing the intro dialogue no longer accepts a fixed demo quest, and the removed final quest no longer queues or resumes the old ending. Quest-gated environment interactions remain gated until explicitly authored again.
+
+QuestStudio `authoring_tags` and graph coordinates are authoring metadata only. They do not add gameplay save fields or change prerequisite evaluation. QuestStudio snapshots are separate from UE gameplay save slots.
+
 ## Armor and ammunition penetration
 
 Combat health and state gauges (health, food, hydration, stamina and scratch) now normalize current/max values to whole points while retaining existing float storage. Imported/restored vitals and ratio-based level transitions round at the normal state setters; no save format/version change or direct save-file rewrite is required. Continuous vitals depletion, stamina changes and practice-dummy recovery keep sub-point remainders only in transient runtime memory. Setting/restoring vitals or resetting the corresponding state clears its remainder; unchanged max-stat refreshes preserve it. Excess changes beyond full/empty are discarded, while opposite-direction pending changes remain. Weight, timers and progress ratios retain their existing fractional units.

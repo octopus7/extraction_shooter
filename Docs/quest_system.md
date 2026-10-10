@@ -1,6 +1,6 @@
 # 퀘스트/목표 진행 프레임워크
 
-> 현재 상태(2026-08-24): 공개 `QuestDefinitions.json`은 새 데모 구성을 위해 `[]`로 비워져 있다. 아래 기존 퀘스트 설명은 프레임워크와 과거 예시 참고용이며 현재 활성 퀘스트가 아니다. 제거 목록은 `Docs/demo_runtime_data_cleanup_2026-08-24.md`, 새 데이터 작성 절차는 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 참고한다.
+> 현재 상태(2026-10-10): 사용자의 퀘스트툴 재구성 요청에 따라 기존 데모 퀘스트 5개를 제거하여 공개 `QuestDefinitions.json`은 `[]`다. 기존 데모의 고정 자동 수락 및 최종 퀘스트 연동 엔딩도 해제했다. 아래 퀘스트 설명은 프레임워크와 과거 예시 참고용이며 현재 활성 퀘스트가 아니다. 새 데이터 작성 절차는 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 참고한다.
 
 ## 범위
 
@@ -18,6 +18,7 @@
 - `provider_id`: 퀘스트를 제공하는 소스 ID. 현재 두더지는 `provider.mole`을 쓴다.
 - `sort_order`: 같은 제공자 안에서 새 퀘스트 후보를 고를 때 쓰는 낮은 값 우선 순서.
 - `required_completed_quest_ids`: 수락 가능해지기 전에 보상 수령까지 끝나야 하는 선행 퀘스트 ID 목록.
+- `authoring_tags`: `chapter:1` 등의 저작용 분류 태그. QuestStudio의 챕터 필터와 경계 표시에만 사용하며 현재 UE 로더는 이 필드를 실행 데이터로 해석하지 않는다. 게임의 선행 조건·목표·보상·세이브 판정에 영향을 주지 않는다.
 - `title`, `description`: 퀘스트 UI와 HUD 추적에 표시할 텍스트.
 - `auto_track_on_accept`: 수락 시 HUD 추적 대상으로 자동 설정할지 여부.
 - `objectives`: 목표 목록.
