@@ -22,23 +22,23 @@ bool FTunaSweeperRetiredDemoQuestTest::RunTest(const FString& Parameters)
 	Quests->GetAllQuestDefinitions(Definitions);
 	TestEqual(TEXT("No retired demo quests remain"), Definitions.Num(), 0);
 
-	FTunaSweeperQuestProgressSaveData OldProgress;
-	OldProgress.QuestId = TEXT("demo_q4_todays_reward");
+	FTunaSweeperNumericQuestProgressSaveData OldProgress;
+	OldProgress.QuestId = 999999;
 	OldProgress.State = ETunaSweeperQuestState::RewardCompleted;
 	Quests->LoadQuestProgressFromSave({OldProgress}, OldProgress.QuestId, 125);
 	TestFalse(TEXT("Removed quests cannot be accepted"), Quests->AcceptQuest(OldProgress.QuestId));
 	TestFalse(TEXT("Removed quests cannot grant rewards"), Quests->ClaimQuestReward(OldProgress.QuestId));
-	TestTrue(TEXT("Removed tracked quest is cleared"), Quests->GetTrackedQuestId().IsNone());
-	FName ResolvedQuest;
+	TestTrue(TEXT("Removed tracked quest is cleared"), Quests->GetTrackedQuestId() == 0);
+	int32 ResolvedQuest = 0;
 	TestFalse(TEXT("Provider cannot resolve a retired quest"),
 		Quests->TryResolveQuestForProvider(TEXT("provider.mole"), OldProgress.QuestId, ResolvedQuest));
 
-	TArray<FTunaSweeperQuestProgressSaveData> Saved;
-	FName Tracked;
+	TArray<FTunaSweeperNumericQuestProgressSaveData> Saved;
+	int32 Tracked = 0;
 	int32 Coins = 0;
 	Quests->ExportQuestProgressForSave(Saved, Tracked, Coins);
 	TestEqual(TEXT("Removed progress is not written back"), Saved.Num(), 0);
-	TestTrue(TEXT("No retired tracking is written back"), Tracked.IsNone());
+	TestTrue(TEXT("No retired tracking is written back"), Tracked == 0);
 	TestEqual(TEXT("Existing currency remains intact"), Coins, 125);
 	return true;
 }

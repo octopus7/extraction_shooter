@@ -26,7 +26,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse", meta=(ClampMin="1"))
     int32 FoodQuantity = 1;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Quest")
-    FName RequiredQuestId = TEXT("demo_q4_todays_reward");
+    int32 RequiredQuestId = 0;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Quest")
+    bool bRequireQuest = true;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Interaction")
     FText InteractionDisplayName = FText::FromString(TEXT("참치캔 획득"));
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Interaction")

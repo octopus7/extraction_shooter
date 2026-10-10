@@ -2,17 +2,17 @@
   import { onMount, tick } from 'svelte';
   import { t } from '../shared/ui-strings';
   import type { QuestPack } from '../shared/types';
-  import { GRAPH_CARD_HEIGHT, GRAPH_CARD_WIDTH, projectChapter } from '../shared/graph';
+  import { formatQuestId, GRAPH_CARD_HEIGHT, GRAPH_CARD_WIDTH, projectChapter } from '../shared/graph';
   import { questText } from './state';
 
-  let { pack, chapter, selectedId, onselect, onmove, onarrange, disabled = false }: { pack: QuestPack; chapter: string; selectedId: string | null; onselect: (id: string) => void; onmove: (id: string, x: number, y: number) => void; onarrange: () => void; disabled?: boolean } = $props();
+  let { pack, chapter, selectedId, onselect, onmove, onarrange, disabled = false }: { pack: QuestPack; chapter: string; selectedId: number | null; onselect: (id: number) => void; onmove: (id: number, x: number, y: number) => void; onarrange: () => void; disabled?: boolean } = $props();
   const projection = $derived(projectChapter(pack, chapter));
   let viewport: HTMLDivElement;
   let scale = $state(1);
   let offset = $state({ x: 40, y: 40 });
   let dragging = $state(false);
   let pointer: { x: number; y: number; originX: number; originY: number; id: number } | null = null;
-  let nodeDrag = $state<{ id: string; pointerId: number; clientX: number; clientY: number; originX: number; originY: number; x: number; y: number; scale: number; moved: boolean } | null>(null);
+  let nodeDrag = $state<{ id: number; pointerId: number; clientX: number; clientY: number; originX: number; originY: number; x: number; y: number; scale: number; moved: boolean } | null>(null);
   const renderedNodes = $derived(projection.nodes.map(node => nodeDrag?.id === node.id ? { ...node, x: nodeDrag.x, y: nodeDrag.y } : node));
   const cardWidth = GRAPH_CARD_WIDTH;
   const cardHeight = GRAPH_CARD_HEIGHT;
@@ -40,7 +40,7 @@
     viewport.setPointerCapture(event.pointerId);
     dragging = true;
   }
-  function startNode(event: PointerEvent, id: string, x: number, y: number, external: boolean) {
+  function startNode(event: PointerEvent, id: number, x: number, y: number, external: boolean) {
     event.stopPropagation();
     if (event.button !== 0 || pointer || nodeDrag) return;
     onselect(id);
@@ -69,7 +69,7 @@
     const rect = viewport.getBoundingClientRect();
     zoom(Math.exp(-event.deltaY * 0.0015), event.clientX - rect.left, event.clientY - rect.top);
   }
-  function path(source: string, target: string): string {
+  function path(source: number, target: number): string {
     const a = positioned.get(source);
     const b = positioned.get(target);
     if (!a || !b) return '';
@@ -96,9 +96,9 @@
       </svg>
       {#each renderedNodes as node (node.id)}
         {@const definition = pack.nodes.find(item => item.definition.quest_id === node.questId)}
-        {@const noPrerequisites = !node.external && node.questId !== '1' && definition?.definition.required_completed_quest_ids.length === 0}
-        <button class="quest-card" class:moving={nodeDrag?.id === node.id && nodeDrag.moved} class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardWidth}px`} style:height={`${cardHeight}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onpointerdown={(event) => startNode(event, node.id, node.x, node.y, node.external)} title={node.external ? t('graph.legendExternal') : t('graph.moveHint')} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: node.questId })} aria-pressed={selectedId === node.questId}>
-          <span class="card-top"><span class="quest-id">{node.questId}</span><span class="node-dot"></span></span>
+        {@const noPrerequisites = !node.external && node.questId !== 1 && definition?.definition.required_completed_quest_ids.length === 0}
+        <button class="quest-card" class:moving={nodeDrag?.id === node.id && nodeDrag.moved} class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardWidth}px`} style:height={`${cardHeight}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onpointerdown={(event) => startNode(event, node.id, node.x, node.y, node.external)} title={node.external ? t('graph.legendExternal') : t('graph.moveHint')} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: formatQuestId(node.questId) })} aria-pressed={selectedId === node.questId}>
+          <span class="card-top"><span class="quest-id">{formatQuestId(node.questId)}</span><span class="node-dot"></span></span>
           <strong>{questText(pack, node.titleKey)}</strong>
           {#if node.external}<span class="card-bottom">{t('graph.legendExternal')}</span>{:else if noPrerequisites}<span class="card-bottom">{t('graph.noPrerequisites')}</span>{/if}
         </button>

@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
+#include "Quest/TunaSweeperQuestId.h"
 
 #include "Achievement/TunaSweeperAchievementModel.h"
 #include "Achievement/TunaSweeperAchievementPublisher.h"
@@ -146,7 +147,6 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 
 		FTunaSweeperAchievementDefinition Definition;
 		Definition.AchievementId = ReadNameField(AchievementObject, TEXT("achievement_id"));
-		Definition.TargetId = ReadNameField(AchievementObject, TEXT("target_id"));
 
 		FString ConditionType;
 		if (!AchievementObject->TryGetStringField(TEXT("condition_type"), ConditionType) ||
@@ -160,6 +160,11 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 				*ConditionType);
 			return false;
 		}
+
+		if (Definition.ConditionType == ETunaSweeperAchievementConditionType::QuestRewardClaimed)
+			Definition.TargetQuestId = TunaSweeperQuestId::Read(AchievementObject, TEXT("target_id"));
+		else
+			Definition.TargetId = ReadNameField(AchievementObject, TEXT("target_id"));
 
 		double RequiredCount = 1.0;
 		AchievementObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
@@ -227,7 +232,7 @@ void UTunaSweeperAchievementSubsystem::ReportLocationReached(FName LocationId)
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordLocationReached(ProgressState, LocationId));
 }
 
-void UTunaSweeperAchievementSubsystem::ReportQuestRewardClaimed(FName QuestId)
+void UTunaSweeperAchievementSubsystem::ReportQuestRewardClaimed(int32 QuestId)
 {
 	// Practice events must never reach the separate achievement save or platform publisher.
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
@@ -301,9 +306,14 @@ bool UTunaSweeperAchievementSubsystem::LoadProgressState()
 		{
 			if (!Id.IsNone()) ProgressState.ReachedLocationIds.Add(Id);
 		}
+		for (const int32 Id : SaveGame->NumericClaimedQuestIds)
+		{
+			if (Id > 0) ProgressState.ClaimedQuestIds.Add(Id);
+		}
 		for (const FName Id : SaveGame->ClaimedQuestIds)
 		{
-			if (!Id.IsNone()) ProgressState.ClaimedQuestIds.Add(Id);
+			const int32 NumericId = TunaSweeperQuestId::FromLegacyString(Id.ToString());
+			if (NumericId > 0) ProgressState.ClaimedQuestIds.Add(NumericId);
 		}
 		for (const FName Id : SaveGame->UnlockedAchievementIds)
 		{
@@ -340,12 +350,12 @@ bool UTunaSweeperAchievementSubsystem::SaveProgressState() const
 	SaveGame->TotalEnemyKills = FMath::Max<int64>(0, ProgressState.TotalEnemyKills);
 	SaveGame->KilledEnemyIds = ProgressState.KilledEnemyIds.Array();
 	SaveGame->ReachedLocationIds = ProgressState.ReachedLocationIds.Array();
-	SaveGame->ClaimedQuestIds = ProgressState.ClaimedQuestIds.Array();
+	SaveGame->NumericClaimedQuestIds = ProgressState.ClaimedQuestIds.Array();
 	SaveGame->UnlockedAchievementIds = ProgressState.UnlockedAchievementIds.Array();
 	SaveGame->ConfirmedPlatformUnlockKeys = ProgressState.ConfirmedPlatformUnlockKeys.Array();
 	SortNames(SaveGame->KilledEnemyIds);
 	SortNames(SaveGame->ReachedLocationIds);
-	SortNames(SaveGame->ClaimedQuestIds);
+	SaveGame->NumericClaimedQuestIds.Sort();
 	SortNames(SaveGame->UnlockedAchievementIds);
 	SaveGame->ConfirmedPlatformUnlockKeys.Sort();
 

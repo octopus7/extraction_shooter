@@ -3,9 +3,9 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Templates/UnrealTemplate.h"
 
-bool UTunaSweeperQuestSubsystem::TryGetItemSubmissionQuestForProvider(FName ProviderId, FName& OutQuestId) const
+bool UTunaSweeperQuestSubsystem::TryGetItemSubmissionQuestForProvider(FName ProviderId, int32& OutQuestId) const
 {
-	OutQuestId = NAME_None;
+	OutQuestId = 0;
 	const auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 	if (ProviderId.IsNone() || !Game || Game->IsCombatTestSession() || !EnsureQuestDataLoaded()) return false;
 	EnsureSaveStateLoaded();
@@ -23,17 +23,17 @@ bool UTunaSweeperQuestSubsystem::TryGetItemSubmissionQuestForProvider(FName Prov
 				OutQuestId = Definition.QuestId;
 				return true;
 			}
-			if (OutQuestId.IsNone() && GetObjectiveProgressCount(Definition.QuestId, Objective.ObjectiveId) < Objective.RequiredCount)
+			if ((OutQuestId <= 0) && GetObjectiveProgressCount(Definition.QuestId, Objective.ObjectiveId) < Objective.RequiredCount)
 				OutQuestId = Definition.QuestId;
 		}
 	}
-	return !OutQuestId.IsNone();
+	return (OutQuestId > 0);
 }
 
 bool UTunaSweeperQuestSubsystem::TrySubmitItemsToProvider(
-	FName ProviderId, FName& OutQuestId, bool bSaveImmediately)
+	FName ProviderId, int32& OutQuestId, bool bSaveImmediately)
 {
-	OutQuestId = NAME_None;
+	OutQuestId = 0;
 	auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 	if (ProviderId.IsNone() || !Game || Game->IsCombatTestSession() || bItemSubmissionInProgress || !EnsureQuestDataLoaded()) return false;
 	EnsureSaveStateLoaded();

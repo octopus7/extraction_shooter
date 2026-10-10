@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Quest/TunaSweeperQuestId.h"
 #include "Settings/TunaSweeperLanguage.h"
 #include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
@@ -17,7 +18,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperQuest, Log, All);
 
 namespace TunaSweeperQuestIds
 {
-	const FName FirstOuting(TEXT("quest_first_outing"));
+	constexpr int32 FirstOuting = 0;
 }
 
 namespace TunaSweeperQuestProviders
@@ -296,7 +297,7 @@ void UTunaSweeperQuestSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	LoadQuestData(false);
 }
 
-FName UTunaSweeperQuestSubsystem::GetFirstOutingQuestId()
+int32 UTunaSweeperQuestSubsystem::GetFirstOutingQuestId()
 {
 	return TunaSweeperQuestIds::FirstOuting;
 }
@@ -316,17 +317,13 @@ bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
 	ResetLoadedQuestData();
 	const bool bLoadedQuestTextStrings = LoadQuestTextStringsCsv();
 	const bool bLoadedQuestDefinitions = LoadQuestDefinitionsJson();
-	if (!bLoadedQuestTextStrings || !bLoadedQuestDefinitions)
-	{
-		RegisterFallbackQuest();
-	}
-
-	bQuestDataLoaded = (bLoadedQuestTextStrings && bLoadedQuestDefinitions) || QuestDefinitions.Num() > 0;
+	if (!bLoadedQuestTextStrings || !bLoadedQuestDefinitions) QuestDefinitions.Reset();
+	bQuestDataLoaded = bLoadedQuestTextStrings && bLoadedQuestDefinitions;
 	return bQuestDataLoaded;
 }
 
 bool UTunaSweeperQuestSubsystem::TryGetQuestDefinition(
-	FName QuestId,
+	int32 QuestId,
 	FTunaSweeperQuestDefinition& OutDefinition) const
 {
 	if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
@@ -340,7 +337,7 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestDefinition(
 	return false;
 }
 
-const FTunaSweeperQuestDefinition* UTunaSweeperQuestSubsystem::FindQuestDefinition(FName QuestId) const
+const FTunaSweeperQuestDefinition* UTunaSweeperQuestSubsystem::FindQuestDefinition(int32 QuestId) const
 {
 	return QuestDefinitions.Find(QuestId);
 }
@@ -367,7 +364,7 @@ bool UTunaSweeperQuestSubsystem::GetAllQuestDefinitions(TArray<FTunaSweeperQuest
 			return Left.SortOrder < Right.SortOrder;
 		}
 
-		return Left.QuestId.LexicalLess(Right.QuestId);
+		return Left.QuestId < Right.QuestId;
 	});
 	return true;
 }
@@ -390,7 +387,7 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestTextByKey(
 }
 
 bool UTunaSweeperQuestSubsystem::GetQuestPresentationLines(
-	FName QuestId,
+	int32 QuestId,
 	ETunaSweeperQuestPresentationTrigger Trigger,
 	TArray<FTunaSweeperQuestPresentationLineView>& OutLines) const
 {
@@ -427,9 +424,9 @@ bool UTunaSweeperQuestSubsystem::GetQuestPresentationLines(
 	return OutLines.Num() > 0;
 }
 
-ETunaSweeperQuestState UTunaSweeperQuestSubsystem::GetQuestState(FName QuestId) const
+ETunaSweeperQuestState UTunaSweeperQuestSubsystem::GetQuestState(int32 QuestId) const
 {
-	if (const FTunaSweeperQuestProgressSaveData* Progress = QuestProgressById.Find(QuestId))
+	if (const FTunaSweeperNumericQuestProgressSaveData* Progress = QuestProgressById.Find(QuestId))
 	{
 		return Progress->State;
 	}
@@ -437,7 +434,7 @@ ETunaSweeperQuestState UTunaSweeperQuestSubsystem::GetQuestState(FName QuestId) 
 	return ETunaSweeperQuestState::Available;
 }
 
-bool UTunaSweeperQuestSubsystem::CanAcceptQuest(FName QuestId) const
+bool UTunaSweeperQuestSubsystem::CanAcceptQuest(int32 QuestId) const
 {
 	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
 	return Definition &&
@@ -445,13 +442,13 @@ bool UTunaSweeperQuestSubsystem::CanAcceptQuest(FName QuestId) const
 		AreDefinitionPrerequisitesMet(*Definition);
 }
 
-bool UTunaSweeperQuestSubsystem::AreQuestPrerequisitesMet(FName QuestId) const
+bool UTunaSweeperQuestSubsystem::AreQuestPrerequisitesMet(int32 QuestId) const
 {
 	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
 	return Definition && AreDefinitionPrerequisitesMet(*Definition);
 }
 
-bool UTunaSweeperQuestSubsystem::AcceptQuest(FName QuestId)
+bool UTunaSweeperQuestSubsystem::AcceptQuest(int32 QuestId)
 {
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
@@ -474,12 +471,12 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(FName QuestId)
 	return true;
 }
 
-bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(FName QuestId) const
+bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(int32 QuestId) const
 {
 	return FindQuestDefinition(QuestId) && GetQuestState(QuestId) == ETunaSweeperQuestState::RewardAvailable;
 }
 
-bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
+bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
 {
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
@@ -541,14 +538,14 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 	}
 	if (TrackedQuestId == QuestId)
 	{
-		TrackedQuestId = NAME_None;
+		TrackedQuestId = 0;
 	}
 
 	BroadcastQuestProgressChanged(true);
 	return true;
 }
 
-bool UTunaSweeperQuestSubsystem::SetTrackedQuest(FName QuestId)
+bool UTunaSweeperQuestSubsystem::SetTrackedQuest(int32 QuestId)
 {
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
@@ -570,16 +567,16 @@ bool UTunaSweeperQuestSubsystem::SetTrackedQuest(FName QuestId)
 void UTunaSweeperQuestSubsystem::ClearTrackedQuest()
 {
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
-	if (!TrackedQuestId.IsNone())
+	if ((TrackedQuestId > 0))
 	{
 		EnsureSaveStateLoaded();
-		TrackedQuestId = NAME_None;
+		TrackedQuestId = 0;
 		BroadcastQuestProgressChanged(true);
 	}
 }
 
 bool UTunaSweeperQuestSubsystem::GetQuestObjectiveProgress(
-	FName QuestId,
+	int32 QuestId,
 	TArray<FTunaSweeperObjectiveProgressView>& OutProgress) const
 {
 	OutProgress.Reset();
@@ -610,10 +607,10 @@ bool UTunaSweeperQuestSubsystem::GetQuestObjectiveProgress(
 
 bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 	FName ProviderId,
-	FName FallbackQuestId,
-	FName& OutQuestId) const
+	int32 FallbackQuestId,
+	int32& OutQuestId) const
 {
-	OutQuestId = NAME_None;
+	OutQuestId = 0;
 	if (!EnsureQuestDataLoaded())
 	{
 		return false;
@@ -623,7 +620,7 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 
 	TArray<const FTunaSweeperQuestDefinition*> Candidates;
 	bool bHasProviderQuests = false;
-	for (const TPair<FName, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
+	for (const TPair<int32, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
 	{
 		const FTunaSweeperQuestDefinition& Definition = QuestPair.Value;
 		if (!IsQuestForProvider(Definition, ProviderId))
@@ -660,7 +657,7 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 			return Left.SortOrder < Right.SortOrder;
 		}
 
-		return Left.QuestId.LexicalLess(Right.QuestId);
+		return Left.QuestId < Right.QuestId;
 	});
 
 	if (Candidates.Num() > 0)
@@ -688,9 +685,9 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 
 bool UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain(
 	FName ProviderId,
-	FName& OutQuestId) const
+	int32& OutQuestId) const
 {
-	OutQuestId = NAME_None;
+	OutQuestId = 0;
 	if (!EnsureQuestDataLoaded() || ProviderId.IsNone())
 	{
 		return false;
@@ -699,7 +696,7 @@ bool UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain(
 	EnsureSaveStateLoaded();
 
 	TArray<const FTunaSweeperQuestDefinition*> Candidates;
-	for (const TPair<FName, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
+	for (const TPair<int32, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
 	{
 		const FTunaSweeperQuestDefinition& Definition = QuestPair.Value;
 		if (!IsQuestForProvider(Definition, ProviderId))
@@ -725,7 +722,7 @@ bool UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain(
 			return Left.SortOrder > Right.SortOrder;
 		}
 
-		return Right.QuestId.LexicalLess(Left.QuestId);
+		return Right.QuestId < Left.QuestId;
 	});
 
 	if (Candidates.Num() <= 0)
@@ -840,17 +837,17 @@ bool UTunaSweeperQuestSubsystem::TrySpendCoins(int32 Amount, bool bSaveImmediate
 }
 
 void UTunaSweeperQuestSubsystem::ExportQuestProgressForSave(
-	TArray<FTunaSweeperQuestProgressSaveData>& OutQuestProgress,
-	FName& OutTrackedQuestId,
+	TArray<FTunaSweeperNumericQuestProgressSaveData>& OutQuestProgress,
+	int32& OutTrackedQuestId,
 	int32& OutQuestCoinBalance) const
 {
 	OutQuestProgress.Reset();
 	QuestProgressById.GenerateValueArray(OutQuestProgress);
 	OutQuestProgress.Sort([](
-		const FTunaSweeperQuestProgressSaveData& Left,
-		const FTunaSweeperQuestProgressSaveData& Right)
+		const FTunaSweeperNumericQuestProgressSaveData& Left,
+		const FTunaSweeperNumericQuestProgressSaveData& Right)
 	{
-		return Left.QuestId.LexicalLess(Right.QuestId);
+		return Left.QuestId < Right.QuestId;
 	});
 
 	OutTrackedQuestId = TrackedQuestId;
@@ -858,16 +855,16 @@ void UTunaSweeperQuestSubsystem::ExportQuestProgressForSave(
 }
 
 void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
-	const TArray<FTunaSweeperQuestProgressSaveData>& SavedQuestProgress,
-	FName SavedTrackedQuestId,
+	const TArray<FTunaSweeperNumericQuestProgressSaveData>& SavedQuestProgress,
+	int32 SavedTrackedQuestId,
 	int32 SavedQuestCoinBalance)
 {
 	LoadQuestData(false);
 	QuestProgressById.Reset();
 	CoinBalance = FMath::Max(0, SavedQuestCoinBalance);
-	TrackedQuestId = NAME_None;
+	TrackedQuestId = 0;
 
-	for (const FTunaSweeperQuestProgressSaveData& SavedProgress : SavedQuestProgress)
+	for (const FTunaSweeperNumericQuestProgressSaveData& SavedProgress : SavedQuestProgress)
 	{
 		const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(SavedProgress.QuestId);
 		if (!Definition)
@@ -875,7 +872,7 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 			continue;
 		}
 
-		FTunaSweeperQuestProgressSaveData LoadedProgress;
+		FTunaSweeperNumericQuestProgressSaveData LoadedProgress;
 		LoadedProgress.QuestId = SavedProgress.QuestId;
 		LoadedProgress.State = SavedProgress.State;
 
@@ -921,7 +918,7 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 void UTunaSweeperQuestSubsystem::ResetQuestProgressForNewGame()
 {
 	QuestProgressById.Reset();
-	TrackedQuestId = NAME_None;
+	TrackedQuestId = 0;
 	CoinBalance = 0;
 	OnQuestProgressChanged.Broadcast();
 }
@@ -957,10 +954,11 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		}
 
 		FTunaSweeperQuestDefinition Definition;
-		Definition.QuestId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("quest_id"));
-		if (Definition.QuestId.IsNone())
+		Definition.QuestId = TunaSweeperQuestId::Read(QuestObject, TEXT("quest_id"));
+		if (Definition.QuestId <= 0 || QuestDefinitions.Contains(Definition.QuestId))
 		{
-			continue;
+			QuestDefinitions.Reset();
+			return false;
 		}
 
 		Definition.TitleStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("title_string_key"));
@@ -971,10 +969,21 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		double SortOrder = 0.0;
 		QuestObject->TryGetNumberField(TEXT("sort_order"), SortOrder);
 		Definition.SortOrder = FMath::RoundToInt(SortOrder);
-		TunaSweeperQuestData::ReadNameArrayField(
-			QuestObject,
-			TEXT("required_completed_quest_ids"),
-			Definition.RequiredCompletedQuestIds);
+		const TArray<TSharedPtr<FJsonValue>>* Prerequisites = nullptr;
+		if (QuestObject->HasField(TEXT("required_completed_quest_ids")))
+		{
+			if (!QuestObject->TryGetArrayField(TEXT("required_completed_quest_ids"), Prerequisites)) return false;
+			for (const auto& Value : *Prerequisites)
+			{
+				const int32 RequiredId = TunaSweeperQuestId::FromJson(Value);
+				if (RequiredId <= 0 || RequiredId == Definition.QuestId)
+				{
+					QuestDefinitions.Reset();
+					return false;
+				}
+				Definition.RequiredCompletedQuestIds.AddUnique(RequiredId);
+			}
+		}
 		QuestObject->TryGetBoolField(TEXT("auto_track_on_accept"), Definition.bAutoTrackOnAccept);
 
 		const TArray<TSharedPtr<FJsonValue>>* ObjectiveValues = nullptr;
@@ -989,7 +998,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 				}
 				else
 				{
-					UE_LOG(LogTunaSweeperQuest, Error, TEXT("Invalid objective in quest %s"), *Definition.QuestId.ToString());
+					UE_LOG(LogTunaSweeperQuest, Error, TEXT("Invalid objective in quest %d"), Definition.QuestId);
 					QuestDefinitions.Reset();
 					return false;
 				}
@@ -1160,31 +1169,6 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 	return bAllFilesValid && bHasValidRows;
 }
 
-void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
-{
-	FTunaSweeperObjectiveDefinition FirstObjective;
-	FirstObjective.ObjectiveId = FName(TEXT("leave_bunker"));
-	FirstObjective.Type = ETunaSweeperObjectiveType::LevelTravel;
-	FirstObjective.TextStringKey = FName(TEXT("quest.first_outing.objective.leave_bunker"));
-	FirstObjective.Text = FText::FromString(TEXT("\uBC99\uCEE4 \uBC16\uC73C\uB85C \uC774\uB3D9"));
-	FirstObjective.RequiredCount = 1;
-	FirstObjective.SourceLevelName = FName(TEXT("BunkerMap"));
-	FirstObjective.TargetLevelName = FName(TEXT("RaidMap"));
-
-	FTunaSweeperQuestDefinition FirstOuting;
-	FirstOuting.QuestId = GetFirstOutingQuestId();
-	FirstOuting.ProviderId = GetMoleProviderId();
-	FirstOuting.SortOrder = 10;
-	FirstOuting.TitleStringKey = FName(TEXT("quest.first_outing.title"));
-	FirstOuting.Title = FText::FromString(TEXT("\uCCAB \uC678\uCD9C"));
-	FirstOuting.DescriptionStringKey = FName(TEXT("quest.first_outing.description"));
-	FirstOuting.Description = FText::FromString(TEXT("\uC774\uC81C \uB4E4\uC5B4\uC654\uC73C\uB2C8 \uB098\uAC00\uC11C \uD55C\uBC88 \uC0B0\uCC45\uD558\uACE0 \uB4E4\uC5B4\uC640"));
-	FirstOuting.Objectives.Add(FirstObjective);
-	FirstOuting.Rewards.Coins = 100;
-
-	QuestDefinitions.Add(FirstOuting.QuestId, FirstOuting);
-}
-
 void UTunaSweeperQuestSubsystem::ResetLoadedQuestData()
 {
 	QuestDefinitions.Reset();
@@ -1301,7 +1285,7 @@ bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchInteractionCompleted(
 		(Objective.InteractionTypeName.IsNone() || Objective.InteractionTypeName == InteractionTypeName);
 }
 
-bool UTunaSweeperQuestSubsystem::AdvanceObjectiveProgress(FName QuestId, FName ObjectiveId, int32 Amount)
+bool UTunaSweeperQuestSubsystem::AdvanceObjectiveProgress(int32 QuestId, FName ObjectiveId, int32 Amount)
 {
 	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
 	if (!Definition || ObjectiveId.IsNone() || Amount <= 0)
@@ -1319,7 +1303,7 @@ bool UTunaSweeperQuestSubsystem::AdvanceObjectiveProgress(FName QuestId, FName O
 		return false;
 	}
 
-	FTunaSweeperQuestProgressSaveData& Progress = GetOrCreateQuestProgress(QuestId);
+	FTunaSweeperNumericQuestProgressSaveData& Progress = GetOrCreateQuestProgress(QuestId);
 	FTunaSweeperObjectiveProgressSaveData* ObjectiveProgress = Progress.ObjectiveProgress.FindByPredicate(
 		[ObjectiveId](const FTunaSweeperObjectiveProgressSaveData& Candidate)
 		{
@@ -1351,7 +1335,7 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 
 	EnsureSaveStateLoaded();
 	bool bChanged = false;
-	for (const TPair<FName, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
+	for (const TPair<int32, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
 	{
 		if (GetQuestState(QuestPair.Key) != ETunaSweeperQuestState::Accepted)
 		{
@@ -1382,7 +1366,7 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 	}
 }
 
-void UTunaSweeperQuestSubsystem::SetQuestState(FName QuestId, ETunaSweeperQuestState NewState)
+void UTunaSweeperQuestSubsystem::SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState)
 {
 	if (FindQuestDefinition(QuestId))
 	{
@@ -1390,7 +1374,7 @@ void UTunaSweeperQuestSubsystem::SetQuestState(FName QuestId, ETunaSweeperQuestS
 	}
 }
 
-void UTunaSweeperQuestSubsystem::ShowQuestCompletedToast(FName QuestId) const
+void UTunaSweeperQuestSubsystem::ShowQuestCompletedToast(int32 QuestId) const
 {
 	FTunaSweeperQuestDefinition Definition;
 	if (!TryGetQuestDefinition(QuestId, Definition))
@@ -1409,9 +1393,9 @@ void UTunaSweeperQuestSubsystem::ShowQuestCompletedToast(FName QuestId) const
 
 bool UTunaSweeperQuestSubsystem::AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const
 {
-	for (const FName RequiredQuestId : Definition.RequiredCompletedQuestIds)
+	for (const int32 RequiredQuestId : Definition.RequiredCompletedQuestIds)
 	{
-		if (!RequiredQuestId.IsNone() && GetQuestState(RequiredQuestId) != ETunaSweeperQuestState::RewardCompleted)
+		if (RequiredQuestId <= 0 || GetQuestState(RequiredQuestId) != ETunaSweeperQuestState::RewardCompleted)
 		{
 			return false;
 		}
@@ -1427,7 +1411,7 @@ bool UTunaSweeperQuestSubsystem::IsQuestForProvider(
 	return !ProviderId.IsNone() && Definition.ProviderId == ProviderId;
 }
 
-bool UTunaSweeperQuestSubsystem::AreAllObjectivesComplete(FName QuestId) const
+bool UTunaSweeperQuestSubsystem::AreAllObjectivesComplete(int32 QuestId) const
 {
 	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
 	if (!Definition || Definition->Objectives.Num() <= 0)
@@ -1446,9 +1430,9 @@ bool UTunaSweeperQuestSubsystem::AreAllObjectivesComplete(FName QuestId) const
 	return true;
 }
 
-int32 UTunaSweeperQuestSubsystem::GetObjectiveProgressCount(FName QuestId, FName ObjectiveId) const
+int32 UTunaSweeperQuestSubsystem::GetObjectiveProgressCount(int32 QuestId, FName ObjectiveId) const
 {
-	const FTunaSweeperQuestProgressSaveData* Progress = QuestProgressById.Find(QuestId);
+	const FTunaSweeperNumericQuestProgressSaveData* Progress = QuestProgressById.Find(QuestId);
 	if (!Progress)
 	{
 		return 0;
@@ -1462,12 +1446,12 @@ int32 UTunaSweeperQuestSubsystem::GetObjectiveProgressCount(FName QuestId, FName
 	return ObjectiveProgress ? FMath::Max(0, ObjectiveProgress->CurrentCount) : 0;
 }
 
-FTunaSweeperQuestProgressSaveData& UTunaSweeperQuestSubsystem::GetOrCreateQuestProgress(FName QuestId)
+FTunaSweeperNumericQuestProgressSaveData& UTunaSweeperQuestSubsystem::GetOrCreateQuestProgress(int32 QuestId)
 {
-	FTunaSweeperQuestProgressSaveData* Progress = QuestProgressById.Find(QuestId);
+	FTunaSweeperNumericQuestProgressSaveData* Progress = QuestProgressById.Find(QuestId);
 	if (!Progress)
 	{
-		FTunaSweeperQuestProgressSaveData NewProgress;
+		FTunaSweeperNumericQuestProgressSaveData NewProgress;
 		NewProgress.QuestId = QuestId;
 
 		if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
@@ -1512,7 +1496,7 @@ void UTunaSweeperQuestSubsystem::RequestSaveGameState() const
 	}
 }
 
-bool UTunaSweeperQuestSubsystem::IsQuestTrackable(FName QuestId) const
+bool UTunaSweeperQuestSubsystem::IsQuestTrackable(int32 QuestId) const
 {
 	const ETunaSweeperQuestState State = GetQuestState(QuestId);
 	return FindQuestDefinition(QuestId) &&

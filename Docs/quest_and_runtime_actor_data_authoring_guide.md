@@ -44,7 +44,7 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 ```json
 [
   {
-    "quest_id": "demo_first_mission",
+    "quest_id": 1,
     "provider_id": "provider.mole",
     "sort_order": 10,
     "title_string_key": "quest.demo.first.title",
@@ -70,7 +70,8 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 
 주요 선택 필드는 다음과 같다.
 
-- `required_completed_quest_ids`: 선행 퀘스트 ID 배열
+- `quest_id`: 1~2147483647 범위의 전역 정수 ID. JSON 숫자로 저장하며 지역 정보를 넣지 않는다. 화면에서만 `001`처럼 최소 세 자리로 표시한다.
+- `required_completed_quest_ids`: `[1, 2]` 같은 정수 선행 퀘스트 ID 배열
 - `accept_presentation`, `reward_presentation`: 화자/대사/카메라 연출 단계
 - `rewards.items`: `{ "item_id": 1001, "quantity": 1 }` 형식의 아이템 보상
 - `rewards.housing_facility_unlocks`: 시설 ID 배열

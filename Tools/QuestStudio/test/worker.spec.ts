@@ -5,7 +5,7 @@ import type { QuestPack, SnapshotMetadata } from '../src/shared/types';
 
 function pack(): QuestPack {
   return { schemaVersion: 1, extra: { format: 'preserve' }, nodes: [{
-    definition: { quest_id: '1', title_string_key: 'synthetic.title', description_string_key: 'synthetic.desc', authoring_tags: ['chapter:1'], required_completed_quest_ids: [], unknown: { rewards: [1, 2] } },
+    definition: { quest_id: 1, title_string_key: 'synthetic.title', description_string_key: 'synthetic.desc', authoring_tags: ['chapter:1'], required_completed_quest_ids: [], unknown: { rewards: [1, 2] } },
     x: 12, y: 34, authoring: { prerequisitesStatus: 'unspecified', detail_string_key: 'synthetic.desc', unknown: ['preserved'] },
   }], strings: [
     { key: 'synthetic.title', locale: 'ko', value: '합성 제목', extra: 3 },
@@ -139,9 +139,9 @@ describe('complete immutable snapshots', () => {
     }
   });
   it('validates packs before storing and returns keyed errors', async () => {
-    const cookie = await login(); const value = pack(); value.nodes[0]!.definition.required_completed_quest_ids = ['999'];
+    const cookie = await login(); const value = pack(); value.nodes[0]!.definition.required_completed_quest_ids = [999];
     const response = await request('/api/snapshots', 'POST', { alias: 'invalid', memo: '', pack: value }, cookie);
-    expect(response.status).toBe(422); expect(await response.json()).toEqual({ error: { key: 'validation.unknown_quest', params: { questId: '999' } } });
+    expect(response.status).toBe(422); expect(await response.json()).toEqual({ error: { key: 'validation.unknown_quest', params: { questId: 999 } } });
     expect((await request('/api/snapshots/no-such-id', 'GET', undefined, cookie)).status).toBe(404);
   });
   it('rejects invalid metadata, malformed JSON, media types and oversized input before storing', async () => {
@@ -153,4 +153,17 @@ describe('complete immutable snapshots', () => {
     expect((await request('/api/snapshots', 'POST', {}, cookie, { 'content-length': String(9 * 1024 * 1024) })).status).toBe(413);
     expect(await (await request('/api/snapshots', 'GET', undefined, cookie)).json()).toEqual({ snapshots: [] });
   });
+});
+
+it('loads legacy string identities numerically without rewriting D1 snapshot JSON', async () => {
+  const cookie = await login();
+  const saved = await request('/api/snapshots', 'POST', { alias: 'legacy numbers', memo: '', pack: pack() }, cookie);
+  const { snapshot } = await saved.json() as { snapshot: SnapshotMetadata };
+  await env.DB.prepare("UPDATE quest_nodes SET node_json = json_set(node_json, '$.definition.quest_id', '1') WHERE snapshot_id = ?").bind(snapshot.id).run();
+  const before = await env.DB.prepare('SELECT node_json FROM quest_nodes WHERE snapshot_id = ?').bind(snapshot.id).first();
+  const loaded = await request('/api/snapshots/' + snapshot.id, 'GET', undefined, cookie);
+  expect(loaded.status).toBe(200);
+  expect(await loaded.json()).toEqual({ snapshot, pack: pack() });
+  expect(await env.DB.prepare('SELECT node_json FROM quest_nodes WHERE snapshot_id = ?').bind(snapshot.id).first()).toEqual(before);
+  expect(await env.DB.prepare('SELECT count(*) AS count FROM snapshots').first()).toEqual({ count: 1 });
 });

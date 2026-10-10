@@ -238,7 +238,7 @@ void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 	}
 }
 
-void UTunaSweeperGameHudWidget::ShowQuestPanel(FName QuestId)
+void UTunaSweeperGameHudWidget::ShowQuestPanel(int32 QuestId)
 {
 	bQuestPanelOpenedFromInteraction = true;
 	SetHudMode(ETunaSweeperHudMode::Quest);
@@ -249,7 +249,7 @@ void UTunaSweeperGameHudWidget::ShowQuestPanel(FName QuestId)
 	}
 }
 
-void UTunaSweeperGameHudWidget::ShowMenuQuestPanel(FName QuestId)
+void UTunaSweeperGameHudWidget::ShowMenuQuestPanel(int32 QuestId)
 {
 	bQuestPanelOpenedFromInteraction = false;
 	SetHudMode(ETunaSweeperHudMode::Quest);

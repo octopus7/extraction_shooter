@@ -16,7 +16,7 @@ public:
 	FSimpleMulticastDelegate OnQuestProgressChanged;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	static FName GetFirstOutingQuestId();
+	static int32 GetFirstOutingQuestId();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	static FName GetMoleProviderId();
@@ -28,9 +28,9 @@ public:
 	bool IsQuestDataLoaded() const { return bQuestDataLoaded; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	bool TryGetQuestDefinition(FName QuestId, FTunaSweeperQuestDefinition& OutDefinition) const;
+	bool TryGetQuestDefinition(int32 QuestId, FTunaSweeperQuestDefinition& OutDefinition) const;
 
-	const FTunaSweeperQuestDefinition* FindQuestDefinition(FName QuestId) const;
+	const FTunaSweeperQuestDefinition* FindQuestDefinition(int32 QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool GetAllQuestDefinitions(TArray<FTunaSweeperQuestDefinition>& OutDefinitions) const;
@@ -40,44 +40,44 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool GetQuestPresentationLines(
-		FName QuestId,
+		int32 QuestId,
 		ETunaSweeperQuestPresentationTrigger Trigger,
 		TArray<FTunaSweeperQuestPresentationLineView>& OutLines) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	ETunaSweeperQuestState GetQuestState(FName QuestId) const;
+	ETunaSweeperQuestState GetQuestState(int32 QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	bool AreQuestPrerequisitesMet(FName QuestId) const;
+	bool AreQuestPrerequisitesMet(int32 QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	bool CanAcceptQuest(FName QuestId) const;
+	bool CanAcceptQuest(int32 QuestId) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	bool AcceptQuest(FName QuestId);
+	bool AcceptQuest(int32 QuestId);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	bool CanClaimQuestReward(FName QuestId) const;
+	bool CanClaimQuestReward(int32 QuestId) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	bool ClaimQuestReward(FName QuestId);
+	bool ClaimQuestReward(int32 QuestId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	bool SetTrackedQuest(FName QuestId);
+	bool SetTrackedQuest(int32 QuestId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void ClearTrackedQuest();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	FName GetTrackedQuestId() const { return TrackedQuestId; }
+	int32 GetTrackedQuestId() const { return TrackedQuestId; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	bool GetQuestObjectiveProgress(FName QuestId, TArray<FTunaSweeperObjectiveProgressView>& OutProgress) const;
+	bool GetQuestObjectiveProgress(int32 QuestId, TArray<FTunaSweeperObjectiveProgressView>& OutProgress) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	bool TryResolveQuestForProvider(FName ProviderId, FName FallbackQuestId, FName& OutQuestId) const;
+	bool TryResolveQuestForProvider(FName ProviderId, int32 FallbackQuestId, int32& OutQuestId) const;
 
-	bool TryGetLatestQuestInProviderChain(FName ProviderId, FName& OutQuestId) const;
+	bool TryGetLatestQuestInProviderChain(FName ProviderId, int32& OutQuestId) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName);
@@ -98,8 +98,8 @@ public:
 	void NotifyInteractionCompleted(FName InteractionEventId, FName InteractionTypeName);
 
 	// One eligible quest per interaction; an already submitted quest can retry its reward without consuming again.
-	bool TrySubmitItemsToProvider(FName ProviderId, FName& OutQuestId, bool bSaveImmediately = true);
-	bool TryGetItemSubmissionQuestForProvider(FName ProviderId, FName& OutQuestId) const;
+	bool TrySubmitItemsToProvider(FName ProviderId, int32& OutQuestId, bool bSaveImmediately = true);
+	bool TryGetItemSubmissionQuestForProvider(FName ProviderId, int32& OutQuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	int32 GetCoinBalance() const { return CoinBalance; }
@@ -111,12 +111,12 @@ public:
 	bool TrySpendCoins(int32 Amount, bool bSaveImmediately = true);
 
 	void ExportQuestProgressForSave(
-		TArray<FTunaSweeperQuestProgressSaveData>& OutQuestProgress,
-		FName& OutTrackedQuestId,
+		TArray<FTunaSweeperNumericQuestProgressSaveData>& OutQuestProgress,
+		int32& OutTrackedQuestId,
 		int32& OutQuestCoinBalance) const;
 	void LoadQuestProgressFromSave(
-		const TArray<FTunaSweeperQuestProgressSaveData>& SavedQuestProgress,
-		FName SavedTrackedQuestId,
+		const TArray<FTunaSweeperNumericQuestProgressSaveData>& SavedQuestProgress,
+		int32 SavedTrackedQuestId,
 		int32 SavedQuestCoinBalance);
 	void ResetQuestProgressForNewGame();
 
@@ -126,7 +126,6 @@ private:
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();
 	bool LoadQuestTextStringsCsv();
-	void RegisterFallbackQuest();
 	void ResetLoadedQuestData();
 	FString GetQuestDefinitionsJsonPath() const;
 	void ResolveDefinitionText(FTunaSweeperQuestDefinition& Definition) const;
@@ -138,27 +137,27 @@ private:
 	bool DoesObjectiveMatchItemAcquired(const FTunaSweeperObjectiveDefinition& Objective, int32 ItemId) const;
 	bool DoesObjectiveMatchEnemyKilled(const FTunaSweeperObjectiveDefinition& Objective, FName EnemyId) const;
 	bool DoesObjectiveMatchInteractionCompleted(const FTunaSweeperObjectiveDefinition& Objective, FName InteractionEventId, FName InteractionTypeName) const;
-	bool AdvanceObjectiveProgress(FName QuestId, FName ObjectiveId, int32 Amount);
+	bool AdvanceObjectiveProgress(int32 QuestId, FName ObjectiveId, int32 Amount);
 	void AdvanceMatchingObjectives(
 		TFunctionRef<bool(const FTunaSweeperObjectiveDefinition&)> Predicate,
 		int32 Amount,
 		bool bSaveImmediately = true);
-	void SetQuestState(FName QuestId, ETunaSweeperQuestState NewState);
-	void ShowQuestCompletedToast(FName QuestId) const;
+	void SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState);
+	void ShowQuestCompletedToast(int32 QuestId) const;
 	bool AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const;
 	bool IsQuestForProvider(const FTunaSweeperQuestDefinition& Definition, FName ProviderId) const;
-	bool AreAllObjectivesComplete(FName QuestId) const;
-	int32 GetObjectiveProgressCount(FName QuestId, FName ObjectiveId) const;
-	FTunaSweeperQuestProgressSaveData& GetOrCreateQuestProgress(FName QuestId);
+	bool AreAllObjectivesComplete(int32 QuestId) const;
+	int32 GetObjectiveProgressCount(int32 QuestId, FName ObjectiveId) const;
+	FTunaSweeperNumericQuestProgressSaveData& GetOrCreateQuestProgress(int32 QuestId);
 	void BroadcastQuestProgressChanged(bool bSaveImmediately);
 	void EnsureSaveStateLoaded() const;
 	void RequestSaveGameState() const;
-	bool IsQuestTrackable(FName QuestId) const;
+	bool IsQuestTrackable(int32 QuestId) const;
 
-	TMap<FName, FTunaSweeperQuestDefinition> QuestDefinitions;
+	TMap<int32, FTunaSweeperQuestDefinition> QuestDefinitions;
 	TMap<FName, FTunaSweeperQuestTextString> QuestTextStringsByKey;
-	TMap<FName, FTunaSweeperQuestProgressSaveData> QuestProgressById;
-	FName TrackedQuestId = NAME_None;
+	TMap<int32, FTunaSweeperNumericQuestProgressSaveData> QuestProgressById;
+	int32 TrackedQuestId = 0;
 	int32 CoinBalance = 0;
 	bool bQuestDataLoaded = false;
 };

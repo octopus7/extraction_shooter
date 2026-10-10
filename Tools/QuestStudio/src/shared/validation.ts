@@ -11,21 +11,21 @@ function fail(key: string, params?: Record<string, string | number>): never { th
 
 export function validatePack(value: unknown): QuestPack {
   if (!isRecord(value) || value.schemaVersion !== 1 || !Array.isArray(value.nodes) || !Array.isArray(value.strings)) fail('validation.pack');
-  const ids = new Map<string, string>();
+  const ids = new Map<number, number>();
   for (const item of value.nodes) {
     if (!isRecord(item) || !isRecord(item.definition) || !isRecord(item.authoring)) fail('validation.node');
     const d = item.definition;
-    if (!nonempty(d.quest_id) || !nonempty(d.title_string_key) || !nonempty(d.description_string_key) ||
-        !stringList(d.required_completed_quest_ids) || !stringList(d.authoring_tags) ||
+    if (!nonempty(d.title_string_key) || !nonempty(d.description_string_key) ||
+        !Array.isArray(d.required_completed_quest_ids) || !stringList(d.authoring_tags) ||
         (item.authoring.prerequisitesStatus !== 'confirmed' && item.authoring.prerequisitesStatus !== 'unspecified') ||
         (item.authoring.sourceReference !== undefined && typeof item.authoring.sourceReference !== 'string')) fail('validation.node');
-    if (!/^[1-9]\d*$/.test(d.quest_id) || d.required_completed_quest_ids.some(id => !/^[1-9]\d*$/.test(id))) {
+    if (!isQuestId(d.quest_id) || !d.required_completed_quest_ids.every(isQuestId)) {
       fail('validation.numeric_quest_id');
     }
     const chapters = d.authoring_tags.filter(tag => tag.startsWith('chapter:'));
     if (chapters.length !== 1 || !/^chapter:[1-9]\d*$/.test(chapters[0]!)) fail('validation.chapter', { questId: d.quest_id });
     if (typeof item.x !== 'number' || typeof item.y !== 'number' || !Number.isFinite(item.x) || !Number.isFinite(item.y)) fail('validation.position', { questId: d.quest_id });
-    const folded = d.quest_id.toLowerCase();
+    const folded = d.quest_id;
     if (ids.has(folded)) fail('validation.duplicate_quest', { questId: d.quest_id });
     ids.set(folded, d.quest_id);
   }
@@ -55,11 +55,11 @@ export function validatePack(value: unknown): QuestPack {
     }
   }
   const pack = value as QuestPack;
-  const dependents = new Map<string, string[]>(); const degree = new Map<string, number>();
+  const dependents = new Map<number, number[]>(); const degree = new Map<number, number>();
   for (const node of pack.nodes) {
-    const id = node.definition.quest_id.toLowerCase(); const seen = new Set<string>();
+    const id = node.definition.quest_id; const seen = new Set<number>();
     for (const prerequisite of node.definition.required_completed_quest_ids) {
-      const ref = prerequisite.toLowerCase();
+      const ref = prerequisite;
       if (!ids.has(ref)) fail('validation.unknown_quest', { questId: prerequisite });
       if (ref === id) fail('validation.self_reference', { questId: node.definition.quest_id });
       if (seen.has(ref)) fail('validation.duplicate_prerequisite', { questId: prerequisite });
@@ -78,4 +78,19 @@ export function validatePack(value: unknown): QuestPack {
   }
   if (count !== pack.nodes.length) fail('validation.cycle');
   return pack;
+}
+
+export function isQuestId(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 2147483647;
+}
+/** Read compatibility only: normalize old schemaVersion 1 packs without mutating storage or input. */
+export function normalizeLoadedPack(value: unknown): QuestPack {
+  const copy: unknown = structuredClone(value);
+  const legacyId = (id: unknown): unknown => typeof id === 'string' && /^[1-9]\d*$/.test(id) ? Number(id) : id;
+  if (isRecord(copy) && Array.isArray(copy.nodes)) for (const node of copy.nodes) {
+    if (!isRecord(node) || !isRecord(node.definition)) continue;
+    node.definition.quest_id = legacyId(node.definition.quest_id);
+    if (Array.isArray(node.definition.required_completed_quest_ids)) node.definition.required_completed_quest_ids = node.definition.required_completed_quest_ids.map(legacyId);
+  }
+  return validatePack(copy);
 }

@@ -109,7 +109,7 @@ protected:
 	bool bPreviewClearedStateInEditor = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Inspect")
-	FName InspectQuestId = TEXT("demo_q1_water_intake_check");
+	int32 InspectQuestId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Inspect")
 	FName InspectObjectiveId = TEXT("inspect_water_intake");
@@ -127,7 +127,7 @@ protected:
 	FVector InspectInteractionLocation = FVector(0.0f, 0.0f, 140.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Clear Debris")
-	FName ClearDebrisQuestId = TEXT("demo_q2_clear_water_screen");
+	int32 ClearDebrisQuestId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Clear Debris")
 	FName ClearDebrisObjectiveId = TEXT("clear_water_screen");
@@ -157,7 +157,7 @@ protected:
 	bool bConsumeRequiredItem = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Repair Valve")
-	FName RepairValveQuestId = TEXT("demo_q3a_repair_valve");
+	int32 RepairValveQuestId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Repair Valve")
 	FName RepairValveObjectiveId = TEXT("repair_valve");
@@ -194,7 +194,7 @@ private:
 	void ApplyVisualState();
 	void RefreshPresentation();
 	ETunaSweeperWaterIntakeInteractionPhase ResolveActiveInteractionPhase() const;
-	bool IsQuestObjectiveActive(FName QuestId, FName ObjectiveId) const;
+	bool IsQuestObjectiveActive(int32 QuestId, FName ObjectiveId) const;
 	FText ResolveLocalizedText(FName StringKey, const FText& FallbackText) const;
 	UTexture2D* LoadItemIconTexture(int32 ItemId) const;
 	FName GetEffectiveProgressObjectId() const;

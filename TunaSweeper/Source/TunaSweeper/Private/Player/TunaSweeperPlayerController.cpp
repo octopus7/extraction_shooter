@@ -1029,10 +1029,10 @@ bool ATunaSweeperPlayerController::StartDialogueSequence(
 }
 
 bool ATunaSweeperPlayerController::PlayQuestPresentation(
-	FName QuestId,
+	int32 QuestId,
 	ETunaSweeperQuestPresentationTrigger Trigger)
 {
-	if (!IsLocalController() || QuestId.IsNone() || bDialogueSequenceActive)
+	if (!IsLocalController() || (QuestId <= 0) || bDialogueSequenceActive)
 	{
 		return false;
 	}
@@ -2308,7 +2308,7 @@ void ATunaSweeperPlayerController::DropWorkbenchOverflowItems(const TArray<FTuna
 	}
 }
 
-void ATunaSweeperPlayerController::OpenQuestPanel(FName QuestId)
+void ATunaSweeperPlayerController::OpenQuestPanel(int32 QuestId)
 {
 	if (!IsLocalController())
 	{

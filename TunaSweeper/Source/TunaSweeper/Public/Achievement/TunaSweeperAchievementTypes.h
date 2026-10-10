@@ -28,6 +28,9 @@ struct TUNASWEEPER_API FTunaSweeperAchievementDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement")
 	FName TargetId = NAME_None;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement")
+	int32 TargetQuestId = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement", meta = (ClampMin = "1", UIMin = "1"))
 	int64 RequiredCount = 1;
 
@@ -40,7 +43,7 @@ struct TUNASWEEPER_API FTunaSweeperAchievementProgressState
 	int64 TotalEnemyKills = 0;
 	TSet<FName> KilledEnemyIds;
 	TSet<FName> ReachedLocationIds;
-	TSet<FName> ClaimedQuestIds;
+	TSet<int32> ClaimedQuestIds;
 	TSet<FName> UnlockedAchievementIds;
 	TSet<FString> ConfirmedPlatformUnlockKeys;
 };
@@ -71,6 +74,9 @@ public:
 
 	UPROPERTY()
 	TArray<FName> ClaimedQuestIds;
+
+	UPROPERTY()
+	TArray<int32> NumericClaimedQuestIds;
 
 	UPROPERTY()
 	TArray<FName> UnlockedAchievementIds;

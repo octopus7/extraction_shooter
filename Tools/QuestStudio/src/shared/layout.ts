@@ -2,7 +2,7 @@ import { getChapter, GRAPH_CARD_HEIGHT, GRAPH_CARD_WIDTH } from './graph';
 import type { QuestPack } from './types';
 import { validatePack } from './validation';
 
-const compareIds = (a: string, b: string): number => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0);
+const compareIds = (a: number, b: number): number => a - b;
 
 /** Explicit editor action only. Coordinates never change prerequisites or runtime data. */
 export function arrangeChapterNodes(pack: QuestPack, chapter: string): QuestPack {
@@ -12,8 +12,8 @@ export function arrangeChapterNodes(pack: QuestPack, chapter: string): QuestPack
   const lookup = new Map(local.map(node => [node.definition.quest_id, node]));
   const ids = [...lookup.keys()].sort(compareIds);
   const parents = new Map(ids.map(id => [id, lookup.get(id)!.definition.required_completed_quest_ids.filter(parent => lookup.has(parent)).sort(compareIds)]));
-  const depth = new Map<string, number>();
-  const column = (id: string): number => {
+  const depth = new Map<number, number>();
+  const column = (id: number): number => {
     if (!depth.has(id)) depth.set(id, Math.max(-1, ...parents.get(id)!.map(column)) + 1);
     return depth.get(id)!;
   };
@@ -21,16 +21,16 @@ export function arrangeChapterNodes(pack: QuestPack, chapter: string): QuestPack
 
   // A deterministic spanning forest keeps each terminal branch in a contiguous band.
   // Merged nodes follow their deepest parent, while all DAG edges still point right.
-  const children = new Map(ids.map(id => [id, [] as string[]]));
-  const roots: string[] = [];
+  const children = new Map(ids.map(id => [id, [] as number[]]));
+  const roots: number[] = [];
   for (const id of ids) {
     const candidates = [...parents.get(id)!].sort((a, b) => depth.get(b)! - depth.get(a)! || compareIds(a, b));
     if (candidates.length) children.get(candidates[0]!)!.push(id);
     else roots.push(id);
   }
-  const rows = new Map<string, number>();
+  const rows = new Map<number, number>();
   let nextRow = 0;
-  const place = (id: string): number => {
+  const place = (id: number): number => {
     const branch = children.get(id)!;
     let row: number;
     if (!branch.length) row = nextRow++;

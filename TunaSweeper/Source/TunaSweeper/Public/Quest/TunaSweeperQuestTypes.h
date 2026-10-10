@@ -176,7 +176,7 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
-	FName QuestId = NAME_None;
+	int32 QuestId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName ProviderId = NAME_None;
@@ -200,7 +200,7 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	bool bAutoTrackOnAccept = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
-	TArray<FName> RequiredCompletedQuestIds;
+	TArray<int32> RequiredCompletedQuestIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperObjectiveDefinition> Objectives;
@@ -227,6 +227,7 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveProgressSaveData
 	int32 CurrentCount = 0;
 };
 
+// Original serialized schema retained only for old save migration.
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperQuestProgressSaveData
 {
@@ -234,6 +235,21 @@ struct TUNASWEEPER_API FTunaSweeperQuestProgressSaveData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName QuestId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	ETunaSweeperQuestState State = ETunaSweeperQuestState::Available;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FTunaSweeperObjectiveProgressSaveData> ObjectiveProgress;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperNumericQuestProgressSaveData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	int32 QuestId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	ETunaSweeperQuestState State = ETunaSweeperQuestState::Available;

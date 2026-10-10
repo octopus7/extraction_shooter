@@ -138,7 +138,7 @@ public:
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	void OpenQuestPanel(FName QuestId);
+	void OpenQuestPanel(int32 QuestId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
 	void OpenMemoPanel(int32 MemoId);
@@ -177,7 +177,7 @@ public:
 	bool StartScenarioForTrigger(FName TriggerName, bool bForceReplay = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	bool PlayQuestPresentation(FName QuestId, ETunaSweeperQuestPresentationTrigger Trigger);
+	bool PlayQuestPresentation(int32 QuestId, ETunaSweeperQuestPresentationTrigger Trigger);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
 	void MoveDialogueCameraToFocusLocation(FVector FocusLocation, float BlendSeconds = 0.75f);

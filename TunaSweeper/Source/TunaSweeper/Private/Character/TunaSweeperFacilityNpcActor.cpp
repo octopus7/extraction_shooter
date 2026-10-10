@@ -122,7 +122,7 @@ void ATunaSweeperFacilityNpcActor::EndPlay(const EEndPlayReason::Type EndPlayRea
 void ATunaSweeperFacilityNpcActor::ConfigureFacilityNpcDefaults(
 	FName InNpcId,
 	FName InQuestProviderId,
-	FName InQuestFallbackId,
+	int32 InQuestFallbackId,
 	FName InQuestInteractionEventId,
 	FVector InBodyScale,
 	FVector InHeadScale,
@@ -149,7 +149,7 @@ void ATunaSweeperFacilityNpcActor::ConfigureFacilityNpcDefaults(
 	}
 }
 
-FName ATunaSweeperFacilityNpcActor::ResolveQuestId() const
+int32 ATunaSweeperFacilityNpcActor::ResolveQuestId() const
 {
 	if (UWorld* World = GetWorld())
 	{
@@ -157,7 +157,7 @@ FName ATunaSweeperFacilityNpcActor::ResolveQuestId() const
 		{
 			if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
-				FName ResolvedQuestId = NAME_None;
+				int32 ResolvedQuestId = 0;
 				if (QuestSubsystem->TryResolveQuestForProvider(QuestProviderId, QuestFallbackId, ResolvedQuestId))
 				{
 					return ResolvedQuestId;
@@ -179,8 +179,8 @@ void ATunaSweeperFacilityNpcActor::RefreshQuestNoticeVisibility()
 
 bool ATunaSweeperFacilityNpcActor::ShouldShowQuestNotice() const
 {
-	const FName ResolvedQuestId = ResolveQuestId();
-	if (ResolvedQuestId.IsNone())
+	const int32 ResolvedQuestId = ResolveQuestId();
+	if ((ResolvedQuestId <= 0))
 	{
 		return false;
 	}
@@ -205,7 +205,7 @@ ATunaSweeperSignalBotActor::ATunaSweeperSignalBotActor()
 	ConfigureFacilityNpcDefaults(
 		FName(TEXT("npc.signalbot")),
 		FName(TEXT("provider.signalbot")),
-		FName(TEXT("quest_signalbot_map_check")),
+		0,
 		FName(TEXT("interaction.signalbot.quest")),
 		FVector(0.36f, 0.36f, 0.92f),
 		FVector(0.72f, 0.36f, 0.28f),
@@ -217,7 +217,7 @@ ATunaSweeperRicePotBotActor::ATunaSweeperRicePotBotActor()
 	ConfigureFacilityNpcDefaults(
 		FName(TEXT("npc.ricepotbot")),
 		FName(TEXT("provider.ricepotbot")),
-		FName(TEXT("quest_ricepotbot_supply_check")),
+		0,
 		FName(TEXT("interaction.ricepotbot.quest")),
 		FVector(0.58f, 0.58f, 0.52f),
 		FVector(0.62f, 0.52f, 0.34f),

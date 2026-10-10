@@ -1,13 +1,13 @@
 import type { QuestNode, QuestPack } from '../shared/types';
 import { getChapter, resolveQuestId, updatePrerequisites } from '../shared/graph';
-import { validatePack, ValidationError } from '../shared/validation';
+import { normalizeLoadedPack, validatePack, ValidationError } from '../shared/validation';
 import { arrangeChapterNodes } from '../shared/layout';
 import { ClientError } from './api';
 
 export interface EditorDocument {
   pack: QuestPack | null;
   chapter: string;
-  selectedQuestId: string | null;
+  selectedQuestId: number | null;
   dirty: boolean;
   origin: string | null;
 }
@@ -17,7 +17,7 @@ export function chapters(pack: QuestPack | null): string[] {
   return pack ? [...new Set(pack.nodes.map(getChapter))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })) : [];
 }
 export function loadDocument(value: unknown, origin: string | null = null): EditorDocument {
-  const pack = validatePack(structuredClone(value));
+  const pack = normalizeLoadedPack(value);
   const chapter = chapters(pack)[0] ?? '';
   return { pack, chapter, selectedQuestId: pack.nodes.find(node => getChapter(node) === chapter)?.definition.quest_id ?? null, dirty: false, origin };
 }
@@ -33,13 +33,13 @@ export function exportDocument(document: EditorDocument): string {
 export function selectChapter(document: EditorDocument, chapter: string): EditorDocument {
   return { ...document, chapter, selectedQuestId: document.pack?.nodes.find(node => getChapter(node) === chapter)?.definition.quest_id ?? null };
 }
-export function selectQuest(document: EditorDocument, questId: string): EditorDocument {
+export function selectQuest(document: EditorDocument, questId: number): EditorDocument {
   return { ...document, selectedQuestId: questId };
 }
 export function selectedNode(document: EditorDocument): QuestNode | undefined {
   return document.pack?.nodes.find(node => node.definition.quest_id === document.selectedQuestId);
 }
-export function moveQuest(document: EditorDocument, questId: string, x: number, y: number): EditorDocument {
+export function moveQuest(document: EditorDocument, questId: number, x: number, y: number): EditorDocument {
   const node = document.pack?.nodes.find(candidate => candidate.definition.quest_id === questId);
   if (!document.pack || !node) throw new ClientError('client.noSelection');
   if (getChapter(node) !== document.chapter) throw new ClientError('client.externalReadOnly');
@@ -63,7 +63,7 @@ export function addPrerequisite(document: EditorDocument, input: string): Editor
   const id = resolveQuestId(document.pack!, input.trim());
   return { ...document, pack: updatePrerequisites(document.pack!, node.definition.quest_id, [...node.definition.required_completed_quest_ids, id]), dirty: true };
 }
-export function removePrerequisite(document: EditorDocument, id: string): EditorDocument {
+export function removePrerequisite(document: EditorDocument, id: number): EditorDocument {
   const node = editableNode(document);
   return { ...document, pack: updatePrerequisites(document.pack!, node.definition.quest_id, node.definition.required_completed_quest_ids.filter(value => value !== id)), dirty: true };
 }

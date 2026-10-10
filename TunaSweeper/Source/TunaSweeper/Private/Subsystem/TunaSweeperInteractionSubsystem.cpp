@@ -61,7 +61,7 @@ namespace TunaSweeperInteractionQuestEvents
 		return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
 	}
 
-	FName ResolveQuestIdForActor(const AActor* Actor)
+	int32 ResolveQuestIdForActor(const AActor* Actor)
 	{
 		if (const ATunaSweeperMoleCompanionActor* MoleActor = Cast<ATunaSweeperMoleCompanionActor>(Actor))
 		{
@@ -73,7 +73,7 @@ namespace TunaSweeperInteractionQuestEvents
 			return FacilityNpcActor->ResolveQuestId();
 		}
 
-		return NAME_None;
+		return 0;
 	}
 
 	FName ResolveQuestProviderIdForActor(const AActor* Actor)
@@ -518,7 +518,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return true;
 	}
 
-	if (!TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Interactable->GetOwner()).IsNone())
+	if (TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Interactable->GetOwner()) > 0)
 	{
 		return true;
 	}
@@ -527,7 +527,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	const UWorld* World = GetWorld();
 	const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
 	const auto* Quests = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
-	FName SubmissionQuest;
+	int32 SubmissionQuest = 0;
 	if (Quests && Quests->TryGetItemSubmissionQuestForProvider(
 		TunaSweeperInteractionQuestEvents::ResolveQuestProviderIdForActor(Interactable->GetOwner()), SubmissionQuest)) return true;
 	const auto* Scenarios = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperScenarioSubsystem>() : nullptr;
@@ -796,7 +796,7 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 	{
 		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
-			FName SubmittedQuest;
+			int32 SubmittedQuest = 0;
 			if (Quests->TrySubmitItemsToProvider(ProviderId, SubmittedQuest))
 			{
 				if (Quests->CanClaimQuestReward(SubmittedQuest))
@@ -820,8 +820,8 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 			TunaPlayerController->StartScenarioForTrigger(TEXT("interaction.mole"), false)) return true;
 	}
 
-	const FName ResolvedQuestId = TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(QuestOwner);
-	if (ResolvedQuestId.IsNone())
+	const int32 ResolvedQuestId = TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(QuestOwner);
+	if ((ResolvedQuestId <= 0))
 	{
 		return false;
 	}

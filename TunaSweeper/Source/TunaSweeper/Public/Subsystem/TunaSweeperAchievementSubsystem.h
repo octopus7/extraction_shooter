@@ -30,7 +30,7 @@ public:
 	void ReportLocationReached(FName LocationId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Achievement")
-	void ReportQuestRewardClaimed(FName QuestId);
+	void ReportQuestRewardClaimed(int32 QuestId);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	int64 GetTotalEnemyKills() const { return ProgressState.TotalEnemyKills; }
@@ -42,7 +42,7 @@ public:
 	bool HasReachedLocation(FName LocationId) const { return ProgressState.ReachedLocationIds.Contains(LocationId); }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
-	bool HasClaimedQuestReward(FName QuestId) const { return ProgressState.ClaimedQuestIds.Contains(QuestId); }
+	bool HasClaimedQuestReward(int32 QuestId) const { return ProgressState.ClaimedQuestIds.Contains(QuestId); }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	bool IsAchievementUnlocked(FName AchievementId) const

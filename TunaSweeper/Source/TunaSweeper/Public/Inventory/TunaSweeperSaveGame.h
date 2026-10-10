@@ -5,6 +5,7 @@
 #include "Housing/TunaSweeperHousingTypes.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Quest/TunaSweeperQuestTypes.h"
+#include "Quest/TunaSweeperQuestId.h"
 #include "Research/TunaSweeperResearchTypes.h"
 #include "TunaSweeperSaveGame.generated.h"
 
@@ -168,8 +169,31 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperQuestProgressSaveData> QuestProgressStates;
 
+	UPROPERTY()
+	TArray<FTunaSweeperNumericQuestProgressSaveData> NumericQuestProgressStates;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName TrackedQuestId;
+
+	UPROPERTY()
+	int32 NumericTrackedQuestId = 0;
+
+	// Keep the original property and struct types readable; never deserialize FName bytes as integers.
+	void MigrateLegacyQuestIds()
+	{
+		for (const auto& Legacy : QuestProgressStates)
+		{
+			const int32 Id = TunaSweeperQuestId::FromLegacyString(Legacy.QuestId.ToString());
+			if (Id <= 0 || NumericQuestProgressStates.ContainsByPredicate([Id](const auto& Entry) { return Entry.QuestId == Id; })) continue;
+			auto& Entry = NumericQuestProgressStates.AddDefaulted_GetRef();
+			Entry.QuestId = Id;
+			Entry.State = Legacy.State;
+			Entry.ObjectiveProgress = Legacy.ObjectiveProgress;
+		}
+		if (NumericTrackedQuestId <= 0) NumericTrackedQuestId = TunaSweeperQuestId::FromLegacyString(TrackedQuestId.ToString());
+		QuestProgressStates.Reset();
+		TrackedQuestId = NAME_None;
+	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest", meta = (ClampMin = "0", UIMin = "0"))
 	int32 QuestCoinBalance = 0;

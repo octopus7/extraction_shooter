@@ -16,7 +16,7 @@ namespace TunaSweeperAchievementModel
 
 	bool RecordEnemyKilled(FTunaSweeperAchievementProgressState& State, FName EnemyId);
 	bool RecordLocationReached(FTunaSweeperAchievementProgressState& State, FName LocationId);
-	bool RecordQuestRewardClaimed(FTunaSweeperAchievementProgressState& State, FName QuestId);
+	bool RecordQuestRewardClaimed(FTunaSweeperAchievementProgressState& State, int32 QuestId);
 
 	void EvaluateDefinitions(
 		const TArray<FTunaSweeperAchievementDefinition>& Definitions,

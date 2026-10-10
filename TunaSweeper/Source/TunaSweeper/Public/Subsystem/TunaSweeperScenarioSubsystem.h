@@ -8,7 +8,7 @@
 
 struct FTunaSweeperScenarioQuestStateCondition
 {
-	FName QuestId = NAME_None;
+	int32 QuestId = 0;
 	ETunaSweeperQuestState RequiredState = ETunaSweeperQuestState::Available;
 };
 

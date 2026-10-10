@@ -680,9 +680,10 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	}
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
+		SaveGame->MigrateLegacyQuestIds();
 		QuestSubsystem->LoadQuestProgressFromSave(
-			SaveGame->QuestProgressStates,
-			SaveGame->TrackedQuestId,
+			SaveGame->NumericQuestProgressStates,
+			SaveGame->NumericTrackedQuestId,
 			SaveGame->QuestCoinBalance);
 
 		TArray<FTunaSweeperQuestDefinition> QuestDefinitions;
@@ -930,8 +931,8 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->ExportQuestProgressForSave(
-			SaveGame->QuestProgressStates,
-			SaveGame->TrackedQuestId,
+			SaveGame->NumericQuestProgressStates,
+			SaveGame->NumericTrackedQuestId,
 			SaveGame->QuestCoinBalance);
 	}
 	if (const UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())

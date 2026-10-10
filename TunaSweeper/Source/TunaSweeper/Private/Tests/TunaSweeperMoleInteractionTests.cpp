@@ -24,8 +24,13 @@ bool FTunaSweeperMoleSingleInteractionTest::RunTest(const FString& Parameters)
 	}
 	auto* Mole = World->SpawnActor<ATunaSweeperMoleCompanionActor>(MoleClass);
 	// Isolate option selection from quest progression and disk saves.
-	auto* Fallback = FindFProperty<FNameProperty>(Mole->GetClass(), TEXT("QuestFallbackId"));
-	Fallback->SetPropertyValue_InContainer(Mole, TEXT("test.mole.quest"));
+	auto* Fallback = FindFProperty<FIntProperty>(Mole->GetClass(), TEXT("QuestFallbackId"));
+	if (!TestNotNull(TEXT("Quest fallback is an integer property"), Fallback))
+	{
+		World->DestroyWorld(false);
+		return false;
+	}
+	Fallback->SetPropertyValue_InContainer(Mole, 3);
 	auto* Interactions = World->GetSubsystem<UTunaSweeperInteractionSubsystem>();
 	TInlineComponentArray<UTunaSweeperInteractableComponent*> Components(Mole);
 	int32 OfferedCount = 0;

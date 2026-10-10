@@ -66,7 +66,7 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Quests->LoadQuestData(false);
 	Quests->QuestDefinitions.Reset();
 	FTunaSweeperQuestDefinition Delivery;
-	Delivery.QuestId = TEXT("test.delivery.single");
+	Delivery.QuestId = 101;
 	Delivery.ProviderId = TEXT("provider.mole");
 	FTunaSweeperObjectiveDefinition DeliveryObjective;
 	DeliveryObjective.ObjectiveId = TEXT("deliver_canned_tuna");
@@ -76,14 +76,14 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	DeliveryObjective.TargetProviderId = TEXT("provider.mole");
 	Delivery.Objectives.Add(DeliveryObjective);
 	Quests->QuestDefinitions.Add(Delivery.QuestId, Delivery);
-	FTunaSweeperQuestProgressSaveData Progress;
+	FTunaSweeperNumericQuestProgressSaveData Progress;
 	Progress.QuestId = Delivery.QuestId;
 	Progress.State = ETunaSweeperQuestState::Accepted;
-	Quests->LoadQuestProgressFromSave({Progress}, NAME_None, 0);
+	Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
 	Quests->NotifyInteractionCompleted(TEXT("demo.canned_tuna.deliver"), TEXT("world_progress"));
 	TestEqual(TEXT("An interaction event without submitted items cannot finish delivery"),
 		Quests->GetQuestState(Progress.QuestId), ETunaSweeperQuestState::Accepted);
-	FName Submitted;
+	int32 Submitted = 0;
 	TestFalse(TEXT("Missing can cannot submit"), Quests->TrySubmitItemsToProvider(TEXT("provider.mole"), Submitted, false));
 	TestTrue(TEXT("Test inventory receives can"), Game->AddItemToFirstAvailableInventorySlot(3004, 1));
 	TestFalse(TEXT("Wrong NPC cannot take the can"), Quests->TrySubmitItemsToProvider(TEXT("provider.other"), Submitted, false));
@@ -99,7 +99,7 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Quests->QuestDefinitions.Reset();
 	Quests->QuestProgressById.Reset();
 	FTunaSweeperQuestDefinition Custom;
-	Custom.QuestId = TEXT("test.delivery");
+	Custom.QuestId = 102;
 	Custom.ProviderId = TEXT("provider.giver");
 	FTunaSweeperObjectiveDefinition First;
 	First.ObjectiveId = TEXT("first");
@@ -117,7 +117,7 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Progress.QuestId = Custom.QuestId;
 	Progress.State = ETunaSweeperQuestState::Accepted;
 	Progress.ObjectiveProgress.Reset();
-	Quests->LoadQuestProgressFromSave({Progress}, NAME_None, 0);
+	Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
 	TestFalse(TEXT("Two objectives require total five, not three"), Quests->TrySubmitItemsToProvider(TEXT("provider.recipient"), Submitted, false));
 	// The recipient need not own the quest; its interaction must remain reachable.
 	for (auto& Objective : Quests->QuestDefinitions.FindChecked(Custom.QuestId).Objectives) Objective.TargetProviderId = TEXT("provider.mole");
@@ -130,7 +130,7 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	auto* Interactions = World->GetSubsystem<UTunaSweeperInteractionSubsystem>();
 	if (TestNotNull(TEXT("Recipient quest interaction"), QuestInteractable) && TestNotNull(TEXT("Interaction subsystem"), Interactions))
 	{
-		TestTrue(TEXT("Recipient has no giver-owned quest"), Mole->ResolveQuestId().IsNone());
+		TestTrue(TEXT("Recipient has no giver-owned quest"), Mole->ResolveQuestId() == 0);
 		TestTrue(TEXT("Cross-provider delivery still offers recipient interaction"), Interactions->CanOfferInteraction(QuestInteractable));
 	}
 	Quests->QuestDefinitions.FindChecked(Custom.QuestId) = Custom;
@@ -143,7 +143,7 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	{
 		bObserverSawCommittedState = Game->CountInventoryItemById(6002) == 1 &&
 			Quests->GetQuestState(Custom.QuestId) == ETunaSweeperQuestState::RewardAvailable;
-		FName ReentrantQuest;
+		int32 ReentrantQuest = 0;
 		bReentrantSubmission = Quests->TrySubmitItemsToProvider(TEXT("provider.recipient"), ReentrantQuest, false);
 	});
 	TestTrue(TEXT("Exact combined requirements submit"), Quests->TrySubmitItemsToProvider(TEXT("provider.recipient"), Submitted, false));
@@ -155,14 +155,14 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Second objective fulfilled"), Quests->GetObjectiveProgressCount(Custom.QuestId, TEXT("second")), 3);
 
 	TStrongObjectPtr<UTunaSweeperSaveGame> Save(NewObject<UTunaSweeperSaveGame>());
-	Quests->ExportQuestProgressForSave(Save->QuestProgressStates, Save->TrackedQuestId, Save->QuestCoinBalance);
+	Quests->ExportQuestProgressForSave(Save->NumericQuestProgressStates, Save->NumericTrackedQuestId, Save->QuestCoinBalance);
 	Save->InventorySlots = Game->PlayerInventorySlots;
 	Game->ItemInstancesByUid.GenerateValueArray(Save->ItemInstances);
 	TArray<uint8> Bytes;
 	TestTrue(TEXT("Submission serializes in existing save format"), UGameplayStatics::SaveGameToMemory(Save.Get(), Bytes));
 	TStrongObjectPtr<UTunaSweeperSaveGame> Loaded(Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes)));
 	if (!TestNotNull(TEXT("Submission save reloads"), Loaded.Get())) return false;
-	Quests->LoadQuestProgressFromSave(Loaded->QuestProgressStates, Loaded->TrackedQuestId, Loaded->QuestCoinBalance);
+	Quests->LoadQuestProgressFromSave(Loaded->NumericQuestProgressStates, Loaded->NumericTrackedQuestId, Loaded->QuestCoinBalance);
 	Game->PlayerInventorySlots = Loaded->InventorySlots;
 	Game->ItemInstancesByUid.Reset();
 	for (const auto& Item : Loaded->ItemInstances) Game->ItemInstancesByUid.Add(Item.Uid, Item);

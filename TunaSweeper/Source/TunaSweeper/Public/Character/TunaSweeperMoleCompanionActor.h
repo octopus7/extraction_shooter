@@ -50,7 +50,7 @@ public:
 	FVector2D GetIdleVariationDelayRange() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	FName ResolveQuestId() const;
+	int32 ResolveQuestId() const;
 	FName GetQuestProviderId() const;
 
 protected:
@@ -110,7 +110,7 @@ private:
 	float BodyCollisionHalfHeight = 72.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Quest", meta = (AllowPrivateAccess = "true"))
-	FName QuestFallbackId;
+	int32 QuestFallbackId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Quest", meta = (AllowPrivateAccess = "true"))
 	FName QuestProviderId;

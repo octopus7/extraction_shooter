@@ -107,7 +107,8 @@ bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
     GI->BeginCombatTestSession(); // Disable disk saves in this isolated gameplay test.
     auto* Warehouse=World->SpawnActor<ATunaSweeperFoodWarehouseActor>(WarehouseClass);
     TestNotNull(TEXT("Replaceable static mesh"),Warehouse->WarehouseMesh->GetStaticMesh().Get());
-    TestEqual(TEXT("Final quest gates warehouse"),Warehouse->RequiredQuestId,FName(TEXT("demo_q4_todays_reward")));
+    TestEqual(TEXT("Retired final quest has no numeric replacement"),Warehouse->RequiredQuestId,0);
+    TestTrue(TEXT("Unconfigured quest gate remains required"),Warehouse->bRequireQuest);
     TestEqual(TEXT("Interaction hidden before final quest"),Warehouse->Interactable->GetInteractionType(),ETunaSweeperInteractionType::None);
     int32 Before=GI->CountInventoryItemById(3004);
     TestFalse(TEXT("Cannot take a can before final quest"),Warehouse->TakeFood());
@@ -115,7 +116,8 @@ bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
 
     // This isolated world has no game-instance subsystems. Clearing the configurable requirement
     // exercises the active presentation and collection path without touching the user's save data.
-    Warehouse->RequiredQuestId=NAME_None;
+    Warehouse->RequiredQuestId=0;
+    Warehouse->bRequireQuest=false;
     Warehouse->DispatchBeginPlay();
     TestEqual(TEXT("Interaction connected"),Warehouse->Interactable->GetInteractionType(),ETunaSweeperInteractionType::WorldProgress);
     TestEqual(TEXT("Interaction says take tuna can"),Warehouse->Interactable->GetInteractionDisplayName().ToString(),FString(TEXT("참치캔 획득")));

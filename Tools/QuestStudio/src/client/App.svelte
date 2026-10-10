@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import type { QuestPack, SnapshotMetadata } from '../shared/types';
   import { getChapter } from '../shared/graph';
+  import { formatQuestId } from '../shared/graph';
   import { t } from '../shared/ui-strings';
   import { apiRequest, errorMessage } from './api';
   import { addPrerequisite, arrangeChapter, moveQuest, chapters, emptyDocument, exportDocument, importDocument, loadDocument, questText, removePrerequisite, selectChapter, selectedNode, selectQuest } from './state';
@@ -71,8 +72,8 @@
     });
   }
   function changeChapter(chapter: string) { document = selectChapter(document, chapter); prerequisite = ''; error = ''; }
-  function changeSelection(id: string) { document = selectQuest(document, id); prerequisite = ''; error = ''; }
-  function moveNode(id: string, x: number, y: number) {
+  function changeSelection(id: number) { document = selectQuest(document, id); prerequisite = ''; error = ''; }
+  function moveNode(id: number, x: number, y: number) {
     void run(() => { document = moveQuest(document, id, x, y); });
   }
   function arrangeNodes() {
@@ -82,7 +83,7 @@
     event.preventDefault();
     void run(() => { document = addPrerequisite(document, prerequisite); prerequisite = ''; notice = t('inspector.updated'); });
   }
-  function removeLink(id: string) {
+  function removeLink(id: number) {
     void run(() => { document = removePrerequisite(document, id); notice = t('inspector.updated'); });
   }
   async function login(event: SubmitEvent) {
@@ -170,12 +171,12 @@
       <main class="editor-layout"><section class="canvas-section"><div class="canvas-heading"><div class="chapter-control"><label for="chapter-select">{t('chapter.label')}</label><select id="chapter-select" value={document.chapter} onchange={(event) => changeChapter(event.currentTarget.value)} disabled={busy}>{#each chapterList as chapter}<option value={chapter}>{t('chapter.name', { chapter })}</option>{/each}</select><span>{t('chapter.count', { count: visibleCount })}</span></div><span class="total-count">{t('document.total', { nodes: document.pack.nodes.length, strings: document.pack.strings.length })}</span></div>
         {#key `${document.chapter}:${document.origin}`}<Graph pack={document.pack} chapter={document.chapter} selectedId={document.selectedQuestId} onselect={changeSelection} onmove={moveNode} onarrange={arrangeNodes} disabled={busy} />{/key}
       </section>
-      <aside class="inspector"><div class="inspector-heading"><span class="eyebrow">{t('inspector.heading')}</span>{#if node}<span class="inspector-id">{node.definition.quest_id}</span>{/if}</div>
+      <aside class="inspector"><div class="inspector-heading"><span class="eyebrow">{t('inspector.heading')}</span>{#if node}<span class="inspector-id">{formatQuestId(node.definition.quest_id)}</span>{/if}</div>
         {#if node}<div class="inspector-body"><h2>{questText(document.pack, node.definition.title_string_key)}</h2><span class="status-pill" class:unspecified={node.authoring.prerequisitesStatus === 'unspecified'}>{external ? t('graph.legendExternal') : node.authoring.prerequisitesStatus === 'unspecified' ? t('inspector.unspecified') : t('inspector.confirmed')}</span>
           <section class="detail-section"><h3>{t('inspector.description')}</h3><p class="quest-description">{questText(document.pack, node.definition.description_string_key)}</p>{#each detailKeys(node.authoring.detail_string_key) as key}<p class="quest-description">{questText(document.pack, key)}</p>{/each}{#each detailKeys(node.authoring.context_string_keys) as key}<p class="quest-description secondary-copy">{questText(document.pack, key)}</p>{/each}</section>
           <section class="detail-section"><div class="section-heading"><h3>{t('inspector.prerequisites')}</h3><span class="count-badge">{node.definition.required_completed_quest_ids.length}</span></div>
             {#if node.authoring.prerequisitesStatus === 'unspecified'}<p class="inline-note">{t('inspector.unspecifiedHelp')}</p>{/if}
-            {#if node.definition.required_completed_quest_ids.length}<ul class="prerequisite-list">{#each node.definition.required_completed_quest_ids as id}<li><span class="prerequisite-id">{id}</span><span class="prerequisite-title">{questText(document.pack, document.pack.nodes.find(item => item.definition.quest_id === id)?.definition.title_string_key ?? id)}</span>{#if !external}<button class="remove-button" onclick={() => removeLink(id)} disabled={busy} aria-label={t('inspector.remove', { id })} title={t('inspector.remove', { id })}>×</button>{/if}</li>{/each}</ul>{:else}<p class="empty-prerequisites">{t('inspector.noPrerequisites')}</p>{/if}
+            {#if node.definition.required_completed_quest_ids.length}<ul class="prerequisite-list">{#each node.definition.required_completed_quest_ids as id}<li><span class="prerequisite-id">{formatQuestId(id)}</span><span class="prerequisite-title">{questText(document.pack, document.pack.nodes.find(item => item.definition.quest_id === id)?.definition.title_string_key ?? formatQuestId(id))}</span>{#if !external}<button class="remove-button" onclick={() => removeLink(id)} disabled={busy} aria-label={t('inspector.remove', { id: formatQuestId(id) })} title={t('inspector.remove', { id: formatQuestId(id) })}>×</button>{/if}</li>{/each}</ul>{:else}<p class="empty-prerequisites">{t('inspector.noPrerequisites')}</p>{/if}
             {#each detailKeys(node.authoring.prerequisites_evidence_string_key) as key}<p class="quest-description secondary-copy">{questText(document.pack, key)}</p>{/each}
             {#if external}<p class="inline-note">{t('inspector.externalHelp')}</p>{:else}<form class="prerequisite-form" onsubmit={addLink}><label for="prerequisite-input">{t('inspector.numberLabel')}</label><div class="input-row"><input id="prerequisite-input" bind:value={prerequisite} placeholder={t('inspector.numberPlaceholder')} autocomplete="off" required disabled={busy} /><button class="secondary" type="submit" disabled={busy || !prerequisite.trim()}>{t('inspector.add')}</button></div><p class="microcopy">{t('inspector.numberHelp')}</p></form>{/if}
           </section>

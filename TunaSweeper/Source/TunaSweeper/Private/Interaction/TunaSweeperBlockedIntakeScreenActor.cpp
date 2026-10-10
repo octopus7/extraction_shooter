@@ -355,13 +355,13 @@ ETunaSweeperWaterIntakeInteractionPhase ATunaSweeperBlockedIntakeScreenActor::Re
 	return ETunaSweeperWaterIntakeInteractionPhase::None;
 }
 
-bool ATunaSweeperBlockedIntakeScreenActor::IsQuestObjectiveActive(FName QuestId, FName ObjectiveId) const
+bool ATunaSweeperBlockedIntakeScreenActor::IsQuestObjectiveActive(int32 QuestId, FName ObjectiveId) const
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
 	UTunaSweeperQuestSubsystem* QuestSubsystem = TunaGameInstance
 		? TunaGameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>()
 		: nullptr;
-	if (!QuestSubsystem || QuestId.IsNone() || ObjectiveId.IsNone() ||
+	if (!QuestSubsystem || (QuestId <= 0) || ObjectiveId.IsNone() ||
 		QuestSubsystem->GetQuestState(QuestId) != ETunaSweeperQuestState::Accepted)
 	{
 		return false;

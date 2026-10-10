@@ -1,5 +1,5 @@
 import type { QuestPack, SnapshotMetadata } from '../shared/types';
-import { isRecord, validatePack, ValidationError } from '../shared/validation';
+import { isRecord, normalizeLoadedPack, validatePack, ValidationError } from '../shared/validation';
 import { ApiError } from './http';
 
 interface SnapshotRow {
@@ -25,7 +25,7 @@ export async function saveSnapshot(db: D1Database, value: unknown): Promise<Snap
     db.prepare(`INSERT INTO snapshots (id, alias, memo, created_at, schema_version, node_count, string_count, pack_metadata_json)
       VALUES (?, ?, ?, ?, 1, ?, ?, ?)`).bind(id, snapshot.alias, snapshot.memo, createdAt, nodes.length, strings.length, JSON.stringify(packMetadata)),
     db.prepare(`INSERT INTO quest_nodes (snapshot_id, quest_id, ordinal, node_json)
-      SELECT ?, json_extract(value, '$.definition.quest_id'), CAST(key AS INTEGER), value FROM json_each(?)`)
+      SELECT ?, CAST(json_extract(value, '$.definition.quest_id') AS TEXT), CAST(key AS INTEGER), value FROM json_each(?)`)
       .bind(id, JSON.stringify(nodes)),
     db.prepare(`INSERT INTO localization_strings (snapshot_id, string_key, locale, value, ordinal, entry_json)
       SELECT ?, json_extract(value, '$.key'), json_extract(value, '$.locale'), json_extract(value, '$.value'), CAST(key AS INTEGER), value FROM json_each(?)`)
@@ -42,7 +42,7 @@ export async function loadSnapshot(db: D1Database, id: string): Promise<{ snapsh
   ]);
   try {
     if (nodes.results.length !== row.node_count || strings.results.length !== row.string_count || row.schema_version !== 1) throw new Error();
-    const pack = validatePack({ ...JSON.parse(row.pack_metadata_json), schemaVersion: 1,
+    const pack = normalizeLoadedPack({ ...JSON.parse(row.pack_metadata_json), schemaVersion: 1,
       nodes: nodes.results.map(node => JSON.parse(node.node_json)), strings: strings.results.map(string => JSON.parse(string.entry_json)) });
     return { snapshot: metadata(row), pack };
   } catch (error) {

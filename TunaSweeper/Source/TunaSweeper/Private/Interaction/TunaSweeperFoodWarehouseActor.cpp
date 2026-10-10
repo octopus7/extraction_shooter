@@ -51,8 +51,8 @@ bool ATunaSweeperFoodWarehouseActor::CanTakeFood() const
     const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance
         ? GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>()
         : nullptr;
-    const bool bRequiredQuestActive = RequiredQuestId.IsNone() ||
-        (QuestSubsystem && QuestSubsystem->GetQuestState(RequiredQuestId) == ETunaSweeperQuestState::Accepted);
+    const bool bRequiredQuestActive = !bRequireQuest ||
+        (RequiredQuestId > 0 && QuestSubsystem && QuestSubsystem->GetQuestState(RequiredQuestId) == ETunaSweeperQuestState::Accepted);
     return !bCollected && FoodQuantity > 0 && bRequiredQuestActive;
 }
 

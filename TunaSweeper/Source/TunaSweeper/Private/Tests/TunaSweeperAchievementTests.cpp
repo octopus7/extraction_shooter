@@ -20,6 +20,11 @@ namespace TunaSweeperAchievementTests
 		Definition.AchievementId = FName(AchievementId);
 		Definition.ConditionType = ConditionType;
 		Definition.TargetId = TargetId && TargetId[0] != 0 ? FName(TargetId) : NAME_None;
+		if (ConditionType == ETunaSweeperAchievementConditionType::QuestRewardClaimed)
+		{
+			Definition.TargetId = NAME_None;
+			Definition.TargetQuestId = 3;
+		}
 		Definition.RequiredCount = RequiredCount;
 		Definition.PlatformIds.Add(SteamPlatform, SteamId);
 		return Definition;
@@ -37,7 +42,7 @@ namespace TunaSweeperAchievementTests
 			MakeDefinition(TEXT("reach_lab"), ETunaSweeperAchievementConditionType::LocationReached,
 				TEXT("location.lab"), 1, TEXT("ACH_REACH_LAB")),
 			MakeDefinition(TEXT("claim_intro"), ETunaSweeperAchievementConditionType::QuestRewardClaimed,
-				TEXT("quest.intro"), 1, TEXT("ACH_CLAIM_INTRO"))
+				TEXT(""), 1, TEXT("ACH_CLAIM_INTRO"))
 		};
 	}
 }
@@ -113,9 +118,13 @@ bool FTunaSweeperAchievementCollectionTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Location achievement unlocks"), NewlyUnlocked.Contains(FName(TEXT("reach_lab"))));
 
 	TestTrue(TEXT("First quest reward claim changes state"),
-		TunaSweeperAchievementModel::RecordQuestRewardClaimed(State, FName(TEXT("quest.intro"))));
+		TunaSweeperAchievementModel::RecordQuestRewardClaimed(State, 3));
+	TestFalse(TEXT("Unset quest ID cannot count as a claim"),
+		TunaSweeperAchievementModel::RecordQuestRewardClaimed(State, 0));
+	TestFalse(TEXT("Negative quest ID cannot count as a claim"),
+		TunaSweeperAchievementModel::RecordQuestRewardClaimed(State, -1));
 	TestFalse(TEXT("Repeated quest reward claim is idempotent"),
-		TunaSweeperAchievementModel::RecordQuestRewardClaimed(State, FName(TEXT("quest.intro"))));
+		TunaSweeperAchievementModel::RecordQuestRewardClaimed(State, 3));
 	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, NewlyUnlocked);
 	TestTrue(TEXT("Claimed quest achievement unlocks"), NewlyUnlocked.Contains(FName(TEXT("claim_intro"))));
 	return true;

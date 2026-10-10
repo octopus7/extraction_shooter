@@ -62,7 +62,7 @@ const ko: Record<string, string> = {
   'inspector.numberLabel': '선행 퀘스트 번호',
   'inspector.numberPlaceholder': '예: 21',
   'inspector.numberHelp': '지역과 관계없이 퀘스트 고유번호를 숫자로 입력하세요.',
-  'validation.numeric_quest_id': '퀘스트 번호는 지역 접두사와 앞자리 0이 없는 양의 정수여야 합니다. 이전 지역별 ID 팩은 숫자 ID로 갱신한 파일을 가져오세요.',
+  'validation.numeric_quest_id': '퀘스트 번호는 1부터 2147483647까지의 정수여야 합니다. JSON에는 문자열이 아닌 숫자로 저장하며, 화면에서는 최소 세 자리로 표시합니다.',
   'inspector.add': '연결',
   'inspector.remove': '{id} 연결 해제',
   'inspector.externalHelp': '다른 지역의 직접 선행 퀘스트입니다. 해당 챕터에서 연결을 편집할 수 있습니다.',

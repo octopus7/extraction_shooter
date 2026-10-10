@@ -1,5 +1,14 @@
 # Save/Load Persistence Contract
 
+## Integer quest identity (2026-10-10)
+
+Runtime quest identities, prerequisite references, tracking, objective submission, scenario quest conditions, and claimed-quest achievement facts now use positive `int32` IDs; `0` means unset. Objective, provider, achievement, and localization keys retain their existing name types. Display formatting may pad an ID to at least three digits without changing the saved integer.
+
+Gameplay save version remains 22 and achievement version remains 1 because this is an additive tagged-property migration. The original `QuestProgressStates` array keeps its original `FTunaSweeperQuestProgressSaveData` structure and `FName QuestId`; the original `TrackedQuestId` and achievement `ClaimedQuestIds` properties also retain their original name types. New writes use `NumericQuestProgressStates` (`FTunaSweeperNumericQuestProgressSaveData`), `NumericTrackedQuestId`, and achievement `NumericClaimedQuestIds`. No existing name property is reinterpreted as an integer.
+
+On gameplay load, digit-only legacy IDs within the positive int32 range migrate in memory, retaining objective counts and quest state; padded `003` becomes integer `3`. Numeric entries take precedence if both formats exist. Retired nonnumeric IDs, zero, signed strings, and overflow are discarded. The active catalog still filters unknown progress and tracking. Legacy fields are cleared after migration and new gameplay saves write integer data. Account achievement loading merges valid numeric legacy claims with its new integer facts. Currency and unrelated saved state remain unchanged; loading does not itself rewrite a gameplay slot.
+
+
 ## Retired demo quest catalog (2026-10-10)
 
 The five former demo quests are removed from the public quest catalog. Existing save files are not rewritten by this content change. The existing quest loader discards saved quest progress and tracking whose IDs are absent from the active catalog; subsequent saves therefore omit that retired progress. Quest coins and unrelated inventory, scenario flags, and world progress remain intact. Completing the intro dialogue no longer accepts a fixed demo quest, and the removed final quest no longer queues or resumes the old ending. Quest-gated environment interactions remain gated until explicitly authored again.

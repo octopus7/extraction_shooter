@@ -17,7 +17,7 @@ namespace TunaSweeperAchievementModel
 			case ETunaSweeperAchievementConditionType::LocationReached:
 				return State.ReachedLocationIds.Contains(Definition.TargetId);
 			case ETunaSweeperAchievementConditionType::QuestRewardClaimed:
-				return State.ClaimedQuestIds.Contains(Definition.TargetId);
+				return State.ClaimedQuestIds.Contains(Definition.TargetQuestId);
 			default:
 				return false;
 			}
@@ -56,7 +56,8 @@ namespace TunaSweeperAchievementModel
 					return false;
 				}
 			}
-			else if (Definition.TargetId.IsNone() || Definition.RequiredCount != 1)
+			else if ((Definition.ConditionType == ETunaSweeperAchievementConditionType::QuestRewardClaimed
+				? Definition.TargetQuestId <= 0 : Definition.TargetId.IsNone()) || Definition.RequiredCount != 1)
 			{
 				OutError = FString::Printf(
 					TEXT("target-based achievement requires target_id and required_count 1: %s"),
@@ -167,9 +168,9 @@ namespace TunaSweeperAchievementModel
 		return true;
 	}
 
-	bool RecordQuestRewardClaimed(FTunaSweeperAchievementProgressState& State, FName QuestId)
+	bool RecordQuestRewardClaimed(FTunaSweeperAchievementProgressState& State, int32 QuestId)
 	{
-		if (QuestId.IsNone() || State.ClaimedQuestIds.Contains(QuestId))
+		if ((QuestId <= 0) || State.ClaimedQuestIds.Contains(QuestId))
 		{
 			return false;
 		}

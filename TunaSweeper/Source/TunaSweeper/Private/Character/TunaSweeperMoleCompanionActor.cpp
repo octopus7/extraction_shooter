@@ -180,7 +180,7 @@ FName ATunaSweeperMoleCompanionActor::GetQuestProviderId() const
 		: QuestProviderId;
 }
 
-FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
+int32 ATunaSweeperMoleCompanionActor::ResolveQuestId() const
 {
 	const FName EffectiveProviderId = GetQuestProviderId();
 
@@ -190,12 +190,12 @@ FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
 		{
 			if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
-				FName ResolvedQuestId = NAME_None;
+				int32 ResolvedQuestId = 0;
 				if (QuestSubsystem->TryResolveQuestForProvider(EffectiveProviderId, QuestFallbackId, ResolvedQuestId))
 				{
 					return ResolvedQuestId;
 				}
-				return NAME_None;
+				return 0;
 			}
 		}
 	}
@@ -282,8 +282,8 @@ void ATunaSweeperMoleCompanionActor::RefreshQuestNoticeVisibility()
 
 bool ATunaSweeperMoleCompanionActor::ShouldShowQuestNotice() const
 {
-	const FName ResolvedQuestId = ResolveQuestId();
-	if (ResolvedQuestId.IsNone())
+	const int32 ResolvedQuestId = ResolveQuestId();
+	if ((ResolvedQuestId <= 0))
 	{
 		return false;
 	}

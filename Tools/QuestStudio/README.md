@@ -32,7 +32,9 @@ npm run verify
 
 팩은 `schemaVersion: 1`, `nodes`, `strings`를 가진다. 노드에는 기존 `definition` 객체, `x`, `y`, `authoring` 메타데이터가 있다. 문자열은 `{key, locale, value}`이며 새 원문은 `ko`만 작성한다. 이미 가져온 다른 언어와 알 수 없는 정의 필드는 보존한다.
 
-퀘스트 `quest_id`와 `required_completed_quest_ids`는 지역을 포함하지 않는 전역 숫자 ID다. JSON에서는 정밀도 손실과 기존 UE 이름형 식별자 호환을 위해 `"1"`, `"21"`처럼 문자열로 저장하며 양의 정수의 십진 표기만 허용한다. 번호 입력은 선택한 챕터와 무관하게 같은 ID를 찾는다.
+퀘스트 `quest_id`와 `required_completed_quest_ids`는 지역을 포함하지 않는 전역 정수 ID다. JSON 및 TypeScript에서는 `1`, `21`처럼 숫자로 저장하며, 허용 범위는 `1..2147483647`이다. 0, 음수, 소수, 범위 초과 및 임의 텍스트는 거부한다. 카드·상세·선행 목록과 접근성 레이블은 최소 세 자리로 표시한다 (`3` → `003`, `1000` → `1000`). `003` 입력은 정수 `3`을 찾으며 선택한 챕터와 무관하다.
+
+기존 `schemaVersion: 1`의 정규 십진 문자열 ID (`"3"`)는 파일 가져오기와 스냅샷 불러오기 경계에서 메모리상 정수로 변환한다. 원본 파일과 D1 기록은 수정하지 않는다. 내보내기와 새 스냅샷은 숫자 JSON을 생성하며, 저장 API는 문자열 ID를 거부한다. 노드 좌표, 문자열 키, 번역, 알 수 없는 데이터는 보존한다. D1의 `quest_nodes.quest_id` TEXT 열은 조회용 문자열 투영만 유지하며 `node_json`에는 정수를 저장하므로 원격 마이그레이션이 필요 없다.
 
 챕터는 퀘스트 정의의 `authoring_tags` 안에 있는 `chapter:N` 태그로 식별한다. UE 실행 로직은 이 태그를 사용하지 않는다. 선행관계는 `required_completed_quest_ids`에만 저장하고 후행 및 연결선을 계산한다. `authoring.prerequisitesStatus`의 `unspecified`는 원문에서 조건을 확정할 수 없다는 뜻이다.
 

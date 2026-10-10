@@ -14,7 +14,7 @@ class UTextBlock;
 class UVerticalBox;
 class UTunaSweeperQuestSubsystem;
 
-DECLARE_DELEGATE_OneParam(FTunaSweeperQuestEntryClickedDelegate, FName);
+DECLARE_DELEGATE_OneParam(FTunaSweeperQuestEntryClickedDelegate, int32);
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperQuestListEntryWidget : public UUserWidget
@@ -23,7 +23,7 @@ class TUNASWEEPER_API UTunaSweeperQuestListEntryWidget : public UUserWidget
 
 public:
 	void InitializeQuestEntry(
-		FName InQuestId,
+		int32 InQuestId,
 		const FText& InLabel,
 		const FText& InStateLabel,
 		bool bInSelected,
@@ -53,7 +53,7 @@ private:
 	TObjectPtr<UTextBlock> EntryStateText;
 
 	FTunaSweeperQuestEntryClickedDelegate ClickedDelegate;
-	FName QuestId = NAME_None;
+	int32 QuestId = 0;
 	FText Label;
 	FText StateLabel;
 	bool bSelected = false;
@@ -68,7 +68,7 @@ public:
 	UTunaSweeperQuestWidget(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	void InitializeQuest(FName InQuestId);
+	void InitializeQuest(int32 InQuestId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void RefreshQuestView();
@@ -112,10 +112,10 @@ private:
 	bool CacheBuiltQuestWidgets();
 	void RebuildQuestList(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions);
 	void ApplySelectedQuest(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions);
-	void SetSelectedQuestId(FName InQuestId);
+	void SetSelectedQuestId(int32 InQuestId);
 	void SetActiveFilter(EQuestListFilter InFilter);
-	FName GetSavedSelectedQuestId(EQuestListFilter Filter) const;
-	void SetSavedSelectedQuestId(EQuestListFilter Filter, FName InQuestId);
+	int32 GetSavedSelectedQuestId(EQuestListFilter Filter) const;
+	void SetSavedSelectedQuestId(EQuestListFilter Filter, int32 InQuestId);
 	void HandleQuestProgressChanged();
 	void UpdateTabButtonStates();
 	void UpdateDetailView();
@@ -127,12 +127,12 @@ private:
 		const UTunaSweeperQuestSubsystem& QuestSubsystem,
 		const FTunaSweeperQuestDefinition& QuestDefinition) const;
 	FText GetQuestText(FName StringKey, const FText& FallbackText = FText::GetEmpty()) const;
-	FText GetStateText(FName InQuestId) const;
-	FText GetPrimaryButtonText(FName InQuestId) const;
+	FText GetStateText(int32 InQuestId) const;
+	FText GetPrimaryButtonText(int32 InQuestId) const;
 	FText GetEmptyListText() const;
-	FText BuildObjectiveText(const UTunaSweeperQuestSubsystem& QuestSubsystem, FName InQuestId) const;
-	FText BuildRewardText(const UTunaSweeperQuestSubsystem& QuestSubsystem, FName InQuestId) const;
-	bool IsPrimaryButtonEnabled(FName InQuestId) const;
+	FText BuildObjectiveText(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 InQuestId) const;
+	FText BuildRewardText(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 InQuestId) const;
+	bool IsPrimaryButtonEnabled(int32 InQuestId) const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> RootPanel;
@@ -207,10 +207,10 @@ private:
 	TObjectPtr<UTextBlock> PrimaryButtonText;
 
 	EQuestListFilter ActiveFilter = EQuestListFilter::Available;
-	FName QuestId = NAME_None;
-	FName AvailableSelectedQuestId = NAME_None;
-	FName InProgressSelectedQuestId = NAME_None;
-	FName CompletedSelectedQuestId = NAME_None;
+	int32 QuestId = 0;
+	int32 AvailableSelectedQuestId = 0;
+	int32 InProgressSelectedQuestId = 0;
+	int32 CompletedSelectedQuestId = 0;
 };
 
 UCLASS(BlueprintType, Blueprintable)

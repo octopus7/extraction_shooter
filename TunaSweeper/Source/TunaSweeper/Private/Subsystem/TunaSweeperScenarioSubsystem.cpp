@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperScenarioSubsystem.h"
+#include "Quest/TunaSweeperQuestId.h"
 #include "Settings/TunaSweeperLanguage.h"
 #include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
@@ -275,12 +276,17 @@ bool UTunaSweeperScenarioSubsystem::LoadScenarioDefinitionsJson()
 			{
 				const TSharedPtr<FJsonObject> ConditionObject = ConditionValue.IsValid() ? ConditionValue->AsObject() : nullptr;
 				FTunaSweeperScenarioQuestStateCondition Condition;
-				Condition.QuestId = TunaSweeperScenarioData::ReadNameField(ConditionObject, TEXT("quest_id"));
+				Condition.QuestId = TunaSweeperQuestId::Read(ConditionObject, TEXT("quest_id"));
 				FString StateName;
 				if (ConditionObject.IsValid() && ConditionObject->TryGetStringField(TEXT("state"), StateName) &&
-					!Condition.QuestId.IsNone() && TunaSweeperScenarioData::ParseQuestState(StateName, Condition.RequiredState))
+					(Condition.QuestId > 0) && TunaSweeperScenarioData::ParseQuestState(StateName, Condition.RequiredState))
 				{
 					Definition.RequiredQuestStates.Add(Condition);
+				}
+				else
+				{
+					ScenarioDefinitions.Reset();
+					return false;
 				}
 			}
 		}

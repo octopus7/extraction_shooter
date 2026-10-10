@@ -21,7 +21,7 @@ public:
 	ATunaSweeperFacilityNpcActor();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Facility NPC")
-	FName ResolveQuestId() const;
+	int32 ResolveQuestId() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Facility NPC")
 	FName GetNpcId() const { return NpcId; }
@@ -34,7 +34,7 @@ protected:
 	void ConfigureFacilityNpcDefaults(
 		FName InNpcId,
 		FName InQuestProviderId,
-		FName InQuestFallbackId,
+		int32 InQuestFallbackId,
 		FName InQuestInteractionEventId,
 		FVector InBodyScale,
 		FVector InHeadScale,
@@ -68,7 +68,7 @@ protected:
 	FName QuestProviderId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest")
-	FName QuestFallbackId = NAME_None;
+	int32 QuestFallbackId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest")
 	FName QuestInteractionEventId = NAME_None;

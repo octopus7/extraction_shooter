@@ -122,7 +122,7 @@ UTunaSweeperInteractionQuestWidget::UTunaSweeperInteractionQuestWidget(const FOb
 }
 
 void UTunaSweeperQuestListEntryWidget::InitializeQuestEntry(
-	FName InQuestId,
+	int32 InQuestId,
 	const FText& InLabel,
 	const FText& InStateLabel,
 	bool bInSelected,
@@ -238,18 +238,18 @@ void UTunaSweeperQuestListEntryWidget::RefreshEntryView()
 
 void UTunaSweeperQuestListEntryWidget::HandleEntryClicked()
 {
-	if (!QuestId.IsNone() && ClickedDelegate.IsBound())
+	if ((QuestId > 0) && ClickedDelegate.IsBound())
 	{
 		ClickedDelegate.Execute(QuestId);
 	}
 }
 
-void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
+void UTunaSweeperQuestWidget::InitializeQuest(int32 InQuestId)
 {
 	ActiveFilter = GetDefaultFilter();
 	QuestId = InQuestId;
 
-	if (!QuestId.IsNone())
+	if ((QuestId > 0))
 	{
 		if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 			? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
@@ -273,7 +273,7 @@ void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 	}
 
 	NormalizeActiveFilter();
-	if (!QuestId.IsNone())
+	if ((QuestId > 0))
 	{
 		SetSavedSelectedQuestId(ActiveFilter, QuestId);
 	}
@@ -295,7 +295,7 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 		: nullptr;
 	if (!QuestSubsystem)
 	{
-		QuestId = NAME_None;
+		QuestId = 0;
 		RebuildQuestList(TArray<FTunaSweeperQuestDefinition>());
 		UpdateDetailView();
 		return;
@@ -310,10 +310,10 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 
 void UTunaSweeperQuestWidget::ResetQuestSelection()
 {
-	QuestId = NAME_None;
-	AvailableSelectedQuestId = NAME_None;
-	InProgressSelectedQuestId = NAME_None;
-	CompletedSelectedQuestId = NAME_None;
+	QuestId = 0;
+	AvailableSelectedQuestId = 0;
+	InProgressSelectedQuestId = 0;
+	CompletedSelectedQuestId = 0;
 	ActiveFilter = GetDefaultFilter();
 }
 
@@ -421,8 +421,8 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
 		: nullptr;
-	const FName ActingQuestId = QuestId;
-	if (!QuestSubsystem || ActingQuestId.IsNone())
+	const int32 ActingQuestId = QuestId;
+	if (!QuestSubsystem || (ActingQuestId <= 0))
 	{
 		return;
 	}
@@ -896,7 +896,7 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 
 void UTunaSweeperQuestWidget::ApplySelectedQuest(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions)
 {
-	const FName SavedQuestId = GetSavedSelectedQuestId(ActiveFilter);
+	const int32 SavedQuestId = GetSavedSelectedQuestId(ActiveFilter);
 	for (const FTunaSweeperQuestDefinition& QuestDefinition : QuestDefinitions)
 	{
 		if (QuestDefinition.QuestId == SavedQuestId)
@@ -906,11 +906,11 @@ void UTunaSweeperQuestWidget::ApplySelectedQuest(const TArray<FTunaSweeperQuestD
 		}
 	}
 
-	QuestId = QuestDefinitions.Num() > 0 ? QuestDefinitions[0].QuestId : NAME_None;
+	QuestId = QuestDefinitions.Num() > 0 ? QuestDefinitions[0].QuestId : 0;
 	SetSavedSelectedQuestId(ActiveFilter, QuestId);
 }
 
-void UTunaSweeperQuestWidget::SetSelectedQuestId(FName InQuestId)
+void UTunaSweeperQuestWidget::SetSelectedQuestId(int32 InQuestId)
 {
 	QuestId = InQuestId;
 	SetSavedSelectedQuestId(ActiveFilter, QuestId);
@@ -926,7 +926,7 @@ void UTunaSweeperQuestWidget::SetActiveFilter(EQuestListFilter InFilter)
 	RefreshQuestView();
 }
 
-FName UTunaSweeperQuestWidget::GetSavedSelectedQuestId(EQuestListFilter Filter) const
+int32 UTunaSweeperQuestWidget::GetSavedSelectedQuestId(EQuestListFilter Filter) const
 {
 	switch (Filter)
 	{
@@ -937,11 +937,11 @@ FName UTunaSweeperQuestWidget::GetSavedSelectedQuestId(EQuestListFilter Filter) 
 	case EQuestListFilter::RewardCompleted:
 		return CompletedSelectedQuestId;
 	default:
-		return NAME_None;
+		return 0;
 	}
 }
 
-void UTunaSweeperQuestWidget::SetSavedSelectedQuestId(EQuestListFilter Filter, FName InQuestId)
+void UTunaSweeperQuestWidget::SetSavedSelectedQuestId(EQuestListFilter Filter, int32 InQuestId)
 {
 	switch (Filter)
 	{
@@ -1084,7 +1084,7 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	FTunaSweeperQuestDefinition QuestDefinition;
 	const bool bHasQuest =
 		QuestSubsystem &&
-		!QuestId.IsNone() &&
+		(QuestId > 0) &&
 		QuestSubsystem->TryGetQuestDefinition(QuestId, QuestDefinition);
 
 	if (DetailStack)
@@ -1199,7 +1199,7 @@ FText UTunaSweeperQuestWidget::GetQuestText(FName StringKey, const FText& Fallba
 	return FallbackText.IsEmpty() ? FText::FromString(StringKey.ToString()) : FallbackText;
 }
 
-FText UTunaSweeperQuestWidget::GetStateText(FName InQuestId) const
+FText UTunaSweeperQuestWidget::GetStateText(int32 InQuestId) const
 {
 	const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
@@ -1226,7 +1226,7 @@ FText UTunaSweeperQuestWidget::GetStateText(FName InQuestId) const
 	}
 }
 
-FText UTunaSweeperQuestWidget::GetPrimaryButtonText(FName InQuestId) const
+FText UTunaSweeperQuestWidget::GetPrimaryButtonText(int32 InQuestId) const
 {
 	const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
@@ -1270,7 +1270,7 @@ FText UTunaSweeperQuestWidget::GetEmptyListText() const
 
 FText UTunaSweeperQuestWidget::BuildObjectiveText(
 	const UTunaSweeperQuestSubsystem& QuestSubsystem,
-	FName InQuestId) const
+	int32 InQuestId) const
 {
 	TArray<FTunaSweeperObjectiveProgressView> ObjectiveProgress;
 	if (!QuestSubsystem.GetQuestObjectiveProgress(InQuestId, ObjectiveProgress) || ObjectiveProgress.Num() <= 0)
@@ -1293,7 +1293,7 @@ FText UTunaSweeperQuestWidget::BuildObjectiveText(
 
 FText UTunaSweeperQuestWidget::BuildRewardText(
 	const UTunaSweeperQuestSubsystem& QuestSubsystem,
-	FName InQuestId) const
+	int32 InQuestId) const
 {
 	FTunaSweeperQuestDefinition QuestDefinition;
 	if (!QuestSubsystem.TryGetQuestDefinition(InQuestId, QuestDefinition))
@@ -1367,7 +1367,7 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 		: GetQuestText(FName(TEXT("quest.ui.no_reward")));
 }
 
-bool UTunaSweeperQuestWidget::IsPrimaryButtonEnabled(FName InQuestId) const
+bool UTunaSweeperQuestWidget::IsPrimaryButtonEnabled(int32 InQuestId) const
 {
 	const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
