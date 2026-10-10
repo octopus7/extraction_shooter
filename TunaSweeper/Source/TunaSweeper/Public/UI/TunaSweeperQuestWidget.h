@@ -68,7 +68,7 @@ public:
 	UTunaSweeperQuestWidget(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	void InitializeQuest(int32 InQuestId);
+	void InitializeQuest(int32 InQuestId, FName InInteractionProviderId = NAME_None);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void RefreshQuestView();
@@ -96,6 +96,9 @@ protected:
 	void NormalizeActiveFilter();
 
 private:
+	friend class FTunaSweeperQuestSubmissionTest;
+	FName InteractionProviderId = NAME_None;
+
 	UFUNCTION()
 	void HandleAvailableTabClicked();
 

@@ -244,8 +244,9 @@ void UTunaSweeperQuestListEntryWidget::HandleEntryClicked()
 	}
 }
 
-void UTunaSweeperQuestWidget::InitializeQuest(int32 InQuestId)
+void UTunaSweeperQuestWidget::InitializeQuest(int32 InQuestId, FName InInteractionProviderId)
 {
+	InteractionProviderId = InInteractionProviderId;
 	ActiveFilter = GetDefaultFilter();
 	QuestId = InQuestId;
 
@@ -310,6 +311,7 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 
 void UTunaSweeperQuestWidget::ResetQuestSelection()
 {
+	InteractionProviderId = NAME_None;
 	QuestId = 0;
 	AvailableSelectedQuestId = 0;
 	InProgressSelectedQuestId = 0;
@@ -422,7 +424,7 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
 		: nullptr;
 	const int32 ActingQuestId = QuestId;
-	if (!QuestSubsystem || (ActingQuestId <= 0))
+	if (!QuestSubsystem || (ActingQuestId <= 0) || !IsPrimaryButtonEnabled(ActingQuestId))
 	{
 		return;
 	}
@@ -1377,6 +1379,9 @@ bool UTunaSweeperQuestWidget::IsPrimaryButtonEnabled(int32 InQuestId) const
 		return false;
 	}
 
-	return QuestSubsystem->CanAcceptQuest(InQuestId) ||
-		QuestSubsystem->GetQuestState(InQuestId) == ETunaSweeperQuestState::RewardAvailable;
+	if (QuestSubsystem->CanAcceptQuest(InQuestId)) return true;
+	const FTunaSweeperQuestDefinition* Definition = QuestSubsystem->FindQuestDefinition(InQuestId);
+	return Definition && !InteractionProviderId.IsNone() &&
+		Definition->ProviderId == InteractionProviderId &&
+		QuestSubsystem->CanClaimQuestReward(InQuestId);
 }

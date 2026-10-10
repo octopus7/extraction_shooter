@@ -104,7 +104,7 @@ public:
 	bool ShowDebugArmoryPanel();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
-	void ShowQuestPanel(int32 QuestId);
+	void ShowQuestPanel(int32 QuestId, FName InteractionProviderId = NAME_None);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowMenuQuestPanel(int32 QuestId = 0);

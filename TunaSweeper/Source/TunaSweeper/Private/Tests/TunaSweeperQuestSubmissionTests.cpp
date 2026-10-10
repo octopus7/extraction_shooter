@@ -13,6 +13,7 @@
 #include "Misc/ScopeExit.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
+#include "UI/TunaSweeperQuestWidget.h"
 
 namespace TunaSweeperQuestData
 {
@@ -94,6 +95,29 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Submission unlocks reward"), Quests->GetQuestState(Submitted), ETunaSweeperQuestState::RewardAvailable);
 	TestTrue(TEXT("Reward retry does not need another can"), Quests->TrySubmitItemsToProvider(TEXT("provider.mole"), Submitted, false));
 	TestEqual(TEXT("Retry consumes nothing"), Game->CountInventoryItemById(3004), 0);
+
+	// Reuse the achieved synthetic quest to exercise both UI entry paths without claiming rewards.
+	auto* Panel = CreateWidget<UTunaSweeperQuestWidget>(Game.Get());
+	if (!TestNotNull(TEXT("Quest panel"), Panel)) return false;
+	Panel->InitializeQuest(Submitted);
+	TestFalse(TEXT("Inventory entry cannot claim rewards"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->HandlePrimaryButtonClicked();
+	TestEqual(TEXT("Direct inventory click cannot bypass the disabled button"), Quests->GetQuestState(Submitted), ETunaSweeperQuestState::RewardAvailable);
+	Panel->InitializeQuest(Submitted, TEXT("provider.other"));
+	TestFalse(TEXT("Wrong NPC cannot claim rewards"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->HandlePrimaryButtonClicked();
+	TestEqual(TEXT("Wrong NPC click preserves progress"), Quests->GetQuestState(Submitted), ETunaSweeperQuestState::RewardAvailable);
+	Panel->InitializeQuest(Submitted, TEXT("provider.mole"));
+	TestTrue(TEXT("Assigned NPC enables reward claim"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->ResetQuestSelection();
+	TestFalse(TEXT("Closing clears NPC reward access"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->InitializeQuest(Submitted, TEXT("provider.mole"));
+	Panel->InitializeQuest(Submitted);
+	TestFalse(TEXT("Reopening from inventory clears old NPC access"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Quests->QuestDefinitions[Submitted].ProviderId = NAME_None;
+	Panel->InitializeQuest(Submitted, TEXT("provider.mole"));
+	TestFalse(TEXT("Unassigned quest is not claimable through any NPC"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->ResetQuestSelection();
 
 	// A different giver, target, item and count exercise the same production submission path.
 	Quests->QuestDefinitions.Reset();

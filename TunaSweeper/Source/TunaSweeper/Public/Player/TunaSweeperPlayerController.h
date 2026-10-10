@@ -138,7 +138,7 @@ public:
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	void OpenQuestPanel(int32 QuestId);
+	void OpenQuestPanel(int32 QuestId, FName InteractionProviderId = NAME_None);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
 	void OpenMemoPanel(int32 MemoId);

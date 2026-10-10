@@ -2308,7 +2308,7 @@ void ATunaSweeperPlayerController::DropWorkbenchOverflowItems(const TArray<FTuna
 	}
 }
 
-void ATunaSweeperPlayerController::OpenQuestPanel(int32 QuestId)
+void ATunaSweeperPlayerController::OpenQuestPanel(int32 QuestId, FName InteractionProviderId)
 {
 	if (!IsLocalController())
 	{
@@ -2321,7 +2321,7 @@ void ATunaSweeperPlayerController::OpenQuestPanel(int32 QuestId)
 		return;
 	}
 
-	GameHudWidget->ShowQuestPanel(QuestId);
+	GameHudWidget->ShowQuestPanel(QuestId, InteractionProviderId);
 	CancelPawnGameplayActions();
 	ApplyDefaultGameInputMode();
 	bShowMouseCursor = true;

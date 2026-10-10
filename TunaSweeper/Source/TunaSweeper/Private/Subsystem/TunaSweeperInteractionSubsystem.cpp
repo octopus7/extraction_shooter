@@ -799,17 +799,19 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 			int32 SubmittedQuest = 0;
 			if (Quests->TrySubmitItemsToProvider(ProviderId, SubmittedQuest))
 			{
-				if (Quests->CanClaimQuestReward(SubmittedQuest))
+				const FTunaSweeperQuestDefinition* Definition = Quests->FindQuestDefinition(SubmittedQuest);
+				if (Definition && !ProviderId.IsNone() && Definition->ProviderId == ProviderId &&
+					Quests->CanClaimQuestReward(SubmittedQuest))
 				{
 					if (Quests->ClaimQuestReward(SubmittedQuest))
 						TunaPlayerController->PlayQuestPresentation(SubmittedQuest, ETunaSweeperQuestPresentationTrigger::OnRewardClaim);
-					else TunaPlayerController->OpenQuestPanel(SubmittedQuest);
+					else TunaPlayerController->OpenQuestPanel(SubmittedQuest, ProviderId);
 				}
 				return true;
 			}
 			if (Quests->TryGetItemSubmissionQuestForProvider(ProviderId, SubmittedQuest))
 			{
-				TunaPlayerController->OpenQuestPanel(SubmittedQuest);
+				TunaPlayerController->OpenQuestPanel(SubmittedQuest, ProviderId);
 				return true;
 			}
 		}
@@ -826,7 +828,7 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		return false;
 	}
 
-	TunaPlayerController->OpenQuestPanel(ResolvedQuestId);
+	TunaPlayerController->OpenQuestPanel(ResolvedQuestId, ProviderId);
 	return true;
 }
 
