@@ -10927,3 +10927,9 @@
 - 구현: ATunaSweeperPowerFacilityActor와 /Game/Interaction/BP_PowerFacility 생성. 기존 전기 캐비닛 메시 및 반복형 P_PowerFacility_Sparks를 기본 할당했다. 수리 시 액터·메시·충돌을 유지하면서 효과를 즉시 종료한다. 퀘스트 목표, 이벤트, 재료 및 고유 저장 ID는 BP에서 설정하며 기본값에 데모 ID를 사용하지 않는다.
 - 저장: 기존 WorldProgressStates로 복원하고 저장 계약 및 Docs/power_facility.md 설정 안내를 추가했다. 퀘스트 데이터와 레이드 맵 배치는 변경하지 않았다.
 - 검증: UE 5.7 Development Editor 빌드 성공. 전력 시설 자동화 테스트 2종(BlueprintAsset, RepairAndRestore)이 실제 렌더러에서 통과했다. 수리 실패 시 효과 유지, 성공 시 실제 파티클 즉시 종료, 완료 상태 복원, 독립 시설 상태 및 BP 디스크 재로드를 검증했다. 코드 리뷰에서 추가 확정 이슈는 없었다. 일회성 생성기 제거 후 재빌드·재검증을 완료했다.
+
+## 2026-10-11 06:00:32 (소요시간: 00:02:35)
+
+- 요청: 뿡뿡 아이템에 약간 갈색인 구름 형태 아이콘 연결.
+- 처리: built-in imagegen의 native transparency로 생성, 원본 보관 및 256×256 알파 보존 축소. 프로젝트 UI 텍스처 임포트 경로로 T_UIIcon_Toot 생성 후 아이템 6006의 임시 아이콘 교체.
+- 검증: 생성·최종 PNG 시각 확인, 투명 모서리 알파 확인. 임포터는 애셋 저장 후 종료 중 코드 3을 반환했으나 별도 UE 프로세스 재로딩 검사에서 크기·UI 압축·알파·밉맵 비활성·아이템 참조 통과(종료 0). C++ 빌드 및 맵 편집 없음.

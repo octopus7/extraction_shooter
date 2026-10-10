@@ -615,7 +615,7 @@
     "shop_sell_price": 0,
     "experience_value": 0,
     "item_grade": "common",
-    "icon_file_name": "T_UIIcon_ValuablesCrate.uasset",
+    "icon_file_name": "T_UIIcon_Toot.uasset",
     "category_tag": "item.category.material",
     "max_stack_category_key": "stack.toot_toot",
     "weight_kg": 0
