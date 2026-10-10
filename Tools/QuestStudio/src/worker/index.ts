@@ -2,7 +2,7 @@ import { ValidationError, isRecord } from '../shared/validation';
 import { ApiError, json, readJson, requireSameOrigin } from './http';
 import { assertLoginAllowed, authenticateAdminSession, clearAdminSessionCookie, createAdminSession,
   isAdminAuthConfigured, isLocalRequest, LoginRateLimitError, recordLoginFailure, revokeAdminSession, verifyAdminPassword } from './auth';
-import { listSnapshots, loadSnapshot, saveSnapshot } from './snapshots';
+import { deleteSnapshot, listSnapshots, loadSnapshot, overwriteSnapshot, saveSnapshot } from './snapshots';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -36,6 +36,13 @@ export default {
         if (!await authenticateAdminSession(request, env)) throw new ApiError(401, 'api.unauthorized');
         if (path === '/api/snapshots' && method === 'GET') return json({ snapshots: await listSnapshots(env.DB) });
         if (path === '/api/snapshots' && method === 'POST') return json({ snapshot: await saveSnapshot(env.DB, await readJson(request)) }, 201);
+        const mutation = /^\/api\/snapshots\/([^/]+)\/(overwrite|delete)$/.exec(path);
+        if (mutation && method === 'POST') {
+          const body = await readJson(request);
+          if (mutation[2] === 'overwrite') return json({ snapshot: await overwriteSnapshot(env.DB, mutation[1]!, body) });
+          await deleteSnapshot(env.DB, mutation[1]!, body);
+          return json({ deleted: true });
+        }
         const match = /^\/api\/snapshots\/([^/]+)$/.exec(path);
         if (match && method === 'GET') return json(await loadSnapshot(env.DB, match[1]!));
       }

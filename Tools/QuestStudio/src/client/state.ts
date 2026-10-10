@@ -1,4 +1,4 @@
-import type { QuestNode, QuestPack } from '../shared/types';
+import type { QuestNode, QuestPack, SnapshotMetadata, SourceFileMetadata } from '../shared/types';
 import { getChapter, resolveQuestId, updatePrerequisites } from '../shared/graph';
 import { normalizeLoadedPack, validatePack, ValidationError } from '../shared/validation';
 import { arrangeChapterNodes } from '../shared/layout';
@@ -10,21 +10,23 @@ export interface EditorDocument {
   selectedQuestId: number | null;
   dirty: boolean;
   origin: string | null;
+  loadedSnapshot: SnapshotMetadata | null;
+  sourceFile: SourceFileMetadata | null;
 }
 
-export const emptyDocument = (): EditorDocument => ({ pack: null, chapter: '', selectedQuestId: null, dirty: false, origin: null });
+export const emptyDocument = (): EditorDocument => ({ pack: null, chapter: '', selectedQuestId: null, dirty: false, origin: null, loadedSnapshot: null, sourceFile: null });
 export function chapters(pack: QuestPack | null): string[] {
   return pack ? [...new Set(pack.nodes.map(getChapter))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })) : [];
 }
-export function loadDocument(value: unknown, origin: string | null = null): EditorDocument {
+export function loadDocument(value: unknown, origin: string | null = null, snapshot?: SnapshotMetadata): EditorDocument {
   const pack = normalizeLoadedPack(value);
   const chapter = chapters(pack)[0] ?? '';
-  return { pack, chapter, selectedQuestId: pack.nodes.find(node => getChapter(node) === chapter)?.definition.quest_id ?? null, dirty: false, origin };
+  return { pack, chapter, selectedQuestId: pack.nodes.find(node => getChapter(node) === chapter)?.definition.quest_id ?? null, dirty: false, origin, loadedSnapshot: snapshot ? structuredClone(snapshot) : null, sourceFile: snapshot?.sourceFile ? { ...snapshot.sourceFile } : null };
 }
-export function importDocument(text: string, origin: string | null = null): EditorDocument {
+export function importDocument(text: string, origin: string | null = null, sourceFile: SourceFileMetadata | null = null): EditorDocument {
   let value: unknown;
   try { value = JSON.parse(text); } catch { throw new ClientError('client.invalidJson'); }
-  return loadDocument(value, origin);
+  return { ...loadDocument(value, origin), sourceFile: sourceFile ? { ...sourceFile } : null };
 }
 export function exportDocument(document: EditorDocument): string {
   if (!document.pack) throw new ClientError('client.noDocument');
@@ -74,4 +76,11 @@ export function questText(pack: QuestPack | null, key: string): string {
 /** Handle owner is the dependent; dropped card is its prerequisite. */
 export function connectPrerequisite(document: EditorDocument, dependentId: number, prerequisiteId: number): EditorDocument {
   return addPrerequisite(selectQuest(document, dependentId), String(prerequisiteId));
+}
+
+export function markSnapshotSaved(document: EditorDocument, snapshot: SnapshotMetadata): EditorDocument {
+  return { ...document, dirty: false, origin: snapshot.alias, loadedSnapshot: structuredClone(snapshot), sourceFile: snapshot.sourceFile ? { ...snapshot.sourceFile } : null };
+}
+export function detachSnapshot(document: EditorDocument, id: string): EditorDocument {
+  return document.loadedSnapshot?.id === id ? { ...document, loadedSnapshot: null, dirty: true } : document;
 }

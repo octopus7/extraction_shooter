@@ -167,3 +167,75 @@ it('loads legacy string identities numerically without rewriting D1 snapshot JSO
   expect(await env.DB.prepare('SELECT node_json FROM quest_nodes WHERE snapshot_id = ?').bind(snapshot.id).first()).toEqual(before);
   expect(await env.DB.prepare('SELECT count(*) AS count FROM snapshots').first()).toEqual({ count: 1 });
 });
+
+describe('snapshot replacement and deletion', () => {
+  async function create(cookie: string) {
+    const response = await request('/api/snapshots', 'POST', { alias: 'keep alias', memo: 'keep memo', pack: pack(), sourceFile: { name: 'original.json', lastModified: 123 } }, cookie);
+    expect(response.status).toBe(201);
+    return (await response.json() as { snapshot: SnapshotMetadata }).snapshot;
+  }
+  it('replaces the complete pack in place and preserves identity with a new revision', async () => {
+    const cookie = await login(); const original = await create(cookie);
+    expect(original).toMatchObject({ revision: 1, updatedAt: original.createdAt, sourceFile: { name: 'original.json', lastModified: 123 } });
+    const replacement = { schemaVersion: 1, replacementOnly: true, nodes: [], strings: [] };
+    const response = await request(`/api/snapshots/${original.id}/overwrite`, 'POST', { pack: replacement, sourceFile: { name: 'replacement.json', lastModified: 456 }, expectedRevision: 1 }, cookie);
+    expect(response.status).toBe(200);
+    const { snapshot } = await response.json() as { snapshot: SnapshotMetadata };
+    expect(snapshot).toMatchObject({ id: original.id, alias: original.alias, memo: original.memo, createdAt: original.createdAt, revision: 2, nodeCount: 0, stringCount: 0, sourceFile: { name: 'replacement.json', lastModified: 456 } });
+    expect(Date.parse(snapshot.updatedAt)).toBeGreaterThanOrEqual(Date.parse(original.updatedAt));
+    expect(await (await request(`/api/snapshots/${original.id}`, 'GET', undefined, cookie)).json()).toEqual({ snapshot, pack: replacement });
+    for (const action of ['overwrite', 'delete']) {
+      const stale = await request(`/api/snapshots/${original.id}/${action}`, 'POST', { expectedRevision: 1, pack: pack(), sourceFile: null }, cookie);
+      expect(stale.status).toBe(409); expect(await stale.json()).toEqual({ error: { key: 'api.snapshot_conflict' } });
+    }
+    expect(await (await request(`/api/snapshots/${original.id}`, 'GET', undefined, cookie)).json()).toEqual({ snapshot, pack: replacement });
+  });
+  it('rolls back every replacement change when a child insertion fails', async () => {
+    const cookie = await login(); const snapshot = await create(cookie);
+    await env.DB.exec("CREATE TRIGGER fail_strings BEFORE INSERT ON localization_strings BEGIN SELECT RAISE(ABORT, 'injected write failure'); END;");
+    const replacement = pack(); replacement.extra = 'changed'; replacement.nodes[0]!.x = 999;
+    expect((await request(`/api/snapshots/${snapshot.id}/overwrite`, 'POST', { pack: replacement, sourceFile: null, expectedRevision: 1 }, cookie)).status).toBe(500);
+    expect(await (await request(`/api/snapshots/${snapshot.id}`, 'GET', undefined, cookie)).json()).toEqual({ snapshot, pack: pack() });
+  });
+  it('deletes all snapshot rows and reports missing targets', async () => {
+    const cookie = await login(); const snapshot = await create(cookie);
+    expect((await request(`/api/snapshots/${snapshot.id}/delete`, 'POST', { expectedRevision: 1 }, cookie)).status).toBe(200);
+    for (const table of ['snapshots', 'quest_nodes', 'localization_strings']) expect(await env.DB.prepare(`SELECT count(*) AS count FROM ${table}`).first()).toEqual({ count: 0 });
+    for (const action of ['delete', 'overwrite']) expect((await request(`/api/snapshots/${snapshot.id}/${action}`, 'POST', { expectedRevision: 1, pack: pack(), sourceFile: null }, cookie)).status).toBe(404);
+  });
+  it('guards both mutations by authentication, origin, revision and source metadata validation', async () => {
+    const cookie = await login(); const snapshot = await create(cookie);
+    for (const action of ['delete', 'overwrite']) {
+      const path = `/api/snapshots/${snapshot.id}/${action}`;
+      expect((await request(path, 'POST', {})).status).toBe(401);
+      expect((await request(path, 'POST', {}, cookie, { origin: 'https://foreign.test' })).status).toBe(403);
+      expect((await request(path, 'POST', { expectedRevision: 0, pack: pack(), sourceFile: null }, cookie)).status).toBe(422);
+    }
+    for (const sourceFile of [{ name: '', lastModified: 1 }, { name: 'a', lastModified: -1 }, { name: 'a', lastModified: 'bad' }]) expect((await request('/api/snapshots', 'POST', { alias: 'invalid', memo: '', pack: pack(), sourceFile }, cookie)).status).toBe(422);
+  });
+  it('defaults metadata for snapshots without file provenance', async () => {
+    const cookie = await login(); const response = await request('/api/snapshots', 'POST', { alias: 'legacy compatible', memo: '', pack: pack() }, cookie);
+    const { snapshot } = await response.json() as { snapshot: SnapshotMetadata };
+    expect(snapshot).toMatchObject({ sourceFile: null, revision: 1, updatedAt: snapshot.createdAt });
+  });
+});
+
+it('allows exactly one concurrent replacement per revision and keeps one complete winner', async () => {
+  const cookie = await login();
+  const { snapshot } = await (await request('/api/snapshots', 'POST', { alias: 'race', memo: '', pack: pack() }, cookie)).json() as { snapshot: SnapshotMetadata };
+  const first = pack(); first.extra = 'first'; first.nodes[0]!.x = 100;
+  const second = pack(); second.extra = 'second'; second.nodes[0]!.x = 200; second.strings[0]!.value = 'second';
+  const responses = await Promise.all([first, second].map(value => request(`/api/snapshots/${snapshot.id}/overwrite`, 'POST', { pack: value, sourceFile: null, expectedRevision: 1 }, cookie)));
+  expect(responses.map(response => response.status).sort()).toEqual([200, 409]);
+  const winner = responses[0]!.status === 200 ? first : second;
+  const loaded = await (await request(`/api/snapshots/${snapshot.id}`, 'GET', undefined, cookie)).json() as { snapshot: SnapshotMetadata; pack: QuestPack };
+  expect(loaded.pack).toEqual(winner); expect(loaded.snapshot.revision).toBe(2);
+});
+
+it('rolls back parent and child deletion when a child delete fails', async () => {
+  const cookie = await login();
+  const { snapshot } = await (await request('/api/snapshots', 'POST', { alias: 'delete rollback', memo: '', pack: pack() }, cookie)).json() as { snapshot: SnapshotMetadata };
+  await env.DB.exec("CREATE TRIGGER fail_strings BEFORE DELETE ON localization_strings BEGIN SELECT RAISE(ABORT, 'injected delete failure'); END;");
+  expect((await request(`/api/snapshots/${snapshot.id}/delete`, 'POST', { expectedRevision: 1 }, cookie)).status).toBe(500);
+  expect(await (await request(`/api/snapshots/${snapshot.id}`, 'GET', undefined, cookie)).json()).toEqual({ snapshot, pack: pack() });
+});

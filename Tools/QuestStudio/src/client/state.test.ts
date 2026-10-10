@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { addPrerequisite, connectPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
-import type { QuestPack } from '../shared/types';
+import { markSnapshotSaved, detachSnapshot, addPrerequisite, connectPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
+import type { QuestPack, SnapshotMetadata } from '../shared/types';
 
 // Synthetic exchange data: never copy an authoring dataset into public tests.
 function fixture(): QuestPack {
@@ -20,6 +20,28 @@ function fixture(): QuestPack {
 }
 
 describe('manual editor document', () => {
+  it('tracks snapshot identity and file provenance independently of display origin', () => {
+    const sourceFile = { name: 'source.json', lastModified: 1700000000000 };
+    const imported = importDocument(JSON.stringify(fixture()), sourceFile.name, sourceFile);
+    expect(imported.sourceFile).toEqual(sourceFile);
+    expect(imported.loadedSnapshot).toBeNull();
+    const snapshot: SnapshotMetadata = { id: 's1', alias: 'alias', memo: '', createdAt: '2026-10-10T00:00:00Z', updatedAt: '2026-10-10T00:00:00Z', revision: 1, nodeCount: 3, stringCount: 7, sourceFile };
+    const saved = markSnapshotSaved(imported, snapshot);
+    expect(saved.loadedSnapshot?.id).toBe('s1');
+    expect(saved.dirty).toBe(false);
+    const loaded = loadDocument(saved.pack, snapshot.alias, snapshot);
+    const moved = moveQuest(loaded, 1, 130, 140);
+    expect(moved.sourceFile).toEqual(sourceFile);
+    expect(moved.loadedSnapshot?.revision).toBe(1);
+    expect(detachSnapshot(moved, 'other')).toBe(moved);
+    const detached = detachSnapshot(moved, 's1');
+    expect(detached.pack).toBe(moved.pack);
+    expect(detached.dirty).toBe(true);
+    expect(detached.loadedSnapshot).toBeNull();
+    expect(detached.sourceFile).toEqual(sourceFile);
+    expect(importDocument(exportDocument(moved), 'other.json').loadedSnapshot).toBeNull();
+    expect(loadDocument(fixture()).sourceFile).toBeNull();
+  });
   it('connects the dropped card as prerequisite of the handle owner regardless of selection', () => {
     const original = selectQuest(loadDocument(fixture()), 1);
     const linked = connectPrerequisite(original, 2, 1);

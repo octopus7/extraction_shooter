@@ -5,7 +5,7 @@
   import { formatQuestId } from '../shared/graph';
   import { t } from '../shared/ui-strings';
   import { apiRequest, errorMessage } from './api';
-  import { addPrerequisite, connectPrerequisite, arrangeChapter, moveQuest, chapters, emptyDocument, exportDocument, importDocument, loadDocument, questText, removePrerequisite, selectChapter, selectedNode, selectQuest } from './state';
+  import { markSnapshotSaved, detachSnapshot, addPrerequisite, connectPrerequisite, arrangeChapter, moveQuest, chapters, emptyDocument, exportDocument, importDocument, loadDocument, questText, removePrerequisite, selectChapter, selectedNode, selectQuest } from './state';
   import Graph from './Graph.svelte';
 
   let document = $state(emptyDocument());
@@ -19,6 +19,8 @@
   let error = $state('');
   let notice = $state('');
   let dialog = $state<'save' | 'load' | 'login' | null>(null);
+  let deleteMode = $state(false);
+  let pendingSnapshot = $state<{ kind: 'overwrite' | 'delete'; snapshot: SnapshotMetadata } | null>(null);
   let pendingReplacement = $state<(() => Promise<void> | void) | null>(null);
   let alias = $state('');
   let memo = $state('');
@@ -55,7 +57,7 @@
     if (!file) return;
     // Parse and validate first; failed input cannot displace current work.
     await run(async () => {
-      const imported = importDocument(await file.text(), file.name);
+      const imported = importDocument(await file.text(), file.name, { name: file.name, lastModified: file.lastModified });
       askReplace(() => {
         document = imported; prerequisite = '';
         notice = t('file.imported', { count: imported.pack!.nodes.length });
@@ -101,7 +103,36 @@
     await run(async () => { await apiRequest('/api/logout', {}); authenticated = false; localMode = true; snapshots = []; });
   }
   function openSave() { alias = ''; memo = ''; dialog = 'save'; error = ''; }
-  function openLoad() { dialog = 'load'; listLoaded = false; void refreshSnapshots(); }
+  function openLoad() { dialog = 'load'; deleteMode = false; listLoaded = false; void refreshSnapshots(); }
+  function openOverwrite() {
+    if (!document.loadedSnapshot || busy) return;
+    error = ''; pendingSnapshot = { kind: 'overwrite', snapshot: document.loadedSnapshot };
+  }
+  function closeModal() {
+    if (busy) return;
+    if (pendingSnapshot) pendingSnapshot = null;
+    else if (pendingReplacement) pendingReplacement = null;
+    else dialog = null;
+    error = '';
+  }
+  async function confirmSnapshot() {
+    if (!pendingSnapshot || busy) return;
+    const operation = pendingSnapshot;
+    await run(async () => {
+      const path = `/api/snapshots/${encodeURIComponent(operation.snapshot.id)}`;
+      if (operation.kind === 'overwrite') {
+        const result = await apiRequest<{ snapshot: SnapshotMetadata }>(`${path}/overwrite`, { pack: document.pack, sourceFile: document.sourceFile, expectedRevision: operation.snapshot.revision });
+        document = markSnapshotSaved(document, result.snapshot);
+        notice = t('snapshot.overwritten');
+      } else {
+        await apiRequest(`${path}/delete`, { expectedRevision: operation.snapshot.revision });
+        document = detachSnapshot(document, operation.snapshot.id);
+        snapshots = snapshots.filter(item => item.id !== operation.snapshot.id);
+        notice = t('snapshot.deleted');
+      }
+      pendingSnapshot = null;
+    });
+  }
   async function refreshSnapshots() {
     await run(async () => {
       snapshots = (await apiRequest<{ snapshots: SnapshotMetadata[] }>('/api/snapshots')).snapshots;
@@ -111,15 +142,15 @@
   async function saveSnapshot(event: SubmitEvent) {
     event.preventDefault();
     await run(async () => {
-      const result = await apiRequest<{ snapshot: SnapshotMetadata }>('/api/snapshots', { alias: alias.trim(), memo: memo.trim(), pack: document.pack });
-      document = { ...document, dirty: false, origin: result.snapshot.alias };
+      const result = await apiRequest<{ snapshot: SnapshotMetadata }>('/api/snapshots', { alias: alias.trim(), memo: memo.trim(), pack: document.pack, sourceFile: document.sourceFile });
+      document = markSnapshotSaved(document, result.snapshot);
       dialog = null; notice = t('snapshot.saved');
     });
   }
   function loadSnapshot(id: string) {
     askReplace(async () => {
       const result = await apiRequest<{ snapshot: SnapshotMetadata; pack: QuestPack }>(`/api/snapshots/${encodeURIComponent(id)}`);
-      const next = loadDocument(result.pack, result.snapshot.alias);
+      const next = loadDocument(result.pack, result.snapshot.alias, result.snapshot);
       document = next; prerequisite = ''; dialog = null; notice = t('snapshot.loaded');
     });
   }
@@ -127,8 +158,9 @@
     const task = pendingReplacement; pendingReplacement = null;
     if (task) void run(task);
   }
-  function dateLabel(value: string) {
-    return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+  function dateLabel(value: string | number) {
+    if (!Number.isFinite(new Date(value).getTime())) return t('snapshot.unknown');
+    return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(value));
   }
   function detailKeys(value: unknown): string[] {
     return typeof value === 'string' ? [value] : Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -149,7 +181,7 @@
   }
 </script>
 
-<svelte:window onkeydown={(event) => { if (event.key === 'Escape' && !busy) { dialog = null; pendingReplacement = null; } }} />
+<svelte:window onkeydown={(event) => { if (event.key === 'Escape') closeModal(); }} />
 <input class="hidden" type="file" accept=".json,application/json" bind:this={fileInput} onchange={importFile} aria-label={t('file.choose')} />
 
 <div class="app-shell">
@@ -169,7 +201,7 @@
       <div class="login-divider"></div><button class="secondary wide" onclick={() => { localMode = true; error = ''; }}>{t('auth.localMode')}</button><p class="microcopy">{t('auth.localHint')}</p>
     </section></main>
   {:else}
-    <div class="workspace-toolbar"><div class="document-identity"><strong>{document.origin ?? t('document.untitled')}</strong><span class:dirty={document.dirty}><i></i>{document.dirty ? t('document.changed') : t('document.clean')}</span></div><div class="toolbar-actions"><button class="secondary" onclick={() => fileInput.click()} disabled={busy}>{t('file.import')}</button><button class="secondary" onclick={exportFile} disabled={!document.pack || busy}>{t('file.export')}</button><span class="toolbar-divider"></span><button class="secondary" onclick={openLoad} disabled={!authenticated || busy}>{t('snapshot.load')}</button><button class="primary" onclick={openSave} disabled={!authenticated || !document.pack || busy}>{t('snapshot.save')}</button></div></div>
+    <div class="workspace-toolbar"><div class="document-identity"><strong>{document.origin ?? t('document.untitled')}</strong><span class:dirty={document.dirty}><i></i>{document.dirty ? t('document.changed') : t('document.clean')}</span></div><div class="toolbar-actions"><button class="secondary" onclick={() => fileInput.click()} disabled={busy}>{t('file.import')}</button><button class="secondary" onclick={exportFile} disabled={!document.pack || busy}>{t('file.export')}</button><span class="toolbar-divider"></span><button class="secondary" onclick={openLoad} disabled={!authenticated || busy}>{t('snapshot.load')}</button>{#if document.loadedSnapshot}<button class="secondary" onclick={openOverwrite} disabled={!authenticated || busy}>{t('snapshot.overwrite')}</button>{/if}<button class="primary" onclick={openSave} disabled={!authenticated || !document.pack || busy}>{t('snapshot.save')}</button></div></div>
 
     {#if document.pack}
       <main class="editor-layout"><section class="canvas-section"><div class="canvas-heading"><div class="chapter-control"><label for="chapter-select">{t('chapter.label')}</label><select id="chapter-select" value={document.chapter} onchange={(event) => changeChapter(event.currentTarget.value)} disabled={busy}>{#each chapterList as chapter}<option value={chapter}>{t('chapter.name', { chapter })}</option>{/each}</select><span>{t('chapter.count', { count: visibleCount })}</span></div><span class="total-count">{t('document.total', { nodes: document.pack.nodes.length, strings: document.pack.strings.length })}</span></div>
@@ -194,13 +226,60 @@
   {/if}
 </div>
 
-{#if dialog || pendingReplacement}
-  <div class="modal-backdrop"><div class="modal" class:snapshot-modal={dialog === 'load' && !pendingReplacement} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" use:modalFocus>
-    <div class="modal-top"><span class="eyebrow">{t('app.title')}</span><button class="icon-button" aria-label={t('common.close')} disabled={busy} onclick={() => { dialog = null; pendingReplacement = null; }}>×</button></div>
-    {#if pendingReplacement}<h2 id="modal-title">{t('document.replaceTitle')}</h2><p>{t('document.replaceDescription')}</p><div class="modal-actions"><button class="secondary" onclick={() => pendingReplacement = null}>{t('common.cancel')}</button><button class="primary" onclick={acceptReplacement}>{t('document.replace')}</button></div>
-    {:else if dialog === 'save'}<h2 id="modal-title">{t('snapshot.saveTitle')}</h2><p>{t('snapshot.saveDescription')}</p><form onsubmit={saveSnapshot}><label for="snapshot-alias">{t('snapshot.alias')}</label><input id="snapshot-alias" bind:value={alias} placeholder={t('snapshot.aliasPlaceholder')} required maxlength="120" disabled={busy} /><label for="snapshot-memo">{t('snapshot.memo')}</label><textarea id="snapshot-memo" bind:value={memo} placeholder={t('snapshot.memoPlaceholder')} rows="3" maxlength="2000" disabled={busy}></textarea><div class="modal-actions"><button class="secondary" type="button" onclick={() => dialog = null} disabled={busy}>{t('common.cancel')}</button><button class="primary" type="submit" disabled={busy || !alias.trim()}>{busy ? t('common.working') : t('snapshot.save')}</button></div></form>
-    {:else if dialog === 'load'}<h2 id="modal-title">{t('snapshot.loadTitle')}</h2><p>{t('snapshot.loadDescription')}</p><div class="snapshot-list">{#each snapshots as snapshot (snapshot.id)}<button class="snapshot-row" onclick={() => loadSnapshot(snapshot.id)} disabled={busy} aria-label={t('snapshot.pick', { alias: snapshot.alias })}><span class="snapshot-row-top"><strong>{snapshot.alias}</strong><time datetime={snapshot.createdAt}>{dateLabel(snapshot.createdAt)}</time></span>{#if snapshot.memo}<span class="snapshot-memo">{snapshot.memo}</span>{/if}<span class="snapshot-count">{t('snapshot.count', { nodes: snapshot.nodeCount, strings: snapshot.stringCount })}</span></button>{:else}<p class="list-empty">{busy ? t('common.working') : listLoaded ? t('snapshot.empty') : ''}</p>{/each}</div><div class="modal-actions"><button class="secondary" onclick={refreshSnapshots} disabled={busy}>{t('snapshot.refresh')}</button><button class="secondary" onclick={() => dialog = null} disabled={busy}>{t('common.close')}</button></div>
-    {:else if dialog === 'login'}<h2 id="modal-title">{t('auth.heading')}</h2><p>{t('auth.description')}</p><form onsubmit={login}><label for="modal-password">{t('auth.password')}</label><input id="modal-password" type="password" autocomplete="current-password" bind:value={password} required disabled={busy} /><div class="modal-actions"><button class="secondary" type="button" onclick={() => dialog = null} disabled={busy}>{t('common.cancel')}</button><button class="primary" type="submit" disabled={busy}>{busy ? t('common.working') : t('auth.login')}</button></div></form>{/if}
-    {#if error}<p class="modal-error" role="alert">{error}</p>{/if}
-  </div></div>
+{#snippet provenance(sourceFile: SnapshotMetadata['sourceFile'])}
+  <dl class="snapshot-provenance">
+    <div><dt>{t('snapshot.sourceFile')}</dt><dd>{sourceFile?.name ?? t('snapshot.unknown')}</dd></div>
+    <div><dt>{t('snapshot.sourceModified')}</dt><dd>{sourceFile ? dateLabel(sourceFile.lastModified) : t('snapshot.unknown')}</dd></div>
+  </dl>
+{/snippet}
+
+{#snippet snapshotDates(snapshot: SnapshotMetadata)}
+  <dl class="snapshot-provenance">
+    <div><dt>{t('snapshot.createdAt')}</dt><dd><time datetime={snapshot.createdAt}>{dateLabel(snapshot.createdAt)}</time></dd></div>
+    <div><dt>{t('snapshot.updatedAt')}</dt><dd><time datetime={snapshot.updatedAt}>{dateLabel(snapshot.updatedAt)}</time></dd></div>
+  </dl>
+{/snippet}
+
+{#if dialog || pendingReplacement || pendingSnapshot}
+  <div class="modal-backdrop">
+    {#key pendingSnapshot?.kind ?? (pendingReplacement ? 'replace' : dialog)}
+    <div class="modal" class:snapshot-modal={dialog === 'load' && !pendingReplacement && !pendingSnapshot} role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" use:modalFocus>
+      <div class="modal-top"><span class="eyebrow">{t('app.title')}</span><button class="icon-button" aria-label={t('common.close')} disabled={busy} onclick={closeModal}>×</button></div>
+      {#if pendingSnapshot}
+        <h2 id="modal-title">{t(pendingSnapshot.kind === 'overwrite' ? 'snapshot.overwriteTitle' : 'snapshot.deleteTitle')}</h2>
+        <p>{t(pendingSnapshot.kind === 'overwrite' ? 'snapshot.overwriteDescription' : 'snapshot.deleteDescription', { alias: pendingSnapshot.snapshot.alias })}</p>
+        <div class="snapshot-details"><strong>{pendingSnapshot.snapshot.alias}</strong>
+          {#if pendingSnapshot.snapshot.memo}<p class="snapshot-memo">{pendingSnapshot.snapshot.memo}</p>{/if}
+          {@render provenance(pendingSnapshot.kind === 'overwrite' ? document.sourceFile : pendingSnapshot.snapshot.sourceFile)}
+          {@render snapshotDates(pendingSnapshot.snapshot)}
+        </div>
+        <div class="modal-actions"><button class="secondary" onclick={closeModal} disabled={busy}>{t('common.cancel')}</button><button class:danger={pendingSnapshot.kind === 'delete'} class="primary" onclick={confirmSnapshot} disabled={busy}>{busy ? t('common.working') : t(pendingSnapshot.kind === 'overwrite' ? 'snapshot.overwrite' : 'snapshot.delete')}</button></div>
+      {:else if pendingReplacement}
+        <h2 id="modal-title">{t('document.replaceTitle')}</h2><p>{t('document.replaceDescription')}</p><div class="modal-actions"><button class="secondary" onclick={closeModal} disabled={busy}>{t('common.cancel')}</button><button class="primary" onclick={acceptReplacement} disabled={busy}>{t('document.replace')}</button></div>
+      {:else if dialog === 'save'}
+        <h2 id="modal-title">{t('snapshot.saveTitle')}</h2><p>{t('snapshot.saveDescription')}</p>
+        <div class="snapshot-details">{@render provenance(document.sourceFile)}</div>
+        <form onsubmit={saveSnapshot}><label for="snapshot-alias">{t('snapshot.alias')}</label><input id="snapshot-alias" bind:value={alias} placeholder={t('snapshot.aliasPlaceholder')} required maxlength="120" disabled={busy} /><label for="snapshot-memo">{t('snapshot.memo')}</label><textarea id="snapshot-memo" bind:value={memo} placeholder={t('snapshot.memoPlaceholder')} rows="3" maxlength="2000" disabled={busy}></textarea><div class="modal-actions"><button class="secondary" type="button" onclick={closeModal} disabled={busy}>{t('common.cancel')}</button><button class="primary" type="submit" disabled={busy || !alias.trim()}>{busy ? t('common.working') : t('snapshot.save')}</button></div></form>
+      {:else if dialog === 'load'}
+        <h2 id="modal-title">{t('snapshot.loadTitle')}</h2><p>{t(deleteMode ? 'snapshot.deleteModeDescription' : 'snapshot.loadDescription')}</p>
+        <div class="snapshot-list-tools"><button class="secondary" class:delete-mode={deleteMode} aria-pressed={deleteMode} onclick={() => { deleteMode = !deleteMode; error = ''; }} disabled={busy}>{t(deleteMode ? 'snapshot.finishDelete' : 'snapshot.deleteMode')}</button></div>
+        <div class="snapshot-list">
+          {#each snapshots as snapshot (snapshot.id)}
+            <div class="snapshot-row" class:delete-mode={deleteMode}>
+              <div class="snapshot-row-top"><strong>{snapshot.alias}</strong><button class="secondary" class:danger={deleteMode} onclick={() => { if (deleteMode) { error = ''; pendingSnapshot = { kind: 'delete', snapshot }; } else loadSnapshot(snapshot.id); }} disabled={busy} aria-label={t(deleteMode ? 'snapshot.deletePick' : 'snapshot.pick', { alias: snapshot.alias })}>{t(deleteMode ? 'snapshot.delete' : 'snapshot.load')}</button></div>
+              {#if snapshot.memo}<p class="snapshot-memo">{snapshot.memo}</p>{/if}
+              {@render provenance(snapshot.sourceFile)}
+              {@render snapshotDates(snapshot)}
+              <span class="snapshot-count">{t('snapshot.count', { nodes: snapshot.nodeCount, strings: snapshot.stringCount })}</span>
+            </div>
+          {:else}<p class="list-empty">{busy ? t('common.working') : listLoaded ? t('snapshot.empty') : ''}</p>{/each}
+        </div>
+        <div class="modal-actions"><button class="secondary" onclick={refreshSnapshots} disabled={busy}>{t('snapshot.refresh')}</button><button class="secondary" onclick={closeModal} disabled={busy}>{t('common.close')}</button></div>
+      {:else if dialog === 'login'}
+        <h2 id="modal-title">{t('auth.heading')}</h2><p>{t('auth.description')}</p><form onsubmit={login}><label for="modal-password">{t('auth.password')}</label><input id="modal-password" type="password" autocomplete="current-password" bind:value={password} required disabled={busy} /><div class="modal-actions"><button class="secondary" type="button" onclick={closeModal} disabled={busy}>{t('common.cancel')}</button><button class="primary" type="submit" disabled={busy}>{busy ? t('common.working') : t('auth.login')}</button></div></form>
+      {/if}
+      {#if error}<p class="modal-error" role="alert">{error}</p>{/if}
+    </div>
+    {/key}
+  </div>
 {/if}

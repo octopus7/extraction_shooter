@@ -19,7 +19,8 @@ export interface QuestNode {
 }
 export interface LocalizationEntry { key: string; locale: string; value: string; [key: string]: unknown }
 export interface QuestPack { schemaVersion: 1; nodes: QuestNode[]; strings: LocalizationEntry[]; [key: string]: unknown }
-export interface SnapshotMetadata { id: string; alias: string; memo: string; createdAt: string; nodeCount: number; stringCount: number }
+export interface SourceFileMetadata { name: string; lastModified: number }
+export interface SnapshotMetadata { id: string; alias: string; memo: string; createdAt: string; updatedAt: string; revision: number; sourceFile: SourceFileMetadata | null; nodeCount: number; stringCount: number }
 export interface GraphProjection {
   nodes: { id: number; questId: number; x: number; y: number; external: boolean; titleKey: string }[];
   edges: { source: number; target: number }[];
