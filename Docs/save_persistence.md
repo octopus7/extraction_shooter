@@ -295,6 +295,12 @@ Game-owned raid actor catalogs preserve each converted source actor's exact `FNa
 
 Directly placed `ATunaSweeperBlockedIntakeScreenActor` instances also use `WorldProgressStates`. The `BP_WaterIntake` facility keeps both its pump/control-panel mesh and screen mesh visible, while the separate `DebrisMesh` using `/Game/Meshes/Props/WaterIntake/SM_ScreenDebris` is the only visual toggled by clearing. The native component has no hard-coded debris asset so the BP owns that presentation assignment. Clearing debris writes `Completed` under `ProgressObjectId`; repairing the valve writes a second `Completed` entry under `ValveProgressObjectId`. Load restores both states, and death saves preserve this long-term world progress while clearing only carried raid possessions. Every placed facility must keep stable, unique screen and valve object ids.
 
+### Power facility repair
+
+`ATunaSweeperPowerFacilityActor` (`/Game/Interaction/BP_PowerFacility`) uses the existing `WorldProgressStates` container. Each future placement must receive an explicit, stable, unique `ProgressObjectId`; an unset ID blocks repair and does not create a save entry. The reusable BP intentionally leaves that ID unset. `InfoId` is `world_progress.power_facility`, with quantity 0/1 while broken and `Completed`, quantity 1/1 after repair. No schema or save-version change is required.
+
+The original facility actor, mesh and collision remain after completion. Its looping fault sparks stop immediately, and BeginPlay restores that presentation before activating the effect. World-progress notifications refresh existing instances as well. Quest eligibility and item requirements control repair availability, independently of whether a broken facility emits sparks. Editor repaired-state preview is transient and never writes save state. This asset creation task adds no map placement or quest dataset entry; see [power facility configuration](power_facility.md).
+
 ### Bunker Housing Facilities
 
 Placed/stored facilities are saved through `UTunaSweeperSaveGame::HousingFacilities`.
