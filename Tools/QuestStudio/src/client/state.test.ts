@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addPrerequisite, exportDocument, importDocument, loadDocument, removePrerequisite, selectChapter, selectQuest } from './state';
+import { addPrerequisite, arrangeChapter, exportDocument, importDocument, loadDocument, moveQuest, removePrerequisite, selectChapter, selectQuest } from './state';
 import type { QuestPack } from '../shared/types';
 
 // Synthetic exchange data: never copy an authoring dataset into public tests.
@@ -20,6 +20,43 @@ function fixture(): QuestPack {
 }
 
 describe('manual editor document', () => {
+  it('moves only the addressed local card and preserves coordinates through editing and full exchange', () => {
+    const original = loadDocument(fixture());
+    const moved = moveQuest(original, '2', -25.5, 0);
+    expect(moved.dirty).toBe(true);
+    expect(moved.pack!.nodes[1]).toEqual({ ...original.pack!.nodes[1], x: -25.5, y: 0 });
+    expect(moved.pack!.nodes[0]).toBe(original.pack!.nodes[0]);
+    expect(moved.pack!.nodes[2]).toBe(original.pack!.nodes[2]);
+    expect(original.pack!.nodes[1]!.x).toBe(450);
+    const linked = addPrerequisite(selectQuest(moved, '2'), '1');
+    const unlinked = removePrerequisite(linked, '1');
+    const reloaded = importDocument(exportDocument(selectChapter(unlinked, '2')));
+    expect(reloaded.pack!.nodes[1]!.x).toBe(-25.5);
+    expect(reloaded.pack!.nodes[1]!.y).toBe(0);
+    expect(reloaded.pack!.strings).toEqual(original.pack!.strings);
+  });
+
+  it('keeps no-op moves clean and rejects non-finite or external card moves', () => {
+    const original = loadDocument(fixture());
+    expect(moveQuest(original, '1', 100, 100)).toBe(original);
+    expect(original.dirty).toBe(false);
+    for (const coordinate of [NaN, Infinity, -Infinity]) {
+      expect(() => moveQuest(original, '1', coordinate, 0)).toThrow('validation.position');
+      expect(() => moveQuest(original, '1', 0, coordinate)).toThrow('validation.position');
+    }
+    expect(() => moveQuest(original, '21', 0, 0)).toThrow('client.externalReadOnly');
+    expect(() => moveQuest(original, '999', 0, 0)).toThrow('client.noSelection');
+  });
+
+  it('arranges only the active chapter on explicit request and keeps a repeated arrangement clean', () => {
+    const original = loadDocument(fixture());
+    const arranged = arrangeChapter(original);
+    expect(arranged.dirty).toBe(true);
+    expect(arranged.pack!.nodes[2]).toBe(original.pack!.nodes[2]);
+    expect(arranged.pack!.strings).toBe(original.pack!.strings);
+    const saved = { ...arranged, dirty: false };
+    expect(arrangeChapter(saved)).toBe(saved);
+  });
   it('switches chapters without narrowing the exported full pack or its unknown fields and locales', () => {
     const imported = importDocument(JSON.stringify(fixture()), 'synthetic.json');
     const switched = selectChapter(imported, '2');

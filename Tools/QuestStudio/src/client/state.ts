@@ -1,6 +1,7 @@
 import type { QuestNode, QuestPack } from '../shared/types';
 import { getChapter, resolveQuestId, updatePrerequisites } from '../shared/graph';
-import { validatePack } from '../shared/validation';
+import { validatePack, ValidationError } from '../shared/validation';
+import { arrangeChapterNodes } from '../shared/layout';
 import { ClientError } from './api';
 
 export interface EditorDocument {
@@ -37,6 +38,19 @@ export function selectQuest(document: EditorDocument, questId: string): EditorDo
 }
 export function selectedNode(document: EditorDocument): QuestNode | undefined {
   return document.pack?.nodes.find(node => node.definition.quest_id === document.selectedQuestId);
+}
+export function moveQuest(document: EditorDocument, questId: string, x: number, y: number): EditorDocument {
+  const node = document.pack?.nodes.find(candidate => candidate.definition.quest_id === questId);
+  if (!document.pack || !node) throw new ClientError('client.noSelection');
+  if (getChapter(node) !== document.chapter) throw new ClientError('client.externalReadOnly');
+  if (!Number.isFinite(x) || !Number.isFinite(y)) throw new ValidationError('validation.position', { questId });
+  if (node.x === x && node.y === y) return document;
+  return { ...document, dirty: true, pack: { ...document.pack, nodes: document.pack.nodes.map(candidate => candidate === node ? { ...node, x, y } : candidate) } };
+}
+export function arrangeChapter(document: EditorDocument): EditorDocument {
+  if (!document.pack) throw new ClientError('client.noDocument');
+  const pack = arrangeChapterNodes(document.pack, document.chapter);
+  return pack === document.pack ? document : { ...document, pack, dirty: true };
 }
 function editableNode(document: EditorDocument): QuestNode {
   const node = selectedNode(document);
