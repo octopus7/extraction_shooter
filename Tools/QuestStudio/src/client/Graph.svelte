@@ -3,11 +3,21 @@
   import { t } from '../shared/ui-strings';
   import type { QuestPack } from '../shared/types';
   import { formatQuestId, GRAPH_CARD_HEIGHT, GRAPH_CARD_WIDTH, projectChapter } from '../shared/graph';
+  import { cardSize, edgeCurve } from '../shared/graph-geometry';
+  import { downloadPrintGraph } from './print-graph';
   import { snapPosition } from './snap';
   import { questText } from './state';
 
   let { pack, chapter, selectedId, onselect, onmove, onconnect, onarrange, disabled = false, snapEnabled = $bindable(true) }: { pack: QuestPack; chapter: string; selectedId: number | null; onselect: (id: number) => void; onmove: (id: number, x: number, y: number) => void; onconnect: (dependentId: number, prerequisiteId: number) => void; onarrange: () => void; disabled?: boolean; snapEnabled?: boolean } = $props();
   const projection = $derived(projectChapter(pack, chapter));
+  let printing = $state(false);
+  let printError = $state('');
+  async function printGraph() {
+    printing = true; printError = '';
+    try { await downloadPrintGraph(pack, chapter); }
+    catch { printError = t('graph.printFailed'); }
+    finally { printing = false; }
+  }
   let viewport: HTMLDivElement;
   let scale = $state(1);
   let offset = $state({ x: 40, y: 40 });
@@ -25,8 +35,8 @@
     if (linkDrag || nodeDrag || !viewport || !projection.nodes.length) return;
     const minX = Math.min(...projection.nodes.map(node => node.x));
     const minY = Math.min(...projection.nodes.map(node => node.y));
-    const width = Math.max(...projection.nodes.map(node => node.x)) + cardWidth - minX;
-    const height = Math.max(...projection.nodes.map(node => node.y)) + cardHeight - minY;
+    const width = Math.max(...projection.nodes.map(node => node.x + cardSize(node).width)) - minX;
+    const height = Math.max(...projection.nodes.map(node => node.y + cardSize(node).height)) - minY;
     const next = Math.min(1, Math.max(0.2, Math.min((viewport.clientWidth - 100) / width, (viewport.clientHeight - 100) / height)));
     scale = next;
     offset = { x: (viewport.clientWidth - width * next) / 2 - minX * next, y: (viewport.clientHeight - height * next) / 2 - minY * next };
@@ -103,12 +113,8 @@
     const a = positioned.get(source);
     const b = positioned.get(target);
     if (!a || !b) return '';
-    const x1 = a.x + cardWidth;
-    const y1 = a.y + cardHeight / 2;
-    const x2 = b.x;
-    const y2 = b.y + cardHeight / 2;
-    const bend = Math.max(60, Math.abs(x2 - x1) / 2);
-    return `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+    const c = edgeCurve(a, b);
+    return `M ${c.x1} ${c.y1} C ${c.c1} ${c.y1}, ${c.c2} ${c.y2}, ${c.x2} ${c.y2}`;
   }
   onMount(fit);
 </script>
@@ -133,7 +139,7 @@
       {#each renderedNodes as node (node.id)}
         {@const definition = pack.nodes.find(item => item.definition.quest_id === node.questId)}
         {@const noPrerequisites = !node.external && node.questId !== 1 && definition?.definition.required_completed_quest_ids.length === 0}
-        <button data-quest-id={node.questId} class:link-target={linkDrag?.target === node.questId} class="quest-card" class:moving={nodeDrag?.id === node.id && nodeDrag.moved} class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardWidth}px`} style:height={`${cardHeight}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onpointerdown={(event) => startNode(event, node.id, node.x, node.y, node.external)} title={node.external ? t('graph.legendExternal') : t('graph.moveHint')} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: formatQuestId(node.questId) })} aria-pressed={selectedId === node.questId}>
+        <button data-quest-id={node.questId} class:link-target={linkDrag?.target === node.questId} class="quest-card" class:moving={nodeDrag?.id === node.id && nodeDrag.moved} class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardSize(node).width}px`} style:height={`${cardSize(node).height}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onpointerdown={(event) => startNode(event, node.id, node.x, node.y, node.external)} title={node.external ? t('graph.legendExternal') : t('graph.moveHint')} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: formatQuestId(node.questId) })} aria-pressed={selectedId === node.questId}>
           <span class="card-top"><span class="quest-id">{formatQuestId(node.questId)}</span><span class="node-dot"></span></span>
           <strong>{questText(pack, node.titleKey)}</strong>
           {#if node.external}<span class="card-bottom">{t('graph.legendExternal')}</span>{:else if noPrerequisites}<span class="card-bottom">{t('graph.noPrerequisites')}</span>{/if}
@@ -145,6 +151,7 @@
     </div>
     {#if !projection.nodes.length}<p class="graph-no-nodes">{t('graph.noNodes')}</p>{/if}
   </div>
+  {#if printError}<p role="alert">{printError}</p>{/if}
   <div class="graph-legend"><span><i class="legend-dot local"></i>{t('graph.legendLocal')}</span><span><i class="legend-dot external"></i>{t('graph.legendExternal')}</span><span><i class="legend-dot no-prerequisites"></i>{t('graph.noPrerequisites')}</span></div>
-  <div class="graph-bottom"><span class="graph-hint">{t('graph.hint')}</span><div class="zoom-controls"><label class="snap-toggle" title={t('graph.snapHelp')}><input type="checkbox" bind:checked={snapEnabled} disabled={!!nodeDrag || !!linkDrag} />{t('graph.snapMode')}</label><button class="fit-button" disabled={disabled || !!nodeDrag || !!linkDrag} onclick={arrange}>{t('graph.arrange')}</button><button aria-label={t('graph.zoomOut')} title={t('graph.zoomOut')} onclick={() => zoom(1 / 1.2)}>−</button><span>{t('graph.zoom', { percent: Math.round(scale * 100) })}</span><button aria-label={t('graph.zoomIn')} title={t('graph.zoomIn')} onclick={() => zoom(1.2)}>+</button><button class="fit-button" onclick={fit}>{t('graph.fit')}</button></div></div>
+  <div class="graph-bottom"><span class="graph-hint">{t('graph.hint')}</span><div class="zoom-controls"><button class="fit-button" disabled={printing || !!nodeDrag || !!linkDrag || !projection.nodes.length} onclick={printGraph}>{t(printing ? 'common.working' : 'graph.print')}</button><label class="snap-toggle" title={t('graph.snapHelp')}><input type="checkbox" bind:checked={snapEnabled} disabled={!!nodeDrag || !!linkDrag} />{t('graph.snapMode')}</label><button class="fit-button" disabled={disabled || !!nodeDrag || !!linkDrag} onclick={arrange}>{t('graph.arrange')}</button><button aria-label={t('graph.zoomOut')} title={t('graph.zoomOut')} onclick={() => zoom(1 / 1.2)}>−</button><span>{t('graph.zoom', { percent: Math.round(scale * 100) })}</span><button aria-label={t('graph.zoomIn')} title={t('graph.zoomIn')} onclick={() => zoom(1.2)}>+</button><button class="fit-button" onclick={fit}>{t('graph.fit')}</button></div></div>
 </div>
