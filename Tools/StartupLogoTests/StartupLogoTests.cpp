@@ -14,6 +14,13 @@ int main()
 	Check(!ShouldShow(false, false, true, true), "Enabled daily limit skips today's logo");
 	Check(ShouldShow(false, false, true, false), "Enabled daily limit plays on a new day");
 	FFlow Flow;
+	Check(IsDailySkip(false, false, true, true), "Fresh Main session skips today's logo");
+	Check(!IsDailySkip(true, false, true, true), "Demo is not a daily skip");
+	Check(!IsDailySkip(false, true, true, true), "Title revisit is not a daily skip");
+	Check(!IsDailySkip(false, false, false, true), "Disabled limit is not a daily skip");
+	Check(!IsDailySkip(false, false, true, false), "New day is not a daily skip");
+	Check(TitleEntryFadeSeconds(true) == 1.2f, "Daily skip fades title in over 1.2 seconds");
+	Check(TitleEntryFadeSeconds(false) == 0.5f, "Other title entries retain 0.5 seconds");
 	Check(Flow.FadeSeconds == 0.25f && Flow.StillSeconds == 1.0f, "Logo uses quarter-second fades and one-second hold");
 	Check(Flow.BlackOpacity == 1.0f && Flow.StillOpacity == 0.0f, "Startup is completely black");
 	Flow.Opened();

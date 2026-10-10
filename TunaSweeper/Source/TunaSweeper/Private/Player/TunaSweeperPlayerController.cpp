@@ -35,6 +35,7 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperStartupLogoWidget.h"
+#include "UI/TunaSweeperStartupLogoFlow.h"
 #include "UI/TunaSweeperPauseMenuWidget.h"
 #include "UI/TunaSweeperTutorialPopupWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
@@ -259,7 +260,6 @@ namespace TunaSweeperHoveredItemInteraction
 
 namespace TunaSweeperIntroMap
 {
-	constexpr float EntryFadeFromBlackSeconds = 0.5f;
 }
 
 namespace TunaSweeperEnemyCombatDebugSettings
@@ -815,7 +815,7 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 		if (ScreenFadeWidget)
 		{
 			ScreenFadeWidget->AddToViewport(1000);
-			ScreenFadeWidget->StartFadeFromBlack(TunaSweeperIntroMap::EntryFadeFromBlackSeconds);
+			ScreenFadeWidget->StartFadeFromBlack(TunaSweeperStartupLogo::TitleEntryFadeSeconds(bDeveloperLogoSkippedByDailyLimit));
 		}
 
 		if (UGameInstance* GameInstance = GetGameInstance())

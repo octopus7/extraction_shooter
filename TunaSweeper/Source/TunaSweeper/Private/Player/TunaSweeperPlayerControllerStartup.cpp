@@ -4,9 +4,10 @@
 
 bool ATunaSweeperPlayerController::TryStartDeveloperLogo()
 {
+	bDeveloperLogoSkippedByDailyLimit = false;
 	if (!IsLocalController()) return false;
 	UTunaSweeperGameInstance* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
-	if (!Instance || !Instance->TryBeginDeveloperLogo()) return false;
+	if (!Instance || !Instance->TryBeginDeveloperLogo(&bDeveloperLogoSkippedByDailyLimit)) return false;
 	StartupLogoWidget = CreateWidget<UTunaSweeperStartupLogoWidget>(this);
 	if (!StartupLogoWidget) return false;
 	StartupLogoWidget->OnFinished.BindUObject(this, &ThisClass::HandleDeveloperLogoFinished);

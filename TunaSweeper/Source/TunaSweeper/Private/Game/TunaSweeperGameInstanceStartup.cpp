@@ -10,7 +10,7 @@ namespace
 	constexpr const TCHAR* DateKey = TEXT("MainLastCompletedLocalDate");
 }
 
-bool UTunaSweeperGameInstance::TryBeginDeveloperLogo()
+bool UTunaSweeperGameInstance::TryBeginDeveloperLogo(bool* OutSkippedByDailyLimit)
 {
 	bool bSeenToday = false;
 	// Do not even read the date while disabled; existing records must have no effect.
@@ -19,6 +19,12 @@ bool UTunaSweeperGameInstance::TryBeginDeveloperLogo()
 		FString LastDate;
 		GConfig->GetString(Section, DateKey, LastDate, GGameUserSettingsIni);
 		bSeenToday = LastDate == FDateTime::Now().ToString(TEXT("%Y-%m-%d"));
+	}
+	if (OutSkippedByDailyLimit)
+	{
+		*OutSkippedByDailyLimit = TunaSweeperStartupLogo::IsDailySkip(
+			TunaSweeperBuildFlavor::IsDemo(), bDeveloperLogoAttemptedThisSession,
+			bDeveloperLogoOncePerDay, bSeenToday);
 	}
 	const bool bShow = TunaSweeperStartupLogo::ShouldShow(
 		TunaSweeperBuildFlavor::IsDemo(), bDeveloperLogoAttemptedThisSession,

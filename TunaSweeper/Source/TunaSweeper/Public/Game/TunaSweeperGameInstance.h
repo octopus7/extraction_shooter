@@ -299,8 +299,8 @@ public:
 
 	virtual void Init() override;
 
-	// Session guard is separate from the optional, currently disabled calendar-day policy.
-	bool TryBeginDeveloperLogo();
+	// Session guard is separate from the optional calendar-day policy.
+	bool TryBeginDeveloperLogo(bool* OutSkippedByDailyLimit = nullptr);
 	void RecordDeveloperLogoCompleted();
 	UPROPERTY(Config, EditDefaultsOnly, Category="TunaSweeper|Startup")
 	bool bDeveloperLogoOncePerDay = false;

@@ -24,7 +24,7 @@ bool FTunaSweeperStartupLogoPolicyTest::RunTest(const FString&)
 	GConfig->SetString(Section, Key, *Today, GGameUserSettingsIni);
 	Settings->BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
 	UTunaSweeperGameInstance* Instance = NewObject<UTunaSweeperGameInstance>();
-	TestFalse(TEXT("Daily limit defaults OFF"), Instance->bDeveloperLogoOncePerDay);
+	Instance->bDeveloperLogoOncePerDay = false;
 	TestTrue(TEXT("OFF ignores a persisted date from today"), Instance->TryBeginDeveloperLogo());
 	TestFalse(TEXT("Title revisit skips logo"), Instance->TryBeginDeveloperLogo());
 	GConfig->SetString(Section, Key, TEXT("sentinel-date"), GGameUserSettingsIni);
@@ -35,7 +35,11 @@ bool FTunaSweeperStartupLogoPolicyTest::RunTest(const FString&)
 	Instance->bDeveloperLogoOncePerDay = true;
 	Instance->bDeveloperLogoAttemptedThisSession = false;
 	GConfig->SetString(Section, Key, *Today, GGameUserSettingsIni);
-	TestFalse(TEXT("ON skips today's completed logo"), Instance->TryBeginDeveloperLogo());
+	bool bDailySkip = false;
+	TestFalse(TEXT("ON skips today's completed logo"), Instance->TryBeginDeveloperLogo(&bDailySkip));
+	TestTrue(TEXT("Daily skip is reported for title fade"), bDailySkip);
+	TestFalse(TEXT("Same-session revisit remains skipped"), Instance->TryBeginDeveloperLogo(&bDailySkip));
+	TestFalse(TEXT("Same-session revisit does not request a daily fade"), bDailySkip);
 	Instance->bDeveloperLogoAttemptedThisSession = false;
 	GConfig->SetString(Section, Key, TEXT("2000-01-01"), GGameUserSettingsIni);
 	TestTrue(TEXT("ON permits a new calendar day"), Instance->TryBeginDeveloperLogo());

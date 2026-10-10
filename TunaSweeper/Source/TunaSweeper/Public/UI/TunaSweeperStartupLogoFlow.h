@@ -3,6 +3,13 @@
 // Engine-independent policy/state so startup and failure paths can be tested without a renderer.
 namespace TunaSweeperStartupLogo
 {
+	inline bool IsDailySkip(bool IsDemo, bool AlreadyAttempted, bool DailyLimit, bool SeenToday)
+	{
+		return !IsDemo && !AlreadyAttempted && DailyLimit && SeenToday;
+	}
+
+	inline float TitleEntryFadeSeconds(bool DailySkip) { return DailySkip ? 1.2f : 0.5f; }
+
 	inline bool ShouldShow(bool IsDemo, bool AlreadyAttempted, bool DailyLimit, bool SeenToday)
 	{
 		return !IsDemo && !AlreadyAttempted && (!DailyLimit || !SeenToday);

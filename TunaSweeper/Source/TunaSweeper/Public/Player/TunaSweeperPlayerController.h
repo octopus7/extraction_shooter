@@ -282,6 +282,7 @@ private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	bool TryStartDeveloperLogo();
+	bool bDeveloperLogoSkippedByDailyLimit = false;
 	void HandleDeveloperLogoFinished(bool bVideoCompleted);
 	void EnsureScenarioPresentationWidget();
 	void BindHousingStateChanged();
