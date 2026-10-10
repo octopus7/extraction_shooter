@@ -7841,3 +7841,11 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 맵 이동 액터 이름이 무엇이며 BP로 존재하는지.
 - 답변: 배치용 BP는 /Game/Interaction/BP_Interact_LevelTravel이며 부모 C++ 클래스는 ATunaSweeperLevelTravelInteractableActor다. 맵에 배치한 인스턴스의 Level Travel > Destination에서 Bunker(기지) 또는 Raid(레이드)를 선택하며 실제 맵과 전환 연출은 공통 데이터에서 해석한다. BP_WarpPoint는 같은 맵 내 연결된 지점으로 순간 이동하는 별도 액터다. 에셋 파일과 현재 헤더/이동 코드를 확인했고 게임 코드·에셋은 변경하지 않았다.
+
+
+## 2026-10-11 05:46:03 (소요시간: 00:02:08)
+
+- 질문: 전력 시설 퀘스트용 BP에 데모 취수시설 클래스를 그대로 재사용할 수 있는지 검토 요청.
+- 답변: BP_WaterIntake의 부모 ATunaSweeperBlockedIntakeScreenActor는 본편에서도 사용할 수 있으며 퀘스트 목표, 이벤트, 요구 아이템, 문자열 키, 메시와 저장 ID를 설정할 수 있다. 다만 조사/이물질 제거/밸브 수리의 고정 단계이며 수리는 제거 완료를 요구한다. 제거 메시 숨김 외의 전력 가동 연출이나 임의 단계 확장은 기본 제공하지 않는다. 동일 흐름이면 별도 BP와 고유 저장 ID로 재사용하고, 다른 흐름이면 공용 단계형 시설 기반을 마련하는 것을 권장한다.
+- 데모 전용 결합: 취수시설 기본 이벤트 및 저장 ID가 demo.water_intake 계열이고, WorldProgressActor의 bunker_pipe 해금 조건에도 데모 취수시설 저장 ID가 직접 연결되어 있다.
+- 검증 범위: 네이티브 클래스, 상호작용 전달 코드, BP 파일 및 자산 목록을 읽어 검토했다. BP 생성, 게임 코드 변경, 빌드는 수행하지 않았다.
