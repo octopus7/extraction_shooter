@@ -376,6 +376,13 @@ When adding a field that should survive save/load:
 3. Add migration/default handling for older saves.
 4. Update this document in the same change.
 
+## Story-triggered quest acceptance
+
+- Quest definitions may specify `auto_accept_after_scenario_flag`. Completing a scenario flag reconciles eligible quests through the existing acceptance path, including tracking and saving.
+- After inventory/save restoration is fully complete, reconciliation runs again using restored `CompletedScenarioFlags`. This repairs a saved story completion whose quest acceptance was interrupted.
+- Existing accepted, reward-available, and reward-completed quest states are preserved. Missing definitions or unmet prerequisites are not forced through; a later load can retry.
+- Uses the existing scenario flags, numeric quest progress, and tracked quest fields; no save version or new serialized field is required.
+
 ## Practice dummy armor
 
 Practice dummy body/head armor tiers are authored in Blueprint defaults and map instances. Current health, regeneration and any armor changes made during play are transient; loading a level restores the authored tiers and full health. No player save fields or version change are introduced.

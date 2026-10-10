@@ -10857,3 +10857,9 @@
 - 처리: WITH_EDITOR에서 퀘스트 CSV의 en/ja 필수 조건 완화. 한국어만 있는 퀘스트 문자열은 기존 CSV 문자열 키의 K{0} 포맷으로 반환하며 원본은 변경하지 않음. 패키지 런타임의 필수 조건은 유지. Steam/Stove Demo/Full BAT 4종에 ko/en/ja 사전 검사를 추가해 파일·키·누락 언어를 출력하고 준비/기존 출력 삭제/BuildCookRun 이전 차단. 개발 메모와 다른 종류 문자열은 검사 대상에서 제외. 검사 메시지는 별도 문자열 키 리소스로 관리.
 - 검증: TestQuestPackagingValidation.ps1 통과. Demo/Full 선택, 여러 누락 키, 공백 번역, 줄바꿈/쉼표 인용 CSV, 잘못된 헤더, BAT 4종 실패 차단 및 번역 완료 시 모의 UAT 진입 확인. 공개 Demo 문자열 검사 통과. git diff --check 통과.
 - 제한: UE 에디터 타깃 빌드 시도는 실행 중인 Live Coding으로 차단되어 C++ 빌드와 추가한 TunaSweeper.Quest.KoreanOnlyPreview 자동화 테스트 실행은 미완료. 열린 에디터를 강제 종료하지 않음. 실제 패키징·웹 배포·데이터 동기화 없음.
+
+## 2026-10-11 04:54:56 (소요시간: 00:02:18)
+
+- 요청: 인트로 대사 후 초기 퀘스트 자동 수락 및 중단 후 다음 로딩 시 수락 누락 복구. 실제 목표 판정과 표시 설명 분리.
+- 처리: 퀘스트 정의의 auto_accept_after_scenario_flag를 읽고 스토리 플래그 기록 직후 및 저장 복원이 완전히 끝난 뒤 기존 수락 API로 복구. 이미 진행/달성/완료된 상태 보존, 자동 추적과 기존 저장 경로 사용. save_persistence.md 갱신 및 합성 데이터 자동화 테스트 추가.
+- 검증: 변경 diff 검사 통과. UE 빌드는 실행 중인 Live Coding으로 차단되어 새 StoryAcceptanceRecovery 테스트 실행 및 플레이 검증은 미완료. 에디터 강제 종료 없음. 웹 동기화·업로드 없음.

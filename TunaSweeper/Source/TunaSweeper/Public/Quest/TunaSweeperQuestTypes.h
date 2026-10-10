@@ -200,6 +200,9 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	bool bAutoTrackOnAccept = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName AutoAcceptAfterScenarioFlag = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<int32> RequiredCompletedQuestIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")

@@ -488,6 +488,26 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(int32 QuestId)
 	return true;
 }
 
+void UTunaSweeperQuestSubsystem::ReconcileStoryQuestAcceptance(const TSet<FName>& CompletedScenarioFlags)
+{
+	if (CompletedScenarioFlags.IsEmpty() || !EnsureQuestDataLoaded()) return;
+	TArray<int32> Candidates;
+	for (const auto& Entry : QuestDefinitions)
+	{
+		if (!Entry.Value.AutoAcceptAfterScenarioFlag.IsNone() &&
+			CompletedScenarioFlags.Contains(Entry.Value.AutoAcceptAfterScenarioFlag))
+		{
+			Candidates.Add(Entry.Key);
+		}
+	}
+	Candidates.Sort();
+	for (const int32 QuestId : Candidates)
+	{
+		// AcceptQuest preserves every non-Available state and saves newly accepted progress.
+		if (CanAcceptQuest(QuestId)) AcceptQuest(QuestId);
+	}
+}
+
 bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(int32 QuestId) const
 {
 	return FindQuestDefinition(QuestId) && GetQuestState(QuestId) == ETunaSweeperQuestState::RewardAvailable;
@@ -1002,6 +1022,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 			}
 		}
 		QuestObject->TryGetBoolField(TEXT("auto_track_on_accept"), Definition.bAutoTrackOnAccept);
+		Definition.AutoAcceptAfterScenarioFlag = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("auto_accept_after_scenario_flag"));
 
 		const TArray<TSharedPtr<FJsonValue>>* ObjectiveValues = nullptr;
 		if (QuestObject->TryGetArrayField(TEXT("objectives"), ObjectiveValues))

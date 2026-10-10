@@ -56,6 +56,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool AcceptQuest(int32 QuestId);
 
+	void ReconcileStoryQuestAcceptance(const TSet<FName>& CompletedScenarioFlags);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool CanClaimQuestReward(int32 QuestId) const;
 
@@ -123,6 +125,7 @@ public:
 private:
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperQuestTranslationTest;
+	friend class FTunaSweeperStoryQuestTest;
 	bool bItemSubmissionInProgress = false;
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();

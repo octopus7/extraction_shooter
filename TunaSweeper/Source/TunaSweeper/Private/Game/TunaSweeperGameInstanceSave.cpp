@@ -529,6 +529,11 @@ void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
 	bInventoryStateInitialized = true;
 	bInventoryStateInitializing = false;
 	RefreshLegacyPlayerInventoryItems();
+	// Reconcile only after all saved state has been restored, so acceptance cannot save a partial load.
+	if (UTunaSweeperQuestSubsystem* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		Quests->ReconcileStoryQuestAcceptance(CompletedScenarioFlags);
+	}
 	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
 	{
 		ResearchSubsystem->FlushDeferredResearchNotifications();

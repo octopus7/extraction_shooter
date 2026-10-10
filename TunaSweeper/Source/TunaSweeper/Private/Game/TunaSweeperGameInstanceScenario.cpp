@@ -15,6 +15,10 @@ void UTunaSweeperGameInstance::MarkScenarioProgressFlag(FName ScenarioFlag, bool
 
 	EnsureInventoryStateInitialized();
 	CompletedScenarioFlags.Add(ScenarioFlag);
+	if (UTunaSweeperQuestSubsystem* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		Quests->ReconcileStoryQuestAcceptance(CompletedScenarioFlags);
+	}
 
 	if (bSaveImmediately)
 	{
