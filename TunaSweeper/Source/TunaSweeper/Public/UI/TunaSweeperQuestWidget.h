@@ -111,6 +111,12 @@ private:
 	UFUNCTION()
 	void HandlePrimaryButtonClicked();
 
+	UFUNCTION()
+	void HandleAcceptAllClicked();
+
+	TArray<int32> GetAcceptAllQuestIds() const;
+	void EnsureAcceptAllButton();
+
 	void BuildQuestWidget();
 	bool CacheBuiltQuestWidgets();
 	void RebuildQuestList(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions);
@@ -208,6 +214,12 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> PrimaryButtonText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> AcceptAllButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> AcceptAllButtonText;
 
 	EQuestListFilter ActiveFilter = EQuestListFilter::Available;
 	int32 QuestId = 0;

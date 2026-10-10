@@ -288,6 +288,7 @@ void UTunaSweeperQuestWidget::InitializeQuest(int32 InQuestId, FName InInteracti
 void UTunaSweeperQuestWidget::RefreshQuestView()
 {
 	BuildQuestWidget();
+	EnsureAcceptAllButton();
 	NormalizeActiveFilter();
 	UpdateTabButtonStates();
 
@@ -464,6 +465,70 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	}
 
 	RefreshQuestView();
+}
+
+TArray<int32> UTunaSweeperQuestWidget::GetAcceptAllQuestIds() const
+{
+	TArray<int32> Result;
+	if (InteractionProviderId.IsNone() || !bShowAvailableTab) return Result;
+	const auto* Quests = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
+	TArray<FTunaSweeperQuestDefinition> Definitions;
+	if (!Quests || !Quests->GetAllQuestDefinitions(Definitions)) return Result;
+	for (const auto& Definition : Definitions)
+	{
+		if (Definition.ProviderId == InteractionProviderId && Quests->CanAcceptQuest(Definition.QuestId))
+			Result.Add(Definition.QuestId);
+	}
+	return Result;
+}
+
+void UTunaSweeperQuestWidget::HandleAcceptAllClicked()
+{
+	if (ActiveFilter != EQuestListFilter::Available) return;
+	const TArray<int32> Candidates = GetAcceptAllQuestIds();
+	if (Candidates.Num() < 2) return;
+	auto* Quests = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
+	if (!Quests) return;
+	const FName Provider = InteractionProviderId;
+	int32 FirstAccepted = 0;
+	for (const int32 Candidate : Candidates)
+	{
+		const auto* Definition = Quests->FindQuestDefinition(Candidate);
+		if (InteractionProviderId != Provider || !Definition || Definition->ProviderId != Provider) break;
+		if (Quests->AcceptQuest(Candidate) && FirstAccepted == 0) FirstAccepted = Candidate;
+	}
+	if (FirstAccepted > 0)
+	{
+		ActiveFilter = EQuestListFilter::InProgress;
+		QuestId = FirstAccepted;
+		SetSavedSelectedQuestId(ActiveFilter, QuestId);
+	}
+	RefreshQuestView();
+}
+
+void UTunaSweeperQuestWidget::EnsureAcceptAllButton()
+{
+	if (!WidgetTree || !PrimaryButton || !DetailStack) return;
+	if (AcceptAllButton && AcceptAllButton->GetParent() == PrimaryButton->GetParent()) return;
+	if (PrimaryButton->GetParent() != DetailStack) return;
+	// Wrap both generated and existing Blueprint button layouts in the same action row.
+	UHorizontalBox* Actions = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("QuestActionRow"));
+	AcceptAllButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestAcceptAllButton"));
+	AcceptAllButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestAcceptAllButtonText"));
+	AcceptAllButton->SetContent(AcceptAllButtonText);
+	AcceptAllButton->SetVisibility(ESlateVisibility::Collapsed);
+	AcceptAllButton->OnClicked.AddDynamic(this, &UTunaSweeperQuestWidget::HandleAcceptAllClicked);
+	TunaSweeperUIStyle::ApplyButton(AcceptAllButton);
+	TunaSweeperUIStyle::ApplyLabel(AcceptAllButtonText, 18);
+	AcceptAllButtonText->SetJustification(ETextJustify::Center);
+	PrimaryButton->RemoveFromParent();
+	if (auto* AcceptAllSlot = Actions->AddChildToHorizontalBox(AcceptAllButton)) AcceptAllSlot->SetPadding(FMargin(0.0f, 0.0f, 12.0f, 0.0f));
+	Actions->AddChildToHorizontalBox(PrimaryButton);
+	if (auto* ActionsSlot = DetailStack->AddChildToVerticalBox(Actions))
+	{
+		ActionsSlot->SetHorizontalAlignment(HAlign_Right);
+		ActionsSlot->SetPadding(FMargin(0.0f, 18.0f, 0.0f, 0.0f));
+	}
 }
 
 bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
@@ -1133,6 +1198,13 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	if (PrimaryButtonText)
 	{
 		PrimaryButtonText->SetText(bHasQuest ? GetPrimaryButtonText(QuestId) : FText::GetEmpty());
+	}
+	if (AcceptAllButton && AcceptAllButtonText)
+	{
+		const bool bCanAcceptAll = ActiveFilter == EQuestListFilter::Available && GetAcceptAllQuestIds().Num() >= 2;
+		AcceptAllButtonText->SetText(GetQuestText(TEXT("quest.ui.accept_all")));
+		AcceptAllButton->SetVisibility(bCanAcceptAll ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		AcceptAllButton->SetIsEnabled(bCanAcceptAll);
 	}
 	if (PrimaryButton)
 	{

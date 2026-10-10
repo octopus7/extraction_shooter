@@ -14,6 +14,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UI/TunaSweeperQuestWidget.h"
+#include "Components/Button.h"
 
 namespace TunaSweeperQuestData
 {
@@ -120,6 +121,33 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Panel->ResetQuestSelection();
 
 	// A different giver, target, item and count exercise the same production submission path.
+	FTunaSweeperQuestDefinition Offered = Delivery;
+	Offered.QuestId = 201;
+	Quests->QuestDefinitions.Add(201, Offered);
+	Panel->InitializeQuest(201, TEXT("provider.mole"));
+	TestEqual(TEXT("One available quest is counted"), Panel->GetAcceptAllQuestIds().Num(), 1);
+	TestEqual(TEXT("Single available quest hides bulk action"), Panel->AcceptAllButton->GetVisibility(), ESlateVisibility::Collapsed);
+	Panel->HandleAcceptAllClicked();
+	TestEqual(TEXT("Bulk click with one candidate does nothing"), Quests->GetQuestState(201), ETunaSweeperQuestState::Available);
+	Offered.QuestId = 202;
+	Quests->QuestDefinitions.Add(202, Offered);
+	Offered.QuestId = 203;
+	Offered.ProviderId = TEXT("provider.other");
+	Quests->QuestDefinitions.Add(203, Offered);
+	Offered.QuestId = 204;
+	Offered.ProviderId = TEXT("provider.mole");
+	Offered.RequiredCompletedQuestIds = { 203 };
+	Quests->QuestDefinitions.Add(204, Offered);
+	TestEqual(TEXT("Only eligible quests for this NPC count"), Panel->GetAcceptAllQuestIds().Num(), 2);
+	Panel->RefreshQuestView();
+	TestEqual(TEXT("Two available quests show bulk action"), Panel->AcceptAllButton->GetVisibility(), ESlateVisibility::Visible);
+	Panel->InitializeQuest(201);
+	TestEqual(TEXT("Inventory has no bulk candidates"), Panel->GetAcceptAllQuestIds().Num(), 0);
+	TestEqual(TEXT("Inventory hides bulk action"), Panel->AcceptAllButton->GetVisibility(), ESlateVisibility::Collapsed);
+	Panel->HandleAcceptAllClicked();
+	TestEqual(TEXT("Inventory bulk click cannot accept"), Quests->GetQuestState(201), ETunaSweeperQuestState::Available);
+	Panel->ResetQuestSelection();
+
 	Quests->QuestDefinitions.Reset();
 	Quests->QuestProgressById.Reset();
 	FTunaSweeperQuestDefinition Custom;
