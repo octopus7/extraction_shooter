@@ -1,5 +1,6 @@
 const ko: Record<string, string> = {
   'exchange.csv': '프로젝트 문자열 CSV 형식 또는 중복 키를 확인하세요.',
+  'exchange.notesKo': '개발용 메모 CSV는 string_key,ko 두 열과 한국어만 허용합니다. 번역 대상이 아닙니다.',
   'exchange.source': '프로젝트 퀘스트 원본 형식을 확인하세요.',
   'exchange.metadataMissing': '퀘스트 ID에 해당하는 스튜디오 메타데이터가 없습니다.',
   'exchange.noSnapshots': '가져올 스냅샷이 없습니다.',

@@ -34,13 +34,39 @@ function parseStrings(csv) {
   }
   return result;
 }
-function writeStrings(strings) {
-  const locales = [...new Set(['ko', 'en', 'ja', ...strings.map(s => s.locale)])];
+function writeStrings(strings, locales = [...new Set(['ko', 'en', 'ja', ...strings.map(s => s.locale)])]) {
   const keys = [...new Set(strings.map(s => s.key))];
   const values = new Map(strings.map(s => [JSON.stringify([s.key, s.locale]), s.value]));
   const quote = value => /[",\r\n]/.test(value) ? '"' + value.replaceAll('"', '""') + '"' : value;
   return [['string_key', ...locales], ...keys.map(key => [key, ...locales.map(locale => values.get(JSON.stringify([key, locale])) ?? '')])]
     .map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';
+}
+function parseNotes(csv) {
+  const rows = parse(csv, { bom: true, skip_empty_lines: true });
+  if (JSON.stringify(rows[0]) !== JSON.stringify(['string_key', 'ko'])) fail('exchange.notesKo');
+  return parseStrings(csv);
+}
+function writeNotes(strings) {
+  if (strings.some(s => s.locale !== 'ko')) fail('exchange.notesKo');
+  return writeStrings(strings, ['ko']);
+}
+function stringRefs(value, refs = new Set()) {
+  if (Array.isArray(value)) value.forEach(v => stringRefs(v, refs));
+  else if (isRecord(value)) for (const [key, v] of Object.entries(value)) {
+    if (key.endsWith('_string_key')) refs.add(v);
+    else if (key.endsWith('_string_keys')) v.forEach(ref => refs.add(ref));
+    else stringRefs(v, refs);
+  }
+  return refs;
+}
+function splitStrings(pack) {
+  validatePack(pack);
+  const runtime = stringRefs(pack.nodes.map(n => n.definition));
+  const authoring = stringRefs(pack.nodes.map(({ definition, ...rest }) => rest));
+  const isNote = s => authoring.has(s.key) && !runtime.has(s.key);
+  const notes = pack.strings.filter(isNote), game = pack.strings.filter(s => !isNote(s));
+  writeNotes(notes);
+  return { game, notes };
 }
 function packProject(definitions, metadata, strings) {
   if (!Array.isArray(definitions) || !isRecord(metadata)) fail('exchange.source');
@@ -85,7 +111,7 @@ function latest(snapshots) {
   return [...snapshots].sort((a, b) => time(b) - time(a) || b.id.localeCompare(a.id))[0];
 }
 
-const targetNames = new Set(['Data/QuestDefinitions.json', 'Data/QuestStudioMetadata.json', 'Data/QuestTextStrings.csv']);
+const targetNames = new Set(['Data/QuestDefinitions.json', 'Data/QuestStudioMetadata.json', 'Data/QuestTextStrings.csv', 'Authoring/QuestStudio/QuestStudioNotes.ko.csv']);
 function stateDirectory(root) { return path.join(root, '.queststudio-exchange'); }
 function safeTarget(root, name) {
   if (!targetNames.has(name)) fail('exchange.source');
@@ -144,4 +170,4 @@ function lock(root) {
   return () => fs.unlinkSync(file);
 }
 
-module.exports = { t, json, readJson, parseStrings, writeStrings, packProject, splitPack, extractRemote, latest, replaceFiles, recover, lock, digest };
+module.exports = { t, json, readJson, parseStrings, writeStrings, parseNotes, writeNotes, splitStrings, packProject, splitPack, extractRemote, latest, replaceFiles, recover, lock, digest };

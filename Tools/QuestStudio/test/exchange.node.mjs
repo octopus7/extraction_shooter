@@ -11,6 +11,19 @@ import { fileURLToPath } from 'node:url';
 const strings = [{ key: 'q.title', locale: 'ko', value: '한글, "제목"\n두 줄' }, { key: 'q.desc', locale: 'ko', value: '설명' }];
 const definition = { quest_id: 1, title_string_key: 'q.title', description_string_key: 'q.desc', required_completed_quest_ids: [], authoring_tags: ['chapter:1'], objectives: [{ custom: 17 }] };
 const pack = () => ({ schemaVersion: 1, nodes: [{ definition: structuredClone(definition), x: -15, y: 25, authoring: { prerequisitesStatus: 'confirmed', cardColor: 'blue', detail_string_key: 'q.desc' } }], strings: structuredClone(strings) });
+test('developer notes are separated by references, Korean-only, and round trip without translations', () => {
+  const p = pack(); p.nodes[0].authoring.detail_string_key = 'q.note';
+  p.strings.push({ key: 'q.note', locale: 'ko', value: '개발용, 메모\n둘째 줄' });
+  const { game, notes } = exchange.splitStrings(p);
+  assert.deepEqual(game, strings);
+  assert.deepEqual(notes, [p.strings.at(-1)]);
+  const csv = exchange.writeNotes(notes);
+  assert.equal(csv.split('\r\n')[0], 'string_key,ko');
+  assert.deepEqual(exchange.parseNotes(csv), notes);
+  assert.throws(() => exchange.parseNotes('string_key,ko,en\na,메모,note\n'));
+  p.strings.push({ key: 'q.note', locale: 'en', value: 'not translatable' });
+  assert.throws(() => exchange.splitStrings(p));
+});
 function workspace(fn) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'quest-exchange-'));
   try { return fn(root); } finally { fs.rmSync(root, { recursive: true, force: true }); }
@@ -115,6 +128,8 @@ test('both BAT launchers work from another directory with a synthetic authentica
   const payload = path.join(project, 'External/MainPayload');
   fs.mkdirSync(path.join(project, 'BatchScripts'), { recursive: true });
   fs.mkdirSync(path.join(payload, 'Data'), { recursive: true });
+  fs.mkdirSync(path.join(payload, 'Authoring/QuestStudio'), { recursive: true });
+  fs.writeFileSync(path.join(payload, 'Authoring/QuestStudio/QuestStudioNotes.ko.csv'), 'string_key,ko\r\n');
   fs.mkdirSync(path.join(studio, 'scripts'), { recursive: true });
   fs.mkdirSync(path.join(studio, 'src/shared'), { recursive: true });
   fs.mkdirSync(path.join(studio, '.local-admin'), { recursive: true });
@@ -123,13 +138,18 @@ test('both BAT launchers work from another directory with a synthetic authentica
   for (const file of ['exchange.cjs', 'exchange-api.cjs', 'quest-exchange.cjs']) fs.copyFileSync(path.join(source, 'scripts', file), path.join(studio, 'scripts', file));
   for (const file of ['validation.ts', 'ui-strings.ts']) fs.copyFileSync(path.join(source, 'src/shared', file), path.join(studio, 'src/shared', file));
   for (const file of ['UploadQuestSnapshot.bat', 'DownloadLatestQuestSnapshot.bat']) fs.copyFileSync(path.resolve(source, '../../TunaSweeper/BatchScripts', file), path.join(project, 'BatchScripts', file));
-  const local = exchange.splitPack(pack());
+  const authored = pack(); authored.nodes[0].authoring.detail_string_key = 'q.note';
+  authored.strings.push({ key: 'q.note', locale: 'ko', value: '개발 전용 메모' });
+  const notesCsv = exchange.writeNotes([authored.strings.at(-1)]);
+  const notesPath = path.join(payload, 'Authoring/QuestStudio/QuestStudioNotes.ko.csv');
+  fs.writeFileSync(notesPath, notesCsv);
+  const local = exchange.splitPack(authored);
   fs.writeFileSync(path.join(payload, 'Data/QuestDefinitions.json'), JSON.stringify(local.definitions));
   fs.writeFileSync(path.join(payload, 'Data/QuestStudioMetadata.json'), JSON.stringify(local.metadata));
   const csv = exchange.writeStrings(strings);
   fs.writeFileSync(path.join(payload, 'Data/QuestTextStrings.csv'), csv);
   fs.writeFileSync(path.join(studio, '.local-admin/admin-password.txt'), '\uFEFFsynthetic-password\r\n');
-  const remote = pack(); remote.nodes[0].x = 123; remote.nodes[0].authoring.cardColor = 'rose'; remote.nodes[0].definition.custom = 'remote'; remote.strings[0].value = 'REMOTE';
+  const remote = structuredClone(authored); remote.nodes[0].x = 123; remote.nodes[0].authoring.cardColor = 'rose'; remote.nodes[0].definition.custom = 'remote'; remote.strings[0].value = 'REMOTE'; remote.strings.at(-1).value = 'REMOTE NOTE';
   const mock = path.join(root, 'mock.cjs');
   fs.writeFileSync(mock, `const fs=require('fs'); const remote=${JSON.stringify(remote)};
     global.fetch=async(url,opts)=>{
@@ -146,10 +166,13 @@ test('both BAT launchers work from another directory with a synthetic authentica
   });
   const upload = run('UploadQuestSnapshot.bat');
   assert.equal(upload.status, 0, upload.stdout + upload.stderr);
-  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root, 'uploaded.json'))).pack.nodes, pack().nodes);
+  const uploaded = JSON.parse(fs.readFileSync(path.join(root, 'uploaded.json'))).pack;
+  assert.deepEqual(uploaded.nodes, authored.nodes);
+  assert.deepEqual(uploaded.strings, authored.strings);
   const download = run('DownloadLatestQuestSnapshot.bat');
   assert.equal(download.status, 0, download.stdout + download.stderr);
   assert.equal(fs.readFileSync(path.join(payload, 'Data/QuestTextStrings.csv'), 'utf8'), csv);
+  assert.equal(fs.readFileSync(notesPath, 'utf8'), notesCsv);
   assert.equal(JSON.parse(fs.readFileSync(path.join(payload, 'Data/QuestDefinitions.json')))[0].custom, 'remote');
   assert.equal(JSON.parse(fs.readFileSync(path.join(payload, 'Data/QuestStudioMetadata.json')))['1'].x, 123);
   assert(![upload.stdout,upload.stderr,download.stdout,download.stderr].join('').includes('synthetic-password'));

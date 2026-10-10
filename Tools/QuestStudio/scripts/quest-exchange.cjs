@@ -1,10 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { t, json, readJson, parseStrings, writeStrings, packProject, splitPack, extractRemote, replaceFiles, recover, lock, digest } = require('./exchange.cjs');
+const { t, json, readJson, parseStrings, writeStrings, parseNotes, writeNotes, splitStrings, packProject, splitPack, extractRemote, replaceFiles, recover, lock, digest } = require('./exchange.cjs');
 const { createClient } = require('./exchange-api.cjs');
 const repo = path.resolve(__dirname, '../../..');
 const root = path.join(repo, 'TunaSweeper/External/MainPayload');
-const names = ['Data/QuestDefinitions.json', 'Data/QuestStudioMetadata.json', 'Data/QuestTextStrings.csv'];
+const names = ['Data/QuestDefinitions.json', 'Data/QuestStudioMetadata.json', 'Data/QuestTextStrings.csv', 'Authoring/QuestStudio/QuestStudioNotes.ko.csv'];
 const read = name => fs.readFileSync(path.join(root, name));
 const baseline = () => names.map(name => fs.existsSync(path.join(root, name)) ? digest(read(name)) : null);
 const unchanged = hashes => { if (JSON.stringify(hashes) !== JSON.stringify(baseline())) throw new Error(t('exchange.localChanged')); };
@@ -19,17 +19,18 @@ async function main(mode) {
     recover(root);
     const hashes = baseline();
     if (mode === 'initialize') {
-      if (readJson(path.join(root, names[0])).length || parseStrings(read(names[2])).length || fs.existsSync(path.join(root, names[1]))) throw new Error(t('exchange.initialized'));
+      if (readJson(path.join(root, names[0])).length || parseStrings(read(names[2])).length || fs.existsSync(path.join(root, names[1])) || fs.existsSync(path.join(root, names[3]))) throw new Error(t('exchange.initialized'));
       const pack = readJson(path.join(root, 'Authoring/QuestStudio/quest-pack.ko.json'));
       const result = splitPack(pack);
-      const csv = writeStrings(pack.strings);
-      packProject(result.definitions, result.metadata, parseStrings(csv));
+      const { game, notes } = splitStrings(pack);
+      const csv = writeStrings(game), notesCsv = writeNotes(notes);
+      packProject(result.definitions, result.metadata, [...parseStrings(csv), ...parseNotes(notesCsv)]);
       unchanged(hashes);
-      const backup = replaceFiles(root, { [names[0]]: json(result.definitions), [names[1]]: json(result.metadata), [names[2]]: csv });
+      const backup = replaceFiles(root, { [names[0]]: json(result.definitions), [names[1]]: json(result.metadata), [names[2]]: csv, [names[3]]: notesCsv });
       say('exchange.initializedDone', { count: result.definitions.length, backup });
       return;
     }
-    const strings = parseStrings(read(names[2]));
+    const strings = [...parseStrings(read(names[2])), ...parseNotes(read(names[3]))];
     const metadata = fs.existsSync(path.join(root, names[1])) ? readJson(path.join(root, names[1])) : {};
     let outgoing;
     if (mode === 'upload') {

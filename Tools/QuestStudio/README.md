@@ -11,6 +11,9 @@
 | 퀘스트 정의 | `QuestDefinitions.json` | 팩의 `nodes[].definition`으로 전달 | 정의 객체를 추출하여 반영 |
 | 좌표·카드 색상 | `QuestStudioMetadata.json` | 노드의 `x`, `y`, `authoring.cardColor`로 전달 | 해당 메타데이터만 추출하여 반영 |
 | 로컬라이징 문자열 | 프로젝트 문자열 원본 (`QuestTextStrings.csv` 등) | 팩의 `strings`로 전달, 웹에서는 읽기 전용 | **반영 금지: 로컬 문자열 파일을 덮어쓰지 않는다** |
+| 개발용 상세·선행근거 메모 | `Authoring/QuestStudio/QuestStudioNotes.ko.csv` | 한국어 원문을 팩의 `strings`에 함께 전달 | **반영 금지: 로컬 메모 CSV를 덮어쓰지 않는다** |
+
+개발 메모 CSV는 `string_key,ko` 두 열만 가진다. 번역 대상이 아니므로 다른 언어 열/항목은 거부한다. 게임 정의에서 참조하는 제목·설명은 게임 문자열 CSV에, 저작 메타데이터에서만 참조하는 디테일·선행근거 등은 개발 메모 CSV에 둔다. 팩 생성 시 두 CSV를 합쳐 검증하며 웹 다운로드는 두 CSV 모두 읽기만 한다. 개발 메모 파일은 `Authoring` 아래에 두고 게임 문자열 로드 경로에 등록하지 않는다.
 
 `QuestDefinitions.json`의 정의 객체와 팩의 `nodes[].definition`은 같은 형식이다. 팩 생성은 정의를 감싸는 작업이고 역추출은 정의를 꺼내는 작업이며, 알 수 없는 정의 필드도 보존한다. 지역은 현재 `definition.authoring_tags`의 `chapter:N`에 포함되지만 게임 실행 판정에는 사용하지 않는다.
 
@@ -31,7 +34,7 @@
 | `UploadQuestSnapshot.bat` | 로컬 정의·메타데이터·문자열로 전체 팩을 구성하고 `https://quest.oc7.workers.dev`에 **새 스냅샷** 생성 |
 | `DownloadLatestQuestSnapshot.bat` | 최종 수정 시각 기준 최신 스냅샷의 정의·좌표·색상을 로컬에 반영. 문자열 CSV는 쓰지 않음 |
 
-BAT는 작업 디렉터리에 관계없이 프로젝트 기준 경로를 사용한다. 대상 원본은 접근 제한 데이터 저장소의 `Data/QuestDefinitions.json`, `Data/QuestStudioMetadata.json`, `Data/QuestTextStrings.csv`다. 업로드는 기존 저작 팩 파일을 재사용하지 않고 이 세 SSOT 파일을 메모리에서 묶는다. 다운로드는 앞의 JSON 두 파일만 교체한다. 기존 웹 API를 사용하므로 별도 서버 배포가 필요하지 않다.
+BAT는 작업 디렉터리에 관계없이 프로젝트 기준 경로를 사용한다. 대상 원본은 접근 제한 데이터 저장소의 `Data/QuestDefinitions.json`, `Data/QuestStudioMetadata.json`, `Data/QuestTextStrings.csv`, `Authoring/QuestStudio/QuestStudioNotes.ko.csv`다. 업로드는 기존 저작 팩 파일을 재사용하지 않고 네 SSOT 파일을 메모리에서 묶는다. 다운로드는 앞의 JSON 두 파일만 교체한다. 기존 웹 API를 사용하므로 별도 서버 배포가 필요하지 않다.
 
 최신 선택은 `updatedAt` 기준이고 이전 데이터는 `createdAt`으로 대체하며 동률은 ID 내림차순으로 결정한다. 다운로드 직후 목록을 재확인하여 ID·수정 시각·revision이 여전히 최신인지 검사한다. 계속 변경되면 중단한다. 다운로드한 정의가 로컬에 없는 문자열을 참조하면 반영하지 않는다. 빈 퀘스트 팩도 업로드·반영하지 않는다.
 
@@ -39,7 +42,7 @@ BAT는 작업 디렉터리에 관계없이 프로젝트 기준 경로를 사용�
 
 로그인은 한 번만 시도하고 작업 후 세션을 해제한다. 서버 응답 본문은 출력하지 않는다. 업로드 응답 유실 시 중복 생성 방지를 위해 자동 재시도하지 않으므로 웹 목록을 먼저 확인한다. 자동 실행은 `QUEST_EXCHANGE_NO_PAUSE=1`로 BAT 종료 대기를 생략할 수 있다. 실패 종료 코드는 0이 아니다.
 
-최초 분리만 필요할 때 `node scripts/quest-exchange.cjs initialize`를 실행한다. 기존 로컬 `Authoring/QuestStudio/quest-pack.ko.json`에서 세 원본 파일을 분리하며, 정의·문자열이 비어 있고 메타데이터 파일이 없을 때만 허용한다. **문자열 쓰기는 이 최초 로컬 초기화에서만 수행하며 웹 다운로드에서는 하지 않는다.** 한국어만 있는 팩에 번역을 임의 생성하지 않는다. 실행 목표·이벤트 및 UE 번역 필수 조건 완성은 별도 런타임 작업이다.
+최초 분리만 필요할 때 `node scripts/quest-exchange.cjs initialize`를 실행한다. 기존 로컬 `Authoring/QuestStudio/quest-pack.ko.json`에서 네 원본 파일을 분리하며, 정의·문자열이 비어 있고 메타데이터·개발 메모 파일이 없을 때만 허용한다. **문자열 쓰기는 이 최초 로컬 초기화에서만 수행하며 웹 다운로드에서는 하지 않는다.** 한국어만 있는 팩에 번역을 임의 생성하지 않는다. 실행 목표·이벤트 및 UE 번역 필수 조건 완성은 별도 런타임 작업이다.
 
 교환 검증은 `node --test test/exchange.node.mjs`로 실행한다. 합성 데이터와 모의 API를 사용하고 실제 스냅샷이나 암호 파일을 읽지 않는다.
 
