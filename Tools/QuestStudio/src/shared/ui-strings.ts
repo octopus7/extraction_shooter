@@ -40,7 +40,7 @@ const ko: Record<string, string> = {
   'graph.label': '퀘스트 선행 관계 그래프',
   'graph.legendLocal': '선택 챕터',
   'graph.legendExternal': '다른 지역',
-  'graph.legendUnspecified': '선행 미정',
+  'graph.noPrerequisites': '선행 없음',
   'graph.hint': '빈 공간을 드래그해 이동 · 휠로 확대',
   'graph.zoomIn': '확대',
   'graph.zoomOut': '축소',

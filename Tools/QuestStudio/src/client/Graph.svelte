@@ -71,15 +71,16 @@
       </svg>
       {#each projection.nodes as node (node.id)}
         {@const definition = pack.nodes.find(item => item.definition.quest_id === node.questId)}
-        <button class="quest-card" class:selected={selectedId === node.questId} class:external={node.external} class:unspecified={definition?.authoring.prerequisitesStatus === 'unspecified'} style:width={`${cardWidth}px`} style:height={`${cardHeight}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: node.questId })} aria-pressed={selectedId === node.questId}>
+        {@const noPrerequisites = !node.external && definition?.definition.required_completed_quest_ids.length === 0}
+        <button class="quest-card" class:selected={selectedId === node.questId} class:external={node.external} class:no-prerequisites={noPrerequisites} style:width={`${cardWidth}px`} style:height={`${cardHeight}px`} style:left={`${node.x}px`} style:top={`${node.y}px`} onclick={() => onselect(node.questId)} aria-label={t('graph.selectNode', { id: node.questId })} aria-pressed={selectedId === node.questId}>
           <span class="card-top"><span class="quest-id">{node.questId}</span><span class="node-dot"></span></span>
           <strong>{questText(pack, node.titleKey)}</strong>
-          <span class="card-bottom">{node.external ? t('graph.legendExternal') : definition?.authoring.prerequisitesStatus === 'unspecified' ? t('inspector.unspecified') : t('inspector.confirmed')}</span>
+          {#if node.external}<span class="card-bottom">{t('graph.legendExternal')}</span>{:else if noPrerequisites}<span class="card-bottom">{t('graph.noPrerequisites')}</span>{/if}
         </button>
       {/each}
     </div>
     {#if !projection.nodes.length}<p class="graph-no-nodes">{t('graph.noNodes')}</p>{/if}
   </div>
-  <div class="graph-legend"><span><i class="legend-dot local"></i>{t('graph.legendLocal')}</span><span><i class="legend-dot external"></i>{t('graph.legendExternal')}</span><span><i class="legend-dot unspecified"></i>{t('graph.legendUnspecified')}</span></div>
+  <div class="graph-legend"><span><i class="legend-dot local"></i>{t('graph.legendLocal')}</span><span><i class="legend-dot external"></i>{t('graph.legendExternal')}</span><span><i class="legend-dot no-prerequisites"></i>{t('graph.noPrerequisites')}</span></div>
   <div class="graph-bottom"><span class="graph-hint">{t('graph.hint')}</span><div class="zoom-controls"><button aria-label={t('graph.zoomOut')} title={t('graph.zoomOut')} onclick={() => zoom(1 / 1.2)}>−</button><span>{t('graph.zoom', { percent: Math.round(scale * 100) })}</span><button aria-label={t('graph.zoomIn')} title={t('graph.zoomIn')} onclick={() => zoom(1.2)}>+</button><button class="fit-button" onclick={fit}>{t('graph.fit')}</button></div></div>
 </div>
