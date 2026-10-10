@@ -33,6 +33,9 @@ if not exist "%RUN_UAT%" (
     exit /b 1
 )
 
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\ValidateQuestTranslations.ps1" -Flavor Demo
+if errorlevel 1 exit /b %ERRORLEVEL%
+
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%BUILD_FLAVOR_DATA%" -Mode PrepareDemo
 if errorlevel 1 exit /b %ERRORLEVEL%
 

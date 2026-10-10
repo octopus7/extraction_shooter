@@ -382,6 +382,23 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestTextByKey(
 	}
 
 	OutText = TunaSweeperLanguage::Resolve(*QuestTextString, Language);
+#if WITH_EDITOR
+	const bool bKoreanOnly = !QuestTextString->Korean.IsEmpty() &&
+		QuestTextString->English.IsEmpty() && QuestTextString->Japanese.IsEmpty() &&
+		QuestTextString->SimplifiedChinese.IsEmpty() && QuestTextString->TraditionalChinese.IsEmpty() &&
+		QuestTextString->Russian.IsEmpty() && QuestTextString->BrazilianPortuguese.IsEmpty();
+	if (bKoreanOnly)
+	{
+		const FTunaSweeperQuestTextString* PreviewFormat = QuestTextStringsByKey.Find(TEXT("ui.quest.editor_korean_only_format"));
+		OutText = PreviewFormat
+			? FText::Format(TunaSweeperLanguage::Resolve(*PreviewFormat, Language), QuestTextString->Korean)
+			: QuestTextString->Korean;
+	}
+	else if (OutText.IsEmpty())
+	{
+		OutText = QuestTextString->Korean;
+	}
+#endif
 
 	return !OutText.IsEmpty();
 }
@@ -1141,7 +1158,11 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 			const FString Korean = TunaSweeperQuestData::GetCsvCell(Row, 1);
 			const FString English = TunaSweeperQuestData::GetCsvCell(Row, 2);
 			const FString Japanese = TunaSweeperQuestData::GetCsvCell(Row, 3);
-			if (StringKey.IsEmpty() || Korean.IsEmpty() || English.IsEmpty() || Japanese.IsEmpty())
+			if (StringKey.IsEmpty() || Korean.IsEmpty()
+#if !WITH_EDITOR
+				|| English.IsEmpty() || Japanese.IsEmpty()
+#endif
+			)
 			{
 				UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d in %s: required cell is empty."), RowIndex, *CsvPath);
 				bAllFilesValid = false;

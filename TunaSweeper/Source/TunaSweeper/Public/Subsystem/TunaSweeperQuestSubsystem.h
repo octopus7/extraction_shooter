@@ -122,6 +122,7 @@ public:
 
 private:
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperQuestTranslationTest;
 	bool bItemSubmissionInProgress = false;
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();
