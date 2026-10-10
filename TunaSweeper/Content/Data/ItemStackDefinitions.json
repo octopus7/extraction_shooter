@@ -6,5 +6,6 @@
   "stack.default.consumable": 10,
   "stack.default.material": 50,
   "stack.default.blueprint": 1,
-  "stack.default.currency": 999
+  "stack.default.currency": 999,
+  "stack.toot_toot": 1
 }

@@ -524,7 +524,7 @@
     "category_tag": "item.category.ear",
     "equipment_slot_tag": "equipment.slot.ear",
     "headphone_hearing_range": 1800,
-    "headphone_sensitivity": 1.0,
+    "headphone_sensitivity": 1,
     "headphone_min_strength": 0.12
   },
   {
@@ -607,6 +607,18 @@
     "icon_file_name": "T_UIIcon_WaterproofTape.uasset",
     "category_tag": "item.category.material",
     "weight_kg": 0.4
+  },
+  {
+    "id": 6006,
+    "name_string_key": "item.toot_toot",
+    "description_string_key": "item.toot_toot.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_ValuablesCrate.uasset",
+    "category_tag": "item.category.material",
+    "max_stack_category_key": "stack.toot_toot",
+    "weight_kg": 0
   },
   {
     "id": 7001,

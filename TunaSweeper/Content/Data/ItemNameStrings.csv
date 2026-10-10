@@ -125,3 +125,5 @@ item.body_armor_tier4,4등급 방탄복,Tier 4 Body Armor,等級4の防弾ベス
 item.body_armor_tier4.desc,방어 4등급 · 기본 방어력 8. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 8. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力8。弾薬の貫通等級に応じて実効防御力が変わる。
 item.ballistic_helmet_tier4,4등급 방탄 헬멧,Tier 4 Ballistic Helmet,等級4の防弾ヘルメット
 item.ballistic_helmet_tier4.desc,방어 4등급 · 기본 방어력 4. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 4. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力4。弾薬の貫通等級に応じて実効防御力が変わる。
+item.toot_toot,뿡뿡,Pfft,ぷぅ
+item.toot_toot.desc,정체는 방귀다. 지금은 아무 쓸모 없이 인벤토리 한 칸만 차지한다.,A fart. Currently useless and only takes up an inventory slot.,正体はおなら。今のところ何の役にも立たず、インベントリを1枠占有するだけ。
