@@ -138,7 +138,7 @@
           <strong>{questText(pack, node.titleKey)}</strong>
           {#if node.external}<span class="card-bottom">{t('graph.legendExternal')}</span>{:else if noPrerequisites}<span class="card-bottom">{t('graph.noPrerequisites')}</span>{/if}
         </button>
-        {#if !node.external && definition?.definition.required_completed_quest_ids.length === 0}
+        {#if noPrerequisites}
           <button data-quest-id={node.questId} class="prerequisite-port" style:left={(node.x - 11) + 'px'} style:top={(node.y + cardHeight / 2 - 11) + 'px'} disabled={disabled} aria-label={t('graph.linkHandle', { id: formatQuestId(node.questId) })} title={t('graph.linkHelp')} onpointerdown={(event) => startLink(event, node.questId, node.x, node.y)} onclick={() => onselect(node.questId)}><span aria-hidden="true"></span></button>
         {/if}
       {/each}
