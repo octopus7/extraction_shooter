@@ -7818,3 +7818,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Cloudflare 계정 ID는 어디서 확인하며 채팅에 전달해도 되는가?
 - 답변: 대시보드에서 Ctrl+K로 Copy account ID를 검색해 복사하거나 Workers & Pages의 Account Details에서 Account ID를 복사할 수 있다. Account ID는 계정 식별자로, 그 값만으로 로그인·데이터 변경을 할 수 있는 인증 비밀값이 아니다. API 토큰·비밀번호·복구 코드를 함께 보내지 않도록 안내했다. 사용자가 제공한 ID로 계정 자동 검색 권한 없이 배포를 진행했다.
 - 근거: https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/
+
+## 2026-10-10 22:36:45 (소요시간: 00:00:17)
+
+- 질문: 로그인 시도 제한으로 대기 시간이 표시될 때 초기화하는 방법은?
+- 답변: 현재 제한은 IP별로 D1의 admin_login_attempts에 저장되며 15분 내 5회 실패 시 15분 차단한다. D1 콘솔에서 DELETE FROM admin_login_attempts;를 실행하면 모든 IP의 로그인 실패·차단 기록만 초기화한다. 비밀번호, 기존 세션, 퀘스트 데이터에는 영향이 없고 이후 제한 정책은 계속 적용된다. 브라우저 새로고침이나 쿠키 삭제로는 서버의 차단 기록이 없어지지 않는다.
+- 범위: auth.ts 구현을 확인하고 방법만 안내했으며 실제 D1 초기화는 실행하지 않았다.
