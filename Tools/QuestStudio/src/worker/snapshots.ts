@@ -1,5 +1,5 @@
 import type { QuestPack, SnapshotMetadata } from '../shared/types';
-import { isRecord, validatePack } from '../shared/validation';
+import { isRecord, validatePack, ValidationError } from '../shared/validation';
 import { ApiError } from './http';
 
 interface SnapshotRow {
@@ -45,5 +45,8 @@ export async function loadSnapshot(db: D1Database, id: string): Promise<{ snapsh
     const pack = validatePack({ ...JSON.parse(row.pack_metadata_json), schemaVersion: 1,
       nodes: nodes.results.map(node => JSON.parse(node.node_json)), strings: strings.results.map(string => JSON.parse(string.entry_json)) });
     return { snapshot: metadata(row), pack };
-  } catch { throw new ApiError(500, 'api.internal_error'); }
+  } catch (error) {
+    if (error instanceof ValidationError && error.key === 'validation.numeric_quest_id') throw error;
+    throw new ApiError(500, 'api.internal_error');
+  }
 }

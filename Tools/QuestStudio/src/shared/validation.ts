@@ -19,6 +19,9 @@ export function validatePack(value: unknown): QuestPack {
         !stringList(d.required_completed_quest_ids) || !stringList(d.authoring_tags) ||
         (item.authoring.prerequisitesStatus !== 'confirmed' && item.authoring.prerequisitesStatus !== 'unspecified') ||
         (item.authoring.sourceReference !== undefined && typeof item.authoring.sourceReference !== 'string')) fail('validation.node');
+    if (!/^[1-9]\d*$/.test(d.quest_id) || d.required_completed_quest_ids.some(id => !/^[1-9]\d*$/.test(id))) {
+      fail('validation.numeric_quest_id');
+    }
     const chapters = d.authoring_tags.filter(tag => tag.startsWith('chapter:'));
     if (chapters.length !== 1 || !/^chapter:[1-9]\d*$/.test(chapters[0]!)) fail('validation.chapter', { questId: d.quest_id });
     if (typeof item.x !== 'number' || typeof item.y !== 'number' || !Number.isFinite(item.x) || !Number.isFinite(item.y)) fail('validation.position', { questId: d.quest_id });

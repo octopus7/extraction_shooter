@@ -8,9 +8,9 @@ function fixture(): QuestPack {
     schemaVersion: 1,
     customPackRevision: 17,
     nodes: [
-      { definition: { quest_id: 'R1-01', title_string_key: 'test.a', description_string_key: 'test.ad', required_completed_quest_ids: [], authoring_tags: ['chapter:1'], custom: { reward: 7 } }, x: 100, y: 100, authoring: { prerequisitesStatus: 'unspecified', customNote: 'synthetic' }, customNode: { nested: true } },
-      { definition: { quest_id: 'R1-02', title_string_key: 'test.b', description_string_key: 'test.bd', required_completed_quest_ids: [], authoring_tags: ['chapter:1'] }, x: 450, y: 100, authoring: { prerequisitesStatus: 'confirmed' } },
-      { definition: { quest_id: 'R2-01', title_string_key: 'test.c', description_string_key: 'test.cd', required_completed_quest_ids: ['R1-01'], authoring_tags: ['chapter:2'] }, x: 450, y: 350, authoring: { prerequisitesStatus: 'confirmed' } },
+      { definition: { quest_id: '1', title_string_key: 'test.a', description_string_key: 'test.ad', required_completed_quest_ids: [], authoring_tags: ['chapter:1'], custom: { reward: 7 } }, x: 100, y: 100, authoring: { prerequisitesStatus: 'unspecified', customNote: 'synthetic' }, customNode: { nested: true } },
+      { definition: { quest_id: '2', title_string_key: 'test.b', description_string_key: 'test.bd', required_completed_quest_ids: [], authoring_tags: ['chapter:1'] }, x: 450, y: 100, authoring: { prerequisitesStatus: 'confirmed' } },
+      { definition: { quest_id: '21', title_string_key: 'test.c', description_string_key: 'test.cd', required_completed_quest_ids: ['1'], authoring_tags: ['chapter:2'] }, x: 450, y: 350, authoring: { prerequisitesStatus: 'confirmed' } },
     ],
     strings: [
       ...['a', 'ad', 'b', 'bd', 'c', 'cd'].map(id => ({ key: `test.${id}`, locale: 'ko', value: `합성 ${id}` })),
@@ -28,31 +28,31 @@ describe('manual editor document', () => {
     expect(switched.dirty).toBe(false);
   });
 
-  it('adds a current-region number and removes a prerequisite without affecting hidden chapters', () => {
-    const imported = selectQuest(importDocument(JSON.stringify(fixture())), 'R1-02');
+  it('adds a global number and removes a prerequisite without affecting hidden chapters', () => {
+    const imported = selectQuest(importDocument(JSON.stringify(fixture())), '2');
     const added = addPrerequisite(imported, '01');
-    expect(added.pack!.nodes[1]!.definition.required_completed_quest_ids).toEqual(['R1-01']);
-    expect(added.pack!.nodes[2]!.definition.required_completed_quest_ids).toEqual(['R1-01']);
+    expect(added.pack!.nodes[1]!.definition.required_completed_quest_ids).toEqual(['1']);
+    expect(added.pack!.nodes[2]!.definition.required_completed_quest_ids).toEqual(['1']);
     expect(added.dirty).toBe(true);
     expect(imported.pack!.nodes[1]!.definition.required_completed_quest_ids).toEqual([]);
-    const removed = removePrerequisite(added, 'R1-01');
+    const removed = removePrerequisite(added, '1');
     expect(removed.pack!.nodes[1]!.definition.required_completed_quest_ids).toEqual([]);
     expect(removed.pack!.strings.at(-1)).toEqual({ key: 'test.a', locale: 'en', value: 'Synthetic A', translatorComment: 'synthetic' });
   });
 
   it('rejects unknown, duplicate, self and cyclic input while preserving the original document', () => {
-    const imported = selectQuest(importDocument(JSON.stringify(fixture())), 'R1-02');
+    const imported = selectQuest(importDocument(JSON.stringify(fixture())), '2');
     for (const input of ['99', '02']) expect(() => addPrerequisite(imported, input)).toThrow();
     const added = addPrerequisite(imported, '01');
     expect(() => addPrerequisite(added, '01')).toThrow();
-    expect(() => addPrerequisite(selectQuest(added, 'R1-01'), '02')).toThrow();
+    expect(() => addPrerequisite(selectQuest(added, '1'), '02')).toThrow();
     expect(JSON.parse(exportDocument(imported))).toEqual(fixture());
   });
 
   it('loads a full snapshot and isolates its data from later edits', () => {
     const snapshotPack = fixture();
     const loaded = loadDocument(snapshotPack, 'snapshot-1');
-    const edited = addPrerequisite(selectQuest(loaded, 'R1-02'), 'R1-01');
+    const edited = addPrerequisite(selectQuest(loaded, '2'), '1');
     expect(snapshotPack.nodes[1]!.definition.required_completed_quest_ids).toEqual([]);
     const switched = selectChapter(edited, '2');
     expect(JSON.parse(exportDocument(switched)).nodes).toHaveLength(3);
@@ -69,9 +69,9 @@ describe('manual editor document', () => {
 
   it('prevents editing external boundary nodes until their own chapter is selected', () => {
     const switched = selectChapter(importDocument(JSON.stringify(fixture())), '2');
-    const boundarySelected = selectQuest(switched, 'R1-01');
-    expect(() => addPrerequisite(boundarySelected, 'R1-02')).toThrow();
-    expect(() => removePrerequisite(boundarySelected, 'R1-02')).toThrow();
+    const boundarySelected = selectQuest(switched, '1');
+    expect(() => addPrerequisite(boundarySelected, '2')).toThrow();
+    expect(() => removePrerequisite(boundarySelected, '2')).toThrow();
     expect(JSON.parse(exportDocument(boundarySelected))).toEqual(fixture());
   });
 });

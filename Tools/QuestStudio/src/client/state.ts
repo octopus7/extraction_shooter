@@ -46,7 +46,7 @@ function editableNode(document: EditorDocument): QuestNode {
 }
 export function addPrerequisite(document: EditorDocument, input: string): EditorDocument {
   const node = editableNode(document);
-  const id = resolveQuestId(document.pack!, input.trim(), document.chapter);
+  const id = resolveQuestId(document.pack!, input.trim());
   return { ...document, pack: updatePrerequisites(document.pack!, node.definition.quest_id, [...node.definition.required_completed_quest_ids, id]), dirty: true };
 }
 export function removePrerequisite(document: EditorDocument, id: string): EditorDocument {

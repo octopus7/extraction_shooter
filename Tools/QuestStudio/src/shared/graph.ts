@@ -7,14 +7,11 @@ const BOUNDARY_ROW_GAP = 32;
 export function getChapter(node: QuestNode): string {
   return node.definition.authoring_tags.find(tag => tag.startsWith('chapter:'))?.slice(8) ?? '';
 }
-export function resolveQuestId(pack: QuestPack, input: string, chapter: string): string {
+export function resolveQuestId(pack: QuestPack, input: string): string {
   const trimmed = input.trim();
-  const exact = pack.nodes.find(node => node.definition.quest_id === trimmed);
-  if (exact) return exact.definition.quest_id;
-  const candidate = /^\d+$/.test(trimmed)
-    ? `R${chapter}-${trimmed.padStart(2, '0')}` : trimmed;
-  const match = /^R\d+-\d+$/i.test(candidate)
-    ? pack.nodes.find(node => node.definition.quest_id.toLowerCase() === candidate.toLowerCase()) : undefined;
+  if (!/^\d+$/.test(trimmed)) throw new ValidationError('validation.numeric_quest_id');
+  const candidate = trimmed.replace(/^0+/, '') || '0';
+  const match = pack.nodes.find(node => node.definition.quest_id === candidate);
   if (!match) throw new ValidationError('validation.unknown_quest', { questId: input });
   return match.definition.quest_id;
 }

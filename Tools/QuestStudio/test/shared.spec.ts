@@ -7,10 +7,10 @@ export function fixture(): QuestPack {
   return {
     schemaVersion: 1,
     nodes: [
-      { definition: { quest_id: 'R1-01', title_string_key: 'q.1.title', description_string_key: 'q.1.desc', required_completed_quest_ids: [], authoring_tags: ['chapter:1'], unknown: { reward: 7 } }, x: 1, y: 2, authoring: { prerequisitesStatus: 'unspecified', sourceReference: 'synthetic' } },
-      { definition: { quest_id: 'R1-02', title_string_key: 'q.2.title', description_string_key: 'q.2.desc', required_completed_quest_ids: ['R2-01'], authoring_tags: ['chapter:1'] }, x: 3, y: 4, authoring: { prerequisitesStatus: 'confirmed' } },
-      { definition: { quest_id: 'R2-01', title_string_key: 'q.3.title', description_string_key: 'q.3.desc', required_completed_quest_ids: ['R3-01'], authoring_tags: ['chapter:2'] }, x: 5, y: 6, authoring: { prerequisitesStatus: 'confirmed', custom: { preserved: true } } },
-      { definition: { quest_id: 'R3-01', title_string_key: 'q.4.title', description_string_key: 'q.4.desc', required_completed_quest_ids: [], authoring_tags: ['chapter:3'] }, x: 7, y: 8, authoring: { prerequisitesStatus: 'confirmed' } },
+      { definition: { quest_id: '1', title_string_key: 'q.1.title', description_string_key: 'q.1.desc', required_completed_quest_ids: [], authoring_tags: ['chapter:1'], unknown: { reward: 7 } }, x: 1, y: 2, authoring: { prerequisitesStatus: 'unspecified', sourceReference: 'synthetic' } },
+      { definition: { quest_id: '2', title_string_key: 'q.2.title', description_string_key: 'q.2.desc', required_completed_quest_ids: ['21'], authoring_tags: ['chapter:1'] }, x: 3, y: 4, authoring: { prerequisitesStatus: 'confirmed' } },
+      { definition: { quest_id: '21', title_string_key: 'q.3.title', description_string_key: 'q.3.desc', required_completed_quest_ids: ['57'], authoring_tags: ['chapter:2'] }, x: 5, y: 6, authoring: { prerequisitesStatus: 'confirmed', custom: { preserved: true } } },
+      { definition: { quest_id: '57', title_string_key: 'q.4.title', description_string_key: 'q.4.desc', required_completed_quest_ids: [], authoring_tags: ['chapter:3'] }, x: 7, y: 8, authoring: { prerequisitesStatus: 'confirmed' } },
     ],
     strings: [1, 2, 3, 4].flatMap(n => [
       { key: `q.${n}.title`, locale: 'ko', value: `합성 ${n}` },
@@ -34,8 +34,14 @@ describe('pack validation', () => {
     rejects(p => { p.nodes[0]!.definition.authoring_tags.push('chapter:2'); }, 'validation.chapter');
     rejects(p => { p.nodes[0]!.x = Infinity; }, 'validation.position');
   });
-  it('rejects case insensitive duplicate IDs and duplicate localization tuples', () => {
-    rejects(p => { p.nodes[1]!.definition.quest_id = 'r1-01'; }, 'validation.duplicate_quest');
+  it('requires canonical global numeric IDs and numeric prerequisite references', () => {
+    for (const id of ['R1-01', '01', '0', '-1', '1.5', 'legacy_intro']) {
+      rejects(p => { p.nodes[0]!.definition.quest_id = id; }, 'validation.numeric_quest_id');
+    }
+    rejects(p => { p.nodes[1]!.definition.required_completed_quest_ids = ['R2-01']; }, 'validation.numeric_quest_id');
+  });
+  it('rejects duplicate IDs and duplicate localization tuples', () => {
+    rejects(p => { p.nodes[1]!.definition.quest_id = '1'; }, 'validation.duplicate_quest');
     rejects(p => { p.strings.push({ ...p.strings[0]! }); }, 'validation.duplicate_string');
   });
   it('requires Korean entries for every nested string reference', () => {
@@ -48,28 +54,31 @@ describe('pack validation', () => {
   it('rejects malformed contract fields and preserves optional unknown authoring data', () => {
     for (const value of [null, {}, { schemaVersion: 2, nodes: [], strings: [] }]) expect(() => validatePack(value)).toThrow(ValidationError);
     rejects(p => { p.nodes[0]!.authoring.prerequisitesStatus = { toString: () => 'confirmed' } as never; }, 'validation.node');
-    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = 'R2-01' as never; }, 'validation.node');
+    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = '21' as never; }, 'validation.node');
   });
   it('rejects missing, duplicate, self and cyclic prerequisites', () => {
-    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = ['R1-99']; }, 'validation.unknown_quest');
-    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = ['R2-01', 'r2-01']; }, 'validation.duplicate_prerequisite');
-    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = ['r1-01']; }, 'validation.self_reference');
-    rejects(p => { p.nodes[3]!.definition.required_completed_quest_ids = ['R1-02']; }, 'validation.cycle');
+    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = ['999']; }, 'validation.unknown_quest');
+    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = ['21', '21']; }, 'validation.duplicate_prerequisite');
+    rejects(p => { p.nodes[0]!.definition.required_completed_quest_ids = ['1']; }, 'validation.self_reference');
+    rejects(p => { p.nodes[3]!.definition.required_completed_quest_ids = ['2']; }, 'validation.cycle');
   });
 });
 
 describe('graph editing and chapter projection', () => {
-  it('resolves regional numbers, qualified IDs and arbitrary existing exact IDs', () => {
-    const pack = fixture(); expect(resolveQuestId(pack, '1', '1')).toBe('R1-01');
-    expect(resolveQuestId(pack, 'r2-01', '1')).toBe('R2-01');
-    pack.nodes[0]!.definition.quest_id = 'legacy_intro';
-    expect(resolveQuestId(pack, 'legacy_intro', '1')).toBe('legacy_intro');
-    expect(() => resolveQuestId(pack, '99', '1')).toThrow(ValidationError);
+  it('resolves global numeric IDs without consulting the selected chapter', () => {
+    const pack = fixture();
+    expect(resolveQuestId(pack, '1')).toBe('1');
+    expect(resolveQuestId(pack, ' 021 ')).toBe('21');
+    pack.nodes[0]!.definition.authoring_tags = ['chapter:9'];
+    expect(resolveQuestId(pack, '1')).toBe('1');
+    for (const input of ['R1-01', 'legacy_intro', '-1', '1.0', '99']) {
+      expect(() => resolveQuestId(pack, input)).toThrow(ValidationError);
+    }
   });
   it('includes only direct outside prerequisites, without expanding their ancestors', () => {
     const projection = projectChapter(fixture(), '1');
-    expect(projection.nodes.map(n => [n.questId, n.external])).toEqual([['R1-01', false], ['R1-02', false], ['R2-01', true]]);
-    expect(projection.edges).toEqual([{ source: 'R2-01', target: 'R1-02' }]);
+    expect(projection.nodes.map(n => [n.questId, n.external])).toEqual([['1', false], ['2', false], ['21', true]]);
+    expect(projection.edges).toEqual([{ source: '21', target: '2' }]);
   });
   it('places canonical shared external cards in a separate nonoverlapping column without changing saved coordinates', () => {
     const pack = fixture();
@@ -77,32 +86,32 @@ describe('graph editing and chapter projection', () => {
     pack.nodes[1]!.x = 360; pack.nodes[1]!.y = 0;
     pack.nodes[2]!.x = 0; pack.nodes[2]!.y = 0;
     pack.nodes[3]!.x = 0; pack.nodes[3]!.y = 0;
-    pack.nodes[0]!.definition.required_completed_quest_ids = ['r2-01', 'R3-01'];
-    pack.nodes[3]!.definition.required_completed_quest_ids = ['R4-01'];
-    pack.nodes.push({ ...pack.nodes[3]!, definition: { ...pack.nodes[3]!.definition, quest_id: 'R4-01', authoring_tags: ['chapter:4'], required_completed_quest_ids: [] } });
+    pack.nodes[0]!.definition.required_completed_quest_ids = ['21', '57'];
+    pack.nodes[3]!.definition.required_completed_quest_ids = ['90'];
+    pack.nodes.push({ ...pack.nodes[3]!, definition: { ...pack.nodes[3]!.definition, quest_id: '90', authoring_tags: ['chapter:4'], required_completed_quest_ids: [] } });
     validatePack(pack);
     const before = JSON.stringify(pack);
     const projection = projectChapter(pack, '1');
     const boundary = projection.nodes.filter(node => node.external);
-    expect(boundary.map(node => node.questId)).toEqual(['R2-01', 'R3-01']);
-    expect(projection.edges.filter(edge => edge.source === 'R2-01')).toHaveLength(2);
+    expect(boundary.map(node => node.questId)).toEqual(['21', '57']);
+    expect(projection.edges.filter(edge => edge.source === '21')).toHaveLength(2);
     expect(boundary.every(node => node.x + 248 < 0)).toBe(true);
     expect(boundary[0]!.x).toBe(boundary[1]!.x);
     expect(boundary[1]!.y - boundary[0]!.y).toBeGreaterThan(116);
-    expect(projection.nodes.some(node => node.questId === 'R4-01')).toBe(false);
+    expect(projection.nodes.some(node => node.questId === '90')).toBe(false);
     expect(projectChapter({ ...pack, nodes: [...pack.nodes].reverse() }, '1').nodes.filter(node => node.external)).toEqual(boundary);
     expect(JSON.stringify(pack)).toBe(before);
   });
   it('edits immutably while preserving hidden nodes, strings and unknown fields', () => {
-    const pack = fixture(); const edited = updatePrerequisites(pack, 'R1-02', ['R1-01']);
-    expect(edited.nodes[1]!.definition.required_completed_quest_ids).toEqual(['R1-01']);
+    const pack = fixture(); const edited = updatePrerequisites(pack, '2', ['1']);
+    expect(edited.nodes[1]!.definition.required_completed_quest_ids).toEqual(['1']);
     expect(edited.nodes[2]!).toEqual(pack.nodes[2]!); expect(edited.strings).toEqual(pack.strings);
-    expect(pack.nodes[1]!.definition.required_completed_quest_ids).toEqual(['R2-01']);
+    expect(pack.nodes[1]!.definition.required_completed_quest_ids).toEqual(['21']);
     expect(edited.nodes[0]!.authoring.prerequisitesStatus).toBe('unspecified');
   });
   it('rejects edits that create a cycle without changing input data', () => {
     const pack = fixture(); const before = JSON.stringify(pack);
-    expect(() => updatePrerequisites(pack, 'R3-01', ['R1-02'])).toThrow(ValidationError);
+    expect(() => updatePrerequisites(pack, '57', ['2'])).toThrow(ValidationError);
     expect(JSON.stringify(pack)).toBe(before);
   });
 });

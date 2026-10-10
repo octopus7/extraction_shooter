@@ -5,7 +5,7 @@ import type { QuestPack, SnapshotMetadata } from '../src/shared/types';
 
 function pack(): QuestPack {
   return { schemaVersion: 1, extra: { format: 'preserve' }, nodes: [{
-    definition: { quest_id: 'R1-01', title_string_key: 'synthetic.title', description_string_key: 'synthetic.desc', authoring_tags: ['chapter:1'], required_completed_quest_ids: [], unknown: { rewards: [1, 2] } },
+    definition: { quest_id: '1', title_string_key: 'synthetic.title', description_string_key: 'synthetic.desc', authoring_tags: ['chapter:1'], required_completed_quest_ids: [], unknown: { rewards: [1, 2] } },
     x: 12, y: 34, authoring: { prerequisitesStatus: 'unspecified', detail_string_key: 'synthetic.desc', unknown: ['preserved'] },
   }], strings: [
     { key: 'synthetic.title', locale: 'ko', value: '합성 제목', extra: 3 },
@@ -105,6 +105,16 @@ describe('administrator authentication', () => {
 });
 
 describe('complete immutable snapshots', () => {
+  it('explains legacy regional snapshot IDs without overwriting the stored snapshot', async () => {
+    const cookie = await login();
+    const saved = await request('/api/snapshots', 'POST', { alias: 'legacy fixture', memo: '', pack: pack() }, cookie);
+    const { snapshot } = await saved.json() as { snapshot: SnapshotMetadata };
+    await env.DB.prepare("UPDATE quest_nodes SET node_json = json_set(node_json, '$.definition.quest_id', 'R1-01') WHERE snapshot_id = ?").bind(snapshot.id).run();
+    const loaded = await request(`/api/snapshots/${snapshot.id}`, 'GET', undefined, cookie);
+    expect(loaded.status).toBe(422);
+    expect(await loaded.json()).toEqual({ error: { key: 'validation.numeric_quest_id' } });
+    expect(await env.DB.prepare("SELECT json_extract(node_json, '$.definition.quest_id') AS id FROM quest_nodes WHERE snapshot_id = ?").bind(snapshot.id).first()).toEqual({ id: 'R1-01' });
+  });
   it('stores and restores full JSON, metadata, locale entries and original ordering without seeding', async () => {
     const cookie = await login(); expect(await (await request('/api/snapshots', 'GET', undefined, cookie)).json()).toEqual({ snapshots: [] });
     const value = pack(); const result = await request('/api/snapshots', 'POST', { alias: '합성 저장', memo: '합성 메모', pack: value }, cookie);
@@ -129,9 +139,9 @@ describe('complete immutable snapshots', () => {
     }
   });
   it('validates packs before storing and returns keyed errors', async () => {
-    const cookie = await login(); const value = pack(); value.nodes[0]!.definition.required_completed_quest_ids = ['R1-99'];
+    const cookie = await login(); const value = pack(); value.nodes[0]!.definition.required_completed_quest_ids = ['999'];
     const response = await request('/api/snapshots', 'POST', { alias: 'invalid', memo: '', pack: value }, cookie);
-    expect(response.status).toBe(422); expect(await response.json()).toEqual({ error: { key: 'validation.unknown_quest', params: { questId: 'R1-99' } } });
+    expect(response.status).toBe(422); expect(await response.json()).toEqual({ error: { key: 'validation.unknown_quest', params: { questId: '999' } } });
     expect((await request('/api/snapshots/no-such-id', 'GET', undefined, cookie)).status).toBe(404);
   });
   it('rejects invalid metadata, malformed JSON, media types and oversized input before storing', async () => {
