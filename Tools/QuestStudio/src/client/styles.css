@@ -8,3 +8,5 @@
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 .quest-card:not(.external){cursor:grab}.quest-card.moving{cursor:grabbing;z-index:2}.quest-card.external{cursor:pointer}
+
+.snap-toggle{display:flex;align-items:center;gap:6px;margin:0;padding:0 10px;white-space:nowrap;font-size:11px;color:#d9e1f3;cursor:pointer}.snap-toggle input{width:14px;height:14px;margin:0;padding:0;accent-color:var(--accent)}.edges .snap-guide{stroke:#7bdfd4;stroke-width:1;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}.zoom-controls{flex-shrink:0}@media(max-width:420px){.graph-bottom{left:8px;right:8px}.snap-toggle{padding:0 6px}.zoom-controls button.fit-button{padding:0 7px}}

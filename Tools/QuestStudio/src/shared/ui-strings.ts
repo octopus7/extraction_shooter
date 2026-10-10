@@ -42,6 +42,8 @@ const ko: Record<string, string> = {
   'graph.legendExternal': '다른 지역',
   'graph.noPrerequisites': '선행 없음',
   'graph.moveHint': '카드를 드래그해 배치 · Esc로 취소',
+  'graph.snapMode': '스냅 모드',
+  'graph.snapHelp': '드래그 중 가까운 카드와 가로·세로 위치를 맞춥니다.',
   'graph.arrange': '자동 정렬',
   'graph.arranged': '현재 챕터의 노드를 정렬했습니다. 파일 또는 새 스냅샷으로 저장하세요.',
   'graph.hint': '카드 드래그로 배치 · 빈 공간으로 이동 · 휠로 확대',

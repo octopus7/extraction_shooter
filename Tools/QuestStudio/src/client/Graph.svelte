@@ -3,9 +3,10 @@
   import { t } from '../shared/ui-strings';
   import type { QuestPack } from '../shared/types';
   import { formatQuestId, GRAPH_CARD_HEIGHT, GRAPH_CARD_WIDTH, projectChapter } from '../shared/graph';
+  import { snapPosition } from './snap';
   import { questText } from './state';
 
-  let { pack, chapter, selectedId, onselect, onmove, onarrange, disabled = false }: { pack: QuestPack; chapter: string; selectedId: number | null; onselect: (id: number) => void; onmove: (id: number, x: number, y: number) => void; onarrange: () => void; disabled?: boolean } = $props();
+  let { pack, chapter, selectedId, onselect, onmove, onarrange, disabled = false, snapEnabled = $bindable(true) }: { pack: QuestPack; chapter: string; selectedId: number | null; onselect: (id: number) => void; onmove: (id: number, x: number, y: number) => void; onarrange: () => void; disabled?: boolean; snapEnabled?: boolean } = $props();
   const projection = $derived(projectChapter(pack, chapter));
   let viewport: HTMLDivElement;
   let scale = $state(1);
@@ -13,6 +14,7 @@
   let dragging = $state(false);
   let pointer: { x: number; y: number; originX: number; originY: number; id: number } | null = null;
   let nodeDrag = $state<{ id: number; pointerId: number; clientX: number; clientY: number; originX: number; originY: number; x: number; y: number; scale: number; moved: boolean } | null>(null);
+  let guides = $state<{ guideX: number | null; guideY: number | null }>({ guideX: null, guideY: null });
   const renderedNodes = $derived(projection.nodes.map(node => nodeDrag?.id === node.id ? { ...node, x: nodeDrag.x, y: nodeDrag.y } : node));
   const cardWidth = GRAPH_CARD_WIDTH;
   const cardHeight = GRAPH_CARD_HEIGHT;
@@ -52,13 +54,19 @@
   function move(event: PointerEvent) {
     if (nodeDrag?.pointerId === event.pointerId) {
       const dx = event.clientX - nodeDrag.clientX, dy = event.clientY - nodeDrag.clientY;
-      if (nodeDrag.moved || Math.hypot(dx, dy) >= 3) nodeDrag = { ...nodeDrag, moved: true, x: Math.round(nodeDrag.originX + dx / nodeDrag.scale), y: Math.round(nodeDrag.originY + dy / nodeDrag.scale) };
+      if (nodeDrag.moved || Math.hypot(dx, dy) >= 3) {
+        const x = Math.round(nodeDrag.originX + dx / nodeDrag.scale), y = Math.round(nodeDrag.originY + dy / nodeDrag.scale);
+        const aligned = snapEnabled ? snapPosition(nodeDrag.id, x, y, nodeDrag.scale, projection.nodes) : { x, y, guideX: null, guideY: null };
+        guides = aligned;
+        nodeDrag = { ...nodeDrag, moved: true, x: aligned.x, y: aligned.y };
+      }
     } else if (pointer?.id === event.pointerId) offset = { x: pointer.originX + event.clientX - pointer.x, y: pointer.originY + event.clientY - pointer.y };
   }
   function end(event?: PointerEvent, commit = false) {
     const id = nodeDrag?.pointerId ?? pointer?.id;
     if (event && event.pointerId !== id) return;
     const finished = nodeDrag;
+    guides = { guideX: null, guideY: null };
     nodeDrag = null; pointer = null; dragging = false;
     if (id !== undefined && viewport.hasPointerCapture(id)) viewport.releasePointerCapture(id);
     if (commit && finished?.moved && !disabled) onmove(finished.id, finished.x, finished.y);
@@ -93,6 +101,8 @@
         {#each projection.edges as edge (`${edge.source}:${edge.target}`)}
           <path class:active={edge.source === selectedId || edge.target === selectedId} d={path(edge.source, edge.target)} marker-end="url(#arrow)" />
         {/each}
+        {#if guides.guideX !== null}<line class="snap-guide" x1={guides.guideX} x2={guides.guideX} y1={Math.min(...renderedNodes.map(node => node.y)) - 40} y2={Math.max(...renderedNodes.map(node => node.y)) + cardHeight + 40} />{/if}
+        {#if guides.guideY !== null}<line class="snap-guide" y1={guides.guideY} y2={guides.guideY} x1={Math.min(...renderedNodes.map(node => node.x)) - 40} x2={Math.max(...renderedNodes.map(node => node.x)) + cardWidth + 40} />{/if}
       </svg>
       {#each renderedNodes as node (node.id)}
         {@const definition = pack.nodes.find(item => item.definition.quest_id === node.questId)}
@@ -107,5 +117,5 @@
     {#if !projection.nodes.length}<p class="graph-no-nodes">{t('graph.noNodes')}</p>{/if}
   </div>
   <div class="graph-legend"><span><i class="legend-dot local"></i>{t('graph.legendLocal')}</span><span><i class="legend-dot external"></i>{t('graph.legendExternal')}</span><span><i class="legend-dot no-prerequisites"></i>{t('graph.noPrerequisites')}</span></div>
-  <div class="graph-bottom"><span class="graph-hint">{t('graph.hint')}</span><div class="zoom-controls"><button class="fit-button" disabled={disabled || !!nodeDrag} onclick={arrange}>{t('graph.arrange')}</button><button aria-label={t('graph.zoomOut')} title={t('graph.zoomOut')} onclick={() => zoom(1 / 1.2)}>−</button><span>{t('graph.zoom', { percent: Math.round(scale * 100) })}</span><button aria-label={t('graph.zoomIn')} title={t('graph.zoomIn')} onclick={() => zoom(1.2)}>+</button><button class="fit-button" onclick={fit}>{t('graph.fit')}</button></div></div>
+  <div class="graph-bottom"><span class="graph-hint">{t('graph.hint')}</span><div class="zoom-controls"><label class="snap-toggle" title={t('graph.snapHelp')}><input type="checkbox" bind:checked={snapEnabled} disabled={!!nodeDrag} />{t('graph.snapMode')}</label><button class="fit-button" disabled={disabled || !!nodeDrag} onclick={arrange}>{t('graph.arrange')}</button><button aria-label={t('graph.zoomOut')} title={t('graph.zoomOut')} onclick={() => zoom(1 / 1.2)}>−</button><span>{t('graph.zoom', { percent: Math.round(scale * 100) })}</span><button aria-label={t('graph.zoomIn')} title={t('graph.zoomIn')} onclick={() => zoom(1.2)}>+</button><button class="fit-button" onclick={fit}>{t('graph.fit')}</button></div></div>
 </div>

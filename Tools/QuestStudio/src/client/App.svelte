@@ -9,6 +9,7 @@
   import Graph from './Graph.svelte';
 
   let document = $state(emptyDocument());
+  let snapEnabled = $state(true);
   let authenticated = $state(false);
   let authConfigured = $state(true);
   let checking = $state(true);
@@ -169,7 +170,7 @@
 
     {#if document.pack}
       <main class="editor-layout"><section class="canvas-section"><div class="canvas-heading"><div class="chapter-control"><label for="chapter-select">{t('chapter.label')}</label><select id="chapter-select" value={document.chapter} onchange={(event) => changeChapter(event.currentTarget.value)} disabled={busy}>{#each chapterList as chapter}<option value={chapter}>{t('chapter.name', { chapter })}</option>{/each}</select><span>{t('chapter.count', { count: visibleCount })}</span></div><span class="total-count">{t('document.total', { nodes: document.pack.nodes.length, strings: document.pack.strings.length })}</span></div>
-        {#key `${document.chapter}:${document.origin}`}<Graph pack={document.pack} chapter={document.chapter} selectedId={document.selectedQuestId} onselect={changeSelection} onmove={moveNode} onarrange={arrangeNodes} disabled={busy} />{/key}
+        {#key `${document.chapter}:${document.origin}`}<Graph pack={document.pack} chapter={document.chapter} selectedId={document.selectedQuestId} onselect={changeSelection} onmove={moveNode} onarrange={arrangeNodes} disabled={busy} bind:snapEnabled />{/key}
       </section>
       <aside class="inspector"><div class="inspector-heading"><span class="eyebrow">{t('inspector.heading')}</span>{#if node}<span class="inspector-id">{formatQuestId(node.definition.quest_id)}</span>{/if}</div>
         {#if node}<div class="inspector-body"><h2>{questText(document.pack, node.definition.title_string_key)}</h2><span class="status-pill" class:unspecified={node.authoring.prerequisitesStatus === 'unspecified'}>{external ? t('graph.legendExternal') : node.authoring.prerequisitesStatus === 'unspecified' ? t('inspector.unspecified') : t('inspector.confirmed')}</span>
