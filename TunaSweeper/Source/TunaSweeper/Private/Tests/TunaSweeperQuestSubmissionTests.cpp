@@ -2,6 +2,7 @@
 
 #include "Engine/Engine.h"
 #include "Character/TunaSweeperMoleCompanionActor.h"
+#include "Character/TunaSweeperQuestPresenceNpcActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Engine/World.h"
@@ -110,6 +111,33 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Wrong NPC click preserves progress"), Quests->GetQuestState(Submitted), ETunaSweeperQuestState::RewardAvailable);
 	Panel->InitializeQuest(Submitted, TEXT("provider.mole"));
 	TestTrue(TEXT("Assigned NPC enables reward claim"), Panel->IsPrimaryButtonEnabled(Submitted));
+	int32 ResolvedQuest = 0;
+	TestTrue(TEXT("Omitted completion provider resolves reward at giver"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.mole"), 0, ResolvedQuest));
+	Quests->QuestDefinitions[Submitted].CompletionProviderId = TEXT("provider.recipient");
+	TestFalse(TEXT("Giver cannot claim a reward assigned to a different NPC"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->HandlePrimaryButtonClicked();
+	TestEqual(TEXT("Giver click cannot bypass completion NPC"), Quests->GetQuestState(Submitted), ETunaSweeperQuestState::RewardAvailable);
+	TestFalse(TEXT("Giver fallback cannot route a reward assigned to another NPC"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.mole"), Submitted, ResolvedQuest));
+	TestTrue(TEXT("Completion NPC resolves the achieved quest"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.recipient"), 0, ResolvedQuest));
+	TestEqual(TEXT("Completion NPC resolves correct reward"), ResolvedQuest, Submitted);
+	auto* FacilityNpc = World->SpawnActor<ATunaSweeperFacilityNpcActor>();
+	if (!TestNotNull(TEXT("Facility provider actor"), FacilityNpc)) return false;
+	FacilityNpc->QuestFallbackId = Submitted;
+	FacilityNpc->QuestProviderId = TEXT("provider.mole");
+	TestEqual(TEXT("Facility giver fallback cannot bypass separate reward NPC"), FacilityNpc->ResolveQuestId(), 0);
+	FacilityNpc->QuestProviderId = TEXT("provider.recipient");
+	TestEqual(TEXT("Facility completion NPC resolves achieved quest"), FacilityNpc->ResolveQuestId(), Submitted);
+	TestFalse(TEXT("Unrelated NPC fallback cannot route the reward"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.other"), Submitted, ResolvedQuest));
+	Panel->InitializeQuest(Submitted, TEXT("provider.recipient"));
+	TestTrue(TEXT("Completion NPC enables reward claim"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Quests->QuestDefinitions[Submitted].CompletionProviderId = NAME_None;
+	TestFalse(TEXT("Empty completion provider removes recipient reward access"), Panel->IsPrimaryButtonEnabled(Submitted));
+	Panel->InitializeQuest(Submitted, TEXT("provider.mole"));
+	TestTrue(TEXT("Empty completion provider restores giver reward access"), Panel->IsPrimaryButtonEnabled(Submitted));
 	Panel->ResetQuestSelection();
 	TestFalse(TEXT("Closing clears NPC reward access"), Panel->IsPrimaryButtonEnabled(Submitted));
 	Panel->InitializeQuest(Submitted, TEXT("provider.mole"));
@@ -123,8 +151,20 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	// A different giver, target, item and count exercise the same production submission path.
 	FTunaSweeperQuestDefinition Offered = Delivery;
 	Offered.QuestId = 201;
+	Offered.CompletionProviderId = TEXT("provider.recipient");
 	Quests->QuestDefinitions.Add(201, Offered);
+	FacilityNpc->QuestFallbackId = 201;
+	TestEqual(TEXT("Facility completion fallback cannot offer giver's available quest"), FacilityNpc->ResolveQuestId(), 0);
+	FacilityNpc->Destroy();
+	TestFalse(TEXT("Completion NPC does not offer unaccepted quest"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.recipient"), 201, ResolvedQuest));
+	Panel->InitializeQuest(201, TEXT("provider.recipient"));
+	TestEqual(TEXT("Completion NPC has no bulk acceptance candidates"), Panel->GetAcceptAllQuestIds().Num(), 0);
+	TestFalse(TEXT("Completion NPC cannot accept giver quest"), Panel->IsPrimaryButtonEnabled(201));
 	Panel->InitializeQuest(201, TEXT("provider.mole"));
+	TestTrue(TEXT("Giver still offers quest with separate completion NPC"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.mole"), 0, ResolvedQuest));
+	TestTrue(TEXT("Giver can accept quest with separate completion NPC"), Panel->IsPrimaryButtonEnabled(201));
 	TestEqual(TEXT("One available quest is counted"), Panel->GetAcceptAllQuestIds().Num(), 1);
 	TestEqual(TEXT("Single available quest hides bulk action"), Panel->AcceptAllButton->GetVisibility(), ESlateVisibility::Collapsed);
 	Panel->HandleAcceptAllClicked();
@@ -153,6 +193,7 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	FTunaSweeperQuestDefinition Custom;
 	Custom.QuestId = 102;
 	Custom.ProviderId = TEXT("provider.giver");
+	Custom.CompletionProviderId = TEXT("provider.completion");
 	FTunaSweeperObjectiveDefinition First;
 	First.ObjectiveId = TEXT("first");
 	First.Type = ETunaSweeperObjectiveType::ItemSubmitted;
@@ -170,6 +211,10 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Progress.State = ETunaSweeperQuestState::Accepted;
 	Progress.ObjectiveProgress.Reset();
 	Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
+	TestTrue(TEXT("Accepted quest remains reachable at giver"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.giver"), 0, ResolvedQuest));
+	TestFalse(TEXT("Completion NPC does not expose a reward before objectives complete"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.completion"), Custom.QuestId, ResolvedQuest));
 	TestFalse(TEXT("Two objectives require total five, not three"), Quests->TrySubmitItemsToProvider(TEXT("provider.recipient"), Submitted, false));
 	// The recipient need not own the quest; its interaction must remain reachable.
 	for (auto& Objective : Quests->QuestDefinitions.FindChecked(Custom.QuestId).Objectives) Objective.TargetProviderId = TEXT("provider.mole");
@@ -205,6 +250,13 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Only requested amount consumed"), Game->CountInventoryItemById(6002), 1);
 	TestEqual(TEXT("First objective fulfilled"), Quests->GetObjectiveProgressCount(Custom.QuestId, TEXT("first")), 2);
 	TestEqual(TEXT("Second objective fulfilled"), Quests->GetObjectiveProgressCount(Custom.QuestId, TEXT("second")), 3);
+	TestFalse(TEXT("Item recipient cannot claim a reward assigned to a third NPC"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.recipient"), Custom.QuestId, ResolvedQuest));
+	TestTrue(TEXT("Separate completion NPC resolves reward after item submission"),
+		Quests->TryResolveQuestForProvider(TEXT("provider.completion"), 0, ResolvedQuest));
+	Quests->QuestDefinitions.FindChecked(Custom.QuestId).CompletionProviderId = TEXT("provider.mole");
+	TestEqual(TEXT("Actor resolves completion quest for reward marker and interaction"), Mole->ResolveQuestId(), Custom.QuestId);
+	Quests->QuestDefinitions.FindChecked(Custom.QuestId).CompletionProviderId = Custom.CompletionProviderId;
 
 	TStrongObjectPtr<UTunaSweeperSaveGame> Save(NewObject<UTunaSweeperSaveGame>());
 	Quests->ExportQuestProgressForSave(Save->NumericQuestProgressStates, Save->NumericTrackedQuestId, Save->QuestCoinBalance);
@@ -222,6 +274,57 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Reload does not consume again"), Game->CountInventoryItemById(6002), 1);
 	Quests->QuestProgressById.FindChecked(Custom.QuestId).State = ETunaSweeperQuestState::RewardCompleted;
 	TestFalse(TEXT("Reward completed quest never submits again"), Quests->TrySubmitItemsToProvider(TEXT("provider.recipient"), Submitted, false));
+
+	// Bind real actor lifecycle listeners, then restore progress as a save load does.
+	// No manual refresh follows the loads: missing subscriptions must fail these checks.
+	Quests->LoadQuestProgressFromSave({}, 0, 0);
+	FActorSpawnParameters PresenceSpawnParameters;
+	PresenceSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	auto* FieldNpc = World->SpawnActor<ATunaSweeperQuestPresenceNpcActor>(PresenceSpawnParameters);
+	auto* BaseNpc = World->SpawnActor<ATunaSweeperQuestPresenceNpcActor>(PresenceSpawnParameters);
+	if (!TestNotNull(TEXT("Field presence actor"), FieldNpc) || !TestNotNull(TEXT("Base presence actor"), BaseNpc)) return false;
+	FieldNpc->PresenceQuestId = Custom.QuestId;
+	FieldNpc->PresenceRole = ETunaSweeperQuestNpcPresenceRole::FieldOffer;
+	BaseNpc->PresenceQuestId = Custom.QuestId;
+	BaseNpc->PresenceRole = ETunaSweeperQuestNpcPresenceRole::BaseResident;
+	FieldNpc->DispatchBeginPlay();
+	BaseNpc->DispatchBeginPlay();
+	TestFalse(TEXT("Available field NPC appears on begin play"), FieldNpc->IsHidden());
+	TestTrue(TEXT("Available field NPC collision is enabled"), FieldNpc->GetActorEnableCollision());
+	TestTrue(TEXT("Available quest does not spawn base resident"), BaseNpc->IsHidden());
+	TestFalse(TEXT("Absent base resident cannot collide"), BaseNpc->GetActorEnableCollision());
+	Progress.QuestId = Custom.QuestId;
+	Progress.ObjectiveProgress.Reset();
+	for (const auto State : { ETunaSweeperQuestState::Accepted, ETunaSweeperQuestState::RewardAvailable })
+	{
+		Progress.State = State;
+		Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
+		TestTrue(TEXT("Accepted or unclaimed quest hides field NPC after load notification"), FieldNpc->IsHidden());
+		TestFalse(TEXT("Accepted or unclaimed quest disables field collision"), FieldNpc->GetActorEnableCollision());
+		TestTrue(TEXT("Accepted or unclaimed quest keeps base resident hidden"), BaseNpc->IsHidden());
+		TestFalse(TEXT("Accepted or unclaimed quest keeps base collision disabled"), BaseNpc->GetActorEnableCollision());
+	}
+	Progress.State = ETunaSweeperQuestState::RewardCompleted;
+	Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
+	TestTrue(TEXT("Reward completion keeps field NPC hidden"), FieldNpc->IsHidden());
+	TestFalse(TEXT("Reward completion keeps field collision disabled"), FieldNpc->GetActorEnableCollision());
+	TestFalse(TEXT("Reward completion reveals base resident through load notification"), BaseNpc->IsHidden());
+	TestTrue(TEXT("Reward completion enables base resident collision"), BaseNpc->GetActorEnableCollision());
+	Quests->LoadQuestProgressFromSave({}, 0, 0);
+	TestFalse(TEXT("Loading pre-accept progress restores field NPC"), FieldNpc->IsHidden());
+	TestTrue(TEXT("Loading pre-accept progress restores field collision"), FieldNpc->GetActorEnableCollision());
+	TestTrue(TEXT("Loading pre-accept progress removes base resident"), BaseNpc->IsHidden());
+	TestFalse(TEXT("Loading pre-accept progress removes base collision"), BaseNpc->GetActorEnableCollision());
+	Quests->QuestDefinitions.FindChecked(Custom.QuestId).RequiredCompletedQuestIds = { 999999 };
+	Quests->LoadQuestProgressFromSave({}, 0, 0);
+	TestTrue(TEXT("Locked available quest does not expose field NPC"), FieldNpc->IsHidden());
+	TestFalse(TEXT("Locked available quest disables field collision"), FieldNpc->GetActorEnableCollision());
+	Quests->QuestDefinitions.Remove(Custom.QuestId);
+	Quests->LoadQuestProgressFromSave({}, 0, 0);
+	TestTrue(TEXT("Unknown quest keeps field NPC hidden"), FieldNpc->IsHidden());
+	TestTrue(TEXT("Unknown quest keeps base resident hidden"), BaseNpc->IsHidden());
+	FieldNpc->Destroy();
+	BaseNpc->Destroy();
 
 	const FString ValidObjective = TEXT(R"({"objective_id":"test","type":"item_submitted","item_id":6002,"required_count":2,"target_provider_id":"provider.recipient"})");
 	for (const FString& Json : { ValidObjective.Replace(TEXT("6002"), TEXT("-1")),

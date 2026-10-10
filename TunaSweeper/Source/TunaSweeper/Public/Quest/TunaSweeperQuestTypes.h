@@ -181,6 +181,15 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName ProviderId = NAME_None;
 
+	// Optional reward NPC override. Acceptance remains assigned to ProviderId.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName CompletionProviderId = NAME_None;
+
+	FName GetCompletionProviderId() const
+	{
+		return CompletionProviderId.IsNone() ? ProviderId : CompletionProviderId;
+	}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	int32 SortOrder = 0;
 

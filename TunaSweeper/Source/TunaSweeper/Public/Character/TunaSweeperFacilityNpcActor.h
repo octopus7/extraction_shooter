@@ -16,6 +16,7 @@ UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperFacilityNpcActor : public AActor
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperQuestSubmissionTest;
 
 public:
 	ATunaSweeperFacilityNpcActor();

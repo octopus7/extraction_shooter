@@ -1451,9 +1451,12 @@ bool UTunaSweeperQuestWidget::IsPrimaryButtonEnabled(int32 InQuestId) const
 		return false;
 	}
 
-	if (QuestSubsystem->CanAcceptQuest(InQuestId)) return true;
 	const FTunaSweeperQuestDefinition* Definition = QuestSubsystem->FindQuestDefinition(InQuestId);
+	if (QuestSubsystem->CanAcceptQuest(InQuestId))
+	{
+		return Definition && (InteractionProviderId.IsNone() || Definition->ProviderId == InteractionProviderId);
+	}
 	return Definition && !InteractionProviderId.IsNone() &&
-		Definition->ProviderId == InteractionProviderId &&
+		Definition->GetCompletionProviderId() == InteractionProviderId &&
 		QuestSubsystem->CanClaimQuestReward(InQuestId);
 }

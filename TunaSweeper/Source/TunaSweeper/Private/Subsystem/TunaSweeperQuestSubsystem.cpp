@@ -660,7 +660,9 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 	for (const TPair<int32, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
 	{
 		const FTunaSweeperQuestDefinition& Definition = QuestPair.Value;
-		if (!IsQuestForProvider(Definition, ProviderId))
+		const bool bIsGiver = IsQuestForProvider(Definition, ProviderId);
+		const bool bIsCompletionProvider = !ProviderId.IsNone() && Definition.GetCompletionProviderId() == ProviderId;
+		if (!bIsGiver && !bIsCompletionProvider)
 		{
 			continue;
 		}
@@ -668,6 +670,7 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 		bHasProviderQuests = true;
 		const ETunaSweeperQuestState State = GetQuestState(Definition.QuestId);
 		if (State == ETunaSweeperQuestState::RewardCompleted ||
+			(State == ETunaSweeperQuestState::RewardAvailable ? !bIsCompletionProvider : !bIsGiver) ||
 			(State == ETunaSweeperQuestState::Available && !AreDefinitionPrerequisitesMet(Definition)))
 		{
 			continue;
@@ -710,6 +713,7 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 
 	const FTunaSweeperQuestDefinition* FallbackDefinition = FindQuestDefinition(FallbackQuestId);
 	if (FallbackDefinition &&
+		FallbackDefinition->ProviderId.IsNone() && FallbackDefinition->GetCompletionProviderId().IsNone() &&
 		GetQuestState(FallbackQuestId) != ETunaSweeperQuestState::RewardCompleted &&
 		AreDefinitionPrerequisitesMet(*FallbackDefinition))
 	{
@@ -1003,6 +1007,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		Definition.DescriptionStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("description_string_key"));
 		Definition.Description = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("description"));
 		Definition.ProviderId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("provider_id"));
+		Definition.CompletionProviderId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("completion_provider_id"));
 		double SortOrder = 0.0;
 		QuestObject->TryGetNumberField(TEXT("sort_order"), SortOrder);
 		Definition.SortOrder = FMath::RoundToInt(SortOrder);

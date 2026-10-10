@@ -800,7 +800,7 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 			if (Quests->TrySubmitItemsToProvider(ProviderId, SubmittedQuest))
 			{
 				const FTunaSweeperQuestDefinition* Definition = Quests->FindQuestDefinition(SubmittedQuest);
-				if (Definition && !ProviderId.IsNone() && Definition->ProviderId == ProviderId &&
+				if (Definition && !ProviderId.IsNone() && Definition->GetCompletionProviderId() == ProviderId &&
 					Quests->CanClaimQuestReward(SubmittedQuest))
 				{
 					if (Quests->ClaimQuestReward(SubmittedQuest))

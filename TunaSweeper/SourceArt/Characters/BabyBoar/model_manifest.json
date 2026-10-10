@@ -1,0 +1,43 @@
+{
+  "name": "SM_BabyBoarDummy",
+  "voxel_cell_cm": 2,
+  "voxel_lattice_max": [
+    32,
+    16,
+    24
+  ],
+  "occupied_voxels": 3368,
+  "dimensions_cm": [
+    64.0,
+    24.0,
+    46.0
+  ],
+  "vertices": 2188,
+  "surface_quads": 2192,
+  "triangles": 4384,
+  "material_slots": 1,
+  "uv_channels": 1,
+  "internal_faces": 0,
+  "palette_size_px": [
+    64,
+    8
+  ],
+  "palette_opaque": true,
+  "forward_blender": "+X",
+  "up_blender": "+Z",
+  "fbx_export_axis_forward": "-Y",
+  "fbx_export_axis_up": "Z",
+  "fbx_unit": "centimeter metadata from meter scene",
+  "origin": "ground centered horizontally",
+  "files": [
+    "SM_BabyBoarDummy.fbx",
+    "T_BabyBoarPalette.png",
+    "BabyBoar.blend",
+    "BabyBoar_Preview.png"
+  ],
+  "uv_mapping": "nonzero area quads inset inside palette swatches",
+  "uv_triangle_min_area": 0.015625,
+  "degenerate_uv_triangles": 0,
+  "blender_tangent_validation": "all loop tangents finite and unit length",
+  "fbx_roundtrip_uv_triangle_min_area": 0.015625
+}

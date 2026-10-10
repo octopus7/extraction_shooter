@@ -408,3 +408,8 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 - Editor drafts, dirty flags, selected slot, preview selection and camera rotation are session state, not automatic disk saves. Switching to solo play preserves the prior editing draft in memory. Exiting the application discards unsaved edits.
 - Part health/destruction, targets, warnings, projectiles, phase and battle results are transient. Each battle uses a definition snapshot and starts with fresh runtime state. The boss lab game mode keeps the existing combat-test save guard active until EndPlay and restores original inventory/experience on exit.
 - No network session data, downloads, matchmaking state or replication is stored. See `Docs/boss_laboratory.md` for the current single-player workflow.
+
+## Quest NPC presence
+
+- Quest-driven NPC visibility and collision are derived from existing quest progress on BeginPlay and OnQuestProgressChanged, including save-load broadcasts. FieldOffer appears only while CanAcceptQuest is true; BaseResident appears only after RewardCompleted. No actor visibility flags, new save fields, or save-version changes are needed.
+- Optional completion_provider_id belongs to quest definitions, not saved progress. Missing or empty values retain provider_id as the completion NPC.

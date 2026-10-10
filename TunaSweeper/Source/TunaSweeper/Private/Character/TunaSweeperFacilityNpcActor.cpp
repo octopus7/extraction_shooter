@@ -162,6 +162,7 @@ int32 ATunaSweeperFacilityNpcActor::ResolveQuestId() const
 				{
 					return ResolvedQuestId;
 				}
+				return 0;
 			}
 		}
 	}
