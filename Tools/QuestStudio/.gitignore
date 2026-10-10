@@ -3,6 +3,7 @@ dist/
 .wrangler/
 
 # Local development secrets
+.local-admin/
 .dev.vars
 .dev.vars.*
 .env
