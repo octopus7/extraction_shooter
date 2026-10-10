@@ -10,7 +10,7 @@ const encoder = new TextEncoder();
 const now = () => Math.floor(Date.now() / 1000);
 
 export function isAdminAuthConfigured(env: Env): boolean {
-  return typeof env.ADMIN_PASSWORD === 'string' && env.ADMIN_PASSWORD.length >= 16;
+  return typeof env.ADMIN_PASSWORD === 'string' && env.ADMIN_PASSWORD.length >= 10;
 }
 export function isLocalRequest(request: Request): boolean {
   const url = new URL(request.url);

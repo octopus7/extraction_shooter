@@ -75,6 +75,26 @@ describe('administrator authentication', () => {
     expect(await session.json()).toEqual({ authenticated: false, authConfigured: false });
     expect((await worker.fetch(new Request(`${origin}/api/login`, { method: 'POST' }), missing)).status).toBe(503);
   });
+  it('accepts a ten-character configured password and authenticates its session', async () => {
+    const configured = { ...env, ADMIN_PASSWORD: 'test-12345' };
+    expect(await (await worker.fetch(new Request(`${origin}/api/session`), configured)).json())
+      .toEqual({ authenticated: false, authConfigured: true });
+    const attempt = (password: string) => worker.fetch(new Request(`${origin}/api/login`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password }),
+    }), configured);
+    expect((await attempt('wrong-1234')).status).toBe(401);
+    const response = await attempt(configured.ADMIN_PASSWORD);
+    expect(response.status).toBe(200);
+    const cookie = response.headers.get('set-cookie')!.split(';')[0]!;
+    expect(await (await worker.fetch(new Request(`${origin}/api/session`, { headers: { cookie } }), configured)).json())
+      .toEqual({ authenticated: true, authConfigured: true });
+  });
+  it('does not enable authentication for a password shorter than ten characters', async () => {
+    const tooShort = { ...env, ADMIN_PASSWORD: 'test-1234' };
+    expect(await (await worker.fetch(new Request(`${origin}/api/session`), tooShort)).json())
+      .toEqual({ authenticated: false, authConfigured: false });
+    expect((await worker.fetch(new Request(`${origin}/api/login`, { method: 'POST' }), tooShort)).status).toBe(503);
+  });
   it('allows localhost development cookies and rejects malformed cookie values', async () => {
     const response = await worker.fetch(new Request('http://localhost/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: env.ADMIN_PASSWORD }) }), env);
     expect(response.status).toBe(200);

@@ -10,7 +10,7 @@ npm run db:migrate:local
 npm run dev
 ```
 
-로컬 로그인에는 Git에서 제외되는 `.dev.vars` 파일에 `ADMIN_PASSWORD`를 설정한다. 최소 16자 비밀번호를 사용한다. 실제 운영 비밀번호를 문서나 소스에 기록하지 않는다. 개발 서버 주소는 `http://127.0.0.1:5179`다.
+로컬 로그인에는 Git에서 제외되는 `.dev.vars` 파일에 `ADMIN_PASSWORD`를 설정한다. 최소 10자 비밀번호를 사용한다. 실제 운영 비밀번호를 문서나 소스에 기록하지 않는다. 개발 서버 주소는 `http://127.0.0.1:5179`다.
 
 ```powershell
 npm run verify
