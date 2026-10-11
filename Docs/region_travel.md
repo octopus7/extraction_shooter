@@ -20,7 +20,7 @@
 
 | 맵 | 액터 라벨 | 위치 X, Y, Z |
 | --- | --- | --- |
-| RaidForest | Forest_BaseEntrance | -22900, -5000, 104.68 |
+| RaidForest | Forest_BaseEntrance | -22350, -5350, -47.69 |
 | RaidForest | Forest_VillagePassage | 18000, 3500, -0.78 |
 | RaidForest | Forest_VillageBombObstacle | 17600, 3500, -17.97 |
 | RaidForest | Forest_PlainsLift | 13000, -12000, 885.15 |
@@ -50,3 +50,7 @@
 폭파 장애물의 `ProgressObjectId`, 승강기의 `RequiredProgressId`와 목표의 `world_progress_id`를 맞추면 기존 액터와 연결된다. 액터에 퀘스트 번호를 넣거나 별도 이벤트를 호출할 필요가 없다. 개방 전에 수락한 퀘스트는 개방 즉시, 먼저 개방한 경우는 나중에 수락하는 시점에 인정한다. 저장 복원은 현재 맵에 액터가 없어도 저장된 상태로 판정한다.
 
 완료는 보상 대기 상태까지만 진행하며 기존 선행 조건·수락 경로·보상 수령 절차를 유지한다. 미수락 퀘스트를 자동 수락하거나 다른 목표를 생략하지 않는다. 반복 알림이나 재입장은 진행값과 보상을 중복 지급하지 않는다.
+
+## 시작점 주변 시설 배치 (2026-10-12)
+
+숲의 PlayerStart는 (-22000, -5000, 60)이다. `QuestFacilities/Forest_PrimaryPowerFacility`에 기존 `/Game/Interaction/BP_PowerFacility_Primary`를 (-21650, -4550, -67.54)에 배치했다. 시작점과의 거리는 약 5.84m이며, 기지 입구는 약 5.07m다. 입구의 뒤집힌 회전을 바로잡고 두 메시의 바닥을 지형에 맞췄다. 저장한 맵을 다시 열어 거리·배치 유일성·지면 접촉·시작점과 귀환 트리거 분리를 확인했다. 실제 수리 및 귀환 플레이 검증은 별도다.
