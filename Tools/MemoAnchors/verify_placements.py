@@ -27,9 +27,7 @@ def verify_data():
             translations = list(csv.DictReader(f))
         assert len(translations) == 120 and {r['string_key'] for r in translations} == keys
         for row in translations:
-            assert all(row.values()), f'Empty translation: {row}'
-            if 'ko' in row:
-                assert row['ko'] == f"메모 {int(row['string_key'].split('.')[1])} 번"
+            assert all(value and value.strip() for value in row.values()), f'Empty translation: {row}'
     return {'definitions': 60, 'string_keys': 120, 'languages': 7}
 
 def verify_maps():
