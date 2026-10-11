@@ -1,6 +1,6 @@
 string_key,ko,en,ja
 memo.title_format,메모 {Number},Memo {Number},メモ {Number}
-memo.1.body,메모 1 번,Memo 1,メモ 1 番
+memo.1.body,회색은 최약체다,The gray ones are the weakest.,灰色のやつが一番弱い。
 memo.2.body,메모 2 번,Memo 2,メモ 2 番
 memo.3.body,메모 3 번,Memo 3,メモ 3 番
 memo.4.body,메모 4 번,Memo 4,メモ 4 番

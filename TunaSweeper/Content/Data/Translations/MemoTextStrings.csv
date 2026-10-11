@@ -1,6 +1,6 @@
 string_key,zh-Hans,zh-Hant,ru,pt-BR
 memo.title_format,备忘录 {Number},備忘錄 {Number},Записка {Number},Anotação {Number}
-memo.1.body,备忘录 1,備忘錄 1,Записка 1,Memorando 1
+memo.1.body,灰色的家伙最弱。,灰色的傢伙最弱。,Серые — самые слабые.,Os cinzentos são os mais fracos.
 memo.2.body,备忘录 2,備忘錄 2,Записка 2,Memorando 2
 memo.3.body,备忘录 3,備忘錄 3,Записка 3,Memorando 3
 memo.4.body,备忘录 4,備忘錄 4,Записка 4,Memorando 4
