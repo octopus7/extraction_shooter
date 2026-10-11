@@ -13,6 +13,28 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperItemData, Log, All);
 
+namespace TunaSweeperShopQuestConditions
+{
+	bool Parse(const FJsonObject& Json, TArray<int32>& OutIds)
+	{
+		OutIds.Reset();
+		if (!Json.HasField(TEXT("required_completed_quest_ids"))) return true;
+		const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+		if (!Json.TryGetArrayField(TEXT("required_completed_quest_ids"), Values) || !Values) return false;
+		TArray<int32> Parsed;
+		for (const auto& Value : *Values)
+		{
+			double Number = 0;
+			if (!Value.IsValid() || Value->Type != EJson::Number || !Value->TryGetNumber(Number) ||
+				!FMath::IsFinite(Number) || Number < 1 || Number > MAX_int32 || FMath::FloorToDouble(Number) != Number)
+				return false;
+			Parsed.AddUnique(static_cast<int32>(Number));
+		}
+		OutIds = MoveTemp(Parsed);
+		return true;
+	}
+}
+
 namespace TunaSweeperItemDataFiles
 {
 	const TCHAR* ItemTableJsonRelativePath = TEXT("Data/ItemTable.json");
@@ -1421,6 +1443,13 @@ bool UTunaSweeperItemDataSubsystem::LoadShopDefinitionsJson()
 			}
 
 			FTunaSweeperShopItemDefinition ShopItem;
+			if (!TunaSweeperShopQuestConditions::Parse(**ItemObject, ShopItem.RequiredCompletedQuestIds))
+			{
+				// Do not skip the row: stock persistence uses original item slot indices.
+				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid required_completed_quest_ids in shop %d item %d."), Definition.ShopId, ItemId);
+				ShopDefinitionsById.Reset();
+				return false;
+			}
 			ShopItem.ItemId = ItemId;
 			ShopItem.StockQuantity = FMath::Max(0, static_cast<int32>(NumericStockQuantity));
 			if ((*ItemObject)->TryGetNumberField(TEXT("price"), NumericPrice) ||

@@ -304,6 +304,10 @@ struct TUNASWEEPER_API FTunaSweeperShopItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
 	int32 PriceOverride = INDEX_NONE;
+
+	// All IDs must be known and RewardCompleted. Empty preserves unrestricted legacy products.
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	TArray<int32> RequiredCompletedQuestIds;
 };
 
 USTRUCT(BlueprintType)
@@ -548,6 +552,7 @@ public:
 
 private:
 	friend class FTunaSweeperWeaponConfigurationDataTest;
+	friend class FTunaSweeperShopQuestUnlockTest;
 	friend class FTunaSweeperWeaponDefinitionsTest;
 	bool ParseWeaponDefinitions(const FString& Json);
 	bool LoadWeaponConfigurationJson();

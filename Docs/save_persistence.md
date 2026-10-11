@@ -478,3 +478,9 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 - 시설 상호작용 해금 여부와 조명 그룹 상태는 기존 `NumericQuestProgressStates`의 퀘스트 상태에서 계산한다. 액터 자체에 해금/점등 플래그를 저장하지 않으며 저장 스키마 변경은 없다.
 - BeginPlay에서 저장된 퀘스트 상태를 즉시 적용하고, 퀘스트 변경·저장 불러오기·새 게임 초기화 알림으로 다시 계산한다. 기본 해금 및 조명 완료 기준은 보상 수령까지 끝난 `RewardCompleted`다.
 - 시설의 `UnlockConditions` 및 조명 컨트롤러의 `LightGroups`는 BP/레벨 저작 데이터다. 시설 서비스에서 별도 영속 데이터를 추가할 경우 해당 데이터의 저장 규칙을 별도로 정의한다. 기본 시설 템플릿의 사용 이벤트 자체는 영속 상태를 만들지 않는다.
+
+## 상점 상품 퀘스트 해금
+
+- 상품 해금은 `required_completed_quest_ids`와 기존 `NumericQuestProgressStates`의 `RewardCompleted` 상태를 조회해 계산한다. 별도 상품 해금 저장 플래그나 저장 버전 변경은 없다.
+- 잠긴 상품을 목록에서 숨겨도 재고의 원래 `ShopId`·`SlotIndex`·`ItemId` 키를 유지한다. 기존 재고 저장값을 재사용하며 해금·재잠금·저장 불러오기·상점 재개방으로 재고를 초기화하지 않는다.
+- 퀘스트 상태 복원 또는 새 게임 초기화 후 열린 상점 목록도 다시 계산하고 구매 경로는 현재 상태를 재검증한다. 기존 저장 재고가 있으므로 상품 배열 순서와 아이템 정체성을 임의로 바꾸지 않는다.

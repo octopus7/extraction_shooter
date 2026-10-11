@@ -273,6 +273,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestWorldActorsTest;
+	friend class FTunaSweeperShopQuestUnlockTest;
 	friend class FTunaSweeperParcelCollectionTest;
 	friend class FTunaSweeperMemoLifecycleTest;
 	friend class FTunaSweeperDeliveryTest;
@@ -953,6 +954,7 @@ private:
 		int32 ShopId,
 		int32 SlotIndex,
 		const FTunaSweeperShopItemDefinition& ShopItemDefinition) const;
+	bool IsShopItemUnlocked(const FTunaSweeperShopItemDefinition& ShopItemDefinition) const;
 	void SetShopStockQuantity(
 		int32 ShopId,
 		int32 SlotIndex,

@@ -139,6 +139,7 @@ private:
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestWorldActorsTest;
+	friend class FTunaSweeperShopQuestUnlockTest;
 	friend class FTunaSweeperQuestLootPlacementTest;
 	friend class FTunaSweeperQuestTranslationTest;
 	friend class FTunaSweeperStoryQuestTest;

@@ -1,5 +1,18 @@
 #include "TunaSweeperGameInstanceShared.h"
 
+bool UTunaSweeperGameInstance::IsShopItemUnlocked(const FTunaSweeperShopItemDefinition& Definition) const
+{
+	if (Definition.RequiredCompletedQuestIds.IsEmpty()) return true;
+	const auto* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>();
+	if (!Quests) return false;
+	for (const int32 QuestId : Definition.RequiredCompletedQuestIds)
+	{
+		if (QuestId <= 0 || !Quests->FindQuestDefinition(QuestId) ||
+			Quests->GetQuestState(QuestId) != ETunaSweeperQuestState::RewardCompleted) return false;
+	}
+	return true;
+}
+
 void UTunaSweeperGameInstance::SetActiveShop(int32 ShopId)
 {
 	EnsureInventoryStateInitialized();
@@ -53,6 +66,7 @@ bool UTunaSweeperGameInstance::GetActiveShopItems(TArray<FTunaSweeperShopItemVie
 	for (int32 SlotIndex = 0; SlotIndex < ShopDefinition.Items.Num(); ++SlotIndex)
 	{
 		const FTunaSweeperShopItemDefinition& ShopItemDefinition = ShopDefinition.Items[SlotIndex];
+		if (!IsShopItemUnlocked(ShopItemDefinition)) continue;
 		FTunaSweeperShopItemView ShopItemView;
 		ShopItemView.ShopId = ActiveShopId;
 		ShopItemView.SlotIndex = SlotIndex;
@@ -85,6 +99,8 @@ bool UTunaSweeperGameInstance::TryGetActiveShopItemView(
 	{
 		return false;
 	}
+	// Shared by direct purchase, drag/drop and item previews; never trust a cached UI tile.
+	if (!IsShopItemUnlocked(ShopItemDefinition)) return false;
 
 	OutShopItem.ShopId = ActiveShopId;
 	OutShopItem.SlotIndex = ShopSlotIndex;

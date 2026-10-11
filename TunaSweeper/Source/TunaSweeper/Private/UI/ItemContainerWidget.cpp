@@ -15,6 +15,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
@@ -705,6 +706,11 @@ void UItemContainerWidget::NativeConstruct()
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UItemContainerWidget::PopulateContainerItems);
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UItemContainerWidget::PopulateContainerItems);
+		if (auto* Quests = TunaGameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			Quests->OnQuestProgressChanged.RemoveAll(this);
+			Quests->OnQuestProgressChanged.AddUObject(this, &UItemContainerWidget::HandleShopQuestProgressChanged);
+		}
 	}
 
 	PopulateContainerItems();
@@ -716,6 +722,8 @@ void UItemContainerWidget::NativeDestruct()
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		if (auto* Quests = TunaGameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			Quests->OnQuestProgressChanged.RemoveAll(this);
 	}
 
 	Super::NativeDestruct();
@@ -723,6 +731,11 @@ void UItemContainerWidget::NativeDestruct()
 
 void UItemContainerWidget::RefreshHeaderControls()
 {
+}
+
+void UItemContainerWidget::HandleShopQuestProgressChanged()
+{
+	if (SlotSource == ETunaSweeperItemSlotSource::Shop) PopulateContainerItems();
 }
 
 void UItemContainerWidget::RebuildCompactedSlotView(

@@ -35,6 +35,8 @@ UCLASS(Abstract, BlueprintType, Blueprintable)
 class TUNASWEEPER_API UItemContainerWidget : public UUserWidget
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperShopQuestUnlockTest;
+	void HandleShopQuestProgressChanged();
 
 protected:
 	virtual void NativeConstruct() override;
