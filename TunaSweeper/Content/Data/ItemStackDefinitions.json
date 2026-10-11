@@ -7,5 +7,18 @@
   "stack.default.material": 50,
   "stack.default.blueprint": 1,
   "stack.default.currency": 999,
-  "stack.toot_toot": 1
+  "stack.toot_toot": 1,
+  "stack.dog_food": 10,
+  "stack.cat_food": 10,
+  "stack.fermented_fuel": 10,
+  "stack.high_tensile_cable": 10,
+  "stack.toad_jar": 1,
+  "stack.rabbit_battery": 10,
+  "stack.maintenance_tool_set": 1,
+  "stack.industrial_lubricant": 10,
+  "stack.broken_spark_plug": 10,
+  "stack.vehicle_spark_plug": 10,
+  "stack.model_boat": 1,
+  "stack.tire": 4,
+  "stack.rocket_launcher": 1
 }

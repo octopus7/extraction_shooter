@@ -1,0 +1,65 @@
+[
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_SweetPotato",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  },
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_DogFood",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  },
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_CatFood",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  },
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_FermentedFuel",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  },
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_ToadJar",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  },
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_RabbitBattery",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  },
+  {
+    "asset": "/Game/UI/Icons/T_UIIcon_ModelBoat",
+    "width": 1254,
+    "height": 1254,
+    "compression": "<TextureCompressionSettings.TC_EDITOR_ICON: 7>",
+    "mips": "<TextureMipGenSettings.TMGS_NO_MIPMAPS: 13>",
+    "group": "<TextureGroup.TEXTUREGROUP_UI: 16>",
+    "srgb": true
+  }
+]

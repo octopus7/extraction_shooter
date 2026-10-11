@@ -127,3 +127,31 @@ item.ballistic_helmet_tier4,4등급 방탄 헬멧,Tier 4 Ballistic Helmet,等級
 item.ballistic_helmet_tier4.desc,방어 4등급 · 기본 방어력 4. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 4. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力4。弾薬の貫通等級に応じて実効防御力が変わる。
 item.toot_toot,뿡뿡,Pfft,ぷぅ
 item.toot_toot.desc,정체는 방귀다. 지금은 아무 쓸모 없이 인벤토리 한 칸만 차지한다.,A fart. Currently useless and only takes up an inventory slot.,正体はおなら。今のところ何の役にも立たず、インベントリを1枠占有するだけ。
+item.sweet_potato,고구마,Sweet Potato,サツマイモ
+item.sweet_potato.desc,먹을 수 있는 고구마. 식량이나 납품 물자로 사용할 수 있다.,An edible sweet potato that can serve as food or supplies.,食料や納品物資として使えるサツマイモ。
+item.dog_food,개 사료,Dog Food,ドッグフード
+item.dog_food.desc,개를 위한 포장 사료.,Packaged food for dogs.,犬用の包装された餌。
+item.cat_food,고양이 사료,Cat Food,キャットフード
+item.cat_food.desc,고양이를 위한 포장 사료.,Packaged food for cats.,猫用の包装された餌。
+item.fermented_fuel,발효 연료,Fermented Fuel,発酵燃料
+item.fermented_fuel.desc,발효 공정으로 얻은 연료가 담긴 용기.,A container of fuel produced through fermentation.,発酵工程で得た燃料が入った容器。
+item.high_tensile_cable,고장력 강선 케이블,High-Tensile Steel Cable,高張力鋼線ケーブル
+item.high_tensile_cable.desc,무거운 하중을 견디도록 꼬아 만든 강선 케이블.,Twisted steel cable made to withstand heavy loads.,重い荷重に耐えられるように撚り合わせた鋼線ケーブル。
+item.toad_jar,두꺼비 유리병,Toad Jar,ヒキガエル入りの瓶
+item.toad_jar.desc,작은 두꺼비가 들어 있는 통풍 가능한 유리병. 조심해서 운반해야 한다.,A ventilated glass jar containing a small toad. Handle with care.,小さなヒキガエルが入った通気性のあるガラス瓶。慎重に運ぶ必要がある。
+item.rabbit_battery,토끼 그림 배터리,Rabbit-Label Battery,ウサギ柄のバッテリー
+item.rabbit_battery.desc,토끼 그림이 표시된 배터리.,A battery marked with a rabbit picture.,ウサギの絵が描かれたバッテリー。
+item.maintenance_tool_set,정비 공구 세트,Maintenance Tool Set,整備工具セット
+item.maintenance_tool_set.desc,기계 정비에 필요한 공구를 모아 둔 세트.,A set of tools for maintaining machinery.,機械整備に必要な工具をまとめたセット。
+item.industrial_lubricant,산업용 윤활유,Industrial Lubricant,工業用潤滑油
+item.industrial_lubricant.desc,기계 부품 사이의 마찰을 줄이는 윤활유.,Lubricant that reduces friction between machine parts.,機械部品の摩擦を減らす潤滑油。
+item.broken_spark_plug,망가진 점화 플러그,Broken Spark Plug,壊れたスパークプラグ
+item.broken_spark_plug.desc,손상되어 정상 부품으로 사용할 수 없는 점화 플러그.,A damaged spark plug that cannot be used as a working replacement.,破損しており交換部品としては使えないスパークプラグ。
+item.vehicle_spark_plug,차량용 점화 플러그,Vehicle Spark Plug,車両用スパークプラグ
+item.vehicle_spark_plug.desc,차량 엔진에 사용하는 정상 상태의 점화 플러그.,A working spark plug for a vehicle engine.,車両のエンジンに使う正常なスパークプラグ。
+item.model_boat,모형배,Model Boat,模型の船
+item.model_boat.desc,작게 만들어진 모형배. 파손되지 않도록 조심해서 운반해야 한다.,A miniature boat. Handle carefully to avoid damage.,小さく作られた模型の船。壊さないよう慎重に運ぶ必要がある。
+item.tire,타이어,Tire,タイヤ
+item.tire.desc,차량 바퀴에 장착하는 고무 타이어.,A rubber tire fitted to a vehicle wheel.,車両の車輪に取り付けるゴム製タイヤ。
+item.rocket_launcher,로켓무기,Rocket Launcher,ロケットランチャー
+item.rocket_launcher.desc,로켓탄을 발사하도록 만들어진 휴대용 발사기.,A portable launcher designed to fire rockets.,ロケット弾を発射するために作られた携帯式発射器。

@@ -125,3 +125,31 @@ item.body_armor_tier4,4级防弹衣,4級防彈衣,Бронежилет 4-го у
 item.body_armor_tier4.desc,护甲等级4 · 基础防御8。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦8。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 8. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 4 · Defesa base 8. A defesa efetiva depende do nível de penetração da munição.
 item.ballistic_helmet_tier4,4级防弹头盔,4級防彈頭盔,Баллистический шлем 4-го уровня,Capacete balístico de nível 4
 item.ballistic_helmet_tier4.desc,护甲等级4 · 基础防御4。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦4。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 4. Эффективная защита зависит от уровня пробития боеприпасов.,Armadura de nível 4 · Defesa base 4. A defesa efetiva depende do nível de penetração da munição.
+item.sweet_potato,红薯,地瓜,Батат,Batata-doce
+item.sweet_potato.desc,可食用的红薯，可作为食物或交付物资。,可食用的地瓜，可作為食物或交付物資。,Съедобный батат. Подходит для еды или поставок.,Uma batata-doce comestível que serve como alimento ou suprimento.
+item.dog_food,狗粮,狗糧,Корм для собак,Ração para cães
+item.dog_food.desc,供狗食用的包装饲料。,供狗食用的包裝飼料。,Упакованный корм для собак.,Ração embalada para cães.
+item.cat_food,猫粮,貓糧,Корм для кошек,Ração para gatos
+item.cat_food.desc,供猫食用的包装饲料。,供貓食用的包裝飼料。,Упакованный корм для кошек.,Ração embalada para gatos.
+item.fermented_fuel,发酵燃料,發酵燃料,Топливо брожения,Combustível fermentado
+item.fermented_fuel.desc,装有通过发酵工艺制成的燃料的容器。,裝有透過發酵製程製成的燃料的容器。,"Ёмкость с топливом, полученным в процессе брожения.",Um recipiente de combustível produzido por fermentação.
+item.high_tensile_cable,高强度钢丝缆,高強度鋼絲纜,Высокопрочный стальной трос,Cabo de aço de alta resistência
+item.high_tensile_cable.desc,绞合制成的钢丝缆，可承受重载。,絞合製成的鋼絲纜，可承受重載。,"Витой стальной трос, рассчитанный на большие нагрузки.",Cabo de aço trançado para suportar cargas pesadas.
+item.toad_jar,蟾蜍玻璃瓶,蟾蜍玻璃瓶,Банка с жабой,Pote com sapo
+item.toad_jar.desc,装有小蟾蜍的透气玻璃瓶，需要小心搬运。,裝有小蟾蜍的透氣玻璃瓶，需要小心搬運。,Стеклянная банка с вентиляцией и маленькой жабой. Переносить осторожно.,Um pote de vidro ventilado com um pequeno sapo. Transporte com cuidado.
+item.rabbit_battery,兔子图案电池,兔子圖案電池,Аккумулятор с рисунком кролика,Bateria com desenho de coelho
+item.rabbit_battery.desc,印有兔子图案的电池。,印有兔子圖案的電池。,Аккумулятор с изображением кролика.,Uma bateria marcada com a imagem de um coelho.
+item.maintenance_tool_set,维修工具套装,維修工具組,Набор ремонтных инструментов,Kit de ferramentas de manutenção
+item.maintenance_tool_set.desc,用于机械维修的成套工具。,用於機械維修的成套工具。,Набор инструментов для обслуживания механизмов.,Um conjunto de ferramentas para a manutenção de máquinas.
+item.industrial_lubricant,工业润滑油,工業潤滑油,Промышленная смазка,Lubrificante industrial
+item.industrial_lubricant.desc,减少机械零件之间摩擦的润滑油。,減少機械零件之間摩擦的潤滑油。,Смазка для уменьшения трения между деталями механизмов.,Lubrificante que reduz o atrito entre peças de máquinas.
+item.broken_spark_plug,损坏的火花塞,損壞的火星塞,Сломанная свеча зажигания,Vela de ignição quebrada
+item.broken_spark_plug.desc,已损坏的火花塞，不能作为正常替换零件使用。,已損壞的火星塞，不能作為正常替換零件使用。,"Повреждённая свеча зажигания, непригодная для замены рабочей детали.",Uma vela de ignição danificada que não serve como peça de reposição funcional.
+item.vehicle_spark_plug,车辆火花塞,車用火星塞,Автомобильная свеча зажигания,Vela de ignição veicular
+item.vehicle_spark_plug.desc,适用于车辆发动机的完好火花塞。,適用於車輛引擎的完好火星塞。,Исправная свеча зажигания для двигателя транспортного средства.,Uma vela de ignição funcional para motor de veículo.
+item.model_boat,模型船,模型船,Модель корабля,Barco em miniatura
+item.model_boat.desc,小型模型船，需要小心搬运以免损坏。,小型模型船，需要小心搬運以免損壞。,Миниатюрная модель корабля. Беречь от повреждений при переноске.,Um barco em miniatura. Transporte com cuidado para evitar danos.
+item.tire,轮胎,輪胎,Шина,Pneu
+item.tire.desc,安装在车辆车轮上的橡胶轮胎。,安裝在車輛車輪上的橡膠輪胎。,Резиновая шина для колеса транспортного средства.,Um pneu de borracha para a roda de um veículo.
+item.rocket_launcher,火箭发射器,火箭發射器,Ракетная пусковая установка,Lançador de foguetes
+item.rocket_launcher.desc,用于发射火箭弹的便携式发射器。,用於發射火箭彈的攜帶式發射器。,"Переносная пусковая установка, предназначенная для запуска ракет.",Um lançador portátil projetado para disparar foguetes.
