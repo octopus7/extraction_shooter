@@ -7,6 +7,7 @@ class USceneComponent;
 class UArrowComponent;
 class UStaticMeshComponent;
 class UWidgetComponent;
+class UCapsuleComponent;
 
 UCLASS(Blueprintable)
 class LOOPRAIL_API ALoopRailStation : public AActor
@@ -22,9 +23,13 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail") TObjectPtr<UStaticMeshComponent> Platform;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail") TObjectPtr<UStaticMeshComponent> AccessRamp;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<UWidgetComponent> ArrivalDisplay;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<USceneComponent> ArrivalMarkerPivot;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<UStaticMeshComponent> ArrivalMarkerBody;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<UCapsuleComponent> ArrivalMarkerCollision;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival") bool bShowArrivalDisplay = true;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="100", Units="cm")) float ArrivalDisplayHeight = 330;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="0.1")) float ArrivalDisplayScale = .5f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="120", Units="cm")) float ArrivalMarkerHeight = 220;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="40", Units="cm")) float ArrivalMarkerWidth = 100;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="10", Units="cm")) float ArrivalMarkerDepth = 25;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LoopRail") TObjectPtr<ALoopRailTrack> Track;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") FName StationId;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") bool bEnabled = true;

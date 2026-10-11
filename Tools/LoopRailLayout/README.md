@@ -16,4 +16,4 @@
 
 결과는 `TunaSweeper/Saved/LoopRailLayout/verification.json` 또는 `runtime.json`에 기록한다. 기준 중앙 배치는 `Docs/level_layout_snapshots/RaidVillage_20261012.json`의 `after` transform이다.
 
-`run_arrival_display.ps1`은 렌더링 가능한 PIE에서 세 역의 `m:ss` 문자열, 카운트다운, 운행 중지·도착 상태와 두 카메라 방향의 패널 정렬을 검사한다. `Saved/LoopRailLayout/ArrivalDisplay/`에 JSON과 Countdown/Arrived PNG를 남긴다. PNG의 검은 바탕·푸른 상단 도트·빈 하단은 육안으로 확인한다. 카메라와 열차 상태 변경은 저장하지 않는다.
+`run_arrival_display.ps1`은 렌더링 가능한 PIE에서 세 역의 `m:ss` 문자열, 카운트다운, 운행 중지·도착 상태를 검사한다. 220×100×25cm 몸체의 승강장 접지와 상단 표시 위치, 두 경사 시점의 Z축 회전, 정수직 시점의 마지막 방향 유지 및 카메라 이동 중 충돌체 불변도 확인한다. `Saved/LoopRailLayout/ArrivalDisplay/`에 JSON과 Countdown/Arrived PNG를 남긴다. PNG의 검은 입체 몸체·푸른 상단 도트·빈 하단은 육안으로 확인한다. 카메라와 열차 상태 변경은 저장하지 않는다.
