@@ -367,6 +367,12 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 	const TArray<FTunaSweeperInventorySlot>& AttachmentSlots = TunaGameInstance->GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& AttachmentSlotTags = TunaGameInstance->GetSelectedWeaponAttachmentSlotTags();
 	SetSelectedItemInfo(DisplayName, Description, AttachmentSlots.Num() > 0);
+	if (VolatileNoticeText && SelectedItemDefinition.IsVolatile())
+	{
+		VolatileNoticeText->SetText(TunaSweeperUiText::ResolveUiText(
+			TunaGameInstance, TEXT("ui.item_info.volatile_warning"), TEXT("")));
+		VolatileNoticeText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
 	const TunaSweeperItemInfoPanel::FItemSpecInfo SpecInfo =
 		TunaSweeperItemInfoPanel::BuildItemSpecInfo(SelectedItemDefinition, TunaGameInstance,
 			Cast<ATunaSweeperTopDownCharacter>(GetOwningPlayerPawn()));
@@ -444,6 +450,12 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 
 void UTunaSweeperHudItemInfoPanelWidget::SetSelectedItemInfo(const FText& ItemName, const FText& ItemDescription, bool bShowModdingPanel)
 {
+	if (VolatileNoticeText)
+	{
+		VolatileNoticeText->SetText(FText::GetEmpty());
+		VolatileNoticeText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
 	if (SelectedItemNameText)
 	{
 		SelectedItemNameText->SetText(ItemName);
@@ -462,6 +474,12 @@ void UTunaSweeperHudItemInfoPanelWidget::SetSelectedItemInfo(const FText& ItemNa
 
 void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemInfo()
 {
+	if (VolatileNoticeText)
+	{
+		VolatileNoticeText->SetText(FText::GetEmpty());
+		VolatileNoticeText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
 	ClearSelectedItemThumbnail();
 	AttachmentTileObjects.Reset();
 	if (AttachmentSlotTileView)
@@ -629,6 +647,27 @@ void UTunaSweeperHudItemInfoPanelWidget::EnsureThumbnailWidgets()
 			TunaSweeperItemInfoPanel::PanelWidth - TunaSweeperItemInfoPanel::PanelHorizontalPadding));
 	}
 
+	if (!VolatileNoticeText)
+	{
+		VolatileNoticeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VolatileNoticeText"));
+		TunaSweeperUIFont::ApplyFont(VolatileNoticeText, 15.0f);
+		VolatileNoticeText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.2f, 0.2f, 1.0f)));
+		VolatileNoticeText->SetAutoWrapText(true);
+		VolatileNoticeText->SetWrapTextAt(TunaSweeperItemInfoPanel::PanelWidth - TunaSweeperItemInfoPanel::PanelHorizontalPadding);
+		VolatileNoticeText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	VolatileNoticeText->RemoveFromParent();
+	const int32 NoticeDescriptionIndex = PanelStack->GetChildIndex(SelectedItemDescriptionText);
+	UPanelSlot* NoticePanelSlot = NoticeDescriptionIndex != INDEX_NONE
+		? PanelStack->InsertChildAt(NoticeDescriptionIndex + 1, VolatileNoticeText)
+		: PanelStack->AddChild(VolatileNoticeText);
+	if (UVerticalBoxSlot* NoticeSlot = Cast<UVerticalBoxSlot>(NoticePanelSlot))
+	{
+		NoticeSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		NoticeSlot->SetHorizontalAlignment(HAlign_Fill);
+		NoticeSlot->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f));
+	}
+
 	if (SelectedItemFormulaText)
 	{
 		SelectedItemFormulaText->RemoveFromParent();
@@ -741,9 +780,7 @@ void UTunaSweeperHudItemInfoPanelWidget::EnsureThumbnailWidgets()
 			SpecSecondarySlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
 		}
 
-		const int32 DescriptionIndex = SelectedItemDescriptionText
-			? PanelStack->GetChildIndex(SelectedItemDescriptionText)
-			: INDEX_NONE;
+		const int32 DescriptionIndex = PanelStack->GetChildIndex(VolatileNoticeText);
 		const int32 IconIndex = PanelStack->GetChildIndex(IconSizeBox);
 		UPanelSlot* SpecPanelSlot = DescriptionIndex != INDEX_NONE
 			? PanelStack->InsertChildAt(DescriptionIndex + 1, SelectedItemSpecStack)
@@ -759,6 +796,7 @@ void UTunaSweeperHudItemInfoPanelWidget::EnsureThumbnailWidgets()
 		}
 		SelectedItemSpecStack->SetVisibility(ESlateVisibility::Collapsed);
 	}
+
 
 	if (SelectedItemDetailRow)
 	{
@@ -855,6 +893,10 @@ void UTunaSweeperHudItemInfoPanelWidget::SetPanelLayoutLimits(float InPanelWidth
 	if (SelectedItemDescriptionText)
 	{
 		SelectedItemDescriptionText->SetWrapTextAt(FMath::Max(1.0f, PanelWidth - TunaSweeperItemInfoPanel::PanelHorizontalPadding));
+	}
+	if (VolatileNoticeText)
+	{
+		VolatileNoticeText->SetWrapTextAt(FMath::Max(1.0f, PanelWidth - TunaSweeperItemInfoPanel::PanelHorizontalPadding));
 	}
 	if (SelectedItemSpecTitleText)
 	{

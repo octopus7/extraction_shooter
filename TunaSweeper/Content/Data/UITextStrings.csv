@@ -598,3 +598,4 @@ ui.passage.part,{0} × {1},{0} × {1},{0} × {1}
 ui.passage.repair,수리: {0},Repair: {0},修理: {0}
 ui.passage.separator," + "," + "," + "
 ui.interaction.deliver_parcel,배달하기,Deliver,配達する
+ui.item_info.volatile_warning,기지로 가져갈 수 없습니다.,Cannot be brought back to base.,拠点には持ち帰れません。

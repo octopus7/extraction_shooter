@@ -44,6 +44,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemDescriptionText;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> VolatileNoticeText;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemPriceText;
 

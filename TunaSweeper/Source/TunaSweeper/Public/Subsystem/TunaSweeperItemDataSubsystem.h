@@ -75,6 +75,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName CategoryTag;
 
+	// System classification; independent of authored item description text.
+	bool IsVolatile() const { return CategoryTag == FName(TEXT("item.category.volatile")); }
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName MaxStackCategoryKey;
 

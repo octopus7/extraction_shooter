@@ -91,6 +91,7 @@ namespace TunaSweeperItemDataFiles
 			{ FName(TEXT("item.category.face")), FName(TEXT("stack.default.equipment")) },
 			{ FName(TEXT("item.category.ear")), FName(TEXT("stack.default.equipment")) },
 			{ FName(TEXT("item.category.material")), FName(TEXT("stack.default.material")) },
+			{ FName(TEXT("item.category.volatile")), FName(TEXT("stack.default.volatile")) },
 			{ FName(TEXT("item.category.blueprint")), FName(TEXT("stack.default.blueprint")) },
 			{ FName(TEXT("item.category.currency")), FName(TEXT("stack.default.currency")) }
 		};

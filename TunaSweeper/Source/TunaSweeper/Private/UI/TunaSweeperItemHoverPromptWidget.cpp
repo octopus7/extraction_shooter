@@ -195,8 +195,8 @@ TSharedRef<SWidget> UTunaSweeperItemHoverPromptWidget::RebuildWidget()
 		BuildNativeWidgetTree();
 	}
 
-	TSharedRef<SWidget> RebuiltWidget = Super::RebuildWidget();
 	CacheNamedWidgets();
+	TSharedRef<SWidget> RebuiltWidget = Super::RebuildWidget();
 	ApplyTileData();
 	return RebuiltWidget;
 }
@@ -430,6 +430,23 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 	{
 		ItemDescriptionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("ItemDescriptionText"))));
 	}
+	if (!VolatileNoticeText && ItemDescriptionText)
+	{
+		if (UVerticalBox* InfoStack = Cast<UVerticalBox>(ItemDescriptionText->GetParent()))
+		{
+			VolatileNoticeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VolatileNoticeText"));
+			TunaSweeperItemHoverPrompt::ConfigureTextBlock(VolatileNoticeText, FText::GetEmpty(), FLinearColor(1.0f, 0.2f, 0.2f, 1.0f), 15);
+			VolatileNoticeText->SetAutoWrapText(true);
+			VolatileNoticeText->SetWrapTextAt(TunaSweeperItemHoverPrompt::DescriptionWrapWidth);
+			VolatileNoticeText->SetVisibility(ESlateVisibility::Collapsed);
+			if (UVerticalBoxSlot* NoticeSlot = Cast<UVerticalBoxSlot>(InfoStack->InsertChildAt(
+				InfoStack->GetChildIndex(ItemDescriptionText) + 1, VolatileNoticeText)))
+			{
+				NoticeSlot->SetHorizontalAlignment(HAlign_Fill);
+				NoticeSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+			}
+		}
+	}
 	if (!ItemPriceText)
 	{
 		ItemPriceText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("ItemPriceText"))));
@@ -502,6 +519,15 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 
 void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 {
+	if (VolatileNoticeText)
+	{
+		const bool bVolatile = !CachedTileData.bIsEmpty && CachedTileData.ItemDefinition.IsVolatile();
+		VolatileNoticeText->SetText(bVolatile
+			? TunaSweeperUiText::ResolveUiText(GetGameInstance<UTunaSweeperGameInstance>(), TEXT("ui.item_info.volatile_warning"), TEXT(""))
+			: FText::GetEmpty());
+		VolatileNoticeText->SetVisibility(bVolatile ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
 	if (CachedTileData.bIsEmpty)
 	{
 		SetVisibility(ESlateVisibility::Collapsed);

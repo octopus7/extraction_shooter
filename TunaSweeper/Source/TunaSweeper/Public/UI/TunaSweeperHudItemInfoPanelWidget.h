@@ -72,6 +72,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SelectedItemDescriptionText;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> VolatileNoticeText;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SelectedItemFormulaText;
 
