@@ -154,3 +154,9 @@ MemoId는 `MemoDefinitions.json`에 있어야 한다. 공용 배치 앵커의 Me
 ## 빈 상태로 되돌리기
 
 특정 범주의 배치를 전부 끄려면 해당 JSON을 `[]`로 바꾼다. 퀘스트를 전부 끄려면 `QuestDefinitions.json`을 `[]`로 만들고, 사용하지 않는 퀘스트 콘텐츠 문자열만 CSV에서 제거한다. `quest.ui.*` 공용 문자열은 유지한다.
+
+## 시설 해금 프리셋
+
+`/Game/Interaction/QuestFacility/Unlocks`의 `BP_FacilityUnlock_Workshop`, `Bathroom`, `Bedroom`, `Kitchen`, `Storage`는 기존 `BP_QuestFacility`의 자식 프리셋이다. 각 프리셋은 `UnlockConditions`에 지정된 퀘스트의 `RewardCompleted`만 허용한다. 납품 완료로 보상 대기에 도달한 상태에는 열리지 않는다.
+
+프리셋은 해금 조건만 제공하며 실제 작업·생활 서비스는 `ExecuteFacilityInteraction` 또는 기존 시설 연동으로 구현해야 한다. 이번 프리셋을 맵에 자동 배치하거나 기존 서비스의 동작을 교체하지 않았다. 해금 상태는 기존 퀘스트 저장에서 계산하며 별도 저장 필드는 없다.

@@ -157,3 +157,11 @@ item.rocket_launcher,로켓무기,Rocket Launcher,ロケットランチャー
 item.rocket_launcher.desc,로켓탄을 발사하도록 만들어진 휴대용 발사기.,A portable launcher designed to fire rockets.,ロケット弾を発射するために作られた携帯式発射器。
 item.hammer,망치,Hammer,ハンマー
 item.hammer.desc,못을 박거나 간단한 수리에 쓰는 망치.,A hammer for driving nails and simple repairs.,釘打ちや簡単な修理に使うハンマー。
+item.water_valve,수도 밸브,Water Valve,水道バルブ
+item.water_valve.desc,배관의 물 흐름을 조절하는 밸브.,A valve for controlling water flow through a pipe.,配管の水の流れを調節するバルブ。
+item.feather,깃털,Feather,羽根
+item.feather.desc,가볍고 부드러운 깃털.,A light and soft feather.,軽くて柔らかい羽根。
+item.heating_coil,전열코일,Heating Coil,電熱コイル
+item.heating_coil.desc,전기를 열로 바꾸는 가열 부품.,A heating element that converts electricity into heat.,電気を熱に変える加熱部品。
+item.motor,모터,Motor,モーター
+item.motor.desc,전기로 장치를 움직이는 소형 모터.,A compact electric motor for driving machinery.,電気で装置を動かす小型モーター。

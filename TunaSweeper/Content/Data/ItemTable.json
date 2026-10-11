@@ -947,5 +947,53 @@
     "category_tag": "item.category.material",
     "weight_kg": 0.8,
     "max_stack_category_key": "stack.hammer"
+  },
+  {
+    "id": 6021,
+    "name_string_key": "item.water_valve",
+    "description_string_key": "item.water_valve.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_WaterValve.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 0.5,
+    "max_stack_category_key": "stack.water_valve"
+  },
+  {
+    "id": 6022,
+    "name_string_key": "item.feather",
+    "description_string_key": "item.feather.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_Feather.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 0.01,
+    "max_stack_category_key": "stack.feather"
+  },
+  {
+    "id": 6023,
+    "name_string_key": "item.heating_coil",
+    "description_string_key": "item.heating_coil.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_HeatingCoil.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 0.4,
+    "max_stack_category_key": "stack.heating_coil"
+  },
+  {
+    "id": 6024,
+    "name_string_key": "item.motor",
+    "description_string_key": "item.motor.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_Motor.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 1.5,
+    "max_stack_category_key": "stack.motor"
   }
 ]

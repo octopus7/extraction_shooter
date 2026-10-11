@@ -155,3 +155,11 @@ item.rocket_launcher,火箭发射器,火箭發射器,Ракетная пуско
 item.rocket_launcher.desc,用于发射火箭弹的便携式发射器。,用於發射火箭彈的攜帶式發射器。,"Переносная пусковая установка, предназначенная для запуска ракет.",Um lançador portátil projetado para disparar foguetes.
 item.hammer,锤子,鎚子,Молоток,Martelo
 item.hammer.desc,用于钉钉子和简单维修的锤子。,用於釘釘子和簡單維修的鎚子。,Молоток для забивания гвоздей и простого ремонта.,Um martelo para pregar e fazer reparos simples.
+item.water_valve,水阀,水閥,Водопроводный вентиль,Válvula de água
+item.water_valve.desc,控制管道水流的阀门。,控制管道水流的閥門。,Вентиль для регулировки потока воды в трубе.,Uma válvula para controlar o fluxo de água em um cano.
+item.feather,羽毛,羽毛,Перо,Pena
+item.feather.desc,轻盈柔软的羽毛。,輕盈柔軟的羽毛。,Лёгкое и мягкое перо.,Uma pena leve e macia.
+item.heating_coil,电热丝,電熱線圈,Нагревательная спираль,Resistência elétrica
+item.heating_coil.desc,将电能转化为热量的加热元件。,將電能轉化為熱量的加熱元件。,"Нагревательный элемент, преобразующий электричество в тепло.",Um elemento de aquecimento que transforma eletricidade em calor.
+item.motor,电机,馬達,Электродвигатель,Motor
+item.motor.desc,用电驱动设备的小型电机。,用電驅動設備的小型馬達。,Компактный электродвигатель для привода механизмов.,Um motor elétrico compacto para mover mecanismos.

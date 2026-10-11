@@ -22,5 +22,9 @@
   "stack.model_boat": 1,
   "stack.tire": 4,
   "stack.rocket_launcher": 1,
-  "stack.hammer": 1
+  "stack.hammer": 1,
+  "stack.water_valve": 10,
+  "stack.feather": 10,
+  "stack.heating_coil": 10,
+  "stack.motor": 10
 }
