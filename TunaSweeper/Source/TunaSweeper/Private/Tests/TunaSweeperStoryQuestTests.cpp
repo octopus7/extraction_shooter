@@ -21,7 +21,7 @@ bool FTunaSweeperStoryQuestTest::RunTest(const FString& Parameters)
     Objective.ObjectiveId = TEXT("leave_bunker");
     Objective.Type = ETunaSweeperObjectiveType::LevelTravel;
     Objective.SourceLevelName = TEXT("BunkerMap");
-    Objective.TargetLevelName = TEXT("RaidMap");
+    Objective.TargetLevelName = TEXT("RaidForest");
     Definition.Objectives.Add(Objective);
     Quests->QuestDefinitions.Add(1, Definition);
     const TSet<FName> CompletedFlags { FName(TEXT("test.intro.complete")) };
@@ -30,9 +30,9 @@ bool FTunaSweeperStoryQuestTest::RunTest(const FString& Parameters)
     Quests->ReconcileStoryQuestAcceptance(CompletedFlags);
     TestEqual(TEXT("Dialogue completion accepts quest"), Quests->GetQuestState(1), ETunaSweeperQuestState::Accepted);
     TestEqual(TEXT("Accepted quest is tracked"), Quests->GetTrackedQuestId(), 1);
-    Quests->NotifyLevelTravelRequested(TEXT("RaidMap"), TEXT("BunkerMap"));
+    Quests->NotifyLevelTravelRequested(TEXT("RaidForest"), TEXT("BunkerMap"));
     TestEqual(TEXT("Return does not satisfy outward travel"), Quests->GetQuestState(1), ETunaSweeperQuestState::Accepted);
-    Quests->NotifyLevelTravelRequested(TEXT("UEDPIE_0_BunkerMap"), TEXT("RaidMap"));
+    Quests->NotifyLevelTravelRequested(TEXT("UEDPIE_0_BunkerMap"), TEXT("RaidForest"));
     TestEqual(TEXT("Outward travel satisfies objective"), Quests->GetQuestState(1), ETunaSweeperQuestState::RewardAvailable);
     Quests->ReconcileStoryQuestAcceptance(CompletedFlags);
     TestEqual(TEXT("Recovery preserves achieved state"), Quests->GetQuestState(1), ETunaSweeperQuestState::RewardAvailable);

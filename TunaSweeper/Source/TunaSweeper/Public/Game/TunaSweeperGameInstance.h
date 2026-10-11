@@ -275,6 +275,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperParcelCollectionTest;
 	friend class FTunaSweeperMemoLifecycleTest;
 	friend class FTunaSweeperDeliveryTest;
+	friend class FTunaSweeperRegionPassageTest;
 	friend class FTunaSweeperOutfitSaveTest;
 	friend class FTunaSweeperOutfitSaveFailureTest;
 	friend class FTunaSweeperOutfitUnlockTest;
@@ -862,6 +863,7 @@ public:
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 	bool HasPendingRaidTutorial() const { return bPendingRaidTutorial; }
 	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
+	void ConsumePendingRegionVitals(UTunaSweeperVitalsComponent* Vitals);
 	bool ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent);
 
 	FSimpleMulticastDelegate OnInventoryStateChanged;
@@ -1208,6 +1210,8 @@ private:
 	mutable bool bExperienceLevelTableLoaded = false;
 	mutable TArray<int64> CachedExperienceForLevels;
 
+	FName PendingRegionVitalsDestination;
+	FVector PendingRegionVitalsRatios = FVector::OneVector;
 	bool bHasPendingBunkerEntryVitals = false;
 	float PendingBunkerEntryHealthRatio = 1.0f;
 	float PendingBunkerEntryFoodRatio = 1.0f;

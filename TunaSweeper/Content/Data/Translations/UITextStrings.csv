@@ -537,4 +537,7 @@ ui.item_info.armor_context,"护甲等级 {0}
 傷害減免 — 鏽蝕彈 {1} / 普通彈 {2} / 穿甲彈 {3} / 高級穿甲彈 {4}","Броня: уровень {0}
 Снижение урона — Ржавые {1} / Обычные {2} / Бронебойные {3} / Улучшенные ББ {4}","Armadura de nível {0}
 Redução de dano — Enferrujada {1} / Comum {2} / Perfurante {3} / Perfurante avançada {4}"
+ui.passage.part,{0} × {1},{0} × {1},{0} × {1},{0} × {1}
+ui.passage.repair,修理：{0},修理：{0},Ремонт: {0},Reparar: {0}
+ui.passage.separator," + "," + "," + "," + "
 ui.interaction.deliver_parcel,交付包裹,交付包裹,Доставить посылку,Entregar encomenda

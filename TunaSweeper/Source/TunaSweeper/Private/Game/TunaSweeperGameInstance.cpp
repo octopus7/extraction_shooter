@@ -45,6 +45,15 @@ bool UTunaSweeperGameInstance::TryResolveLevelTravel(
 	case ETunaSweeperLevelTravelDestination::Raid:
 		OutTargetLevelName = TunaSweeperBuildFlavor::GetRaidGameplayLevelName();
 		break;
+	case ETunaSweeperLevelTravelDestination::Forest:
+		OutTargetLevelName = TEXT("/Game/MainRaid/RaidForest");
+		break;
+	case ETunaSweeperLevelTravelDestination::Village:
+		OutTargetLevelName = TEXT("/Game/MainRaid/RaidVillage");
+		break;
+	case ETunaSweeperLevelTravelDestination::Plains:
+		OutTargetLevelName = TEXT("/Game/MainRaid/RaidPlains");
+		break;
 	case ETunaSweeperLevelTravelDestination::Basement:
 		OutTargetLevelName = FName(TEXT("/Game/Environment/Basement/Maps/L_Basement"));
 		break;

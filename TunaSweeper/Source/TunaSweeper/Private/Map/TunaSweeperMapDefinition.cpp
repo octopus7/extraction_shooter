@@ -100,7 +100,7 @@ bool UTunaSweeperMapDefinition::MatchesWorld(const UWorld* InWorld) const
 	{
 		return true;
 	}
-	if (MapId == FName(TEXT("RaidMap")) &&
+	if (TunaSweeperBuildFlavor::IsDemo() && MapId == FName(TEXT("RaidMap")) &&
 		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*InWorldPackageName)))
 	{
 		return true;

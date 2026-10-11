@@ -13,7 +13,10 @@ enum class ETunaSweeperLevelTravelDestination : uint8
 {
 	Bunker UMETA(DisplayName = "Bunker"),
 	Raid UMETA(DisplayName = "Raid"),
-	Basement UMETA(DisplayName = "Basement")
+	Basement UMETA(DisplayName = "Basement"),
+	Forest UMETA(DisplayName = "Forest"),
+	Village UMETA(DisplayName = "Village"),
+	Plains UMETA(DisplayName = "Plains")
 };
 
 /** Shared transition presentation selected by a logical level-travel destination. */
@@ -44,7 +47,7 @@ struct TUNASWEEPER_API FTunaSweeperLevelTravelPresentationDefinition
 	float FadeFromBlackDuration = 0.2f;
 };
 
-/** Central demo transition-video configuration, owned by the GameInstance. */
+/** Central transition-video configuration, owned by the GameInstance. */
 UCLASS(BlueprintType)
 class TUNASWEEPER_API UTunaSweeperLevelTravelPresentationDataAsset : public UDataAsset
 {

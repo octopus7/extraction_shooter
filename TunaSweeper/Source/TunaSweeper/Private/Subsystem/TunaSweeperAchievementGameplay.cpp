@@ -101,8 +101,12 @@ void UTunaSweeperAchievementSubsystem::HandleGameplayWorldReady(UWorld* World)
 		ProcessProgressChanged(true);
 		GameplaySnapshot.bSuccessfulExtraction = false;
 	}
-	CancelRaid();
 	const bool bRaidWorld = TunaSweeperBuildFlavor::IsRaidGameplayLevelName(Level);
+	const bool bContinueRaid = bRaidWorld && RaidState.bActive && Level == PendingRegionDestination;
+	const double PreviousSeconds = PendingRegionRaidSeconds;
+	if (!bContinueRaid) CancelRaid();
+	PendingRegionDestination = NAME_None;
+	PendingRegionRaidSeconds = 0;
 	FString PackageName = World->GetOutermost()->GetName();
 	if (!World->StreamingLevelsPrefix.IsEmpty()) PackageName.ReplaceInline(*World->StreamingLevelsPrefix, TEXT(""));
 	const FName PackagePath(*PackageName);
@@ -112,7 +116,8 @@ void UTunaSweeperAchievementSubsystem::HandleGameplayWorldReady(UWorld* World)
 		if (Definition.ConditionType == ETunaSweeperAchievementConditionType::LocationReached)
 			ReportLocationReached(Definition.TargetId);
 	}
-	if (bRaidWorld) RaidState.Begin(World->GetTimeSeconds());
+	if (bContinueRaid) RaidState.StartedAt = World->GetTimeSeconds() - PreviousSeconds;
+	else if (bRaidWorld) RaidState.Begin(World->GetTimeSeconds());
 	RefreshGameplaySnapshot();
 }
 
@@ -141,7 +146,22 @@ void UTunaSweeperAchievementSubsystem::DiscardPendingExtraction(UWorld* World)
 
 void UTunaSweeperAchievementSubsystem::CancelRaid()
 {
+	PendingRegionDestination = NAME_None;
+	PendingRegionRaidSeconds = 0;
 	RaidState.Reset();
 	PendingExtraction = {};
 	PendingExtractionDestination = NAME_None;
+}
+
+void UTunaSweeperAchievementSubsystem::PrepareRegionTravel(UWorld* World, FName Destination)
+{
+	PendingRegionDestination = NAME_None;
+	PendingRegionRaidSeconds = 0;
+	if (World && World == GetWorld() && RaidState.bActive &&
+		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*UGameplayStatics::GetCurrentLevelName(World, true))) &&
+		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(Destination))
+	{
+		PendingRegionDestination = FName(*FPackageName::GetShortName(Destination.ToString()));
+		PendingRegionRaidSeconds = FMath::Max(0.0, World->GetTimeSeconds() - RaidState.StartedAt);
+	}
 }

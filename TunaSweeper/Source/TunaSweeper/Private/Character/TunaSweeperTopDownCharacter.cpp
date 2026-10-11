@@ -155,6 +155,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : FRotator::ZeroRotator;
 	CacheBaseSurvivalStats();
 	ApplyProgressionStatBonuses();
+	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>()) Game->ConsumePendingRegionVitals(VitalsComponent);
 	ApplyBunkerPeaceZoneVitalsRules();
 	MaxStamina = TunaSweeperCombatValue::Round(MaxStamina);
 	CurrentStamina = MaxStamina;

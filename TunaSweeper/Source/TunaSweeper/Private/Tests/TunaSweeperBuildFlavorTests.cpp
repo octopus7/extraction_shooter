@@ -89,7 +89,12 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 	TestEqual(
 		TEXT("Full target ignores the demo box raid option"),
 		TunaSweeperBuildFlavor::GetRaidGameplayLevelName(),
-		FName(TEXT("/Game/MainRaid/RaidMap")));
+		FName(TEXT("/Game/MainRaid/RaidForest")));
+    TestTrue(TEXT("Forest is a playable raid"), TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TEXT("UEDPIE_0_RaidForest")));
+    TestTrue(TEXT("Village is a playable raid"), TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TEXT("/Game/MainRaid/RaidVillage")));
+    TestTrue(TEXT("Plains is a playable raid"), TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TEXT("RaidPlains")));
+    TestFalse(TEXT("Development RaidMap is not gameplay"), TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TEXT("RaidMap")));
+    TestEqual(TEXT("Legacy travel targets redirect to forest"), TunaSweeperBuildFlavor::ResolveGameplayLevelName(TEXT("RaidMap")), FName(TEXT("/Game/MainRaid/RaidForest")));
 	TestFalse(
 		TEXT("Main placement data does not use the Demo public placement file"),
 		TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("EnemySpawns.json"))

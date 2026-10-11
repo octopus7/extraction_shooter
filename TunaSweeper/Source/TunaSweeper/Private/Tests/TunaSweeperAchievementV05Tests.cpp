@@ -285,6 +285,23 @@ bool FTunaAchievementLifecycleTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Exactly one notification queued per local unlock"), Subject->PendingNotifications.Num(), 2);
 	Subject->HandleGameplayWorldReady(World);
 	TestEqual(TEXT("Duplicate world-ready event does not notify twice"), Subject->PendingNotifications.Num(), 2);
+	UWorld* Forest = UWorld::CreateWorld(EWorldType::Game, false, TEXT("RaidForest"), CreatePackage(TEXT("/Temp/RegionAchievement/RaidForest")));
+	UWorld* Village = UWorld::CreateWorld(EWorldType::Game, false, TEXT("RaidVillage"), CreatePackage(TEXT("/Temp/RegionAchievement/RaidVillage")));
+	Forest->SetGameInstance(Instance.Get()); Village->SetGameInstance(Instance.Get());
+	Context.SetCurrentWorld(Forest);
+	Subject->HandleGameplayWorldReady(Forest);
+	Subject->RaidState.StartedAt = Forest->GetTimeSeconds() - 120;
+	Subject->RaidState.Kills = 7;
+	Subject->PrepareRegionTravel(Forest, TEXT("/Game/MainRaid/RaidVillage"));
+	Context.SetCurrentWorld(Village);
+	Subject->HandleGameplayWorldReady(Village);
+	TestEqual(TEXT("Regional travel preserves raid kills"), Subject->RaidState.Kills, 7);
+	TestEqual(TEXT("Regional travel preserves gameplay seconds without load or pause time"), Village->GetTimeSeconds() - Subject->RaidState.StartedAt, 120.0);
+	TestTrue(TEXT("Regional handoff consumed once"), Subject->PendingRegionDestination.IsNone());
+	Context.SetCurrentWorld(World);
+	Forest->SetGameInstance(nullptr); Village->SetGameInstance(nullptr);
+	Forest->DestroyWorld(false); Forest->RemoveFromRoot();
+	Village->DestroyWorld(false); Village->RemoveFromRoot();
 	return true;
 }
 #endif

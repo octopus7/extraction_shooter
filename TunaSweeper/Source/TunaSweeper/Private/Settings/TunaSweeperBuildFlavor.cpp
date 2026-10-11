@@ -14,7 +14,7 @@ namespace TunaSweeperBuildFlavor
 	namespace
 	{
 		constexpr const TCHAR* MainPayloadManifestName = TEXT("main-payload.json");
-		constexpr const TCHAR* MainRaidLevelPath = TEXT("/Game/MainRaid/RaidMap");
+		constexpr const TCHAR* MainRaidLevelPath = TEXT("/Game/MainRaid/RaidForest");
 		constexpr const TCHAR* DemoRaidLevelName = TEXT("DemoRaidMap");
 		constexpr const TCHAR* DemoBoxRaidLevelName = TEXT("DemoBoxRaidMap");
 
@@ -191,23 +191,14 @@ namespace TunaSweeperBuildFlavor
 				: DemoRaidLevelName);
 		}
 
-		FString ManifestText;
-		const FString ManifestPath = FPaths::Combine(GetMainPayloadRoot(), MainPayloadManifestName);
-		TSharedPtr<FJsonObject> Manifest;
-		FString RaidLevel;
-		if (FFileHelper::LoadFileToString(ManifestText, *ManifestPath) &&
-			FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(ManifestText), Manifest) &&
-			Manifest.IsValid() && Manifest->TryGetStringField(TEXT("raid_level"), RaidLevel) && !RaidLevel.IsEmpty())
-		{
-			return RaidLevel == TEXT("RaidMap") ? FName(MainRaidLevelPath) : FName(*RaidLevel);
-		}
-
 		return FName(MainRaidLevelPath);
 	}
 
 	bool IsRaidGameplayLevelName(FName LevelName)
 	{
-		return NormalizeLevelName(LevelName) == NormalizeLevelName(GetRaidGameplayLevelName());
+		const FString Name = NormalizeLevelName(LevelName);
+		if (IsDemo()) return Name == NormalizeLevelName(GetRaidGameplayLevelName());
+		return Name == TEXT("RaidForest") || Name == TEXT("RaidVillage") || Name == TEXT("RaidPlains");
 	}
 
 	FName ResolveGameplayLevelName(FName LevelName)

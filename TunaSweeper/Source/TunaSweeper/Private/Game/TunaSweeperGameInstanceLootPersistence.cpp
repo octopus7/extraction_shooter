@@ -1,3 +1,5 @@
+#include "Misc/PackageName.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "TunaSweeperGameInstanceShared.h"
 #include <tuple>
 
@@ -275,6 +277,19 @@ bool UTunaSweeperGameInstance::ClearInventoryAndSaveInternal(bool bNotifyChanges
 void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName)
 {
 	bPendingRaidTutorial = false;
+    PendingRegionVitalsDestination = NAME_None;
+    if (TunaSweeperBuildFlavor::IsRaidGameplayLevelName(SourceLevelName) && TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TargetLevelName))
+    {
+        if (auto* Pawn = GetWorld() ? UGameplayStatics::GetPlayerPawn(GetWorld(), 0) : nullptr)
+            if (auto* Vitals = Pawn->FindComponentByClass<UTunaSweeperVitalsComponent>())
+            {
+                const auto& State = Vitals->GetVitalsState();
+                PendingRegionVitalsRatios = FVector(State.MaxHealth > 0 ? State.Health / State.MaxHealth : 1,
+                    State.MaxFood > 0 ? State.Food / State.MaxFood : 1, State.MaxHydration > 0 ? State.Hydration / State.MaxHydration : 1);
+                PendingRegionVitalsDestination = FName(*FPackageName::GetShortName(TargetLevelName.ToString()));
+            }
+        return;
+    }
 	if (IsRaidToBunkerTravel(SourceLevelName, TargetLevelName))
 	{
 		EnsureInventoryStateInitialized();
@@ -348,3 +363,18 @@ bool UTunaSweeperGameInstance::ConsumePendingBunkerEntryVitals(UTunaSweeperVital
 	return true;
 }
 
+
+void UTunaSweeperGameInstance::ConsumePendingRegionVitals(UTunaSweeperVitalsComponent* Vitals)
+{
+    if (!Vitals || PendingRegionVitalsDestination.IsNone() || !GetWorld()) return;
+    const FName Current(*UGameplayStatics::GetCurrentLevelName(GetWorld(), true));
+    if (Current == PendingRegionVitalsDestination)
+    {
+        auto State = Vitals->GetVitalsState();
+        State.Health = State.MaxHealth * FMath::Clamp(PendingRegionVitalsRatios.X, 0.0, 1.0);
+        State.Food = State.MaxFood * FMath::Clamp(PendingRegionVitalsRatios.Y, 0.0, 1.0);
+        State.Hydration = State.MaxHydration * FMath::Clamp(PendingRegionVitalsRatios.Z, 0.0, 1.0);
+        Vitals->SetVitalsState(State);
+    }
+    PendingRegionVitalsDestination = NAME_None;
+}

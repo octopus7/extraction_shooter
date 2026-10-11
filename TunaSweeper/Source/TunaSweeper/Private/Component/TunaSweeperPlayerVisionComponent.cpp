@@ -1,3 +1,4 @@
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Component/TunaSweeperPlayerVisionComponent.h"
 
 #include "Blueprint/UserWidget.h"
@@ -580,7 +581,7 @@ bool UTunaSweeperPlayerVisionComponent::IsVisionWorldEnabled() const
 	}
 
 	const FString MapName = World->GetMapName();
-	if (MapName.EndsWith(TEXT("RaidMap")))
+	if (TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*MapName)))
 	{
 		return true;
 	}

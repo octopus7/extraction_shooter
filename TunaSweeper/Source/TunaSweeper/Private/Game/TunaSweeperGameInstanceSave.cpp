@@ -1106,6 +1106,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
 	bRaidExperienceSessionActive = false;
 	bHasPendingRaidExperienceAnimationState = false;
+	PendingRegionVitalsDestination = NAME_None;
 	bHasPendingBunkerEntryVitals = false;
 	PendingBunkerEntryHealthRatio = 1.0f;
 	PendingBunkerEntryFoodRatio = 1.0f;
@@ -1146,6 +1147,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
 	bRaidExperienceSessionActive = false;
 	bHasPendingRaidExperienceAnimationState = false;
+	PendingRegionVitalsDestination = NAME_None;
 	bHasPendingBunkerEntryVitals = false;
 	bPendingBunkerItemStateSave = false;
 	PendingBunkerEntryHealthRatio = 1.0f;

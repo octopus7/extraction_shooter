@@ -46,6 +46,7 @@ public:
 	void CancelRaid();
 	// Non-extraction travel must discard any previous completed-hold evidence.
 	void DiscardPendingExtraction(UWorld* World);
+	void PrepareRegionTravel(UWorld* World, FName Destination);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	TArray<FTunaSweeperAchievementDefinition> GetAchievementDefinitions() const { return Definitions; }
@@ -97,6 +98,8 @@ private:
 	FTunaSweeperAchievementSnapshot GameplaySnapshot;
 	FTunaSweeperAchievementSnapshot PendingExtraction;
 	FTunaSweeperAchievementRaidState RaidState;
+	double PendingRegionRaidSeconds = 0;
+	FName PendingRegionDestination;
 	FName PendingExtractionDestination;
 	TWeakObjectPtr<UWorld> GameplayWorld;
 	TArray<FName> PendingNotifications;

@@ -1,3 +1,5 @@
+#include "Settings/TunaSweeperBuildFlavor.h"
+#include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 
 #include "Game/TunaSweeperGameInstance.h"
@@ -10,11 +12,13 @@
 
 ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableActor()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickInterval = 0.15f;
 	if (InteractableComponent)
 	{
 		InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
 			ETunaSweeperInteractionType::LevelTravel,
-			FText::FromString(TEXT("Travel")),
+			FText::GetEmpty(),
 			FName(TEXT("ui.interaction.travel")));
 	}
 }
@@ -34,7 +38,10 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (auto* Achievements = GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+		{
 			Achievements->DiscardPendingExtraction(GetWorld());
+			Achievements->PrepareRegionTravel(GetWorld(), TargetLevelName);
+		}
 		TunaGameInstance->HandleLevelTravelPersistence(SourceLevelName, TargetLevelName);
 
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
@@ -92,4 +99,15 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 
 	UGameplayStatics::OpenLevel(WorldContextObject, TargetLevelName);
 	return true;
+}
+
+void ATunaSweeperLevelTravelInteractableActor::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if (!bWalkThroughInFullGame || bWalkTravelStarted || TunaSweeperBuildFlavor::IsDemo()) return;
+    APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0);
+    if (!Pawn || !Pawn->IsLocallyControlled()) return;
+    const FVector Local = GetActorTransform().InverseTransformPosition(Pawn->GetActorLocation());
+    if (FMath::Abs(Local.X) <= 120 && FMath::Abs(Local.Y) <= 120 && FMath::Abs(Local.Z) <= 220)
+        bWalkTravelStarted = TravelToTargetLevel(Pawn);
 }
