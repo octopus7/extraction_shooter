@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Interaction/TunaSweeperInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelPresentationDataAsset.h"
+#include "Game/TunaSweeperRaidPlayerStart.h"
 #include "TunaSweeperLevelTravelInteractableActor.generated.h"
 
 class APawn;
@@ -24,6 +25,8 @@ public:
 	virtual bool TravelToTargetLevel(APawn* InstigatorPawn);
 
 protected:
+	virtual ETunaSweeperRaidArrivalGroup GetArrivalGroup() const { return ETunaSweeperRaidArrivalGroup::None; }
+
 	/** Per-instance selection only; maps and presentation stay centralized elsewhere. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Travel")
 	ETunaSweeperLevelTravelDestination Destination = ETunaSweeperLevelTravelDestination::Raid;

@@ -163,3 +163,5 @@ item.heating_coil,电热丝,電熱線圈,Нагревательная спира
 item.heating_coil.desc,将电能转化为热量的加热元件。,將電能轉化為熱量的加熱元件。,"Нагревательный элемент, преобразующий электричество в тепло.",Um elemento de aquecimento que transforma eletricidade em calor.
 item.motor,电机,馬達,Электродвигатель,Motor
 item.motor.desc,用电驱动设备的小型电机。,用電驅動設備的小型馬達。,Компактный электродвигатель для привода механизмов.,Um motor elétrico compacto para mover mecanismos.
+item.high_capacity_capacitor,大容量电容器,大容量電容器,Конденсатор большой ёмкости,Capacitor de alta capacidade
+item.high_capacity_capacitor.desc,用于修复升降机供电装置的大容量电容器。,用於修復升降機供電裝置的大容量電容器。,Конденсатор большой ёмкости для ремонта блока питания подъёмника.,Um capacitor de alta capacidade usado para reparar a unidade de energia de um elevador.

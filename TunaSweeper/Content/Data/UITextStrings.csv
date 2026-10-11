@@ -629,3 +629,10 @@ ui.quest_reward_locker.close,닫기,Close,閉じる
 ui.quest_reward_locker.no_space,가방 공간이 부족합니다. 보상은 보관함에 남아 있습니다.,Not enough bag space. The reward remains in the locker.,バッグの空きが足りません。報酬は保管庫に残っています。
 ui.quest_reward_locker.unnamed_item,아이템,Item,アイテム
 ui.quest.submit,제출,Submit,納品
+ui.lift.title,리프트 목적지 선택,Choose lift destination,リフトの行き先を選択
+ui.lift.choose,리프트 이용,Use lift,リフトを使う
+ui.lift.forest,숲,Forest,森
+ui.lift.village_east,마을 동쪽,Village East,村の東
+ui.lift.village_west,마을 서쪽,Village West,村の西
+ui.lift.plains,평원,Plains,平原
+ui.lift.cancel,취소,Cancel,キャンセル

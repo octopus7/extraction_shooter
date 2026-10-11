@@ -7,6 +7,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperRaidExperienceReturnSubsystem.h"
+#include "Subsystem/TunaSweeperRaidArrivalSubsystem.h"
 
 ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableActor()
 {
@@ -33,6 +34,10 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
+		if (auto* Arrival = GameInstance->GetSubsystem<UTunaSweeperRaidArrivalSubsystem>())
+		{
+			Arrival->PrepareArrival(TargetLevelName, GetArrivalGroup());
+		}
 		if (auto* Achievements = GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
 		{
 			Achievements->DiscardPendingExtraction(GetWorld());

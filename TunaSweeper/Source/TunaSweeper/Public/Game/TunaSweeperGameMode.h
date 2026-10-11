@@ -11,4 +11,9 @@ class TUNASWEEPER_API ATunaSweeperGameMode : public AGameModeBase
 
 public:
 	ATunaSweeperGameMode();
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
+
+private:
+	bool bLiftArrivalMissingStart = false;
 };
