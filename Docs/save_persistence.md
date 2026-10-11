@@ -428,9 +428,15 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 
 ## Quest NPC presence
 
+- Quest-gated raid loot placements use `required_active_quest_id` from placement data and derive presence from the existing quest state (`Accepted` only). Quest-change and save-load notifications update visibility/collision immediately. Per-world actor references and the spawned-once guard are transient; no new save fields or version changes are introduced. Hidden containers retain their existing runtime contents within that world and are not regenerated on repeated quest events.
+
 - Quest-driven NPC visibility and collision are derived from existing quest progress on BeginPlay and OnQuestProgressChanged, including save-load broadcasts. FieldOffer appears only while CanAcceptQuest is true; BaseResident appears only after RewardCompleted. No actor visibility flags, new save fields, or save-version changes are needed.
 - Optional completion_provider_id belongs to quest definitions, not saved progress. Missing or empty values retain provider_id as the completion NPC.
 
 ### 수락 즉시 완료 퀘스트
 
 명시적 `complete_on_accept` 정의는 수락 시 기존 퀘스트 상태 `RewardAvailable`을 저장한다. 보상 수령 전에는 후속 선행 완료로 간주하지 않으며, 기존 보상 수령 경로가 `RewardCompleted`를 저장한다. 신규 저장 필드나 스키마 변경은 없다.
+
+### 기본 전력 시설 프리셋의 저장 ID
+
+`BP_PowerFacility_Primary`는 기존 월드 진행 저장의 `power.facility.primary` ID를 사용한다. 수리 성공 시 완료 상태가 저장되고 다시 로드한 액터는 스파크가 꺼진 상태로 복원된다. 같은 시설을 대표하는 단일 배치용 ID이며 독립 설비에 중복 사용하지 않는다. 저장 스키마 변경은 없다.
