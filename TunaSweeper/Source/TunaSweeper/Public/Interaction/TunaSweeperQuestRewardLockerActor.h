@@ -11,4 +11,14 @@ class TUNASWEEPER_API ATunaSweeperQuestRewardLockerActor : public ATunaSweeperIn
 	GENERATED_BODY()
 public:
 	ATunaSweeperQuestRewardLockerActor();
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Allows the outlet to follow a curved wall independently of the screen. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Collection Terminal")
+	FTransform OutletTransform = FTransform(FVector(0, 145, 0));
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USceneComponent> OutletRoot;
+
 };
