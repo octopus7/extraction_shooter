@@ -227,3 +227,22 @@ v1 목표 타입:
 차량 목표는 `type`을 `vehicle_location_reached`로 바꾼다. 두 타입은 서로의 목표를 진행시키지 않는다. 두 역 방문은 각기 다른 `location_id`를 갖는 목표 두 개로 작성한다. 도착 목표의 `required_count`는 생략 또는 1만 허용하며 장소 없는 정의·반복 횟수·잘못된 숫자 형식은 거절한다. 수락 중인 퀘스트만 진행하고 같은 장소의 재판정은 중복 저장·보상 지급을 일으키지 않는다. 저장은 기존 목표 진행값을 사용한다.
 
 이 기능의 선행 구현에는 실제 퀘스트 데이터, 맵 배치, 복구/연료 시스템, 전용 BP 에셋이 포함되지 않는다. 편집기에서 네이티브 `TunaSweeperQuestArrivalTrigger` 액터를 직접 배치해 설정할 수 있다.
+
+### 퀘스트 조건 시설 액터
+
+- 콘텐츠 브라우저의 `/Game/Interaction/QuestFacility/BP_QuestFacility`를 배치한다. 기반 클래스는 `ATunaSweeperQuestFacilityActor`이며 648삼각형 복셀 새끼 멧돼지 임시 메시를 기본으로 사용한다. `VisualMesh`는 시설 모델로 교체할 수 있다. 실제 시설 서비스나 특정 퀘스트 ID는 템플릿에 지정하지 않는다.
+- `UnlockConditions`에 `QuestId`와 `AllowedStates`를 추가한다. 모든 항목이 만족되어야 상호작용할 수 있다. 기본 허용 상태는 `RewardCompleted`(보상 수령 완료)다. 빈 조건, 존재하지 않는 ID, 0 이하 ID, 빈 허용 상태 목록은 잠금으로 처리한다.
+- 진행 중에만 쓰는 시설은 `Accepted`, 목표 달성 후 보고 전에는 `RewardAvailable`을 선택한다. 수락 이후 계속 열어 두려면 `Accepted`, `RewardAvailable`, `RewardCompleted`를 모두 넣는다. 상태는 정확히 일치해야 하며 자동 누적 조건이 아니다.
+- 잠금 중에도 메시·충돌은 유지하고 상호작용 프롬프트만 제거한다. 실행 시 조건을 다시 검사하므로 오래된 프롬프트로 우회할 수 없다.
+- `InteractionStringKey`는 UI 문자열 키이며 기본은 `ui.interaction.use_facility`다. 표시 문구를 코드에 직접 쓰지 않는다.
+- BP에서 `ExecuteFacilityInteraction`을 재정의해 시설 UI나 서비스를 연결한다. 성공 시 true를 반환하면 `OnFacilityUsed`가 발생하고, 일반 상호작용 경로에서 `InteractionObjectiveEventId` 및 `quest_facility_use` 타입으로 퀘스트 목표에 알린다. 실패는 false로 반환한다. 기본 템플릿은 성공 이벤트만 제공하며 서비스·아이템 소모·추가 해금 상태를 만들지 않는다.
+- 최초 진입·퀘스트 변경·저장 불러오기·언어 변경 때 갱신한다. 실행 중 BP로 조건을 편집하면 `RefreshQuestState`를 호출한다.
+
+### 퀘스트 완료 조명 제어 액터
+
+- `/Game/Interaction/QuestFacility/BP_QuestLightController`를 제어할 조명과 같은 레벨에 배치한다. 기반 클래스는 `ATunaSweeperQuestLightController`다.
+- 인스턴스의 `LightGroups` 각 행에 `CompletedQuestId`와 `LightActors` 목록을 지정한다. 레벨에서 조명 액터를 선택하거나 스포이트로 참조를 연결한다. 한 액터의 여러 조명 컴포넌트도 함께 제어한다.
+- `bVisibleBeforeCompletion`과 `bVisibleAfterCompletion`은 기본 false/true다. 반대로 설정하면 완료 후 소등한다. 완료는 `RewardCompleted`이며 `RewardAvailable`은 완료 전으로 취급한다. 잘못된 ID나 아직 없는 퀘스트는 완료 전 상태를 사용한다.
+- Movable 조명을 권장한다. Static 조명은 건드리지 않으며, Stationary 조명의 이미 구워진 간접광은 이 액터로 제거할 수 없다. 조명 컴포넌트의 Visibility만 바꾸고 밝기·색·메시·액터의 Hidden In Game 값은 유지한다. 대상 조명 자체의 Hidden In Game은 꺼 두어야 한다.
+- 같은 조명을 여러 행에 넣으면 아래쪽 행이 우선한다. 여러 컨트롤러가 같은 조명을 제어하지 않도록 배치한다. null·삭제된 참조는 무시한다.
+- BeginPlay와 퀘스트 변경·불러오기·새 게임 초기화 이벤트에서 갱신하며 매 프레임 순회하지 않는다. 스트리밍 서브레벨마다 컨트롤러를 함께 배치한다. 실행 중 목록이나 조명 컴포넌트를 바꾸면 `RefreshQuestLights`를 호출한다. 에디터 구성 단계에서는 레벨 조명을 변경하지 않는다.

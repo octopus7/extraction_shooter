@@ -8,6 +8,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperBlockedIntakeScreenActor.h"
 #include "Interaction/TunaSweeperPowerFacilityActor.h"
+#include "Interaction/TunaSweeperQuestFacilityActor.h"
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
 #include "Interaction/TunaSweeperCrowbarWallRackActor.h"
@@ -106,6 +107,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("self_destruct"));
 		case ETunaSweeperInteractionType::WorldProgress:
 			return FName(TEXT("world_progress"));
+		case ETunaSweeperInteractionType::QuestFacilityUse:
+			return FName(TEXT("quest_facility_use"));
 		case ETunaSweeperInteractionType::PersistentDoor:
 			return FName(TEXT("persistent_door"));
 		case ETunaSweeperInteractionType::WarpPoint:
@@ -298,6 +301,10 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::WorldProgress:
 		bHandled = HandleWorldProgressInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::QuestFacilityUse:
+		if (auto* Facility = Cast<ATunaSweeperQuestFacilityActor>(Interactable->GetOwner()))
+			bHandled = Facility->TryUseFacility(InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::PersistentDoor:
 		bHandled = HandlePersistentDoorInteraction(Interactable);
 		break;
@@ -435,6 +442,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld()))
 	{
 		return false;
+	}
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::QuestFacilityUse)
+	{
+		const auto* Facility = Cast<ATunaSweeperQuestFacilityActor>(Interactable->GetOwner());
+		return Facility && Facility->IsFacilityUnlocked();
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::VehicleMount)

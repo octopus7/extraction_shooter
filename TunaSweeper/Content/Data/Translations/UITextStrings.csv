@@ -542,3 +542,4 @@ ui.passage.repair,修理：{0},修理：{0},Ремонт: {0},Reparar: {0}
 ui.passage.separator," + "," + "," + "," + "
 ui.interaction.deliver_parcel,交付包裹,交付包裹,Доставить посылку,Entregar encomenda
 ui.item_info.volatile_warning,无法带回基地。,無法帶回基地。,Нельзя принести на базу.,Não pode ser levado de volta à base.
+ui.interaction.use_facility,使用设施,使用設施,Использовать объект,Usar instalação
