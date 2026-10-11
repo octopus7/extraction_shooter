@@ -209,6 +209,10 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	bool bAutoTrackOnAccept = true;
 
+	// Explicit handoff quests have no objectives and await reward claim immediately after acceptance.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	bool bCompleteOnAccept = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName AutoAcceptAfterScenarioFlag = NAME_None;
 

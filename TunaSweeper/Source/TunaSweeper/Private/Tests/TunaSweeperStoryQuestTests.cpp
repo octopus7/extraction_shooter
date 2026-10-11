@@ -3,6 +3,7 @@
 #include "Misc/AutomationTest.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
+#include "UObject/UnrealType.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperStoryQuestTest,
     "TunaSweeper.Quest.StoryAcceptanceRecovery",
@@ -43,6 +44,36 @@ bool FTunaSweeperStoryQuestTest::RunTest(const FString& Parameters)
     Quests->SetQuestState(1, ETunaSweeperQuestState::RewardCompleted);
     Quests->ReconcileStoryQuestAcceptance(CompletedFlags);
     TestEqual(TEXT("Recovery preserves completed state"), Quests->GetQuestState(1), ETunaSweeperQuestState::RewardCompleted);
+    FTunaSweeperQuestDefinition Immediate;
+    Immediate.QuestId = 902;
+    Immediate.ProviderId = TEXT("provider.test_source");
+    Immediate.CompletionProviderId = TEXT("provider.test_reward");
+    const FBoolProperty* CompleteOnAccept = FindFProperty<FBoolProperty>(
+        FTunaSweeperQuestDefinition::StaticStruct(), TEXT("bCompleteOnAccept"));
+    if (!TestNotNull(TEXT("Explicit completion-on-accept option exists"), CompleteOnAccept)) return false;
+    CompleteOnAccept->SetPropertyValue_InContainer(&Immediate, true);
+    Quests->QuestDefinitions.Add(902, Immediate);
+    FTunaSweeperQuestDefinition Followup;
+    Followup.QuestId = 903;
+    Followup.RequiredCompletedQuestIds.Add(902);
+    Followup.Objectives.Add(Objective);
+    Quests->QuestDefinitions.Add(903, Followup);
+    TestTrue(TEXT("Immediate quest accepts"), Quests->AcceptQuest(902));
+    TestEqual(TEXT("Acceptance immediately enables reward"), Quests->GetQuestState(902), ETunaSweeperQuestState::RewardAvailable);
+    TestFalse(TEXT("Acceptance does not unlock reward-dependent followup"), Quests->CanAcceptQuest(903));
+    TestFalse(TEXT("Cannot accept again"), Quests->AcceptQuest(902));
+    int32 Resolved = 0;
+    TestFalse(TEXT("Source NPC cannot offer completed quest reward"), Quests->TryResolveQuestForProvider(Immediate.ProviderId, 0, Resolved));
+    TestTrue(TEXT("Reward NPC offers reward"), Quests->TryResolveQuestForProvider(Immediate.CompletionProviderId, 0, Resolved));
+    TestEqual(TEXT("Reward NPC resolves immediate quest"), Resolved, 902);
+    TArray<FTunaSweeperNumericQuestProgressSaveData> Saved;
+    int32 Tracked = 0, Coins = 0;
+    Quests->ExportQuestProgressForSave(Saved, Tracked, Coins);
+    Quests->LoadQuestProgressFromSave(Saved, Tracked, Coins);
+    TestEqual(TEXT("Immediate reward state survives reload"), Quests->GetQuestState(902), ETunaSweeperQuestState::RewardAvailable);
+    TestTrue(TEXT("Explicit reward claim succeeds"), Quests->ClaimQuestReward(902));
+    TestTrue(TEXT("Reward claim unlocks followup"), Quests->CanAcceptQuest(903));
+    TestFalse(TEXT("Reward cannot be claimed twice"), Quests->ClaimQuestReward(902));
     return true;
 }
 #endif

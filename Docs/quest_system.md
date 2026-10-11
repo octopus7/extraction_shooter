@@ -198,3 +198,7 @@ v1 목표 타입:
 - A presentation step uses `speaker_name_string_key` and `dialogue_text_string_key`; optional `use_camera_focus`, `camera_focus_location`, and `camera_blend_seconds` reuse the existing dialogue camera flow.
 - Accepting a quest calls `PlayQuestPresentation(..., OnAccept)` after the quest is accepted. Claiming rewards can similarly call `OnRewardClaim` when reward presentation data exists.
 - Quest rewards can include `housing_facilities` or `housing_facility_unlocks` arrays. Reward claim unlocks those facility ids in `UTunaSweeperGameInstance`, and the housing UI only shows locked facilities after their ids are unlocked.
+
+### 수락 즉시 완료하는 전달형 퀘스트
+
+`complete_on_accept: true`를 명시하고 `objectives`는 비워 둔다. 수락 시 `RewardAvailable`이 되며 보상은 자동 지급하지 않는다. `completion_provider_id`로 지정한 NPC에서 보상을 수령해야 `RewardCompleted`가 되어 후속 퀘스트가 해금된다. 목표와 해당 옵션의 혼용은 로더 오류로 처리한다. 옵션이 없는 목표 미정의 퀘스트는 계속 실행 등록에서 제외한다.

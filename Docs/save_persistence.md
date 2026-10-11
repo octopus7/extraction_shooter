@@ -430,3 +430,7 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 
 - Quest-driven NPC visibility and collision are derived from existing quest progress on BeginPlay and OnQuestProgressChanged, including save-load broadcasts. FieldOffer appears only while CanAcceptQuest is true; BaseResident appears only after RewardCompleted. No actor visibility flags, new save fields, or save-version changes are needed.
 - Optional completion_provider_id belongs to quest definitions, not saved progress. Missing or empty values retain provider_id as the completion NPC.
+
+### 수락 즉시 완료 퀘스트
+
+명시적 `complete_on_accept` 정의는 수락 시 기존 퀘스트 상태 `RewardAvailable`을 저장한다. 보상 수령 전에는 후속 선행 완료로 간주하지 않으며, 기존 보상 수령 경로가 `RewardCompleted`를 저장한다. 신규 저장 필드나 스키마 변경은 없다.

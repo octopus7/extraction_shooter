@@ -505,6 +505,11 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(int32 QuestId)
 
 	if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
 	{
+		if (Definition->bCompleteOnAccept && Definition->Objectives.IsEmpty())
+		{
+			SetQuestState(QuestId, ETunaSweeperQuestState::RewardAvailable);
+			ShowQuestCompletedToast(QuestId);
+		}
 		if (Definition->bAutoTrackOnAccept)
 		{
 			TrackedQuestId = QuestId;
@@ -1120,6 +1125,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 			}
 		}
 		QuestObject->TryGetBoolField(TEXT("auto_track_on_accept"), Definition.bAutoTrackOnAccept);
+		QuestObject->TryGetBoolField(TEXT("complete_on_accept"), Definition.bCompleteOnAccept);
 		Definition.AutoAcceptAfterScenarioFlag = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("auto_accept_after_scenario_flag"));
 
 		const TArray<TSharedPtr<FJsonValue>>* ObjectiveValues = nullptr;
@@ -1207,7 +1213,14 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 			TEXT("reward_presentation"),
 			Definition.RewardPresentationSteps);
 
-		if (Definition.Objectives.Num() > 0)
+		if (Definition.bCompleteOnAccept && !Definition.Objectives.IsEmpty())
+		{
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest %d cannot combine complete_on_accept with objectives."), Definition.QuestId);
+			QuestDefinitions.Reset();
+			return false;
+		}
+
+		if (Definition.Objectives.Num() > 0 || Definition.bCompleteOnAccept)
 		{
 			ResolveDefinitionText(Definition);
 			QuestDefinitions.Add(Definition.QuestId, Definition);
