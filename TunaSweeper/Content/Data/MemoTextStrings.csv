@@ -1,41 +1,121 @@
 string_key,ko,en,ja
-memo.1.title,"다른 숲","Another Forest","別の森"
-memo.1.body,"데모는 본편게임과 다른 숲에서 진행된다.","The demo takes place in a different forest from the Full Game.","デモはフルゲームとは別の森で進行する。"
-memo.2.title,"친절한 두더지","Kind Mole","親切なモグラ"
-memo.2.body,"두더지는 의외로 친절하다","Mole is surprisingly kind.","モグラは意外と親切だ。"
-memo.3.title,"기지의 중요한 기능","The Base's Important Function","基地の重要な機能"
-memo.3.body,"기지에는 여러가지 기능이 있지만 지금은 화장실이 중요하다.","The base has many facilities, but right now the toilet is what matters.","基地にはさまざまな機能があるが、今はトイレが重要だ。"
-memo.4.title,"돌아가","Go Back","戻れ"
-memo.4.body,"여기까지 오다니 이제 돌아가","You made it this far. Now go back.","ここまで来るとは。もう戻れ。"
-memo.5.title,"잃어버린 무기","Lost Weapon","失った武器"
-memo.5.body,"무기를 잃으면 여기서 줍자.","If you lose your weapon, pick one up here.","武器を失ったら、ここで拾おう。"
-memo.6.title,"녹슨 사다리","Rusty Ladder","錆びた梯子"
-memo.6.body,"사다리의 첫 칸이 차갑지 않으면 최근에 누군가 지나갔다. 손잡이에 남은 온기는 거짓말을 하지 않는다. 따라갈지 숨을지는 발소리를 듣고 정한다.","If the first rung is not cold, someone passed recently. Warmth left on the rail does not lie. Listen for footsteps before choosing to follow or hide.","梯子の一段目が冷たくなければ、最近誰かが通った。手すりに残る温もりは嘘をつかない。追うか隠れるかは足音を聞いて決めろ。"
-memo.7.title,"파란 렌즈","Blue Lens","青いレンズ"
-memo.7.body,"푸른 렌즈를 단 기계는 정면보다 측면을 늦게 본다. 반짝임이 왼쪽으로 밀리면 이미 추적 중이다. 벽을 끼고 사라지는 편이 빠르다.","Machines with blue lenses notice their sides later than their front. If the glint shifts left, tracking has begun. Break sight behind a wall quickly.","青いレンズの機械は正面より側面を見るのが遅い。反射が左へずれたなら、すでに追跡中だ。壁に沿って視界から消える方が早い。"
-memo.8.title,"식량 창고의 번호","Food Storehouse Numbers","食料倉庫の番号"
-memo.8.body,"창고 번호가 낮다고 더 안전하지 않다. 오래된 구역일수록 잠금은 약하지만 바닥이 기억하는 소리는 더 많다. 빈 캔은 밟지 마라.","A lower storehouse number does not mean safer. Older sectors have weaker locks, but their floors remember more sounds. Do not step on empty cans.","倉庫番号が小さくても安全とは限らない。古い区画ほど鍵は弱いが、床が覚えている音は多い。空き缶を踏むな。"
-memo.9.title,"침묵하는 무전","Silent Radio","沈黙する無線"
-memo.9.body,"무전기가 잡음을 삼키는 순간이 있다. 그때는 멀리서 신호가 온 것이 아니라 가까운 곳에서 신호가 눌린 것이다. 금속 선반 아래를 확인하라.","Sometimes the radio swallows its own static. That means a nearby signal is being suppressed, not that one arrived from afar. Check beneath the metal shelving.","無線機が雑音を飲み込む瞬間がある。それは遠くから信号が来たのではなく、近くで信号が抑えられたということだ。金属棚の下を確認しろ。"
-memo.10.title,"긴 복도의 바람","Wind in the Long Corridor","長い廊下の風"
-memo.10.body,"바람이 복도 끝에서 불어오면 출구가 아니라 환기 장치가 살아 있다는 뜻이다. 팬 소리 사이에 한 박자 빠지는 구간이 있으면 통로가 숨겨져 있다.","Wind from the end of a corridor means the ventilation is alive, not that an exit is near. A missing beat in the fan noise marks a hidden passage.","廊下の奥から風が来るなら出口ではなく換気装置が動いている。ファン音が一拍抜ける場所には隠し通路がある。"
-memo.11.title,"낡은 탄피","Old Casings","古い薬莢"
-memo.11.body,"바닥의 탄피는 항상 전투의 방향을 말한다. 입구 쪽으로 굴러간 탄피가 많으면 누군가 물러나며 쐈다. 그 끝에는 대개 급한 숨이 남아 있다.","Casings on the floor reveal the direction of a fight. If many rolled toward the entrance, someone fired while retreating. Ragged breath usually waits at the end.","床の薬莢は戦闘の向きを語る。入口側へ転がった薬莢が多ければ、誰かが後退しながら撃った。その先にはたいてい荒い息が残っている。"
-memo.12.title,"잠긴 의료함","Locked Medical Case","施錠された医療箱"
-memo.12.body,"의료함이 비어 있어도 버리지 마라. 잠금쇠 안쪽에는 얇은 철심이 남는다. 급할 때는 문보다 작은 틈이 더 쓸모 있다.","Do not discard an empty medical case. A thin metal pin remains inside the latch. In an emergency, a small gap can be more useful than a door.","医療箱が空でも捨てるな。留め金の内側には細い鉄芯が残る。急ぐときは扉より小さな隙間の方が役に立つ。"
-memo.13.title,"흰 선 아래","Below the White Line","白線の下"
-memo.13.body,"바닥의 흰 선은 길잡이가 아니라 금지선이었다. 선을 따라가면 빠르지만 선 아래 배관은 발소리를 멀리 보낸다. 조용히 가려면 선을 비켜라.","The white floor line was a boundary, not a guide. Following it is quick, but pipes beneath it carry footsteps far. Keep away from the line to move quietly.","床の白線は案内ではなく立入禁止線だった。沿えば速いが、下の配管が足音を遠くへ運ぶ。静かに進むなら線を避けろ。"
-memo.14.title,"돌아오지 않은 지도","Map That Never Returned","戻らなかった地図"
-memo.14.body,"지도에는 북쪽이 위라고 적혀 있지만 이곳의 북쪽은 늘 출구를 뜻하지 않는다. 햇빛이 들어오는 쪽과 구조 신호가 오는 쪽은 다르다.","The map says north is up, but north here does not always mean exit. Sunlight and rescue signals come from different directions.","地図では北が上だが、ここで北が出口とは限らない。日光が差す方角と救難信号が来る方角は違う。"
-memo.15.title,"전원 스위치 옆 메모","Note Beside the Power Switch","電源スイッチ横のメモ"
-memo.15.body,"꺼진 장치는 죽은 장치가 아니다. 전원이 없는 물건도 마지막 명령을 기억한다. 손대기 전에 무엇을 멈추려 했는지 생각하라.","A powered-down device is not a dead device. Even without power, it remembers its last command. Before touching it, ask what it was meant to stop.","停止した装置は死んだ装置ではない。電源がなくても最後の命令を覚えている。触る前に、何を止めようとしていたのか考えろ。"
-memo.16.title,"작은 나사 두 개","Two Small Screws","小さなねじ二本"
-memo.16.body,"작은 나사는 버리기 쉽다. 그러나 이곳의 문은 큰 부품보다 작은 고정핀 하나로 버틴다. 주머니 한 칸은 늘 사소한 것들에게 남겨 두어라.","Small screws are easy to discard, yet doors here endure on one tiny retaining pin rather than a large part. Keep one pocket for insignificant things.","小さなねじは捨てやすい。だがここの扉は大きな部品より小さな固定ピン一本で持ちこたえる。ポケット一つは些細な物のために空けておけ。"
-memo.17.title,"울림이 낮은 방","Room with a Low Echo","反響の低い部屋"
-memo.17.body,"울림이 낮은 방은 비어 있는 방이 아니다. 천장 위 공간이 소리를 먹고 있다. 그림자가 없는데도 소리가 낮다면 위를 먼저 봐라.","A room with a low echo is not empty. Space above the ceiling is swallowing the sound. If the sound is dull without a shadow, look up first.","反響の低い部屋は空ではない。天井裏の空間が音を吸っている。影がないのに音が低いなら、まず上を見ろ。"
-memo.18.title,"젖은 장갑","Wet Gloves","濡れた手袋"
-memo.18.body,"젖은 장갑은 추위를 막지 못하지만 감전을 조금 늦춘다. 완전한 안전은 아니다. 잠깐의 지연을 탈출 시간으로 바꿀 수 있을 뿐이다.","Wet gloves do not stop the cold, but they can delay a shock. They are not protection—only a moment that can be turned into escape time.","濡れた手袋は寒さを防げないが、感電を少し遅らせる。完全な安全ではない。その一瞬を脱出時間に変えられるだけだ。"
-memo.19.title,"닫힌 눈 표시","Closed-Eye Mark","閉じた目の印"
-memo.19.body,"닫힌 눈 표식은 은신 구역이라는 뜻이 아니었다. 감시자가 눈을 감는 구역이라는 뜻이다. 오래 머물면 다시 뜨는 순간을 맞게 된다.","The closed-eye mark did not mean a hiding area. It marked where the watcher shuts its eye. Stay too long and you will see it open again.","閉じた目の印は隠れ場所ではない。監視者が目を閉じる区画という意味だ。長居すれば再び開く瞬間に出会う。"
-memo.20.title,"마지막 식사 전","Before the Last Meal","最後の食事の前"
-memo.20.body,"누군가는 첫 식사를 마지막처럼 준비했다. 접시의 방향이 모두 북쪽을 향하고 있었다. 그들이 기다린 것은 사람이었을까, 신호였을까.","Someone prepared a first meal as though it were the last. Every plate faced north. Were they waiting for a person, or for a signal?","誰かが最初の食事を最後のように用意した。皿はすべて北を向いていた。彼らが待っていたのは人か、それとも信号か。"
+memo.1.title,메모 1 번,Memo 1,メモ 1 番
+memo.1.body,메모 1 번,Memo 1,メモ 1 番
+memo.2.title,메모 2 번,Memo 2,メモ 2 番
+memo.2.body,메모 2 번,Memo 2,メモ 2 番
+memo.3.title,메모 3 번,Memo 3,メモ 3 番
+memo.3.body,메모 3 번,Memo 3,メモ 3 番
+memo.4.title,메모 4 번,Memo 4,メモ 4 番
+memo.4.body,메모 4 번,Memo 4,メモ 4 番
+memo.5.title,메모 5 번,Memo 5,メモ 5 番
+memo.5.body,메모 5 번,Memo 5,メモ 5 番
+memo.6.title,메모 6 번,Memo 6,メモ 6 番
+memo.6.body,메모 6 번,Memo 6,メモ 6 番
+memo.7.title,메모 7 번,Memo 7,メモ 7 番
+memo.7.body,메모 7 번,Memo 7,メモ 7 番
+memo.8.title,메모 8 번,Memo 8,メモ 8 番
+memo.8.body,메모 8 번,Memo 8,メモ 8 番
+memo.9.title,메모 9 번,Memo 9,メモ 9 番
+memo.9.body,메모 9 번,Memo 9,メモ 9 番
+memo.10.title,메모 10 번,Memo 10,メモ 10 番
+memo.10.body,메모 10 번,Memo 10,メモ 10 番
+memo.11.title,메모 11 번,Memo 11,メモ 11 番
+memo.11.body,메모 11 번,Memo 11,メモ 11 番
+memo.12.title,메모 12 번,Memo 12,メモ 12 番
+memo.12.body,메모 12 번,Memo 12,メモ 12 番
+memo.13.title,메모 13 번,Memo 13,メモ 13 番
+memo.13.body,메모 13 번,Memo 13,メモ 13 番
+memo.14.title,메모 14 번,Memo 14,メモ 14 番
+memo.14.body,메모 14 번,Memo 14,メモ 14 番
+memo.15.title,메모 15 번,Memo 15,メモ 15 番
+memo.15.body,메모 15 번,Memo 15,メモ 15 番
+memo.16.title,메모 16 번,Memo 16,メモ 16 番
+memo.16.body,메모 16 번,Memo 16,メモ 16 番
+memo.17.title,메모 17 번,Memo 17,メモ 17 番
+memo.17.body,메모 17 번,Memo 17,メモ 17 番
+memo.18.title,메모 18 번,Memo 18,メモ 18 番
+memo.18.body,메모 18 번,Memo 18,メモ 18 番
+memo.19.title,메모 19 번,Memo 19,メモ 19 番
+memo.19.body,메모 19 번,Memo 19,メモ 19 番
+memo.20.title,메모 20 번,Memo 20,メモ 20 番
+memo.20.body,메모 20 번,Memo 20,メモ 20 番
+memo.21.title,메모 21 번,Memo 21,メモ 21 番
+memo.21.body,메모 21 번,Memo 21,メモ 21 番
+memo.22.title,메모 22 번,Memo 22,メモ 22 番
+memo.22.body,메모 22 번,Memo 22,メモ 22 番
+memo.23.title,메모 23 번,Memo 23,メモ 23 番
+memo.23.body,메모 23 번,Memo 23,メモ 23 番
+memo.24.title,메모 24 번,Memo 24,メモ 24 番
+memo.24.body,메모 24 번,Memo 24,メモ 24 番
+memo.25.title,메모 25 번,Memo 25,メモ 25 番
+memo.25.body,메모 25 번,Memo 25,メモ 25 番
+memo.26.title,메모 26 번,Memo 26,メモ 26 番
+memo.26.body,메모 26 번,Memo 26,メモ 26 番
+memo.27.title,메모 27 번,Memo 27,メモ 27 番
+memo.27.body,메모 27 번,Memo 27,メモ 27 番
+memo.28.title,메모 28 번,Memo 28,メモ 28 番
+memo.28.body,메모 28 번,Memo 28,メモ 28 番
+memo.29.title,메모 29 번,Memo 29,メモ 29 番
+memo.29.body,메모 29 번,Memo 29,メモ 29 番
+memo.30.title,메모 30 번,Memo 30,メモ 30 番
+memo.30.body,메모 30 번,Memo 30,メモ 30 番
+memo.31.title,메모 31 번,Memo 31,メモ 31 番
+memo.31.body,메모 31 번,Memo 31,メモ 31 番
+memo.32.title,메모 32 번,Memo 32,メモ 32 番
+memo.32.body,메모 32 번,Memo 32,メモ 32 番
+memo.33.title,메모 33 번,Memo 33,メモ 33 番
+memo.33.body,메모 33 번,Memo 33,メモ 33 番
+memo.34.title,메모 34 번,Memo 34,メモ 34 番
+memo.34.body,메모 34 번,Memo 34,メモ 34 番
+memo.35.title,메모 35 번,Memo 35,メモ 35 番
+memo.35.body,메모 35 번,Memo 35,メモ 35 番
+memo.36.title,메모 36 번,Memo 36,メモ 36 番
+memo.36.body,메모 36 번,Memo 36,メモ 36 番
+memo.37.title,메모 37 번,Memo 37,メモ 37 番
+memo.37.body,메모 37 번,Memo 37,メモ 37 番
+memo.38.title,메모 38 번,Memo 38,メモ 38 番
+memo.38.body,메모 38 번,Memo 38,メモ 38 番
+memo.39.title,메모 39 번,Memo 39,メモ 39 番
+memo.39.body,메모 39 번,Memo 39,メモ 39 番
+memo.40.title,메모 40 번,Memo 40,メモ 40 番
+memo.40.body,메모 40 번,Memo 40,メモ 40 番
+memo.41.title,메모 41 번,Memo 41,メモ 41 番
+memo.41.body,메모 41 번,Memo 41,メモ 41 番
+memo.42.title,메모 42 번,Memo 42,メモ 42 番
+memo.42.body,메모 42 번,Memo 42,メモ 42 番
+memo.43.title,메모 43 번,Memo 43,メモ 43 番
+memo.43.body,메모 43 번,Memo 43,メモ 43 番
+memo.44.title,메모 44 번,Memo 44,メモ 44 番
+memo.44.body,메모 44 번,Memo 44,メモ 44 番
+memo.45.title,메모 45 번,Memo 45,メモ 45 番
+memo.45.body,메모 45 번,Memo 45,メモ 45 番
+memo.46.title,메모 46 번,Memo 46,メモ 46 番
+memo.46.body,메모 46 번,Memo 46,メモ 46 番
+memo.47.title,메모 47 번,Memo 47,メモ 47 番
+memo.47.body,메모 47 번,Memo 47,メモ 47 番
+memo.48.title,메모 48 번,Memo 48,メモ 48 番
+memo.48.body,메모 48 번,Memo 48,メモ 48 番
+memo.49.title,메모 49 번,Memo 49,メモ 49 番
+memo.49.body,메모 49 번,Memo 49,メモ 49 番
+memo.50.title,메모 50 번,Memo 50,メモ 50 番
+memo.50.body,메모 50 번,Memo 50,メモ 50 番
+memo.51.title,메모 51 번,Memo 51,メモ 51 番
+memo.51.body,메모 51 번,Memo 51,メモ 51 番
+memo.52.title,메모 52 번,Memo 52,メモ 52 番
+memo.52.body,메모 52 번,Memo 52,メモ 52 番
+memo.53.title,메모 53 번,Memo 53,メモ 53 番
+memo.53.body,메모 53 번,Memo 53,メモ 53 番
+memo.54.title,메모 54 번,Memo 54,メモ 54 番
+memo.54.body,메모 54 번,Memo 54,メモ 54 番
+memo.55.title,메모 55 번,Memo 55,メモ 55 番
+memo.55.body,메모 55 번,Memo 55,メモ 55 番
+memo.56.title,메모 56 번,Memo 56,メモ 56 番
+memo.56.body,메모 56 번,Memo 56,メモ 56 番
+memo.57.title,메모 57 번,Memo 57,メモ 57 番
+memo.57.body,메모 57 번,Memo 57,メモ 57 番
+memo.58.title,메모 58 번,Memo 58,メモ 58 番
+memo.58.body,메모 58 번,Memo 58,メモ 58 番
+memo.59.title,메모 59 번,Memo 59,メモ 59 番
+memo.59.body,메모 59 번,Memo 59,メモ 59 番
+memo.60.title,메모 60 번,Memo 60,メモ 60 番
+memo.60.body,메모 60 번,Memo 60,メモ 60 番
