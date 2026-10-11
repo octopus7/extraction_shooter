@@ -220,7 +220,7 @@ Mole 등 벙커 캐릭터는 `BunkerMap`에 직접 배치한다. 맵 로드 후 
 
 ## RaidMap 로드 후 배치
 
-적·앵커형 루트 컨테이너는 `UTunaSweeperRaidPlacementSubsystem`, 메모는 `UTunaSweeperMemoSubsystem`이 현재 월드의 `BP_RaidPlacementAnchor`와 `level_name + placement_id` 데이터를 연결해 생성한다. `EnemySpawns.json`과 `MemoSpawns.json`에는 좌표가 없으며 앵커 Transform이 유일한 공간 소스다. `LootContainerSpawns.json`의 기존 좌표 행만 호환 경로로 남는다.
+적·앵커형 루트 컨테이너는 `UTunaSweeperRaidPlacementSubsystem`이 현재 월드의 `BP_RaidPlacementAnchor`와 `level_name + placement_id` 데이터를 연결해 생성한다. 메모는 독립 `BP_MemoAnchor`를 레벨에 직접 놓고 MemoId만 지정한다. 메모 획득 시 즉시 저장하고 재진입 시 수집 기록을 확인해 숨긴다. `EnemySpawns.json`에는 좌표가 없으며 공용 앵커 Transform이 공간 소스다. `LootContainerSpawns.json`의 기존 좌표 행만 호환 경로로 남는다.
 
 레벨 이동, 추출, 월드 진행, 워프, 투명 장애물과 일반 상호작용 액터는 맵의 직접 배치 인스턴스를 그대로 사용한다.
 

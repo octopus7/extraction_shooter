@@ -26,7 +26,7 @@
 - `TunaSweeper/Content/Data/QuestDefinitions.json`
 - `TunaSweeper/Content/Data/QuestTextStrings.csv`
 - `TunaSweeper/Content/Data/EnemySpawns.json`
-- `TunaSweeper/Content/Data/MemoSpawns.json`
+- `TunaSweeper/Content/Data/MemoDefinitions.json`
 - `TunaSweeper/Content/Data/ItemTable.json`
 - `TunaSweeper/Content/Data/ItemStackDefinitions.json`
 

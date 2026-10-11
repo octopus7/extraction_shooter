@@ -14,7 +14,6 @@ The remaining runtime placement files are:
 | `EnemySpawnProfiles.json` | no transform; enemy class/loadout/profile | `UTunaSweeperRaidPlacementSubsystem` |
 | `EnemyCombatProfiles.json` | no transform; combat behavior | `UTunaSweeperEnemySpawnSubsystem` |
 | `LootContainerSpawns.json` | anchor rows or retained coordinate rows | raid placement and enemy-spawn subsystems |
-| `MemoSpawns.json` | `BP_RaidPlacementAnchor` only | `UTunaSweeperMemoSubsystem` |
 | `MemoDefinitions.json` | no transform; memo content | `UTunaSweeperMemoSubsystem` |
 
 ## Direct level actors
@@ -24,11 +23,11 @@ The remaining runtime placement files are:
 - The map widget discovers directly placed level-travel actors whose destination is `Bunker` and directly placed extraction actors. Their actor transforms drive the start/extraction overlays.
 - Directly placed world-progress actors keep their stable progress ids and restore state through the existing save flow.
 - `BP_Mole` remains directly placed in `BunkerMap`; its dialogue, quest provider, and quest state are unchanged.
-- Directly placed memo actors remain supported independently of `MemoSpawns.json`.
+- Memos use the directly placed `/Game/Interaction/BP_MemoAnchor` with only MemoId; runtime placement JSON is not used.
 
 ## Enemy placement
 
-Every `EnemySpawns.json` row requires `level_name`, positive `placement_id`, and `profile_id`. It may contain chance/condition data, but must not contain `location`, `rotation`, or `scale`. A matching level instance of `/Game/Raid/Placement/BP_RaidPlacementAnchor` with kind `Enemy` owns the transform.
+Every `EnemySpawns.json` row requires `level_name`, positive `placement_id`, and `profile_id`. It may contain chance/condition data, but must not contain `location`, `rotation`, or `scale`. A matching level instance of `/RaidLevelKit/Placement/BP_RaidPlacementAnchor` with kind `Enemy` owns the transform.
 
 The demo row uses logical level `DemoRaidMap` and `placement_id=1`. Both demo raid maps contain a matching anchor, so the build-flavor level alias can select either map without falling back to coordinates. `EnemySpawnProfiles.json` resolves the actor/loadout, while `EnemyCombatProfiles.json` remains the source of combat behavior.
 
@@ -42,22 +41,14 @@ Anchor rows use kind `LootContainer`. Container class, definition id, contents i
 
 ## Memo placement
 
-Every `MemoSpawns.json` row requires:
-
-```json
-{
-  "level_name": "DemoRaidMap",
-  "placement_id": 2100,
-  "memo_id": 1
-}
-```
-
-The matching anchor uses kind `Memo` and owns the transform. JSON may additionally select `actor_class`, `marker_widget_class`, `visual_mesh`, `visual_material`, `visual_scale`, `visual_relative_location`, and `interaction_display_name`. Transform fields are rejected.
-
-Validation rejects duplicate `(level_name, placement_id)`, duplicate memo ids within a level, missing memo definitions, missing anchors, duplicate anchor ids, and anchor-kind mismatches. `MemoDefinitions.json` continues to own memo content. `AcquiredMemoIds` remains the save/runtime collection gate, so acquired memos do not respawn.
+Place `/Game/Interaction/BP_MemoAnchor` (native `ATunaSweeperMemoAnchor`) and set MemoId to an entry in `MemoDefinitions.json`.
+The default prop is `SM_MemoStorageDevice_LowPoly`. No PlacementId or MemoSpawns.json is used.
+Collection immediately saves `AcquiredMemoIds`; a failed save leaves the memo collectible. Collected/unknown IDs are hidden and noninteractive.
+Save initialization and collection refresh existing instances, including duplicates of the same MemoId. Re-entering a map respects the acquired IDs in the active save slot.
+See `Docs/raid_placement_anchors.md` and `Docs/save_persistence.md` for the complete contract.
 
 ## Editor authoring
 
-Place `/Game/Raid/Placement/BP_RaidPlacementAnchor`, choose `Enemy`, `Loot Container`, or `Memo` in the Details panel, and assign a stable positive `PlacementId` unique across all three kinds in that level. The arrow, billboard, label, and loot preview are editor-only. Runtime actors spawn at the anchor transform and do not use preview components as gameplay authority.
+Place `/RaidLevelKit/Placement/BP_RaidPlacementAnchor`, choose `Enemy`, `Loot Container`, or `AuthoredActor` in the Details panel, and assign a stable positive `PlacementId` unique across all three kinds in that level. The arrow, billboard, label, and loot preview are editor-only. Runtime actors spawn at the anchor transform and do not use preview components as gameplay authority.
 
 `Tools/RaidPlacement/place_quadruped_enemy_spawn.py` maintains the demo quadruped anchor in both demo raid maps without removing directly placed actors.

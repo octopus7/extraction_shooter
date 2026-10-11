@@ -22,7 +22,7 @@ bool FRaidLevelSavedContractTest::RunTest(const FString& Parameters)
     {
         TestEqual(TEXT("Enemy serialized ordinal"), OldEnum->GetValueByNameString(TEXT("Enemy")), int64(0));
         TestEqual(TEXT("Loot serialized ordinal"), OldEnum->GetValueByNameString(TEXT("LootContainer")), int64(1));
-        TestEqual(TEXT("Memo serialized ordinal"), OldEnum->GetValueByNameString(TEXT("Memo")), int64(2));
+        TestEqual(TEXT("Memo kind removed"), OldEnum->GetValueByNameString(TEXT("Memo")), int64(INDEX_NONE));
         TestEqual(TEXT("Authored serialized ordinal"), OldEnum->GetValueByNameString(TEXT("AuthoredActor")), int64(3));
     }
     TestEqual(TEXT("Preview struct redirect resolves"), Cast<UScriptStruct>(LoadRedirected(TEXT("/Script/TunaSweeper.TunaSweeperLootAnchorPreviewDefinition"))), FTunaSweeperLootAnchorPreviewDefinition::StaticStruct());
@@ -44,7 +44,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRaidLevelStructureTest, "TunaSweeper.RaidPlace
 bool FRaidLevelStructureTest::RunTest(const FString& Parameters)
 {
     using K = ETunaSweeperRaidPlacementAnchorKind;
-    TArray<FRaidPlacementDescriptor> Rows = {{1,K::Enemy,true},{1,K::Enemy,true},{1000,K::LootContainer,false},{2000,K::Memo,false},{3000,K::AuthoredActor,false}};
+    TArray<FRaidPlacementDescriptor> Rows = {{1,K::Enemy,true},{1,K::Enemy,true},{1000,K::LootContainer,false},{3000,K::AuthoredActor,false}};
     TestTrue(TEXT("Only opted-in enemies may share id"), ValidateRaidPlacementStructure(Rows).IsEmpty());
     Rows[1].bAllowDuplicatePlacementId = false;
     auto Issues = ValidateRaidPlacementStructure(Rows);
@@ -56,9 +56,9 @@ bool FRaidLevelStructureTest::RunTest(const FString& Parameters)
     }
     Rows = {{1000,K::LootContainer,true},{1000,K::LootContainer,true}};
     TestEqual(TEXT("Loot never permits duplicate"), ValidateRaidPlacementStructure(Rows).Num(), 1);
-    Rows = {{2000,K::Memo,true},{2000,K::Memo,true}};
-    TestEqual(TEXT("Memo never permits duplicate"), ValidateRaidPlacementStructure(Rows).Num(), 1);
-    Rows = {{1,K::Enemy,true},{1,K::Memo,true}};
+    Rows = {{2000,static_cast<K>(2),false}};
+    TestEqual(TEXT("Retired memo kind rejected"), ValidateRaidPlacementStructure(Rows).Num(), 1);
+    Rows = {{1,K::Enemy,true},{1,K::AuthoredActor,true}};
     TestEqual(TEXT("Cross-kind duplicates rejected"), ValidateRaidPlacementStructure(Rows).Num(), 1);
     Rows = {{0,K::Enemy,false},{-1,K::Enemy,false},{2,static_cast<K>(255),false}};
     TestEqual(TEXT("Non-positive ids and unknown kinds rejected"), ValidateRaidPlacementStructure(Rows).Num(), 3);

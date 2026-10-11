@@ -88,11 +88,12 @@ bool UTunaSweeperGameInstance::MarkMemoAcquired(int32 MemoId, bool bSaveImmediat
 		return false;
 	}
 
-	OnMemoStateChanged.Broadcast();
-	if (bSaveImmediately)
+	if (bSaveImmediately && !SaveGameStateInternal())
 	{
-		SaveGameStateInternal();
+		AcquiredMemoIds.Remove(MemoId);
+		return false;
 	}
+	OnMemoStateChanged.Broadcast();
 	return true;
 }
 

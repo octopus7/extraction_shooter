@@ -92,13 +92,12 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 | `EnemySpawns.json` | 앵커 기반 적 선택 | `level_name`, `placement_id`, `profile_id` |
 | `EnemySpawnProfiles.json` | 적 클래스/로드아웃 | `profile_id`, `enemy_class`, `combat_profile_id` |
 | `LootContainerSpawns.json` | 앵커 또는 기존 좌표 기반 루트 컨테이너 | 앵커: `level_name`, `placement_id`, 정의/내용 ID |
-| `MemoSpawns.json` | 앵커 기반 수집 메모 | `level_name`, `placement_id`, `memo_id` |
 | `MemoDefinitions.json` | 메모 본문과 제목 키 | `memo_id`, `title_string_key`, `body_string_key` |
 | `MemoTextStrings.csv` | 메모 다국어 원문 | `string_key,ko,en,ja` |
 | `DifficultyDefinitions.json` | 난이도 키와 적→플레이어 피해 배율 | `difficulty_stage`, 텍스트 키, `enemy_incoming_damage_multiplier` |
 | `DifficultyTextStrings.csv` | 난이도 다국어 원문 | `string_key,ko,en,ja` |
 
-모든 파일은 `TunaSweeper/Content/Data` 아래에 있다. `EnemySpawns.json`과 `MemoSpawns.json`에는 `location`, `rotation`, `scale`을 쓰지 않는다. 같은 `placement_id`와 종류를 가진 `BP_RaidPlacementAnchor`의 Transform이 위치를 소유한다. 일반 상호작용, Mole, 워프, 월드 진행, 투명 장애물, 레벨 이동, 추출은 레벨에 직접 배치한다.
+모든 파일은 `TunaSweeper/Content/Data` 아래에 있다. `EnemySpawns.json`에는 `location`, `rotation`, `scale`을 쓰지 않는다. 같은 `placement_id`와 종류를 가진 `BP_RaidPlacementAnchor`의 Transform이 위치를 소유한다. 일반 상호작용, Mole, 워프, 월드 진행, 투명 장애물, 레벨 이동, 추출은 레벨에 직접 배치한다.
 
 ### 적 예시
 
@@ -120,20 +119,11 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 
 맵에 필요한 BP를 직접 배치하고 인스턴스 Details에서 설정한다. `BP_Interact_LevelTravel`은 `Destination`을 `Bunker` 또는 `Raid`로 고르고, `BP_ExtractionPoint`는 반경·유지 시간·대상 레벨을 설정한다. 상점, 작업대, 픽업, 워프, 월드 진행, 투명 장애물과 테스트 프랍도 같은 원칙을 따른다.
 
-### 메모 예시
+### 메모 배치
 
-```json
-[
-  {
-    "level_name": "DemoRaidMap",
-    "placement_id": 2100,
-    "memo_id": 1,
-    "visual_scale": [0.85, 0.55, 0.08]
-  }
-]
-```
-
-같은 `memo_id`가 `MemoDefinitions.json`에 있어야 하고, 레벨에는 종류 `Memo`, ID `301`인 앵커가 있어야 한다. 이미 획득한 메모 ID는 `AcquiredMemoIds` 때문에 다시 나타나지 않을 수 있으므로 새 저장 슬롯으로 확인한다. 직접 배치한 `ATunaSweeperMemoActor`도 별도로 계속 지원한다.
+`/Game/Interaction/BP_MemoAnchor`를 레벨에 직접 놓고 **MemoId** 하나만 지정한다. 네이티브 부모는 독립 클래스 `ATunaSweeperMemoAnchor`이며 로우폴리 저장 장치 메시가 기본이다.
+MemoId는 `MemoDefinitions.json`에 있어야 한다. 공용 배치 앵커의 Memo 타입, PlacementId 및 MemoSpawns.json은 사용하지 않는다.
+획득 시 즉시 저장하며 저장 실패 시 재시도할 수 있도록 메모를 남긴다. 획득한 ID는 같은 저장 슬롯에서 재진입·사망·재실행 후에도 숨겨진다. 새 슬롯에서 배치를 확인할 수 있다.
 
 `MemoDefinitions.json`에는 표시 문장을 직접 쓰지 않는다. 제목과 본문은 각각 `title_string_key`, `body_string_key`로 `MemoTextStrings.csv`를 참조한다. CSV 헤더는 정확히 `string_key,ko,en,ja`이며 키 중복이나 번역 누락은 데이터 오류로 취급한다. 언어 변경 시 메모 목록과 현재 본문은 같은 키를 현재 언어로 다시 해석한다.
 

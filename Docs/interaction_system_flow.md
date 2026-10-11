@@ -43,7 +43,7 @@ flowchart TD
 | `UTunaSweeperInteractableComponent` | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperInteractableComponent.cpp` | 상호작용 타입/이름/거리/목표 이벤트를 보관하고 마커 위젯을 생성/갱신한다. |
 | `ATunaSweeperInteractableActor` | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperInteractableActor.cpp` | 기본 `SceneRoot`, `VisualMesh`, `InteractableComponent`를 가진 상호작용 액터 베이스다. |
 | 아이템/컨테이너 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPickupItemActor.cpp`, `TunaSweeperItemSpawnInteractableActor.cpp`, `TunaSweeperLootContainerActor.cpp`, `TunaSweeperLootContainerSpawnInteractableActor.cpp` | 픽업, 아이템 스폰, 루팅 컨테이너 열기/스폰을 처리한다. |
-| 이동/월드 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperLevelTravelInteractableActor.cpp`, `TunaSweeperWorldProgressActor.cpp`, `TunaSweeperPersistentDoorActor.cpp`, `TunaSweeperDoorActor.cpp`, `TunaSweeperWarpPointActor.cpp`, `TunaSweeperMemoActor.cpp` | 레벨 이동, 월드 진행 수리, 영속 문, 일반 문, 워프, 메모 획득을 처리한다. |
+| 이동/월드 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperLevelTravelInteractableActor.cpp`, `TunaSweeperWorldProgressActor.cpp`, `TunaSweeperPersistentDoorActor.cpp`, `TunaSweeperDoorActor.cpp`, `TunaSweeperWarpPointActor.cpp`, `TunaSweeperMemoAnchor.cpp` | 레벨 이동, 월드 진행 수리, 영속 문, 일반 문, 워프, 메모 획득을 처리한다. |
 | 벙커 시설 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperHousingManagementActor.cpp`, `TunaSweeperStorageActor.cpp`, `TunaSweeperShopActor.cpp`, `TunaSweeperWorkbenchActor.cpp`, `TunaSweeperPiggyBankActor.cpp` | 하우징, 창고, 상점, 작업대, 돼지저금통 상호작용을 처리한다. |
 | 퀘스트/두더지 액터 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperMoleCompanionActor.cpp`, `TunaSweeperFacilityNpcActor.cpp` | 퀘스트 제공자/폴백 ID를 해석하고 퀘스트 알림과 통합 퀘스트 옵션을 제공한다. |
 | HUD 패널 | `TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperGameHudWidget.cpp` | 루팅/창고/상점/작업대 외부 패널, 퀘스트 패널, 메모 패널, 하우징 패널 표시를 담당한다. |
@@ -125,14 +125,14 @@ flowchart TD
 flowchart TD
     A["레벨에 직접 배치한 BP"] --> B["BeginPlay / InteractableComponent 등록"]
     B --> C["InteractionSubsystem 포커스·실행"]
-    D["Enemy/Loot/Memo JSON"] --> E["level_name + placement_id 검증"]
+    D["Enemy/Loot JSON"] --> E["level_name + placement_id 검증"]
     E --> F["같은 종류의 BP_RaidPlacementAnchor 연결"]
     F --> G["앵커 Transform에서 런타임 액터 생성"]
 ```
 
 범용 상호작용 스폰 JSON과 parser/switch는 제거되었다. 픽업, 상점, 작업대, 돼지저금통, 자폭, 난이도 조정, 테스트 프랍, 레벨 이동, 추출, 워프, 월드 진행, 투명 장애물, Mole은 필요한 레벨에 직접 배치한다. 로딩 경로는 같은 이름·태그·클래스·좌표를 가진 기존 BP를 검색하거나 삭제하지 않는다.
 
-데이터 소유 배치가 필요한 적, 루트 컨테이너, 메모는 `level_name + placement_id`로 `BP_RaidPlacementAnchor`에 연결한다. 적과 메모 JSON에는 Transform을 둘 수 없다. `LootContainerSpawns.json`만 기존 좌표 행을 호환 목적으로 유지한다.
+데이터 소유 배치가 필요한 적과 루트 컨테이너는 `level_name + placement_id`로 `BP_RaidPlacementAnchor`에 연결한다. 적 JSON에는 Transform을 둘 수 없다. `LootContainerSpawns.json`만 기존 좌표 행을 호환 목적으로 유지한다. 메모는 독립 `BP_MemoAnchor`를 직접 배치하고 MemoId만 지정한다.
 
 ## 디버깅 체크리스트
 
@@ -145,7 +145,7 @@ flowchart TD
 7. 창고/상점/작업대/돼지저금통/두더지가 안 뜨면 현재 맵 이름이 실제로 `BunkerMap`으로 끝나는지 확인한다.
 8. HUD가 안 열리면 `ATunaSweeperPlayerController::EnsureGameHudWidget()`가 성공했는지, `GameHudWidgetClass`가 `/Game/UI/WBP_GameHud`로 로드되는지 확인한다.
 9. 루팅 컨테이너가 비거나 열리지 않으면 `ContainerDefinitionId`, `ContentsId`, `UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance()`를 확인한다.
-10. 메모가 안 보이면 `MemoId > 0`, `TryGetMemoDefinition()`, `UTunaSweeperGameInstance::IsMemoAcquired()` 상태를 확인한다. 획득한 메모 액터는 `BeginPlay()` 또는 상호작용 후 제거된다.
+10. 메모가 안 보이면 `MemoId > 0`, `TryGetMemoDefinition()`, `UTunaSweeperGameInstance::IsMemoAcquired()` 상태를 확인한다. 획득한 메모는 시작·수집·세이브 초기화 때 숨김과 충돌/상호작용 차단을 적용한다. 획득 저장 실패 시 숨기지 않아 재시도할 수 있다.
 11. 월드 진행 수리가 실패하면 필요 아이템 ID/수량과 `CountInventoryItemById()` 결과를 확인한다. 현재 `RepairUsingAvailableRequiredItems()`는 부족분 일부 투입이 아니라 완료 필요 수량을 모두 보유해야 성공한다.
 12. 앵커 기반 액터가 안 생기면 JSON의 `level_name`, `placement_id`, 프로필/정의 ID와 레벨 앵커의 `PlacementId`, `AnchorKind`를 확인한다.
 13. PIE에서 맵 이름 문제가 의심되면 배치 서브시스템은 `UEDPIE_` 접두사와 빌드 flavor 레이드 별칭을 정규화하지만, 상호작용의 BunkerMap 제한은 `GetMapName().EndsWith("BunkerMap")`를 쓴다는 차이를 확인한다.

@@ -26,8 +26,8 @@ ROOT_ASSETS = tuple(json.loads(os.environ["RAID_AUDIT_ROOT_ASSETS"])) if "RAID_A
 LOGICAL = {package: ("DemoRaidMap" if package.rsplit("/", 1)[-1] in ("DemoBoxRaidMap", "DemoRaidMap") else "RaidMap") for package in MAPS}
 LOGICAL.update(json.loads(os.environ.get("RAID_AUDIT_LOGICAL_IDS", "{}")))
 OUTPUT_FILE = os.environ.get("RAID_AUDIT_OUTPUT_FILE", "before.json")
-GAME_DATA = ("EnemySpawns.json", "LootContainerSpawns.json", "MemoSpawns.json")
-KIND_BY_DATA = {"EnemySpawns.json": "Enemy", "LootContainerSpawns.json": "LootContainer", "MemoSpawns.json": "Memo"}
+GAME_DATA = ("EnemySpawns.json", "LootContainerSpawns.json")
+KIND_BY_DATA = {"EnemySpawns.json": "Enemy", "LootContainerSpawns.json": "LootContainer": "Memo"}
 PROJECT = pathlib.Path(unreal.Paths.project_dir())
 OUTPUT = pathlib.Path(os.environ.get("RAID_AUDIT_OUTPUT", str(PROJECT / "Saved" / "RaidLevelMigration")))
 OUTPUT.mkdir(parents=True, exist_ok=True)

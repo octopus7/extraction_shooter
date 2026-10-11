@@ -158,21 +158,21 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
         UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Raid anchor validation %s: %s/%d"), *Issue.StringKey.ToString(), *World->GetMapName(), InvalidId);
         AnchorsByPlacementId.Remove(InvalidId);
     }
-	TArray<int32> MemoPlacementIds;
+	TArray<int32> AuthoredPlacementIds;
 	for (const TPair<int32, TArray<ATunaSweeperRaidPlacementAnchor*>>& Pair : AnchorsByPlacementId)
 	{
 		if (Pair.Value.ContainsByPredicate(
 			[](const ATunaSweeperRaidPlacementAnchor* Anchor)
 			{
-				return Anchor && (Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo || Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::AuthoredActor);
+				return Anchor && Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::AuthoredActor;
 			}))
 		{
-			MemoPlacementIds.Add(Pair.Key);
+			AuthoredPlacementIds.Add(Pair.Key);
 		}
 	}
-	for (int32 MemoPlacementId : MemoPlacementIds)
+	for (int32 AuthoredPlacementId : AuthoredPlacementIds)
 	{
-		AnchorsByPlacementId.Remove(MemoPlacementId);
+		AnchorsByPlacementId.Remove(AuthoredPlacementId);
 	}
 
 	TSet<int32> ConnectedPlacementIds;

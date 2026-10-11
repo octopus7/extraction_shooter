@@ -14,7 +14,7 @@
 | 레벨 이동/추출 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperLevelTravelInteractableActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperExtractionPointActor.cpp` |
 | 사망 저장 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperTopDownCharacter.cpp` |
 | 퀘스트 저장 연동 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperQuestSubsystem.cpp` |
-| 메모/문/월드 진행 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperMemoActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPersistentDoorActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperWorldProgressActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperBlockedIntakeScreenActor.cpp` |
+| 메모/문/월드 진행 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperMemoAnchor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPersistentDoorActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperWorldProgressActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperBlockedIntakeScreenActor.cpp` |
 | 하우징 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperHousingSubsystem.cpp` |
 | 런타임 배치 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperRaidPlacementSubsystem.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperMemoSubsystem.cpp` |
 
@@ -148,7 +148,7 @@ flowchart TD
 | 현재 선택 슬롯 설정 | `UTunaSweeperSaveSettings::LastSelectedSaveSlotIndex` | `SetActiveSaveSlotIndex()`, `Init()` fallback |
 | 경험치 | `TotalExperiencePoints` | 레이드 생존 복귀 시 `CommitRaidExperienceGain()` 후 저장 |
 | 시나리오 플래그 | `CompletedScenarioFlags` | `MarkScenarioProgressFlag()`, `CompletePendingScenarioBunkerEntryIfNeeded()` |
-| 메모 | `AcquiredMemoIds` | `MarkMemoAcquired()`가 메모 획득 즉시 메모 세트를 갱신, 저장은 다음 저장 시점 |
+| 메모 | `AcquiredMemoIds` | 전용 앵커가 `MarkMemoAcquired(MemoId, true)`로 즉시 저장하고, 실패하면 획득을 취소 |
 | 아이템 획득 이력 | `EverAcquiredItemIds` | 전리품 획득, 구매, 제작, 퀘스트 보상, 로드 backfill |
 | 지도 마커 | `MapMarkers` | `AddMapMarker()`, `RemoveMapMarker()` |
 | 아이템 인스턴스 | `ItemInstances` | 저장 시 플레이어 소유 슬롯과 부착물 UID만 수집 |
@@ -279,7 +279,7 @@ flowchart TD
 
 ### 메모
 
-`UTunaSweeperInteractionSubsystem::HandleMemoInteraction()`은 메모 정의를 확인한 뒤 `TunaGameInstance->MarkMemoAcquired(MemoId, false)`를 호출하고 메모 액터를 제거한다. 기본적으로 즉시 저장하지 않는다. 메모 ID는 메모 세트에 즉시 들어가므로 같은 런타임에서는 다시 스폰되지 않고, 이후 일반 저장/레벨 이동/사망 저장 때 디스크에 기록된다.
+`UTunaSweeperInteractionSubsystem::HandleMemoInteraction()`은 독립 `ATunaSweeperMemoAnchor::CollectMemo()`를 호출한다. 유효한 미수집 MemoId인지 확인한 뒤 `MarkMemoAcquired(MemoId, true)`로 즉시 저장한다. 저장 실패 시 추가한 ID를 취소하고 액터를 남겨 재시도하게 한다. 성공 시 `OnMemoStateChanged`로 같은 ID의 모든 액터를 숨기고 충돌과 상호작용을 차단한다. 액터는 파괴하지 않아 다른 세이브를 초기화하면 그 슬롯의 획득 상태에 맞게 다시 표시할 수 있다.
 
 ### 문과 월드 진행 오브젝트
 
@@ -360,7 +360,7 @@ flowchart TD
 2. `ATunaSweeperWorldProgressActor::BeginPlay()`는 `ApplySavedState()`로 `WorldProgressStates`를 읽는다. 완료 상태면 blocking collision을 끄고 완료 replacement actor를 스폰한다.
 3. `ATunaSweeperPersistentDoorActor::BeginPlay()`는 `ApplySavedState()`로 같은 `WorldProgressStates`를 읽어 문 열림 상태를 적용한다.
 4. 레벨에 직접 배치된 `ATunaSweeperBlockedIntakeScreenActor::BeginPlay()`는 같은 `WorldProgressStates`를 읽어 막힘/제거 메시를 적용한다.
-5. `UTunaSweeperMemoSubsystem`이 메모 스폰 데이터와 직접 배치된 `Memo` 앵커를 연결하고, `AcquiredMemoIds`에 이미 있는 `memo_id`는 스폰하지 않는다. 직접 배치 메모 액터도 `BeginPlay()`에서 `IsMemoAcquired()`를 검사해 이미 획득된 메모를 제거한다.
+5. 직접 배치한 `BP_MemoAnchor`가 시작 시 `MemoId`의 정의와 수집 여부를 검사한다. 획득한 메모는 숨기고 충돌과 상호작용을 차단한다. 공용 배치 앵커나 메모 스폰 JSON 연결은 없다. 세이브 초기화 완료 시에도 `OnMemoStateChanged`를 통해 상태를 갱신한다.
 6. `UTunaSweeperHousingSubsystem::EnsureHousingForWorld()`는 저장된 `HousingFacilities`를 불러오고 `RefreshSpawnedFacilities()`로 배치 액터를 다시 만든다. 저장된 시설이 보관 상태면 스폰하지 않는다.
 7. `BunkerMap`에 직접 배치된 Mole 등 벙커 캐릭터가 시작된다. 이 캐릭터의 대화 완료 여부는 `CompletedScenarioFlags`로 제어된다.
 8. 상점 UI는 열릴 때 `GetShopStockQuantity()`로 `ShopStockStatesByKey`를 조회한다. 저장 상태가 없으면 정적 `ShopDefinitions.json`의 기본 재고를 사용한다.
@@ -409,7 +409,7 @@ flowchart TD
 19. 레벨 이동이나 로드 후 전리품 상자 잔여물이 사라지는 것은 현재 설계상 정상일 수 있다. 남은 컨테이너 내용은 SaveGame 대상이 아니고, 플레이어 슬롯으로 옮긴 아이템만 저장된다.
 20. 퀘스트 진행이 저장되지 않으면 `BroadcastQuestProgressChanged(true)` 또는 `RequestSaveGameState()` 경로가 호출됐는지 본다.
 21. 완료한 문/수리 오브젝트가 되돌아오면 JSON 또는 액터의 `ObjectId`/`DoorObjectId`가 바뀌었는지 확인한다.
-22. 획득한 메모가 다시 보이면 `AcquiredMemoIds`에 `MemoId`가 들어갔는지, 메모 스폰 데이터의 `memo_id`가 바뀌지 않았는지 확인한다.
+22. 획득한 메모가 다시 보이면 `AcquiredMemoIds`에 `MemoId`가 들어갔는지, 직접 배치한 `BP_MemoAnchor`의 MemoId가 바뀌지 않았는지 확인한다.
 23. 하우징 시설이 사라지거나 중복되면 `HousingFacilities`의 `InstanceId`, `FacilityId`, `AnchorCell`, `RotationQuarterTurns`, `bStored`를 확인한다.
 24. 로드 직후 슬롯에 빈 참조가 생기면 `ItemInstances`에 해당 UID가 저장됐는지, 부착물 UID가 `AttachmentSlots` 재귀 수집에 포함됐는지 확인한다.
 25. 저장 실패 시 기존 슬롯 백업뿐 아니라 `.candidate` 기록·full flush·CRC/의미 검증, `.previous` 검증 복사, 후보 승격과 최종 재검증을 차례로 본다. 어느 단계든 실패하면 기존 정상 액티브를 유지하고 저장 실패를 반환하는 것이 정상이다.

@@ -106,7 +106,7 @@ void ATunaSweeperRaidPlacementAnchor::RefreshEditorPreview()
 	}
 	if (EditorPreviewLabel)
 	{
-        const TCHAR* KindKey = bIsEnemy ? TEXT("Anchor.Kind.Enemy") : bIsLootContainer ? TEXT("Anchor.Kind.LootContainer") : AnchorKind == ETunaSweeperRaidPlacementAnchorKind::AuthoredActor ? TEXT("Anchor.Kind.AuthoredActor") : TEXT("Anchor.Kind.Memo");
+        const TCHAR* KindKey = bIsEnemy ? TEXT("Anchor.Kind.Enemy") : bIsLootContainer ? TEXT("Anchor.Kind.LootContainer") : TEXT("Anchor.Kind.AuthoredActor");
         FFormatNamedArguments Args;
         Args.Add(TEXT("Kind"), FText::FromStringTable(TEXT("RaidLevelKit.Editor"), KindKey));
         Args.Add(TEXT("PlacementId"), FText::AsNumber(PlacementId, &FNumberFormattingOptions::DefaultNoGrouping()));

@@ -538,6 +538,7 @@ void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
 	{
 		ResearchSubsystem->FlushDeferredResearchNotifications();
 	}
+	OnMemoStateChanged.Broadcast();
 }
 
 bool UTunaSweeperGameInstance::LoadGameState()

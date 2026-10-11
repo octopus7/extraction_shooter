@@ -6,7 +6,6 @@
 #include "TunaSweeperInteractionSubsystem.generated.h"
 
 class ATunaSweeperLootContainerActor;
-class ATunaSweeperMemoActor;
 class ATunaSweeperDoorActor;
 class ATunaSweeperPersistentDoorActor;
 class AActor;

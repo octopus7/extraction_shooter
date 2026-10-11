@@ -20,7 +20,7 @@ enum class ETunaSweeperRaidPlacementAnchorKind : uint8
 {
 	Enemy = 0 UMETA(DisplayName = "Enemy"),
 	LootContainer = 1 UMETA(DisplayName = "Loot Container"),
-	Memo = 2 UMETA(DisplayName = "Memo"),
+	// Serialized value 2 is retired; memos use an independent actor.
     AuthoredActor = 3
 };
 

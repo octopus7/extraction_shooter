@@ -20,7 +20,7 @@
 #include "Interaction/TunaSweeperLadderTransferActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
-#include "Interaction/TunaSweeperMemoActor.h"
+#include "Interaction/TunaSweeperMemoAnchor.h"
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
@@ -450,12 +450,8 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Memo)
 	{
-		const ATunaSweeperMemoActor* MemoActor = Cast<ATunaSweeperMemoActor>(Interactable->GetOwner());
-		UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
-		return MemoActor &&
-			TunaGameInstance &&
-			MemoActor->GetMemoId() > 0 &&
-			!TunaGameInstance->IsMemoAcquired(MemoActor->GetMemoId());
+		const ATunaSweeperMemoAnchor* MemoActor = Cast<ATunaSweeperMemoAnchor>(Interactable->GetOwner());
+		return MemoActor && MemoActor->CanCollectMemo();
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::StorageOpen)
@@ -904,8 +900,8 @@ bool UTunaSweeperInteractionSubsystem::HandleMemoInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
-	ATunaSweeperMemoActor* MemoActor = Interactable
-		? Cast<ATunaSweeperMemoActor>(Interactable->GetOwner())
+	ATunaSweeperMemoAnchor* MemoActor = Interactable
+		? Cast<ATunaSweeperMemoAnchor>(Interactable->GetOwner())
 		: nullptr;
 	if (!MemoActor || !InstigatorPawn)
 	{
@@ -913,29 +909,13 @@ bool UTunaSweeperInteractionSubsystem::HandleMemoInteraction(
 	}
 
 	const int32 MemoId = MemoActor->GetMemoId();
-	UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
-	if (!TunaGameInstance || TunaGameInstance->IsMemoAcquired(MemoId))
-	{
-		return false;
-	}
-
-	FTunaSweeperMemoDefinition MemoDefinition;
-	UTunaSweeperMemoSubsystem* MemoSubsystem = GetWorld() && GetWorld()->GetGameInstance()
-		? GetWorld()->GetGameInstance()->GetSubsystem<UTunaSweeperMemoSubsystem>()
-		: nullptr;
-	if (!MemoSubsystem || !MemoSubsystem->TryGetMemoDefinition(MemoId, MemoDefinition))
-	{
-		return false;
-	}
-
-	TunaGameInstance->MarkMemoAcquired(MemoId, false);
+	if (!MemoActor->CollectMemo()) return false;
 
 	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController()))
 	{
 		TunaPlayerController->OpenMemoPanel(MemoId);
 	}
 
-	MemoActor->Destroy();
 	return true;
 }
 

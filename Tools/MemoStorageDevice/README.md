@@ -42,7 +42,7 @@
 
 ## 연결 안내
 
-현재 네이티브 메모 CDO는 엔진 Cube와 기존 메모 재질을 사용한다. UE 레지스트리와 콘텐츠 직렬화 조사에서 이 클래스의 파생 BP 및 직접 저장된 메모 액터 참조가 없었고, 공개 데모 `MemoSpawns.json`은 빈 배열이었다. 조사 시점의 기존 텍스처는 1254×1254, 기존 저장 재질은 단면이었다. C++ 재생성 루틴의 two-sided 설정과 저장 애셋 상태가 다르므로 실제 조사 보고서를 기준으로 했다.
+최초 모델 제작 당시 네이티브 메모 CDO는 엔진 Cube와 기존 메모 재질을 사용했고, 공개 데모 `MemoSpawns.json`은 빈 배열이었다. 현재는 독립 `ATunaSweeperMemoAnchor` / `/Game/Interaction/BP_MemoAnchor`가 로우폴리 메시와 메시의 4개 재질을 기본으로 사용한다. 레벨에서 MemoId만 지정하며 PlacementId 및 MemoSpawns.json 연결은 제거되었다. `audit_existing.py`도 새 전용 클래스와 BP의 기본값을 조사한다. 이전 `existing_state_audit.json`은 모델 제작 당시의 기록이다.
 
 사용자가 메모 BP 또는 스폰 설정을 연결할 때:
 

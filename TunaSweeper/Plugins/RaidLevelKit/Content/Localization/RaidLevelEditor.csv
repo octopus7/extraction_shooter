@@ -1,7 +1,6 @@
 Key,SourceString
 Anchor.Kind.Enemy,ENEMY
 Anchor.Kind.LootContainer,LOOT BOX
-Anchor.Kind.Memo,MEMO
 Anchor.Label,{Kind} #{PlacementId}
 Anchor.LabelWithPreview,{Kind} #{PlacementId} [{PreviewId}]
 Validation.InvalidPlacementId,Placement ID {PlacementId} must be positive.

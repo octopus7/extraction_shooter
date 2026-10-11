@@ -183,7 +183,7 @@ The active scenario data pack supplies dialogue completion flags. Demo uses `dia
 
 Collected memo ids are persisted per save slot through `UTunaSweeperSaveGame::AcquiredMemoIds`.
 
-Memo interaction marks the id as acquired in `UTunaSweeperGameInstance` memory immediately and destroys the spawned memo actor. It does not force an immediate save by default; the acquired ids are written on the next normal save, level-travel save, death save, or any other call to `SaveGameStateInternal()`. Runtime memo spawns must query this in-memory set so a collected memo stays hidden after death/respawn even before the next disk write.
+The directly placed `BP_MemoAnchor` / `ATunaSweeperMemoAnchor` uses only `MemoId`; there is no raid PlacementId or MemoSpawns.json linkage. Memo interaction calls `MarkMemoAcquired(MemoId, true)` and immediately persists the existing save schema. If saving fails, it removes the newly acquired ID and leaves the memo collectible without publishing a state change. After success, all live matching memo actors hide their mesh, collision, and interaction. They remain as hidden level instances so activating a different save slot can restore an uncollected memo. Save initialization broadcasts `OnMemoStateChanged` after restoration is complete. On map re-entry or application restart, already collected IDs remain hidden. IDs are permanent per save slot until that slot is reset; collection does not depend on raid extraction or death. No new serialized fields or save-version change are required.
 
 ### Item Acquisition History
 

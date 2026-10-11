@@ -1,4 +1,4 @@
-"""Read-only UE 5.7 audit before authoring the shared memo prop."""
+"""Read-only UE 5.7 audit of the dedicated memo anchor and its prop."""
 import json
 from pathlib import Path
 import unreal
@@ -8,7 +8,7 @@ OUT = ROOT / 'TunaSweeper/SourceArt/Memo/StorageDevice'
 OUT.mkdir(parents=True, exist_ok=True)
 registry = unreal.AssetRegistryHelpers.get_asset_registry()
 registry.search_all_assets(synchronous_search=True)
-base = unreal.load_class(None, '/Script/TunaSweeper.TunaSweeperMemoActor')
+base = unreal.load_class(None, '/Script/TunaSweeper.TunaSweeperMemoAnchor')
 assert base
 cdo = unreal.get_default_object(base)
 def path(value):
@@ -17,13 +17,14 @@ def path(value):
     return value.get_path_name() if hasattr(value, 'get_path_name') else str(value)
 def visual(obj):
     component = obj.get_editor_property('visual_mesh')
-    return {key: path(obj.get_editor_property(key)) for key in
-            ['visual_mesh_asset', 'visual_material_asset', 'visual_scale', 'visual_relative_location']} | {
+    return {
+        'memo_id': obj.get_editor_property('memo_id'),
+        'visual_scale': path(component.get_editor_property('relative_scale3d')),
         'component_mesh': path(component.get_editor_property('static_mesh')),
         'component_materials': [path(x) for x in component.get_materials()]}
-derived_paths = registry.get_derived_class_names([unreal.TopLevelAssetPath('/Script/TunaSweeper', 'TunaSweeperMemoActor')], [])
+derived_paths = registry.get_derived_class_names([unreal.TopLevelAssetPath('/Script/TunaSweeper', 'TunaSweeperMemoAnchor')], [])
 derived = [str(p.get_editor_property('package_name'))+'.'+str(p.get_editor_property('asset_name')) for p in derived_paths]
-derived = [p for p in derived if p != '/Script/TunaSweeper.TunaSweeperMemoActor']
+derived = [p for p in derived if p != '/Script/TunaSweeper.TunaSweeperMemoAnchor']
 report = {'engine': unreal.SystemLibrary.get_engine_version(), 'native_defaults': visual(cdo),
           'derived_classes': [str(x) for x in derived], 'blueprints': [], 'references': {}}
 for cls in derived:
@@ -44,8 +45,8 @@ for asset in (ROOT / 'TunaSweeper/Content').rglob('*'):
     if asset.suffix not in ('.uasset', '.umap'):
         continue
     raw = asset.read_bytes()
-    if b'TunaSweeperMemoActor' in raw or 'TunaSweeperMemoActor'.encode('utf-16le') in raw:
+    if b'TunaSweeperMemoAnchor' in raw or 'TunaSweeperMemoAnchor'.encode('utf-16le') in raw:
         report['serialized_memo_references'].append(str(asset.relative_to(ROOT)))
-report['demo_memo_spawn_count'] = len(json.loads((ROOT/'TunaSweeper/Content/Data/MemoSpawns.json').read_text(encoding='utf-8-sig')))
+report['placement_workflow'] = 'BP_MemoAnchor with MemoId only; no MemoSpawns.json'
 (OUT/'existing_state_audit.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
 unreal.log('MEMO_EXISTING_AUDIT_COMPLETE')

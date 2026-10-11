@@ -4,17 +4,17 @@ Read `Docs/raid_placement_id_numbering.md` before assigning or changing a `Place
 
 ## Level contract
 
-`ATunaSweeperRaidPlacementAnchor` is the spatial source of truth for data-owned enemy, loot-container, and memo placement. The reusable Blueprint is `/Game/Raid/Placement/BP_RaidPlacementAnchor`.
+`ATunaSweeperRaidPlacementAnchor` is the spatial source of truth for data-owned enemy and loot-container placement, plus authored actor profiles. The reusable Blueprint is `/RaidLevelKit/Placement/BP_RaidPlacementAnchor`.
 
 A placed instance serializes its actor transform, a positive `PlacementId`, and `AnchorKind`:
 
 - `Enemy`
 - `Loot Container`
-- `Memo`
+- `AuthoredActor`
 
-`PlacementId` must be unique across every anchor kind in one level. Enemy anchors may intentionally share an id only when every member of the duplicate group is an `Enemy` anchor with `Allow Duplicate Placement Id` enabled. Loot and memo anchors never allow duplicates. Its stable key is `(LevelId, PlacementId)`. Do not recycle a shipped id for another location or kind.
+`PlacementId` must be unique across every anchor kind in one level. Enemy anchors may intentionally share an id only when every member of the duplicate group is an `Enemy` anchor with `Allow Duplicate Placement Id` enabled. Loot and authored-actor anchors never allow duplicates. Its stable key is `(LevelId, PlacementId)`. Do not recycle a shipped id for another location or kind.
 
-The Details panel exposes the kind and id. Editor-only arrows, billboards, labels, and loot preview meshes make anchors visible without owning runtime behavior. Loot preview choices come from `/Game/Raid/Placement/DA_LootAnchorPreviews`; memo anchors use the blue `MEMO` preview. Preview components have no collision or gameplay authority.
+The Details panel exposes the kind and id. Editor-only arrows, billboards, labels, and loot preview meshes make anchors visible without owning runtime behavior. Loot preview choices come from `/RaidLevelKit/Placement/DA_LootAnchorPreviews`. Preview components have no collision or gameplay authority.
 
 ## Data schemas
 
@@ -61,25 +61,28 @@ Loot-container anchor placement:
 
 앵커의 위치/방향/PlacementId 소유 규칙은 같다. 퀘스트 조건은 게임 데이터에 두며 앵커 자체에 퀘스트 실행 로직을 넣지 않는다. 이 조건은 택배 아이템의 기지 귀환 시 소멸이나 도착지 전달 처리를 대신하지 않는다.
 
-Memo placement:
+## Independent memo placement
 
-```json
-{
-  "level_name": "DemoRaidMap",
-  "placement_id": 2100,
-  "memo_id": 1,
-  "visual_scale": [0.85, 0.55, 0.08]
-}
-```
+Place `/Game/Interaction/BP_MemoAnchor` and set **MemoId** to a positive ID in `MemoDefinitions.json`.
+Its native parent is `ATunaSweeperMemoAnchor`, directly derived from `AActor`.
+The actor owns its transform and uses `SM_MemoStorageDevice_LowPoly` with its four mesh materials and unit scale.
+There is no `AnchorKind`, `PlacementId`, spawn probability, or `MemoSpawns.json` mapping for memos.
+The shared raid anchor no longer offers Memo; serialized kind value 2 is retired, while AuthoredActor remains 3.
 
-Anchor-owned rows must not contain `location`, `rotation`, or `scale`. `EnemySpawns.json` and `MemoSpawns.json` accept only anchor-owned placement. `LootContainerSpawns.json` alone retains its existing coordinate-row form for backward compatibility.
+The placed mesh is visible in the editor. At runtime, an unassigned/unknown MemoId or an already acquired memo is hidden, noncolliding, and unavailable for interaction.
+Collection immediately saves the existing `AcquiredMemoIds` state before publishing success. A failed save rolls back collection and leaves the memo available for retry.
+All live instances of the same MemoId hide together. Loading an acquired save or revisiting the map keeps the memo hidden; activating an uncollected save restores the placed instance.
+The runtime actor stays hidden rather than being destroyed so save-slot changes in the same world work correctly.
+Titles and bodies still use `MemoDefinitions.json` string keys; the interaction label uses `ui.interaction.memo`.
+
+Anchor-owned rows must not contain `location`, `rotation`, or `scale`. `EnemySpawns.json` accepts only anchor-owned placement. `LootContainerSpawns.json` alone retains its existing coordinate-row form for backward compatibility.
 
 Enemy class/loadout data stays in `EnemySpawnProfiles.json`, combat behavior stays in `EnemyCombatProfiles.json`, memo content stays in `MemoDefinitions.json`, and loot class/definition/contents stay in the loot placement row. Main-only authoring belongs in the access-restricted runtime payload; public Main defaults are empty fallbacks.
 
 ## Runtime validation
 
-`UTunaSweeperRaidPlacementSubsystem` validates enemy and loot anchors. `UTunaSweeperMemoSubsystem` validates memo anchors. Invalid/nonpositive ids, duplicate level ids, duplicate data ids, missing anchors, unconnected anchors, kind mismatches, missing definitions/profiles, and transform fields in anchor rows are logged explicitly. Invalid data never spawns at a guessed transform.
+`UTunaSweeperRaidPlacementSubsystem` validates enemy and loot anchors. The independent memo actor validates its MemoId through `UTunaSweeperMemoSubsystem`, which only manages memo definitions and the collection UI list. Invalid/nonpositive ids, duplicate level ids, duplicate data ids, missing anchors, unconnected anchors, kind mismatches, missing definitions/profiles, and transform fields in anchor rows are logged explicitly. Invalid data never spawns at a guessed transform.
 
 Enemy chance uses a deterministic hash of `(RaidSeed, PlacementId)`. Placement ordering therefore cannot change another placement's result. Only empty `condition_id` and `always` currently evaluate true; unknown conditions fail closed.
 
-Memo collection persistence remains keyed by `memo_id` through `AcquiredMemoIds`; the anchor id and runtime actor tag are not persisted. Enemy and loot placement decisions are also not persisted.
+Memo collection persistence remains keyed by `memo_id` through `AcquiredMemoIds`; there is no secondary placement identity. Enemy and loot placement decisions are also not persisted.

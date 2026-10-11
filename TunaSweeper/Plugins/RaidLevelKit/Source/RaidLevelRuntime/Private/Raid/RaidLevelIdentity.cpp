@@ -17,7 +17,7 @@ TArray<FRaidLevelValidationIssue> ValidateRaidPlacementStructure(TConstArrayView
             AddIssue(TEXT("Validation.InvalidPlacementId"), Placement.PlacementId);
             continue;
         }
-        if (Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::Enemy && Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::LootContainer && Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::Memo && Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::AuthoredActor)
+        if (Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::Enemy && Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::LootContainer && Placement.Kind != ETunaSweeperRaidPlacementAnchorKind::AuthoredActor)
         {
             AddIssue(TEXT("Validation.InvalidAnchorKind"), Placement.PlacementId);
         }
