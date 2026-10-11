@@ -12,7 +12,7 @@ UE 5.7에서 다음 명령으로 검사한다. 에디터는 명시된 프로젝�
 ./Tools/SSTOLander/run_review.ps1 -Mode Capture
 ```
 
-- Structure: 저장 맵 재로드, 원본 좌표·UE 빌드 삼각형 수·재질·경계 보존, 지면 추적과 Pawn 캡슐 통로 검사, Map Check.
+- Structure: 저장 맵 재로드, 현재 배치 좌표·UE 빌드 삼각형 수·재질·경계, 지면 추적과 Pawn 캡슐 통로 검사, Map Check. 200m 평원 재배치 이후 좌표와 경계는 `Docs/level_layout_snapshots/RaidPlains_2026-10-12.json`의 `ssto_verification`을 사용하고, SourceArt의 최초 배치 기록은 보존한다.
 - Runtime: SIE의 테스트용 관전자 제한을 해제하고 게임 캐릭터를 제어해 실제 상호작용으로 두 번 왕복한다. 기존 컴포넌트의 틱이 배색을 보존한 MID에 활성화·절단 높이·디졸브 폭을 전달하는지 확인한다.
 - Capture: 외관과 기존 마스크가 적용된 내부를 렌더링한다. 실제 디졸브 매개변수를 설정하며, 메시를 숨겨 내부를 표시하지 않는다.
 

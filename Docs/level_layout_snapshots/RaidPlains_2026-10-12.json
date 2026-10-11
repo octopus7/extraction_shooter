@@ -1,0 +1,7538 @@
+{
+  "map": "/Game/MainRaid/RaidPlains",
+  "units": "cm",
+  "source_sha256": "8eb4c86191cdf052e7948e9e0687588dc58527c135254cf78d35502357907216",
+  "original_landscape_size_m": 504,
+  "target_landscape_size_m": 200,
+  "terrain_uniform_factor": 0.3968253968253968,
+  "actor_mesh_scales_preserved": true,
+  "ssto_group_z_delta_cm": -111.29222417724668,
+  "ssto_clearance_repositioned": [
+    "StaticMeshActor_24",
+    "StaticMeshActor_32",
+    "StaticMeshActor_57",
+    "StaticMeshActor_80",
+    "StaticMeshActor_84",
+    "StaticMeshActor_87",
+    "StaticMeshActor_98",
+    "StaticMeshActor_100",
+    "StaticMeshActor_142"
+  ],
+  "actor_count": 174,
+  "memo_ids": [
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60
+  ],
+  "actors": [
+    {
+      "name": "Landscape_0",
+      "label": "TS_Plains_Landscape",
+      "class_name": "Landscape",
+      "parent": null,
+      "mode": "terrain_uniform_scale",
+      "before": {
+        "location_cm": [
+          -25200.0,
+          -25200.0,
+          0.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          100.0,
+          100.0,
+          100.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -10000.0,
+          -10000.0,
+          0.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          39.682539682539684,
+          39.682539682539684,
+          39.682539682539684
+        ]
+      }
+    },
+    {
+      "name": "DirectionalLight_0",
+      "label": "TS_Plains_Sun",
+      "class_name": "DirectionalLight",
+      "parent": null,
+      "mode": "lighting_preserved",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          20000.0
+        ],
+        "rotation_pyr": [
+          -86.00000000000024,
+          145.00000000000026,
+          -179.99999999999991
+        ],
+        "scale3d": [
+          2.5,
+          2.5,
+          2.5
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          20000.0
+        ],
+        "rotation_pyr": [
+          -86.00000000000024,
+          145.00000000000026,
+          -179.99999999999991
+        ],
+        "scale3d": [
+          2.5,
+          2.5,
+          2.5
+        ]
+      }
+    },
+    {
+      "name": "SkyLight_0",
+      "label": "TS_Plains_SkyLight",
+      "class_name": "SkyLight",
+      "parent": null,
+      "mode": "lighting_preserved",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          15000.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          15000.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "SkyAtmosphere_0",
+      "label": "TS_Plains_SkyAtmosphere",
+      "class_name": "SkyAtmosphere",
+      "parent": null,
+      "mode": "lighting_preserved",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "ExponentialHeightFog_0",
+      "label": "TS_Plains_HeightFog",
+      "class_name": "ExponentialHeightFog",
+      "parent": null,
+      "mode": "lighting_preserved",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          -1000.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          -1000.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "PlayerStart_0",
+      "label": "TS_Plains_PlayerStart",
+      "class_name": "PlayerStart",
+      "parent": null,
+      "mode": "keep_start_xy_ground_clearance",
+      "before": {
+        "location_cm": [
+          -240.0,
+          1940.0,
+          260.0
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -240.0,
+          1940.0,
+          279.5175785294632
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "CameraActor_0",
+      "label": "TS_Plains_ReviewCamera",
+      "class_name": "CameraActor",
+      "parent": null,
+      "mode": "overview_camera",
+      "before": {
+        "location_cm": [
+          1000.0,
+          -36000.0,
+          41000.0
+        ],
+        "rotation_pyr": [
+          -48.70433344709915,
+          91.5911402711946,
+          0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          396.82539682539687,
+          -14285.714285714283,
+          16269.841269841269
+        ],
+        "rotation_pyr": [
+          -48.70433344709915,
+          91.5911402711946,
+          0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_0",
+      "label": "TS_Plains_Rocks",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -679.75,
+          -12645.1953125,
+          217.97386169433594
+        ],
+        "rotation_pyr": [
+          0.0,
+          -38.63247871398926,
+          0.0
+        ],
+        "scale3d": [
+          0.7665374875068665,
+          0.7665374875068665,
+          0.7665374875068665
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -269.7420634920635,
+          -5017.93464781746,
+          86.45094452492413
+        ],
+        "rotation_pyr": [
+          0.0,
+          -38.63247871398926,
+          0.0
+        ],
+        "scale3d": [
+          0.7665374875068665,
+          0.7665374875068665,
+          0.7665374875068665
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_1",
+      "label": "TS_Plains_Rocks_002",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -12484.439453125,
+          -15890.63671875,
+          305.52874755859375
+        ],
+        "rotation_pyr": [
+          0.0,
+          117.26094245910645,
+          0.0
+        ],
+        "scale3d": [
+          0.7118679881095886,
+          0.7118679881095886,
+          0.7118679881095886
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -4954.142640128968,
+          -6305.808221726191,
+          121.19079495795086
+        ],
+        "rotation_pyr": [
+          0.0,
+          117.26094245910645,
+          0.0
+        ],
+        "scale3d": [
+          0.7118679881095886,
+          0.7118679881095886,
+          0.7118679881095886
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_2",
+      "label": "TS_Plains_Rocks_003",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19288.68359375,
+          -3557.619140625,
+          188.82647705078125
+        ],
+        "rotation_pyr": [
+          0.0,
+          49.24072265625002,
+          0.0
+        ],
+        "scale3d": [
+          0.6986725330352783,
+          0.6986725330352783,
+          0.6986725330352783
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7654.239521329364,
+          -1411.7536272321431,
+          74.87162484976943
+        ],
+        "rotation_pyr": [
+          0.0,
+          49.24072265625002,
+          0.0
+        ],
+        "scale3d": [
+          0.6986725330352783,
+          0.6986725330352783,
+          0.6986725330352783
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_3",
+      "label": "TS_Plains_Rocks_004",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          23613.796875,
+          -5331.09765625,
+          1046.0684814453125
+        ],
+        "rotation_pyr": [
+          0.0,
+          172.72747993469238,
+          0.0
+        ],
+        "scale3d": [
+          0.8757484555244446,
+          0.8757484555244446,
+          0.8757484555244446
+        ]
+      },
+      "after": {
+        "location_cm": [
+          9370.55431547619,
+          -2115.514942956349,
+          414.9993781942394
+        ],
+        "rotation_pyr": [
+          0.0,
+          172.72747993469238,
+          0.0
+        ],
+        "scale3d": [
+          0.8757484555244446,
+          0.8757484555244446,
+          0.8757484555244446
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_4",
+      "label": "TS_Plains_Rocks_005",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5516.658203125,
+          22649.91796875,
+          1007.8277587890625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -122.66956329345703,
+          0.0
+        ],
+        "scale3d": [
+          1.2418650388717651,
+          1.2418650388717651,
+          1.2418650388717651
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2189.1500806051586,
+          8988.062686011905,
+          399.9524593113056
+        ],
+        "rotation_pyr": [
+          0.0,
+          -122.66956329345703,
+          0.0
+        ],
+        "scale3d": [
+          1.2418650388717651,
+          1.2418650388717651,
+          1.2418650388717651
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_5",
+      "label": "TS_Plains_Rocks_006",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5518.923828125,
+          7342.208984375,
+          126.24998474121094
+        ],
+        "rotation_pyr": [
+          0.0,
+          162.35793113708496,
+          0.0
+        ],
+        "scale3d": [
+          0.664758563041687,
+          0.664758563041687,
+          0.664758563041687
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2190.049138144841,
+          2913.5749937996025,
+          49.9481708702624
+        ],
+        "rotation_pyr": [
+          0.0,
+          162.35793113708496,
+          0.0
+        ],
+        "scale3d": [
+          0.664758563041687,
+          0.664758563041687,
+          0.664758563041687
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_6",
+      "label": "TS_Plains_Rocks_007",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17089.365234375,
+          -4761.263671875,
+          143.80494689941406
+        ],
+        "rotation_pyr": [
+          0.0,
+          150.56955814361575,
+          0.0
+        ],
+        "scale3d": [
+          0.9868449568748474,
+          0.9868449568748474,
+          0.9868449568748474
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6781.494140625,
+          -1889.3903459821427,
+          57.0997194128322
+        ],
+        "rotation_pyr": [
+          0.0,
+          150.56955814361575,
+          0.0
+        ],
+        "scale3d": [
+          0.9868449568748474,
+          0.9868449568748474,
+          0.9868449568748474
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_7",
+      "label": "TS_Plains_Rocks_008",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          22600.78125,
+          18449.703125,
+          886.8997802734375
+        ],
+        "rotation_pyr": [
+          0.0,
+          175.79601287841797,
+          0.0
+        ],
+        "scale3d": [
+          0.7801511883735657,
+          0.7801511883735657,
+          0.7801511883735657
+        ]
+      },
+      "after": {
+        "location_cm": [
+          8968.563988095237,
+          7321.310763888889,
+          351.9840532386552
+        ],
+        "rotation_pyr": [
+          0.0,
+          175.79601287841797,
+          0.0
+        ],
+        "scale3d": [
+          0.7801511883735657,
+          0.7801511883735657,
+          0.7801511883735657
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_8",
+      "label": "TS_Plains_Rocks_009",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5296.02734375,
+          -18825.7421875,
+          283.9465637207031
+        ],
+        "rotation_pyr": [
+          0.0,
+          -69.94926452636717,
+          0.0
+        ],
+        "scale3d": [
+          0.712965726852417,
+          0.712965726852417,
+          0.712965726852417
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2101.598152281746,
+          -7470.5326140873,
+          112.54520980490634
+        ],
+        "rotation_pyr": [
+          0.0,
+          -69.94926452636717,
+          0.0
+        ],
+        "scale3d": [
+          0.712965726852417,
+          0.712965726852417,
+          0.712965726852417
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_9",
+      "label": "TS_Plains_Rocks_010",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -21557.515625,
+          -17898.7890625,
+          736.9067993164062
+        ],
+        "rotation_pyr": [
+          0.0,
+          -135.2268505096435,
+          0.0
+        ],
+        "scale3d": [
+          1.4480990171432495,
+          1.4480990171432495,
+          1.4480990171432495
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8554.569692460316,
+          -7102.694072420634,
+          292.61842722440633
+        ],
+        "rotation_pyr": [
+          0.0,
+          -135.2268505096435,
+          0.0
+        ],
+        "scale3d": [
+          1.4480990171432495,
+          1.4480990171432495,
+          1.4480990171432495
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_10",
+      "label": "TS_Plains_Rocks_011",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18989.02734375,
+          -10836.08984375,
+          171.05490112304688
+        ],
+        "rotation_pyr": [
+          0.0,
+          -63.018865585327134,
+          0.0
+        ],
+        "scale3d": [
+          1.4064068794250488,
+          1.4064068794250488,
+          1.4064068794250488
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7535.328311011905,
+          -4300.035652281746,
+          67.74899962691416
+        ],
+        "rotation_pyr": [
+          0.0,
+          -63.018865585327134,
+          0.0
+        ],
+        "scale3d": [
+          1.4064068794250488,
+          1.4064068794250488,
+          1.4064068794250488
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_11",
+      "label": "TS_Plains_Rocks_012",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          18183.203125,
+          -4334.490234375,
+          179.33853149414062
+        ],
+        "rotation_pyr": [
+          0.0,
+          -153.5241937637329,
+          0.0
+        ],
+        "scale3d": [
+          1.3291653394699097,
+          1.3291653394699097,
+          1.3291653394699097
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7215.5567956349205,
+          -1720.0358072916665,
+          71.02357438910622
+        ],
+        "rotation_pyr": [
+          0.0,
+          -153.5241937637329,
+          0.0
+        ],
+        "scale3d": [
+          1.3291653394699097,
+          1.3291653394699097,
+          1.3291653394699097
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_12",
+      "label": "TS_Plains_Rocks_013",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          20462.0,
+          -16716.44140625,
+          388.7701721191406
+        ],
+        "rotation_pyr": [
+          0.0,
+          102.438497543335,
+          0.0
+        ],
+        "scale3d": [
+          1.072374701499939,
+          1.072374701499939,
+          1.072374701499939
+        ]
+      },
+      "after": {
+        "location_cm": [
+          8119.8412698412685,
+          -6633.50849454365,
+          154.27949234031985
+        ],
+        "rotation_pyr": [
+          0.0,
+          102.438497543335,
+          0.0
+        ],
+        "scale3d": [
+          1.072374701499939,
+          1.072374701499939,
+          1.072374701499939
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_13",
+      "label": "TS_Plains_Rocks_014",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -22082.095703125,
+          14095.58984375,
+          978.6741943359375
+        ],
+        "rotation_pyr": [
+          0.0,
+          -67.5334310531616,
+          0.0
+        ],
+        "scale3d": [
+          0.9713784456253052,
+          0.9713784456253052,
+          0.9713784456253052
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8762.736390128968,
+          5593.488033234127,
+          388.53270033059744
+        ],
+        "rotation_pyr": [
+          0.0,
+          -67.5334310531616,
+          0.0
+        ],
+        "scale3d": [
+          0.9713784456253052,
+          0.9713784456253052,
+          0.9713784456253052
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_14",
+      "label": "TS_Plains_Rocks_015",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3156.880859375,
+          -17128.916015625,
+          251.04371643066406
+        ],
+        "rotation_pyr": [
+          0.0,
+          -0.881180763244629,
+          0.0
+        ],
+        "scale3d": [
+          1.0821224451065063,
+          1.0821224451065063,
+          1.0821224451065063
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1252.730499751984,
+          -6797.188895089286,
+          99.51112311364705
+        ],
+        "rotation_pyr": [
+          0.0,
+          -0.881180763244629,
+          0.0
+        ],
+        "scale3d": [
+          1.0821224451065063,
+          1.0821224451065063,
+          1.0821224451065063
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_15",
+      "label": "TS_Plains_Rocks_016",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -4758.716796875,
+          11879.09765625,
+          198.53094482421875
+        ],
+        "rotation_pyr": [
+          0.0,
+          -85.60954570770264,
+          0.0
+        ],
+        "scale3d": [
+          0.7778833508491516,
+          0.7778833508491516,
+          0.7778833508491516
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1888.3796812996034,
+          4713.927641369048,
+          78.66079775943217
+        ],
+        "rotation_pyr": [
+          0.0,
+          -85.60954570770264,
+          0.0
+        ],
+        "scale3d": [
+          0.7778833508491516,
+          0.7778833508491516,
+          0.7778833508491516
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_16",
+      "label": "TS_Plains_Rocks_017",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17686.1640625,
+          961.498046875,
+          101.77751922607422
+        ],
+        "rotation_pyr": [
+          0.0,
+          -127.25695610046385,
+          0.0
+        ],
+        "scale3d": [
+          0.9639660716056824,
+          0.9639660716056824,
+          0.9639660716056824
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7018.319072420634,
+          381.5468439980159,
+          40.459761766236625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -127.25695610046385,
+          0.0
+        ],
+        "scale3d": [
+          0.9639660716056824,
+          0.9639660716056824,
+          0.9639660716056824
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_17",
+      "label": "TS_Plains_Rocks_018",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19372.1796875,
+          20441.8359375,
+          389.68060302734375
+        ],
+        "rotation_pyr": [
+          0.0,
+          -0.9012222290039064,
+          0.0
+        ],
+        "scale3d": [
+          0.851037323474884,
+          0.851037323474884,
+          0.851037323474884
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7687.372891865078,
+          8111.839657738095,
+          154.63254404538384
+        ],
+        "rotation_pyr": [
+          0.0,
+          -0.9012222290039064,
+          0.0
+        ],
+        "scale3d": [
+          0.851037323474884,
+          0.851037323474884,
+          0.851037323474884
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_18",
+      "label": "TS_Plains_Rocks_019",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          9145.34375,
+          9590.6640625,
+          209.5456085205078
+        ],
+        "rotation_pyr": [
+          0.0,
+          -115.18856048583984,
+          0.0
+        ],
+        "scale3d": [
+          1.2647570371627808,
+          1.2647570371627808,
+          1.2647570371627808
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3629.1046626984125,
+          3805.8190724206343,
+          83.30006066514034
+        ],
+        "rotation_pyr": [
+          0.0,
+          -115.18856048583984,
+          0.0
+        ],
+        "scale3d": [
+          1.2647570371627808,
+          1.2647570371627808,
+          1.2647570371627808
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_19",
+      "label": "TS_Plains_Rocks_020",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17436.916015625,
+          4473.662109375,
+          18.530746459960938
+        ],
+        "rotation_pyr": [
+          0.0,
+          107.51203536987309,
+          0.0
+        ],
+        "scale3d": [
+          1.0026887655258179,
+          1.0026887655258179,
+          1.0026887655258179
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6919.411117311509,
+          1775.2627418154761,
+          7.3709562962758355
+        ],
+        "rotation_pyr": [
+          0.0,
+          107.51203536987309,
+          0.0
+        ],
+        "scale3d": [
+          1.0026887655258179,
+          1.0026887655258179,
+          1.0026887655258179
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_20",
+      "label": "TS_Plains_Rocks_021",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16738.677734375,
+          22103.2734375,
+          982.8063354492188
+        ],
+        "rotation_pyr": [
+          0.0,
+          -130.78845977783206,
+          0.0
+        ],
+        "scale3d": [
+          1.0317391157150269,
+          1.0317391157150269,
+          1.0317391157150269
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6642.332434275793,
+          8771.14025297619,
+          390.11944191799194
+        ],
+        "rotation_pyr": [
+          0.0,
+          -130.78845977783206,
+          0.0
+        ],
+        "scale3d": [
+          1.0317391157150269,
+          1.0317391157150269,
+          1.0317391157150269
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_21",
+      "label": "TS_Plains_Rocks_022",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          22628.73046875,
+          11200.0,
+          755.8046875
+        ],
+        "rotation_pyr": [
+          0.0,
+          146.34874820709229,
+          0.0
+        ],
+        "scale3d": [
+          0.9786497950553894,
+          0.9786497950553894,
+          0.9786497950553894
+        ]
+      },
+      "after": {
+        "location_cm": [
+          8979.654947916666,
+          4444.444444444444,
+          299.83268523601873
+        ],
+        "rotation_pyr": [
+          0.0,
+          146.34874820709229,
+          0.0
+        ],
+        "scale3d": [
+          0.9786497950553894,
+          0.9786497950553894,
+          0.9786497950553894
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_22",
+      "label": "TS_Plains_Rocks_023",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          21907.3046875,
+          -9476.5380859375,
+          821.6787719726562
+        ],
+        "rotation_pyr": [
+          0.0,
+          44.28511619567874,
+          0.0
+        ],
+        "scale3d": [
+          1.3724303245544434,
+          1.3724303245544434,
+          1.3724303245544434
+        ]
+      },
+      "after": {
+        "location_cm": [
+          8693.374875992064,
+          -3760.5309864831343,
+          326.0779191284528
+        ],
+        "rotation_pyr": [
+          0.0,
+          44.28511619567874,
+          0.0
+        ],
+        "scale3d": [
+          1.3724303245544434,
+          1.3724303245544434,
+          1.3724303245544434
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_23",
+      "label": "TS_Plains_Rocks_024",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -2378.90625,
+          -20405.9140625,
+          534.4103393554688
+        ],
+        "rotation_pyr": [
+          0.0,
+          -178.70859146118164,
+          0.0
+        ],
+        "scale3d": [
+          0.8985079526901245,
+          0.8985079526901245,
+          0.8985079526901245
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -944.0104166666665,
+          -8097.584945436507,
+          212.0146294383958
+        ],
+        "rotation_pyr": [
+          0.0,
+          -178.70859146118164,
+          0.0
+        ],
+        "scale3d": [
+          0.8985079526901245,
+          0.8985079526901245,
+          0.8985079526901245
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_24",
+      "label": "TS_Plains_Rocks_025",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          2083.01953125,
+          4555.40625,
+          42.654876708984375
+        ],
+        "rotation_pyr": [
+          0.0,
+          57.65187263488768,
+          0.0
+        ],
+        "scale3d": [
+          0.8270969986915588,
+          0.8270969986915588,
+          0.8270969986915588
+        ]
+      },
+      "after": {
+        "location_cm": [
+          854.0238451745565,
+          1867.6855898814351,
+          20.44933704858704
+        ],
+        "rotation_pyr": [
+          0.0,
+          57.65187263488768,
+          0.0
+        ],
+        "scale3d": [
+          0.8270969986915588,
+          0.8270969986915588,
+          0.8270969986915588
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_25",
+      "label": "TS_Plains_Rocks_026",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -9270.1552734375,
+          17927.00390625,
+          305.2421875
+        ],
+        "rotation_pyr": [
+          0.0,
+          35.510215759277386,
+          0.0
+        ],
+        "scale3d": [
+          1.3782867193222046,
+          1.3782867193222046,
+          1.3782867193222046
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -3678.6330450148807,
+          7113.890438988095,
+          121.2464828543234
+        ],
+        "rotation_pyr": [
+          0.0,
+          35.510215759277386,
+          0.0
+        ],
+        "scale3d": [
+          1.3782867193222046,
+          1.3782867193222046,
+          1.3782867193222046
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_26",
+      "label": "TS_Plains_Rocks_027",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          16035.25390625,
+          -9001.962890625,
+          218.3970184326172
+        ],
+        "rotation_pyr": [
+          0.0,
+          105.08332729339605,
+          0.0
+        ],
+        "scale3d": [
+          0.986347496509552,
+          0.986347496509552,
+          0.986347496509552
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6363.19599454365,
+          -3572.2074962797615,
+          86.49871737833382
+        ],
+        "rotation_pyr": [
+          0.0,
+          105.08332729339605,
+          0.0
+        ],
+        "scale3d": [
+          0.986347496509552,
+          0.986347496509552,
+          0.986347496509552
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_27",
+      "label": "TS_Plains_Rocks_028",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          10545.421875,
+          16382.18359375,
+          200.10997009277344
+        ],
+        "rotation_pyr": [
+          0.0,
+          120.66563129425052,
+          0.0
+        ],
+        "scale3d": [
+          1.3704439401626587,
+          1.3704439401626587,
+          1.3704439401626587
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4184.691220238095,
+          6500.86650545635,
+          79.34534208035257
+        ],
+        "rotation_pyr": [
+          0.0,
+          120.66563129425052,
+          0.0
+        ],
+        "scale3d": [
+          1.3704439401626587,
+          1.3704439401626587,
+          1.3704439401626587
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_28",
+      "label": "TS_Plains_Rocks_029",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17313.35546875,
+          -339.197265625,
+          120.792724609375
+        ],
+        "rotation_pyr": [
+          0.0,
+          -29.659051895141612,
+          0.0
+        ],
+        "scale3d": [
+          0.7759355306625366,
+          0.7759355306625366,
+          0.7759355306625366
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6870.379154265873,
+          -134.60208953373015,
+          47.976793543664826
+        ],
+        "rotation_pyr": [
+          0.0,
+          -29.659051895141612,
+          0.0
+        ],
+        "scale3d": [
+          0.7759355306625366,
+          0.7759355306625366,
+          0.7759355306625366
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_29",
+      "label": "TS_Plains_Rocks_030",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -21854.9375,
+          1148.677734375,
+          792.9159545898438
+        ],
+        "rotation_pyr": [
+          0.0,
+          156.3537311553955,
+          0.0
+        ],
+        "scale3d": [
+          0.705072283744812,
+          0.705072283744812,
+          0.705072283744812
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8672.594246031746,
+          455.8244977678571,
+          314.5445135552145
+        ],
+        "rotation_pyr": [
+          0.0,
+          156.3537311553955,
+          0.0
+        ],
+        "scale3d": [
+          0.705072283744812,
+          0.705072283744812,
+          0.705072283744812
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_30",
+      "label": "TS_Plains_Rocks_031",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -2723.029296875,
+          -11306.0478515625,
+          213.8398895263672
+        ],
+        "rotation_pyr": [
+          0.0,
+          -56.57864570617675,
+          0.0
+        ],
+        "scale3d": [
+          0.6760039329528809,
+          0.6760039329528809,
+          0.6760039329528809
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1080.5671812996031,
+          -4486.526925223214,
+          84.8691902627179
+        ],
+        "rotation_pyr": [
+          0.0,
+          -56.57864570617675,
+          0.0
+        ],
+        "scale3d": [
+          0.6760039329528809,
+          0.6760039329528809,
+          0.6760039329528809
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_31",
+      "label": "TS_Plains_Rocks_032",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          23128.4140625,
+          13014.484375,
+          1015.1582641601562
+        ],
+        "rotation_pyr": [
+          0.0,
+          -19.35838222503662,
+          0.0
+        ],
+        "scale3d": [
+          1.0178145170211792,
+          1.0178145170211792,
+          1.0178145170211792
+        ]
+      },
+      "after": {
+        "location_cm": [
+          9177.94208829365,
+          5164.477926587301,
+          402.90537146358474
+        ],
+        "rotation_pyr": [
+          0.0,
+          -19.35838222503662,
+          0.0
+        ],
+        "scale3d": [
+          1.0178145170211792,
+          1.0178145170211792,
+          1.0178145170211792
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_32",
+      "label": "TS_Plains_Rocks_033",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          1762.34375,
+          -3963.32421875,
+          148.1083984375
+        ],
+        "rotation_pyr": [
+          0.0,
+          155.5770492553711,
+          0.0
+        ],
+        "scale3d": [
+          1.1531890630722046,
+          1.1531890630722046,
+          1.1531890630722046
+        ]
+      },
+      "after": {
+        "location_cm": [
+          842.5775842215869,
+          -1894.8676418668506,
+          58.78954900440658
+        ],
+        "rotation_pyr": [
+          0.0,
+          155.5770492553711,
+          0.0
+        ],
+        "scale3d": [
+          1.1531890630722046,
+          1.1531890630722046,
+          1.1531890630722046
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_33",
+      "label": "TS_Plains_Rocks_034",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -7211.099609375,
+          -4000.025390625,
+          86.22972869873047
+        ],
+        "rotation_pyr": [
+          0.0,
+          -131.85580730438227,
+          0.0
+        ],
+        "scale3d": [
+          1.4240469932556152,
+          1.4240469932556152,
+          1.4240469932556152
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2861.547464037698,
+          -1587.3116629464284,
+          34.134843647258094
+        ],
+        "rotation_pyr": [
+          0.0,
+          -131.85580730438227,
+          0.0
+        ],
+        "scale3d": [
+          1.4240469932556152,
+          1.4240469932556152,
+          1.4240469932556152
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_34",
+      "label": "TS_Plains_StoneScatter",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3338.853515625,
+          -14518.1923828125,
+          263.6600646972656
+        ],
+        "rotation_pyr": [
+          0.0,
+          73.42330455780028,
+          0.0
+        ],
+        "scale3d": [
+          1.0076814889907837,
+          1.0076814889907837,
+          1.0076814889907837
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1324.941871279762,
+          -5761.187453497023,
+          104.5872414011028
+        ],
+        "rotation_pyr": [
+          0.0,
+          73.42330455780028,
+          0.0
+        ],
+        "scale3d": [
+          1.0076814889907837,
+          1.0076814889907837,
+          1.0076814889907837
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_35",
+      "label": "TS_Plains_StoneScatter_002",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17603.587890625,
+          7685.267578125,
+          223.7022247314453
+        ],
+        "rotation_pyr": [
+          0.0,
+          -10.334315299987795,
+          0.0
+        ],
+        "scale3d": [
+          0.6568394899368286,
+          0.6568394899368286,
+          0.6568394899368286
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6985.550750248016,
+          3049.709356398809,
+          88.79018072738472
+        ],
+        "rotation_pyr": [
+          0.0,
+          -10.334315299987795,
+          0.0
+        ],
+        "scale3d": [
+          0.6568394899368286,
+          0.6568394899368286,
+          0.6568394899368286
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_36",
+      "label": "TS_Plains_StoneScatter_003",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -21485.75,
+          3804.6171875,
+          606.6924438476562
+        ],
+        "rotation_pyr": [
+          0.0,
+          -65.7814979553222,
+          0.0
+        ],
+        "scale3d": [
+          1.243528962135315,
+          1.243528962135315,
+          1.243528962135315
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8526.091269841269,
+          1509.7687251984125,
+          240.61177395064078
+        ],
+        "rotation_pyr": [
+          0.0,
+          -65.7814979553222,
+          0.0
+        ],
+        "scale3d": [
+          1.243528962135315,
+          1.243528962135315,
+          1.243528962135315
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_37",
+      "label": "TS_Plains_StoneScatter_004",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -11091.458984375,
+          -12722.7978515625,
+          259.32928466796875
+        ],
+        "rotation_pyr": [
+          0.0,
+          100.3687763214112,
+          0.0
+        ],
+        "scale3d": [
+          0.8695508241653442,
+          0.8695508241653442,
+          0.8695508241653442
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -4401.372612847222,
+          -5048.729306175595,
+          103.03030263436449
+        ],
+        "rotation_pyr": [
+          0.0,
+          100.3687763214112,
+          0.0
+        ],
+        "scale3d": [
+          0.8695508241653442,
+          0.8695508241653442,
+          0.8695508241653442
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_38",
+      "label": "TS_Plains_StoneScatter_005",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          8720.3125,
+          22620.75390625,
+          1034.7252197265625
+        ],
+        "rotation_pyr": [
+          0.0,
+          65.81621646881102,
+          0.0
+        ],
+        "scale3d": [
+          0.781365692615509,
+          0.781365692615509,
+          0.781365692615509
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3460.441468253968,
+          8976.4896453373,
+          410.7538279390319
+        ],
+        "rotation_pyr": [
+          0.0,
+          65.81621646881102,
+          0.0
+        ],
+        "scale3d": [
+          0.781365692615509,
+          0.781365692615509,
+          0.781365692615509
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_39",
+      "label": "TS_Plains_StoneScatter_006",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          8752.7734375,
+          8510.525390625,
+          190.065185546875
+        ],
+        "rotation_pyr": [
+          0.0,
+          95.49788475036627,
+          0.0
+        ],
+        "scale3d": [
+          1.0462056398391724,
+          1.0462056398391724,
+          1.0462056398391724
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3473.3227926587297,
+          3377.1926153273807,
+          75.58122171165815
+        ],
+        "rotation_pyr": [
+          0.0,
+          95.49788475036627,
+          0.0
+        ],
+        "scale3d": [
+          1.0462056398391724,
+          1.0462056398391724,
+          1.0462056398391724
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_40",
+      "label": "TS_Plains_StoneScatter_007",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          13099.21484375,
+          3059.583984375,
+          132.0380859375
+        ],
+        "rotation_pyr": [
+          0.0,
+          -11.250987052917479,
+          0.0
+        ],
+        "scale3d": [
+          0.8377546072006226,
+          0.8377546072006226,
+          0.8377546072006226
+        ]
+      },
+      "after": {
+        "location_cm": [
+          5198.101128472222,
+          1214.120628720238,
+          52.32791530679606
+        ],
+        "rotation_pyr": [
+          0.0,
+          -11.250987052917479,
+          0.0
+        ],
+        "scale3d": [
+          0.8377546072006226,
+          0.8377546072006226,
+          0.8377546072006226
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_41",
+      "label": "TS_Plains_StoneScatter_008",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          7411.6171875,
+          21052.1953125,
+          640.2681274414062
+        ],
+        "rotation_pyr": [
+          0.0,
+          178.92428398132327,
+          0.0
+        ],
+        "scale3d": [
+          1.090775489807129,
+          1.090775489807129,
+          1.090775489807129
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2941.1179315476184,
+          8354.04575892857,
+          254.13268628768128
+        ],
+        "rotation_pyr": [
+          0.0,
+          178.92428398132327,
+          0.0
+        ],
+        "scale3d": [
+          1.090775489807129,
+          1.090775489807129,
+          1.090775489807129
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_42",
+      "label": "TS_Plains_StoneScatter_009",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          20559.75,
+          -3119.6484375,
+          416.05767822265625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -16.394348144531254,
+          0.0
+        ],
+        "scale3d": [
+          1.1340562105178833,
+          1.1340562105178833,
+          1.1340562105178833
+        ]
+      },
+      "after": {
+        "location_cm": [
+          8158.630952380952,
+          -1237.9557291666665,
+          165.22254636746948
+        ],
+        "rotation_pyr": [
+          0.0,
+          -16.394348144531254,
+          0.0
+        ],
+        "scale3d": [
+          1.1340562105178833,
+          1.1340562105178833,
+          1.1340562105178833
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_43",
+      "label": "TS_Plains_StoneScatter_010",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -9568.9375,
+          18933.4296875,
+          303.1815185546875
+        ],
+        "rotation_pyr": [
+          0.0,
+          53.520627021789544,
+          0.0
+        ],
+        "scale3d": [
+          1.1610524654388428,
+          1.1610524654388428,
+          1.1610524654388428
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -3797.1974206349205,
+          7513.265749007936,
+          120.02182476395683
+        ],
+        "rotation_pyr": [
+          0.0,
+          53.520627021789544,
+          0.0
+        ],
+        "scale3d": [
+          1.1610524654388428,
+          1.1610524654388428,
+          1.1610524654388428
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_44",
+      "label": "TS_Plains_StoneScatter_011",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          20621.05078125,
+          17190.94140625,
+          458.2645568847656
+        ],
+        "rotation_pyr": [
+          0.0,
+          138.29671382904056,
+          0.0
+        ],
+        "scale3d": [
+          1.2475999593734741,
+          1.2475999593734741,
+          1.2475999593734741
+        ]
+      },
+      "after": {
+        "location_cm": [
+          8182.956659226191,
+          6821.8021453373,
+          181.83857368520694
+        ],
+        "rotation_pyr": [
+          0.0,
+          138.29671382904056,
+          0.0
+        ],
+        "scale3d": [
+          1.2475999593734741,
+          1.2475999593734741,
+          1.2475999593734741
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_45",
+      "label": "TS_Plains_StoneScatter_012",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -9235.662109375,
+          -6231.54296875,
+          167.24159240722656
+        ],
+        "rotation_pyr": [
+          0.0,
+          117.17674255371094,
+          0.0
+        ],
+        "scale3d": [
+          0.6760717630386353,
+          0.6760717630386353,
+          0.6760717630386353
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -3664.945281498016,
+          -2472.83451140873,
+          66.28964698697382
+        ],
+        "rotation_pyr": [
+          0.0,
+          117.17674255371094,
+          0.0
+        ],
+        "scale3d": [
+          0.6760717630386353,
+          0.6760717630386353,
+          0.6760717630386353
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_46",
+      "label": "TS_Plains_StoneScatter_013",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          15256.34765625,
+          2166.61328125,
+          115.50495910644531
+        ],
+        "rotation_pyr": [
+          0.0,
+          -87.17986106872559,
+          0.0
+        ],
+        "scale3d": [
+          1.1753567457199097,
+          1.1753567457199097,
+          1.1753567457199097
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6054.106212797618,
+          859.7671750992063,
+          45.74362202883276
+        ],
+        "rotation_pyr": [
+          0.0,
+          -87.17986106872559,
+          0.0
+        ],
+        "scale3d": [
+          1.1753567457199097,
+          1.1753567457199097,
+          1.1753567457199097
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_47",
+      "label": "TS_Plains_StoneScatter_014",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          17115.6171875,
+          -19026.734375,
+          172.08316040039062
+        ],
+        "rotation_pyr": [
+          0.0,
+          -63.68486881256102,
+          0.0
+        ],
+        "scale3d": [
+          0.7360327839851379,
+          0.7360327839851379,
+          0.7360327839851379
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6791.9115823412685,
+          -7550.291418650793,
+          68.15506429284869
+        ],
+        "rotation_pyr": [
+          0.0,
+          -63.68486881256102,
+          0.0
+        ],
+        "scale3d": [
+          0.7360327839851379,
+          0.7360327839851379,
+          0.7360327839851379
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_48",
+      "label": "TS_Plains_StoneScatter_015",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16263.2734375,
+          15768.76171875,
+          274.7904052734375
+        ],
+        "rotation_pyr": [
+          0.0,
+          21.526851654052738,
+          0.0
+        ],
+        "scale3d": [
+          1.1101102828979492,
+          1.1101102828979492,
+          1.1101102828979492
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6453.679935515873,
+          6257.445126488095,
+          109.06874979692657
+        ],
+        "rotation_pyr": [
+          0.0,
+          21.526851654052738,
+          0.0
+        ],
+        "scale3d": [
+          1.1101102828979492,
+          1.1101102828979492,
+          1.1101102828979492
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_49",
+      "label": "TS_Plains_StoneScatter_016",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          11283.8359375,
+          6984.345703125,
+          196.07838439941406
+        ],
+        "rotation_pyr": [
+          0.0,
+          116.90654754638675,
+          0.0
+        ],
+        "scale3d": [
+          0.9547214508056641,
+          0.9547214508056641,
+          0.9547214508056641
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4477.712673611111,
+          2771.565755208333,
+          77.78327762994013
+        ],
+        "rotation_pyr": [
+          0.0,
+          116.90654754638675,
+          0.0
+        ],
+        "scale3d": [
+          0.9547214508056641,
+          0.9547214508056641,
+          0.9547214508056641
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_50",
+      "label": "TS_Plains_StoneScatter_017",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          474.884765625,
+          13463.6640625,
+          155.85569763183594
+        ],
+        "rotation_pyr": [
+          0.0,
+          152.8865146636963,
+          0.0
+        ],
+        "scale3d": [
+          1.029129147529602,
+          1.029129147529602,
+          1.029129147529602
+        ]
+      },
+      "after": {
+        "location_cm": [
+          188.44633556547615,
+          5342.723834325397,
+          61.83397018933829
+        ],
+        "rotation_pyr": [
+          0.0,
+          152.8865146636963,
+          0.0
+        ],
+        "scale3d": [
+          1.029129147529602,
+          1.029129147529602,
+          1.029129147529602
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_51",
+      "label": "TS_Plains_StoneScatter_018",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          6506.384765625,
+          -14522.552734375,
+          260.6938171386719
+        ],
+        "rotation_pyr": [
+          0.0,
+          12.985925674438478,
+          0.0
+        ],
+        "scale3d": [
+          0.9044319987297058,
+          0.9044319987297058,
+          0.9044319987297058
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2581.898716517857,
+          -5762.9177517361095,
+          103.5618844929486
+        ],
+        "rotation_pyr": [
+          0.0,
+          12.985925674438478,
+          0.0
+        ],
+        "scale3d": [
+          0.9044319987297058,
+          0.9044319987297058,
+          0.9044319987297058
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_52",
+      "label": "TS_Plains_StoneScatter_019",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -22131.14453125,
+          -11058.763671875,
+          829.263916015625
+        ],
+        "rotation_pyr": [
+          0.0,
+          86.7529821395874,
+          0.0
+        ],
+        "scale3d": [
+          0.6953387260437012,
+          0.6953387260437012,
+          0.6953387260437012
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8782.200210813491,
+          -4388.3982824900795,
+          329.11486655549743
+        ],
+        "rotation_pyr": [
+          0.0,
+          86.7529821395874,
+          0.0
+        ],
+        "scale3d": [
+          0.6953387260437012,
+          0.6953387260437012,
+          0.6953387260437012
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_53",
+      "label": "TS_Plains_StoneScatter_020",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          6802.8828125,
+          -5413.673828125,
+          157.11578369140625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -87.33242511749269,
+          0.0
+        ],
+        "scale3d": [
+          0.7733888030052185,
+          0.7733888030052185,
+          0.7733888030052185
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2699.556671626984,
+          -2148.283265128968,
+          62.2560772725119
+        ],
+        "rotation_pyr": [
+          0.0,
+          -87.33242511749269,
+          0.0
+        ],
+        "scale3d": [
+          0.7733888030052185,
+          0.7733888030052185,
+          0.7733888030052185
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_54",
+      "label": "TS_Plains_StoneScatter_021",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -5854.212890625,
+          21833.765625,
+          889.3968505859375
+        ],
+        "rotation_pyr": [
+          0.0,
+          -110.86994647979738,
+          0.0
+        ],
+        "scale3d": [
+          0.6709928512573242,
+          0.6709928512573242,
+          0.6709928512573242
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2323.100353422619,
+          8664.192708333332,
+          353.1421188221502
+        ],
+        "rotation_pyr": [
+          0.0,
+          -110.86994647979738,
+          0.0
+        ],
+        "scale3d": [
+          0.6709928512573242,
+          0.6709928512573242,
+          0.6709928512573242
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_55",
+      "label": "TS_Plains_StoneScatter_022",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19318.9375,
+          23121.50390625,
+          973.597900390625
+        ],
+        "rotation_pyr": [
+          0.0,
+          141.66110515594482,
+          0.0
+        ],
+        "scale3d": [
+          1.2356685400009155,
+          1.2356685400009155,
+          1.2356685400009155
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7666.245039682539,
+          9175.199962797618,
+          386.2888231044053
+        ],
+        "rotation_pyr": [
+          0.0,
+          141.66110515594482,
+          0.0
+        ],
+        "scale3d": [
+          1.2356685400009155,
+          1.2356685400009155,
+          1.2356685400009155
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_56",
+      "label": "TS_Plains_StoneScatter_023",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          6205.673828125,
+          -13565.3173828125,
+          246.4831085205078
+        ],
+        "rotation_pyr": [
+          0.0,
+          -95.56290149688722,
+          0.0
+        ],
+        "scale3d": [
+          0.7438461780548096,
+          0.7438461780548096,
+          0.7438461780548096
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2462.5689794146824,
+          -5383.062453497024,
+          97.87491735422736
+        ],
+        "rotation_pyr": [
+          0.0,
+          -95.56290149688722,
+          0.0
+        ],
+        "scale3d": [
+          0.7438461780548096,
+          0.7438461780548096,
+          0.7438461780548096
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_57",
+      "label": "TS_Plains_StoneScatter_024",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          -330.1328125,
+          1789.00390625,
+          61.246917724609375
+        ],
+        "rotation_pyr": [
+          0.0,
+          -35.71299076080323,
+          0.0
+        ],
+        "scale3d": [
+          0.7336212396621704,
+          0.7336212396621704,
+          0.7336212396621704
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -363.5125192274729,
+          1969.8899722932795,
+          52.20330511091379
+        ],
+        "rotation_pyr": [
+          0.0,
+          -35.71299076080323,
+          0.0
+        ],
+        "scale3d": [
+          0.7336212396621704,
+          0.7336212396621704,
+          0.7336212396621704
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_58",
+      "label": "TS_Plains_StoneScatter_025",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3465.099609375,
+          -22582.70703125,
+          1032.2647705078125
+        ],
+        "rotation_pyr": [
+          0.0,
+          -174.72540378570557,
+          0.0
+        ],
+        "scale3d": [
+          1.1658252477645874,
+          1.1658252477645874,
+          1.1658252477645874
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1375.039527529762,
+          -8961.39167906746,
+          409.66170538637743
+        ],
+        "rotation_pyr": [
+          0.0,
+          -174.72540378570557,
+          0.0
+        ],
+        "scale3d": [
+          1.1658252477645874,
+          1.1658252477645874,
+          1.1658252477645874
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_59",
+      "label": "TS_Plains_StoneScatter_026",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -1715.521484375,
+          23409.10546875,
+          1036.865966796875
+        ],
+        "rotation_pyr": [
+          0.0,
+          -118.0078411102295,
+          0.0
+        ],
+        "scale3d": [
+          0.9727933406829834,
+          0.9727933406829834,
+          0.9727933406829834
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -680.7624937996031,
+          9289.327566964284,
+          411.3082021921
+        ],
+        "rotation_pyr": [
+          0.0,
+          -118.0078411102295,
+          0.0
+        ],
+        "scale3d": [
+          0.9727933406829834,
+          0.9727933406829834,
+          0.9727933406829834
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_60",
+      "label": "TS_Plains_StoneScatter_027",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -21298.970703125,
+          12553.546875,
+          798.4774169921875
+        ],
+        "rotation_pyr": [
+          0.0,
+          79.68976020812985,
+          0.0
+        ],
+        "scale3d": [
+          0.704201340675354,
+          0.704201340675354,
+          0.704201340675354
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8451.97250124008,
+          4981.566220238095,
+          316.7935453022001
+        ],
+        "rotation_pyr": [
+          0.0,
+          79.68976020812985,
+          0.0
+        ],
+        "scale3d": [
+          0.704201340675354,
+          0.704201340675354,
+          0.704201340675354
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_61",
+      "label": "TS_Plains_StoneScatter_028",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -20251.201171875,
+          -15864.892578125,
+          379.5023193359375
+        ],
+        "rotation_pyr": [
+          0.0,
+          129.3656015396118,
+          0.0
+        ],
+        "scale3d": [
+          0.829348623752594,
+          0.829348623752594,
+          0.829348623752594
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8036.190941220237,
+          -6295.592292906746,
+          150.56238638209106
+        ],
+        "rotation_pyr": [
+          0.0,
+          129.3656015396118,
+          0.0
+        ],
+        "scale3d": [
+          0.829348623752594,
+          0.829348623752594,
+          0.829348623752594
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_62",
+      "label": "TS_Plains_StoneScatter_029",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3894.498046875,
+          20432.7578125,
+          485.44366455078125
+        ],
+        "rotation_pyr": [
+          0.0,
+          135.9422922134399,
+          0.0
+        ],
+        "scale3d": [
+          1.1052614450454712,
+          1.1052614450454712,
+          1.1052614450454712
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1545.4357328869046,
+          8108.237227182539,
+          192.77331342823527
+        ],
+        "rotation_pyr": [
+          0.0,
+          135.9422922134399,
+          0.0
+        ],
+        "scale3d": [
+          1.1052614450454712,
+          1.1052614450454712,
+          1.1052614450454712
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_63",
+      "label": "TS_Plains_StoneScatter_030",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -12850.169921875,
+          -10327.955078125,
+          235.209716796875
+        ],
+        "rotation_pyr": [
+          0.0,
+          47.65401363372805,
+          0.0
+        ],
+        "scale3d": [
+          0.8699906468391418,
+          0.8699906468391418,
+          0.8699906468391418
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -5099.273778521825,
+          -4098.394872271825,
+          93.44610876540901
+        ],
+        "rotation_pyr": [
+          0.0,
+          47.65401363372805,
+          0.0
+        ],
+        "scale3d": [
+          0.8699906468391418,
+          0.8699906468391418,
+          0.8699906468391418
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_64",
+      "label": "TS_Plains_StoneScatter_031",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -20925.58984375,
+          17180.390625,
+          683.5178833007812
+        ],
+        "rotation_pyr": [
+          0.0,
+          -155.23016452789307,
+          0.0
+        ],
+        "scale3d": [
+          1.1704808473587036,
+          1.1704808473587036,
+          1.1704808473587036
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8303.805493551587,
+          6817.615327380952,
+          271.2707107638744
+        ],
+        "rotation_pyr": [
+          0.0,
+          -155.23016452789307,
+          0.0
+        ],
+        "scale3d": [
+          1.1704808473587036,
+          1.1704808473587036,
+          1.1704808473587036
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_65",
+      "label": "TS_Plains_StoneScatter_032",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          10750.72265625,
+          18103.66796875,
+          220.4372100830078
+        ],
+        "rotation_pyr": [
+          0.0,
+          -58.67411613464355,
+          0.0
+        ],
+        "scale3d": [
+          1.1270158290863037,
+          1.1270158290863037,
+          1.1270158290863037
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4266.15978422619,
+          7183.995225694445,
+          87.29427972371195
+        ],
+        "rotation_pyr": [
+          0.0,
+          -58.67411613464355,
+          0.0
+        ],
+        "scale3d": [
+          1.1270158290863037,
+          1.1270158290863037,
+          1.1270158290863037
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_66",
+      "label": "TS_Plains_StoneScatter_033",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -8384.45703125,
+          -18779.50390625,
+          288.5447082519531
+        ],
+        "rotation_pyr": [
+          0.0,
+          -74.47335720062253,
+          0.0
+        ],
+        "scale3d": [
+          1.1209681034088135,
+          1.1209681034088135,
+          1.1209681034088135
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -3327.1654885912703,
+          -7452.184089781746,
+          114.43285814041883
+        ],
+        "rotation_pyr": [
+          0.0,
+          -74.47335720062253,
+          0.0
+        ],
+        "scale3d": [
+          1.1209681034088135,
+          1.1209681034088135,
+          1.1209681034088135
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_67",
+      "label": "TS_Plains_StoneScatter_034",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -9593.83984375,
+          -8153.9951171875,
+          208.75022888183594
+        ],
+        "rotation_pyr": [
+          0.0,
+          -129.18067932128903,
+          0.0
+        ],
+        "scale3d": [
+          0.9976364970207214,
+          0.9976364970207214,
+          0.9976364970207214
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -3807.0793030753966,
+          -3235.7123480902774,
+          82.86528689026454
+        ],
+        "rotation_pyr": [
+          0.0,
+          -129.18067932128903,
+          0.0
+        ],
+        "scale3d": [
+          0.9976364970207214,
+          0.9976364970207214,
+          0.9976364970207214
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_68",
+      "label": "TS_Plains_StoneScatter_035",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -2418.4921875,
+          6877.951171875,
+          177.12112426757812
+        ],
+        "rotation_pyr": [
+          0.0,
+          75.51821708679195,
+          0.0
+        ],
+        "scale3d": [
+          1.0072084665298462,
+          1.0072084665298462,
+          1.0072084665298462
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -959.7191220238096,
+          2729.345703125,
+          70.16898877374115
+        ],
+        "rotation_pyr": [
+          0.0,
+          75.51821708679195,
+          0.0
+        ],
+        "scale3d": [
+          1.0072084665298462,
+          1.0072084665298462,
+          1.0072084665298462
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_69",
+      "label": "TS_Plains_StoneScatter_036",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3193.833984375,
+          7222.703125,
+          156.04383850097656
+        ],
+        "rotation_pyr": [
+          0.0,
+          15.18100261688232,
+          0.0
+        ],
+        "scale3d": [
+          0.6907291412353516,
+          0.6907291412353516,
+          0.6907291412353516
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1267.3944382440475,
+          2866.152033730159,
+          61.997687903716724
+        ],
+        "rotation_pyr": [
+          0.0,
+          15.18100261688232,
+          0.0
+        ],
+        "scale3d": [
+          0.6907291412353516,
+          0.6907291412353516,
+          0.6907291412353516
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_70",
+      "label": "TS_Plains_StoneScatter_037",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16538.029296875,
+          -14822.92578125,
+          223.25672912597656
+        ],
+        "rotation_pyr": [
+          0.0,
+          34.43758964538576,
+          0.0
+        ],
+        "scale3d": [
+          1.2080676555633545,
+          1.2080676555633545,
+          1.2080676555633545
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6562.710038442459,
+          -5882.113405257936,
+          88.56101174105788
+        ],
+        "rotation_pyr": [
+          0.0,
+          34.43758964538576,
+          0.0
+        ],
+        "scale3d": [
+          1.2080676555633545,
+          1.2080676555633545,
+          1.2080676555633545
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_71",
+      "label": "TS_Plains_StoneScatter_038",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          15360.17578125,
+          -3361.724609375,
+          226.9182891845703
+        ],
+        "rotation_pyr": [
+          0.0,
+          85.34196853637695,
+          0.0
+        ],
+        "scale3d": [
+          0.8145163059234619,
+          0.8145163059234619,
+          0.8145163059234619
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6095.307849702382,
+          -1334.0177021329364,
+          90.07480782112543
+        ],
+        "rotation_pyr": [
+          0.0,
+          85.34196853637695,
+          0.0
+        ],
+        "scale3d": [
+          0.8145163059234619,
+          0.8145163059234619,
+          0.8145163059234619
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_72",
+      "label": "TS_Plains_StoneScatter_039",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          15972.6171875,
+          5892.001953125,
+          254.6571502685547
+        ],
+        "rotation_pyr": [
+          0.0,
+          85.37291049957275,
+          0.0
+        ],
+        "scale3d": [
+          1.1203973293304443,
+          1.1203973293304443,
+          1.1203973293304443
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6338.340153769841,
+          2338.096013144841,
+          101.05321068179182
+        ],
+        "rotation_pyr": [
+          0.0,
+          85.37291049957275,
+          0.0
+        ],
+        "scale3d": [
+          1.1203973293304443,
+          1.1203973293304443,
+          1.1203973293304443
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_73",
+      "label": "TS_Plains_StoneScatter_040",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16636.482421875,
+          6728.662109375,
+          168.8657684326172
+        ],
+        "rotation_pyr": [
+          0.0,
+          -101.79236412048341,
+          0.0
+        ],
+        "scale3d": [
+          0.8180530667304993,
+          0.8180530667304993,
+          0.8180530667304993
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6601.778738839286,
+          2670.104011656746,
+          66.9060947436592
+        ],
+        "rotation_pyr": [
+          0.0,
+          -101.79236412048341,
+          0.0
+        ],
+        "scale3d": [
+          0.8180530667304993,
+          0.8180530667304993,
+          0.8180530667304993
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_74",
+      "label": "TS_Plains_StoneScatter_041",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19712.8828125,
+          -20362.30078125,
+          361.3465576171875
+        ],
+        "rotation_pyr": [
+          0.0,
+          90.39430618286134,
+          0.0
+        ],
+        "scale3d": [
+          0.810592770576477,
+          0.810592770576477,
+          0.810592770576477
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7822.572544642857,
+          -8080.278087797618,
+          143.44112012812184
+        ],
+        "rotation_pyr": [
+          0.0,
+          90.39430618286134,
+          0.0
+        ],
+        "scale3d": [
+          0.810592770576477,
+          0.810592770576477,
+          0.810592770576477
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_75",
+      "label": "TS_Plains_StoneScatter_042",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18532.126953125,
+          830.03515625,
+          119.32288360595703
+        ],
+        "rotation_pyr": [
+          0.0,
+          -152.95208930969238,
+          0.0
+        ],
+        "scale3d": [
+          0.7267737984657288,
+          0.7267737984657288,
+          0.7267737984657288
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7354.018632192459,
+          329.3790302579365,
+          47.357734648561745
+        ],
+        "rotation_pyr": [
+          0.0,
+          -152.95208930969238,
+          0.0
+        ],
+        "scale3d": [
+          0.7267737984657288,
+          0.7267737984657288,
+          0.7267737984657288
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_76",
+      "label": "TS_Plains_StoneScatter_043",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18740.21484375,
+          -9161.310546875,
+          155.00277709960938
+        ],
+        "rotation_pyr": [
+          0.0,
+          -140.3056240081787,
+          0.0
+        ],
+        "scale3d": [
+          0.8563894033432007,
+          0.8563894033432007,
+          0.8563894033432007
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7436.593191964286,
+          -3635.440693204365,
+          61.39433743351765
+        ],
+        "rotation_pyr": [
+          0.0,
+          -140.3056240081787,
+          0.0
+        ],
+        "scale3d": [
+          0.8563894033432007,
+          0.8563894033432007,
+          0.8563894033432007
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_77",
+      "label": "TS_Plains_StoneScatter_044",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -21663.333984375,
+          18447.4765625,
+          837.4954223632812
+        ],
+        "rotation_pyr": [
+          0.0,
+          -90.61171531677248,
+          0.0
+        ],
+        "scale3d": [
+          1.1905394792556763,
+          1.1905394792556763,
+          1.1905394792556763
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8596.561104910714,
+          7320.4272073412685,
+          332.5393707283474
+        ],
+        "rotation_pyr": [
+          0.0,
+          -90.61171531677248,
+          0.0
+        ],
+        "scale3d": [
+          1.1905394792556763,
+          1.1905394792556763,
+          1.1905394792556763
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_78",
+      "label": "TS_Plains_StoneScatter_045",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -5738.41015625,
+          -302.17578125,
+          82.07061004638672
+        ],
+        "rotation_pyr": [
+          0.0,
+          -141.77101135253906,
+          0.0
+        ],
+        "scale3d": [
+          1.101159930229187,
+          1.101159930229187,
+          1.101159930229187
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2277.1468874007937,
+          -119.91102430555554,
+          32.57210044085514
+        ],
+        "rotation_pyr": [
+          0.0,
+          -141.77101135253906,
+          0.0
+        ],
+        "scale3d": [
+          1.101159930229187,
+          1.101159930229187,
+          1.101159930229187
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_79",
+      "label": "TS_Plains_StoneScatter_046",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17373.515625,
+          19723.77734375,
+          379.2976379394531
+        ],
+        "rotation_pyr": [
+          0.0,
+          72.40015983581542,
+          0.0
+        ],
+        "scale3d": [
+          1.244183897972107,
+          1.244183897972107,
+          1.244183897972107
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6894.252232142857,
+          7826.895771329364,
+          150.4100528629242
+        ],
+        "rotation_pyr": [
+          0.0,
+          72.40015983581542,
+          0.0
+        ],
+        "scale3d": [
+          1.244183897972107,
+          1.244183897972107,
+          1.244183897972107
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_80",
+      "label": "TS_Plains_StoneScatter_047",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          1531.63671875,
+          -2834.970703125,
+          143.83021545410156
+        ],
+        "rotation_pyr": [
+          0.0,
+          89.85777854919438,
+          0.0
+        ],
+        "scale3d": [
+          0.7207112908363342,
+          0.7207112908363342,
+          0.7207112908363342
+        ]
+      },
+      "after": {
+        "location_cm": [
+          951.7915564247921,
+          -1761.7109494137546,
+          57.74818952809801
+        ],
+        "rotation_pyr": [
+          0.0,
+          89.85777854919438,
+          0.0
+        ],
+        "scale3d": [
+          0.7207112908363342,
+          0.7207112908363342,
+          0.7207112908363342
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_81",
+      "label": "TS_Plains_StoneScatter_048",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18419.1796875,
+          -9091.81640625,
+          161.3624725341797
+        ],
+        "rotation_pyr": [
+          0.0,
+          15.79151630401612,
+          0.0
+        ],
+        "scale3d": [
+          0.9805610179901123,
+          0.9805610179901123,
+          0.9805610179901123
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7309.198288690477,
+          -3607.863653273809,
+          63.90195731255517
+        ],
+        "rotation_pyr": [
+          0.0,
+          15.79151630401612,
+          0.0
+        ],
+        "scale3d": [
+          0.9805610179901123,
+          0.9805610179901123,
+          0.9805610179901123
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_82",
+      "label": "TS_Plains_StoneScatter_049",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          2142.03125,
+          -11093.9541015625,
+          193.91123962402344
+        ],
+        "rotation_pyr": [
+          0.0,
+          38.98477077484131,
+          0.0
+        ],
+        "scale3d": [
+          0.8025811314582825,
+          0.8025811314582825,
+          0.8025811314582825
+        ]
+      },
+      "after": {
+        "location_cm": [
+          850.0124007936506,
+          -4402.362738715277,
+          77.08531525857325
+        ],
+        "rotation_pyr": [
+          0.0,
+          38.98477077484131,
+          0.0
+        ],
+        "scale3d": [
+          0.8025811314582825,
+          0.8025811314582825,
+          0.8025811314582825
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_83",
+      "label": "TS_Plains_StoneScatter_050",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          8623.837890625,
+          22825.12109375,
+          1061.2349853515625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -147.8023338317871,
+          0.0
+        ],
+        "scale3d": [
+          0.736091673374176,
+          0.736091673374176,
+          0.736091673374176
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3422.157893105159,
+          9057.58773561508,
+          421.3030742505034
+        ],
+        "rotation_pyr": [
+          0.0,
+          -147.8023338317871,
+          0.0
+        ],
+        "scale3d": [
+          0.736091673374176,
+          0.736091673374176,
+          0.736091673374176
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_84",
+      "label": "TS_Plains_StoneScatter_051",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          3517.421875,
+          271.1796875,
+          159.68115234375
+        ],
+        "rotation_pyr": [
+          0.0,
+          29.69909191131594,
+          0.0
+        ],
+        "scale3d": [
+          1.0378351211547852,
+          1.0378351211547852,
+          1.0378351211547852
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1998.4655133275057,
+          154.07399869646858,
+          61.95773200270196
+        ],
+        "rotation_pyr": [
+          0.0,
+          29.69909191131594,
+          0.0
+        ],
+        "scale3d": [
+          1.0378351211547852,
+          1.0378351211547852,
+          1.0378351211547852
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_85",
+      "label": "TS_Plains_StoneScatter_052",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3954.123046875,
+          -21657.02734375,
+          840.9527587890625
+        ],
+        "rotation_pyr": [
+          0.0,
+          125.07170677185053,
+          0.0
+        ],
+        "scale3d": [
+          0.9888103604316711,
+          0.9888103604316711,
+          0.9888103604316711
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1569.0964471726193,
+          -8594.058469742064,
+          333.8495440608058
+        ],
+        "rotation_pyr": [
+          0.0,
+          125.07170677185053,
+          0.0
+        ],
+        "scale3d": [
+          0.9888103604316711,
+          0.9888103604316711,
+          0.9888103604316711
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_86",
+      "label": "TS_Plains_StoneScatter_053",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          6528.7578125,
+          6264.06640625,
+          73.39588928222656
+        ],
+        "rotation_pyr": [
+          0.0,
+          42.415595054626486,
+          0.0
+        ],
+        "scale3d": [
+          0.725363552570343,
+          0.725363552570343,
+          0.725363552570343
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2590.776909722222,
+          2485.7406374007937,
+          29.038517659497302
+        ],
+        "rotation_pyr": [
+          0.0,
+          42.415595054626486,
+          0.0
+        ],
+        "scale3d": [
+          0.725363552570343,
+          0.725363552570343,
+          0.725363552570343
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_87",
+      "label": "TS_Plains_StoneScatter_054",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          -3861.5859375,
+          -3157.1953125,
+          38.189308166503906
+        ],
+        "rotation_pyr": [
+          0.0,
+          -15.924682617187502,
+          0.0
+        ],
+        "scale3d": [
+          1.168912410736084,
+          1.168912410736084,
+          1.168912410736084
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1551.9203316766207,
+          -1268.8350527076345,
+          15.809772513115604
+        ],
+        "rotation_pyr": [
+          0.0,
+          -15.924682617187502,
+          0.0
+        ],
+        "scale3d": [
+          1.168912410736084,
+          1.168912410736084,
+          1.168912410736084
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_88",
+      "label": "TS_Plains_StoneScatter_055",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          23587.01171875,
+          -21489.595703125,
+          986.4288330078125
+        ],
+        "rotation_pyr": [
+          0.0,
+          -51.98460102081298,
+          0.0
+        ],
+        "scale3d": [
+          1.088678240776062,
+          1.088678240776062,
+          1.088678240776062
+        ]
+      },
+      "after": {
+        "location_cm": [
+          9359.925285218253,
+          -8527.61734250992,
+          391.35484119188914
+        ],
+        "rotation_pyr": [
+          0.0,
+          -51.98460102081298,
+          0.0
+        ],
+        "scale3d": [
+          1.088678240776062,
+          1.088678240776062,
+          1.088678240776062
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_89",
+      "label": "TS_Plains_SparseGrass",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5532.8359375,
+          19305.56640625,
+          260.3602600097656
+        ],
+        "rotation_pyr": [
+          0.0,
+          -118.31442832946777,
+          0.0
+        ],
+        "scale3d": [
+          1.053216576576233,
+          1.053216576576233,
+          1.053216576576233
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2195.569816468254,
+          7660.939050099205,
+          103.47271173302943
+        ],
+        "rotation_pyr": [
+          0.0,
+          -118.31442832946777,
+          0.0
+        ],
+        "scale3d": [
+          1.053216576576233,
+          1.053216576576233,
+          1.053216576576233
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_90",
+      "label": "TS_Plains_SparseGrass_002",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18199.42578125,
+          20521.53515625,
+          540.7047729492188
+        ],
+        "rotation_pyr": [
+          0.0,
+          98.51114273071293,
+          0.0
+        ],
+        "scale3d": [
+          1.0914454460144043,
+          1.0914454460144043,
+          1.0914454460144043
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7221.994357638889,
+          8143.466331845237,
+          214.66456760259825
+        ],
+        "rotation_pyr": [
+          0.0,
+          98.51114273071293,
+          0.0
+        ],
+        "scale3d": [
+          1.0914454460144043,
+          1.0914454460144043,
+          1.0914454460144043
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_91",
+      "label": "TS_Plains_SparseGrass_003",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -22683.57421875,
+          -8025.55859375,
+          455.8956298828125
+        ],
+        "rotation_pyr": [
+          0.0,
+          -104.88085269927987,
+          0.0
+        ],
+        "scale3d": [
+          0.7382912635803223,
+          0.7382912635803223,
+          0.7382912635803223
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -9001.41834077381,
+          -3184.745473710317,
+          180.21857153954988
+        ],
+        "rotation_pyr": [
+          0.0,
+          -104.88085269927987,
+          0.0
+        ],
+        "scale3d": [
+          0.7382912635803223,
+          0.7382912635803223,
+          0.7382912635803223
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_92",
+      "label": "TS_Plains_SparseGrass_004",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -1103.279296875,
+          15988.9765625,
+          223.56417846679688
+        ],
+        "rotation_pyr": [
+          0.0,
+          -119.27920818328857,
+          0.0
+        ],
+        "scale3d": [
+          1.0699410438537598,
+          1.0699410438537598,
+          1.0699410438537598
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -437.80924479166663,
+          6344.831969246032,
+          88.82942016560992
+        ],
+        "rotation_pyr": [
+          0.0,
+          -119.27920818328857,
+          0.0
+        ],
+        "scale3d": [
+          1.0699410438537598,
+          1.0699410438537598,
+          1.0699410438537598
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_93",
+      "label": "TS_Plains_SparseGrass_005",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -20104.283203125,
+          22211.1796875,
+          930.0894775390625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -38.241991996765144,
+          0.0
+        ],
+        "scale3d": [
+          1.1114777326583862,
+          1.1114777326583862,
+          1.1114777326583862
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7977.890159970237,
+          8813.96019345238,
+          369.0276710136786
+        ],
+        "rotation_pyr": [
+          0.0,
+          -38.241991996765144,
+          0.0
+        ],
+        "scale3d": [
+          1.1114777326583862,
+          1.1114777326583862,
+          1.1114777326583862
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_94",
+      "label": "TS_Plains_SparseGrass_006",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5993.642578125,
+          -14623.0087890625,
+          266.0105285644531
+        ],
+        "rotation_pyr": [
+          0.0,
+          135.92920303344727,
+          0.0
+        ],
+        "scale3d": [
+          1.0528539419174194,
+          1.0528539419174194,
+          1.0528539419174194
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2378.4295944940477,
+          -5802.781265500991,
+          105.54559619612701
+        ],
+        "rotation_pyr": [
+          0.0,
+          135.92920303344727,
+          0.0
+        ],
+        "scale3d": [
+          1.0528539419174194,
+          1.0528539419174194,
+          1.0528539419174194
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_95",
+      "label": "TS_Plains_SparseGrass_007",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          1312.923828125,
+          -15528.556640625,
+          230.28860473632812
+        ],
+        "rotation_pyr": [
+          0.0,
+          13.207497596740724,
+          0.0
+        ],
+        "scale3d": [
+          0.9409386515617371,
+          0.9409386515617371,
+          0.9409386515617371
+        ]
+      },
+      "after": {
+        "location_cm": [
+          521.0015190972222,
+          -6162.125651041666,
+          91.34981057911136
+        ],
+        "rotation_pyr": [
+          0.0,
+          13.207497596740724,
+          0.0
+        ],
+        "scale3d": [
+          0.9409386515617371,
+          0.9409386515617371,
+          0.9409386515617371
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_96",
+      "label": "TS_Plains_SparseGrass_008",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          18612.53515625,
+          22028.4453125,
+          817.8375854492188
+        ],
+        "rotation_pyr": [
+          0.0,
+          -140.52419185638428,
+          0.0
+        ],
+        "scale3d": [
+          0.9492009282112122,
+          0.9492009282112122,
+          0.9492009282112122
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7385.926649305555,
+          8741.446552579364,
+          324.5229479146219
+        ],
+        "rotation_pyr": [
+          0.0,
+          -140.52419185638428,
+          0.0
+        ],
+        "scale3d": [
+          0.9492009282112122,
+          0.9492009282112122,
+          0.9492009282112122
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_97",
+      "label": "TS_Plains_SparseGrass_009",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          9310.4375,
+          18321.2421875,
+          202.66867065429688
+        ],
+        "rotation_pyr": [
+          0.0,
+          108.40441703796392,
+          0.0
+        ],
+        "scale3d": [
+          0.7015933990478516,
+          0.7015933990478516,
+          0.7015933990478516
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3694.6180555555547,
+          7270.334201388889,
+          80.52199130526424
+        ],
+        "rotation_pyr": [
+          0.0,
+          108.40441703796392,
+          0.0
+        ],
+        "scale3d": [
+          0.7015933990478516,
+          0.7015933990478516,
+          0.7015933990478516
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_98",
+      "label": "TS_Plains_SparseGrass_010",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          1084.185546875,
+          -806.57421875,
+          97.54975891113281
+        ],
+        "rotation_pyr": [
+          0.0,
+          157.19560146331787,
+          0.0
+        ],
+        "scale3d": [
+          1.0021965503692627,
+          1.0021965503692627,
+          1.0021965503692627
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1668.167635068625,
+          -1241.024666744279,
+          52.26557196593785
+        ],
+        "rotation_pyr": [
+          0.0,
+          157.19560146331787,
+          0.0
+        ],
+        "scale3d": [
+          1.0021965503692627,
+          1.0021965503692627,
+          1.0021965503692627
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_99",
+      "label": "TS_Plains_SparseGrass_011",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          14799.61328125,
+          4280.673828125,
+          241.7642822265625
+        ],
+        "rotation_pyr": [
+          0.0,
+          51.820321083068855,
+          0.0
+        ],
+        "scale3d": [
+          1.197188138961792,
+          1.197188138961792,
+          1.197188138961792
+        ]
+      },
+      "after": {
+        "location_cm": [
+          5872.862413194445,
+          1698.6800905257933,
+          95.85347163123151
+        ],
+        "rotation_pyr": [
+          0.0,
+          51.820321083068855,
+          0.0
+        ],
+        "scale3d": [
+          1.197188138961792,
+          1.197188138961792,
+          1.197188138961792
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_100",
+      "label": "TS_Plains_SparseGrass_012",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          517.697265625,
+          -1626.994140625,
+          94.43177032470703
+        ],
+        "rotation_pyr": [
+          0.0,
+          -62.62764930725097,
+          0.0
+        ],
+        "scale3d": [
+          0.7706986665725708,
+          0.7706986665725708,
+          0.7706986665725708
+        ]
+      },
+      "after": {
+        "location_cm": [
+          625.1806179408194,
+          -1964.7876660002012,
+          58.214647473436344
+        ],
+        "rotation_pyr": [
+          0.0,
+          -62.62764930725097,
+          0.0
+        ],
+        "scale3d": [
+          0.7706986665725708,
+          0.7706986665725708,
+          0.7706986665725708
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_101",
+      "label": "TS_Plains_SparseGrass_013",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          12329.48828125,
+          8667.720703125,
+          245.47805786132812
+        ],
+        "rotation_pyr": [
+          0.0,
+          -20.835528373718265,
+          0.0
+        ],
+        "scale3d": [
+          1.1511163711547852,
+          1.1511163711547852,
+          1.1511163711547852
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4892.65407986111,
+          3439.5717075892853,
+          97.2476932182326
+        ],
+        "rotation_pyr": [
+          0.0,
+          -20.835528373718265,
+          0.0
+        ],
+        "scale3d": [
+          1.1511163711547852,
+          1.1511163711547852,
+          1.1511163711547852
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_102",
+      "label": "TS_Plains_SparseGrass_014",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          13769.234375,
+          -21337.029296875,
+          666.4993896484375
+        ],
+        "rotation_pyr": [
+          0.0,
+          130.19172191619867,
+          0.0
+        ],
+        "scale3d": [
+          1.0794038772583008,
+          1.0794038772583008,
+          1.0794038772583008
+        ]
+      },
+      "after": {
+        "location_cm": [
+          5463.9818948412685,
+          -8467.075117807539,
+          264.5972733920862
+        ],
+        "rotation_pyr": [
+          0.0,
+          130.19172191619867,
+          0.0
+        ],
+        "scale3d": [
+          1.0794038772583008,
+          1.0794038772583008,
+          1.0794038772583008
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_103",
+      "label": "TS_Plains_SparseGrass_015",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -10444.4501953125,
+          17441.93359375,
+          316.83416748046875
+        ],
+        "rotation_pyr": [
+          0.0,
+          110.58713436126713,
+          0.0
+        ],
+        "scale3d": [
+          0.7659890055656433,
+          0.7659890055656433,
+          0.7659890055656433
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -4144.623093377976,
+          6921.402219742064,
+          125.70101297923975
+        ],
+        "rotation_pyr": [
+          0.0,
+          110.58713436126713,
+          0.0
+        ],
+        "scale3d": [
+          0.7659890055656433,
+          0.7659890055656433,
+          0.7659890055656433
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_104",
+      "label": "TS_Plains_SparseGrass_016",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19410.7890625,
+          -16902.396484375,
+          178.8443603515625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -125.3056812286377,
+          0.0
+        ],
+        "scale3d": [
+          0.9377925395965576,
+          0.9377925395965576,
+          0.9377925395965576
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7702.694072420634,
+          -6707.3001922123,
+          71.00166542044826
+        ],
+        "rotation_pyr": [
+          0.0,
+          -125.3056812286377,
+          0.0
+        ],
+        "scale3d": [
+          0.9377925395965576,
+          0.9377925395965576,
+          0.9377925395965576
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_105",
+      "label": "TS_Plains_SparseGrass_017",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5708.484375,
+          15048.23046875,
+          179.81649780273438
+        ],
+        "rotation_pyr": [
+          0.0,
+          31.382532119751,
+          0.0
+        ],
+        "scale3d": [
+          0.7519549131393433,
+          0.7519549131393433,
+          0.7519549131393433
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2265.2715773809523,
+          5971.520027281746,
+          71.45076698929188
+        ],
+        "rotation_pyr": [
+          0.0,
+          31.382532119751,
+          0.0
+        ],
+        "scale3d": [
+          0.7519549131393433,
+          0.7519549131393433,
+          0.7519549131393433
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_106",
+      "label": "TS_Plains_SparseGrass_018",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -17301.0703125,
+          17993.390625,
+          287.44183349609375
+        ],
+        "rotation_pyr": [
+          0.0,
+          153.22880744934082,
+          0.0
+        ],
+        "scale3d": [
+          0.9278245568275452,
+          0.9278245568275452,
+          0.9278245568275452
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6865.504092261905,
+          7140.234375,
+          114.02473282205028
+        ],
+        "rotation_pyr": [
+          0.0,
+          153.22880744934082,
+          0.0
+        ],
+        "scale3d": [
+          0.9278245568275452,
+          0.9278245568275452,
+          0.9278245568275452
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_107",
+      "label": "TS_Plains_SparseGrass_019",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3062.908203125,
+          -23739.3671875,
+          1110.4456787109375
+        ],
+        "rotation_pyr": [
+          0.0,
+          20.19214153289796,
+          0.0
+        ],
+        "scale3d": [
+          0.8237709999084473,
+          0.8237709999084473,
+          0.8237709999084473
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1215.4397631448412,
+          -9420.383804563491,
+          440.76635657229417
+        ],
+        "rotation_pyr": [
+          0.0,
+          20.19214153289796,
+          0.0
+        ],
+        "scale3d": [
+          0.8237709999084473,
+          0.8237709999084473,
+          0.8237709999084473
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_108",
+      "label": "TS_Plains_SparseGrass_020",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -22456.47265625,
+          -10707.189453125,
+          861.55517578125
+        ],
+        "rotation_pyr": [
+          0.0,
+          113.40512752532962,
+          0.0
+        ],
+        "scale3d": [
+          1.0603841543197632,
+          1.0603841543197632,
+          1.0603841543197632
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8911.29867311508,
+          -4248.884703621032,
+          342.43129652900825
+        ],
+        "rotation_pyr": [
+          0.0,
+          113.40512752532962,
+          0.0
+        ],
+        "scale3d": [
+          1.0603841543197632,
+          1.0603841543197632,
+          1.0603841543197632
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_109",
+      "label": "TS_Plains_SparseGrass_021",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          23406.16015625,
+          11026.00390625,
+          920.326171875
+        ],
+        "rotation_pyr": [
+          0.0,
+          104.70764636993415,
+          0.0
+        ],
+        "scale3d": [
+          1.1666227579116821,
+          1.1666227579116821,
+          1.1666227579116821
+        ]
+      },
+      "after": {
+        "location_cm": [
+          9288.158792162698,
+          4375.398375496032,
+          365.24992190450575
+        ],
+        "rotation_pyr": [
+          0.0,
+          104.70764636993415,
+          0.0
+        ],
+        "scale3d": [
+          1.1666227579116821,
+          1.1666227579116821,
+          1.1666227579116821
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_110",
+      "label": "TS_Plains_SparseGrass_022",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -6523.458984375,
+          -16091.9267578125,
+          280.7425842285156
+        ],
+        "rotation_pyr": [
+          0.0,
+          117.5476598739624,
+          0.0
+        ],
+        "scale3d": [
+          1.1004753112792969,
+          1.1004753112792969,
+          1.1004753112792969
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2588.674200148809,
+          -6385.685221354166,
+          111.32112895489627
+        ],
+        "rotation_pyr": [
+          0.0,
+          117.5476598739624,
+          0.0
+        ],
+        "scale3d": [
+          1.1004753112792969,
+          1.1004753112792969,
+          1.1004753112792969
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_111",
+      "label": "TS_Plains_SparseGrass_023",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          13507.0,
+          -9692.1787109375,
+          240.3475799560547
+        ],
+        "rotation_pyr": [
+          0.0,
+          84.87423419952393,
+          0.0
+        ],
+        "scale3d": [
+          0.8706943392753601,
+          0.8706943392753601,
+          0.8706943392753601
+        ]
+      },
+      "after": {
+        "location_cm": [
+          5359.920634920634,
+          -3846.1026630704364,
+          95.5700005170911
+        ],
+        "rotation_pyr": [
+          0.0,
+          84.87423419952393,
+          0.0
+        ],
+        "scale3d": [
+          0.8706943392753601,
+          0.8706943392753601,
+          0.8706943392753601
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_112",
+      "label": "TS_Plains_SparseGrass_024",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          3620.744140625,
+          -15935.16015625,
+          261.7454528808594
+        ],
+        "rotation_pyr": [
+          0.0,
+          -0.35194873809814453,
+          0.0
+        ],
+        "scale3d": [
+          0.8611676096916199,
+          0.8611676096916199,
+          0.8611676096916199
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1436.803230406746,
+          -6323.476252480159,
+          103.85381692808369
+        ],
+        "rotation_pyr": [
+          0.0,
+          -0.35194873809814453,
+          0.0
+        ],
+        "scale3d": [
+          0.8611676096916199,
+          0.8611676096916199,
+          0.8611676096916199
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_113",
+      "label": "TS_Plains_SparseGrass_025",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -12415.615234375,
+          -3070.095703125,
+          112.479736328125
+        ],
+        "rotation_pyr": [
+          0.0,
+          163.59354972839355,
+          0.0
+        ],
+        "scale3d": [
+          0.8344890475273132,
+          0.8344890475273132,
+          0.8344890475273132
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -4926.831442212301,
+          -1218.2919456845239,
+          44.78573662609415
+        ],
+        "rotation_pyr": [
+          0.0,
+          163.59354972839355,
+          0.0
+        ],
+        "scale3d": [
+          0.8344890475273132,
+          0.8344890475273132,
+          0.8344890475273132
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_114",
+      "label": "TS_Plains_SparseGrass_026",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5658.474609375,
+          22646.02734375,
+          1006.9501953125
+        ],
+        "rotation_pyr": [
+          0.0,
+          89.81876850128174,
+          0.0
+        ],
+        "scale3d": [
+          0.9662908911705017,
+          0.9662908911705017,
+          0.9662908911705017
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2245.4264322916665,
+          8986.51878720238,
+          399.87560803570886
+        ],
+        "rotation_pyr": [
+          0.0,
+          89.81876850128174,
+          0.0
+        ],
+        "scale3d": [
+          0.9662908911705017,
+          0.9662908911705017,
+          0.9662908911705017
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_115",
+      "label": "TS_Plains_SparseGrass_027",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          18776.234375,
+          17420.171875,
+          190.0517578125
+        ],
+        "rotation_pyr": [
+          0.0,
+          24.92699146270753,
+          0.0
+        ],
+        "scale3d": [
+          1.136899709701538,
+          1.136899709701538,
+          1.136899709701538
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7450.886656746032,
+          6912.766617063491,
+          75.1671368669704
+        ],
+        "rotation_pyr": [
+          0.0,
+          24.92699146270753,
+          0.0
+        ],
+        "scale3d": [
+          1.136899709701538,
+          1.136899709701538,
+          1.136899709701538
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_116",
+      "label": "TS_Plains_SparseGrass_028",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -12199.607421875,
+          11535.51171875,
+          220.99647521972656
+        ],
+        "rotation_pyr": [
+          0.0,
+          -33.754076957702644,
+          0.0
+        ],
+        "scale3d": [
+          1.0818805694580078,
+          1.0818805694580078,
+          1.0818805694580078
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -4841.114056299602,
+          4577.584015376984,
+          87.63914563636354
+        ],
+        "rotation_pyr": [
+          0.0,
+          -33.754076957702644,
+          0.0
+        ],
+        "scale3d": [
+          1.0818805694580078,
+          1.0818805694580078,
+          1.0818805694580078
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_117",
+      "label": "TS_Plains_SparseGrass_029",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          11608.1484375,
+          -21145.59765625,
+          668.2403564453125
+        ],
+        "rotation_pyr": [
+          0.0,
+          -40.201334953308105,
+          0.0
+        ],
+        "scale3d": [
+          0.8780285716056824,
+          0.8780285716056824,
+          0.8780285716056824
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4606.408110119048,
+          -8391.110181051587,
+          265.0039262783248
+        ],
+        "rotation_pyr": [
+          0.0,
+          -40.201334953308105,
+          0.0
+        ],
+        "scale3d": [
+          0.8780285716056824,
+          0.8780285716056824,
+          0.8780285716056824
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_118",
+      "label": "TS_Plains_SparseGrass_030",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          11754.23828125,
+          10961.90234375,
+          240.76588439941406
+        ],
+        "rotation_pyr": [
+          0.0,
+          -25.357561111450206,
+          0.0
+        ],
+        "scale3d": [
+          1.1163736581802368,
+          1.1163736581802368,
+          1.1163736581802368
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4664.380270337301,
+          4349.961247519841,
+          95.58816068245142
+        ],
+        "rotation_pyr": [
+          0.0,
+          -25.357561111450206,
+          0.0
+        ],
+        "scale3d": [
+          1.1163736581802368,
+          1.1163736581802368,
+          1.1163736581802368
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_119",
+      "label": "TS_Plains_SparseGrass_031",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          23462.1796875,
+          -13300.0263671875,
+          969.6639404296875
+        ],
+        "rotation_pyr": [
+          0.0,
+          79.19867992401123,
+          0.0
+        ],
+        "scale3d": [
+          0.9887582659721375,
+          0.9887582659721375,
+          0.9887582659721375
+        ]
+      },
+      "after": {
+        "location_cm": [
+          9310.388764880952,
+          -5277.7882409474205,
+          384.69439621073616
+        ],
+        "rotation_pyr": [
+          0.0,
+          79.19867992401123,
+          0.0
+        ],
+        "scale3d": [
+          0.9887582659721375,
+          0.9887582659721375,
+          0.9887582659721375
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_120",
+      "label": "TS_Plains_SparseGrass_032",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -19306.43359375,
+          -20157.720703125,
+          427.91705322265625
+        ],
+        "rotation_pyr": [
+          0.0,
+          115.20126342773439,
+          0.0
+        ],
+        "scale3d": [
+          0.8895531892776489,
+          0.8895531892776489,
+          0.8895531892776489
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7661.283172123016,
+          -7999.095517113095,
+          169.62971860089237
+        ],
+        "rotation_pyr": [
+          0.0,
+          115.20126342773439,
+          0.0
+        ],
+        "scale3d": [
+          0.8895531892776489,
+          0.8895531892776489,
+          0.8895531892776489
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_121",
+      "label": "TS_Plains_SparseGrass_033",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16954.43359375,
+          -4340.388671875,
+          140.8185272216797
+        ],
+        "rotation_pyr": [
+          0.0,
+          134.88610267639157,
+          0.0
+        ],
+        "scale3d": [
+          1.0090714693069458,
+          1.0090714693069458,
+          1.0090714693069458
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6727.949838789682,
+          -1722.376457093254,
+          55.8082168318324
+        ],
+        "rotation_pyr": [
+          0.0,
+          134.88610267639157,
+          0.0
+        ],
+        "scale3d": [
+          1.0090714693069458,
+          1.0090714693069458,
+          1.0090714693069458
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_122",
+      "label": "TS_Plains_SparseGrass_034",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          4226.4921875,
+          15125.953125,
+          171.79525756835938
+        ],
+        "rotation_pyr": [
+          0.0,
+          -102.95150756835945,
+          0.0
+        ],
+        "scale3d": [
+          0.7702442407608032,
+          0.7702442407608032,
+          0.7702442407608032
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1677.1794394841272,
+          6002.362351190477,
+          68.2267831219142
+        ],
+        "rotation_pyr": [
+          0.0,
+          -102.95150756835945,
+          0.0
+        ],
+        "scale3d": [
+          0.7702442407608032,
+          0.7702442407608032,
+          0.7702442407608032
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_123",
+      "label": "TS_Plains_SparseGrass_035",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          5859.505859375,
+          17515.1484375,
+          214.35720825195312
+        ],
+        "rotation_pyr": [
+          0.0,
+          -52.40774631500244,
+          0.0
+        ],
+        "scale3d": [
+          0.8351215720176697,
+          0.8351215720176697,
+          0.8351215720176697
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2325.200737847222,
+          6950.455729166666,
+          85.16930679112556
+        ],
+        "rotation_pyr": [
+          0.0,
+          -52.40774631500244,
+          0.0
+        ],
+        "scale3d": [
+          0.8351215720176697,
+          0.8351215720176697,
+          0.8351215720176697
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_124",
+      "label": "TS_Plains_SparseGrass_036",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          16364.46875,
+          -23861.783203125,
+          991.24853515625
+        ],
+        "rotation_pyr": [
+          0.0,
+          -119.8035907745361,
+          0.0
+        ],
+        "scale3d": [
+          0.7827588319778442,
+          0.7827588319778442,
+          0.7827588319778442
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6493.836805555555,
+          -9468.961588541666,
+          393.2491727626839
+        ],
+        "rotation_pyr": [
+          0.0,
+          -119.8035907745361,
+          0.0
+        ],
+        "scale3d": [
+          0.7827588319778442,
+          0.7827588319778442,
+          0.7827588319778442
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_125",
+      "label": "TS_Plains_SparseGrass_037",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          10667.87890625,
+          1971.26171875,
+          163.00494384765625
+        ],
+        "rotation_pyr": [
+          0.0,
+          82.72366046905518,
+          0.0
+        ],
+        "scale3d": [
+          0.9350531697273254,
+          0.9350531697273254,
+          0.9350531697273254
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4233.285280257936,
+          782.2467137896824,
+          64.80171803178382
+        ],
+        "rotation_pyr": [
+          0.0,
+          82.72366046905518,
+          0.0
+        ],
+        "scale3d": [
+          0.9350531697273254,
+          0.9350531697273254,
+          0.9350531697273254
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_126",
+      "label": "TS_Plains_SparseGrass_038",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -9508.9990234375,
+          -18075.92578125,
+          304.36651611328125
+        ],
+        "rotation_pyr": [
+          0.0,
+          -135.0033903121948,
+          0.0
+        ],
+        "scale3d": [
+          1.1820913553237915,
+          1.1820913553237915,
+          1.1820913553237915
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -3773.4123108878966,
+          -7172.986421130952,
+          120.86016459918756
+        ],
+        "rotation_pyr": [
+          0.0,
+          -135.0033903121948,
+          0.0
+        ],
+        "scale3d": [
+          1.1820913553237915,
+          1.1820913553237915,
+          1.1820913553237915
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_127",
+      "label": "TS_Plains_SparseGrass_039",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -19033.98046875,
+          14499.2421875,
+          312.8127136230469
+        ],
+        "rotation_pyr": [
+          0.0,
+          -106.43464565277108,
+          0.0
+        ],
+        "scale3d": [
+          1.0335718393325806,
+          1.0335718393325806,
+          1.0335718393325806
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7553.166852678571,
+          5753.667534722223,
+          123.96899319928343
+        ],
+        "rotation_pyr": [
+          0.0,
+          -106.43464565277108,
+          0.0
+        ],
+        "scale3d": [
+          1.0335718393325806,
+          1.0335718393325806,
+          1.0335718393325806
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_128",
+      "label": "TS_Plains_SparseGrass_040",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16669.572265625,
+          5592.017578125,
+          97.8858871459961
+        ],
+        "rotation_pyr": [
+          0.0,
+          -150.90678691864014,
+          0.0
+        ],
+        "scale3d": [
+          0.9978638887405396,
+          0.9978638887405396,
+          0.9978638887405396
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6614.9096292162685,
+          2219.0545944940477,
+          38.70662195817931
+        ],
+        "rotation_pyr": [
+          0.0,
+          -150.90678691864014,
+          0.0
+        ],
+        "scale3d": [
+          0.9978638887405396,
+          0.9978638887405396,
+          0.9978638887405396
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_129",
+      "label": "TS_Plains_SparseGrass_041",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          7449.451171875,
+          -8819.2802734375,
+          204.2947998046875
+        ],
+        "rotation_pyr": [
+          0.0,
+          131.98382377624506,
+          0.0
+        ],
+        "scale3d": [
+          0.7652649283409119,
+          0.7652649283409119,
+          0.7652649283409119
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2956.1314174107138,
+          -3499.7143942212297,
+          81.2130254501426
+        ],
+        "rotation_pyr": [
+          0.0,
+          131.98382377624506,
+          0.0
+        ],
+        "scale3d": [
+          0.7652649283409119,
+          0.7652649283409119,
+          0.7652649283409119
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_130",
+      "label": "TS_Plains_SparseGrass_042",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          7916.65625,
+          5657.775390625,
+          69.94786071777344
+        ],
+        "rotation_pyr": [
+          0.0,
+          151.87598705291748,
+          0.0
+        ],
+        "scale3d": [
+          1.0470213890075684,
+          1.0470213890075684,
+          1.0470213890075684
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3141.530257936508,
+          2245.14896453373,
+          27.70615168605218
+        ],
+        "rotation_pyr": [
+          0.0,
+          151.87598705291748,
+          0.0
+        ],
+        "scale3d": [
+          1.0470213890075684,
+          1.0470213890075684,
+          1.0470213890075684
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_131",
+      "label": "TS_Plains_SparseGrass_043",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          15482.6484375,
+          -17448.572265625,
+          201.04745483398438
+        ],
+        "rotation_pyr": [
+          0.0,
+          46.63031101226809,
+          0.0
+        ],
+        "scale3d": [
+          0.7966715693473816,
+          0.7966715693473816,
+          0.7966715693473816
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6143.908110119048,
+          -6924.036613343254,
+          79.8470272034283
+        ],
+        "rotation_pyr": [
+          0.0,
+          46.63031101226809,
+          0.0
+        ],
+        "scale3d": [
+          0.7966715693473816,
+          0.7966715693473816,
+          0.7966715693473816
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_132",
+      "label": "TS_Plains_SparseGrass_044",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          23561.9140625,
+          18388.0234375,
+          960.3569946289062
+        ],
+        "rotation_pyr": [
+          0.0,
+          -13.566613197326658,
+          0.0
+        ],
+        "scale3d": [
+          0.9152773022651672,
+          0.9152773022651672,
+          0.9152773022651672
+        ]
+      },
+      "after": {
+        "location_cm": [
+          9349.96589781746,
+          7296.834697420634,
+          381.22837707793224
+        ],
+        "rotation_pyr": [
+          0.0,
+          -13.566613197326658,
+          0.0
+        ],
+        "scale3d": [
+          0.9152773022651672,
+          0.9152773022651672,
+          0.9152773022651672
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_133",
+      "label": "TS_Plains_SparseGrass_045",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -6432.220703125,
+          22444.953125,
+          1009.2157592773438
+        ],
+        "rotation_pyr": [
+          0.0,
+          128.64376544952395,
+          0.0
+        ],
+        "scale3d": [
+          0.9171032309532166,
+          0.9171032309532166,
+          0.9171032309532166
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2552.468532986111,
+          8906.727430555555,
+          400.4573174622128
+        ],
+        "rotation_pyr": [
+          0.0,
+          128.64376544952395,
+          0.0
+        ],
+        "scale3d": [
+          0.9171032309532166,
+          0.9171032309532166,
+          0.9171032309532166
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_134",
+      "label": "TS_Plains_SparseGrass_046",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -5174.509765625,
+          19144.19140625,
+          290.18145751953125
+        ],
+        "rotation_pyr": [
+          0.0,
+          -120.99431991577147,
+          0.0
+        ],
+        "scale3d": [
+          0.9073087573051453,
+          0.9073087573051453,
+          0.9073087573051453
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2053.376891121032,
+          7596.901351686509,
+          115.00787387354649
+        ],
+        "rotation_pyr": [
+          0.0,
+          -120.99431991577147,
+          0.0
+        ],
+        "scale3d": [
+          0.9073087573051453,
+          0.9073087573051453,
+          0.9073087573051453
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_135",
+      "label": "TS_Plains_SparseGrass_047",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          2813.443359375,
+          5836.4921875,
+          116.49159240722656
+        ],
+        "rotation_pyr": [
+          0.0,
+          64.85414028167722,
+          0.0
+        ],
+        "scale3d": [
+          1.098213791847229,
+          1.098213791847229,
+          1.098213791847229
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1116.445777529762,
+          2316.068328373016,
+          46.207362969755195
+        ],
+        "rotation_pyr": [
+          0.0,
+          64.85414028167722,
+          0.0
+        ],
+        "scale3d": [
+          1.098213791847229,
+          1.098213791847229,
+          1.098213791847229
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_136",
+      "label": "TS_Plains_SparseGrass_048",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19482.5078125,
+          -15273.8232421875,
+          182.2884979248047
+        ],
+        "rotation_pyr": [
+          0.0,
+          15.938158035278326,
+          0.0
+        ],
+        "scale3d": [
+          0.9657016396522522,
+          0.9657016396522522,
+          0.9657016396522522
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7731.153893849205,
+          -6061.040969122023,
+          72.36150045843897
+        ],
+        "rotation_pyr": [
+          0.0,
+          15.938158035278326,
+          0.0
+        ],
+        "scale3d": [
+          0.9657016396522522,
+          0.9657016396522522,
+          0.9657016396522522
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_137",
+      "label": "TS_Plains_SparseGrass_049",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          6942.73046875,
+          23798.05078125,
+          1076.5943603515625
+        ],
+        "rotation_pyr": [
+          0.0,
+          95.37072658538823,
+          0.0
+        ],
+        "scale3d": [
+          0.9238817095756531,
+          0.9238817095756531,
+          0.9238817095756531
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2755.051773313492,
+          9443.670944940475,
+          427.3154359127366
+        ],
+        "rotation_pyr": [
+          0.0,
+          95.37072658538823,
+          0.0
+        ],
+        "scale3d": [
+          0.9238817095756531,
+          0.9238817095756531,
+          0.9238817095756531
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_138",
+      "label": "TS_Plains_SparseGrass_050",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          10430.01171875,
+          -10915.431640625,
+          246.34915161132812
+        ],
+        "rotation_pyr": [
+          0.0,
+          -99.11354541778572,
+          0.0
+        ],
+        "scale3d": [
+          1.0965166091918945,
+          1.0965166091918945,
+          1.0965166091918945
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4138.893539186508,
+          -4331.520492311508,
+          97.80947856217608
+        ],
+        "rotation_pyr": [
+          0.0,
+          -99.11354541778572,
+          0.0
+        ],
+        "scale3d": [
+          1.0965166091918945,
+          1.0965166091918945,
+          1.0965166091918945
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_139",
+      "label": "TS_Plains_SparseGrass_051",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          12429.3125,
+          -16352.193359375,
+          254.22869873046875
+        ],
+        "rotation_pyr": [
+          0.0,
+          133.66541862487793,
+          0.0
+        ],
+        "scale3d": [
+          0.8767594695091248,
+          0.8767594695091248,
+          0.8767594695091248
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4932.266865079365,
+          -6488.965618799602,
+          100.81816884422733
+        ],
+        "rotation_pyr": [
+          0.0,
+          133.66541862487793,
+          0.0
+        ],
+        "scale3d": [
+          0.8767594695091248,
+          0.8767594695091248,
+          0.8767594695091248
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_140",
+      "label": "TS_Plains_SparseGrass_052",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          8292.646484375,
+          21734.48046875,
+          840.6433715820312
+        ],
+        "rotation_pyr": [
+          0.0,
+          -160.54625988006592,
+          0.0
+        ],
+        "scale3d": [
+          1.1222944259643555,
+          1.1222944259643555,
+          1.1222944259643555
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3290.732731894841,
+          8624.793836805555,
+          333.495301716448
+        ],
+        "rotation_pyr": [
+          0.0,
+          -160.54625988006592,
+          0.0
+        ],
+        "scale3d": [
+          1.1222944259643555,
+          1.1222944259643555,
+          1.1222944259643555
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_141",
+      "label": "TS_Plains_SparseGrass_053",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -11205.791015625,
+          -6720.646484375,
+          157.6332244873047
+        ],
+        "rotation_pyr": [
+          0.0,
+          99.16405677795414,
+          0.0
+        ],
+        "scale3d": [
+          0.8786081671714783,
+          0.8786081671714783,
+          0.8786081671714783
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -4446.742466517857,
+          -2666.923208085317,
+          62.72203537853056
+        ],
+        "rotation_pyr": [
+          0.0,
+          99.16405677795414,
+          0.0
+        ],
+        "scale3d": [
+          0.8786081671714783,
+          0.8786081671714783,
+          0.8786081671714783
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_142",
+      "label": "TS_Plains_SparseGrass_054",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "ssto_clearance_grounded",
+      "before": {
+        "location_cm": [
+          613.76953125,
+          4525.353515625,
+          75.25865173339844
+        ],
+        "rotation_pyr": [
+          0.0,
+          68.19432735443115,
+          0.0
+        ],
+        "scale3d": [
+          0.7109310030937195,
+          0.7109310030937195,
+          0.7109310030937195
+        ]
+      },
+      "after": {
+        "location_cm": [
+          276.31171789237976,
+          2037.2601445791688,
+          42.274220322899055
+        ],
+        "rotation_pyr": [
+          0.0,
+          68.19432735443115,
+          0.0
+        ],
+        "scale3d": [
+          0.7109310030937195,
+          0.7109310030937195,
+          0.7109310030937195
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_143",
+      "label": "TS_Plains_SparseGrass_055",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          523.21875,
+          8909.32421875,
+          179.057861328125
+        ],
+        "rotation_pyr": [
+          0.0,
+          126.80145263671872,
+          0.0
+        ],
+        "scale3d": [
+          0.7036558985710144,
+          0.7036558985710144,
+          0.7036558985710144
+        ]
+      },
+      "after": {
+        "location_cm": [
+          207.62648809523807,
+          3535.4461185515866,
+          71.19113241251034
+        ],
+        "rotation_pyr": [
+          0.0,
+          126.80145263671872,
+          0.0
+        ],
+        "scale3d": [
+          0.7036558985710144,
+          0.7036558985710144,
+          0.7036558985710144
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_144",
+      "label": "TS_Plains_LandingZone",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          19000.0,
+          8000.0,
+          273.02703857421875
+        ],
+        "rotation_pyr": [
+          0.0,
+          18.000000000000007,
+          0.0
+        ],
+        "scale3d": [
+          8.0,
+          8.0,
+          0.25
+        ]
+      },
+      "after": {
+        "location_cm": [
+          7539.682539682539,
+          3174.603174603175,
+          120.3547300809987
+        ],
+        "rotation_pyr": [
+          0.0,
+          18.000000000000007,
+          0.0
+        ],
+        "scale3d": [
+          8.0,
+          8.0,
+          0.25
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_145",
+      "label": "TS_Plains_ServiceTank",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          16600.0,
+          11200.0,
+          258.01373291015625
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6587.301587301587,
+          4444.444444444444,
+          102.50785962483133
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_146",
+      "label": "TS_Plains_ServiceGenerator",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          15600.0,
+          10600.0,
+          265.25714111328125
+        ],
+        "rotation_pyr": [
+          0.0,
+          25.000000000000014,
+          0.0
+        ],
+        "scale3d": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "after": {
+        "location_cm": [
+          6190.476190476191,
+          4206.349206349206,
+          105.03911005087866
+        ],
+        "rotation_pyr": [
+          0.0,
+          25.000000000000014,
+          0.0
+        ],
+        "scale3d": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      }
+    },
+    {
+      "name": "BlockingVolume_0",
+      "label": "TS_Plains_Boundary_North",
+      "class_name": "BlockingVolume",
+      "parent": null,
+      "mode": "boundary_200m_with_10m_overlap",
+      "before": {
+        "location_cm": [
+          25500.0,
+          0.0,
+          7456.640625
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          5.0,
+          260.0,
+          125.43359375
+        ]
+      },
+      "after": {
+        "location_cm": [
+          10500.0,
+          0.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          5.0,
+          110.0,
+          125.17206101190477
+        ]
+      }
+    },
+    {
+      "name": "BlockingVolume_1",
+      "label": "TS_Plains_Boundary_South",
+      "class_name": "BlockingVolume",
+      "parent": null,
+      "mode": "boundary_200m_with_10m_overlap",
+      "before": {
+        "location_cm": [
+          -25500.0,
+          0.0,
+          7456.640625
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          5.0,
+          260.0,
+          125.43359375
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -10500.0,
+          0.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          5.0,
+          110.0,
+          125.17206101190477
+        ]
+      }
+    },
+    {
+      "name": "BlockingVolume_2",
+      "label": "TS_Plains_Boundary_East",
+      "class_name": "BlockingVolume",
+      "parent": null,
+      "mode": "boundary_200m_with_10m_overlap",
+      "before": {
+        "location_cm": [
+          0.0,
+          25500.0,
+          7456.640625
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          260.0,
+          5.0,
+          125.43359375
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          10500.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          110.0,
+          5.0,
+          125.17206101190477
+        ]
+      }
+    },
+    {
+      "name": "BlockingVolume_3",
+      "label": "TS_Plains_Boundary_West",
+      "class_name": "BlockingVolume",
+      "parent": null,
+      "mode": "boundary_200m_with_10m_overlap",
+      "before": {
+        "location_cm": [
+          0.0,
+          -25500.0,
+          7456.640625
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          260.0,
+          5.0,
+          125.43359375
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          -10500.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          110.0,
+          5.0,
+          125.17206101190477
+        ]
+      }
+    },
+    {
+      "name": "BP_SSTOLander_C_0",
+      "label": "TS_Plains_SSTOLander",
+      "class_name": "BP_SSTOLander_C",
+      "parent": null,
+      "mode": "ssto_group_ground_translation",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          248.95140340545672
+        ],
+        "rotation_pyr": [
+          -1.9999999999999996,
+          35.000000000000014,
+          6.000000000000002
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          137.65917922821004
+        ],
+        "rotation_pyr": [
+          -1.9999999999999996,
+          35.000000000000014,
+          6.000000000000002
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "TunaSweeperLadderTransferActor_0",
+      "label": "TS_Plains_SSTO_Entry",
+      "class_name": "TunaSweeperLadderTransferActor",
+      "parent": null,
+      "mode": "ssto_group_ground_translation",
+      "before": {
+        "location_cm": [
+          63.25921241212275,
+          -696.2985278856277,
+          145.61264841452976
+        ],
+        "rotation_pyr": [
+          0.0,
+          125.00000000000001,
+          0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          63.25921241212275,
+          -696.2985278856277,
+          34.32042423728308
+        ],
+        "rotation_pyr": [
+          0.0,
+          125.00000000000001,
+          0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "TunaSweeperLadderTransferActor_1",
+      "label": "TS_Plains_SSTO_Exit",
+      "class_name": "TunaSweeperLadderTransferActor",
+      "parent": null,
+      "mode": "ssto_group_ground_translation",
+      "before": {
+        "location_cm": [
+          -217.65788970115892,
+          -287.2679881210913,
+          453.65154031723
+        ],
+        "rotation_pyr": [
+          0.0,
+          35.0,
+          0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -217.65788970115892,
+          -287.2679881210913,
+          342.3593161399833
+        ],
+        "rotation_pyr": [
+          0.0,
+          35.0,
+          0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_ExtractionPoint_C_0",
+      "label": "RaidPlains_Extraction_1",
+      "class_name": "BP_ExtractionPoint_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          2500.0,
+          4500.0,
+          68.59349965667207
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          992.063492063492,
+          1785.7142857142853,
+          51.63053269994634
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "StaticMeshActor_147",
+      "label": "RaidPlains_ExtractionVoxel_1",
+      "class_name": "StaticMeshActor",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          2500.0934468781024,
+          4499.688565537227,
+          32.10918766859778
+        ],
+        "rotation_pyr": [
+          -1.987846675914698e-16,
+          16.702035745782503,
+          -4.662602093151293
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          992.100574157977,
+          1785.5907006100106,
+          15.160985420895486
+        ],
+        "rotation_pyr": [
+          -1.987846675914698e-16,
+          16.702035745782503,
+          -4.662602093151293
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_0",
+      "label": "Memo_051",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -5579.240131048068,
+          -17025.60642416602,
+          289.24252291996544
+        ],
+        "rotation_pyr": [
+          18.245188736712784,
+          90.14421171755222,
+          -179.5282229682747
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2213.9841789873285,
+          -6756.193025462706,
+          115.38199035681123
+        ],
+        "rotation_pyr": [
+          18.245188736712784,
+          90.14421171755222,
+          -179.5282229682747
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_1",
+      "label": "Memo_052",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -20367.327326943643,
+          13933.709771318689,
+          565.5149706908074
+        ],
+        "rotation_pyr": [
+          -40.58356729576234,
+          102.36834423261547,
+          -18.627581701464635
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -8082.27274878716,
+          5529.249909253447,
+          225.03244833959127
+        ],
+        "rotation_pyr": [
+          -40.58356729576234,
+          102.36834423261547,
+          -18.627581701464635
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_2",
+      "label": "Memo_053",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -2119.077753013401,
+          13718.7930347489,
+          192.9974360758635
+        ],
+        "rotation_pyr": [
+          76.75031144828294,
+          -129.61711672528534,
+          -174.47080869501434
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -840.9038702434132,
+          5443.965489979722,
+          77.18960589390844
+        ],
+        "rotation_pyr": [
+          76.75031144828294,
+          -129.61711672528534,
+          -174.47080869501434
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_3",
+      "label": "Memo_054",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -7161.585761123773,
+          860.4664360919753,
+          44.63144404039832
+        ],
+        "rotation_pyr": [
+          73.40572350348643,
+          -161.2128015708619,
+          -168.8713349870233
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2841.8991115570534,
+          341.454934957133,
+          18.31498357761285
+        ],
+        "rotation_pyr": [
+          73.40572350348643,
+          -161.2128015708619,
+          -168.8713349870233
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_4",
+      "label": "Memo_055",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          11137.221794416979,
+          -13782.992815337764,
+          303.70048798257596
+        ],
+        "rotation_pyr": [
+          -7.216150609515809,
+          90.05319861052904,
+          179.54863308297075
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4419.532458101976,
+          -5469.441593388001,
+          121.11927811037424
+        ],
+        "rotation_pyr": [
+          -7.216150609515809,
+          90.05319861052904,
+          179.54863308297075
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_5",
+      "label": "Memo_056",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -12847.141538614082,
+          -15421.738979351769,
+          285.97347534620724
+        ],
+        "rotation_pyr": [
+          25.929685918633982,
+          54.211503247572736,
+          -177.5128205921433
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -5098.072039132572,
+          -6119.737690218955,
+          114.08517231961025
+        ],
+        "rotation_pyr": [
+          25.929685918633982,
+          54.211503247572736,
+          -177.5128205921433
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_6",
+      "label": "Memo_057",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18623.513958713567,
+          2866.9012718940944,
+          49.901937034882565
+        ],
+        "rotation_pyr": [
+          -12.460875046123364,
+          -39.29994367028877,
+          -177.06776115295855
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7390.283316949828,
+          1137.659234878609,
+          20.406284437197655
+        ],
+        "rotation_pyr": [
+          -12.460875046123364,
+          -39.29994367028877,
+          -177.06776115295855
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_7",
+      "label": "Memo_058",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -2290.924750365987,
+          15448.715213922826,
+          232.08778391561935
+        ],
+        "rotation_pyr": [
+          76.08218957909205,
+          39.88594359565044,
+          -5.267879684976383
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -909.0971231611061,
+          6130.44254520747,
+          92.70164868745923
+        ],
+        "rotation_pyr": [
+          76.08218957909205,
+          39.88594359565044,
+          -5.267879684976383
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_8",
+      "label": "Memo_059",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -16126.165762036457,
+          -1345.3090150203134,
+          115.47076095699451
+        ],
+        "rotation_pyr": [
+          -28.275958796687725,
+          -90.48177493408552,
+          -178.98307650338486
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -6399.272127792245,
+          -533.8527837382196,
+          46.42497883204703
+        ],
+        "rotation_pyr": [
+          -28.275958796687725,
+          -90.48177493408552,
+          -178.98307650338486
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "BP_MemoAnchor_C_9",
+      "label": "Memo_060",
+      "class_name": "BP_MemoAnchor_C",
+      "parent": null,
+      "mode": "compressed_xy_ground_offset",
+      "before": {
+        "location_cm": [
+          -18587.375245746272,
+          -15174.68870474907,
+          196.80493342725924
+        ],
+        "rotation_pyr": [
+          38.78676677355447,
+          -72.71938008803913,
+          -1.8155601422249064
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7375.942557835822,
+          -6021.7018669639165,
+          78.70055442352998
+        ],
+        "rotation_pyr": [
+          38.78676677355447,
+          -72.71938008803913,
+          -1.8155601422249064
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "UpperShell_GEN_VARIABLE_BP_SSTOUpperShell_C_CAT_0",
+      "label": "BP_SSTOUpperShell0",
+      "class_name": "BP_SSTOUpperShell_C",
+      "parent": "BP_SSTOLander_C_0",
+      "mode": "attached_to_parent",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          248.95140340545672
+        ],
+        "rotation_pyr": [
+          -1.9999999999999996,
+          35.000000000000014,
+          6.000000000000002
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          137.65917922821004
+        ],
+        "rotation_pyr": [
+          -1.9999999999999996,
+          35.000000000000014,
+          6.000000000000002
+        ],
+        "scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ],
+  "saved_sha256": "55a71905968fbb455dc27acbcec52c0a4fdfee25f1bf71fc701b5f18f8b9059d",
+  "ssto_verification": {
+    "passed": true,
+    "ship": {
+      "location_cm": [
+        0.0,
+        0.0,
+        137.65917922821004
+      ],
+      "rotation_pyr": [
+        -1.9999999999999996,
+        35.000000000000014,
+        6.000000000000002
+      ],
+      "scale3d": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label": "TS_Plains_SSTOLander",
+      "bounds_center_cm": [
+        -13.142498683126632,
+        -85.61121137601958,
+        514.9666079268814
+      ],
+      "bounds_extent_cm": [
+        1399.4312589727347,
+        1246.256062068377,
+        436.5402696011963
+      ]
+    },
+    "preserved_boundaries": [
+      {
+        "location_cm": [
+          10500.0,
+          0.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          5.0,
+          110.0,
+          125.17206101190477
+        ],
+        "label": "TS_Plains_Boundary_North",
+        "bounds_center_cm": [
+          10500.0,
+          0.0,
+          7482.793898809524
+        ],
+        "bounds_extent_cm": [
+          500.0,
+          11000.0,
+          12517.206101190477
+        ]
+      },
+      {
+        "location_cm": [
+          -10500.0,
+          0.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          5.0,
+          110.0,
+          125.17206101190477
+        ],
+        "label": "TS_Plains_Boundary_South",
+        "bounds_center_cm": [
+          -10500.0,
+          0.0,
+          7482.793898809524
+        ],
+        "bounds_extent_cm": [
+          500.0,
+          11000.0,
+          12517.206101190477
+        ]
+      },
+      {
+        "location_cm": [
+          0.0,
+          10500.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          110.0,
+          5.0,
+          125.17206101190477
+        ],
+        "label": "TS_Plains_Boundary_East",
+        "bounds_center_cm": [
+          0.0,
+          10500.0,
+          7482.793898809524
+        ],
+        "bounds_extent_cm": [
+          11000.0,
+          500.0,
+          12517.206101190477
+        ]
+      },
+      {
+        "location_cm": [
+          0.0,
+          -10500.0,
+          7482.793898809524
+        ],
+        "rotation_pyr": [
+          0.0,
+          0.0,
+          -0.0
+        ],
+        "scale3d": [
+          110.0,
+          5.0,
+          125.17206101190477
+        ],
+        "label": "TS_Plains_Boundary_West",
+        "bounds_center_cm": [
+          0.0,
+          -10500.0,
+          7482.793898809524
+        ],
+        "bounds_extent_cm": [
+          11000.0,
+          500.0,
+          12517.206101190477
+        ]
+      }
+    ],
+    "interior_floor_paths_cm": [
+      [
+        [
+          -217.6579,
+          -287.268,
+          342.3592758227533
+        ],
+        [
+          -292.2028,
+          -181.6336,
+          328.7788758227533
+        ],
+        [
+          485.5176,
+          362.9321,
+          295.62437582275334
+        ]
+      ],
+      [
+        [
+          -292.2028,
+          -181.6336,
+          328.7788758227533
+        ],
+        [
+          -644.2236,
+          -428.1212,
+          343.7856758227533
+        ]
+      ]
+    ],
+    "external_approach_paths_cm": [
+      [
+        [
+          745.6321,
+          -1663.2595,
+          58.87669656947401
+        ],
+        [
+          286.894,
+          -1013.2017,
+          51.07662230553251
+        ],
+        [
+          63.2592,
+          -696.2985,
+          34.32042266334247
+        ]
+      ]
+    ]
+  },
+  "ground_height_before_cm": {
+    "Landscape_0": 1055.4610370412738,
+    "DirectionalLight_0": 209.375,
+    "SkyLight_0": 209.375,
+    "SkyAtmosphere_0": 209.375,
+    "ExponentialHeightFog_0": 209.375,
+    "PlayerStart_0": 29.06021591516037,
+    "StaticMeshActor_0": 218.0511521492881,
+    "StaticMeshActor_1": 305.6129214168541,
+    "StaticMeshActor_2": 188.92514970167758,
+    "StaticMeshActor_3": 1046.2461448636277,
+    "StaticMeshActor_4": 1007.7932596604915,
+    "StaticMeshActor_5": 126.5003756281476,
+    "StaticMeshActor_6": 143.74814030670314,
+    "StaticMeshActor_7": 886.8339685050232,
+    "StaticMeshActor_8": 284.16540254461506,
+    "StaticMeshActor_9": 736.5833537314684,
+    "StaticMeshActor_10": 171.27031037515917,
+    "StaticMeshActor_11": 179.57479730571868,
+    "StaticMeshActor_12": 388.76086384383234,
+    "StaticMeshActor_13": 978.3924769035912,
+    "StaticMeshActor_14": 251.22508892031328,
+    "StaticMeshActor_15": 198.73208592319497,
+    "StaticMeshActor_16": 101.65838736762817,
+    "StaticMeshActor_17": 389.68493989115086,
+    "StaticMeshActor_18": 209.3018293391615,
+    "StaticMeshActor_19": 18.501757376634487,
+    "StaticMeshActor_20": 982.6124813807182,
+    "StaticMeshActor_21": 755.953582700804,
+    "StaticMeshActor_22": 821.6540455048671,
+    "StaticMeshActor_23": 534.4981506519907,
+    "StaticMeshActor_24": 43.00425451221963,
+    "StaticMeshActor_25": 305.0455103336244,
+    "StaticMeshActor_26": 218.67349911630663,
+    "StaticMeshActor_27": 200.21504117849327,
+    "StaticMeshActor_28": 120.72114887210046,
+    "StaticMeshActor_29": 793.089494346892,
+    "StaticMeshActor_30": 213.81984351605206,
+    "StaticMeshActor_31": 1015.0508484180064,
+    "StaticMeshActor_32": 148.1499750951225,
+    "StaticMeshActor_33": 86.36783574322908,
+    "StaticMeshActor_34": 263.7259965173216,
+    "StaticMeshActor_35": 223.6699676909484,
+    "StaticMeshActor_36": 606.9232158818886,
+    "StaticMeshActor_37": 259.1272596873023,
+    "StaticMeshActor_38": 1034.478886384586,
+    "StaticMeshActor_39": 189.80236109521866,
+    "StaticMeshActor_40": 132.15107236143376,
+    "StaticMeshActor_41": 640.1719155969658,
+    "StaticMeshActor_42": 415.8582449178102,
+    "StaticMeshActor_43": 303.6594923372613,
+    "StaticMeshActor_44": 458.28518267295294,
+    "StaticMeshActor_45": 167.36769898620696,
+    "StaticMeshActor_46": 115.65695357604636,
+    "StaticMeshActor_47": 172.30184354670928,
+    "StaticMeshActor_48": 274.7490603952683,
+    "StaticMeshActor_49": 196.12083490729128,
+    "StaticMeshActor_50": 155.8781270757172,
+    "StaticMeshActor_51": 260.5082041231617,
+    "StaticMeshActor_52": 829.1944767365276,
+    "StaticMeshActor_53": 157.267408010277,
+    "StaticMeshActor_54": 889.0538973978692,
+    "StaticMeshActor_55": 973.6966281324203,
+    "StaticMeshActor_56": 246.37673798620017,
+    "StaticMeshActor_57": 61.20225749983001,
+    "StaticMeshActor_58": 1032.2103448065864,
+    "StaticMeshActor_59": 1037.1089255289553,
+    "StaticMeshActor_60": 798.5811556965637,
+    "StaticMeshActor_61": 379.55830989716924,
+    "StaticMeshActor_62": 485.216634755805,
+    "StaticMeshActor_63": 235.02913963112223,
+    "StaticMeshActor_64": 683.4624176269863,
+    "StaticMeshActor_65": 220.7369634904062,
+    "StaticMeshActor_66": 288.6591199217546,
+    "StaticMeshActor_67": 208.70398277549612,
+    "StaticMeshActor_68": 177.31538252925748,
+    "StaticMeshActor_69": 155.91861809546754,
+    "StaticMeshActor_70": 223.31132092762346,
+    "StaticMeshActor_71": 226.8720875236031,
+    "StaticMeshActor_72": 254.65916299910532,
+    "StaticMeshActor_73": 169.03840637905523,
+    "StaticMeshActor_74": 361.2642779424059,
+    "StaticMeshActor_75": 119.31064169253659,
+    "StaticMeshActor_76": 155.19293944641686,
+    "StaticMeshActor_77": 837.163980342124,
+    "StaticMeshActor_78": 82.06331855655299,
+    "StaticMeshActor_79": 379.47152262687086,
+    "StaticMeshActor_80": 143.74982118333355,
+    "StaticMeshActor_81": 161.57927523585386,
+    "StaticMeshActor_82": 193.68508513218694,
+    "StaticMeshActor_83": 1060.9397473517529,
+    "StaticMeshActor_84": 159.83828074707708,
+    "StaticMeshActor_85": 840.7237507337013,
+    "StaticMeshActor_86": 73.53985295346865,
+    "StaticMeshActor_87": 38.10075895659247,
+    "StaticMeshActor_88": 986.5700390632446,
+    "StaticMeshActor_89": 260.1030405640704,
+    "StaticMeshActor_90": 540.5403404430836,
+    "StaticMeshActor_91": 457.0435440954061,
+    "StaticMeshActor_92": 223.3760466572312,
+    "StaticMeshActor_93": 930.1814160815629,
+    "StaticMeshActor_94": 266.03396682116727,
+    "StaticMeshActor_95": 230.34589557643267,
+    "StaticMeshActor_96": 817.86374117577,
+    "StaticMeshActor_97": 202.50633681549152,
+    "StaticMeshActor_98": 97.36735470754502,
+    "StaticMeshActor_99": 241.90476493436654,
+    "StaticMeshActor_100": 94.57553394189381,
+    "StaticMeshActor_101": 245.75034138196497,
+    "StaticMeshActor_102": 666.3114032671147,
+    "StaticMeshActor_103": 316.87865088362014,
+    "StaticMeshActor_104": 178.7918363331737,
+    "StaticMeshActor_105": 179.6589747696562,
+    "StaticMeshActor_106": 287.5072984859107,
+    "StaticMeshActor_107": 1110.2578235456494,
+    "StaticMeshActor_108": 860.6527471813497,
+    "StaticMeshActor_109": 920.2579933721245,
+    "StaticMeshActor_110": 280.8829390062674,
+    "StaticMeshActor_111": 240.02598696459972,
+    "StaticMeshActor_112": 261.7677122374989,
+    "StaticMeshActor_113": 112.22952582179278,
+    "StaticMeshActor_114": 1006.4657631167829,
+    "StaticMeshActor_115": 190.4666084096898,
+    "StaticMeshActor_116": 221.09241483558435,
+    "StaticMeshActor_117": 668.5235552768463,
+    "StaticMeshActor_118": 240.6893840570665,
+    "StaticMeshActor_119": 969.8179285735241,
+    "StaticMeshActor_120": 428.2132126623983,
+    "StaticMeshActor_121": 140.93814617263706,
+    "StaticMeshActor_122": 171.7056286875304,
+    "StaticMeshActor_123": 214.1799418955743,
+    "StaticMeshActor_124": 991.4199955472286,
+    "StaticMeshActor_125": 162.8106112210553,
+    "StaticMeshActor_126": 304.2342143523201,
+    "StaticMeshActor_127": 313.0830101762331,
+    "StaticMeshActor_128": 98.11299228506687,
+    "StaticMeshActor_129": 204.05662590359134,
+    "StaticMeshActor_130": 70.03230707889816,
+    "StaticMeshActor_131": 200.93755107171455,
+    "StaticMeshActor_132": 960.134286992401,
+    "StaticMeshActor_133": 1009.2574166935083,
+    "StaticMeshActor_134": 290.4193623604515,
+    "StaticMeshActor_135": 116.5238540673854,
+    "StaticMeshActor_136": 182.24739053635494,
+    "StaticMeshActor_137": 1076.4361115696374,
+    "StaticMeshActor_138": 246.2631421604383,
+    "StaticMeshActor_139": 254.3385100745545,
+    "StaticMeshActor_140": 840.7981158297771,
+    "StaticMeshActor_141": 157.35276089085892,
+    "StaticMeshActor_142": 75.47876371635721,
+    "StaticMeshActor_143": 178.83168214958278,
+    "StaticMeshActor_144": 253.1146167124425,
+    "StaticMeshActor_145": 257.81236886777697,
+    "StaticMeshActor_146": 265.6246304455635,
+    "BP_SSTOLander_C_0": 209.375,
+    "TunaSweeperLadderTransferActor_0": 145.61264841452794,
+    "TunaSweeperLadderTransferActor_1": 207.91058811339462,
+    "BP_ExtractionPoint_C_0": 28.122425040051894,
+    "StaticMeshActor_147": 28.098335305396176,
+    "BP_MemoAnchor_C_0": 288.2424618810219,
+    "BP_MemoAnchor_C_1": 564.4841817928063,
+    "BP_MemoAnchor_C_2": 191.9971921437682,
+    "BP_MemoAnchor_C_3": 43.62992129356644,
+    "BP_MemoAnchor_C_4": 302.7004268933888,
+    "BP_MemoAnchor_C_5": 284.9727129125167,
+    "BP_MemoAnchor_C_6": 48.90068720142517,
+    "BP_MemoAnchor_C_7": 231.08753998352768,
+    "BP_MemoAnchor_C_8": 114.4706387860897,
+    "BP_MemoAnchor_C_9": 195.8046283482836,
+    "UpperShell_GEN_VARIABLE_BP_SSTOUpperShell_C_CAT_0": 209.375
+  },
+  "collision_rebuilt": true
+}

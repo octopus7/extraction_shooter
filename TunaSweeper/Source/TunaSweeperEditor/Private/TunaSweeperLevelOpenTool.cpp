@@ -1,18 +1,13 @@
 #include "TunaSweeperLevelOpenTool.h"
+#include "TunaSweeperEditorText.h"
 
 #include "FileHelpers.h"
-#include "Engine/GameInstance.h"
-#include "Internationalization/Culture.h"
-#include "Internationalization/Internationalization.h"
 #include "Misc/MessageDialog.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Settings/TunaSweeperBuildTargetSettings.h"
-#include "Settings/TunaSweeperLanguage.h"
-#include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "ToolMenus.h"
-#include "UObject/StrongObjectPtr.h"
 
 #define LOCTEXT_NAMESPACE "TunaSweeperLevelOpenTool"
 
@@ -23,12 +18,7 @@ namespace TunaSweeperLevelOpenTool
 
 	FText MenuText(const TCHAR* Key)
 	{
-		static TStrongObjectPtr<UGameInstance> TextOwner(NewObject<UGameInstance>());
-		static TStrongObjectPtr<UTunaSweeperTextSubsystem> TextData(NewObject<UTunaSweeperTextSubsystem>(TextOwner.Get()));
-		ETunaSweeperItemTextLanguage Language = ETunaSweeperItemTextLanguage::English;
-		TunaSweeperLanguage::TryParseLanguageCode(
-			FInternationalization::Get().GetCurrentCulture()->GetName(), Language);
-		return TextData->ResolveText(FName(Key), Language, FText::GetEmpty());
+		return TunaSweeperEditorText::Resolve(Key);
 	}
 
 	FString GetRaidMapPackagePath()

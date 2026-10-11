@@ -18,11 +18,11 @@ EXPECTED_MATERIAL = "/Game/Materials/Landscape/M_LandScape.M_LandScape"
 EXPECTED_LAYERS = {"Grass", "GrassDark", "Dirt", "Rock"}
 # Project convention: +X is north, +Y is east (Docs/game_conventions.md).
 BOUNDARY_SIDES = {"North": (0, 1), "South": (0, -1), "East": (1, 1), "West": (1, -1)}
-BOUNDARY_INNER_CM = 25000.0
-BOUNDARY_OUTER_CM = 26000.0
+BOUNDARY_THICKNESS_CM = 1000.0
 MAPS = {
     "RaidForest": {
         "path": "/Game/MainRaid/RaidForest",
+        "size_cm": 20000.0,
         "required_labels": {
             "TS_Forest_Landscape",
             "TS_Forest_PlayerStart",
@@ -38,6 +38,7 @@ MAPS = {
     },
     "RaidVillage": {
         "path": "/Game/MainRaid/RaidVillage",
+        "size_cm": 30000.0,
         "required_labels": {
             "TS_Village_Landscape",
             "TS_Village_PlayerStart",
@@ -49,10 +50,12 @@ MAPS = {
             "TS_Village_ReviewCamera",
         },
         "route": [(-22000, -12000), (-15500, -7500), (-9000, -3500), (-3000, 0), (5000, 2500), (12000, 6500), (19000, 10000)],
+        "route_cm": [(-1980, -1080), (-1980, -1230), (-3030, -1230), (-4500, -1230), (-4500, 0), (-4500, 3000), (0, 3000), (4500, 3000)],
         "min_mesh_references": 8,
     },
     "RaidPlains": {
         "path": "/Game/MainRaid/RaidPlains",
+        "size_cm": 20000.0,
         "required_labels": {
             "TS_Plains_Landscape",
             "TS_Plains_PlayerStart",
@@ -66,6 +69,9 @@ MAPS = {
         # The cabin and ladder are checked by Tools/SSTOLander/verify_ssto.py;
         # the primary landscape route passes around the landed craft.
         "route": [(-22000, -9000), (-15000, -6000), (-8000, -2500), (-2200, 0), (0, 2200), (2200, 1800), (8500, 3500), (15500, 7000), (22000, 9000)],
+        # The spacecraft retains its original dimensions; walk around its south
+        # side instead of scaling the old route through the full-size hull.
+        "route_cm": [(-8730, -3571), (-5952, -2381), (-3175, -992), (-2200, -2000), (-1500, -2500), (2000, -2500), (3500, 1389), (6150, 2778), (8730, 3571)],
         "min_mesh_references": 5,
     },
 }
@@ -75,9 +81,8 @@ def package_hashes():
     folder = ROOT / "TunaSweeper/Content/MainRaid"
     return {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted(folder.glob("RaidForest.umap"))
-        + sorted(folder.glob("RaidVillage.umap"))
-        + sorted(folder.glob("RaidPlains.umap"))
+        for name in MAPS
+        if (path := folder / f"{name}.umap").is_file()
     }
 
 
@@ -119,8 +124,25 @@ def blocking_hit(result):
     return bool(result), None
 
 
+def ground_trace(world, x, y, top, bottom, ignored_actors):
+    # Fractional Landscape spacing can make a vertical Chaos ray miss an exact
+    # heightfield vertex. Retry within 1.5 mm; full-size capsule checks below
+    # still exercise the unshifted player/route position and boundary collision.
+    for dx, dy in ((0.0, 0.0), (0.0, 0.1), (0.1, 0.0), (-0.1, 0.0), (0.0, -0.1), (0.1, 0.1), (-0.1, -0.1), (0.1, -0.1), (-0.1, 0.1)):
+        result = unreal.SystemLibrary.line_trace_single(
+            world, unreal.Vector(x + dx, y + dy, top), unreal.Vector(x + dx, y + dy, bottom),
+            unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ignored_actors,
+            unreal.DrawDebugTrace.NONE, True,
+        )
+        if blocking_hit(result)[0]:
+            return result
+    return None
+
+
 def validate_boundaries(name, world, all_actors, landscape):
     """Check saved brush geometry and exercise its registered Pawn collision."""
+    inner_cm = MAPS[name]["size_cm"] * 0.5
+    outer_cm = inner_cm + BOUNDARY_THICKNESS_CM
     region = name.removeprefix("Raid")
     expected = {f"TS_{region}_Boundary_{side}" for side in BOUNDARY_SIDES}
     volumes = [actor for actor in all_actors if isinstance(actor, unreal.BlockingVolume)]
@@ -164,10 +186,10 @@ def validate_boundaries(name, world, all_actors, landscape):
         origin, extent, _radius = unreal.SystemLibrary.get_component_bounds(brush)
         lower = [origin.x - extent.x, origin.y - extent.y, origin.z - extent.z]
         upper = [origin.x + extent.x, origin.y + extent.y, origin.z + extent.z]
-        expected_lower = [-BOUNDARY_OUTER_CM, -BOUNDARY_OUTER_CM, floor]
-        expected_upper = [BOUNDARY_OUTER_CM, BOUNDARY_OUTER_CM, ceiling]
-        expected_lower[axis] = BOUNDARY_INNER_CM if sign > 0 else -BOUNDARY_OUTER_CM
-        expected_upper[axis] = BOUNDARY_OUTER_CM if sign > 0 else -BOUNDARY_INNER_CM
+        expected_lower = [-outer_cm, -outer_cm, floor]
+        expected_upper = [outer_cm, outer_cm, ceiling]
+        expected_lower[axis] = inner_cm if sign > 0 else -outer_cm
+        expected_upper[axis] = outer_cm if sign > 0 else -inner_cm
         assert all(abs(actual - target) <= 1.0 for actual, target in zip(lower + upper, expected_lower + expected_upper)), (
             f"{label}: brush bounds {lower}, {upper}; expected {expected_lower}, {expected_upper}"
         )
@@ -188,11 +210,7 @@ def validate_boundaries(name, world, all_actors, landscape):
             )
 
     def ground_height(x, y):
-        result = unreal.SystemLibrary.line_trace_single(
-            world, unreal.Vector(x, y, ceiling), unreal.Vector(x, y, floor),
-            unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ignore_except_landscape,
-            unreal.DrawDebugTrace.NONE, True,
-        )
+        result = ground_trace(world, x, y, ceiling, floor, ignore_except_landscape)
         hit, detail = blocking_hit(result)
         assert hit and detail is not None, f"{name}: no landscape collision near perimeter at {(x, y)}"
         return detail.to_tuple()[5].z
@@ -217,14 +235,14 @@ def validate_boundaries(name, world, all_actors, landscape):
         return hit_label
 
     samples = []
-    offsets = [-24500.0] + list(range(-22500, 22501, 2500)) + [24500.0]
+    offsets = [-inner_cm + 500.0] + list(range(int(-inner_cm + 2500), int(inner_cm - 2499), 2500)) + [inner_cm - 500.0]
     for side, (axis, sign) in BOUNDARY_SIDES.items():
         expected_label = f"TS_{region}_Boundary_{side}"
         for offset in offsets:
             start_xy = [float(offset), float(offset)]
             end_xy = list(start_xy)
-            start_xy[axis] = sign * (BOUNDARY_INNER_CM - 300.0)
-            end_xy[axis] = sign * (BOUNDARY_OUTER_CM + 300.0)
+            start_xy[axis] = sign * (inner_cm - 300.0)
+            end_xy[axis] = sign * (outer_cm + 300.0)
             near_ground = ground_height(*start_xy) + 105.0
             assert floor + 90.0 < near_ground < ceiling - 90.0, f"{name}: wall does not cover perimeter ground"
             for height_name, z in (("near_ground", near_ground), ("high", ceiling - 200.0)):
@@ -234,9 +252,9 @@ def validate_boundaries(name, world, all_actors, landscape):
 
     for x_side, x_sign in (("North", 1), ("South", -1)):
         for y_side, y_sign in (("East", 1), ("West", -1)):
-            x, y = x_sign * 24700.0, y_sign * 24700.0
+            x, y = x_sign * (inner_cm - 300.0), y_sign * (inner_cm - 300.0)
             for height_name, z in (("near_ground", ground_height(x, y) + 105.0), ("high", ceiling - 200.0)):
-                start, end = unreal.Vector(x, y, z), unreal.Vector(x_sign * 26300.0, y_sign * 26300.0, z)
+                start, end = unreal.Vector(x, y, z), unreal.Vector(x_sign * (outer_cm + 300.0), y_sign * (outer_cm + 300.0), z)
                 hit_label = sweep(start, end, {f"TS_{region}_Boundary_{x_side}", f"TS_{region}_Boundary_{y_side}"})
                 samples.append({"corner": f"{x_side}{y_side}", "height": height_name, "start_cm": vector(start), "hit_actor": hit_label})
 
@@ -244,7 +262,7 @@ def validate_boundaries(name, world, all_actors, landscape):
         sweep(unreal.Vector(0, 0, z), unreal.Vector(1000, 1000, z), set())
     return {
         "volume_count": len(volumes), "volumes": volume_report,
-        "inner_limit_cm": BOUNDARY_INNER_CM, "corner_overlap_verified": True,
+        "inner_limit_cm": inner_cm, "corner_overlap_verified": True,
         "registered_collision_verified_by_pawn_sweeps": True,
         "outward_capsule_sweep_count": len(samples), "outward_capsule_sweeps": samples,
         "interior_control_sweep_count": 2, "interior_controls_clear": True,
@@ -325,6 +343,10 @@ class MainRaidVerifier:
         landscape_actors = [actor for actor in all_actors if actor.get_class().get_name() == "Landscape"]
         assert len(landscape_actors) == 1, f"{name}: expected one Landscape, found {len(landscape_actors)}"
         landscape = landscape_actors[0]
+        landscape_origin, landscape_extent = landscape.get_actor_bounds(False)
+        assert abs(landscape_extent.x * 2.0 - spec["size_cm"]) <= 1.0, f"{name}: wrong landscape width"
+        assert abs(landscape_extent.y * 2.0 - spec["size_cm"]) <= 1.0, f"{name}: wrong landscape depth"
+        assert abs(landscape_origin.x) <= 1.0 and abs(landscape_origin.y) <= 1.0, f"{name}: landscape not centered"
         material = landscape.get_editor_property("landscape_material")
         assert material and material.get_path_name() == EXPECTED_MATERIAL, (name, material)
         landscape_components = [
@@ -358,7 +380,7 @@ class MainRaidVerifier:
             trains = unreal.GameplayStatics.get_all_actors_of_class(world, train_cls)
             stations = unreal.GameplayStatics.get_all_actors_of_class(world, station_cls)
             assert len(tracks) == 1 and len(trains) == 1 and len(stations) == 3
-            assert tracks[0].is_usable_loop() and tracks[0].get_length() > 60000
+            assert tracks[0].is_usable_loop() and tracks[0].get_length() > 60000 * spec["size_cm"] / 50400.0
             assert trains[0].get_editor_property("track") == tracks[0]
             assert all(station.get_editor_property("track") == tracks[0] for station in stations)
         elif name == "RaidPlains":
@@ -369,13 +391,7 @@ class MainRaidVerifier:
             assert len(ssto_parts) >= 7, f"{name}: SSTO must retain its permanent hull, wings and interior parts"
 
         player_start_location = starts[0].get_actor_location()
-        start_ground_trace = unreal.SystemLibrary.line_trace_single(
-            world,
-            unreal.Vector(player_start_location.x, player_start_location.y, 15000),
-            unreal.Vector(player_start_location.x, player_start_location.y, -15000),
-            unreal.TraceTypeQuery.TRACE_TYPE_QUERY1,
-            False, [starts[0]], unreal.DrawDebugTrace.NONE, True,
-        )
+        start_ground_trace = ground_trace(world, player_start_location.x, player_start_location.y, 15000, -15000, [starts[0]])
         start_hit, start_result = blocking_hit(start_ground_trace)
         assert start_hit and start_result is not None, f"{name}: PlayerStart has no ground collision"
         start_ground = start_result.to_tuple()[5]
@@ -388,16 +404,20 @@ class MainRaidVerifier:
         )
         start_blocked, _ = blocking_hit(start_capsule_trace)
         assert not start_blocked, f"{name}: PlayerStart capsule volume is obstructed"
+        start_support_trace = unreal.SystemLibrary.capsule_trace_single_by_profile(
+            world, player_start_location, player_start_location - unreal.Vector(0, 0, 1000),
+            42.0, 90.0, "Pawn", False, [starts[0]], unreal.DrawDebugTrace.NONE, True,
+        )
+        start_supported, _ = blocking_hit(start_support_trace)
+        assert start_supported, f"{name}: PlayerStart capsule has no supporting collision"
 
         route = []
         route_heights = []
-        route_samples = densify_route(spec["route"])
+        layout_ratio = spec["size_cm"] / 50400.0
+        route_points = spec.get("route_cm", [(x * layout_ratio, y * layout_ratio) for x, y in spec["route"]])
+        route_samples = densify_route(route_points, spacing_cm=200.0)
         for index, (x, y) in enumerate(route_samples):
-            trace = unreal.SystemLibrary.line_trace_single(
-                world, unreal.Vector(x, y, 15000), unreal.Vector(x, y, -15000),
-                unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, [],
-                unreal.DrawDebugTrace.NONE, True,
-            )
+            trace = ground_trace(world, x, y, 15000, -15000, [])
             hit, result = blocking_hit(trace)
             assert hit and result is not None, f"{name}: route point {index} has no ground collision"
             # UE 5.7's Python struct wrapper exposes this as a direct field,
@@ -434,10 +454,12 @@ class MainRaidVerifier:
             "path": spec["path"],
             "actor_count": len(all_actors),
             "landscape_components": len(landscape_components),
+            "landscape_size_cm": [landscape_extent.x * 2.0, landscape_extent.y * 2.0],
             "landscape_material": material.get_path_name(),
             "landscape_layers": sorted(layer_names),
             "player_start_cm": vector(starts[0].get_actor_location()),
             "player_start_ground_clearance_cm": round(start_clearance, 2),
+            "player_start_capsule_support_verified": start_supported,
             "mesh_references": mesh_references,
             "route_samples": route,
             "max_sampled_route_slope_degrees": round(max_slope_degrees, 3),

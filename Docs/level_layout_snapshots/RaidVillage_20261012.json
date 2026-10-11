@@ -1,0 +1,8030 @@
+{
+  "map": "/Game/MainRaid/RaidVillage",
+  "units": "cm",
+  "original_landscape_m": 504,
+  "landscape_m": 300,
+  "landscape_and_rail_factor": 0.5952380952380952,
+  "test_actor_xy_factor": 0.09,
+  "staging_bounds_xy_cm": [
+    -2500,
+    2500
+  ],
+  "restore_note": "Restore each actor by stable name using before transform; spline points/tangents, train distance, and decal sizes are also recorded. Local collision-clearance offsets are recorded separately; do not multiply after coordinates alone for exact restoration.",
+  "actors": [
+    {
+      "name": "Landscape_0",
+      "label": "TS_Village_Landscape",
+      "class": "/Script/Landscape.Landscape",
+      "before": {
+        "location_cm": [
+          -25200.0,
+          -25200.0,
+          0.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          100.0,
+          100.0,
+          100.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -15000.0,
+          -15000.0,
+          0.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          59.523809523809526,
+          59.523809523809526,
+          59.523809523809526
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "DirectionalLight_0",
+      "label": "TS_Village_Sun",
+      "class": "/Script/Engine.DirectionalLight",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          20000.0
+        ],
+        "rotation_degrees": [
+          -86.00000000000024,
+          145.00000000000026,
+          -179.99999999999991
+        ],
+        "scale": [
+          2.5,
+          2.5,
+          2.5
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          20000.0
+        ],
+        "rotation_degrees": [
+          -86.00000000000024,
+          145.00000000000026,
+          -179.99999999999991
+        ],
+        "scale": [
+          2.5,
+          2.5,
+          2.5
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "SkyLight_0",
+      "label": "TS_Village_SkyLight",
+      "class": "/Script/Engine.SkyLight",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          15000.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          15000.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "SkyAtmosphere_0",
+      "label": "TS_Village_SkyAtmosphere",
+      "class": "/Script/Engine.SkyAtmosphere",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "ExponentialHeightFog_0",
+      "label": "TS_Village_HeightFog",
+      "class": "/Script/Engine.ExponentialHeightFog",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          -1000.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          -1000.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "PlayerStart_0",
+      "label": "TS_Village_PlayerStart",
+      "class": "/Script/Engine.PlayerStart",
+      "before": {
+        "location_cm": [
+          -22000.0,
+          -12000.0,
+          1122.5
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1980.0,
+          -1080.0,
+          368.4748454910498
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 222.50036955443852
+    },
+    {
+      "name": "CameraActor_0",
+      "label": "TS_Village_ReviewCamera",
+      "class": "/Script/Engine.CameraActor",
+      "before": {
+        "location_cm": [
+          -2000.0,
+          -35000.0,
+          42000.0
+        ],
+        "rotation_degrees": [
+          -50.14849181438487,
+          86.72951207681636,
+          9.926823021136882e-15
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1190.4761904761904,
+          -20833.333333333332,
+          25000.0
+        ],
+        "rotation_degrees": [
+          -50.14849181438487,
+          86.72951207681636,
+          9.926823021136882e-15
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "StaticMeshActor_0",
+      "label": "TS_Village_District_Farm",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -8500.0,
+          -6500.0,
+          300.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          25.000000000000014,
+          0.0
+        ],
+        "scale": [
+          1.149999976158142,
+          1.149999976158142,
+          1.149999976158142
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -765.0,
+          -585.0,
+          139.8142375586806
+        ],
+        "rotation_degrees": [
+          0.0,
+          25.000000000000014,
+          0.0
+        ],
+        "scale": [
+          1.149999976158142,
+          1.149999976158142,
+          1.149999976158142
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.00047684443529760756
+    },
+    {
+      "name": "StaticMeshActor_1",
+      "label": "TS_Village_District_Workshop",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -3500.0,
+          7200.0,
+          295.81988525390625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -30.00000000000001,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -315.0,
+          98.0,
+          134.119795482271
+        ],
+        "rotation_degrees": [
+          0.0,
+          -30.00000000000001,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        -550.0
+      ],
+      "original_ground_clearance_cm": -0.2735786394259776
+    },
+    {
+      "name": "StaticMeshActor_2",
+      "label": "TS_Village_District_Depot",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          7200.0,
+          2200.0,
+          275.9270935058594
+        ],
+        "rotation_degrees": [
+          0.0,
+          95.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.2000000476837158,
+          1.2000000476837158,
+          1.2000000476837158
+        ]
+      },
+      "after": {
+        "location_cm": [
+          648.0,
+          198.0,
+          136.5511630688328
+        ],
+        "rotation_degrees": [
+          0.0,
+          95.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.2000000476837158,
+          1.2000000476837158,
+          1.2000000476837158
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.14608192807497744
+    },
+    {
+      "name": "StaticMeshActor_3",
+      "label": "TS_Village_Building_01",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -11500.0,
+          -6500.0,
+          350.956787109375
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          0.8999999761581421,
+          0.8999999761581421
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1035.0,
+          -1085.0,
+          144.69740173233515
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          0.8999999761581421,
+          0.8999999761581421
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        -500.0
+      ],
+      "original_ground_clearance_cm": 0.17775443599532537
+    },
+    {
+      "name": "StaticMeshActor_4",
+      "label": "TS_Village_Building_02",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -8500.0,
+          -9800.0,
+          293.7467956542969
+        ],
+        "rotation_degrees": [
+          0.0,
+          37.000000000000014,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -465.0,
+          -1232.0,
+          136.48805283175955
+        ],
+        "rotation_degrees": [
+          0.0,
+          37.000000000000014,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        300.0,
+        -350.0
+      ],
+      "original_ground_clearance_cm": -0.002489435726033662
+    },
+    {
+      "name": "StaticMeshActor_5",
+      "label": "TS_Village_Building_03",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -5400.0,
+          -5900.0,
+          290.9149169921875
+        ],
+        "rotation_degrees": [
+          0.0,
+          73.99999999999999,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -86.0,
+          -581.0,
+          132.56507622417513
+        ],
+        "rotation_degrees": [
+          0.0,
+          73.99999999999999,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        400.0,
+        -50.0
+      ],
+      "original_ground_clearance_cm": 0.29025078329169673
+    },
+    {
+      "name": "StaticMeshActor_6",
+      "label": "TS_Village_Building_04",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -6500.0,
+          7200.0,
+          299.58294677734375
+        ],
+        "rotation_degrees": [
+          0.0,
+          111.00000000000003,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          0.8999999761581421,
+          0.8999999761581421
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -835.0,
+          648.0,
+          133.82785339758482
+        ],
+        "rotation_degrees": [
+          0.0,
+          111.00000000000003,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          0.8999999761581421,
+          0.8999999761581421
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -250.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.3643755940123583
+    },
+    {
+      "name": "StaticMeshActor_7",
+      "label": "TS_Village_Building_05",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -3000.0,
+          10200.0,
+          299.280517578125
+        ],
+        "rotation_degrees": [
+          0.0,
+          148.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -270.0,
+          1418.0,
+          140.33566058377545
+        ],
+        "rotation_degrees": [
+          0.0,
+          148.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        500.0
+      ],
+      "original_ground_clearance_cm": 0.062077527010103495
+    },
+    {
+      "name": "StaticMeshActor_8",
+      "label": "TS_Village_Building_06",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -500.0,
+          6900.0,
+          289.32305908203125
+        ],
+        "rotation_degrees": [
+          0.0,
+          -175.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "after": {
+        "location_cm": [
+          405.0,
+          821.0,
+          136.88854776129432
+        ],
+        "rotation_degrees": [
+          0.0,
+          -175.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        450.0,
+        200.0
+      ],
+      "original_ground_clearance_cm": 0.2611074531354802
+    },
+    {
+      "name": "StaticMeshActor_9",
+      "label": "TS_Village_Building_07",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          7200.0,
+          5200.0,
+          291.976318359375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -137.99999999999997,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          0.8999999761581421,
+          0.8999999761581421
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1198.0,
+          468.0,
+          137.90032905340485
+        ],
+        "rotation_degrees": [
+          0.0,
+          -137.99999999999997,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          0.8999999761581421,
+          0.8999999761581421
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        550.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.2130915742498587
+    },
+    {
+      "name": "StaticMeshActor_10",
+      "label": "TS_Village_Building_08",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          10400.0,
+          1900.0,
+          296.77227783203125
+        ],
+        "rotation_degrees": [
+          0.0,
+          -101.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1136.0,
+          -79.0,
+          133.05506209534315
+        ],
+        "rotation_degrees": [
+          0.0,
+          -101.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        200.0,
+        -250.0
+      ],
+      "original_ground_clearance_cm": -0.1036771347830836
+    },
+    {
+      "name": "StaticMeshActor_11",
+      "label": "TS_Village_Building_09",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          6500.0,
+          -900.0,
+          273.1500549316406
+        ],
+        "rotation_degrees": [
+          0.0,
+          -64.0,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "after": {
+        "location_cm": [
+          535.0,
+          -381.0,
+          128.80451407424215
+        ],
+        "rotation_degrees": [
+          0.0,
+          -64.0,
+          0.0
+        ],
+        "scale": [
+          1.100000023841858,
+          1.100000023841858,
+          1.100000023841858
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -50.0,
+        -300.0
+      ],
+      "original_ground_clearance_cm": -0.28715896170007227
+    },
+    {
+      "name": "StaticMeshActor_12",
+      "label": "TS_Village_WoodWall",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -2800.0,
+          8700.0,
+          299.9949951171875
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -252.0,
+          783.0,
+          134.85297324683228
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.005004882810737854
+    },
+    {
+      "name": "StaticMeshActor_13",
+      "label": "TS_Village_WoodRoof",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -2800.0,
+          8700.0,
+          299.9949951171875
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -252.0,
+          783.0,
+          134.85297324683228
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.005004882810737854
+    },
+    {
+      "name": "StaticMeshActor_14",
+      "label": "TS_Village_Generator",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          9000.0,
+          3600.0,
+          298.7892150878906
+        ],
+        "rotation_degrees": [
+          0.0,
+          89.99999999999999,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          210.0,
+          324.0,
+          136.14016146513882
+        ],
+        "rotation_degrees": [
+          0.0,
+          89.99999999999999,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -600.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.3519535101024758
+    },
+    {
+      "name": "StaticMeshActor_15",
+      "label": "TS_Village_Pallets",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          8700.0,
+          800.0,
+          288.119384765625
+        ],
+        "rotation_degrees": [
+          0.0,
+          14.999999999999998,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          783.0,
+          622.0,
+          137.0227504244662
+        ],
+        "rotation_degrees": [
+          0.0,
+          14.999999999999998,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        550.0
+      ],
+      "original_ground_clearance_cm": -0.160851939954739
+    },
+    {
+      "name": "StaticMeshActor_16",
+      "label": "TS_Village_Crate",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -9900.0,
+          -8000.0,
+          297.83441162109375
+        ],
+        "rotation_degrees": [
+          0.0,
+          40.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.2999999523162842,
+          1.2999999523162842,
+          1.2999999523162842
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1191.0,
+          -720.0,
+          143.54252435710862
+        ],
+        "rotation_degrees": [
+          0.0,
+          40.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.2999999523162842,
+          1.2999999523162842,
+          1.2999999523162842
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -300.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.17990210327900513
+    },
+    {
+      "name": "StaticMeshActor_17",
+      "label": "TS_Village_Highland",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -22000.0,
+          -12000.0,
+          900.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1.5
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2180.0,
+          -1080.0,
+          144.06994427959785
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.5,
+          1.5,
+          1.5
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -200.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.00036955443852093595
+    },
+    {
+      "name": "StaticMeshActor_18",
+      "label": "TS_Village_Trees",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -16104.24609375,
+          -16949.38671875,
+          326.8695068359375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -108.8947677612305,
+          0.0
+        ],
+        "scale": [
+          0.9198237061500549,
+          0.9198237061500549,
+          0.9198237061500549
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1449.3821484375003,
+          -1525.4448046875004,
+          147.73002098747963
+        ],
+        "rotation_degrees": [
+          0.0,
+          -108.8947677612305,
+          0.0
+        ],
+        "scale": [
+          0.9198237061500549,
+          0.9198237061500549,
+          0.9198237061500549
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": -0.31150859199408387
+    },
+    {
+      "name": "StaticMeshActor_19",
+      "label": "TS_Village_Trees_002",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          6037.919921875,
+          8787.6796875,
+          300.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          -101.29922389984138,
+          0.0
+        ],
+        "scale": [
+          1.0386723279953003,
+          1.0386723279953003,
+          1.0386723279953003
+        ]
+      },
+      "after": {
+        "location_cm": [
+          393.4127929687502,
+          1290.8911718749996,
+          138.00398494801323
+        ],
+        "rotation_degrees": [
+          0.0,
+          -101.29922389984138,
+          0.0
+        ],
+        "scale": [
+          1.0386723279953003,
+          1.0386723279953003,
+          1.0386723279953003
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -149.99999999999977,
+        499.99999999999966
+      ],
+      "original_ground_clearance_cm": 7.844391802791506e-12
+    },
+    {
+      "name": "StaticMeshActor_20",
+      "label": "TS_Village_Trees_003",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          13466.56640625,
+          2898.736328125,
+          299.7948303222656
+        ],
+        "rotation_degrees": [
+          0.0,
+          -83.20804595947264,
+          0.0
+        ],
+        "scale": [
+          0.8951705098152161,
+          0.8951705098152161,
+          0.8951705098152161
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1611.9909765624998,
+          -39.113730468749964,
+          137.05432684145723
+        ],
+        "rotation_degrees": [
+          0.0,
+          -83.20804595947264,
+          0.0
+        ],
+        "scale": [
+          0.8951705098152161,
+          0.8951705098152161,
+          0.8951705098152161
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        399.9999999999998,
+        -299.99999999999994
+      ],
+      "original_ground_clearance_cm": -0.20514583551033638
+    },
+    {
+      "name": "StaticMeshActor_21",
+      "label": "TS_Village_Trees_004",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          18313.1796875,
+          14645.75390625,
+          179.69961547851562
+        ],
+        "rotation_degrees": [
+          0.0,
+          16.74247741699219,
+          0.0
+        ],
+        "scale": [
+          0.8381646871566772,
+          0.8381646871566772,
+          0.8381646871566772
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1748.1861718750006,
+          1318.1178515624997,
+          139.73161338425575
+        ],
+        "rotation_degrees": [
+          0.0,
+          16.74247741699219,
+          0.0
+        ],
+        "scale": [
+          0.8381646871566772,
+          0.8381646871566772,
+          0.8381646871566772
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        100.00000000000068,
+        -2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.2421107844004382
+    },
+    {
+      "name": "StaticMeshActor_22",
+      "label": "TS_Village_Trees_005",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -15924.642578125,
+          -17293.9921875,
+          301.54498291015625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -30.220899581909183,
+          0.0
+        ],
+        "scale": [
+          1.0271058082580566,
+          1.0271058082580566,
+          1.0271058082580566
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1433.2178320312505,
+          -1556.4592968750003,
+          148.2890969405159
+        ],
+        "rotation_degrees": [
+          0.0,
+          -30.220899581909183,
+          0.0
+        ],
+        "scale": [
+          1.0271058082580566,
+          1.0271058082580566,
+          1.0271058082580566
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": 0.3048189407197128
+    },
+    {
+      "name": "StaticMeshActor_23",
+      "label": "TS_Village_Trees_006",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -6134.474609375,
+          -8482.26953125,
+          300.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          -145.46164512634277,
+          0.0
+        ],
+        "scale": [
+          1.1037451028823853,
+          1.1037451028823853,
+          1.1037451028823853
+        ]
+      },
+      "after": {
+        "location_cm": [
+          147.8972851562503,
+          -1163.4042578125,
+          131.85675560718113
+        ],
+        "rotation_degrees": [
+          0.0,
+          -145.46164512634277,
+          0.0
+        ],
+        "scale": [
+          1.1037451028823853,
+          1.1037451028823853,
+          1.1037451028823853
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        700.0000000000002,
+        -400.0
+      ],
+      "original_ground_clearance_cm": 1.7621459846850485e-12
+    },
+    {
+      "name": "StaticMeshActor_24",
+      "label": "TS_Village_Trees_007",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -6599.939453125,
+          22221.48046875,
+          1115.875732421875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -72.20476627349852,
+          0.0
+        ],
+        "scale": [
+          1.079406499862671,
+          1.079406499862671,
+          1.079406499862671
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -593.9945507812499,
+          1999.9332421875006,
+          142.89239284103496
+        ],
+        "rotation_degrees": [
+          0.0,
+          -72.20476627349852,
+          0.0
+        ],
+        "scale": [
+          1.079406499862671,
+          1.079406499862671,
+          1.079406499862671
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        6.821210263296962e-13
+      ],
+      "original_ground_clearance_cm": 0.02685417303109716
+    },
+    {
+      "name": "StaticMeshActor_25",
+      "label": "TS_Village_Trees_008",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -8068.2109375,
+          6244.80078125,
+          299.60906982421875
+        ],
+        "rotation_degrees": [
+          0.0,
+          96.8560695648194,
+          0.0
+        ],
+        "scale": [
+          1.0883402824401855,
+          1.0883402824401855,
+          1.0883402824401855
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -876.1389843750003,
+          162.03207031249985,
+          133.16928227328071
+        ],
+        "rotation_degrees": [
+          0.0,
+          96.8560695648194,
+          0.0
+        ],
+        "scale": [
+          1.0883402824401855,
+          1.0883402824401855,
+          1.0883402824401855
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -150.00000000000034,
+        -400.0000000000001
+      ],
+      "original_ground_clearance_cm": 0.04041242610810514
+    },
+    {
+      "name": "StaticMeshActor_26",
+      "label": "TS_Village_Trees_009",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -1718.75390625,
+          -8584.7685546875,
+          299.7801513671875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -22.556777000427253,
+          0.0
+        ],
+        "scale": [
+          1.0044682025909424,
+          1.0044682025909424,
+          1.0044682025909424
+        ]
+      },
+      "after": {
+        "location_cm": [
+          145.31214843750013,
+          -1122.6291699218746,
+          131.31849829687593
+        ],
+        "rotation_degrees": [
+          0.0,
+          -22.556777000427253,
+          0.0
+        ],
+        "scale": [
+          1.0044682025909424,
+          1.0044682025909424,
+          1.0044682025909424
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        300.0000000000001,
+        -349.99999999999955
+      ],
+      "original_ground_clearance_cm": -0.21984863281073785
+    },
+    {
+      "name": "StaticMeshActor_27",
+      "label": "TS_Village_Trees_010",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -12195.5966796875,
+          -9747.7509765625,
+          270.04559326171875
+        ],
+        "rotation_degrees": [
+          0.0,
+          170.24049282073975,
+          0.0
+        ],
+        "scale": [
+          0.862013041973114,
+          0.862013041973114,
+          0.862013041973114
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1447.6037011718745,
+          -1127.2975878906254,
+          149.03054040909979
+        ],
+        "rotation_degrees": [
+          0.0,
+          170.24049282073975,
+          0.0
+        ],
+        "scale": [
+          0.862013041973114,
+          0.862013041973114,
+          0.862013041973114
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -349.99999999999955,
+        -250.00000000000045
+      ],
+      "original_ground_clearance_cm": 0.07254825217592042
+    },
+    {
+      "name": "StaticMeshActor_28",
+      "label": "TS_Village_Trees_011",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -1686.390625,
+          -9225.087890625,
+          300.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          135.3680849075317,
+          0.0
+        ],
+        "scale": [
+          1.0538631677627563,
+          1.0538631677627563,
+          1.0538631677627563
+        ]
+      },
+      "after": {
+        "location_cm": [
+          148.22484375,
+          -1180.2579101562496,
+          131.98832229985112
+        ],
+        "rotation_degrees": [
+          0.0,
+          135.3680849075317,
+          0.0
+        ],
+        "scale": [
+          1.0538631677627563,
+          1.0538631677627563,
+          1.0538631677627563
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        300.0,
+        -349.99999999999966
+      ],
+      "original_ground_clearance_cm": 7.844391802791506e-12
+    },
+    {
+      "name": "StaticMeshActor_29",
+      "label": "TS_Village_Trees_012",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -7298.40625,
+          -13424.9150390625,
+          273.806640625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -174.5874309539795,
+          0.0
+        ],
+        "scale": [
+          1.0389212369918823,
+          1.0389212369918823,
+          1.0389212369918823
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1006.8565625000001,
+          -1508.242353515625,
+          143.9872612579992
+        ],
+        "rotation_degrees": [
+          0.0,
+          -174.5874309539795,
+          0.0
+        ],
+        "scale": [
+          1.0389212369918823,
+          1.0389212369918823,
+          1.0389212369918823
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -350.0000000000001,
+        -300.0
+      ],
+      "original_ground_clearance_cm": 0.17549089318606548
+    },
+    {
+      "name": "StaticMeshActor_30",
+      "label": "TS_Village_Trees_013",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -21981.388671875,
+          14906.32421875,
+          1099.71142578125
+        ],
+        "rotation_degrees": [
+          0.0,
+          -92.36386299133302,
+          0.0
+        ],
+        "scale": [
+          0.7896865010261536,
+          0.7896865010261536,
+          0.7896865010261536
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1978.3249804687512,
+          1341.5691796874999,
+          140.72061109243486
+        ],
+        "rotation_degrees": [
+          0.0,
+          -92.36386299133302,
+          0.0
+        ],
+        "scale": [
+          0.7896865010261536,
+          0.7896865010261536,
+          0.7896865010261536
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.1368683772161603e-12,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.07782814385018355
+    },
+    {
+      "name": "StaticMeshActor_31",
+      "label": "TS_Village_Trees_014",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -5247.271484375,
+          -12461.654296875,
+          284.9968566894531
+        ],
+        "rotation_degrees": [
+          0.0,
+          -4.008893966674804,
+          0.0
+        ],
+        "scale": [
+          1.1113232374191284,
+          1.1113232374191284,
+          1.1113232374191284
+        ]
+      },
+      "after": {
+        "location_cm": [
+          77.74556640624996,
+          -1121.5488867187505,
+          131.74000546668526
+        ],
+        "rotation_degrees": [
+          0.0,
+          -4.008893966674804,
+          0.0
+        ],
+        "scale": [
+          1.1113232374191284,
+          1.1113232374191284,
+          1.1113232374191284
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        550.0,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": 0.2101048173883555
+    },
+    {
+      "name": "StaticMeshActor_32",
+      "label": "TS_Village_Trees_015",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          10063.21484375,
+          -872.818359375,
+          292.7345275878906
+        ],
+        "rotation_degrees": [
+          0.0,
+          -16.43670558929443,
+          0.0
+        ],
+        "scale": [
+          0.8634615540504456,
+          0.8634615540504456,
+          0.8634615540504456
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1105.6893359375008,
+          -628.55365234375,
+          131.52207541386423
+        ],
+        "rotation_degrees": [
+          0.0,
+          -16.43670558929443,
+          0.0
+        ],
+        "scale": [
+          0.8634615540504456,
+          0.8634615540504456,
+          0.8634615540504456
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        200.0000000000008,
+        -550.0
+      ],
+      "original_ground_clearance_cm": 0.053312634095789235
+    },
+    {
+      "name": "StaticMeshActor_33",
+      "label": "TS_Village_Trees_016",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -23282.947265625,
+          9850.8671875,
+          1333.5814208984375
+        ],
+        "rotation_degrees": [
+          0.0,
+          116.07102870941162,
+          0.0
+        ],
+        "scale": [
+          1.015984296798706,
+          1.015984296798706,
+          1.015984296798706
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2095.4652539062517,
+          886.5780468749999,
+          139.32339543554144
+        ],
+        "rotation_degrees": [
+          0.0,
+          116.07102870941162,
+          0.0
+        ],
+        "scale": [
+          1.015984296798706,
+          1.015984296798706,
+          1.015984296798706
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.8189894035458565e-12,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.28318354643442945
+    },
+    {
+      "name": "StaticMeshActor_34",
+      "label": "TS_Village_Trees_017",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          19478.62890625,
+          -4939.1328125,
+          328.2769775390625
+        ],
+        "rotation_degrees": [
+          0.0,
+          37.043066024780295,
+          0.0
+        ],
+        "scale": [
+          0.9700470566749573,
+          0.9700470566749573,
+          0.9700470566749573
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1753.0766015625013,
+          -444.52195312500044,
+          140.45856332831562
+        ],
+        "rotation_degrees": [
+          0.0,
+          37.043066024780295,
+          0.0
+        ],
+        "scale": [
+          0.9700470566749573,
+          0.9700470566749573,
+          0.9700470566749573
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.3642420526593924e-12,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": -0.15294078577545633
+    },
+    {
+      "name": "StaticMeshActor_35",
+      "label": "TS_Village_Trees_018",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -21297.552734375,
+          10699.01953125,
+          859.6624145507812
+        ],
+        "rotation_degrees": [
+          0.0,
+          -174.69845294952393,
+          0.0
+        ],
+        "scale": [
+          0.8755829930305481,
+          0.8755829930305481,
+          0.8755829930305481
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1916.7797460937509,
+          962.9117578125006,
+          139.0299434465784
+        ],
+        "rotation_degrees": [
+          0.0,
+          -174.69845294952393,
+          0.0
+        ],
+        "scale": [
+          0.8755829930305481,
+          0.8755829930305481,
+          0.8755829930305481
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -9.094947017729282e-13,
+        5.684341886080801e-13
+      ],
+      "original_ground_clearance_cm": 0.3693733753758579
+    },
+    {
+      "name": "StaticMeshActor_36",
+      "label": "TS_Village_Trees_019",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -23120.916015625,
+          -4769.81640625,
+          1166.6109619140625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -164.6253204345703,
+          0.0
+        ],
+        "scale": [
+          0.7765426635742188,
+          0.7765426635742188,
+          0.7765426635742188
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2080.882441406251,
+          170.71652343749975,
+          132.68967805685588
+        ],
+        "rotation_degrees": [
+          0.0,
+          -164.6253204345703,
+          0.0
+        ],
+        "scale": [
+          0.7765426635742188,
+          0.7765426635742188,
+          0.7765426635742188
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -9.094947017729282e-13,
+        599.9999999999998
+      ],
+      "original_ground_clearance_cm": 0.17591493641430134
+    },
+    {
+      "name": "StaticMeshActor_37",
+      "label": "TS_Village_Trees_020",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          13884.171875,
+          -19159.5390625,
+          220.379150390625
+        ],
+        "rotation_degrees": [
+          0.0,
+          21.463980674743663,
+          0.0
+        ],
+        "scale": [
+          0.9151169657707214,
+          0.9151169657707214,
+          0.9151169657707214
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1249.5754687499993,
+          -1724.358515625001,
+          150.721362800489
+        ],
+        "rotation_degrees": [
+          0.0,
+          21.463980674743663,
+          0.0
+        ],
+        "scale": [
+          0.9151169657707214,
+          0.9151169657707214,
+          0.9151169657707214
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        -1.1368683772161603e-12
+      ],
+      "original_ground_clearance_cm": -0.37732835221075334
+    },
+    {
+      "name": "StaticMeshActor_38",
+      "label": "TS_Village_Trees_021",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -7319.4296875,
+          -17348.91015625,
+          303.2552185058594
+        ],
+        "rotation_degrees": [
+          0.0,
+          55.59129238128662,
+          0.0
+        ],
+        "scale": [
+          1.0261956453323364,
+          1.0261956453323364,
+          1.0261956453323364
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -658.7486718749997,
+          -1811.4019140625005,
+          142.83049347792854
+        ],
+        "rotation_degrees": [
+          0.0,
+          55.59129238128662,
+          0.0
+        ],
+        "scale": [
+          1.0261956453323364,
+          1.0261956453323364,
+          1.0261956453323364
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        3.410605131648481e-13,
+        -250.00000000000045
+      ],
+      "original_ground_clearance_cm": 0.29978964873822633
+    },
+    {
+      "name": "StaticMeshActor_39",
+      "label": "TS_Village_Trees_022",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -18776.373046875,
+          22697.890625,
+          1275.2022705078125
+        ],
+        "rotation_degrees": [
+          0.0,
+          20.550312995910645,
+          0.0
+        ],
+        "scale": [
+          0.753309428691864,
+          0.753309428691864,
+          0.753309428691864
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1689.8735742187491,
+          2042.8101562500015,
+          146.08089452170384
+        ],
+        "rotation_degrees": [
+          0.0,
+          20.550312995910645,
+          0.0
+        ],
+        "scale": [
+          0.753309428691864,
+          0.753309428691864,
+          0.753309428691864
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        9.094947017729282e-13,
+        1.5916157281026244e-12
+      ],
+      "original_ground_clearance_cm": -0.13267740960441188
+    },
+    {
+      "name": "StaticMeshActor_40",
+      "label": "TS_Village_Trees_023",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -23680.41796875,
+          13426.453125,
+          1312.9520263671875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -71.71188354492188,
+          0.0
+        ],
+        "scale": [
+          0.8173068761825562,
+          0.8173068761825562,
+          0.8173068761825562
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2131.2376171875003,
+          1208.38078125,
+          140.9566686576361
+        ],
+        "rotation_degrees": [
+          0.0,
+          -71.71188354492188,
+          0.0
+        ],
+        "scale": [
+          0.8173068761825562,
+          0.8173068761825562,
+          0.8173068761825562
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.0042022134691706015
+    },
+    {
+      "name": "StaticMeshActor_41",
+      "label": "TS_Village_Trees_024",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          7187.083984375,
+          -18547.19921875,
+          174.793212890625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -175.65898418426514,
+          0.0
+        ],
+        "scale": [
+          0.8690155744552612,
+          0.8690155744552612,
+          0.8690155744552612
+        ]
+      },
+      "after": {
+        "location_cm": [
+          646.8375585937501,
+          -1669.247929687499,
+          142.34125559007995
+        ],
+        "rotation_degrees": [
+          0.0,
+          -175.65898418426514,
+          0.0
+        ],
+        "scale": [
+          0.8690155744552612,
+          0.8690155744552612,
+          0.8690155744552612
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.1368683772161603e-13,
+        9.094947017729282e-13
+      ],
+      "original_ground_clearance_cm": 0.10581420144123399
+    },
+    {
+      "name": "StaticMeshActor_42",
+      "label": "TS_Village_Trees_025",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          12471.86328125,
+          -3660.181640625,
+          300.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          -11.049585342407227,
+          0.0
+        ],
+        "scale": [
+          1.057137370109558,
+          1.057137370109558,
+          1.057137370109558
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1122.4676953125,
+          -629.4163476562499,
+          131.73765920715044
+        ],
+        "rotation_degrees": [
+          0.0,
+          -11.049585342407227,
+          0.0
+        ],
+        "scale": [
+          1.057137370109558,
+          1.057137370109558,
+          1.057137370109558
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        -299.9999999999999
+      ],
+      "original_ground_clearance_cm": 1.7621459846850485e-12
+    },
+    {
+      "name": "StaticMeshActor_43",
+      "label": "TS_Village_Trees_026",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          16464.4609375,
+          21139.21875,
+          760.5909423828125
+        ],
+        "rotation_degrees": [
+          0.0,
+          -64.51678276062009,
+          0.0
+        ],
+        "scale": [
+          1.0426286458969116,
+          1.0426286458969116,
+          1.0426286458969116
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1481.8014843750007,
+          1952.5296874999985,
+          152.18487030809558
+        ],
+        "rotation_degrees": [
+          0.0,
+          -64.51678276062009,
+          0.0
+        ],
+        "scale": [
+          1.0426286458969116,
+          1.0426286458969116,
+          1.0426286458969116
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        6.821210263296962e-13,
+        49.999999999998636
+      ],
+      "original_ground_clearance_cm": 0.02267678784266991
+    },
+    {
+      "name": "StaticMeshActor_44",
+      "label": "TS_Village_Trees_027",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          14271.171875,
+          -14550.859375,
+          251.44898986816406
+        ],
+        "rotation_degrees": [
+          0.0,
+          -143.21820259094238,
+          0.0
+        ],
+        "scale": [
+          0.8908141255378723,
+          0.8908141255378723,
+          0.8908141255378723
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1284.4054687499993,
+          -1309.5773437499993,
+          144.2000760678998
+        ],
+        "rotation_degrees": [
+          0.0,
+          -143.21820259094238,
+          0.0
+        ],
+        "scale": [
+          0.8908141255378723,
+          0.8908141255378723,
+          0.8908141255378723
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        6.821210263296962e-13
+      ],
+      "original_ground_clearance_cm": -0.03254228217380728
+    },
+    {
+      "name": "StaticMeshActor_45",
+      "label": "TS_Village_Trees_028",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          19688.04296875,
+          -14262.5537109375,
+          387.59979248046875
+        ],
+        "rotation_degrees": [
+          0.0,
+          160.06895542144775,
+          0.0
+        ],
+        "scale": [
+          0.9724860787391663,
+          0.9724860787391663,
+          0.9724860787391663
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1771.9238671874991,
+          -1283.6298339843743,
+          151.53279601952454
+        ],
+        "rotation_degrees": [
+          0.0,
+          160.06895542144775,
+          0.0
+        ],
+        "scale": [
+          0.9724860787391663,
+          0.9724860787391663,
+          0.9724860787391663
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -9.094947017729282e-13,
+        6.821210263296962e-13
+      ],
+      "original_ground_clearance_cm": 0.08861507765686838
+    },
+    {
+      "name": "StaticMeshActor_46",
+      "label": "TS_Village_Trees_029",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -2471.96875,
+          -22319.462890625,
+          1233.48876953125
+        ],
+        "rotation_degrees": [
+          0.0,
+          41.03221893310549,
+          0.0
+        ],
+        "scale": [
+          1.1052367687225342,
+          1.1052367687225342,
+          1.1052367687225342
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -222.47718750000013,
+          -2008.7516601562493,
+          143.88959675575802
+        ],
+        "rotation_degrees": [
+          0.0,
+          41.03221893310549,
+          0.0
+        ],
+        "scale": [
+          1.1052367687225342,
+          1.1052367687225342,
+          1.1052367687225342
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.4210854715202004e-13,
+        6.821210263296962e-13
+      ],
+      "original_ground_clearance_cm": -0.033745874785608976
+    },
+    {
+      "name": "StaticMeshActor_47",
+      "label": "TS_Village_Trees_030",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          14151.265625,
+          -6732.140625,
+          291.96099853515625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -82.28686809539794,
+          0.0
+        ],
+        "scale": [
+          1.0662760734558105,
+          1.0662760734558105,
+          1.0662760734558105
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1273.6139062500006,
+          -655.8926562500001,
+          133.61488855446265
+        ],
+        "rotation_degrees": [
+          0.0,
+          -82.28686809539794,
+          0.0
+        ],
+        "scale": [
+          1.0662760734558105,
+          1.0662760734558105,
+          1.0662760734558105
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        6.821210263296962e-13,
+        -50.000000000000114
+      ],
+      "original_ground_clearance_cm": -0.2260246204113514
+    },
+    {
+      "name": "StaticMeshActor_48",
+      "label": "TS_Village_Trees_031",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          15948.45703125,
+          -16577.96875,
+          234.2243194580078
+        ],
+        "rotation_degrees": [
+          0.0,
+          -145.17394065856934,
+          0.0
+        ],
+        "scale": [
+          0.9079835414886475,
+          0.9079835414886475,
+          0.9079835414886475
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1435.3611328125007,
+          -1492.0171874999996,
+          149.79125784900083
+        ],
+        "rotation_degrees": [
+          0.0,
+          -145.17394065856934,
+          0.0
+        ],
+        "scale": [
+          0.9079835414886475,
+          0.9079835414886475,
+          0.9079835414886475
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        6.821210263296962e-13,
+        2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.11533318168454798
+    },
+    {
+      "name": "StaticMeshActor_49",
+      "label": "TS_Village_Trees_032",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -22472.568359375,
+          6884.58203125,
+          1166.9105224609375
+        ],
+        "rotation_degrees": [
+          0.0,
+          59.13180828094482,
+          0.0
+        ],
+        "scale": [
+          1.0074437856674194,
+          1.0074437856674194,
+          1.0074437856674194
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2022.5311523437485,
+          619.6123828125001,
+          134.67706388107422
+        ],
+        "rotation_degrees": [
+          0.0,
+          59.13180828094482,
+          0.0
+        ],
+        "scale": [
+          1.0074437856674194,
+          1.0074437856674194,
+          1.0074437856674194
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.3642420526593924e-12,
+        1.1368683772161603e-13
+      ],
+      "original_ground_clearance_cm": 0.37817879029194046
+    },
+    {
+      "name": "StaticMeshActor_50",
+      "label": "TS_Village_Trees_033",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -2647.2578125,
+          -13882.6787109375,
+          293.5218505859375
+        ],
+        "rotation_degrees": [
+          0.0,
+          76.49055004119873,
+          0.0
+        ],
+        "scale": [
+          0.8812176585197449,
+          0.8812176585197449,
+          0.8812176585197449
+        ]
+      },
+      "after": {
+        "location_cm": [
+          61.7467968750002,
+          -1249.441083984375,
+          132.89745321785597
+        ],
+        "rotation_degrees": [
+          0.0,
+          76.49055004119873,
+          0.0
+        ],
+        "scale": [
+          0.8812176585197449,
+          0.8812176585197449,
+          0.8812176585197449
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        300.0000000000002,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.09196373329757535
+    },
+    {
+      "name": "StaticMeshActor_51",
+      "label": "TS_Village_Trees_034",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          2588.48828125,
+          14969.3203125,
+          242.601318359375
+        ],
+        "rotation_degrees": [
+          0.0,
+          71.22015953063962,
+          0.0
+        ],
+        "scale": [
+          0.8965969681739807,
+          0.8965969681739807,
+          0.8965969681739807
+        ]
+      },
+      "after": {
+        "location_cm": [
+          232.96394531250007,
+          1347.2388281250005,
+          139.19302014400702
+        ],
+        "rotation_degrees": [
+          0.0,
+          71.22015953063962,
+          0.0
+        ],
+        "scale": [
+          0.8965969681739807,
+          0.8965969681739807,
+          0.8965969681739807
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        8.526512829121202e-14,
+        4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": 0.025123456142608802
+    },
+    {
+      "name": "StaticMeshActor_52",
+      "label": "TS_Village_Trees_035",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          8894.171875,
+          -17140.48046875,
+          197.1240997314453
+        ],
+        "rotation_degrees": [
+          0.0,
+          -81.616530418396,
+          0.0
+        ],
+        "scale": [
+          0.9105936288833618,
+          0.9105936288833618,
+          0.9105936288833618
+        ]
+      },
+      "after": {
+        "location_cm": [
+          800.4754687499999,
+          -1542.6432421874997,
+          141.3506150284635
+        ],
+        "rotation_degrees": [
+          0.0,
+          -81.616530418396,
+          0.0
+        ],
+        "scale": [
+          0.9105936288833618,
+          0.9105936288833618,
+          0.9105936288833618
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.1368683772161603e-13,
+        2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": 0.14659247316797064
+    },
+    {
+      "name": "StaticMeshActor_53",
+      "label": "TS_Village_Trees_036",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -3076.24609375,
+          4225.021484375,
+          261.4200439453125
+        ],
+        "rotation_degrees": [
+          0.0,
+          29.630727767944357,
+          0.0
+        ],
+        "scale": [
+          0.9679132699966431,
+          0.9679132699966431,
+          0.9679132699966431
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -876.8621484374999,
+          130.25193359374998,
+          133.36329338248862
+        ],
+        "rotation_degrees": [
+          0.0,
+          29.630727767944357,
+          0.0
+        ],
+        "scale": [
+          0.9679132699966431,
+          0.9679132699966431,
+          0.9679132699966431
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -599.9999999999999,
+        -250.0
+      ],
+      "original_ground_clearance_cm": 0.277524761593952
+    },
+    {
+      "name": "StaticMeshActor_54",
+      "label": "TS_Village_Trees_037",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -8722.2119140625,
+          9984.90234375,
+          293.0483093261719
+        ],
+        "rotation_degrees": [
+          0.0,
+          -176.7784309387207,
+          0.0
+        ],
+        "scale": [
+          1.0891633033752441,
+          1.0891633033752441,
+          1.0891633033752441
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -834.9990722656248,
+          1148.6412109374996,
+          137.74892454884247
+        ],
+        "rotation_degrees": [
+          0.0,
+          -176.7784309387207,
+          0.0
+        ],
+        "scale": [
+          1.0891633033752441,
+          1.0891633033752441,
+          1.0891633033752441
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -49.999999999999886,
+        249.99999999999966
+      ],
+      "original_ground_clearance_cm": -0.03770284375497113
+    },
+    {
+      "name": "StaticMeshActor_55",
+      "label": "TS_Village_Trees_038",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          3658.693359375,
+          13769.71875,
+          265.0257873535156
+        ],
+        "rotation_degrees": [
+          0.0,
+          98.85154724121102,
+          0.0
+        ],
+        "scale": [
+          1.0805455446243286,
+          1.0805455446243286,
+          1.0805455446243286
+        ]
+      },
+      "after": {
+        "location_cm": [
+          329.28240234375016,
+          1289.2746874999993,
+          138.29440712417346
+        ],
+        "rotation_degrees": [
+          0.0,
+          98.85154724121102,
+          0.0
+        ],
+        "scale": [
+          1.0805455446243286,
+          1.0805455446243286,
+          1.0805455446243286
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.7053025658242404e-13,
+        49.99999999999932
+      ],
+      "original_ground_clearance_cm": 0.03238782323461464
+    },
+    {
+      "name": "StaticMeshActor_56",
+      "label": "TS_Village_Trees_039",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -18446.107421875,
+          1054.486328125,
+          301.50152587890625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -133.27351570129392,
+          0.0
+        ],
+        "scale": [
+          0.8764470219612122,
+          0.8764470219612122,
+          0.8764470219612122
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1660.1496679687516,
+          194.90376953124996,
+          131.20500562000478
+        ],
+        "rotation_degrees": [
+          0.0,
+          -133.27351570129392,
+          0.0
+        ],
+        "scale": [
+          0.8764470219612122,
+          0.8764470219612122,
+          0.8764470219612122
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.5916157281026244e-12,
+        99.99999999999997
+      ],
+      "original_ground_clearance_cm": -0.060866831097257545
+    },
+    {
+      "name": "StaticMeshActor_57",
+      "label": "TS_Village_Trees_040",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -19796.5625,
+          13304.55859375,
+          390.3514404296875
+        ],
+        "rotation_degrees": [
+          0.0,
+          131.31455898284906,
+          0.0
+        ],
+        "scale": [
+          1.145525574684143,
+          1.145525574684143,
+          1.145525574684143
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1781.6906249999993,
+          1197.4102734374992,
+          138.74834210196434
+        ],
+        "rotation_degrees": [
+          0.0,
+          131.31455898284906,
+          0.0
+        ],
+        "scale": [
+          1.145525574684143,
+          1.145525574684143,
+          1.145525574684143
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        6.821210263296962e-13,
+        -6.821210263296962e-13
+      ],
+      "original_ground_clearance_cm": -0.2637493156543087
+    },
+    {
+      "name": "StaticMeshActor_58",
+      "label": "TS_Village_Trees_041",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -23818.02734375,
+          20648.4765625,
+          1321.3724365234375
+        ],
+        "rotation_degrees": [
+          0.0,
+          88.76858711242677,
+          0.0
+        ],
+        "scale": [
+          1.1485214233398438,
+          1.1485214233398438,
+          1.1485214233398438
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2143.6224609374985,
+          1858.3628906250015,
+          149.0716080833297
+        ],
+        "rotation_degrees": [
+          0.0,
+          88.76858711242677,
+          0.0
+        ],
+        "scale": [
+          1.1485214233398438,
+          1.1485214233398438,
+          1.1485214233398438
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.3642420526593924e-12,
+        1.5916157281026244e-12
+      ],
+      "original_ground_clearance_cm": 0.045437034630367634
+    },
+    {
+      "name": "StaticMeshActor_59",
+      "label": "TS_Village_Trees_042",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -22237.7421875,
+          -18023.751953125,
+          1093.600341796875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -6.457085609436036,
+          0.0
+        ],
+        "scale": [
+          1.020019769668579,
+          1.020019769668579,
+          1.020019769668579
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2001.3967968750003,
+          -1622.1376757812504,
+          151.0320092712243
+        ],
+        "rotation_degrees": [
+          0.0,
+          -6.457085609436036,
+          0.0
+        ],
+        "scale": [
+          1.020019769668579,
+          1.020019769668579,
+          1.020019769668579
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": 0.07268395354162749
+    },
+    {
+      "name": "StaticMeshActor_60",
+      "label": "TS_Village_Trees_043",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -12774.3359375,
+          -14553.5263671875,
+          252.4091339111328
+        ],
+        "rotation_degrees": [
+          0.0,
+          -48.65870475769043,
+          0.0
+        ],
+        "scale": [
+          0.9304320812225342,
+          0.9304320812225342,
+          0.9304320812225342
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1149.6902343750007,
+          -1559.8173730468752,
+          145.2334737252965
+        ],
+        "rotation_degrees": [
+          0.0,
+          -48.65870475769043,
+          0.0
+        ],
+        "scale": [
+          0.9304320812225342,
+          0.9304320812225342,
+          0.9304320812225342
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        -250.00000000000023
+      ],
+      "original_ground_clearance_cm": -0.14841894194279348
+    },
+    {
+      "name": "StaticMeshActor_61",
+      "label": "TS_Village_Trees_044",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -11756.0009765625,
+          2723.693359375,
+          300.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          58.53313922882079,
+          0.0
+        ],
+        "scale": [
+          0.9658053517341614,
+          0.9658053517341614,
+          0.9658053517341614
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1058.0400878906257,
+          145.13240234375007,
+          132.6375497649223
+        ],
+        "rotation_degrees": [
+          0.0,
+          58.53313922882079,
+          0.0
+        ],
+        "scale": [
+          0.9658053517341614,
+          0.9658053517341614,
+          0.9658053517341614
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        -99.99999999999991
+      ],
+      "original_ground_clearance_cm": 1.7621459846850485e-12
+    },
+    {
+      "name": "StaticMeshActor_62",
+      "label": "TS_Village_Trees_045",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -2881.05078125,
+          -15025.0341796875,
+          295.9331359863281
+        ],
+        "rotation_degrees": [
+          0.0,
+          -42.787284851074226,
+          0.0
+        ],
+        "scale": [
+          1.020189881324768,
+          1.020189881324768,
+          1.020189881324768
+        ]
+      },
+      "after": {
+        "location_cm": [
+          140.70542968749987,
+          -1352.2530761718754,
+          133.9707258638984
+        ],
+        "rotation_degrees": [
+          0.0,
+          -42.787284851074226,
+          0.0
+        ],
+        "scale": [
+          1.020189881324768,
+          1.020189881324768,
+          1.020189881324768
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        399.9999999999999,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": -0.16025638034335543
+    },
+    {
+      "name": "StaticMeshActor_63",
+      "label": "TS_Village_Trees_046",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          20690.9453125,
+          -9036.96484375,
+          695.0380859375
+        ],
+        "rotation_degrees": [
+          0.0,
+          64.14230346679686,
+          0.0
+        ],
+        "scale": [
+          1.0367445945739746,
+          1.0367445945739746,
+          1.0367445945739746
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1862.1850781249996,
+          -813.3268359374997,
+          146.42775165405237
+        ],
+        "rotation_degrees": [
+          0.0,
+          64.14230346679686,
+          0.0
+        ],
+        "scale": [
+          1.0367445945739746,
+          1.0367445945739746,
+          1.0367445945739746
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.008818431743748079
+    },
+    {
+      "name": "StaticMeshActor_64",
+      "label": "TS_Village_Trees_047",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -23188.740234375,
+          -2176.369140625,
+          1164.5987548828125
+        ],
+        "rotation_degrees": [
+          0.0,
+          -172.48595237731934,
+          0.0
+        ],
+        "scale": [
+          0.9492800831794739,
+          0.9492800831794739,
+          0.9492800831794739
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2086.9866210937507,
+          154.12677734375006,
+          132.80260224010044
+        ],
+        "rotation_degrees": [
+          0.0,
+          -172.48595237731934,
+          0.0
+        ],
+        "scale": [
+          0.9492800831794739,
+          0.9492800831794739,
+          0.9492800831794739
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -9.094947017729282e-13,
+        350.00000000000006
+      ],
+      "original_ground_clearance_cm": 0.24115163229862446
+    },
+    {
+      "name": "StaticMeshActor_65",
+      "label": "TS_Village_Trees_048",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -22605.353515625,
+          13878.9140625,
+          1246.9384765625
+        ],
+        "rotation_degrees": [
+          0.0,
+          51.14479064941408,
+          0.0
+        ],
+        "scale": [
+          0.871012270450592,
+          0.871012270450592,
+          0.871012270450592
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2034.481816406249,
+          1249.1022656250007,
+          140.56900576049907
+        ],
+        "rotation_degrees": [
+          0.0,
+          51.14479064941408,
+          0.0
+        ],
+        "scale": [
+          0.871012270450592,
+          0.871012270450592,
+          0.871012270450592
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        9.094947017729282e-13,
+        6.821210263296962e-13
+      ],
+      "original_ground_clearance_cm": 0.053979295684484896
+    },
+    {
+      "name": "StaticMeshActor_66",
+      "label": "TS_Village_Trees_049",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          2140.966796875,
+          12063.0625,
+          285.5578308105469
+        ],
+        "rotation_degrees": [
+          0.0,
+          -88.38389396667482,
+          0.0
+        ],
+        "scale": [
+          1.0975006818771362,
+          1.0975006818771362,
+          1.0975006818771362
+        ]
+      },
+      "after": {
+        "location_cm": [
+          342.68701171875,
+          1285.6756249999999,
+          138.0305139023278
+        ],
+        "rotation_degrees": [
+          0.0,
+          -88.38389396667482,
+          0.0
+        ],
+        "scale": [
+          1.0975006818771362,
+          1.0975006818771362,
+          1.0975006818771362
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        150.0,
+        200.0
+      ],
+      "original_ground_clearance_cm": -0.1752846346842034
+    },
+    {
+      "name": "StaticMeshActor_67",
+      "label": "TS_Village_Trees_050",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -19069.095703125,
+          20896.14453125,
+          711.9158935546875
+        ],
+        "rotation_degrees": [
+          0.0,
+          67.93413162231445,
+          0.0
+        ],
+        "scale": [
+          0.9098572731018066,
+          0.9098572731018066,
+          0.9098572731018066
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1716.2186132812494,
+          1880.6530078124997,
+          143.88352355434836
+        ],
+        "rotation_degrees": [
+          0.0,
+          67.93413162231445,
+          0.0
+        ],
+        "scale": [
+          0.9098572731018066,
+          0.9098572731018066,
+          0.9098572731018066
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        4.547473508864641e-13,
+        -2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.2076682429178618
+    },
+    {
+      "name": "StaticMeshActor_68",
+      "label": "TS_Village_Trees_051",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -21692.28125,
+          5948.416015625,
+          903.265869140625
+        ],
+        "rotation_degrees": [
+          0.0,
+          72.21991539001465,
+          0.0
+        ],
+        "scale": [
+          0.8716781735420227,
+          0.8716781735420227,
+          0.8716781735420227
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1952.3053125000006,
+          535.3574414062496,
+          132.45258922126425
+        ],
+        "rotation_degrees": [
+          0.0,
+          72.21991539001465,
+          0.0
+        ],
+        "scale": [
+          0.8716781735420227,
+          0.8716781735420227,
+          0.8716781735420227
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": -0.07472924805358616
+    },
+    {
+      "name": "StaticMeshActor_69",
+      "label": "TS_Village_Trees_052",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -7219.55078125,
+          -11430.4677734375,
+          284.48876953125
+        ],
+        "rotation_degrees": [
+          0.0,
+          -165.71189403533936,
+          0.0
+        ],
+        "scale": [
+          0.8429591059684753,
+          0.8429591059684753,
+          0.8429591059684753
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -999.7595703124998,
+          -1478.7420996093751,
+          143.33642477756553
+        ],
+        "rotation_degrees": [
+          0.0,
+          -165.71189403533936,
+          0.0
+        ],
+        "scale": [
+          0.8429591059684753,
+          0.8429591059684753,
+          0.8429591059684753
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -349.9999999999999,
+        -450.0000000000002
+      ],
+      "original_ground_clearance_cm": -0.1896093041275435
+    },
+    {
+      "name": "StaticMeshActor_70",
+      "label": "TS_Village_Trees_053",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          18363.7890625,
+          3722.48828125,
+          243.91928100585938
+        ],
+        "rotation_degrees": [
+          0.0,
+          62.72948741912842,
+          0.0
+        ],
+        "scale": [
+          1.1134428977966309,
+          1.1134428977966309,
+          1.1134428977966309
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1802.7410156250007,
+          335.0239453125,
+          139.88725332342597
+        ],
+        "rotation_degrees": [
+          0.0,
+          62.72948741912842,
+          0.0
+        ],
+        "scale": [
+          1.1134428977966309,
+          1.1134428977966309,
+          1.1134428977966309
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        150.00000000000068,
+        5.684341886080802e-14
+      ],
+      "original_ground_clearance_cm": -0.219457666479002
+    },
+    {
+      "name": "StaticMeshActor_71",
+      "label": "TS_Village_Trees_054",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          15319.34765625,
+          -19732.2109375,
+          328.688720703125
+        ],
+        "rotation_degrees": [
+          0.0,
+          16.866545677185066,
+          0.0
+        ],
+        "scale": [
+          0.7531319260597229,
+          0.7531319260597229,
+          0.7531319260597229
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1378.7412890625,
+          -1775.8989843749987,
+          153.25719758037116
+        ],
+        "rotation_degrees": [
+          0.0,
+          16.866545677185066,
+          0.0
+        ],
+        "scale": [
+          0.7531319260597229,
+          0.7531319260597229,
+          0.7531319260597229
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        2.2737367544323206e-13,
+        1.1368683772161603e-12
+      ],
+      "original_ground_clearance_cm": -0.12468860614723098
+    },
+    {
+      "name": "StaticMeshActor_72",
+      "label": "TS_Village_Trees_055",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -13025.076171875,
+          11388.28515625,
+          265.9377746582031
+        ],
+        "rotation_degrees": [
+          0.0,
+          66.32605075836176,
+          0.0
+        ],
+        "scale": [
+          1.0749105215072632,
+          1.0749105215072632,
+          1.0749105215072632
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1172.2568554687496,
+          1224.9456640624994,
+          138.02540707309453
+        ],
+        "rotation_degrees": [
+          0.0,
+          66.32605075836176,
+          0.0
+        ],
+        "scale": [
+          1.0749105215072632,
+          1.0749105215072632,
+          1.0749105215072632
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        4.547473508864641e-13,
+        199.99999999999955
+      ],
+      "original_ground_clearance_cm": 0.03878526060287868
+    },
+    {
+      "name": "StaticMeshActor_73",
+      "label": "TS_Village_Trees_056",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -1627.97265625,
+          -10095.4228515625,
+          299.952880859375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -116.14565849304199,
+          0.0
+        ],
+        "scale": [
+          0.990526020526886,
+          0.990526020526886,
+          0.990526020526886
+        ]
+      },
+      "after": {
+        "location_cm": [
+          103.48246093750004,
+          -1108.588056640625,
+          131.38144622486465
+        ],
+        "rotation_degrees": [
+          0.0,
+          -116.14565849304199,
+          0.0
+        ],
+        "scale": [
+          0.990526020526886,
+          0.990526020526886,
+          0.990526020526886
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        250.00000000000003,
+        -200.0
+      ],
+      "original_ground_clearance_cm": -0.047119140623237854
+    },
+    {
+      "name": "StaticMeshActor_74",
+      "label": "TS_Village_Trees_057",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          8491.423828125,
+          19231.0625,
+          275.59375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -73.0010175704956,
+          0.0
+        ],
+        "scale": [
+          0.9411799907684326,
+          0.9411799907684326,
+          0.9411799907684326
+        ]
+      },
+      "after": {
+        "location_cm": [
+          764.2281445312501,
+          1930.7956249999988,
+          152.27535323913543
+        ],
+        "rotation_degrees": [
+          0.0,
+          -73.0010175704956,
+          0.0
+        ],
+        "scale": [
+          0.9411799907684326,
+          0.9411799907684326,
+          0.9411799907684326
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.1368683772161603e-13,
+        199.99999999999886
+      ],
+      "original_ground_clearance_cm": -0.3993504633661473
+    },
+    {
+      "name": "StaticMeshActor_75",
+      "label": "TS_Village_Trees_058",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -193.130859375,
+          22722.65625,
+          1256.2811279296875
+        ],
+        "rotation_degrees": [
+          0.0,
+          94.28359508514407,
+          0.0
+        ],
+        "scale": [
+          0.7839781641960144,
+          0.7839781641960144,
+          0.7839781641960144
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -17.381777343750002,
+          2045.0390625,
+          148.7714721212385
+        ],
+        "rotation_degrees": [
+          0.0,
+          94.28359508514407,
+          0.0
+        ],
+        "scale": [
+          0.7839781641960144,
+          0.7839781641960144,
+          0.7839781641960144
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -3.552713678800501e-15,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.2313603093959955
+    },
+    {
+      "name": "StaticMeshActor_76",
+      "label": "TS_Village_Trees_059",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          12916.9296875,
+          -13837.9501953125,
+          245.3419952392578
+        ],
+        "rotation_degrees": [
+          0.0,
+          151.49884700775146,
+          0.0
+        ],
+        "scale": [
+          0.9154900908470154,
+          0.9154900908470154,
+          0.9154900908470154
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1162.5236718750002,
+          -1245.4155175781252,
+          140.56947476282613
+        ],
+        "rotation_degrees": [
+          0.0,
+          151.49884700775146,
+          0.0
+        ],
+        "scale": [
+          0.9154900908470154,
+          0.9154900908470154,
+          0.9154900908470154
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        2.2737367544323206e-13,
+        -2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.2908203243711682
+    },
+    {
+      "name": "StaticMeshActor_77",
+      "label": "TS_Village_Trees_060",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          18004.9453125,
+          137.66015625,
+          274.9471435546875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -46.26338481903076,
+          0.0
+        ],
+        "scale": [
+          1.0136680603027344,
+          1.0136680603027344,
+          1.0136680603027344
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1770.4450781250016,
+          12.389414062499995,
+          139.37750746386183
+        ],
+        "rotation_degrees": [
+          0.0,
+          -46.26338481903076,
+          0.0
+        ],
+        "scale": [
+          1.0136680603027344,
+          1.0136680603027344,
+          1.0136680603027344
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        150.0000000000016,
+        -5.329070518200751e-15
+      ],
+      "original_ground_clearance_cm": -0.011876728931099478
+    },
+    {
+      "name": "StaticMeshActor_78",
+      "label": "TS_Village_Trees_061",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          22877.1328125,
+          -22937.810546875,
+          1184.3603515625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -81.20947837829588,
+          0.0
+        ],
+        "scale": [
+          1.0793753862380981,
+          1.0793753862380981,
+          1.0793753862380981
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2058.9419531249987,
+          -2064.402949218751,
+          159.26700958754327
+        ],
+        "rotation_degrees": [
+          0.0,
+          -81.20947837829588,
+          0.0
+        ],
+        "scale": [
+          1.0793753862380981,
+          1.0793753862380981,
+          1.0793753862380981
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.3642420526593924e-12,
+        -9.094947017729282e-13
+      ],
+      "original_ground_clearance_cm": 0.3749714405598752
+    },
+    {
+      "name": "StaticMeshActor_79",
+      "label": "TS_Village_Trees_062",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -10671.2265625,
+          9581.80078125,
+          294.259521484375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -42.45078563690186,
+          0.0
+        ],
+        "scale": [
+          0.958774209022522,
+          0.958774209022522,
+          0.958774209022522
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -960.4103906250002,
+          1212.3620703124998,
+          137.8422768141341
+        ],
+        "rotation_degrees": [
+          0.0,
+          -42.45078563690186,
+          0.0
+        ],
+        "scale": [
+          0.958774209022522,
+          0.958774209022522,
+          0.958774209022522
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -2.2737367544323206e-13,
+        349.9999999999998
+      ],
+      "original_ground_clearance_cm": -0.27137088229704887
+    },
+    {
+      "name": "StaticMeshActor_80",
+      "label": "TS_Village_Trees_063",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -18411.4375,
+          21125.9140625,
+          800.8070068359375
+        ],
+        "rotation_degrees": [
+          0.0,
+          17.006449699401863,
+          0.0
+        ],
+        "scale": [
+          0.8278225660324097,
+          0.8278225660324097,
+          0.8278225660324097
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1657.0293749999983,
+          1901.3322656249984,
+          143.7484719089016
+        ],
+        "rotation_degrees": [
+          0.0,
+          17.006449699401863,
+          0.0
+        ],
+        "scale": [
+          0.8278225660324097,
+          0.8278225660324097,
+          0.8278225660324097
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.5916157281026244e-12,
+        -1.5916157281026244e-12
+      ],
+      "original_ground_clearance_cm": 0.1835591182398275
+    },
+    {
+      "name": "StaticMeshActor_81",
+      "label": "TS_Village_Trees_064",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -1408.93359375,
+          -12652.353515625,
+          289.18914794921875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -98.48633766174325,
+          0.0
+        ],
+        "scale": [
+          1.0201306343078613,
+          1.0201306343078613,
+          1.0201306343078613
+        ]
+      },
+      "after": {
+        "location_cm": [
+          73.19597656249994,
+          -1138.7118164062504,
+          131.8522058305607
+        ],
+        "rotation_degrees": [
+          0.0,
+          -98.48633766174325,
+          0.0
+        ],
+        "scale": [
+          1.0201306343078613,
+          1.0201306343078613,
+          1.0201306343078613
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        199.99999999999994,
+        -4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": 0.12754203254007734
+    },
+    {
+      "name": "StaticMeshActor_82",
+      "label": "TS_Village_Trees_065",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -14172.689453125,
+          -20795.12890625,
+          727.68701171875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -92.10040569305421,
+          0.0
+        ],
+        "scale": [
+          1.0794267654418945,
+          1.0794267654418945,
+          1.0794267654418945
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1275.5420507812505,
+          -1871.5616015624983,
+          148.4957320551573
+        ],
+        "rotation_degrees": [
+          0.0,
+          -92.10040569305421,
+          0.0
+        ],
+        "scale": [
+          1.0794267654418945,
+          1.0794267654418945,
+          1.0794267654418945
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        1.5916157281026244e-12
+      ],
+      "original_ground_clearance_cm": 0.21144958272520853
+    },
+    {
+      "name": "StaticMeshActor_83",
+      "label": "TS_Village_Rocks",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -13910.2646484375,
+          16874.37109375,
+          202.81365966796875
+        ],
+        "rotation_degrees": [
+          0.0,
+          59.36749935150145,
+          0.0
+        ],
+        "scale": [
+          1.0209139585494995,
+          1.0209139585494995,
+          1.0209139585494995
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1251.9238183593752,
+          1518.6933984374991,
+          137.5478792624372
+        ],
+        "rotation_degrees": [
+          0.0,
+          59.36749935150145,
+          0.0
+        ],
+        "scale": [
+          1.0209139585494995,
+          1.0209139585494995,
+          1.0209139585494995
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -2.2737367544323206e-13,
+        -9.094947017729282e-13
+      ],
+      "original_ground_clearance_cm": 0.11028254439500529
+    },
+    {
+      "name": "StaticMeshActor_84",
+      "label": "TS_Village_Rocks_002",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          5442.083984375,
+          21623.94140625,
+          990.0985107421875
+        ],
+        "rotation_degrees": [
+          0.0,
+          7.546191215515146,
+          0.0
+        ],
+        "scale": [
+          0.9959034323692322,
+          0.9959034323692322,
+          0.9959034323692322
+        ]
+      },
+      "after": {
+        "location_cm": [
+          489.78755859374996,
+          1946.1547265625013,
+          151.59459653844942
+        ],
+        "rotation_degrees": [
+          0.0,
+          7.546191215515146,
+          0.0
+        ],
+        "scale": [
+          0.9959034323692322,
+          0.9959034323692322,
+          0.9959034323692322
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        1.3642420526593924e-12
+      ],
+      "original_ground_clearance_cm": 0.1723471989284917
+    },
+    {
+      "name": "StaticMeshActor_85",
+      "label": "TS_Village_Rocks_003",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -9675.544921875,
+          -19177.7578125,
+          326.8326416015625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -17.358827590942383,
+          0.0
+        ],
+        "scale": [
+          1.2207525968551636,
+          1.2207525968551636,
+          1.2207525968551636
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -870.7990429687507,
+          -1725.9982031250001,
+          143.24128604163053
+        ],
+        "rotation_degrees": [
+          0.0,
+          -17.358827590942383,
+          0.0
+        ],
+        "scale": [
+          1.2207525968551636,
+          1.2207525968551636,
+          1.2207525968551636
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        -2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.2787634565131043
+    },
+    {
+      "name": "StaticMeshActor_86",
+      "label": "TS_Village_Rocks_004",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          3408.640625,
+          17617.3671875,
+          222.30430603027344
+        ],
+        "rotation_degrees": [
+          0.0,
+          -109.8048305511475,
+          0.0
+        ],
+        "scale": [
+          0.8532930612564087,
+          0.8532930612564087,
+          0.8532930612564087
+        ]
+      },
+      "after": {
+        "location_cm": [
+          306.77765624999984,
+          1585.5630468750005,
+          143.43816440057037
+        ],
+        "rotation_degrees": [
+          0.0,
+          -109.8048305511475,
+          0.0
+        ],
+        "scale": [
+          0.8532930612564087,
+          0.8532930612564087,
+          0.8532930612564087
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.7053025658242404e-13,
+        4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": -0.21476336422290387
+    },
+    {
+      "name": "StaticMeshActor_87",
+      "label": "TS_Village_Rocks_005",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -15315.7197265625,
+          -10489.580078125,
+          393.797119140625
+        ],
+        "rotation_degrees": [
+          0.0,
+          56.79356575012207,
+          0.0
+        ],
+        "scale": [
+          0.7664528489112854,
+          0.7664528489112854,
+          0.7664528489112854
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1378.4147753906254,
+          -994.0622070312493,
+          148.67649795372228
+        ],
+        "rotation_degrees": [
+          0.0,
+          56.79356575012207,
+          0.0
+        ],
+        "scale": [
+          0.7664528489112854,
+          0.7664528489112854,
+          0.7664528489112854
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        -49.99999999999932
+      ],
+      "original_ground_clearance_cm": 0.25912937948334047
+    },
+    {
+      "name": "StaticMeshActor_88",
+      "label": "TS_Village_Rocks_006",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          11430.2265625,
+          1361.388671875,
+          299.23028564453125
+        ],
+        "rotation_degrees": [
+          0.0,
+          156.97192668914795,
+          0.0
+        ],
+        "scale": [
+          0.7759904265403748,
+          0.7759904265403748,
+          0.7759904265403748
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1478.7203906249997,
+          72.52498046875007,
+          136.65708064402105
+        ],
+        "rotation_degrees": [
+          0.0,
+          156.97192668914795,
+          0.0
+        ],
+        "scale": [
+          0.7759904265403748,
+          0.7759904265403748,
+          0.7759904265403748
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        449.9999999999998,
+        -49.99999999999993
+      ],
+      "original_ground_clearance_cm": 0.01171446119377606
+    },
+    {
+      "name": "StaticMeshActor_89",
+      "label": "TS_Village_Rocks_007",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -21440.84375,
+          -16133.7548828125,
+          922.38916015625
+        ],
+        "rotation_degrees": [
+          0.0,
+          173.9829683303833,
+          0.0
+        ],
+        "scale": [
+          1.0575121641159058,
+          1.0575121641159058,
+          1.0575121641159058
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1929.6759375000001,
+          -1452.0379394531246,
+          150.6139414712867
+        ],
+        "rotation_degrees": [
+          0.0,
+          173.9829683303833,
+          0.0
+        ],
+        "scale": [
+          1.0575121641159058,
+          1.0575121641159058,
+          1.0575121641159058
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -2.2737367544323206e-13,
+        2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": 0.2152517146256514
+    },
+    {
+      "name": "StaticMeshActor_90",
+      "label": "TS_Village_Rocks_008",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          4190.04296875,
+          -4220.431640625,
+          269.519287109375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -152.35736846923828,
+          0.0
+        ],
+        "scale": [
+          0.7585309147834778,
+          0.7585309147834778,
+          0.7585309147834778
+        ]
+      },
+      "after": {
+        "location_cm": [
+          177.10386718749987,
+          -179.83884765624998,
+          133.82613285583182
+        ],
+        "rotation_degrees": [
+          0.0,
+          -152.35736846923828,
+          0.0
+        ],
+        "scale": [
+          0.7585309147834778,
+          0.7585309147834778,
+          0.7585309147834778
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -200.0000000000001,
+        200.0
+      ],
+      "original_ground_clearance_cm": -0.09373209318903264
+    },
+    {
+      "name": "StaticMeshActor_91",
+      "label": "TS_Village_Rocks_009",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -21970.6875,
+          -18446.021484375,
+          1054.7940673828125
+        ],
+        "rotation_degrees": [
+          0.0,
+          147.56423950195312,
+          0.0
+        ],
+        "scale": [
+          1.1116795539855957,
+          1.1116795539855957,
+          1.1116795539855957
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1977.3618749999987,
+          -1660.1419335937499,
+          151.06069959478623
+        ],
+        "rotation_degrees": [
+          0.0,
+          147.56423950195312,
+          0.0
+        ],
+        "scale": [
+          1.1116795539855957,
+          1.1116795539855957,
+          1.1116795539855957
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.1368683772161603e-12,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.02282075388143312
+    },
+    {
+      "name": "StaticMeshActor_92",
+      "label": "TS_Village_Rocks_010",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -5337.146484375,
+          10815.7578125,
+          290.4683532714844
+        ],
+        "rotation_degrees": [
+          0.0,
+          -169.93510723114014,
+          0.0
+        ],
+        "scale": [
+          0.7747870683670044,
+          0.7747870683670044,
+          0.7747870683670044
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -680.3431835937499,
+          973.4182031250002,
+          135.81885713083784
+        ],
+        "rotation_degrees": [
+          0.0,
+          -169.93510723114014,
+          0.0
+        ],
+        "scale": [
+          0.7747870683670044,
+          0.7747870683670044,
+          0.7747870683670044
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -199.99999999999994,
+        2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.03302924582067135
+    },
+    {
+      "name": "StaticMeshActor_93",
+      "label": "TS_Village_Rocks_011",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -10636.3681640625,
+          11168.5390625,
+          277.14654541015625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -34.65405464172364,
+          0.0
+        ],
+        "scale": [
+          1.1008371114730835,
+          1.1008371114730835,
+          1.1008371114730835
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -957.2731347656245,
+          1005.1685156250005,
+          136.75843946568057
+        ],
+        "rotation_degrees": [
+          0.0,
+          -34.65405464172364,
+          0.0
+        ],
+        "scale": [
+          1.1008371114730835,
+          1.1008371114730835,
+          1.1008371114730835
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        4.547473508864641e-13,
+        5.684341886080801e-13
+      ],
+      "original_ground_clearance_cm": 0.0926370339220739
+    },
+    {
+      "name": "StaticMeshActor_94",
+      "label": "TS_Village_Rocks_012",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          17164.91796875,
+          -5924.841796875,
+          293.0201416015625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -51.928553581237786,
+          0.0
+        ],
+        "scale": [
+          0.8721842169761658,
+          0.8721842169761658,
+          0.8721842169761658
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1544.8426171874999,
+          -533.2357617187499,
+          137.63740713691396
+        ],
+        "rotation_degrees": [
+          0.0,
+          -51.928553581237786,
+          0.0
+        ],
+        "scale": [
+          0.8721842169761658,
+          0.8721842169761658,
+          0.8721842169761658
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 0.05168962933413468
+    },
+    {
+      "name": "StaticMeshActor_95",
+      "label": "TS_Village_Rocks_013",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          11949.171875,
+          -14432.4130859375,
+          229.8426971435547
+        ],
+        "rotation_degrees": [
+          0.0,
+          94.47023391723637,
+          0.0
+        ],
+        "scale": [
+          1.2834028005599976,
+          1.2834028005599976,
+          1.2834028005599976
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1075.4254687499997,
+          -1298.9171777343745,
+          140.21637200195502
+        ],
+        "rotation_degrees": [
+          0.0,
+          94.47023391723637,
+          0.0
+        ],
+        "scale": [
+          1.2834028005599976,
+          1.2834028005599976,
+          1.2834028005599976
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -2.2737367544323206e-13,
+        4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": -0.11897710135352213
+    },
+    {
+      "name": "StaticMeshActor_96",
+      "label": "TS_Village_Rocks_014",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          10302.52734375,
+          13535.03515625,
+          255.62974548339844
+        ],
+        "rotation_degrees": [
+          0.0,
+          -80.91361999511719,
+          0.0
+        ],
+        "scale": [
+          1.0071443319320679,
+          1.0071443319320679,
+          1.0071443319320679
+        ]
+      },
+      "after": {
+        "location_cm": [
+          627.2274609374999,
+          1218.1531640624999,
+          137.34797085283992
+        ],
+        "rotation_degrees": [
+          0.0,
+          -80.91361999511719,
+          0.0
+        ],
+        "scale": [
+          1.0071443319320679,
+          1.0071443319320679,
+          1.0071443319320679
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -300.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.051801777880768896
+    },
+    {
+      "name": "StaticMeshActor_97",
+      "label": "TS_Village_Rocks_015",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -11115.0966796875,
+          11340.18359375,
+          270.5405578613281
+        ],
+        "rotation_degrees": [
+          0.0,
+          174.30328845977783,
+          0.0
+        ],
+        "scale": [
+          1.2273770570755005,
+          1.2273770570755005,
+          1.2273770570755005
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1000.3587011718755,
+          1020.6165234375003,
+          137.23677377116752
+        ],
+        "rotation_degrees": [
+          0.0,
+          174.30328845977783,
+          0.0
+        ],
+        "scale": [
+          1.2273770570755005,
+          1.2273770570755005,
+          1.2273770570755005
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -5.684341886080801e-13,
+        3.410605131648481e-13
+      ],
+      "original_ground_clearance_cm": 0.07517785692385814
+    },
+    {
+      "name": "StaticMeshActor_98",
+      "label": "TS_Village_Rocks_016",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -11934.236328125,
+          13513.4765625,
+          227.77911376953125
+        ],
+        "rotation_degrees": [
+          0.0,
+          85.76575756072998,
+          0.0
+        ],
+        "scale": [
+          0.7743831276893616,
+          0.7743831276893616,
+          0.7743831276893616
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1074.0812695312507,
+          1216.212890625,
+          137.9786849167537
+        ],
+        "rotation_degrees": [
+          0.0,
+          85.76575756072998,
+          0.0
+        ],
+        "scale": [
+          0.7743831276893616,
+          0.7743831276893616,
+          0.7743831276893616
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.13496277968107506
+    },
+    {
+      "name": "StaticMeshActor_99",
+      "label": "TS_Village_Rocks_017",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -17424.5390625,
+          -724.388671875,
+          292.9832458496094
+        ],
+        "rotation_degrees": [
+          0.0,
+          -153.17391872406006,
+          0.0
+        ],
+        "scale": [
+          0.9458895921707153,
+          0.9458895921707153,
+          0.9458895921707153
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1568.2085156249996,
+          34.80501953124997,
+          131.64783764652964
+        ],
+        "rotation_degrees": [
+          0.0,
+          -153.17391872406006,
+          0.0
+        ],
+        "scale": [
+          0.9458895921707153,
+          0.9458895921707153,
+          0.9458895921707153
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        4.547473508864641e-13,
+        99.99999999999997
+      ],
+      "original_ground_clearance_cm": 0.20554873064099866
+    },
+    {
+      "name": "StaticMeshActor_100",
+      "label": "TS_Village_Rocks_018",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          3922.244140625,
+          23638.125,
+          1378.071044921875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -14.861841201782223,
+          0.0
+        ],
+        "scale": [
+          1.048706293106079,
+          1.048706293106079,
+          1.048706293106079
+        ]
+      },
+      "after": {
+        "location_cm": [
+          353.00197265625,
+          2127.4312500000015,
+          152.50793678683453
+        ],
+        "rotation_degrees": [
+          0.0,
+          -14.861841201782223,
+          0.0
+        ],
+        "scale": [
+          1.048706293106079,
+          1.048706293106079,
+          1.048706293106079
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        5.684341886080802e-14,
+        1.3642420526593924e-12
+      ],
+      "original_ground_clearance_cm": -0.21322241746042891
+    },
+    {
+      "name": "StaticMeshActor_101",
+      "label": "TS_Village_Rocks_019",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -675.115234375,
+          15832.09375,
+          210.5240478515625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -75.47495841979979,
+          0.0
+        ],
+        "scale": [
+          0.9452465772628784,
+          0.9452465772628784,
+          0.9452465772628784
+        ]
+      },
+      "after": {
+        "location_cm": [
+          89.23962890625,
+          1424.8884374999998,
+          140.52643966536576
+        ],
+        "rotation_degrees": [
+          0.0,
+          -75.47495841979979,
+          0.0
+        ],
+        "scale": [
+          0.9452465772628784,
+          0.9452465772628784,
+          0.9452465772628784
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        150.0,
+        -2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": 0.14533817276620198
+    },
+    {
+      "name": "StaticMeshActor_102",
+      "label": "TS_Village_Rocks_020",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          3910.88671875,
+          4814.970703125,
+          279.72930908203125
+        ],
+        "rotation_degrees": [
+          0.0,
+          135.24530410766596,
+          0.0
+        ],
+        "scale": [
+          0.9393067955970764,
+          0.9393067955970764,
+          0.9393067955970764
+        ]
+      },
+      "after": {
+        "location_cm": [
+          251.97980468749984,
+          83.34736328125018,
+          135.4349919687981
+        ],
+        "rotation_degrees": [
+          0.0,
+          135.24530410766596,
+          0.0
+        ],
+        "scale": [
+          0.9393067955970764,
+          0.9393067955970764,
+          0.9393067955970764
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -100.00000000000017,
+        -349.99999999999983
+      ],
+      "original_ground_clearance_cm": -0.07438008779837446
+    },
+    {
+      "name": "StaticMeshActor_103",
+      "label": "TS_Village_Rocks_021",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -9069.6142578125,
+          -16394.45703125,
+          267.8233337402344
+        ],
+        "rotation_degrees": [
+          0.0,
+          -64.21761989593504,
+          0.0
+        ],
+        "scale": [
+          1.1854772567749023,
+          1.1854772567749023,
+          1.1854772567749023
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -816.2652832031254,
+          -1475.5011328125001,
+          141.7290026163231
+        ],
+        "rotation_degrees": [
+          0.0,
+          -64.21761989593504,
+          0.0
+        ],
+        "scale": [
+          1.1854772567749023,
+          1.1854772567749023,
+          1.1854772567749023
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -3.410605131648481e-13,
+        -2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": 0.1621485842755419
+    },
+    {
+      "name": "StaticMeshActor_104",
+      "label": "TS_Village_Rocks_022",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          735.6328125,
+          4197.046875,
+          267.1177673339844
+        ],
+        "rotation_degrees": [
+          0.0,
+          -160.71723461151123,
+          0.0
+        ],
+        "scale": [
+          0.8565618991851807,
+          0.8565618991851807,
+          0.8565618991851807
+        ]
+      },
+      "after": {
+        "location_cm": [
+          116.20695312500004,
+          77.73421874999985,
+          135.30055508596752
+        ],
+        "rotation_degrees": [
+          0.0,
+          -160.71723461151123,
+          0.0
+        ],
+        "scale": [
+          0.8565618991851807,
+          0.8565618991851807,
+          0.8565618991851807
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        50.00000000000004,
+        -300.0000000000001
+      ],
+      "original_ground_clearance_cm": -0.0227437374519468
+    },
+    {
+      "name": "StaticMeshActor_105",
+      "label": "TS_Village_Rocks_023",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -14723.9052734375,
+          -21201.673828125,
+          865.142333984375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -32.23281383514406,
+          0.0
+        ],
+        "scale": [
+          0.7533806562423706,
+          0.7533806562423706,
+          0.7533806562423706
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1325.1514746093744,
+          -1908.1506445312516,
+          148.71022826483068
+        ],
+        "rotation_degrees": [
+          0.0,
+          -32.23281383514406,
+          0.0
+        ],
+        "scale": [
+          0.7533806562423706,
+          0.7533806562423706,
+          0.7533806562423706
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        4.547473508864641e-13,
+        -1.5916157281026244e-12
+      ],
+      "original_ground_clearance_cm": -0.2476792244447097
+    },
+    {
+      "name": "StaticMeshActor_106",
+      "label": "TS_Village_Rocks_024",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -8693.6357421875,
+          965.412109375,
+          291.1679992675781
+        ],
+        "rotation_degrees": [
+          0.0,
+          162.65996932983398,
+          0.0
+        ],
+        "scale": [
+          1.1240849494934082,
+          1.1240849494934082,
+          1.1240849494934082
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -782.4272167968747,
+          86.88708984375,
+          133.47805403927543
+        ],
+        "rotation_degrees": [
+          0.0,
+          162.65996932983398,
+          0.0
+        ],
+        "scale": [
+          1.1240849494934082,
+          1.1240849494934082,
+          1.1240849494934082
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        2.2737367544323206e-13,
+        1.4210854715202004e-14
+      ],
+      "original_ground_clearance_cm": 0.08193997317778212
+    },
+    {
+      "name": "StaticMeshActor_107",
+      "label": "TS_Village_Rocks_025",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          19845.859375,
+          -4423.26171875,
+          374.4226379394531
+        ],
+        "rotation_degrees": [
+          0.0,
+          -163.222975730896,
+          0.0
+        ],
+        "scale": [
+          1.1574616432189941,
+          1.1574616432189941,
+          1.1574616432189941
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1786.1273437499985,
+          -398.0935546874998,
+          140.30472484979487
+        ],
+        "rotation_degrees": [
+          0.0,
+          -163.222975730896,
+          0.0
+        ],
+        "scale": [
+          1.1574616432189941,
+          1.1574616432189941,
+          1.1574616432189941
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.3642420526593924e-12,
+        1.7053025658242404e-13
+      ],
+      "original_ground_clearance_cm": -0.46053168163257396
+    },
+    {
+      "name": "StaticMeshActor_108",
+      "label": "TS_Village_Rocks_026",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          8539.66796875,
+          -21994.16015625,
+          1049.1785888671875
+        ],
+        "rotation_degrees": [
+          0.0,
+          -119.27955150604248,
+          0.0
+        ],
+        "scale": [
+          1.0090211629867554,
+          1.0090211629867554,
+          1.0090211629867554
+        ]
+      },
+      "after": {
+        "location_cm": [
+          768.5701171874998,
+          -1979.4744140625007,
+          149.1342829692319
+        ],
+        "rotation_degrees": [
+          0.0,
+          -119.27955150604248,
+          0.0
+        ],
+        "scale": [
+          1.0090211629867554,
+          1.0090211629867554,
+          1.0090211629867554
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.1368683772161603e-13,
+        -9.094947017729282e-13
+      ],
+      "original_ground_clearance_cm": -0.33596924461130584
+    },
+    {
+      "name": "StaticMeshActor_109",
+      "label": "TS_Village_Rocks_027",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          22322.76953125,
+          12849.546875,
+          1140.021484375
+        ],
+        "rotation_degrees": [
+          0.0,
+          53.66211891174317,
+          0.0
+        ],
+        "scale": [
+          1.1901291608810425,
+          1.1901291608810425,
+          1.1901291608810425
+        ]
+      },
+      "after": {
+        "location_cm": [
+          2009.0492578125013,
+          1156.4592187500002,
+          140.43031877576163
+        ],
+        "rotation_degrees": [
+          0.0,
+          53.66211891174317,
+          0.0
+        ],
+        "scale": [
+          1.1901291608810425,
+          1.1901291608810425,
+          1.1901291608810425
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.3642420526593924e-12,
+        2.2737367544323206e-13
+      ],
+      "original_ground_clearance_cm": -0.008314524511433774
+    },
+    {
+      "name": "StaticMeshActor_110",
+      "label": "TS_Village_Rocks_028",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -20598.306640625,
+          -7840.908203125,
+          772.873291015625
+        ],
+        "rotation_degrees": [
+          0.0,
+          -16.074671745300293,
+          0.0
+        ],
+        "scale": [
+          0.7921019792556763,
+          0.7921019792556763,
+          0.7921019792556763
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1603.8475976562513,
+          -955.6817382812496,
+          147.2639699846053
+        ],
+        "rotation_degrees": [
+          0.0,
+          -16.074671745300293,
+          0.0
+        ],
+        "scale": [
+          0.7921019792556763,
+          0.7921019792556763,
+          0.7921019792556763
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        249.99999999999864,
+        -249.99999999999966
+      ],
+      "original_ground_clearance_cm": 0.23768778543796998
+    },
+    {
+      "name": "StaticMeshActor_111",
+      "label": "TS_Village_Rocks_029",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          22132.4375,
+          -1029.607421875,
+          895.8958740234375
+        ],
+        "rotation_degrees": [
+          0.0,
+          -31.979398727416996,
+          0.0
+        ],
+        "scale": [
+          0.9125128388404846,
+          0.9125128388404846,
+          0.9125128388404846
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1991.9193750000013,
+          -92.66466796875,
+          142.64569070851633
+        ],
+        "rotation_degrees": [
+          0.0,
+          -31.979398727416996,
+          0.0
+        ],
+        "scale": [
+          0.9125128388404846,
+          0.9125128388404846,
+          0.9125128388404846
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        1.3642420526593924e-12,
+        0.0
+      ],
+      "original_ground_clearance_cm": -0.0848304921377121
+    },
+    {
+      "name": "StaticMeshActor_112",
+      "label": "TS_Village_Rocks_030",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          10539.03125,
+          10787.44140625,
+          279.5254211425781
+        ],
+        "rotation_degrees": [
+          0.0,
+          152.14197635650635,
+          0.0
+        ],
+        "scale": [
+          1.0004433393478394,
+          1.0004433393478394,
+          1.0004433393478394
+        ]
+      },
+      "after": {
+        "location_cm": [
+          948.5128124999992,
+          770.8697265624996,
+          137.69447918075542
+        ],
+        "rotation_degrees": [
+          0.0,
+          152.14197635650635,
+          0.0
+        ],
+        "scale": [
+          1.0004433393478394,
+          1.0004433393478394,
+          1.0004433393478394
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -7.958078640513122e-13,
+        -200.00000000000034
+      ],
+      "original_ground_clearance_cm": 0.0459676847175956
+    },
+    {
+      "name": "LoopRailTrack_0",
+      "label": "TS_Village_LoopRail",
+      "class": "/Script/LoopRail.LoopRailTrack",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          330.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "spline_points_local_cm": [
+          [
+            13000.0,
+            0.0,
+            0.0
+          ],
+          [
+            12010.43359375,
+            3635.492919921875,
+            0.0
+          ],
+          [
+            9192.3876953125,
+            6717.51416015625,
+            0.0
+          ],
+          [
+            4974.8828125,
+            8776.85546875,
+            0.0
+          ],
+          [
+            -0.0011364960810169578,
+            9499.9990234375,
+            0.0
+          ],
+          [
+            -4974.884765625,
+            8776.85546875,
+            0.0
+          ],
+          [
+            -9192.3896484375,
+            6717.51416015625,
+            0.0
+          ],
+          [
+            -12010.435546875,
+            3635.4912109375,
+            0.0
+          ],
+          [
+            -12999.9990234375,
+            -0.0008305163937620819,
+            0.0
+          ],
+          [
+            -12010.43359375,
+            -3635.492919921875,
+            0.0
+          ],
+          [
+            -9192.384765625,
+            -6717.515625,
+            0.0
+          ],
+          [
+            -4974.87890625,
+            -8776.857421875,
+            0.0
+          ],
+          [
+            0.0022729921620339155,
+            -9499.9990234375,
+            0.0
+          ],
+          [
+            4974.888671875,
+            -8776.85546875,
+            0.0
+          ],
+          [
+            9192.392578125,
+            -6717.51220703125,
+            0.0
+          ],
+          [
+            12010.4345703125,
+            -3635.492431640625,
+            0.0
+          ]
+        ],
+        "spline_tangents_local_cm": [
+          [
+            -0.00048828125,
+            3635.49267578125,
+            0.0
+          ],
+          [
+            -1903.80615234375,
+            3358.757080078125,
+            0.0
+          ],
+          [
+            -3517.775390625,
+            2570.6812744140625,
+            0.0
+          ],
+          [
+            -4596.1944159042905,
+            1391.242431640625,
+            0.0
+          ],
+          [
+            -4974.8837890625,
+            0.0,
+            0.0
+          ],
+          [
+            -4596.1942559707095,
+            -1391.242431640625,
+            0.0
+          ],
+          [
+            -3517.775390625,
+            -2570.68212890625,
+            0.0
+          ],
+          [
+            -1903.8046875,
+            -3358.757495336322,
+            0.0
+          ],
+          [
+            0.0009765625,
+            -3635.4920654296875,
+            0.0
+          ],
+          [
+            1903.80712890625,
+            -3358.757397241803,
+            0.0
+          ],
+          [
+            3517.77734375,
+            -2570.6822509765625,
+            0.0
+          ],
+          [
+            4596.193519308581,
+            -1391.24169921875,
+            0.0
+          ],
+          [
+            4974.8837890625,
+            0.0009765625,
+            0.0
+          ],
+          [
+            4596.195152566419,
+            1391.243408203125,
+            0.0
+          ],
+          [
+            3517.77294921875,
+            2570.6815185546875,
+            0.0
+          ],
+          [
+            1903.8037109375,
+            3358.756103515625,
+            0.0
+          ]
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          196.42857142857142
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "spline_points_local_cm": [
+          [
+            7738.095238095238,
+            0.0,
+            0.0
+          ],
+          [
+            7149.067615327381,
+            2163.983880905878,
+            0.0
+          ],
+          [
+            5471.659342447917,
+            3998.520333426339,
+            0.0
+          ],
+          [
+            2961.239769345238,
+            5224.318731398809,
+            0.0
+          ],
+          [
+            -0.0006764857625100939,
+            5654.761323474702,
+            0.0
+          ],
+          [
+            -2961.2409319196427,
+            5224.318731398809,
+            0.0
+          ],
+          [
+            -5471.660505022322,
+            3998.520333426339,
+            0.0
+          ],
+          [
+            -7149.068777901785,
+            2163.982863653274,
+            0.0
+          ],
+          [
+            -7738.094656808035,
+            -0.0004943549962869535,
+            0.0
+          ],
+          [
+            -7149.067615327381,
+            -2163.983880905878,
+            0.0
+          ],
+          [
+            -5471.657598586309,
+            -3998.5212053571427,
+            0.0
+          ],
+          [
+            -2961.2374441964284,
+            -5224.319893973215,
+            0.0
+          ],
+          [
+            0.0013529715250201878,
+            -5654.761323474702,
+            0.0
+          ],
+          [
+            2961.2432570684523,
+            -5224.318731398809,
+            0.0
+          ],
+          [
+            5471.662248883928,
+            -3998.5191708519346,
+            0.0
+          ],
+          [
+            7149.068196614583,
+            -2163.9835902622767,
+            0.0
+          ]
+        ],
+        "spline_tangents_local_cm": [
+          [
+            -0.0002906436011904762,
+            2163.9837355840773,
+            0.0
+          ],
+          [
+            -1133.2179478236608,
+            1999.2601667131696,
+            0.0
+          ],
+          [
+            -2093.9139229910716,
+            1530.1674252464657,
+            0.0
+          ],
+          [
+            -2735.83000946684,
+            828.1204950241815,
+            0.0
+          ],
+          [
+            -2961.2403506324404,
+            0.0,
+            0.0
+          ],
+          [
+            -2735.8299142682795,
+            -828.1204950241815,
+            0.0
+          ],
+          [
+            -2093.9139229910716,
+            -1530.167933872768,
+            0.0
+          ],
+          [
+            -1133.217075892857,
+            -1999.2604138906677,
+            0.0
+          ],
+          [
+            0.0005812872023809524,
+            -2163.983372279576,
+            0.0
+          ],
+          [
+            1133.218529110863,
+            -1999.2603555010733,
+            0.0
+          ],
+          [
+            2093.915085565476,
+            -1530.1680065336682,
+            0.0
+          ],
+          [
+            2735.829475778917,
+            -828.1200590587797,
+            0.0
+          ],
+          [
+            2961.2403506324404,
+            0.0005812872023809524,
+            0.0
+          ],
+          [
+            2735.8304479562016,
+            828.121076311384,
+            0.0
+          ],
+          [
+            2093.9124697730654,
+            1530.1675705682665,
+            0.0
+          ],
+          [
+            1133.2164946056548,
+            1999.2595854259673,
+            0.0
+          ]
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "LoopRailStation_0",
+      "label": "TS_Village_Station_01",
+      "class": "/Script/LoopRail.LoopRailStation",
+      "before": {
+        "location_cm": [
+          -12999.9990234375,
+          -0.0008305163937620819,
+          330.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          -89.999984609261,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -7738.094656808035,
+          -0.0004943549962869535,
+          196.42857142857142
+        ],
+        "rotation_degrees": [
+          0.0,
+          -89.999984609261,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "LoopRailStation_1",
+      "label": "TS_Village_Station_02",
+      "class": "/Script/LoopRail.LoopRailStation",
+      "before": {
+        "location_cm": [
+          6216.07294492355,
+          8339.862328092124,
+          330.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          158.10649061786611,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          3700.070830844686,
+          4964.192742816453,
+          196.42857142857142
+        ],
+        "rotation_degrees": [
+          0.0,
+          158.10630484705035,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "LoopRailStation_2",
+      "label": "TS_Village_Station_03",
+      "class": "/Script/LoopRail.LoopRailStation",
+      "before": {
+        "location_cm": [
+          7201.482944492285,
+          -7902.8818680112345,
+          330.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          25.9531508051813,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          4286.6384880360565,
+          -4704.076151823909,
+          196.42857142857142
+        ],
+        "rotation_degrees": [
+          0.0,
+          25.95344833070081,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "BlockingVolume_0",
+      "label": "TS_Village_Boundary_North",
+      "class": "/Script/Engine.BlockingVolume",
+      "before": {
+        "location_cm": [
+          25500.0,
+          0.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          5.0,
+          260.0,
+          125.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          15500.0,
+          0.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          5.0,
+          160.0,
+          125.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "BlockingVolume_1",
+      "label": "TS_Village_Boundary_South",
+      "class": "/Script/Engine.BlockingVolume",
+      "before": {
+        "location_cm": [
+          -25500.0,
+          0.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          5.0,
+          260.0,
+          125.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -15500.0,
+          0.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          5.0,
+          160.0,
+          125.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "BlockingVolume_2",
+      "label": "TS_Village_Boundary_East",
+      "class": "/Script/Engine.BlockingVolume",
+      "before": {
+        "location_cm": [
+          0.0,
+          25500.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          260.0,
+          5.0,
+          125.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          15500.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          160.0,
+          5.0,
+          125.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "BlockingVolume_3",
+      "label": "TS_Village_Boundary_West",
+      "class": "/Script/Engine.BlockingVolume",
+      "before": {
+        "location_cm": [
+          0.0,
+          -25500.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          260.0,
+          5.0,
+          125.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          -15500.0,
+          7500.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          160.0,
+          5.0,
+          125.0
+        ]
+      },
+      "category": "level_infrastructure_or_rail"
+    },
+    {
+      "name": "DecalActor_0",
+      "label": "TS_Village_LayoutPreview_Farm",
+      "class": "/Script/Engine.DecalActor",
+      "before": {
+        "location_cm": [
+          -8500.0,
+          -8500.0,
+          319.1385626478218
+        ],
+        "rotation_degrees": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "decal_size_cm": [
+          80.54668426222634,
+          3000.0,
+          3000.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -765.0,
+          -765.0,
+          161.15369564654623
+        ],
+        "rotation_degrees": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "decal_size_cm": [
+          80.54668426222634,
+          270.0,
+          270.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 19.922530661097085
+    },
+    {
+      "name": "DecalActor_1",
+      "label": "TS_Village_LayoutPreview_Workshop",
+      "class": "/Script/Engine.DecalActor",
+      "before": {
+        "location_cm": [
+          -3500.0,
+          8500.0,
+          287.1089816033416
+        ],
+        "rotation_degrees": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "decal_size_cm": [
+          32.89101839665841,
+          3000.0,
+          3000.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -315.0,
+          765.0,
+          121.96695973298637
+        ],
+        "rotation_degrees": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "decal_size_cm": [
+          32.89101839665841,
+          270.0,
+          270.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": -12.891018396656648
+    },
+    {
+      "name": "DecalActor_2",
+      "label": "TS_Village_LayoutPreview_Depot",
+      "class": "/Script/Engine.DecalActor",
+      "before": {
+        "location_cm": [
+          8200.0,
+          -700.0,
+          270.702677958343
+        ],
+        "rotation_degrees": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "decal_size_cm": [
+          49.297322041657026,
+          3000.0,
+          3000.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          738.0,
+          -63.0,
+          121.29751758615544
+        ],
+        "rotation_degrees": [
+          -90.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "decal_size_cm": [
+          49.297322041657026,
+          270.0,
+          270.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": -12.111027091441656
+    },
+    {
+      "name": "BP_ExtractionPoint_C_0",
+      "label": "RaidVillage_Extraction_1",
+      "class": "/Game/Interaction/BP_ExtractionPoint.BP_ExtractionPoint_C",
+      "before": {
+        "location_cm": [
+          -20500.0,
+          -11500.0,
+          856.8660949301884
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1845.0,
+          -485.0,
+          163.0581716433328
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        550.0
+      ],
+      "original_ground_clearance_cm": 29.52811474784471
+    },
+    {
+      "name": "StaticMeshActor_113",
+      "label": "RaidVillage_ExtractionVoxel_1",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          -20499.843780665436,
+          -11499.875497924271,
+          831.3329889123305
+        ],
+        "rotation_degrees": [
+          -1.987846675914698e-16,
+          128.55378361657384,
+          -2.862584644783795
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1844.9859402598886,
+          -484.98879481318363,
+          137.5348570703842
+        ],
+        "rotation_degrees": [
+          -1.987846675914698e-16,
+          128.55378361657384,
+          -2.862584644783795
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        6.821210263296962e-13,
+        550.0000000000007
+      ],
+      "original_ground_clearance_cm": 4.004997505997039
+    },
+    {
+      "name": "BP_ExtractionPoint_C_1",
+      "label": "RaidVillage_Extraction_2",
+      "class": "/Game/Interaction/BP_ExtractionPoint.BP_ExtractionPoint_C",
+      "before": {
+        "location_cm": [
+          12000.0,
+          14000.0,
+          253.7497138933395
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1080.0,
+          1260.0,
+          152.48580975278455
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        0.0,
+        0.0
+      ],
+      "original_ground_clearance_cm": 13.907479993512965
+    },
+    {
+      "name": "StaticMeshActor_114",
+      "label": "RaidVillage_ExtractionVoxel_2",
+      "class": "/Script/Engine.StaticMeshActor",
+      "before": {
+        "location_cm": [
+          12000.062535268291,
+          13999.968732365855,
+          243.84293625384274
+        ],
+        "rotation_degrees": [
+          0.0,
+          63.4349488229216,
+          -1.0015318887320175
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1080.0056281741454,
+          1259.9971859129273,
+          142.57869648632413
+        ],
+        "rotation_degrees": [
+          0.0,
+          63.4349488229216,
+          -1.0015318887320175
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        4.547473508864641e-13
+      ],
+      "original_ground_clearance_cm": 4.000366727052551
+    },
+    {
+      "name": "BP_MemoAnchor_C_0",
+      "label": "Memo_016",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -15267.786039444316,
+          13560.249043211501,
+          246.311439021134
+        ],
+        "rotation_degrees": [
+          68.63853454589848,
+          -90.00000000000004,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1374.1007435499887,
+          1570.422413889035,
+          138.8661070901301
+        ],
+        "rotation_degrees": [
+          68.63853454589848,
+          -90.00000000000004,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -2.2737367544323206e-13,
+        350.0
+      ],
+      "memo_id": 16,
+      "original_ground_clearance_cm": 1.0000000000011653
+    },
+    {
+      "name": "BP_MemoAnchor_C_1",
+      "label": "Memo_017",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -13746.1971497565,
+          -17550.10737441483,
+          276.75012299185636
+        ],
+        "rotation_degrees": [
+          8.802158658572127,
+          -89.92723510248688,
+          0.452679332117629
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1587.1577434780847,
+          -1929.509663697334,
+          151.7065214364119
+        ],
+        "rotation_degrees": [
+          8.802158658572127,
+          -89.92723510248688,
+          0.452679332117629
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -349.9999999999998,
+        -349.9999999999993
+      ],
+      "memo_id": 17,
+      "original_ground_clearance_cm": 1.0000609681227388
+    },
+    {
+      "name": "BP_MemoAnchor_C_2",
+      "label": "Memo_018",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -332.1307410130212,
+          -3522.037290664603,
+          245.09419160471438
+        ],
+        "rotation_degrees": [
+          -63.75967832640924,
+          -178.18386084217494,
+          -2.02463526141253
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          270.1082333088281,
+          -766.9833561598143,
+          130.02812704512232
+        ],
+        "rotation_degrees": [
+          -63.75967832640924,
+          -178.18386084217494,
+          -2.02463526141253
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        300.0,
+        -450.00000000000006
+      ],
+      "memo_id": 18,
+      "original_ground_clearance_cm": 1.000122020034695
+    },
+    {
+      "name": "BP_MemoAnchor_C_3",
+      "label": "Memo_019",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          19574.081148582714,
+          10061.32545363631,
+          521.3039168001778
+        ],
+        "rotation_degrees": [
+          83.8420562744144,
+          -90.00000000000036,
+          -5.93002061237633e-14
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1761.6673033724437,
+          905.5192908272675,
+          140.60771240708596
+        ],
+        "rotation_degrees": [
+          83.8420562744144,
+          -90.00000000000036,
+          -5.93002061237633e-14
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        -3.410605131648481e-13
+      ],
+      "memo_id": 19,
+      "original_ground_clearance_cm": 0.9999999999988631
+    },
+    {
+      "name": "BP_MemoAnchor_C_4",
+      "label": "Memo_020",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -231.919828331038,
+          17593.494526340393,
+          199.71864147629182
+        ],
+        "rotation_degrees": [
+          -73.85774029073201,
+          86.90500374334164,
+          -176.77823559703307
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          79.12721545020659,
+          1683.414507370635,
+          145.88588873744987
+        ],
+        "rotation_degrees": [
+          -73.85774029073201,
+          86.90500374334164,
+          -176.77823559703307
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        100.00000000000001,
+        99.99999999999955
+      ],
+      "memo_id": 20,
+      "original_ground_clearance_cm": 1.000122094528649
+    },
+    {
+      "name": "BP_MemoAnchor_C_5",
+      "label": "Memo_021",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -10745.607577851873,
+          13760.147065586825,
+          222.24562886078184
+        ],
+        "rotation_degrees": [
+          72.17145155497306,
+          175.82140564188447,
+          -4.3885822003552555
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -967.1046820066676,
+          1588.4132359028135,
+          138.64862993971062
+        ],
+        "rotation_degrees": [
+          72.17145155497306,
+          175.82140564188447,
+          -4.3885822003552555
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        9.094947017729282e-13,
+        349.9999999999993
+      ],
+      "memo_id": 21,
+      "original_ground_clearance_cm": 1.000274553457956
+    },
+    {
+      "name": "BP_MemoAnchor_C_6",
+      "label": "Memo_022",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          12298.522996658547,
+          -4060.9202257411634,
+          301.0
+        ],
+        "rotation_degrees": [
+          86.54256439209082,
+          90.00000000000085,
+          179.9999999999998
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          806.8670696992685,
+          -815.4828203167049,
+          130.86201606054658
+        ],
+        "rotation_degrees": [
+          86.54256439209082,
+          90.00000000000085,
+          179.9999999999998
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -300.0000000000007,
+        -450.00000000000017
+      ],
+      "memo_id": 22,
+      "original_ground_clearance_cm": 1.0000000000078444
+    },
+    {
+      "name": "BP_MemoAnchor_C_7",
+      "label": "Memo_023",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          17165.97692642289,
+          -7974.280656431036,
+          293.18702315556584
+        ],
+        "rotation_degrees": [
+          4.150197505950931,
+          -90.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1494.93792337806,
+          -967.685259078793,
+          142.7682325585793
+        ],
+        "rotation_degrees": [
+          4.150197505950931,
+          -90.00000000000003,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -49.99999999999977,
+        -249.99999999999977
+      ],
+      "memo_id": 23,
+      "original_ground_clearance_cm": 0.9999999999982379
+    },
+    {
+      "name": "BP_MemoAnchor_C_8",
+      "label": "Memo_024",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          13370.090330946376,
+          6951.44609025526,
+          389.99255753835956
+        ],
+        "rotation_degrees": [
+          -28.938948496067113,
+          -62.881263425751186,
+          -1.1441514686553693
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1203.3081297851732,
+          775.630148122973,
+          139.21379686439923
+        ],
+        "rotation_degrees": [
+          -28.938948496067113,
+          -62.881263425751186,
+          -1.1441514686553693
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -6.821210263296962e-13,
+        149.99999999999955
+      ],
+      "memo_id": 24,
+      "original_ground_clearance_cm": 1.0001527159556645
+    },
+    {
+      "name": "BP_MemoAnchor_C_9",
+      "label": "Memo_025",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -10274.561371616805,
+          -8524.379962559404,
+          294.9466188390866
+        ],
+        "rotation_degrees": [
+          -52.88045925644698,
+          89.40891484267367,
+          -179.25872919778067
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1174.710523445512,
+          -567.1941966303466,
+          140.22042984110118
+        ],
+        "rotation_degrees": [
+          -52.88045925644698,
+          89.40891484267367,
+          -179.25872919778067
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -249.99999999999966,
+        199.99999999999977
+      ],
+      "memo_id": 25,
+      "original_ground_clearance_cm": 1.0000304789351162
+    },
+    {
+      "name": "BP_MemoAnchor_C_10",
+      "label": "Memo_026",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          5557.284625681677,
+          -10128.950121433802,
+          298.6558327611201
+        ],
+        "rotation_degrees": [
+          70.36656188964847,
+          90.00000000000007,
+          180.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          550.155616311351,
+          -911.6055109290428,
+          130.42449752992383
+        ],
+        "rotation_degrees": [
+          70.36656188964847,
+          90.00000000000007,
+          180.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        50.0,
+        -6.821210263296962e-13
+      ],
+      "memo_id": 26,
+      "original_ground_clearance_cm": 1.0000000000049454
+    },
+    {
+      "name": "BP_MemoAnchor_C_11",
+      "label": "Memo_027",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          1046.3089126822197,
+          -4813.610628810052,
+          269.07503075776515
+        ],
+        "rotation_degrees": [
+          -31.10304282468013,
+          90.0000000032408,
+          179.9999999936442
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          444.16780214139976,
+          -783.2249565929051,
+          129.42149817673908
+        ],
+        "rotation_degrees": [
+          -31.10304282468013,
+          90.0000000032408,
+          179.9999999936442
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        350.0,
+        -350.0000000000004
+      ],
+      "memo_id": 27,
+      "original_ground_clearance_cm": 1.0000304696395688
+    },
+    {
+      "name": "BP_MemoAnchor_C_12",
+      "label": "Memo_028",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          9251.961269190075,
+          18918.213617327096,
+          241.56956062456894
+        ],
+        "rotation_degrees": [
+          41.56854189228629,
+          -169.61223436980538,
+          -175.18034778927625
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1082.676514227107,
+          1752.63922555944,
+          148.2245212631173
+        ],
+        "rotation_degrees": [
+          41.56854189228629,
+          -169.61223436980538,
+          -175.18034778927625
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        250.00000000000023,
+        50.00000000000159
+      ],
+      "memo_id": 28,
+      "original_ground_clearance_cm": 1.0019815855343381
+    },
+    {
+      "name": "BP_MemoAnchor_C_13",
+      "label": "Memo_029",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          4230.851821933844,
+          9631.88356451803,
+          301.0
+        ],
+        "rotation_degrees": [
+          41.485229492187564,
+          90.00000000000003,
+          180.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1080.7766639740457,
+          766.869520806622,
+          139.11342062766255
+        ],
+        "rotation_degrees": [
+          41.485229492187564,
+          90.00000000000003,
+          180.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        699.9999999999998,
+        -100.00000000000068
+      ],
+      "memo_id": 29,
+      "original_ground_clearance_cm": 1.0000000000078444
+    },
+    {
+      "name": "BP_MemoAnchor_C_14",
+      "label": "Memo_030",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          6009.358532941504,
+          -7645.348471276522,
+          301.0
+        ],
+        "rotation_degrees": [
+          -31.471221923828207,
+          -90.00000000000009,
+          -3.729095302804421e-15
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          540.8422679647356,
+          -788.0813624148868,
+          129.45943790340056
+        ],
+        "rotation_degrees": [
+          -31.471221923828207,
+          -90.00000000000009,
+          -3.729095302804421e-15
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        2.2737367544323206e-13,
+        -99.99999999999989
+      ],
+      "memo_id": 30,
+      "original_ground_clearance_cm": 1.0000000000017621
+    },
+    {
+      "name": "BP_MemoAnchor_C_15",
+      "label": "Memo_031",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -2870.915296739542,
+          -9331.618230182054,
+          301.0
+        ],
+        "rotation_degrees": [
+          -32.07104492187508,
+          -90.00000000000001,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -258.3823767065587,
+          -1589.8456407163849,
+          138.67175529970876
+        ],
+        "rotation_degrees": [
+          -32.07104492187508,
+          -90.00000000000001,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        5.684341886080802e-14,
+        -750.0000000000001
+      ],
+      "memo_id": 31,
+      "original_ground_clearance_cm": 1.0000000000017621
+    },
+    {
+      "name": "BP_MemoAnchor_C_16",
+      "label": "Memo_032",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -20355.952979103167,
+          -5451.777353343426,
+          548.1162395854452
+        ],
+        "rotation_degrees": [
+          -41.01574536965669,
+          121.61866319512056,
+          -16.90555229889241
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -2332.0357681192836,
+          -490.6599618009086,
+          138.29121775614192
+        ],
+        "rotation_degrees": [
+          -41.01574536965669,
+          121.61866319512056,
+          -16.90555229889241
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -499.99999999999864,
+        -3.410605131648481e-13
+      ],
+      "memo_id": 32,
+      "original_ground_clearance_cm": 1.0249766213136127
+    },
+    {
+      "name": "BP_MemoAnchor_C_17",
+      "label": "Memo_033",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          13394.297918913377,
+          -8829.857237397331,
+          288.49990463111317
+        ],
+        "rotation_degrees": [
+          70.99267578125007,
+          -90.00000000000007,
+          -5.859371047579277e-14
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          805.4868127022037,
+          -944.6871513657597,
+          131.86015612655262
+        ],
+        "rotation_degrees": [
+          70.99267578125007,
+          -90.00000000000007,
+          -5.859371047579277e-14
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -400.0000000000002,
+        -150.0
+      ],
+      "memo_id": 33,
+      "original_ground_clearance_cm": 0.9999999999994316
+    },
+    {
+      "name": "BP_MemoAnchor_C_18",
+      "label": "Memo_034",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          14667.229343985025,
+          1141.367792267014,
+          299.4355926222597
+        ],
+        "rotation_degrees": [
+          -7.889205932617188,
+          90.0,
+          180.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1520.0506409586524,
+          702.7231013040312,
+          140.04323889088
+        ],
+        "rotation_degrees": [
+          -7.889205932617188,
+          90.0,
+          180.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        200.00000000000023,
+        599.9999999999999
+      ],
+      "memo_id": 34,
+      "original_ground_clearance_cm": 0.9999999999951683
+    },
+    {
+      "name": "BP_MemoAnchor_C_19",
+      "label": "Memo_035",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -19271.831141984145,
+          -20931.233926228117,
+          748.5089011999643
+        ],
+        "rotation_degrees": [
+          -14.54855897407776,
+          -174.88155105610954,
+          -19.625043903337765
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1734.4648027785734,
+          -1933.8110533605286,
+          152.8836404121215
+        ],
+        "rotation_degrees": [
+          -14.54855897407776,
+          -174.88155105610954,
+          -19.625043903337765
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -4.547473508864641e-13,
+        -49.99999999999818
+      ],
+      "memo_id": 35,
+      "original_ground_clearance_cm": 1.0574381952832255
+    },
+    {
+      "name": "BP_MemoAnchor_C_20",
+      "label": "Memo_036",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          13318.144278714943,
+          9592.978645274825,
+          267.1732884556094
+        ],
+        "rotation_degrees": [
+          87.18753396279847,
+          95.8682107356124,
+          -20.801256790364846
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1548.632985084345,
+          863.3680780747345,
+          140.05132143562116
+        ],
+        "rotation_degrees": [
+          87.18753396279847,
+          95.8682107356124,
+          -20.801256790364846
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        350.0000000000002,
+        3.410605131648481e-13
+      ],
+      "memo_id": 36,
+      "original_ground_clearance_cm": 1.0001518510940741
+    },
+    {
+      "name": "BP_MemoAnchor_C_21",
+      "label": "Memo_037",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          3512.616554621234,
+          19316.47953659635,
+          269.56804172312417
+        ],
+        "rotation_degrees": [
+          78.65668656485545,
+          -123.56553578695164,
+          -120.47197008617893
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          316.13548991591097,
+          1738.4831582936713,
+          147.8353249233939
+        ],
+        "rotation_degrees": [
+          78.65668656485545,
+          -123.56553578695164,
+          -120.47197008617893
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.1368683772161603e-13,
+        -2.2737367544323206e-13
+      ],
+      "memo_id": 37,
+      "original_ground_clearance_cm": 1.0146858770046379
+    },
+    {
+      "name": "BP_MemoAnchor_C_22",
+      "label": "Memo_038",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          7635.325207463087,
+          -1383.352114320125,
+          280.68733310444804
+        ],
+        "rotation_degrees": [
+          -82.98901367187538,
+          -90.00000000000021,
+          2.605737796069318e-14
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          687.1792686716781,
+          -774.5016902888112,
+          129.81324404761295
+        ],
+        "rotation_degrees": [
+          -82.98901367187538,
+          -90.00000000000021,
+          2.605737796069318e-14
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        2.2737367544323206e-13,
+        -650.0
+      ],
+      "memo_id": 38,
+      "original_ground_clearance_cm": 0.9999999999982379
+    },
+    {
+      "name": "BP_MemoAnchor_C_23",
+      "label": "Memo_039",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          19819.23375533934,
+          15920.135610526137,
+          327.08396109297723
+        ],
+        "rotation_degrees": [
+          -13.309170345839442,
+          90.42525585573438,
+          -165.97703681821065
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          1833.7310379805422,
+          1632.8122049473532,
+          141.95850571352622
+        ],
+        "rotation_degrees": [
+          -13.309170345839442,
+          90.42525585573438,
+          -165.97703681821065
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        50.00000000000159,
+        200.0000000000009
+      ],
+      "memo_id": 39,
+      "original_ground_clearance_cm": 1.0290173314822937
+    },
+    {
+      "name": "BP_MemoAnchor_C_24",
+      "label": "Memo_040",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          14529.03562378692,
+          -6960.417443181479,
+          292.4055466544596
+        ],
+        "rotation_degrees": [
+          -1.6084289550781257,
+          -90.00000000000001,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          707.6132061408225,
+          -926.4375698863332,
+          131.00544649643518
+        ],
+        "rotation_degrees": [
+          -1.6084289550781257,
+          -90.00000000000001,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -600.0000000000002,
+        -300.0000000000001
+      ],
+      "memo_id": 40,
+      "original_ground_clearance_cm": 0.9999999999973852
+    },
+    {
+      "name": "BP_MemoAnchor_C_25",
+      "label": "Memo_041",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          9157.501479963947,
+          -4219.192905048854,
+          298.3241463778057
+        ],
+        "rotation_degrees": [
+          56.843942741474294,
+          90.68511910422903,
+          -179.18165522278795
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          574.1751331967553,
+          -1029.727361454397,
+          131.34713265386318
+        ],
+        "rotation_degrees": [
+          56.843942741474294,
+          90.68511910422903,
+          -179.18165522278795
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -249.9999999999999,
+        -650.0
+      ],
+      "memo_id": 41,
+      "original_ground_clearance_cm": 1.0000305096612578
+    },
+    {
+      "name": "BP_MemoAnchor_C_26",
+      "label": "Memo_042",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -16870.358405521158,
+          -6633.502627563703,
+          390.6170240507005
+        ],
+        "rotation_degrees": [
+          2.9932276650669483,
+          19.745993836423402,
+          -166.5055008458356
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1318.332256496904,
+          -547.0152364807336,
+          138.42715011474257
+        ],
+        "rotation_degrees": [
+          2.9932276650669483,
+          19.745993836423402,
+          -166.5055008458356
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        200.00000000000023,
+        49.99999999999966
+      ],
+      "memo_id": 42,
+      "original_ground_clearance_cm": 1.0283107605440023
+    },
+    {
+      "name": "BP_MemoAnchor_C_27",
+      "label": "Memo_043",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -21738.552662762377,
+          -18732.326323227084,
+          1005.4410783439416
+        ],
+        "rotation_degrees": [
+          -9.97211447980391,
+          -90.72594541596789,
+          -165.73887908505608
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1956.4697396486154,
+          -1935.9093690904374,
+          153.74253098416227
+        ],
+        "rotation_degrees": [
+          -9.97211447980391,
+          -90.72594541596789,
+          -165.73887908505608
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.5916157281026244e-12,
+        -250.0
+      ],
+      "memo_id": 43,
+      "original_ground_clearance_cm": 1.0307987496947817
+    },
+    {
+      "name": "BP_MemoAnchor_C_28",
+      "label": "Memo_044",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -20480.03967113083,
+          -14692.457084782338,
+          841.5814417782904
+        ],
+        "rotation_degrees": [
+          21.125761033719048,
+          77.82702725574958,
+          -5.344934293700596
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1843.2035704017762,
+          -1322.3211376304098,
+          151.20773551012758
+        ],
+        "rotation_degrees": [
+          21.125761033719048,
+          77.82702725574958,
+          -5.344934293700596
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -1.5916157281026244e-12,
+        6.821210263296962e-13
+      ],
+      "memo_id": 44,
+      "original_ground_clearance_cm": 1.0037965253243328
+    },
+    {
+      "name": "BP_MemoAnchor_C_29",
+      "label": "Memo_045",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          11298.451058654684,
+          -16000.98802500682,
+          208.82043341089766
+        ],
+        "rotation_degrees": [
+          26.277856632325644,
+          44.37500871515591,
+          -1.4114632683172759
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          816.8605952789221,
+          -1240.088922250614,
+          136.50511887894461
+        ],
+        "rotation_degrees": [
+          26.277856632325644,
+          44.37500871515591,
+          -1.4114632683172759
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -199.99999999999943,
+        199.99999999999977
+      ],
+      "memo_id": 45,
+      "original_ground_clearance_cm": 1.000243999104697
+    },
+    {
+      "name": "BP_MemoAnchor_C_30",
+      "label": "Memo_046",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -11488.70548068653,
+          -12877.21176616234,
+          250.48492199970767
+        ],
+        "rotation_degrees": [
+          -9.641860341126291,
+          89.920390854032,
+          -179.54557715284255
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1283.9834932617887,
+          -858.9490589546112,
+          147.4192979118252
+        ],
+        "rotation_degrees": [
+          -9.641860341126291,
+          89.920390854032,
+          -179.54557715284255
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -250.0000000000009,
+        299.9999999999993
+      ],
+      "memo_id": 46,
+      "original_ground_clearance_cm": 1.0000610314909864
+    },
+    {
+      "name": "BP_MemoAnchor_C_31",
+      "label": "Memo_047",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -1988.2816788284,
+          10346.947461309079,
+          300.2184400511178
+        ],
+        "rotation_degrees": [
+          -87.205596923829,
+          90.00000000000104,
+          179.99999999999974
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -678.9453510945559,
+          1581.2252715178165,
+          140.30624086947427
+        ],
+        "rotation_degrees": [
+          -87.205596923829,
+          90.00000000000104,
+          179.99999999999974
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        -499.99999999999994,
+        649.9999999999994
+      ],
+      "memo_id": 47,
+      "original_ground_clearance_cm": 1.000000000002899
+    },
+    {
+      "name": "BP_MemoAnchor_C_32",
+      "label": "Memo_048",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -15991.719327100129,
+          6810.413955824075,
+          305.6222787136185
+        ],
+        "rotation_degrees": [
+          -57.29932121825175,
+          90.69761634327266,
+          179.1710059382916
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -1439.2547394390112,
+          612.9372560241663,
+          133.67127649422395
+        ],
+        "rotation_degrees": [
+          -57.29932121825175,
+          90.69761634327266,
+          179.1710059382916
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        2.2737367544323206e-13,
+        -3.410605131648481e-13
+      ],
+      "memo_id": 48,
+      "original_ground_clearance_cm": 1.000030549715973
+    },
+    {
+      "name": "BP_MemoAnchor_C_33",
+      "label": "Memo_049",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          -5447.9867532823555,
+          20015.382767492152,
+          369.6700890576392
+        ],
+        "rotation_degrees": [
+          -69.51240045834375,
+          127.40650107843292,
+          -125.61653682610591
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          -240.31880779541189,
+          1801.3844490742922,
+          144.84196544387675
+        ],
+        "rotation_degrees": [
+          -69.51240045834375,
+          127.40650107843292,
+          -125.61653682610591
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        250.0000000000001,
+        -1.3642420526593924e-12
+      ],
+      "memo_id": 49,
+      "original_ground_clearance_cm": 1.0431150009099497
+    },
+    {
+      "name": "BP_MemoAnchor_C_34",
+      "label": "Memo_050",
+      "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+      "before": {
+        "location_cm": [
+          3774.5079511730983,
+          11753.324001085954,
+          292.77081751686364
+        ],
+        "rotation_degrees": [
+          -3.7885151406799205,
+          90.00000000031805,
+          179.999999994543
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "after": {
+        "location_cm": [
+          539.7057156055789,
+          1607.7991600977348,
+          145.17398933564363
+        ],
+        "rotation_degrees": [
+          -3.7885151406799205,
+          90.00000000031805,
+          179.999999994543
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "category": "central_test_actor",
+      "xy_adjustment_after_uniform_cm": [
+        200.0000000000001,
+        549.9999999999991
+      ],
+      "memo_id": 50,
+      "original_ground_clearance_cm": 1.0000305031437051
+    },
+    {
+      "name": "LoopRailTrain_0",
+      "label": "TS_Village_Train",
+      "class": "/Script/LoopRail.LoopRailTrain",
+      "before": {
+        "location_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "start_distance_cm": 2500.0
+      },
+      "after": {
+        "location_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_degrees": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "start_distance_cm": 1488.095238095238
+      },
+      "category": "level_infrastructure_or_rail"
+    }
+  ]
+}

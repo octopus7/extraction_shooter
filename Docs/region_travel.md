@@ -16,18 +16,18 @@
 
 ## 배치와 BP
 
-새 액터는 각 맵의 `RegionTravel` 폴더에 있다. 아래 좌표는 cm이며 이동·회전은 에디터에서 변경 가능하다.
+새 액터는 각 맵의 `RegionTravel` 폴더에 있다. 아래 좌표는 2026-10-12 맵 축소 후 cm 단위이며 이동·회전은 에디터에서 변경 가능하다. 맵 크기와 원래 좌표 복원 자료는 [main_raid_layout.md](main_raid_layout.md)를 따른다.
 
 | 맵 | 액터 라벨 | 위치 X, Y, Z |
 | --- | --- | --- |
-| RaidForest | Forest_BaseEntrance | -22350, -5350, -47.69 |
-| RaidForest | Forest_VillagePassage | 18000, 3500, -0.78 |
-| RaidForest | Forest_VillageBombObstacle | 17600, 3500, -17.97 |
-| RaidForest | Forest_PlainsLift | 13000, -12000, 885.15 |
-| RaidForest | RaidForest_Extraction_1 | -10000, 5000, 95.16 |
-| RaidVillage | RaidVillage_Extraction_1 | -20500, -11500, 856.87 |
-| RaidVillage | RaidVillage_Extraction_2 | 12000, 14000, 253.75 |
-| RaidPlains | RaidPlains_Extraction_1 | 2500, 4500, 68.59 |
+| RaidForest | Forest_BaseEntrance | -9080.16, -2334.13, 335.87 |
+| RaidForest | Forest_VillagePassage | 7142.86, 1388.89, -0.31 |
+| RaidForest | Forest_VillageBombObstacle | 6742.86, 1388.89, -15.27 |
+| RaidForest | Forest_PlainsLift | 5158.73, -4761.90, 351.25 |
+| RaidForest | RaidForest_Extraction_1 | -3968.25, 1984.13, 58.40 |
+| RaidVillage | RaidVillage_Extraction_1 | -1845, -485, 163.06 |
+| RaidVillage | RaidVillage_Extraction_2 | 1080, 1260, 152.49 |
+| RaidPlains | RaidPlains_Extraction_1 | 992.06, 1785.71, 51.63 |
 
 `/Game/MainRaid/RegionTravel`에 `BP_ForestReturn`, `BP_ForestToVillage`, `BP_ForestBombObstacle`, `BP_ForestToPlainsLift`가 있다. 메시·재료는 같은 폴더의 복셀 형태 임시 애셋이다. 익스트랙션은 기존 `/Game/Interaction/BP_ExtractionPoint`를 사용하고 각 포인트 위치에 복셀 표시대를 별도 배치했다. 위치를 바꿀 때에는 같은 번호의 `ExtractionVoxel` 액터도 함께 옮긴다. 모든 익스트랙션 목적지는 `BunkerMap`이다.
 
@@ -54,5 +54,7 @@
 ## 시작점 주변 시설 배치 (2026-10-12)
 
 숲의 PlayerStart는 (-22000, -5000, 60)이다. `QuestFacilities/Forest_PrimaryPowerFacility`에 기존 `/Game/Interaction/BP_PowerFacility_Primary`를 (-21650, -4550, -67.54)에 배치했다. 시작점과의 거리는 약 5.84m이며, 기지 입구는 약 5.07m다. 입구의 뒤집힌 회전을 바로잡고 두 메시의 바닥을 지형에 맞췄다. 저장한 맵을 다시 열어 거리·배치 유일성·지면 접촉·시작점과 귀환 트리거 분리를 확인했다. 실제 수리 및 귀환 플레이 검증은 별도다.
+
+위 문단은 최초 배치 기록이다. 맵 축소 후 시작점은 (-8730.16, -1984.13, 108.07), 전력 시설은 (-8380.16, -1534.13, -8.23)이다. 시작점에 대한 두 시설의 XY 간격은 유지하고 각 지점의 새 지형 높이에 맞췄다.
 
 2026-10-12 수정: 일반 이동 액터는 F 상호작용으로만 이동한다. 거리 검사·WalkArea 중첩 자동 이동 코드와 설정을 제거했으므로 기존 BP/맵에 저장된 자동 통과 값도 동작하지 않는다. 익스트랙션 포인트의 4초 대기 귀환은 유지한다.

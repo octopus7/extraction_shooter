@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SAVED = ROOT / "TunaSweeper/Saved/SSTOLander_20261003"
 REPORT = SAVED / "verification.json"
 PLACEMENT = ROOT / "TunaSweeper/SourceArt/Environment/SSTO_Lander/Manifests/SSTO_Placement.json"
+LAYOUT_SNAPSHOT = ROOT / "Docs/level_layout_snapshots/RaidPlains_2026-10-12.json"
 MANIFEST = ROOT / "TunaSweeper/SourceArt/Environment/SSTO_Lander/Manifests/SSTO_Lander.json"
 MAP_PATH = "/Game/MainRaid/RaidPlains"
 ASSET_ROOT = "/Game/MainRaid/SSTO/"
@@ -135,6 +136,10 @@ class Verifier:
                 assert PLACEMENT.is_file(), f"Missing placement evidence: {PLACEMENT}"
                 self.manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
                 self.placement = json.loads(PLACEMENT.read_text(encoding="utf-8"))
+                if LAYOUT_SNAPSHOT.is_file():
+                    layout = json.loads(LAYOUT_SNAPSHOT.read_text(encoding="utf-8"))
+                    assert layout["map"] == MAP_PATH, "Wrong map in current layout snapshot"
+                    self.placement = layout["ssto_verification"]
                 assert self.placement.get("passed"), "Placement report did not pass"
                 assert self.levels.load_level(MAP_PATH), f"Unable to load {MAP_PATH}"
                 self.state = "settle"

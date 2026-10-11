@@ -1,5 +1,7 @@
 # Main Raid Region Levels Design
 
+> Historical creation specification. Current dimensions and compact test placement are documented in [main_raid_layout.md](../../main_raid_layout.md): Forest/Plains 200m, Village 300m, with Village test actors in the central 50m square.
+
 ## Purpose
 
 Create three independently loadable UE 5.7 main-game raid levels: `/Game/MainRaid/RaidForest`, `/Game/MainRaid/RaidVillage`, and `/Game/MainRaid/RaidPlains`. Each level must contain an actual painted Landscape, a playable primary route, a PlayerStart, lighting, collision, and a recognizable blockout made primarily from existing project assets.

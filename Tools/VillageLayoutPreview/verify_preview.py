@@ -1,12 +1,13 @@
 """Read-only verification and rendered evidence of saved village preview decals."""
 from pathlib import Path
-import hashlib, json, re, time, traceback
+import hashlib, json, time, traceback
 import unreal
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'TunaSweeper/Saved/VillageLayoutPreview'
 DEST='/Game/MainRaid/EditorPreviews/VillageLayout'
-SPECS={'Farm':(-8500,-8500),'Workshop':(-3500,8500),'Depot':(8200,-700)}
-ROUTE=[(-22000,-12000),(-15500,-7500),(-9000,-3500),(-3000,0),(5000,2500),(12000,6500),(19000,10000)]
+LAYOUT=json.loads((ROOT/'Docs/level_layout_snapshots/RaidVillage_20261012.json').read_text(encoding='utf-8'))
+DECALS={row['label'].removeprefix('TS_Village_LayoutPreview_'):row['after'] for row in LAYOUT['actors'] if row['label'].startswith('TS_Village_LayoutPreview_')}
+SPECS={name:tuple(data['location_cm'][:2]) for name,data in DECALS.items()}
 def v(value): return [value.x,value.y,value.z]
 def hashes():
     # Other region tasks may write their own assets concurrently.
@@ -20,7 +21,7 @@ class Verify:
         self.actors=unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
         self.before=hashes(); self.started=time.monotonic(); self.frames=0; self.state='load'; self.index=0
         self.report={'passed':False,'decals':[],'captures':[]}
-        self.views=[('Overview',(-1500,0),24000)]+[(n,xy,6500) for n,xy in SPECS.items()]
+        self.views=[('Overview',(0,0),6500)]+[(n,xy,900) for n,xy in SPECS.items()]
     def start(self):
         unreal.EditorPythonScripting.set_keep_python_script_alive(True)
         self.handle=unreal.register_slate_post_tick_callback(self.tick)
@@ -38,7 +39,9 @@ class Verify:
             c=a.get_component_by_class(unreal.DecalComponent)
             location=a.get_actor_location(); size=c.get_editor_property('decal_size')
             assert abs(location.x-x)<1 and abs(location.y-y)<1
-            assert abs(size.y-3000)<1 and abs(size.z-3000)<1
+            expected_size=DECALS[name]['decal_size_cm']
+            assert all(abs(actual-expected)<1 for actual,expected in zip(v(size),expected_size))
+            assert abs(x)+size.y<=2500 and abs(y)+size.z<=2500,'Preview extends outside central staging area'
             assert a.get_editor_property('is_editor_only_actor') and a.get_editor_property('hidden')
             direction=a.get_actor_forward_vector()
             assert direction.z<-.999,'Projection must face down'
@@ -48,24 +51,22 @@ class Verify:
             assert mi.get_editor_property('parent')==mat
             tex=unreal.MaterialEditingLibrary.get_material_instance_texture_parameter_value(mi,'PreviewTexture')
             assert tex.get_path_name()==DEST+f'/T_Layout_{name}.T_Layout_{name}'
-            # Every 1m sample on the existing inter-district route stays outside patches.
-            for p,q in zip(ROUTE,ROUTE[1:]):
-                steps=max(1,int(((q[0]-p[0])**2+(q[1]-p[1])**2)**.5/100))
-                for i in range(steps+1):
-                    xx=p[0]+(q[0]-p[0])*i/steps; yy=p[1]+(q[1]-p[1])*i/steps
-                    assert not (abs(xx-x)<=3000 and abs(yy-y)<=3000),'Route overlaps preview'
             self.report['decals'].append({'name':name,'location_cm':v(location),'half_extents_cm':v(size),'direction':v(direction),'editor_only':True,'hidden_in_game':True})
-        baseline_file=OUT/'inspection.json'
-        if baseline_file.exists():
-            baseline=json.loads(baseline_file.read_text())['actors']
-            actual={a.get_actor_label():a for a in actors}
-            for old in baseline:
-                assert old['label'] in actual
-                coords=[float(t) for t in re.findall(r'[xyz]: (-?\d+\.\d+)',old['location'])]
-                assert all(abs(aa-bb)<.01 for aa,bb in zip(v(actual[old['label']].get_actor_location()),coords))
-            assert len(actors)==len(baseline)+3
-            self.report['preserved_original_actors']=len(baseline)
-        self.report['route_clear']=True
+        actual={a.get_name():a for a in actors}
+        for row in LAYOUT['actors']:
+            assert row['name'] in actual
+            actor=actual[row['name']]
+            coords=row['after']['location_cm']
+            assert all(abs(aa-bb)<.01 for aa,bb in zip(v(actor.get_actor_location()),coords))
+            assert all(abs(aa-bb)<.0001 for aa,bb in zip(v(actor.get_actor_scale3d()),row['after']['scale']))
+            if row['category']=='central_test_actor':
+                center,extent=actor.get_actor_bounds(False)
+                assert abs(center.x)+extent.x<=2500.01 and abs(center.y)+extent.y<=2500.01,row['label']+' outside central 50m'
+                for key in ('memo_id','placement_id'):
+                    if key in row: assert actor.get_editor_property(key)==row[key]
+        assert len(actors)==len(LAYOUT['actors'])
+        self.report['preserved_snapshot_actors']=len(actors)
+        self.report['central_staging_bounds_valid']=True
         self.report['landscape_material_unchanged']=True
         self.camera=self.actors.spawn_actor_from_class(unreal.CameraActor,unreal.Vector(0,0,24000),unreal.Rotator(pitch=-90,yaw=0,roll=0))
         self.camera.get_component_by_class(unreal.CameraComponent).set_editor_property('field_of_view',70.0)

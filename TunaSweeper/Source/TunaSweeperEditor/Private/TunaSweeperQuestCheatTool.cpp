@@ -1,18 +1,13 @@
 #include "TunaSweeperQuestCheatTool.h"
+#include "TunaSweeperEditorText.h"
 #include "Dom/JsonObject.h"
 #include "Editor.h"
-#include "Engine/GameInstance.h"
 #include "Framework/Docking/TabManager.h"
 #include "HAL/PlatformProcess.h"
-#include "Internationalization/Internationalization.h"
-#include "Internationalization/Culture.h"
 #include "Inventory/TunaSweeperSaveTool.h"
 #include "Quest/TunaSweeperQuestId.h"
 #include "Widgets/Input/NumericTypeInterface.h"
-#include "Settings/TunaSweeperLanguage.h"
-#include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "ToolMenus.h"
-#include "UObject/StrongObjectPtr.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SNumericEntryBox.h"
@@ -38,19 +33,9 @@ namespace TunaSweeperQuestCheatEditor
             GEditor->IsPlayingViaLauncher() || GEditor->IsPlayingOnLocalPCSession() || bStandalone;
     }
 
-    TStrongObjectPtr<UGameInstance> TextOwner;
-    TStrongObjectPtr<UTunaSweeperTextSubsystem> TextData;
-
     FText Text(const TCHAR* Key)
     {
-        if (!TextData.IsValid())
-        {
-            TextOwner.Reset(NewObject<UGameInstance>());
-            TextData.Reset(NewObject<UTunaSweeperTextSubsystem>(TextOwner.Get()));
-        }
-        ETunaSweeperItemTextLanguage Language = ETunaSweeperItemTextLanguage::English;
-        TunaSweeperLanguage::TryParseLanguageCode(FInternationalization::Get().GetCurrentCulture()->GetTwoLetterISOLanguageName(), Language);
-        return TextData->ResolveText(FName(Key), Language, FText::GetEmpty());
+        return TunaSweeperEditorText::Resolve(Key);
     }
 
     struct FQuestIdTypeInterface : TDefaultNumericTypeInterface<int32>
@@ -161,8 +146,6 @@ void FTunaSweeperQuestCheatTool::Shutdown()
     FEditorDelegates::BeginStandaloneLocalPlay.Remove(StandaloneHandle);
     for (auto& Process : StandaloneProcesses) FPlatformProcess::CloseProc(Process);
     StandaloneProcesses.Reset();
-    TextData.Reset();
-    TextOwner.Reset();
     UToolMenus::UnRegisterStartupCallback(this);
     UToolMenus::UnregisterOwner(this);
     if (auto Tab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabId)) Tab->RequestCloseTab();
