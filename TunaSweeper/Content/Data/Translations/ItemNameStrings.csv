@@ -153,3 +153,5 @@ item.tire,轮胎,輪胎,Шина,Pneu
 item.tire.desc,安装在车辆车轮上的橡胶轮胎。,安裝在車輛車輪上的橡膠輪胎。,Резиновая шина для колеса транспортного средства.,Um pneu de borracha para a roda de um veículo.
 item.rocket_launcher,火箭发射器,火箭發射器,Ракетная пусковая установка,Lançador de foguetes
 item.rocket_launcher.desc,用于发射火箭弹的便携式发射器。,用於發射火箭彈的攜帶式發射器。,"Переносная пусковая установка, предназначенная для запуска ракет.",Um lançador portátil projetado para disparar foguetes.
+item.hammer,锤子,鎚子,Молоток,Martelo
+item.hammer.desc,用于钉钉子和简单维修的锤子。,用於釘釘子和簡單維修的鎚子。,Молоток для забивания гвоздей и простого ремонта.,Um martelo para pregar e fazer reparos simples.

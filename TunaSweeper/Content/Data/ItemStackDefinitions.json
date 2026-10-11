@@ -21,5 +21,6 @@
   "stack.vehicle_spark_plug": 10,
   "stack.model_boat": 1,
   "stack.tire": 4,
-  "stack.rocket_launcher": 1
+  "stack.rocket_launcher": 1,
+  "stack.hammer": 1
 }

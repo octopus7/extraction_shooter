@@ -153,5 +153,27 @@
     "id": 8015,
     "memo_ko": "택배 상자: 모형배 1개",
     "items": [ { "item_id": 6017, "quantity": 1 } ]
+  },
+  {
+    "id": 8016,
+    "memo_ko": "캔참치 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 3004,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
+  },
+  {
+    "id": 8017,
+    "memo_ko": "망치 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 6020,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]

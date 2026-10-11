@@ -155,3 +155,5 @@ item.tire,타이어,Tire,タイヤ
 item.tire.desc,차량 바퀴에 장착하는 고무 타이어.,A rubber tire fitted to a vehicle wheel.,車両の車輪に取り付けるゴム製タイヤ。
 item.rocket_launcher,로켓무기,Rocket Launcher,ロケットランチャー
 item.rocket_launcher.desc,로켓탄을 발사하도록 만들어진 휴대용 발사기.,A portable launcher designed to fire rockets.,ロケット弾を発射するために作られた携帯式発射器。
+item.hammer,망치,Hammer,ハンマー
+item.hammer.desc,못을 박거나 간단한 수리에 쓰는 망치.,A hammer for driving nails and simple repairs.,釘打ちや簡単な修理に使うハンマー。
