@@ -175,5 +175,16 @@
         "drop_chance": 10000
       }
     ]
+  },
+  {
+    "id": 8018,
+    "memo_ko": "모터 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 6024,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]
