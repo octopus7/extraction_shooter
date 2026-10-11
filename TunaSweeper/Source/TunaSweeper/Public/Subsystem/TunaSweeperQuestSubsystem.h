@@ -148,6 +148,7 @@ private:
 	friend class FTunaSweeperQuestTranslationTest;
 	friend class FTunaSweeperStoryQuestTest;
 	friend class FTunaSweeperExtractionReturnTest;
+	friend class FTunaSweeperQuestLevelTravelPathsTest;
 	void HandleExtractionArrival(UWorld* World);
 	void CompleteExtractionReturn(FName ArrivedLevelName);
 	FDelegateHandle ExtractionPostLoadHandle;

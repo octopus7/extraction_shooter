@@ -1418,14 +1418,15 @@ bool UTunaSweeperQuestSubsystem::IsMapNameMatch(FName ActualMapName, const TCHAR
 	{
 		return false;
 	}
-	if (FCString::Stricmp(ExpectedMapName, TEXT("RaidMap")) == 0 &&
-		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(ActualMapName))
+	const FName ActualShortName(*UWorld::RemovePIEPrefix(FPackageName::GetShortName(ActualMapName.ToString())));
+	const FName ExpectedShortName(*UWorld::RemovePIEPrefix(FPackageName::GetShortName(ExpectedMapName)));
+	if (ExpectedShortName == FName(TEXT("RaidMap")) &&
+		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(ActualShortName))
 	{
 		return true;
 	}
 
-	const FString ActualMapString = ActualMapName.ToString();
-	return ActualMapString == ExpectedMapName || ActualMapString.EndsWith(FString::Printf(TEXT("_%s"), ExpectedMapName));
+	return !ActualShortName.IsNone() && ActualShortName == ExpectedShortName;
 }
 
 bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchLevelTravel(

@@ -74,6 +74,7 @@ public:
 
 private:
 	friend class FTunaAchievementLifecycleTest;
+	friend class FTunaAchievementRegionEntryTest;
 	bool IsGameplayReportingAllowed() const;
 	void RefreshGameplaySnapshot();
 	void FlushPendingProgress();

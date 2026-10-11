@@ -67,3 +67,17 @@
 - `Forest_ToolCache_Power`: (-8130.16, -1534.13, -14.26), ContentsId 8017, 망치(6020) 1개 확정. 현재 전력 시설에서 약 2.5m.
 
 두 상자는 기존 BP_LootContainer를 직접 배치하며 PlacementId를 새로 할당하지 않는다. 상자 내용은 기존 수동 루팅과 런타임 슬롯 유지 규칙을 따른다. 확률은 프로젝트 10000분율 기준 10000이다.
+
+## 맵 진입 판정 (2026-10-12)
+
+퀘스트의 레벨 비교는 실제 이동 경로와 목표 양쪽에서 패키지 경로와 PIE 접두어를 제거한 맵 이름을 비교한다. 예를 들어 `RaidForest`, `/Game/MainRaid/RaidForest`, `/Game/MainRaid/UEDPIE_0_RaidForest`는 같은 맵이다. 임의의 접미어 일치는 허용하지 않으므로 `Other_RaidForest`는 해당하지 않는다. 기존 목표의 논리 이름 `RaidMap`에 대한 레이드 지역 호환 처리는 유지하지만, 명시적인 `RaidForest` 목표가 개발용 `RaidMap`에서 완료되지는 않는다.
+
+일반 이동 퀘스트의 판정 주체는 `UTunaSweeperQuestSubsystem`이며 기존 이동 요청 알림 시점을 유지한다. 지역 진입 도전과제는 `UTunaSweeperAchievementSubsystem`이 실제 게임 월드 준비 완료를 받은 뒤 PIE 접두어를 제외한 전체 패키지 경로로 판정한다.
+
+| 도전과제 ID | 도착 맵 | 저장 지역 ID |
+| --- | --- | --- |
+| 01 | `/Game/MainRaid/RaidForest` | `region.forest` |
+| 07 | `/Game/MainRaid/RaidVillage` | `region.village` |
+| 19 | `/Game/MainRaid/RaidPlains` | `region.plains` |
+
+개발용 `RaidMap`은 위 세 도전과제에 포함하지 않는다. 플랫폼 도전과제 ID 연결은 기존 상태를 유지한다.
