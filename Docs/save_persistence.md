@@ -440,3 +440,9 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 ### 기본 전력 시설 프리셋의 저장 ID
 
 `BP_PowerFacility_Primary`는 기존 월드 진행 저장의 `power.facility.primary` ID를 사용한다. 수리 성공 시 완료 상태가 저장되고 다시 로드한 액터는 스파크가 꺼진 상태로 복원된다. 같은 시설을 대표하는 단일 배치용 ID이며 독립 설비에 중복 사용하지 않는다. 저장 스키마 변경은 없다.
+
+## 휘발성 배달 아이템 — 확정 요구사항 (구현 예정)
+
+- 기지로 귀환할 때 휘발성 배달 아이템을 제거한다.
+- 레이드 레벨 사이를 이동할 때는 해당 아이템을 유지한다. 일반적인 레벨 전환이나 액터 EndPlay 자체를 제거 조건으로 사용하지 않는다.
+- 이 항목은 구현 시 적용할 수명 규칙이며, 현재 런타임에 구현되었다는 의미는 아니다.
