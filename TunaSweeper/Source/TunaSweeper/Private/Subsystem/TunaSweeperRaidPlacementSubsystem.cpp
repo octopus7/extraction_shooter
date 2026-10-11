@@ -16,6 +16,7 @@
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperRaidPlacement, Log, All);
 
@@ -79,6 +80,9 @@ namespace TunaSweeperRaidPlacement
 void UTunaSweeperRaidPlacementSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	Collection.InitializeDependency<UTunaSweeperQuestSubsystem>();
+	GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()->OnQuestProgressChanged.AddUObject(
+		this, &UTunaSweeperRaidPlacementSubsystem::RefreshQuestLootPlacements);
 	PostLoadMapHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(
 		this,
 		&UTunaSweeperRaidPlacementSubsystem::HandlePostLoadMapWithWorld);
@@ -86,6 +90,9 @@ void UTunaSweeperRaidPlacementSubsystem::Initialize(FSubsystemCollectionBase& Co
 
 void UTunaSweeperRaidPlacementSubsystem::Deinitialize()
 {
+	if (auto* Quests = GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		Quests->OnQuestProgressChanged.RemoveAll(this);
+	QuestLootPlacements.Reset();
 	if (PostLoadMapHandle.IsValid())
 	{
 		FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(PostLoadMapHandle);
@@ -102,6 +109,7 @@ void UTunaSweeperRaidPlacementSubsystem::SetRaidSeed(int32 InRaidSeed)
 	{
 		RaidSeed = InRaidSeed;
 		LastSpawnedWorld.Reset();
+		QuestLootPlacements.Reset();
 	}
 	bRaidSeedExplicitlySet = true;
 }
@@ -114,7 +122,7 @@ float UTunaSweeperRaidPlacementSubsystem::GetDeterministicPlacementRoll(int32 In
 
 bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorld(UWorld* World)
 {
-	if (!World || !World->IsGameWorld())
+	if (!World || !World->IsGameWorld() || World->GetGameInstance() != GetGameInstance())
 	{
 		return true;
 	}
@@ -130,6 +138,7 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 	{
 		return false;
 	}
+	QuestLootPlacements.Reset();
 
 	if (!bRaidSeedExplicitlySet)
 	{
@@ -276,6 +285,13 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Loot placement %s/%d points to a non-loot anchor."), *Placement.LevelId.ToString(), Placement.PlacementId);
 			continue;
 		}
+		if (Placement.RequiredActiveQuestId > 0)
+		{
+			auto& Runtime = QuestLootPlacements.AddDefaulted_GetRef();
+			Runtime.Definition = Placement;
+			Runtime.Anchor = *LootAnchor;
+			continue;
+		}
 		if (!DoesSpawnConditionPass(Placement.ConditionId, FString::Printf(TEXT("loot %s/%d"), *Placement.LevelId.ToString(), Placement.PlacementId)) || !ShouldSpawnAtPlacement(Placement.PlacementId, Placement.SpawnChance))
 		{
 			continue;
@@ -311,6 +327,7 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 	}
 
 	LastSpawnedWorld = World;
+	RefreshQuestLootPlacements();
 	UE_LOG(LogTunaSweeperRaidPlacement, Log, TEXT("Resolved raid anchors for %s: enemies=%d loot_containers=%d seed=%d."), *World->GetMapName(), SpawnedEnemies, SpawnedLootContainers, RaidSeed);
 	return true;
 }
@@ -510,6 +527,18 @@ bool UTunaSweeperRaidPlacementSubsystem::LoadLootPlacements(const FString& JsonP
 		Placement.LootContainerClass = TSoftClassPtr<ATunaSweeperLootContainerActor>(FSoftObjectPath(ClassPath.TrimStartAndEnd()));
 		Placement.ContainerDefinitionId = FMath::RoundToInt(ContainerDefinitionId);
 		Placement.ContentsId = FMath::RoundToInt(ContentsId);
+		if (JsonObject->HasField(TEXT("required_active_quest_id")))
+		{
+			double QuestId = 0;
+			if (!JsonObject->HasTypedField<EJson::Number>(TEXT("required_active_quest_id")) ||
+				!JsonObject->TryGetNumberField(TEXT("required_active_quest_id"), QuestId) ||
+				!FMath::IsFinite(QuestId) || QuestId <= 0 || QuestId > MAX_int32 || FMath::FloorToDouble(QuestId) != QuestId)
+			{
+				UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Loot placement row %d has invalid required_active_quest_id; expected a positive int32."), RowIndex);
+				continue;
+			}
+			Placement.RequiredActiveQuestId = static_cast<int32>(QuestId);
+		}
 		Placement.SpawnChance = TunaSweeperRaidPlacement::ReadSpawnChance(JsonObject);
 		Placement.ConditionId = TunaSweeperRaidPlacement::ReadOptionalName(JsonObject, TEXT("condition_id"));
 		const FString Key = Placement.LevelId.ToString() + TEXT(":") + FString::FromInt(Placement.PlacementId);
@@ -550,6 +579,46 @@ bool UTunaSweeperRaidPlacementSubsystem::DoesSpawnConditionPass(FName ConditionI
 bool UTunaSweeperRaidPlacementSubsystem::ShouldSpawnAtPlacement(int32 PlacementId, float SpawnChance) const
 {
 	return SpawnChance >= 1.0f || (SpawnChance > 0.0f && GetDeterministicPlacementRoll(RaidSeed, PlacementId) < SpawnChance);
+}
+
+bool UTunaSweeperRaidPlacementSubsystem::IsQuestLootActive(int32 QuestId) const
+{
+	const auto* Quests = GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>();
+	return QuestId > 0 && Quests && Quests->FindQuestDefinition(QuestId) &&
+		Quests->GetQuestState(QuestId) == ETunaSweeperQuestState::Accepted;
+}
+
+void UTunaSweeperRaidPlacementSubsystem::RefreshQuestLootPlacements()
+{
+	UWorld* World = LastSpawnedWorld.Get();
+	if (bRefreshingQuestLoot || !World || World->bIsTearingDown || World->GetGameInstance() != GetGameInstance()) return;
+	TGuardValue<bool> RefreshGuard(bRefreshingQuestLoot, true);
+	for (auto& Runtime : QuestLootPlacements)
+	{
+		const bool bActive = IsQuestLootActive(Runtime.Definition.RequiredActiveQuestId);
+		if (bActive && !Runtime.bSpawnedOnce)
+		{
+			auto* Anchor = Runtime.Anchor.Get();
+			if (!Anchor || Anchor->GetWorld() != World) continue;
+			TSubclassOf<ATunaSweeperLootContainerActor> Class = Runtime.Definition.LootContainerClass.LoadSynchronous();
+			if (!Class) continue;
+			const FTransform Transform = Anchor->GetActorTransform();
+			auto* Container = World->SpawnActorDeferred<ATunaSweeperLootContainerActor>(
+				Class, Transform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (!Container) continue;
+			Container->SetContainerDataIds(Runtime.Definition.ContainerDefinitionId, Runtime.Definition.ContentsId);
+			Container->Tags.AddUnique(MakeRuntimeInstanceId(Runtime.Definition.LevelId, Runtime.Definition.PlacementId));
+			Runtime.Container = Container;
+			Runtime.bSpawnedOnce = true;
+			UGameplayStatics::FinishSpawningActor(Container, Transform);
+			Runtime.bOriginalCollisionEnabled = Container->GetActorEnableCollision();
+		}
+		if (auto* Container = Runtime.Container.Get())
+		{
+			Container->SetActorHiddenInGame(!bActive);
+			Container->SetActorEnableCollision(bActive && Runtime.bOriginalCollisionEnabled);
+		}
+	}
 }
 
 FName UTunaSweeperRaidPlacementSubsystem::MakeRuntimeInstanceId(FName LevelId, int32 PlacementId) const

@@ -18,6 +18,7 @@ UCLASS()
 class TUNASWEEPER_API UTunaSweeperRaidPlacementSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperQuestLootPlacementTest;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -77,9 +78,23 @@ private:
 		TSoftClassPtr<ATunaSweeperLootContainerActor> LootContainerClass;
 		int32 ContainerDefinitionId = INDEX_NONE;
 		int32 ContentsId = INDEX_NONE;
+		int32 RequiredActiveQuestId = 0;
 		float SpawnChance = 1.0f;
 		FName ConditionId;
 	};
+
+	struct FQuestLootPlacementRuntime
+	{
+		FLootPlacementDefinition Definition;
+		TWeakObjectPtr<ATunaSweeperRaidPlacementAnchor> Anchor;
+		TWeakObjectPtr<ATunaSweeperLootContainerActor> Container;
+		bool bSpawnedOnce = false;
+		bool bOriginalCollisionEnabled = true;
+	};
+	bool IsQuestLootActive(int32 QuestId) const;
+	void RefreshQuestLootPlacements();
+	TArray<FQuestLootPlacementRuntime> QuestLootPlacements;
+	bool bRefreshingQuestLoot = false;
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	bool LoadData(bool bForceReload = false);

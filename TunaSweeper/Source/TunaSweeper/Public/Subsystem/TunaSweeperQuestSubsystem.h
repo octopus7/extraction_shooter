@@ -129,6 +129,7 @@ public:
 
 private:
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperQuestLootPlacementTest;
 	friend class FTunaSweeperQuestTranslationTest;
 	friend class FTunaSweeperStoryQuestTest;
 	friend class FTunaSweeperExtractionReturnTest;
