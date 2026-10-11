@@ -108,6 +108,10 @@ public:
 	bool TrySubmitItemsToProvider(FName ProviderId, int32& OutQuestId, bool bSaveImmediately = true);
 	bool TryGetItemSubmissionQuestForProvider(FName ProviderId, int32& OutQuestId) const;
 
+	// Delivery destinations submit one exact objective, without claiming its reward.
+	bool CanSubmitItemsForObjective(int32 QuestId, FName ObjectiveId, FName DestinationId) const;
+	bool TrySubmitItemsForObjective(int32 QuestId, FName ObjectiveId, FName DestinationId, bool bSaveImmediately = true);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	int32 GetCoinBalance() const { return CoinBalance; }
 
@@ -129,6 +133,7 @@ public:
 
 private:
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperQuestLootPlacementTest;
 	friend class FTunaSweeperQuestTranslationTest;
 	friend class FTunaSweeperStoryQuestTest;

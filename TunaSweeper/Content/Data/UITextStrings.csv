@@ -594,3 +594,4 @@ ui.item_info.armor_context,"방어 {0}등급
 탄종별 피해 감소 — 녹슨 {1} / 일반 {2} / 철갑 {3} / 고급 철갑 {4}","Armor tier {0}
 Damage reduction — Rusty {1} / Standard {2} / AP {3} / Advanced AP {4}","防御等級{0}
 ダメージ軽減 — 錆びた弾{1} / 通常弾{2} / 徹甲弾{3} / 高性能徹甲弾{4}"
+ui.interaction.deliver_parcel,배달하기,Deliver,配達する

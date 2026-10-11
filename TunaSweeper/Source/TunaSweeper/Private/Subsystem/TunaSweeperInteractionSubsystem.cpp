@@ -8,6 +8,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperBlockedIntakeScreenActor.h"
 #include "Interaction/TunaSweeperPowerFacilityActor.h"
+#include "Interaction/TunaSweeperDeliveryDestinationActor.h"
 #include "Interaction/TunaSweeperCrowbarWallRackActor.h"
 #include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
 #include "../../TunaSweeperDebugRifleSupplyActor.h"
@@ -862,6 +863,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 		return ProgressActor->RepairUsingAvailableRequiredItems(true);
 	}
 	if (auto* Warehouse = Cast<ATunaSweeperFoodWarehouseActor>(ProgressOwner)) return Warehouse->TakeFood();
+	if (auto* Delivery = Cast<ATunaSweeperDeliveryDestinationActor>(ProgressOwner)) return Delivery->Deliver(InstigatorPawn);
 	if (auto* PowerFacility = Cast<ATunaSweeperPowerFacilityActor>(ProgressOwner)) return PowerFacility->Repair(true);
 
 	if (ATunaSweeperBlockedIntakeScreenActor* IntakeScreenActor = Cast<ATunaSweeperBlockedIntakeScreenActor>(ProgressOwner))

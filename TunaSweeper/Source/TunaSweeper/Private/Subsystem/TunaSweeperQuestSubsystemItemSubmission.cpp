@@ -3,6 +3,41 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Templates/UnrealTemplate.h"
 
+bool UTunaSweeperQuestSubsystem::CanSubmitItemsForObjective(int32 QuestId, FName ObjectiveId, FName DestinationId) const
+{
+	auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (!Game || Game->IsCombatTestSession() || QuestId <= 0 || ObjectiveId.IsNone() || DestinationId.IsNone() ||
+		!EnsureQuestDataLoaded() || GetQuestState(QuestId) != ETunaSweeperQuestState::Accepted) return false;
+	const auto* Definition = FindQuestDefinition(QuestId);
+	if (!Definition) return false;
+	const auto* Objective = Definition->Objectives.FindByPredicate(
+		[ObjectiveId](const auto& Value) { return Value.ObjectiveId == ObjectiveId; });
+	if (!Objective || Objective->Type != ETunaSweeperObjectiveType::ItemSubmitted ||
+		Objective->TargetProviderId != DestinationId || Objective->ItemId <= 0 || Objective->RequiredCount <= 0) return false;
+	const int32 Remaining = Objective->RequiredCount - GetObjectiveProgressCount(QuestId, ObjectiveId);
+	return Remaining > 0 && Game->CountInventoryItemById(Objective->ItemId) >= Remaining;
+}
+
+bool UTunaSweeperQuestSubsystem::TrySubmitItemsForObjective(
+	int32 QuestId, FName ObjectiveId, FName DestinationId, bool bSaveImmediately)
+{
+	if (bItemSubmissionInProgress || !CanSubmitItemsForObjective(QuestId, ObjectiveId, DestinationId)) return false;
+	TGuardValue<bool> SubmissionGuard(bItemSubmissionInProgress, true);
+	const auto* Objective = FindQuestDefinition(QuestId)->Objectives.FindByPredicate(
+		[ObjectiveId](const auto& Value) { return Value.ObjectiveId == ObjectiveId; });
+	FTunaSweeperItemStack Requirement;
+	Requirement.ItemId = Objective->ItemId;
+	Requirement.Quantity = Objective->RequiredCount - GetObjectiveProgressCount(QuestId, ObjectiveId);
+	auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (!Game->TryConsumeInventoryItems({Requirement}, [this, QuestId, ObjectiveId, Count = Requirement.Quantity] {
+		AdvanceObjectiveProgress(QuestId, ObjectiveId, Count);
+		if (AreAllObjectivesComplete(QuestId)) SetQuestState(QuestId, ETunaSweeperQuestState::RewardAvailable);
+	})) return false;
+	if (GetQuestState(QuestId) == ETunaSweeperQuestState::RewardAvailable) ShowQuestCompletedToast(QuestId);
+	BroadcastQuestProgressChanged(bSaveImmediately);
+	return true;
+}
+
 bool UTunaSweeperQuestSubsystem::TryGetItemSubmissionQuestForProvider(FName ProviderId, int32& OutQuestId) const
 {
 	OutQuestId = 0;
