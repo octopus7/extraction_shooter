@@ -82,6 +82,11 @@ namespace TunaSweeperQuestData
 	bool ReadObjectiveType(const FString& RawType, ETunaSweeperObjectiveType& OutType)
 	{
 		const FString Type = RawType.TrimStartAndEnd().ToLower();
+		if (Type == TEXT("world_progress_completed"))
+		{
+			OutType = ETunaSweeperObjectiveType::WorldProgressCompleted;
+			return true;
+		}
 		if (Type == TEXT("location_reached") || Type == TEXT("vehicle_location_reached"))
 		{
 			OutType = Type == TEXT("location_reached")
@@ -189,6 +194,12 @@ namespace TunaSweeperQuestData
 		double RequiredCount = 1.0;
 		const bool bHasRequiredCount = JsonObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
 		OutObjective.LocationId = ReadNameField(JsonObject, TEXT("location_id"));
+		OutObjective.WorldProgressId = ReadNameField(JsonObject, TEXT("world_progress_id"));
+		if (OutObjective.Type == ETunaSweeperObjectiveType::WorldProgressCompleted &&
+			(!JsonObject->HasTypedField<EJson::String>(TEXT("world_progress_id")) ||
+			OutObjective.WorldProgressId.IsNone() || RequiredCount != 1.0 ||
+			(JsonObject->HasField(TEXT("required_count")) &&
+				!JsonObject->HasTypedField<EJson::Number>(TEXT("required_count"))))) return false;
 		const bool bArrival = OutObjective.Type == ETunaSweeperObjectiveType::LocationReached ||
 			OutObjective.Type == ETunaSweeperObjectiveType::VehicleLocationReached;
 		if (bArrival && (!JsonObject->HasTypedField<EJson::String>(TEXT("location_id")) ||
@@ -318,6 +329,10 @@ void UTunaSweeperQuestSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	Super::Initialize(Collection);
 
 	LoadQuestData(false);
+	if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		Game->OnWorldProgressChanged.AddUObject(this, &ThisClass::HandleWorldProgressChanged);
+	}
 	ExtractionPostLoadHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::HandleExtractionArrival);
 	if (GEngine)
 	{
@@ -331,6 +346,10 @@ void UTunaSweeperQuestSubsystem::Initialize(FSubsystemCollectionBase& Collection
 
 void UTunaSweeperQuestSubsystem::Deinitialize()
 {
+	if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		Game->OnWorldProgressChanged.RemoveAll(this);
+	}
 	FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(ExtractionPostLoadHandle);
 	if (GEngine) GEngine->OnTravelFailure().Remove(ExtractionTravelFailureHandle);
 	CancelExtractionReturn();
@@ -529,6 +548,7 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(int32 QuestId)
 		}
 	}
 
+	ReconcileWorldProgressObjectives(true);
 	BroadcastQuestProgressChanged(true);
 	return true;
 }
@@ -1075,6 +1095,8 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 		TrackedQuestId = SavedTrackedQuestId;
 	}
 
+	// WorldProgressStates is restored before quest progress. Do not save or toast during loading.
+	ReconcileWorldProgressObjectives(false);
 	OnQuestProgressChanged.Broadcast();
 }
 

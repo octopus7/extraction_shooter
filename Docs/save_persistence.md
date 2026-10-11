@@ -490,3 +490,10 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 The quest cheat edits the last selected existing save slot in the active dataset only while gameplay is stopped. It validates the complete prerequisite graph before changing `NumericQuestProgressStates`. The inclusive action completes the target and every ancestor; the prerequisites-only action preserves the target's existing state. Edited rows use `RewardCompleted` and objective counts at their required values. Tracking is cleared only when the tracked quest is among the completed IDs. Legacy numeric IDs follow the existing migration helper.
 
 No items, coins, experience, dialogue, or world-progress rewards are executed by this editor operation. Unrelated slot data remains intact. Subsequent gameplay load keeps its existing quest-derived reconciliation behavior. The offline save tool validates identity/version, compares the source hash, creates a byte-identical `.tool-backup-*` backup, and writes through the existing fail-closed save path. PIE/SIE, pending play, editor standalone, and Launcher sessions lock the UI; the mutation callback rechecks the lock and the save backend rejects live gameplay worlds. No new save fields or schema version are introduced. See [quest cheat usage](quest_cheats.md).
+
+### 저장된 월드 완료 상태를 사용하는 퀘스트 목표
+
+- `world_progress_completed`는 정의의 `world_progress_id`로 기존 `WorldProgressStates`의 `Completed` 상태를 읽고 기존 `NumericQuestProgressStates`에 목표 진행값 0/1과 보상 대기 상태를 저장한다. 새 저장 필드·버전 변경은 없다.
+- 수락한 목표는 월드 진행 변경 시 판정한다. 수락 전에 완료된 오브젝트는 수락 시 인정하며, 미수락 퀘스트나 선행 조건을 자동으로 건너뛰지 않는다. 완료한 목표는 되돌리지 않고 보상 수령은 기존 경로로 처리한다.
+- 실제 세이브 로더는 월드 오브젝트를 먼저 복원하고 퀘스트 진행을 복원한다. 이 시점에 누락된 목표 진행값을 조용히 보정하되 토스트·자동 저장·보상 지급은 하지 않는다. 해당 액터가 현재 맵에 없어도 복원 가능하다.
+- 월드 변경 알림의 목표 동기화는 자체 저장하지 않는다. 폭파·수리 등 생산자의 저장 정책을 따르므로 재료 소모·월드 개방·퀘스트 진행이 함께 저장되며 지연 저장 요청을 무시하지 않는다. 반복 알림·재입장으로 진행값이나 보상을 누적하지 않는다. 전투 테스트 세션에서는 판정하지 않는다.

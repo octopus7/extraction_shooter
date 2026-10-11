@@ -1,5 +1,5 @@
-#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Component/TunaSweeperPlayerVisionComponent.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 #include "Blueprint/UserWidget.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"

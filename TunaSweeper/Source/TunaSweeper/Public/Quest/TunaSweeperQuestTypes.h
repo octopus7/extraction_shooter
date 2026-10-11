@@ -25,7 +25,8 @@ enum class ETunaSweeperObjectiveType : uint8
 	ItemSubmitted UMETA(DisplayName = "Item Submitted"),
 	ExtractionReturn UMETA(DisplayName = "Extraction Return"),
 	LocationReached UMETA(DisplayName = "Location Reached"),
-	VehicleLocationReached UMETA(DisplayName = "Vehicle Location Reached")
+	VehicleLocationReached UMETA(DisplayName = "Vehicle Location Reached"),
+	WorldProgressCompleted UMETA(DisplayName = "World Progress Completed")
 };
 
 UENUM(BlueprintType)
@@ -157,6 +158,10 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 	// Arrival objectives name one destination each and always require one visit.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName LocationId = NAME_None;
+
+	// A persistent world object, credited even when completed before quest acceptance.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName WorldProgressId = NAME_None;
 };
 
 USTRUCT(BlueprintType)

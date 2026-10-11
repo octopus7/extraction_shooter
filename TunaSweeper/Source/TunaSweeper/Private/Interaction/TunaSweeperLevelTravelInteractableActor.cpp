@@ -1,6 +1,6 @@
+#include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "GameFramework/Pawn.h"
-#include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"

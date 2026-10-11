@@ -135,6 +135,10 @@ public:
 	void ResetQuestProgressForNewGame();
 
 private:
+	friend class FTunaSweeperQuestWorldProgressTest;
+	void HandleWorldProgressChanged();
+	bool ReconcileWorldProgressObjectives(bool bShowCompletionToast);
+	bool bReconcilingWorldProgress = false;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperQuestArrivalTest;
