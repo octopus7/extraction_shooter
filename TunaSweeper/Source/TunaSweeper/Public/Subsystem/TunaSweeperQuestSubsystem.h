@@ -12,6 +12,7 @@ class TUNASWEEPER_API UTunaSweeperQuestSubsystem : public UGameInstanceSubsystem
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	FSimpleMulticastDelegate OnQuestProgressChanged;
 
@@ -84,6 +85,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName);
 
+	// Only the extraction actor calls this after its hold succeeds, before travel.
+	void BeginExtractionReturn(FName SourceLevelName, FName TargetLevelName);
+	void CancelExtractionReturn();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyBunkerRescueReturn(FName SourceLevelName, FName TargetLevelName);
 
@@ -126,6 +131,13 @@ private:
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperQuestTranslationTest;
 	friend class FTunaSweeperStoryQuestTest;
+	friend class FTunaSweeperExtractionReturnTest;
+	void HandleExtractionArrival(UWorld* World);
+	void CompleteExtractionReturn(FName ArrivedLevelName);
+	FDelegateHandle ExtractionPostLoadHandle;
+	FDelegateHandle ExtractionTravelFailureHandle;
+	FName PendingExtractionDestination;
+	TMap<int32, TSet<FName>> PendingExtractionObjectives;
 	bool bItemSubmissionInProgress = false;
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();

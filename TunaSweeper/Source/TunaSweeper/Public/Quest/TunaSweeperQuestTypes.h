@@ -22,7 +22,8 @@ enum class ETunaSweeperObjectiveType : uint8
 	InteractionCompleted UMETA(DisplayName = "Interaction Completed"),
 	BunkerRescueReturn UMETA(DisplayName = "Bunker Rescue Return"),
 	WarpPointUsed UMETA(DisplayName = "Warp Point Used"),
-	ItemSubmitted UMETA(DisplayName = "Item Submitted")
+	ItemSubmitted UMETA(DisplayName = "Item Submitted"),
+	ExtractionReturn UMETA(DisplayName = "Extraction Return")
 };
 
 UENUM(BlueprintType)

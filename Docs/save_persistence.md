@@ -49,6 +49,12 @@ Added/replaced items use existing instance, ownership, loaded-ammo, attachment a
 
 ## Current Save Container
 
+### Extraction return quest objectives
+
+The `extraction_return` objective advances only when the destination game world has finished loading into the base after a successful extraction-point hold. The quest subsystem snapshots eligible accepted objectives at departure, then consumes that transient record on its own GameInstance's `PostLoadMapWithWorld` notification. Ordinary level travel, death rescue, travel failure, another destination, save loading, new game, and definition reload clear pending credit. A duplicate arrival notification cannot increment twice. The record is not serialized, so restarting during travel cannot award an unconfirmed return.
+
+Confirmed objective progress and `RewardAvailable` state use the existing numeric quest progress save fields and are saved after arrival. Claiming rewards remains a separate NPC action. No save version changes. Existing `level_travel` objectives retain their request-time behavior.
+
 ### Developer startup logo (Main only)
 
 The Main startup logo is attempted once per `UTunaSweeperGameInstance` session; returning to the title does not replay it. This guard is transient and independent of gameplay save slots. Demo builds retain their existing direct title entry.

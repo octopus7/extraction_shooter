@@ -4,6 +4,11 @@
 #include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
 #include "Dom/JsonObject.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "Misc/PackageName.h"
+#include "UObject/UObjectGlobals.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -77,6 +82,11 @@ namespace TunaSweeperQuestData
 	bool ReadObjectiveType(const FString& RawType, ETunaSweeperObjectiveType& OutType)
 	{
 		const FString Type = RawType.TrimStartAndEnd().ToLower();
+		if (Type == TEXT("extraction_return"))
+		{
+			OutType = ETunaSweeperObjectiveType::ExtractionReturn;
+			return true;
+		}
 		if (Type == TEXT("level_travel") || Type == TEXT("leveltravel"))
 		{
 			OutType = ETunaSweeperObjectiveType::LevelTravel;
@@ -295,6 +305,23 @@ void UTunaSweeperQuestSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	Super::Initialize(Collection);
 
 	LoadQuestData(false);
+	ExtractionPostLoadHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::HandleExtractionArrival);
+	if (GEngine)
+	{
+		ExtractionTravelFailureHandle = GEngine->OnTravelFailure().AddWeakLambda(this,
+			[this](UWorld* World, ETravelFailure::Type, const FString&)
+			{
+				if (!World || World->GetGameInstance() == GetGameInstance()) CancelExtractionReturn();
+			});
+	}
+}
+
+void UTunaSweeperQuestSubsystem::Deinitialize()
+{
+	FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(ExtractionPostLoadHandle);
+	if (GEngine) GEngine->OnTravelFailure().Remove(ExtractionTravelFailureHandle);
+	CancelExtractionReturn();
+	Super::Deinitialize();
 }
 
 int32 UTunaSweeperQuestSubsystem::GetFirstOutingQuestId()
@@ -777,6 +804,8 @@ bool UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain(
 
 void UTunaSweeperQuestSubsystem::NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName)
 {
+	// Normal travel supersedes any prior extraction. The extraction actor arms its record after this call.
+	CancelExtractionReturn();
 	AdvanceMatchingObjectives(
 		[this, SourceLevelName, TargetLevelName](const FTunaSweeperObjectiveDefinition& Objective)
 		{
@@ -787,12 +816,74 @@ void UTunaSweeperQuestSubsystem::NotifyLevelTravelRequested(FName SourceLevelNam
 
 void UTunaSweeperQuestSubsystem::NotifyBunkerRescueReturn(FName SourceLevelName, FName TargetLevelName)
 {
+	CancelExtractionReturn();
 	AdvanceMatchingObjectives(
 		[this, SourceLevelName, TargetLevelName](const FTunaSweeperObjectiveDefinition& Objective)
 		{
 			return DoesObjectiveMatchBunkerRescueReturn(Objective, SourceLevelName, TargetLevelName);
 		},
 		1);
+}
+
+void UTunaSweeperQuestSubsystem::CancelExtractionReturn()
+{
+	PendingExtractionDestination = NAME_None;
+	PendingExtractionObjectives.Reset();
+}
+
+void UTunaSweeperQuestSubsystem::BeginExtractionReturn(FName SourceLevelName, FName TargetLevelName)
+{
+	CancelExtractionReturn();
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) return;
+	const FName Destination(*UWorld::RemovePIEPrefix(FPackageName::GetShortName(TargetLevelName.ToString())));
+	const FName Bunker = TunaSweeperBuildFlavor::GetBunkerLevelName();
+	if (!EnsureQuestDataLoaded() || !TunaSweeperBuildFlavor::IsRaidGameplayLevelName(SourceLevelName) ||
+		Destination != Bunker) return;
+	EnsureSaveStateLoaded();
+	// Snapshot eligibility at extraction time; quests accepted after departure get no credit.
+	for (const auto& Pair : QuestDefinitions)
+	{
+		if (GetQuestState(Pair.Key) != ETunaSweeperQuestState::Accepted) continue;
+		for (const auto& Objective : Pair.Value.Objectives)
+		{
+			if (Objective.Type == ETunaSweeperObjectiveType::ExtractionReturn &&
+				(Objective.SourceLevelName.IsNone() || IsMapNameMatch(SourceLevelName, *Objective.SourceLevelName.ToString())) &&
+				(Objective.TargetLevelName.IsNone() || IsMapNameMatch(Destination, *Objective.TargetLevelName.ToString())))
+			{
+				PendingExtractionObjectives.FindOrAdd(Pair.Key).Add(Objective.ObjectiveId);
+			}
+		}
+	}
+	if (!PendingExtractionObjectives.IsEmpty()) PendingExtractionDestination = Bunker;
+}
+
+void UTunaSweeperQuestSubsystem::HandleExtractionArrival(UWorld* World)
+{
+	if (!World || !World->IsGameWorld() || World->GetGameInstance() != GetGameInstance()) return;
+	CompleteExtractionReturn(FName(*UGameplayStatics::GetCurrentLevelName(World, true)));
+}
+
+void UTunaSweeperQuestSubsystem::CompleteExtractionReturn(FName ArrivedLevelName)
+{
+	const FName Arrived(*UWorld::RemovePIEPrefix(FPackageName::GetShortName(ArrivedLevelName.ToString())));
+	const bool bArrived = !PendingExtractionDestination.IsNone() && Arrived == PendingExtractionDestination;
+	const auto Pending = MoveTemp(PendingExtractionObjectives);
+	CancelExtractionReturn(); // Consume before callbacks/save; repeated map notifications cannot double count.
+	if (!bArrived) return;
+	bool bChanged = false;
+	for (const auto& Pair : Pending)
+	{
+		if (GetQuestState(Pair.Key) != ETunaSweeperQuestState::Accepted) continue;
+		bool bQuestChanged = false;
+		for (const FName ObjectiveId : Pair.Value) bQuestChanged |= AdvanceObjectiveProgress(Pair.Key, ObjectiveId, 1);
+		if (bQuestChanged && AreAllObjectivesComplete(Pair.Key))
+		{
+			SetQuestState(Pair.Key, ETunaSweeperQuestState::RewardAvailable);
+			ShowQuestCompletedToast(Pair.Key);
+		}
+		bChanged |= bQuestChanged;
+	}
+	if (bChanged) BroadcastQuestProgressChanged(true);
 }
 
 void UTunaSweeperQuestSubsystem::NotifyWarpPointUsed(FName LevelName, FName WarpPointId, FName TargetWarpPointId)
@@ -900,6 +991,7 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 	int32 SavedTrackedQuestId,
 	int32 SavedQuestCoinBalance)
 {
+	CancelExtractionReturn();
 	LoadQuestData(false);
 	QuestProgressById.Reset();
 	CoinBalance = FMath::Max(0, SavedQuestCoinBalance);
@@ -958,6 +1050,7 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 
 void UTunaSweeperQuestSubsystem::ResetQuestProgressForNewGame()
 {
+	CancelExtractionReturn();
 	QuestProgressById.Reset();
 	TrackedQuestId = 0;
 	CoinBalance = 0;
@@ -1218,6 +1311,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 
 void UTunaSweeperQuestSubsystem::ResetLoadedQuestData()
 {
+	CancelExtractionReturn();
 	QuestDefinitions.Reset();
 	QuestTextStringsByKey.Reset();
 	bQuestDataLoaded = false;

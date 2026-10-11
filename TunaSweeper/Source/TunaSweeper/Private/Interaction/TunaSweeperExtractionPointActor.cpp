@@ -265,6 +265,7 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			QuestSubsystem->NotifyLevelTravelRequested(SourceLevelName, TargetLevelName);
+			QuestSubsystem->BeginExtractionReturn(SourceLevelName, TargetLevelName);
 		}
 
 		const FText ResolvedTransitionMessage = ResolveTransitionMessage();
