@@ -1,0 +1,209 @@
+{
+  "map": "/Game/MainRaid/RaidVillage",
+  "units": "cm",
+  "shape": "rounded rectangle with four straight sections and four radius-4000 quarter curves",
+  "bounds_centerline_xy_cm": [
+    -12000,
+    -11000,
+    12000,
+    11000
+  ],
+  "corner_radius_cm": 4000,
+  "length_cm": 85160.6015625,
+  "points_local_cm": [
+    [
+      -8000,
+      -11000,
+      210.12617161812886
+    ],
+    [
+      8000,
+      -11000,
+      210.12617161812886
+    ],
+    [
+      12000,
+      -7000,
+      340.51779770760186
+    ],
+    [
+      12000,
+      7000,
+      340.51779770760186
+    ],
+    [
+      8000,
+      11000,
+      162.13482486866633
+    ],
+    [
+      -8000,
+      11000,
+      162.13482486866633
+    ],
+    [
+      -12000,
+      7000,
+      503.6486458639847
+    ],
+    [
+      -12000,
+      -7000,
+      503.6486458639847
+    ]
+  ],
+  "arrive_tangents_local_cm": [
+    [
+      6627.416997969521,
+      0.0,
+      0
+    ],
+    [
+      16000,
+      0,
+      0
+    ],
+    [
+      0.0,
+      6627.416997969521,
+      0
+    ],
+    [
+      0,
+      14000,
+      0
+    ],
+    [
+      -6627.416997969521,
+      0.0,
+      0
+    ],
+    [
+      -16000,
+      0,
+      0
+    ],
+    [
+      0.0,
+      -6627.416997969521,
+      0
+    ],
+    [
+      0,
+      -14000,
+      0
+    ]
+  ],
+  "leave_tangents_local_cm": [
+    [
+      16000,
+      0,
+      0
+    ],
+    [
+      6627.416997969521,
+      0.0,
+      0
+    ],
+    [
+      0,
+      14000,
+      0
+    ],
+    [
+      0.0,
+      6627.416997969521,
+      0
+    ],
+    [
+      -16000,
+      0,
+      0
+    ],
+    [
+      -6627.416997969521,
+      0.0,
+      0
+    ],
+    [
+      0,
+      -14000,
+      0
+    ],
+    [
+      0.0,
+      -6627.416997969521,
+      0
+    ]
+  ],
+  "track_actor_location_cm": [
+    0,
+    0,
+    0
+  ],
+  "rail_ground_clearance_cm": 15,
+  "terrain_edit_layer_name": "Layer",
+  "railbed_width_cm": 250,
+  "railbed_side_falloff_cm": 400,
+  "station_bed_half_width_cm": 750,
+  "station_bed_side_falloff_cm": 350,
+  "stations": [
+    {
+      "actor_name": "LoopRailStation_0",
+      "station_id": "village_01",
+      "head_position_cm": [
+        3000.0,
+        -11000.0,
+        210.12617161812886
+      ],
+      "stop_distance_cm": 10999.994140625,
+      "direction_xy": [
+        1,
+        0
+      ],
+      "straight_clearance_behind_cm": 11000,
+      "straight_clearance_ahead_cm": 5000
+    },
+    {
+      "actor_name": "LoopRailStation_1",
+      "station_id": "village_02",
+      "head_position_cm": [
+        12000.0,
+        3000.001072883606,
+        340.51779770760186
+      ],
+      "stop_distance_cm": 32285.71484375,
+      "direction_xy": [
+        0,
+        1
+      ],
+      "straight_clearance_behind_cm": 10000,
+      "straight_clearance_ahead_cm": 4000
+    },
+    {
+      "actor_name": "LoopRailStation_2",
+      "station_id": "village_03",
+      "head_position_cm": [
+        -2999.992847442627,
+        11000.0,
+        162.13482486866633
+      ],
+      "stop_distance_cm": 53572.8515625,
+      "direction_xy": [
+        -1,
+        0
+      ],
+      "straight_clearance_behind_cm": 11000,
+      "straight_clearance_ahead_cm": 5000
+    }
+  ],
+  "pre_change_map_backup": "TunaSweeper/Saved/VillageRailRoute20261012/RaidVillage.before_outer_rail.umap",
+  "pre_change_map_sha256": "3547d47721fab45971f3087381c10121b9e24354d139d14c747fbcb025a230ff",
+  "terrain_restore_note": "Actor snapshot alone cannot restore railbed height edits; restore the pre-change map backup (or corresponding Git map revision) for the original terrain.",
+  "central_ground_samples": 2601,
+  "central_ground_max_delta_cm": 0.0,
+  "max_railbed_offset_error_cm": 0.49420722134414063,
+  "max_grade_degrees": 4.767193187749209,
+  "actor_count": 171,
+  "central_test_actor_count": 156
+}
