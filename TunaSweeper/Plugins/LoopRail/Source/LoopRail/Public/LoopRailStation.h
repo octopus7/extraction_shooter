@@ -6,6 +6,7 @@ class ALoopRailTrack;
 class USceneComponent;
 class UArrowComponent;
 class UStaticMeshComponent;
+class UWidgetComponent;
 
 UCLASS(Blueprintable)
 class LOOPRAIL_API ALoopRailStation : public AActor
@@ -14,10 +15,16 @@ class LOOPRAIL_API ALoopRailStation : public AActor
 public:
     ALoopRailStation();
     virtual void OnConstruction(const FTransform& Transform) override;
+    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail") TObjectPtr<USceneComponent> Root;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail") TObjectPtr<UArrowComponent> StopMarker;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail") TObjectPtr<UStaticMeshComponent> Platform;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail") TObjectPtr<UStaticMeshComponent> AccessRamp;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<UWidgetComponent> ArrivalDisplay;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival") bool bShowArrivalDisplay = true;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="100", Units="cm")) float ArrivalDisplayHeight = 330;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="0.1")) float ArrivalDisplayScale = .5f;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LoopRail") TObjectPtr<ALoopRailTrack> Track;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") FName StationId;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") bool bEnabled = true;
@@ -28,4 +35,14 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail") bool bPlatformOnRight = true;
     UFUNCTION(BlueprintCallable, CallInEditor, Category="LoopRail") void AlignToTrack();
     UFUNCTION(BlueprintPure, Category="LoopRail") double GetStopDistance() const;
+    UFUNCTION(BlueprintPure, Category="LoopRail|Arrival") bool TryGetNextArrivalSeconds(double& OutSeconds) const;
+    // The host project supplies these through its localization/string-key workflow.
+    UFUNCTION(BlueprintCallable, Category="LoopRail|Arrival") void SetArrivalTextFormats(const FText& TimeFormat, const FText& UnavailableText);
+    UFUNCTION(BlueprintCallable, Category="LoopRail|Arrival") void RefreshArrivalDisplay();
+    UFUNCTION(BlueprintPure, Category="LoopRail|Arrival") FText GetArrivalDisplayText() const;
+private:
+    void UpdateArrivalDisplayTransform();
+    UPROPERTY(Transient) FText ArrivalTimeFormat;
+    UPROPERTY(Transient) FText ArrivalUnavailableText;
+    float DisplayRefreshRemaining = 0;
 };

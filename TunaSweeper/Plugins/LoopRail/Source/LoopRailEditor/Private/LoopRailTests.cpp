@@ -77,6 +77,60 @@ bool FLoopRailActorTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoopRailArrivalTest,"LoopRail.Runtime.ArrivalEstimate",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FLoopRailArrivalTest::RunTest(const FString& Parameters)
+{
+    FTestWorld T;
+    auto* Track = T.World->SpawnActor<ALoopRailTrack>();
+    auto* Train = T.World->SpawnActor<ALoopRailTrain>();
+    Train->Track = Track; Train->StartDistance = 1000; Train->RebuildTrain(); Train->ResetTrain();
+    auto* First = T.World->SpawnActor<ALoopRailStation>();
+    First->Track = Track; First->DwellSeconds = 5;
+    First->SetActorLocation(Track->Sample(5000).GetLocation());
+    auto* Target = T.World->SpawnActor<ALoopRailStation>();
+    Target->Track = Track; Target->DwellSeconds = 9;
+    Target->SetActorLocation(Track->Sample(9500).GetLocation());
+    double Predicted = 0;
+    TestTrue(TEXT("Moving service predicts through an intermediate station"), Train->TryGetArrivalSeconds(Target, Predicted));
+    double Elapsed = 0;
+    bool bReachedTarget = false, bCheckedDwell = false;
+    for (int32 Step = 0; Step < 10000 && !bReachedTarget; ++Step)
+    {
+        Train->Tick(.02f); Elapsed += .02;
+        if (!Train->IsDwelling()) continue;
+        if (FMath::Abs(Train->GetHeadDistance()-First->GetStopDistance()) < .1 && !bCheckedDwell)
+        {
+            double Now = -1, ServerEta = 0, ClientEta = 0;
+            TestTrue(TEXT("Current station has an estimate"), Train->TryGetArrivalSeconds(First, Now));
+            TestEqual(TEXT("Current dwelling station is already here"), Now, 0.0);
+            TestTrue(TEXT("Server predicts during dwell"), Train->TryGetArrivalSeconds(Target, ServerEta));
+            Train->SetRole(ROLE_SimulatedProxy);
+            Train->CruiseSpeed = 17; // A client must use the authoritative replicated service configuration.
+            TestTrue(TEXT("Client predicts from replicated running/dwell state"), Train->TryGetArrivalSeconds(Target, ClientEta));
+            TestTrue(TEXT("Client and server ETA agree"), FMath::Abs(ClientEta-ServerEta) < .001);
+            Train->SetRole(ROLE_Authority); Train->CruiseSpeed = 600;
+            bCheckedDwell = true;
+        }
+        bReachedTarget = FMath::Abs(Train->GetHeadDistance()-Target->GetStopDistance()) < .1;
+    }
+    TestTrue(TEXT("Runtime train actually reaches predicted station"), bReachedTarget);
+    TestTrue(TEXT("Intermediate dwell and replicated state checked"), bCheckedDwell);
+    TestTrue(TEXT("Prediction matches actual 20ms runtime integration"), FMath::Abs(Elapsed-Predicted) < .1);
+    double Unavailable = -1;
+    Train->SetRunning(false);
+    TestFalse(TEXT("Paused service has no ETA"), Train->TryGetArrivalSeconds(Target, Unavailable));
+    TestEqual(TEXT("Unavailable output is initialized"), Unavailable, 0.0);
+    Train->SetRunning(true); Target->bEnabled = false;
+    TestFalse(TEXT("Disabled station has no ETA"), Train->TryGetArrivalSeconds(Target, Unavailable));
+    Target->bEnabled = true;
+    auto* OtherTrack = T.World->SpawnActor<ALoopRailTrack>();
+    Target->Track = OtherTrack;
+    TestFalse(TEXT("Station on another track has no ETA"), Train->TryGetArrivalSeconds(Target, Unavailable));
+    TestFalse(TEXT("Null station has no ETA"), Train->TryGetArrivalSeconds(nullptr, Unavailable));
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoopRailMeshTest,"LoopRail.Assets.VehicleBudgetAndAisle",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FLoopRailMeshTest::RunTest(const FString& Parameters)

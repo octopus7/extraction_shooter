@@ -2,6 +2,7 @@
 #include "LoopRailTrack.h"
 #include "LoopRailStation.h"
 #include "LoopRailMotion.h"
+#include "LoopRailArrivalEstimate.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -158,6 +159,43 @@ double ALoopRailTrain::GetConsistLength() const
 { const int32 Count = FMath::Clamp(VehicleCount, 1, 16); return VehicleLength*Count + FMath::Max(0.f, VehicleGap)*(Count-1); }
 bool ALoopRailTrain::HasUsableTrack() const
 { return IsValid(Track) && Track->IsUsableLoop() && Track->GetLength() > GetConsistLength() + 100; }
+bool ALoopRailTrain::TryGetArrivalSeconds(const ALoopRailStation* Station, double& OutSeconds) const
+{
+    OutSeconds = 0;
+    if (!IsValid(Station) || !Station->bEnabled || Station->Track != Track || !HasUsableTrack() || !GetWorld()) return false;
+    LoopRailArrivalEstimate::FState State;
+    State.Length = Track->GetLength();
+    State.HeadDistance = HasAuthority() ? HeadDistance : RepState.Distance;
+    State.Speed = HasAuthority() ? CurrentSpeed : RepState.Speed;
+    State.CruiseSpeed = HasAuthority() ? CruiseSpeed : RepState.CruiseSpeed;
+    State.Acceleration = HasAuthority() ? Acceleration : RepState.Acceleration;
+    State.Brake = HasAuthority() ? BrakingDeceleration : RepState.BrakingDeceleration;
+    State.DwellRemaining = HasAuthority() ? DwellRemaining : RepState.DwellSeconds;
+    State.SinceDeparture = HasAuthority() ? SinceDeparture : RepState.SinceDeparture;
+    State.Running = HasAuthority() ? bRunning : RepState.bRunning;
+    const ALoopRailStation* LastStation = HasAuthority() ? CurrentStation.Get() : RepState.Station.Get();
+    TArray<LoopRailArrivalEstimate::FStop, TInlineAllocator<8>> Stops;
+    std::size_t Target = LoopRailArrivalEstimate::NoStop;
+    for (TActorIterator<ALoopRailStation> It(GetWorld()); It; ++It)
+    {
+        if (It->Track != Track) continue;
+        const int32 Index = Stops.Num();
+        if (*It == Station) Target = static_cast<std::size_t>(Index);
+        if (*It == LastStation) State.CurrentStop = static_cast<std::size_t>(Index);
+        Stops.Add({It->GetStopDistance(), It->DwellSeconds, It->bEnabled});
+    }
+    if (!LoopRailArrivalEstimate::TryEstimate(State, Stops.GetData(), Stops.Num(), Target, OutSeconds)) return false;
+    // Clients estimate from the replicated authoritative snapshot, not their visual extrapolation.
+    if (!HasAuthority())
+    {
+        if (const AGameStateBase* GS = GetWorld()->GetGameState())
+        {
+            const double Age = FMath::Clamp(GS->GetServerWorldTimeSeconds() - RepState.ServerTime, 0.0, .25);
+            OutSeconds = FMath::Max(0.0, OutSeconds - Age);
+        }
+    }
+    return true;
+}
 UBoxComponent* ALoopRailTrain::GetVehicleFloor(int32 Index) const { return Floors.IsValidIndex(Index) ? Floors[Index].Get() : nullptr; }
 UBoxComponent* ALoopRailTrain::GetConnectionFloor(int32 Index) const { return ConnectionFloors.IsValidIndex(Index) ? ConnectionFloors[Index].Get() : nullptr; }
 void ALoopRailTrain::UpdateVehicles()
@@ -263,6 +301,8 @@ void ALoopRailTrain::PublishState()
     RepState.Distance = HeadDistance; RepState.Speed = CurrentSpeed;
     RepState.ServerTime = GetWorld()->GetTimeSeconds(); RepState.bMoving = bRunning && DwellRemaining <= 0;
     RepState.DwellSeconds = DwellRemaining;
+    RepState.bRunning = bRunning; RepState.SinceDeparture = SinceDeparture; RepState.Station = CurrentStation;
+    RepState.CruiseSpeed = CruiseSpeed; RepState.Acceleration = Acceleration; RepState.BrakingDeceleration = BrakingDeceleration;
 }
 void ALoopRailTrain::OnRep_State() { HeadDistance = RepState.Distance; CurrentSpeed = RepState.Speed; DwellRemaining = RepState.DwellSeconds; UpdateVehicles(); }
 void ALoopRailTrain::OnRep_Configuration() { RebuildTrain(); OnRep_State(); }

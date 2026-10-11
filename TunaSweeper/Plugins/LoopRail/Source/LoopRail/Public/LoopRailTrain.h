@@ -19,6 +19,12 @@ struct FLoopRailRepState
     UPROPERTY() float ServerTime = 0;
     UPROPERTY() bool bMoving = false;
     UPROPERTY() float DwellSeconds = 0;
+    UPROPERTY() bool bRunning = false;
+    UPROPERTY() double SinceDeparture = 100;
+    UPROPERTY() TObjectPtr<ALoopRailStation> Station;
+    UPROPERTY() float CruiseSpeed = 600;
+    UPROPERTY() float Acceleration = 120;
+    UPROPERTY() float BrakingDeceleration = 180;
 };
 
 UCLASS(Blueprintable)
@@ -54,6 +60,8 @@ public:
     UFUNCTION(BlueprintPure, Category="LoopRail") bool IsDwelling() const { return DwellRemaining > 0; }
     UFUNCTION(BlueprintPure, Category="LoopRail") double GetConsistLength() const;
     UFUNCTION(BlueprintPure, Category="LoopRail") bool HasUsableTrack() const;
+    /** Arrival ETA in game seconds, including intermediate station dwell; false when service is unavailable. */
+    UFUNCTION(BlueprintPure, Category="LoopRail") bool TryGetArrivalSeconds(const ALoopRailStation* Station, double& OutSeconds) const;
     UFUNCTION(BlueprintPure, Category="LoopRail") UBoxComponent* GetVehicleFloor(int32 Index) const;
     UFUNCTION(BlueprintPure, Category="LoopRail") UBoxComponent* GetConnectionFloor(int32 Index) const;
     static constexpr double VehicleLength = 900;

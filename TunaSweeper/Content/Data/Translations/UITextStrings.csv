@@ -560,3 +560,5 @@ ui.editor.open_level.raid_village,突袭 - 村庄,突襲 - 村莊,Рейд — �
 ui.editor.open_level.raid_plains,突袭 - 平原,突襲 - 平原,Рейд — равнины,Incursão — Planícies
 ui.editor.open_level.basement,地下室,地下室,Подвал,Porão
 ui.editor.open_level.tooltip,在编辑器中打开{0}关卡。,在編輯器中開啟{0}關卡。,Открыть уровень {0} в редакторе.,Abrir o nível {0} no editor.
+ui.rail.arrival_time_format,{Minutes}:{Seconds},{Minutes}:{Seconds},{Minutes}:{Seconds},{Minutes}:{Seconds}
+ui.rail.arrival_unavailable,--:--,--:--,--:--,--:--

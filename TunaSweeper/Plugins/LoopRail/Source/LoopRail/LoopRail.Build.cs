@@ -5,6 +5,7 @@ public class LoopRail : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bUseUnity = false;
-        PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine" });
+        PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "UMG" });
+        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore" });
     }
 }

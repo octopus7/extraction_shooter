@@ -617,3 +617,5 @@ ui.editor.open_level.raid_village,레이드 - 마을,Raid Village,レイド - �
 ui.editor.open_level.raid_plains,레이드 - 평원,Raid Plains,レイド - 平原
 ui.editor.open_level.basement,지하실,Basement,地下室
 ui.editor.open_level.tooltip,에디터에서 {0} 레벨을 엽니다.,Open the {0} level in the editor.,エディタで{0}レベルを開きます。
+ui.rail.arrival_time_format,{Minutes}:{Seconds},{Minutes}:{Seconds},{Minutes}:{Seconds}
+ui.rail.arrival_unavailable,--:--,--:--,--:--

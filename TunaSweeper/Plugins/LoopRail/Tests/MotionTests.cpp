@@ -1,4 +1,5 @@
 #include "../Source/LoopRail/Public/LoopRailMotion.h"
+#include "../Source/LoopRail/Public/LoopRailArrivalEstimate.h"
 #include <cmath>
 #include <cstdio>
 int main()
@@ -30,6 +31,66 @@ int main()
         Remaining -= Step.Distance; Speed = Step.Speed; Arrived = Step.Arrived;
     }
     Check(Arrived && Remaining < .001 && Speed == 0, "brake reaches exact stop");
+    using namespace LoopRailArrivalEstimate;
+    FState State;
+    State.Length = 10000;
+    State.CruiseSpeed = 600;
+    State.Acceleration = 120;
+    State.Brake = 180;
+    State.Running = true;
+    FStop Stops[] = {{2000, 7, true}, {6000, 11, true}, {9000, 3, true}};
+    double Eta = -1;
+    Check(TryEstimate(State, Stops, 3, 0, Eta) && Eta > 5 && Eta < 12,
+        "arrival predicts acceleration and braking rather than distance divided by cruise");
+    double FirstLeg = Eta;
+    State.HeadDistance = 2000;
+    State.CurrentStop = 0;
+    State.SinceDeparture = 0;
+    State.DwellRemaining = 4;
+    Check(TryEstimate(State, Stops, 3, 0, Eta) && Eta == 0, "current dwelling station arrives now");
+    Check(TryEstimate(State, Stops, 3, 1, Eta), "next station from dwell has an ETA");
+    double WithDwell = Eta;
+    State.DwellRemaining = 0;
+    Check(TryEstimate(State, Stops, 3, 1, Eta) && std::abs(WithDwell-Eta-4) < .001,
+        "remaining current dwell contributes exactly once");
+    Check(TryEstimate(State, Stops, 3, 0, Eta) && Eta > 25,
+        "departing current station predicts next lap instead of zero");
+    State = FState{};
+    State.Length = 10000; State.CruiseSpeed = 600; State.Acceleration = 120; State.Brake = 180;
+    State.Running = true;
+    Check(TryEstimate(State, Stops, 3, 2, Eta), "arrival through intermediate stations");
+    double WithIntermediateDwell = Eta;
+    Stops[0].DwellSeconds = Stops[1].DwellSeconds = 0;
+    Check(TryEstimate(State, Stops, 3, 2, Eta) && std::abs(WithIntermediateDwell-Eta-18) < .001,
+        "intermediate station dwell is counted, target dwell is not");
+    State.HeadDistance = 9000;
+    Check(TryEstimate(State, Stops, 3, 0, Eta) && Eta > FirstLeg,
+        "seam crossing wraps forward to the target");
+    State.Running = false;
+    Check(!TryEstimate(State, Stops, 3, 0, Eta) && Eta == 0, "stopped service has no arrival estimate");
+    State.Running = true;
+    Stops[0].Enabled = false;
+    Check(!TryEstimate(State, Stops, 3, 0, Eta), "disabled target has no ETA");
+    Stops[0].Enabled = true;
+    State.CruiseSpeed = 0;
+    Check(!TryEstimate(State, Stops, 3, 0, Eta), "zero cruise cannot promise an arrival");
+    State.CruiseSpeed = 600;
+    State.Length = 0;
+    Check(!TryEstimate(State, Stops, 3, 0, Eta), "invalid track cannot produce ETA");
+    State.Length = 10000;
+    State.HeadDistance = NAN;
+    Check(!TryEstimate(State, Stops, 3, 0, Eta), "non-finite train state is rejected");
+    State.HeadDistance = 0;
+    State.CruiseSpeed = .0001;
+    Check(!TryEstimate(State, Stops, 3, 0, Eta), "prediction work is bounded for unreachable distant stops");
+    State.CruiseSpeed = 600;
+    State.HeadDistance = 2000; State.CurrentStop = 0; State.SinceDeparture = 0;
+    Check(TryEstimate(State, Stops, 1, 0, Eta) && Eta > 15,
+        "a single-station loop departs and predicts the next full lap");
+    State.DwellRemaining = 3; State.Running = false;
+    Check(!TryEstimate(State, Stops, 1, 0, Eta), "paused service overrides currently dwelling status");
+    State.Running = true;
+    Check(!TryEstimate(State, Stops, 1, 5, Eta), "unknown target index is rejected");
     std::printf("LoopRail motion: %d failure(s)\n", Failures);
     return Failures ? 1 : 0;
 }
