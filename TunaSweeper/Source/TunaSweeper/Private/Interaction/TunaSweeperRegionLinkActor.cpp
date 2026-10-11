@@ -1,18 +1,9 @@
 #include "Interaction/TunaSweeperRegionLinkActor.h"
-#include "Components/BoxComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
-#include "GameFramework/Pawn.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 
 ATunaSweeperRegionLinkActor::ATunaSweeperRegionLinkActor()
 {
-    PrimaryActorTick.bCanEverTick = true;
-    PrimaryActorTick.TickInterval = 0.15f;
-    WalkArea = CreateDefaultSubobject<UBoxComponent>(TEXT("WalkArea"));
-    WalkArea->SetupAttachment(RootComponent);
-    WalkArea->SetBoxExtent(FVector(130, 130, 180));
-    WalkArea->SetRelativeLocation(FVector(0, 0, 180));
-    WalkArea->SetCollisionProfileName(TEXT("Trigger"));
 }
 void ATunaSweeperRegionLinkActor::OnConstruction(const FTransform& Transform)
 {
@@ -95,14 +86,4 @@ bool ATunaSweeperRegionLinkActor::TravelToTargetLevel(APawn* Pawn)
     if (bTravelStarted || !IsPassageUnlocked()) return false;
     bTravelStarted = Super::TravelToTargetLevel(Pawn);
     return bTravelStarted;
-}
-void ATunaSweeperRegionLinkActor::Tick(float DeltaSeconds)
-{
-    Super::Tick(DeltaSeconds);
-    if (!bWalkThrough || bTravelStarted || !IsPassageUnlocked()) return;
-    TArray<AActor*> Actors;
-    WalkArea->GetOverlappingActors(Actors, APawn::StaticClass());
-    for (AActor* Actor : Actors)
-        if (auto* Pawn = Cast<APawn>(Actor); Pawn && Pawn->IsPlayerControlled() && Pawn->IsLocallyControlled())
-        { TravelToTargetLevel(Pawn); break; }
 }

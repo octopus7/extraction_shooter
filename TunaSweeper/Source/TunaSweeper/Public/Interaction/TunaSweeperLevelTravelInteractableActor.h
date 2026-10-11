@@ -14,10 +14,6 @@ class TUNASWEEPER_API ATunaSweeperLevelTravelInteractableActor : public ATunaSwe
 
 public:
 	ATunaSweeperLevelTravelInteractableActor();
-	virtual void Tick(float DeltaSeconds) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel")
-	bool bWalkThroughInFullGame = false;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Level Travel")
 	ETunaSweeperLevelTravelDestination GetDestination() const { return Destination; }
@@ -28,7 +24,6 @@ public:
 	virtual bool TravelToTargetLevel(APawn* InstigatorPawn);
 
 protected:
-	bool bWalkTravelStarted = false;
 	/** Per-instance selection only; maps and presentation stay centralized elsewhere. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level Travel")
 	ETunaSweeperLevelTravelDestination Destination = ETunaSweeperLevelTravelDestination::Raid;
