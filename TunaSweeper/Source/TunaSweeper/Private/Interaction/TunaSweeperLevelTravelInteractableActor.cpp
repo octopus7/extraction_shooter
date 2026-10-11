@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperRaidExperienceReturnSubsystem.h"
 
 ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableActor()
@@ -32,6 +33,8 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
+		if (auto* Achievements = GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+			Achievements->DiscardPendingExtraction(GetWorld());
 		TunaGameInstance->HandleLevelTravelPersistence(SourceLevelName, TargetLevelName);
 
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())

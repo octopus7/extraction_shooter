@@ -18,6 +18,7 @@
 #include "ProceduralMeshComponent.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperRaidExperienceReturnSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
@@ -242,6 +243,11 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 	}
 
 	bExtractionTriggered = true;
+	if (GetGameInstance())
+	{
+		if (auto* Achievements = GetGameInstance()->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+			Achievements->CaptureCompletedExtraction(InstigatorPawn, TargetLevelName);
+	}
 	StopPawnForExtraction(InstigatorPawn);
 	CurrentHoldSeconds = 0.0f;
 	UpdateHudProgressWidget();

@@ -1,4 +1,6 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "Vehicle/TunaSweeperVehicleCollisionDamageType.h"
+#include "Engine/DamageEvents.h"
 
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Combat/TunaSweeperArmor.h"
@@ -296,6 +298,12 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 	if (CurrentHealth <= 0.0f)
 	{
 		HandleDeath(EventInstigator, DamageCauser);
+		if (EventInstigator && EventInstigator->IsLocalPlayerController() &&
+			DamageEvent.DamageTypeClass && DamageEvent.DamageTypeClass->IsChildOf(UTunaSweeperVehicleCollisionDamageType::StaticClass()))
+		{
+			if (auto* Achievements = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperAchievementSubsystem>() : nullptr)
+				Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::VehicleCollisionKill, NAME_None);
+		}
 	}
 
 	return AppliedDamage;
@@ -1292,7 +1300,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =
 				GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
 			{
-				AchievementSubsystem->ReportEnemyKilled(EnemyId);
+				if (KillerController->IsLocalPlayerController()) AchievementSubsystem->ReportEnemyKilled(EnemyId);
 			}
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{

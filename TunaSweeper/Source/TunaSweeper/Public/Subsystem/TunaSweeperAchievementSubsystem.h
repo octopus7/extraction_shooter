@@ -6,6 +6,7 @@
 #include "TunaSweeperAchievementSubsystem.generated.h"
 
 class ITunaSweeperAchievementPublisher;
+class APawn;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FTunaSweeperAchievementUnlockedDelegate, FName);
 
@@ -32,6 +33,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Achievement")
 	void ReportQuestRewardClaimed(int32 QuestId);
 
+	// Only call after the owning gameplay system commits the actual action/state.
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Achievement")
+	void ReportGameplayEvent(ETunaSweeperAchievementEvent Event, FName TargetId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Achievement")
+	void ReportWeaponFired(int32 WeaponItemId);
+
+	// Called by the local controller once its gameplay world is ready (also supports PIE).
+	void HandleGameplayWorldReady(UWorld* World);
+	void CaptureCompletedExtraction(APawn* Player, FName Destination);
+	void CancelRaid();
+	// Non-extraction travel must discard any previous completed-hold evidence.
+	void DiscardPendingExtraction(UWorld* World);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
+	TArray<FTunaSweeperAchievementDefinition> GetAchievementDefinitions() const { return Definitions; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
+	FText GetAchievementName(FName AchievementId) const;
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	int64 GetTotalEnemyKills() const { return ProgressState.TotalEnemyKills; }
 
@@ -47,10 +68,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	bool IsAchievementUnlocked(FName AchievementId) const
 	{
-		return ProgressState.UnlockedAchievementIds.Contains(AchievementId);
+		return AchievementId != FName(TEXT("14")) && ProgressState.UnlockedAchievementIds.Contains(AchievementId);
 	}
 
 private:
+	friend class FTunaAchievementLifecycleTest;
+	bool IsGameplayReportingAllowed() const;
+	void RefreshGameplaySnapshot();
+	void FlushPendingProgress();
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	bool LoadProgressState();
 	bool SaveProgressState() const;
@@ -69,10 +94,19 @@ private:
 
 	TArray<FTunaSweeperAchievementDefinition> Definitions;
 	FTunaSweeperAchievementProgressState ProgressState;
+	FTunaSweeperAchievementSnapshot GameplaySnapshot;
+	FTunaSweeperAchievementSnapshot PendingExtraction;
+	FTunaSweeperAchievementRaidState RaidState;
+	FName PendingExtractionDestination;
+	TWeakObjectPtr<UWorld> GameplayWorld;
+	TArray<FName> PendingNotifications;
+	bool bRefreshingSnapshot = false;
+	bool bProgressDirty = false;
 	TSharedPtr<ITunaSweeperAchievementPublisher> Publisher;
 	TSet<FName> AttemptedPlatformWrites;
 	FName CurrentPlatformName = NAME_None;
 	FDelegateHandle PostLoadMapHandle;
+	FDelegateHandle TravelFailureHandle;
 	bool bDefinitionsLoaded = false;
 	bool bProgressStateLoaded = false;
 	bool bPlatformQueryInFlight = false;

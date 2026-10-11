@@ -1,3 +1,25 @@
 {
-  "achievements": []
+  "schema_version": 2,
+  "achievements": [
+    { "achievement_id": "01", "name_string_key": "achievement.01.name", "condition_type": "location_reached", "enabled": false, "target_id": "", "map_paths": [], "platform_ids": {}, "todo": "Confirm region 1 entry location ID or exact map package(s)." },
+    { "achievement_id": "02", "name_string_key": "achievement.02.name", "condition_type": "total_enemy_kills", "required_count": 1, "platform_ids": {} },
+    { "achievement_id": "03", "name_string_key": "achievement.03.name", "condition_type": "gameplay_event", "event_type": "CharacterJoined", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm baby boar identity and committed recruitment event." },
+    { "achievement_id": "04", "name_string_key": "achievement.04.name", "condition_type": "gameplay_event", "event_type": "FacilityUsed", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm lift identity and actual-use producer. Repair completion does not qualify." },
+    { "achievement_id": "05", "name_string_key": "achievement.05.name", "condition_type": "all_facilities_restored", "enabled": false, "required_facility_ids": [], "platform_ids": {}, "todo": "Author the complete approved region 1 repair-object ID list before enabling." },
+    { "achievement_id": "06", "name_string_key": "achievement.06.name", "condition_type": "specific_enemy_first_kill", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm region 1 boss EnemyId; do not infer it from test bosses." },
+    { "achievement_id": "07", "name_string_key": "achievement.07.name", "condition_type": "location_reached", "enabled": false, "target_id": "", "map_paths": [], "platform_ids": {}, "todo": "Confirm region 2 entry location ID or exact map package(s)." },
+    { "achievement_id": "08", "name_string_key": "achievement.08.name", "condition_type": "gameplay_event", "event_type": "FacilityRelocated", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm AI vending machine identity and committed relocation event." },
+    { "achievement_id": "09", "name_string_key": "achievement.09.name", "condition_type": "gameplay_event", "event_type": "FastTravelUsed", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Connect actual completed loop-rail fast travel, not track repair or boarding." },
+    { "achievement_id": "10", "name_string_key": "achievement.10.name", "condition_type": "specific_enemy_first_kill", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm rabbit captain EnemyId." },
+    { "achievement_id": "11", "name_string_key": "achievement.11.name", "condition_type": "extraction_health", "platform_ids": {} },
+    { "achievement_id": "12", "name_string_key": "achievement.12.name", "condition_type": "timed_extraction", "required_count": 5, "platform_ids": {} },
+    { "achievement_id": "13", "name_string_key": "achievement.13.name", "condition_type": "location_reached", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Approve lake volume bounds and LocationId, then place the existing location trigger." },
+    { "achievement_id": "14", "condition_type": "reserved", "enabled": false, "platform_ids": {}, "todo": "Reserved. No name, translation, condition or platform mapping." },
+    { "achievement_id": "15", "name_string_key": "achievement.15.name", "condition_type": "gameplay_event", "event_type": "WeaponFired", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm anti-tank RPG item ID (decimal target_id) and successful launch path." },
+    { "achievement_id": "16", "name_string_key": "achievement.16.name", "condition_type": "gameplay_event", "event_type": "VehicleCollisionKill", "platform_ids": {}, "todo": "Vehicle collision damage producer must supply VehicleCollisionDamageType and actual driver instigator. No such producer currently exists." },
+    { "achievement_id": "17", "name_string_key": "achievement.17.name", "condition_type": "current_item_quantity", "target_item_id": 3004, "required_count": 100, "platform_ids": {} },
+    { "achievement_id": "18", "name_string_key": "achievement.18.name", "condition_type": "total_enemy_kills", "required_count": 100, "platform_ids": {} },
+    { "achievement_id": "19", "name_string_key": "achievement.19.name", "condition_type": "location_reached", "enabled": false, "target_id": "", "map_paths": [], "platform_ids": {}, "todo": "Confirm region 3 entry location ID or exact map package(s)." },
+    { "achievement_id": "20", "name_string_key": "achievement.20.name", "condition_type": "gameplay_event", "event_type": "EndingReached", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Connect confirmed full-game ending reached event. Demo ending is not a substitute." }
+  ]
 }

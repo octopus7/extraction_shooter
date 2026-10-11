@@ -176,4 +176,22 @@ bool FTunaSweeperAchievementPublishingStateTest::RunTest(const FString& Paramete
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaAchievementReservedTest,
+	"TunaSweeper.Achievement.ReservedSlot", TunaSweeperAchievementTests::TestFlags)
+
+bool FTunaAchievementReservedTest::RunTest(const FString& Parameters)
+{
+	auto Definition = TunaSweeperAchievementTests::MakeDefinition(TEXT("14"),
+		ETunaSweeperAchievementConditionType::TotalEnemyKills, TEXT(""), 1, TEXT("TEST_RESERVED"));
+	FTunaSweeperAchievementProgressState State;
+	State.TotalEnemyKills = 100;
+	TArray<FName> Unlocked;
+	TunaSweeperAchievementModel::EvaluateDefinitions({Definition}, State, Unlocked);
+	TestTrue(TEXT("Reserved 14 cannot unlock even if a condition is configured"), Unlocked.IsEmpty());
+	TunaSweeperAchievementModel::MergePlatformState({Definition}, FName(TEXT("Steam")),
+		{TEXT("TEST_RESERVED")}, State, Unlocked);
+	TestFalse(TEXT("Remote platform cannot unlock reserved 14"), State.UnlockedAchievementIds.Contains(FName(TEXT("14"))));
+	return true;
+}
+
 #endif

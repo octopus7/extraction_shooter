@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Combat/TunaSweeperArmor.h"
 
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
@@ -90,6 +91,11 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 
 	if (IsValid(VehicleMount)) VehicleMount->ReleaseRiderForEndPlay();
 	bIsDead = true;
+	if (IsLocallyControlled() && GetGameInstance())
+	{
+		if (auto* Achievements = GetGameInstance()->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+			Achievements->CancelRaid();
+	}
 	FinishRoll();
 	bFireHeld = false;
 	bIsAiming = false;

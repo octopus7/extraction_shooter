@@ -6,6 +6,7 @@
 #include "Achievement/TunaSweeperOnlineAchievementPublisher.h"
 #include "Dom/JsonObject.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Game/TunaSweeperSafeSave.h"
 #include "HAL/FileManager.h"
@@ -16,12 +17,14 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Subsystem/TunaSweeperToastSubsystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperAchievement, Log, All);
 
 namespace
 {
-	constexpr int32 AchievementSaveVersion = 1;
+	constexpr int32 AchievementSaveVersion = 2;
 	constexpr int32 MaximumConfiguredSteamAchievements = 256;
 	const TCHAR* AchievementConfigSection = TEXT("TunaSweeperAchievements");
 
@@ -36,6 +39,12 @@ namespace
 	bool ParseConditionType(const FString& RawType, ETunaSweeperAchievementConditionType& OutType)
 	{
 		const FString Type = RawType.TrimStartAndEnd().ToLower();
+		if (Type == TEXT("reserved")) { OutType = ETunaSweeperAchievementConditionType::Reserved; return true; }
+		if (Type == TEXT("gameplay_event")) { OutType = ETunaSweeperAchievementConditionType::GameplayEvent; return true; }
+		if (Type == TEXT("all_facilities_restored")) { OutType = ETunaSweeperAchievementConditionType::AllFacilitiesRestored; return true; }
+		if (Type == TEXT("extraction_health")) { OutType = ETunaSweeperAchievementConditionType::ExtractionHealth; return true; }
+		if (Type == TEXT("timed_extraction")) { OutType = ETunaSweeperAchievementConditionType::TimedExtraction; return true; }
+		if (Type == TEXT("current_item_quantity")) { OutType = ETunaSweeperAchievementConditionType::CurrentItemQuantity; return true; }
 		if (Type == TEXT("specific_enemy_first_kill"))
 		{
 			OutType = ETunaSweeperAchievementConditionType::SpecificEnemyFirstKill;
@@ -85,15 +94,30 @@ void UTunaSweeperAchievementSubsystem::Initialize(FSubsystemCollectionBase& Coll
 	Super::Initialize(Collection);
 	LoadAchievementDefinitions();
 	LoadProgressState();
+	if (auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		Instance->OnInventoryStateChanged.AddUObject(this, &ThisClass::RefreshGameplaySnapshot);
+		Instance->OnWorldProgressChanged.AddUObject(this, &ThisClass::RefreshGameplaySnapshot);
+	}
 
 	PostLoadMapHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(
 		this,
 		&UTunaSweeperAchievementSubsystem::HandlePostLoadMapWithWorld);
+	if (GEngine)
+		TravelFailureHandle = GEngine->OnTravelFailure().AddWeakLambda(this,
+			[this](UWorld* World, ETravelFailure::Type, const FString&) { DiscardPendingExtraction(World); });
 	TryStartPlatformSync();
 }
 
 void UTunaSweeperAchievementSubsystem::Deinitialize()
 {
+	if (bProgressDirty && bProgressStateLoaded) SaveProgressState();
+	if (GEngine) GEngine->OnTravelFailure().Remove(TravelFailureHandle);
+	if (auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		Instance->OnInventoryStateChanged.RemoveAll(this);
+		Instance->OnWorldProgressChanged.RemoveAll(this);
+	}
 	if (PostLoadMapHandle.IsValid())
 	{
 		FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(PostLoadMapHandle);
@@ -147,6 +171,21 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 
 		FTunaSweeperAchievementDefinition Definition;
 		Definition.AchievementId = ReadNameField(AchievementObject, TEXT("achievement_id"));
+		Definition.NameStringKey = ReadNameField(AchievementObject, TEXT("name_string_key"));
+		AchievementObject->TryGetBoolField(TEXT("enabled"), Definition.bEnabled);
+		AchievementObject->TryGetNumberField(TEXT("target_item_id"), Definition.TargetItemId);
+		for (const TCHAR* Field : {TEXT("required_facility_ids"), TEXT("map_paths")})
+		{
+			const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+			if (!AchievementObject->TryGetArrayField(Field, Values)) continue;
+			TArray<FName>& Destination = FCString::Strcmp(Field, TEXT("map_paths")) == 0 ? Definition.MapPaths : Definition.RequiredFacilityIds;
+			for (const auto& Value : *Values)
+			{
+				FString Id;
+				if (!Value->TryGetString(Id) || Id.TrimStartAndEnd().IsEmpty()) return false;
+				Destination.Add(FName(*Id));
+			}
+		}
 
 		FString ConditionType;
 		if (!AchievementObject->TryGetStringField(TEXT("condition_type"), ConditionType) ||
@@ -161,6 +200,15 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 			return false;
 		}
 
+		if (Definition.ConditionType == ETunaSweeperAchievementConditionType::GameplayEvent)
+		{
+			FString EventName;
+			AchievementObject->TryGetStringField(TEXT("event_type"), EventName);
+			const int64 Value = StaticEnum<ETunaSweeperAchievementEvent>()->GetValueByNameString(EventName);
+			if (Value < 0 || Value > static_cast<int64>(ETunaSweeperAchievementEvent::EndingReached)) return false;
+			Definition.EventType = static_cast<ETunaSweeperAchievementEvent>(Value);
+		}
+
 		if (Definition.ConditionType == ETunaSweeperAchievementConditionType::QuestRewardClaimed)
 			Definition.TargetQuestId = TunaSweeperQuestId::Read(AchievementObject, TEXT("target_id"));
 		else
@@ -168,6 +216,7 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 
 		double RequiredCount = 1.0;
 		AchievementObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
+		if (!FMath::IsFinite(RequiredCount) || RequiredCount < 1 || RequiredCount > MAX_int32 || FMath::FloorToDouble(RequiredCount) != RequiredCount) return false;
 		Definition.RequiredCount = FMath::RoundToInt64(RequiredCount);
 
 		const TSharedPtr<FJsonObject>* PlatformIdsObject = nullptr;
@@ -202,13 +251,7 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 
 	if (bProgressStateLoaded)
 	{
-		TArray<FName> NewlyUnlockedIds;
-		TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, ProgressState, NewlyUnlockedIds);
-		if (!NewlyUnlockedIds.IsEmpty())
-		{
-			SaveProgressState();
-			BroadcastUnlocked(NewlyUnlockedIds);
-		}
+		ProcessProgressChanged(true);
 
 		bPlatformQueryComplete = false;
 		AttemptedPlatformWrites.Reset();
@@ -221,21 +264,22 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 void UTunaSweeperAchievementSubsystem::ReportEnemyKilled(FName EnemyId)
 {
 	// Practice events must never reach the separate achievement save or platform publisher.
-	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
+	if (!IsGameplayReportingAllowed()) return;
+	RaidState.RecordKill();
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordEnemyKilled(ProgressState, EnemyId));
 }
 
 void UTunaSweeperAchievementSubsystem::ReportLocationReached(FName LocationId)
 {
 	// Practice events must never reach the separate achievement save or platform publisher.
-	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
+	if (!IsGameplayReportingAllowed()) return;
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordLocationReached(ProgressState, LocationId));
 }
 
 void UTunaSweeperAchievementSubsystem::ReportQuestRewardClaimed(int32 QuestId)
 {
 	// Practice events must never reach the separate achievement save or platform publisher.
-	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
+	if (!IsGameplayReportingAllowed()) return;
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordQuestRewardClaimed(ProgressState, QuestId));
 }
 
@@ -245,6 +289,8 @@ void UTunaSweeperAchievementSubsystem::HandlePostLoadMapWithWorld(UWorld* Loaded
 	{
 		return;
 	}
+	HandleGameplayWorldReady(LoadedWorld);
+	FlushPendingProgress();
 
 	if (bPlatformQueryComplete)
 	{
@@ -272,12 +318,7 @@ bool UTunaSweeperAchievementSubsystem::LoadProgressState()
 	const TunaSweeperSafeSave::FSaveValidator Validator =
 		[ExpectedFlavor, ExpectedNamespace](const USaveGame& Candidate)
 		{
-			const UTunaSweeperAchievementSaveGame* AchievementSave =
-				Cast<UTunaSweeperAchievementSaveGame>(&Candidate);
-			return AchievementSave &&
-				AchievementSave->SaveVersion == AchievementSaveVersion &&
-				AchievementSave->BuildFlavor == ExpectedFlavor &&
-				AchievementSave->DistributionNamespace == ExpectedNamespace;
+			return TunaSweeperAchievementModel::IsSupportedSave(Candidate, ExpectedFlavor, ExpectedNamespace);
 		};
 
 	FString RecoveryPath;
@@ -297,32 +338,7 @@ bool UTunaSweeperAchievementSubsystem::LoadProgressState()
 
 	if (SaveGame)
 	{
-		ProgressState.TotalEnemyKills = FMath::Max<int64>(0, SaveGame->TotalEnemyKills);
-		for (const FName Id : SaveGame->KilledEnemyIds)
-		{
-			if (!Id.IsNone()) ProgressState.KilledEnemyIds.Add(Id);
-		}
-		for (const FName Id : SaveGame->ReachedLocationIds)
-		{
-			if (!Id.IsNone()) ProgressState.ReachedLocationIds.Add(Id);
-		}
-		for (const int32 Id : SaveGame->NumericClaimedQuestIds)
-		{
-			if (Id > 0) ProgressState.ClaimedQuestIds.Add(Id);
-		}
-		for (const FName Id : SaveGame->ClaimedQuestIds)
-		{
-			const int32 NumericId = TunaSweeperQuestId::FromLegacyString(Id.ToString());
-			if (NumericId > 0) ProgressState.ClaimedQuestIds.Add(NumericId);
-		}
-		for (const FName Id : SaveGame->UnlockedAchievementIds)
-		{
-			if (!Id.IsNone()) ProgressState.UnlockedAchievementIds.Add(Id);
-		}
-		for (const FString& Key : SaveGame->ConfirmedPlatformUnlockKeys)
-		{
-			if (!Key.IsEmpty()) ProgressState.ConfirmedPlatformUnlockKeys.Add(Key);
-		}
+		TunaSweeperAchievementModel::RestoreProgress(*SaveGame, ProgressState);
 	}
 
 	bProgressStateLoaded = true;
@@ -330,8 +346,9 @@ bool UTunaSweeperAchievementSubsystem::LoadProgressState()
 	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, ProgressState, NewlyUnlockedIds);
 	if (!NewlyUnlockedIds.IsEmpty())
 	{
-		SaveProgressState();
-		BroadcastUnlocked(NewlyUnlockedIds);
+		PendingNotifications.Append(NewlyUnlockedIds);
+		bProgressDirty = true;
+		FlushPendingProgress();
 	}
 
 	if (!RecoveryPath.IsEmpty())
@@ -347,12 +364,7 @@ bool UTunaSweeperAchievementSubsystem::SaveProgressState() const
 	SaveGame->SaveVersion = AchievementSaveVersion;
 	SaveGame->BuildFlavor = TunaSweeperBuildFlavor::GetName();
 	SaveGame->DistributionNamespace = GetDistributionNamespace();
-	SaveGame->TotalEnemyKills = FMath::Max<int64>(0, ProgressState.TotalEnemyKills);
-	SaveGame->KilledEnemyIds = ProgressState.KilledEnemyIds.Array();
-	SaveGame->ReachedLocationIds = ProgressState.ReachedLocationIds.Array();
-	SaveGame->NumericClaimedQuestIds = ProgressState.ClaimedQuestIds.Array();
-	SaveGame->UnlockedAchievementIds = ProgressState.UnlockedAchievementIds.Array();
-	SaveGame->ConfirmedPlatformUnlockKeys = ProgressState.ConfirmedPlatformUnlockKeys.Array();
+	TunaSweeperAchievementModel::CaptureProgress(ProgressState, *SaveGame);
 	SortNames(SaveGame->KilledEnemyIds);
 	SortNames(SaveGame->ReachedLocationIds);
 	SaveGame->NumericClaimedQuestIds.Sort();
@@ -364,12 +376,7 @@ bool UTunaSweeperAchievementSubsystem::SaveProgressState() const
 	const TunaSweeperSafeSave::FSaveValidator Validator =
 		[ExpectedFlavor, ExpectedNamespace](const USaveGame& Candidate)
 		{
-			const UTunaSweeperAchievementSaveGame* AchievementSave =
-				Cast<UTunaSweeperAchievementSaveGame>(&Candidate);
-			return AchievementSave &&
-				AchievementSave->SaveVersion == AchievementSaveVersion &&
-				AchievementSave->BuildFlavor == ExpectedFlavor &&
-				AchievementSave->DistributionNamespace == ExpectedNamespace;
+			return TunaSweeperAchievementModel::IsSupportedSave(Candidate, ExpectedFlavor, ExpectedNamespace);
 		};
 
 	const bool bSaved = TunaSweeperSafeSave::SaveGameFileFailClosed(
@@ -385,15 +392,17 @@ bool UTunaSweeperAchievementSubsystem::SaveProgressState() const
 
 void UTunaSweeperAchievementSubsystem::ProcessProgressChanged(bool bStateChanged)
 {
-	if (!bStateChanged)
+	if (!bStateChanged && !bProgressDirty)
 	{
 		return;
 	}
 
 	TArray<FName> NewlyUnlockedIds;
-	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, ProgressState, NewlyUnlockedIds);
-	SaveProgressState();
-	BroadcastUnlocked(NewlyUnlockedIds);
+	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, ProgressState, NewlyUnlockedIds, GameplaySnapshot);
+	PendingNotifications.Append(NewlyUnlockedIds);
+	bProgressDirty = bProgressDirty || bStateChanged || !NewlyUnlockedIds.IsEmpty();
+	FlushPendingProgress();
+	if (bProgressDirty) return;
 
 	if (bPlatformQueryComplete)
 	{
@@ -405,12 +414,29 @@ void UTunaSweeperAchievementSubsystem::ProcessProgressChanged(bool bStateChanged
 	}
 }
 
+void UTunaSweeperAchievementSubsystem::FlushPendingProgress()
+{
+	if (!bProgressDirty || !bProgressStateLoaded || !SaveProgressState()) return;
+	bProgressDirty = false;
+	TArray<FName> Notifications = MoveTemp(PendingNotifications);
+	PendingNotifications.Reset();
+	BroadcastUnlocked(Notifications);
+}
+
 void UTunaSweeperAchievementSubsystem::BroadcastUnlocked(const TArray<FName>& AchievementIds)
 {
 	for (const FName AchievementId : AchievementIds)
 	{
 		UE_LOG(LogTunaSweeperAchievement, Log, TEXT("Achievement unlocked locally: %s"), *AchievementId.ToString());
 		OnAchievementUnlocked.Broadcast(AchievementId);
+		const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+		const auto* Text = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperTextSubsystem>() : nullptr;
+		auto* Toast = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperToastSubsystem>() : nullptr;
+		FText Format;
+		const FText Name = GetAchievementName(AchievementId);
+		if (Instance && Text && Toast && !Name.IsEmpty() &&
+			Text->TryGetTextByKey(TEXT("ui.achievement.unlocked"), Instance->GetCurrentTextLanguage(), Format))
+			Toast->ShowToast(FText::Format(Format, Name));
 	}
 }
 
@@ -472,15 +498,16 @@ void UTunaSweeperAchievementSubsystem::HandlePlatformQueryComplete(
 		ProgressState,
 		RemotelyUnlockedInternalIds))
 	{
-		SaveProgressState();
+		bProgressDirty = true;
 	}
-	BroadcastUnlocked(RemotelyUnlockedInternalIds);
+	for (FName Id : RemotelyUnlockedInternalIds) PendingNotifications.AddUnique(Id);
+	FlushPendingProgress();
 	PublishNextPendingAchievement();
 }
 
 void UTunaSweeperAchievementSubsystem::PublishNextPendingAchievement()
 {
-	if (!bPlatformQueryComplete || bPlatformWriteInFlight || !Publisher.IsValid())
+	if (bProgressDirty || !bPlatformQueryComplete || bPlatformWriteInFlight || !Publisher.IsValid())
 	{
 		return;
 	}
@@ -516,7 +543,8 @@ void UTunaSweeperAchievementSubsystem::PublishNextPendingAchievement()
 						TunaSweeperAchievementModel::MakePlatformUnlockKey(
 							Subsystem->CurrentPlatformName,
 							PlatformIdCopy));
-					Subsystem->SaveProgressState();
+					Subsystem->bProgressDirty = true;
+					Subsystem->FlushPendingProgress();
 					UE_LOG(
 						LogTunaSweeperAchievement,
 						Log,
@@ -544,6 +572,7 @@ bool UTunaSweeperAchievementSubsystem::HasPlatformMappings(FName PlatformName) c
 {
 	for (const FTunaSweeperAchievementDefinition& Definition : Definitions)
 	{
+		if (!TunaSweeperAchievementModel::CanUnlock(Definition)) continue;
 		if (Definition.PlatformIds.Contains(PlatformName))
 		{
 			return true;

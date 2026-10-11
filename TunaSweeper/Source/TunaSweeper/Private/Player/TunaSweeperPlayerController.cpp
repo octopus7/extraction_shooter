@@ -32,6 +32,7 @@
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperStartupLogoWidget.h"
@@ -459,6 +460,11 @@ void ATunaSweeperPlayerController::SetDeveloperAlwaysSlowPresentationPreference(
 void ATunaSweeperPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	if (IsLocalController() && GetGameInstance())
+	{
+		if (auto* Achievements = GetGameInstance()->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+			Achievements->HandleGameplayWorldReady(GetWorld());
+	}
 
 	bShowMouseCursor = true;
 

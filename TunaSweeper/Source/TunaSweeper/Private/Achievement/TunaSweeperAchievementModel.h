@@ -4,6 +4,12 @@
 
 namespace TunaSweeperAchievementModel
 {
+	bool CanUnlock(const FTunaSweeperAchievementDefinition& Definition);
+	bool IsSupportedSave(const USaveGame& Save, FName BuildFlavor, FName DistributionNamespace);
+	FString MakeGameplayFactKey(ETunaSweeperAchievementEvent Event, FName TargetId);
+	bool RecordGameplayEvent(FTunaSweeperAchievementProgressState& State, ETunaSweeperAchievementEvent Event, FName TargetId);
+	void RestoreProgress(const UTunaSweeperAchievementSaveGame& Save, FTunaSweeperAchievementProgressState& State);
+	void CaptureProgress(const FTunaSweeperAchievementProgressState& State, UTunaSweeperAchievementSaveGame& Save);
 	bool ValidateDefinitions(
 		const TArray<FTunaSweeperAchievementDefinition>& Definitions,
 		FString& OutError);
@@ -21,7 +27,8 @@ namespace TunaSweeperAchievementModel
 	void EvaluateDefinitions(
 		const TArray<FTunaSweeperAchievementDefinition>& Definitions,
 		FTunaSweeperAchievementProgressState& State,
-		TArray<FName>& OutNewlyUnlockedIds);
+		TArray<FName>& OutNewlyUnlockedIds,
+		const FTunaSweeperAchievementSnapshot& Snapshot = {});
 
 	bool MergePlatformState(
 		const TArray<FTunaSweeperAchievementDefinition>& Definitions,

@@ -1,4 +1,24 @@
 string_key,ko,en,ja
+achievement.01.name,첫 외출,First Outing,初めてのお出かけ
+achievement.02.name,붉은 신고식,First Blood,紅の洗礼
+achievement.03.name,새로운 가족,New Family,新しい家族
+achievement.04.name,발사,Blast Off!,発射！
+achievement.05.name,아늑한 집,Home Sweet Home,居心地のいい我が家
+achievement.06.name,골목대장,King of the Block,路地裏の番長
+achievement.07.name,마을,The Town,街
+achievement.08.name,또 다른 가족?,Another Family Member?,また家族が増えた？
+achievement.09.name,문명의 맛,Now That’s Civilization!,これが文明か！
+achievement.10.name,토끼사냥,Rabbit Hunt,ウサギ狩り
+achievement.11.name,구사일생,Close Call,九死に一生
+achievement.12.name,퇴근합니다,Clocking Out,定時で帰ります！
+achievement.13.name,미지와 조우,Encounter with the Unknown,未知との遭遇
+achievement.15.name,요술봉,Magic Wand,魔法のステッキ
+achievement.16.name,안전운전,Drive Safely,安全運転
+achievement.17.name,부자,Rich,お金持ち
+achievement.18.name,동네최강,Top Dog,町内最強
+achievement.19.name,황무지,Wasteland,荒野
+achievement.20.name,결말,The End,結末
+ui.achievement.unlocked,도전 과제 달성: {0},Achievement unlocked: {0},実績解除：{0}
 ui.interaction.travel_basement,지하실로 이동,Go to basement,地下室へ移動
 ui.interaction.travel_control_room,관제실로 이동,Enter control room,管制室へ移動
 ui.interaction.return_bunker,벙커로 돌아가기,Return to bunker,バンカーに戻る

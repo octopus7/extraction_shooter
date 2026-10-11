@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Combat/TunaSweeperWeaponBurnResolver.h"
 
 void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
@@ -263,6 +264,11 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	if (!bFired)
 	{
 		return;
+	}
+	if (IsLocallyControlled())
+	{
+		if (auto* Achievements = TunaGameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+			Achievements->ReportWeaponFired(WeaponInstance.ItemId);
 	}
 
 	if (!bIsBunkerMap && !TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))

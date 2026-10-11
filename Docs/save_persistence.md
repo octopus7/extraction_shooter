@@ -79,7 +79,7 @@ Unlock writes use the existing CRC envelope and candidate/previous fail-closed c
 
 ## Account-Global Achievement Container
 
-Achievements use `UTunaSweeperAchievementSaveGame` version `1` instead of `UTunaSweeperSaveGame`. The file is stored as `Achievements_<DistributionNamespace>.sav` in the active save root described above, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
+Achievements use `UTunaSweeperAchievementSaveGame` version `2` (with version `1` read/upgrade support) instead of `UTunaSweeperSaveGame`. The file is stored as `Achievements_<DistributionNamespace>.sav` in the active save root described above, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
 
 The achievement container persists independently of gameplay slots:
 
@@ -87,10 +87,15 @@ The achievement container persists independently of gameplay slots:
 - enemy ids killed at least once;
 - reached achievement location ids;
 - quest ids whose rewards were claimed;
+- confirmed gameplay facts (event kind plus target id, such as actual facility use);
 - internally unlocked achievement ids;
 - platform unlock confirmations used to avoid duplicate writes.
 
 Facts are saved immediately when first observed, regardless of whether a current JSON definition consumes them. Loading a new definition can therefore unlock an achievement retroactively. New game, save-slot selection, and slot deletion must not reset this container. The platform publisher may merge remote unlocks into it, while failed or unavailable platform writes remain derivable as pending from locally unlocked ids without a matching platform confirmation.
+
+Version 1 files load and upgrade on the next successful write. The candidate/previous replacement validator accepts both supported versions so the existing v1 primary can be preserved during migration. Reserved achievement `14` is excluded from restored/captured unlocks and platform synchronization. New unlock notifications and platform writes wait for a successful local save; failed writes retain dirty progress for retry without duplicate notifications.
+
+Raid start time and kills, pending extraction evidence, current inventory quantities and current facility states are transient, not account facts. Raid state starts at actual raid-world readiness and resets after arrival or death. Completed extraction samples health/time/kills and commits only upon arrival at its intended destination; travel failure or non-extraction travel discards the pending evidence. Item `3004` quantity counts currently owned carried/equipped/quick-slot/auxiliary-bag and base-storage items, deduplicated by UID; loot containers and cumulative acquisition do not count. Facility completion checks the configured full set in the current gameplay slot.
 
 ## Fail-Closed File Commit
 
