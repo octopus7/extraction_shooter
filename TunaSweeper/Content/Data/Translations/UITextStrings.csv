@@ -554,3 +554,9 @@ ui.quest_cheat.selection_invalid,无法读取所选存档槽。,無法讀取所�
 ui.quest_cheat.selection_changed,所选存档已更改。请确认显示的存档后重试。,所選存檔已變更。請確認顯示的存檔後重試。,Сохранение изменилось. Проверьте выбранный слот и повторите попытку.,O slot selecionado mudou. Confira o slot exibido e tente novamente.
 ui.quest_cheat.success,已保存 {0} 个任务的完成状态，并保留原存档备份。,已儲存 {0} 個任務的完成狀態，並保留原存檔備份。,Сохранено завершение заданий: {0}. Создана резервная копия.,Conclusão de {0} missões salva. Uma cópia do arquivo original foi guardada.
 ui.quest_cheat.error,无法保存更改。错误代码：{0},無法儲存變更。錯誤代碼：{0},Не удалось сохранить изменения. Код ошибки: {0},Não foi possível salvar as alterações. Código de erro: {0}
+ui.editor.open_level.raid_test,突袭 (Test),突襲 (Test),Рейд (Test),Incursão (Test)
+ui.editor.open_level.raid_forest,突袭 - 森林,突襲 - 森林,Рейд — лес,Incursão — Floresta
+ui.editor.open_level.raid_village,突袭 - 村庄,突襲 - 村莊,Рейд — деревня,Incursão — Vila
+ui.editor.open_level.raid_plains,突袭 - 平原,突襲 - 平原,Рейд — равнины,Incursão — Planícies
+ui.editor.open_level.basement,地下室,地下室,Подвал,Porão
+ui.editor.open_level.tooltip,在编辑器中打开{0}关卡。,在編輯器中開啟{0}關卡。,Открыть уровень {0} в редакторе.,Abrir o nível {0} no editor.

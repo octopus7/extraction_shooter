@@ -1,12 +1,18 @@
 #include "TunaSweeperLevelOpenTool.h"
 
 #include "FileHelpers.h"
+#include "Engine/GameInstance.h"
+#include "Internationalization/Culture.h"
+#include "Internationalization/Internationalization.h"
 #include "Misc/MessageDialog.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Settings/TunaSweeperBuildTargetSettings.h"
+#include "Settings/TunaSweeperLanguage.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "ToolMenus.h"
+#include "UObject/StrongObjectPtr.h"
 
 #define LOCTEXT_NAMESPACE "TunaSweeperLevelOpenTool"
 
@@ -14,6 +20,16 @@ namespace TunaSweeperLevelOpenTool
 {
 	const TCHAR* IntroMapPackagePath = TEXT("/Game/Maps/IntroMap");
 	const TCHAR* BunkerMapPackagePath = TEXT("/Game/Maps/BunkerMap");
+
+	FText MenuText(const TCHAR* Key)
+	{
+		static TStrongObjectPtr<UGameInstance> TextOwner(NewObject<UGameInstance>());
+		static TStrongObjectPtr<UTunaSweeperTextSubsystem> TextData(NewObject<UTunaSweeperTextSubsystem>(TextOwner.Get()));
+		ETunaSweeperItemTextLanguage Language = ETunaSweeperItemTextLanguage::English;
+		TunaSweeperLanguage::TryParseLanguageCode(
+			FInternationalization::Get().GetCurrentCulture()->GetName(), Language);
+		return TextData->ResolveText(FName(Key), Language, FText::GetEmpty());
+	}
 
 	FString GetRaidMapPackagePath()
 	{
@@ -97,18 +113,24 @@ void FTunaSweeperLevelOpenTool::PopulateOpenLevelMenu(UToolMenu* Menu)
 		LOCTEXT("OpenIntroLevelTooltip", "Open the Intro level."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::OpenLevel, FString(TunaSweeperLevelOpenTool::IntroMapPackagePath))));
-	Section.AddMenuEntry(
-		TEXT("OpenRaidLevel"),
-		LOCTEXT("OpenRaidLevel", "Raid"),
-		LOCTEXT("OpenRaidLevelTooltip", "Open the Raid level."),
-		FSlateIcon(),
-		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::OpenLevel, TunaSweeperLevelOpenTool::GetRaidMapPackagePath())));
+	const auto AddLevelEntry = [this, &Section](FName EntryName, const TCHAR* LabelKey, const FString& PackagePath)
+	{
+		const FText Label = TunaSweeperLevelOpenTool::MenuText(LabelKey);
+		Section.AddMenuEntry(EntryName, Label,
+			FText::Format(TunaSweeperLevelOpenTool::MenuText(TEXT("ui.editor.open_level.tooltip")), Label),
+			FSlateIcon(), FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::OpenLevel, PackagePath)));
+	};
+	AddLevelEntry(TEXT("OpenRaidLevel"), TEXT("ui.editor.open_level.raid_test"), TunaSweeperLevelOpenTool::GetRaidMapPackagePath());
+	AddLevelEntry(TEXT("OpenRaidForestLevel"), TEXT("ui.editor.open_level.raid_forest"), TEXT("/Game/MainRaid/RaidForest"));
+	AddLevelEntry(TEXT("OpenRaidVillageLevel"), TEXT("ui.editor.open_level.raid_village"), TEXT("/Game/MainRaid/RaidVillage"));
+	AddLevelEntry(TEXT("OpenRaidPlainsLevel"), TEXT("ui.editor.open_level.raid_plains"), TEXT("/Game/MainRaid/RaidPlains"));
 	Section.AddMenuEntry(
 		TEXT("OpenBunkerLevel"),
 		LOCTEXT("OpenBunkerLevel", "Bunker"),
 		LOCTEXT("OpenBunkerLevelTooltip", "Open the Bunker level."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::OpenLevel, FString(TunaSweeperLevelOpenTool::BunkerMapPackagePath))));
+	AddLevelEntry(TEXT("OpenBasementLevel"), TEXT("ui.editor.open_level.basement"), TEXT("/Game/Environment/Basement/Maps/L_Basement"));
 }
 
 void FTunaSweeperLevelOpenTool::OpenLevel(FString MapPackagePath) const

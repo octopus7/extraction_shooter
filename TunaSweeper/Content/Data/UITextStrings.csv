@@ -611,3 +611,9 @@ ui.quest_cheat.selection_invalid,현재 선택된 세이브 슬롯을 읽을 수
 ui.quest_cheat.selection_changed,선택된 슬롯이 바뀌었습니다. 표시된 슬롯을 확인하고 다시 실행하세요.,The selected slot changed. Check the displayed slot and try again.,スロットが変更されました。表示を確認して再実行してください。
 ui.quest_cheat.success,{0}개 퀘스트 완료 상태를 저장했습니다. 원본 세이브 백업도 보관했습니다.,Saved completion for {0} quests. A backup of the original save was kept.,{0}件の完了状態を保存しました。元のセーブもバックアップしました。
 ui.quest_cheat.error,변경하지 못했습니다. 오류 코드: {0},Changes could not be saved. Error code: {0},変更を保存できませんでした。エラーコード: {0}
+ui.editor.open_level.raid_test,레이드 (Test),Raid (Test),レイド (Test)
+ui.editor.open_level.raid_forest,레이드 - 숲,Raid Forest,レイド - 森
+ui.editor.open_level.raid_village,레이드 - 마을,Raid Village,レイド - 村
+ui.editor.open_level.raid_plains,레이드 - 평원,Raid Plains,レイド - 平原
+ui.editor.open_level.basement,지하실,Basement,地下室
+ui.editor.open_level.tooltip,에디터에서 {0} 레벨을 엽니다.,Open the {0} level in the editor.,エディタで{0}レベルを開きます。
