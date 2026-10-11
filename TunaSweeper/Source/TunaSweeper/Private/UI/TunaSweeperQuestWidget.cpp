@@ -1319,7 +1319,9 @@ FText UTunaSweeperQuestWidget::GetPrimaryButtonText(int32 InQuestId) const
 	case ETunaSweeperQuestState::Accepted:
 		return GetQuestText(FName(TEXT("quest.ui.button.in_progress")));
 	case ETunaSweeperQuestState::RewardAvailable:
-		return GetQuestText(FName(TEXT("quest.ui.button.claim_reward")));
+        if (QuestSubsystem->HasPossessionObjectives(InQuestId))
+            if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>()) return Game->ResolveLocalizedText(TEXT("ui.quest.submit"), FText::GetEmpty());
+        return GetQuestText(FName(TEXT("quest.ui.button.claim_reward")));
 	case ETunaSweeperQuestState::RewardCompleted:
 		return GetQuestText(FName(TEXT("quest.ui.button.completed")));
 	default:

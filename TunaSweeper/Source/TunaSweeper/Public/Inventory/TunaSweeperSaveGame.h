@@ -148,6 +148,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Storage")
 	TArray<FTunaSweeperInventorySlot> StorageSlots;
 
+    UPROPERTY()
+    TArray<FTunaSweeperItemStack> PendingQuestRewards;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Shop")
 	TArray<FTunaSweeperShopStockSaveData> ShopStockStates;
 

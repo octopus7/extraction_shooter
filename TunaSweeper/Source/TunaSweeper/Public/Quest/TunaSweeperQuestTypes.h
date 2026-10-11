@@ -26,7 +26,8 @@ enum class ETunaSweeperObjectiveType : uint8
 	ExtractionReturn UMETA(DisplayName = "Extraction Return"),
 	LocationReached UMETA(DisplayName = "Location Reached"),
 	VehicleLocationReached UMETA(DisplayName = "Vehicle Location Reached"),
-	WorldProgressCompleted UMETA(DisplayName = "World Progress Completed")
+	WorldProgressCompleted UMETA(DisplayName = "World Progress Completed"),
+	ItemPossessed UMETA(DisplayName = "Item Possessed")
 };
 
 UENUM(BlueprintType)

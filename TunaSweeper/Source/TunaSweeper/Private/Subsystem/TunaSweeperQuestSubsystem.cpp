@@ -109,7 +109,12 @@ namespace TunaSweeperQuestData
 			OutType = ETunaSweeperObjectiveType::ItemAcquired;
 			return true;
 		}
-		if (Type == TEXT("item_submitted"))
+		if (Type == TEXT("item_possessed"))
+        {
+            OutType = ETunaSweeperObjectiveType::ItemPossessed;
+            return true;
+        }
+        if (Type == TEXT("item_submitted"))
 		{
 			OutType = ETunaSweeperObjectiveType::ItemSubmitted;
 			return true;
@@ -206,7 +211,7 @@ namespace TunaSweeperQuestData
 			OutObjective.LocationId.IsNone() || RequiredCount != 1.0 ||
 			(JsonObject->HasField(TEXT("required_count")) &&
 				!JsonObject->HasTypedField<EJson::Number>(TEXT("required_count"))))) return false;
-		if (OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted &&
+		if ((OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted || OutObjective.Type == ETunaSweeperObjectiveType::ItemPossessed) &&
 			(!bHasRequiredCount || !FMath::IsFinite(RequiredCount) || RequiredCount < 1 ||
 			RequiredCount > MAX_int32 || FMath::FloorToDouble(RequiredCount) != RequiredCount)) return false;
 		OutObjective.RequiredCount = FMath::Max(1, FMath::RoundToInt(RequiredCount));
@@ -221,7 +226,7 @@ namespace TunaSweeperQuestData
 		double ItemId = INDEX_NONE;
 		const bool bHasItemId = JsonObject->TryGetNumberField(TEXT("item_id"), ItemId);
 		OutObjective.TargetProviderId = ReadNameField(JsonObject, TEXT("target_provider_id"));
-		if (OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted &&
+		if ((OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted || OutObjective.Type == ETunaSweeperObjectiveType::ItemPossessed) &&
 			(!bHasItemId || !FMath::IsFinite(ItemId) || ItemId < 1 || ItemId > MAX_int32 ||
 			FMath::FloorToDouble(ItemId) != ItemId || OutObjective.TargetProviderId.IsNone())) return false;
 		OutObjective.ItemId = FMath::RoundToInt(ItemId);
@@ -332,6 +337,7 @@ void UTunaSweeperQuestSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		Game->OnWorldProgressChanged.AddUObject(this, &ThisClass::HandleWorldProgressChanged);
+        Game->OnInventoryStateChanged.AddUObject(this, &ThisClass::HandleQuestInventoryChanged);
 	}
 	ExtractionPostLoadHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::HandleExtractionArrival);
 	if (GEngine)
@@ -349,6 +355,7 @@ void UTunaSweeperQuestSubsystem::Deinitialize()
 	if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		Game->OnWorldProgressChanged.RemoveAll(this);
+        Game->OnInventoryStateChanged.RemoveAll(this);
 	}
 	FCoreUObjectDelegates::PostLoadMapWithWorld.Remove(ExtractionPostLoadHandle);
 	if (GEngine) GEngine->OnTravelFailure().Remove(ExtractionTravelFailureHandle);
@@ -549,6 +556,7 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(int32 QuestId)
 	}
 
 	ReconcileWorldProgressObjectives(true);
+    ReconcilePossessionObjectives(true);
 	BroadcastQuestProgressChanged(true);
 	return true;
 }
@@ -580,6 +588,8 @@ bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(int32 QuestId) const
 
 bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
 {
+    if (bQuestRewardClaimInProgress) return false;
+    ReconcilePossessionObjectives(false);
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
 	if (!CanClaimQuestReward(QuestId))
@@ -593,10 +603,23 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
 		return false;
 	}
 
-	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
-	if (Definition->Rewards.Items.Num() > 0)
+	TGuardValue<bool> ClaimGuard(bQuestRewardClaimInProgress, true);
+    UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+    if (TunaGameInstance && (TunaGameInstance->IsQuestRewardTransferInProgress() || !TunaGameInstance->ValidateQuestItemRewards(Definition->Rewards.Items))) return false;
+    if (!TunaGameInstance && (!Definition->Rewards.Items.IsEmpty() || !Definition->Rewards.HousingFacilityUnlocks.IsEmpty() || !Definition->Rewards.WorkbenchRecipeUnlocks.IsEmpty())) return false;
+    TArray<FTunaSweeperItemStack> Requirements;
+    for (const auto& Objective : Definition->Objectives)
+    {
+        if (Objective.Type != ETunaSweeperObjectiveType::ItemPossessed) continue;
+        FTunaSweeperItemStack Requirement;
+        Requirement.ItemId = Objective.ItemId;
+        Requirement.Quantity = Objective.RequiredCount;
+        Requirements.Add(Requirement);
+    }
+    if (!Requirements.IsEmpty() && (!TunaGameInstance || !TunaGameInstance->TryConsumeQuestItems(Requirements, [] {}, false))) return false;
+    if (Definition->Rewards.Items.Num() > 0)
 	{
-		if (!TunaGameInstance || !TunaGameInstance->GrantQuestItemRewards(Definition->Rewards.Items))
+		if (!TunaGameInstance || !TunaGameInstance->GrantQuestItemRewards(Definition->Rewards.Items, false))
 		{
 			return false;
 		}
@@ -643,6 +666,8 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
 		TrackedQuestId = 0;
 	}
 
+	bQuestRewardClaimInProgress = false;
+    if (TunaGameInstance) TunaGameInstance->NotifyQuestItemMutation();
 	BroadcastQuestProgressChanged(true);
 	return true;
 }

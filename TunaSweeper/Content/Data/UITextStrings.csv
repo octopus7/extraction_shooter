@@ -619,3 +619,13 @@ ui.editor.open_level.basement,지하실,Basement,地下室
 ui.editor.open_level.tooltip,에디터에서 {0} 레벨을 엽니다.,Open the {0} level in the editor.,エディタで{0}レベルを開きます。
 ui.rail.arrival_time_format,{Minutes}:{Seconds},{Minutes}:{Seconds},{Minutes}:{Seconds}
 ui.rail.arrival_unavailable,--:--,--:--,--:--
+ui.interaction.quest_reward_locker,보상 보관함 열기,Open reward locker,報酬保管庫を開く
+ui.quest_reward_locker.title,보상 보관함,Reward Locker,報酬保管庫
+ui.quest_reward_locker.description,가방에 들어가지 못한 퀘스트 보상입니다. 공간을 확보한 뒤 수령하세요.,Quest rewards that did not fit in your bag. Make room to receive them.,バッグに入りきらなかったクエスト報酬です。空きを作ってから受け取ってください。
+ui.quest_reward_locker.empty,보관 중인 보상이 없습니다.,No rewards are waiting.,保管中の報酬はありません。
+ui.quest_reward_locker.receive,수령,Receive,受け取る
+ui.quest_reward_locker.quantity,수량: {0},Quantity: {0},数量：{0}
+ui.quest_reward_locker.close,닫기,Close,閉じる
+ui.quest_reward_locker.no_space,가방 공간이 부족합니다. 보상은 보관함에 남아 있습니다.,Not enough bag space. The reward remains in the locker.,バッグの空きが足りません。報酬は保管庫に残っています。
+ui.quest_reward_locker.unnamed_item,아이템,Item,アイテム
+ui.quest.submit,제출,Submit,納品

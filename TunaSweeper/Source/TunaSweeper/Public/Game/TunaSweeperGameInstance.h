@@ -271,6 +271,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperArmorPenetrationTest;
 	friend class FTunaSweeperPowerFacilityTest;
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestWorldActorsTest;
 	friend class FTunaSweeperShopQuestUnlockTest;
@@ -284,6 +285,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperOutfitUnlockTest;
 	friend class FTunaSweeperWardrobePanelTest;
 	friend class FTunaWardrobeInteractionTest;
+	friend class FTunaQuestRewardLockerInteractionTest;
 	friend class FTunaDebugArmoryTest;
 
 public:
@@ -688,7 +690,15 @@ public:
 	bool TryConsumeInventoryItems(const TArray<FTunaSweeperItemStack>& Requirements, TFunctionRef<void()> OnConsumed);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	bool GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards);
+	bool GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards, bool bNotifyAndSave = true);
+
+    bool ValidateQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards) const;
+    int32 CountQuestSubmissionItemById(int32 ItemId);
+    bool TryConsumeQuestItems(const TArray<FTunaSweeperItemStack>& Requirements, TFunctionRef<void()> OnConsumed, bool bNotifyAndSave = true);
+    const TArray<FTunaSweeperItemStack>& GetPendingQuestRewards();
+    bool ReceivePendingQuestReward(int32 Index);
+    void NotifyQuestItemMutation();
+    bool IsQuestRewardTransferInProgress() const { return bQuestRewardTransferInProgress; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void CompactInventorySlots();
@@ -1089,6 +1099,10 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> StorageSlots;
+
+    UPROPERTY(Transient)
+    TArray<FTunaSweeperItemStack> PendingQuestRewards;
+    bool bQuestRewardTransferInProgress = false;
 
 	UPROPERTY(Transient)
 	int32 StorageSlotCapacity = 100;

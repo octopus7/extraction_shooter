@@ -15,7 +15,7 @@ bool UTunaSweeperQuestSubsystem::CanSubmitItemsForObjective(int32 QuestId, FName
 	if (!Objective || Objective->Type != ETunaSweeperObjectiveType::ItemSubmitted ||
 		Objective->TargetProviderId != DestinationId || Objective->ItemId <= 0 || Objective->RequiredCount <= 0) return false;
 	const int32 Remaining = Objective->RequiredCount - GetObjectiveProgressCount(QuestId, ObjectiveId);
-	return Remaining > 0 && Game->CountInventoryItemById(Objective->ItemId) >= Remaining;
+	return Remaining > 0 && Game->CountQuestSubmissionItemById(Objective->ItemId) >= Remaining;
 }
 
 bool UTunaSweeperQuestSubsystem::TrySubmitItemsForObjective(
@@ -29,7 +29,7 @@ bool UTunaSweeperQuestSubsystem::TrySubmitItemsForObjective(
 	Requirement.ItemId = Objective->ItemId;
 	Requirement.Quantity = Objective->RequiredCount - GetObjectiveProgressCount(QuestId, ObjectiveId);
 	auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
-	if (!Game->TryConsumeInventoryItems({Requirement}, [this, QuestId, ObjectiveId, Count = Requirement.Quantity] {
+	if (!Game->TryConsumeQuestItems({Requirement}, [this, QuestId, ObjectiveId, Count = Requirement.Quantity] {
 		AdvanceObjectiveProgress(QuestId, ObjectiveId, Count);
 		if (AreAllObjectivesComplete(QuestId)) SetQuestState(QuestId, ETunaSweeperQuestState::RewardAvailable);
 	})) return false;
@@ -52,7 +52,7 @@ bool UTunaSweeperQuestSubsystem::TryGetItemSubmissionQuestForProvider(FName Prov
 		if (State != ETunaSweeperQuestState::Accepted && State != ETunaSweeperQuestState::RewardAvailable) continue;
 		for (const auto& Objective : Definition.Objectives)
 		{
-			if (Objective.Type != ETunaSweeperObjectiveType::ItemSubmitted || Objective.TargetProviderId != ProviderId) continue;
+			if ((Objective.Type != ETunaSweeperObjectiveType::ItemSubmitted && Objective.Type != ETunaSweeperObjectiveType::ItemPossessed) || Objective.TargetProviderId != ProviderId) continue;
 			if (State == ETunaSweeperQuestState::RewardAvailable)
 			{
 				OutQuestId = Definition.QuestId;
@@ -85,7 +85,9 @@ bool UTunaSweeperQuestSubsystem::TrySubmitItemsToProvider(
 	{
 		const auto State = GetQuestState(Definition.QuestId);
 		if (State != ETunaSweeperQuestState::Accepted && State != ETunaSweeperQuestState::RewardAvailable) continue;
-		TArray<FTunaSweeperItemStack> Requirements;
+        if (HasPossessionObjectives(Definition.QuestId) && Definition.GetCompletionProviderId() == ProviderId && CanClaimQuestReward(Definition.QuestId))
+        { OutQuestId = Definition.QuestId; return true; }
+        TArray<FTunaSweeperItemStack> Requirements;
 		TArray<TPair<FName, int32>> Objectives;
 		bool bMatchesProvider = false;
 		for (const auto& Objective : Definition.Objectives)
@@ -109,7 +111,7 @@ bool UTunaSweeperQuestSubsystem::TrySubmitItemsToProvider(
 			return true;
 		}
 		if (Requirements.IsEmpty()) continue;
-		if (!Game->TryConsumeInventoryItems(Requirements, [this, &Definition, &Objectives]()
+		if (!Game->TryConsumeQuestItems(Requirements, [this, &Definition, &Objectives]()
 		{
 			for (const auto& Objective : Objectives)
 			{

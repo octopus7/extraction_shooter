@@ -532,7 +532,8 @@ void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
 	// Reconcile only after all saved state has been restored, so acceptance cannot save a partial load.
 	if (UTunaSweeperQuestSubsystem* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
-		Quests->ReconcileStoryQuestAcceptance(CompletedScenarioFlags);
+		if (Quests->ReconcilePossessionObjectives(false)) Quests->OnQuestProgressChanged.Broadcast();
+        Quests->ReconcileStoryQuestAcceptance(CompletedScenarioFlags);
 	}
 	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
 	{
@@ -748,6 +749,8 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	UsableQuickSlots = SaveGame->UsableQuickSlots;
 	StorageSlotCapacity = NormalizeStorageSlotCapacity(SaveGame->StorageSlotCapacity);
 	StorageSlots = SaveGame->StorageSlots;
+    PendingQuestRewards = SaveGame->PendingQuestRewards;
+    PendingQuestRewards.RemoveAll([](const FTunaSweeperItemStack& Entry) { return Entry.ItemId <= 0 || Entry.Quantity <= 0; });
 	ShopStockStatesByKey.Reset();
 	for (const FTunaSweeperShopStockSaveData& SavedShopStockState : SaveGame->ShopStockStates)
 	{
@@ -953,6 +956,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
 	SaveGame->StorageSlotCapacity = NormalizeStorageSlotCapacity(StorageSlotCapacity);
 	SaveGame->StorageSlots = StorageSlots;
+    SaveGame->PendingQuestRewards = PendingQuestRewards;
 	EnsureSlotArraySize(SaveGame->StorageSlots, SaveGame->StorageSlotCapacity);
 	ShopStockStatesByKey.GenerateValueArray(SaveGame->ShopStockStates);
 	SaveGame->ShopStockStates.Sort([](
@@ -1078,6 +1082,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	AuxiliaryBagSlots.Reset();
 	UsableQuickSlots.Reset();
 	StorageSlots.Reset();
+    PendingQuestRewards.Reset();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
 	ShopStockStatesByKey.Reset();
 	ActiveShopId = INDEX_NONE;
@@ -1178,6 +1183,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	ResetPlayerSlotArrays();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
 	StorageSlots.Reset();
+    PendingQuestRewards.Reset();
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
 	ShopStockStatesByKey.Reset();
 	ActiveShopId = INDEX_NONE;

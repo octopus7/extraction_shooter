@@ -27,6 +27,7 @@ class UTunaSweeperMemoWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperResearchTreeWidget;
 class UTunaSweeperWardrobePanelWidget;
+class UTunaSweeperQuestRewardLockerPanelWidget;
 class UTunaSweeperDebugArmoryPanelWidget;
 class UTunaSweeperReloadRingWidget;
 class UBorder;
@@ -99,6 +100,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	bool ShowWardrobePanel();
+	bool ShowQuestRewardLockerPanel();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|DebugArmory")
 	bool ShowDebugArmoryPanel();
@@ -228,6 +230,8 @@ protected:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperWardrobePanelWidget> WardrobePanelWidget;
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperQuestRewardLockerPanelWidget> QuestRewardLockerPanelWidget;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperDebugArmoryPanelWidget> DebugArmoryPanelWidget;
@@ -429,6 +433,7 @@ private:
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
 	void EnsureWardrobePanelWidget();
+	void EnsureQuestRewardLockerPanelWidget();
 	void EnsureDebugArmoryPanelWidget();
 	void EnsureQuestPanelWidgets();
 	void EnsureShopSellPanelWidget();

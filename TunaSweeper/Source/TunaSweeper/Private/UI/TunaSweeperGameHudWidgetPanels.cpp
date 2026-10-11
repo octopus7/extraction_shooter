@@ -211,6 +211,23 @@ bool UTunaSweeperGameHudWidget::ShowDebugArmoryPanel()
 #endif
 }
 
+bool UTunaSweeperGameHudWidget::ShowQuestRewardLockerPanel()
+{
+	const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	if (!Controller || !Controller->IsQuestRewardLockerInteractionValid())
+	{
+		return false;
+	}
+	EnsureQuestRewardLockerPanelWidget();
+	if (!QuestRewardLockerPanelWidget)
+	{
+		return false;
+	}
+	SetHudMode(ETunaSweeperHudMode::QuestRewardLocker);
+	QuestRewardLockerPanelWidget->OpenQuestRewardLocker();
+	return ActiveHudMode == ETunaSweeperHudMode::QuestRewardLocker;
+}
+
 bool UTunaSweeperGameHudWidget::ShowWardrobePanel()
 {
 	const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
@@ -338,6 +355,12 @@ void UTunaSweeperGameHudWidget::HideHousingFacilityContextMenu()
 
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
+	if (InHudMode == ETunaSweeperHudMode::QuestRewardLocker)
+	{
+		const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+		if (!Controller || !Controller->IsQuestRewardLockerInteractionValid()) return;
+	}
+
 	if (InHudMode == ETunaSweeperHudMode::DebugArmory)
 	{
 #if UE_BUILD_SHIPPING

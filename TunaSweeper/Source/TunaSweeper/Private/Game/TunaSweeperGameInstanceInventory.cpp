@@ -1157,48 +1157,6 @@ int32 UTunaSweeperGameInstance::ConsumeInventoryItemById(int32 ItemId, int32 Req
 	return ConsumedAmount;
 }
 
-bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards)
-{
-	EnsureInventoryStateInitialized();
-	if (!CanGrantQuestItemRewards(ItemRewards))
-	{
-		return false;
-	}
-
-	const TMap<FGuid, FTunaSweeperItemInstance> PreviousItemInstances = ItemInstancesByUid;
-	const TArray<FTunaSweeperInventorySlot> PreviousInventorySlots = PlayerInventorySlots;
-	TArray<int32> GrantedItemIds;
-	for (const FTunaSweeperItemStack& ItemReward : ItemRewards)
-	{
-		if (ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
-		{
-			continue;
-		}
-
-		int32 RemainingQuantity = ItemReward.Quantity;
-		TryAddItemQuantityToExistingStacks(ItemReward.ItemId, RemainingQuantity, PlayerInventorySlots);
-		TryAddItemQuantityToFirstEmptySlots(ItemReward.ItemId, RemainingQuantity, PlayerInventorySlots);
-		if (RemainingQuantity > 0)
-		{
-			ItemInstancesByUid = PreviousItemInstances;
-			PlayerInventorySlots = PreviousInventorySlots;
-			return false;
-		}
-
-		GrantedItemIds.AddUnique(ItemReward.ItemId);
-	}
-
-	if (GrantedItemIds.Num() > 0)
-	{
-		for (const int32 GrantedItemId : GrantedItemIds)
-		{
-			MarkItemEverAcquired(GrantedItemId);
-		}
-		BroadcastInventoryStateChanged();
-		MarkItemStateMutationForSave();
-	}
-	return true;
-}
 
 void UTunaSweeperGameInstance::CompactInventorySlots()
 {

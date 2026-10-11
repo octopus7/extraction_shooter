@@ -23,5 +23,6 @@ enum class ETunaSweeperHudMode : uint8
 	Memo UMETA(DisplayName = "Memo"),
 	Research UMETA(DisplayName = "Research"),
 	Wardrobe UMETA(DisplayName = "Wardrobe"),
-	DebugArmory UMETA(DisplayName = "Debug Armory")
+	DebugArmory UMETA(DisplayName = "Debug Armory"),
+	QuestRewardLocker UMETA(DisplayName = "Quest Reward Locker")
 };

@@ -133,6 +133,8 @@ public:
 		int32 SavedTrackedQuestId,
 		int32 SavedQuestCoinBalance);
 	void ResetQuestProgressForNewGame();
+    bool ReconcilePossessionObjectives(bool bShowCompletionToast);
+    bool HasPossessionObjectives(int32 QuestId) const;
 
 private:
 	friend class FTunaSweeperQuestWorldProgressTest;
@@ -140,6 +142,7 @@ private:
 	bool ReconcileWorldProgressObjectives(bool bShowCompletionToast);
 	bool bReconcilingWorldProgress = false;
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestWorldActorsTest;
@@ -156,6 +159,9 @@ private:
 	FName PendingExtractionDestination;
 	TMap<int32, TSet<FName>> PendingExtractionObjectives;
 	bool bItemSubmissionInProgress = false;
+    bool bQuestRewardClaimInProgress = false;
+    bool bReconcilingPossession = false;
+    void HandleQuestInventoryChanged();
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();
 	bool LoadQuestTextStringsCsv();

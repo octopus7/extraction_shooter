@@ -22,6 +22,7 @@ class UTunaSweeperScreenFadeWidget;
 class UInputAction;
 class ATunaSweeperPickupItemActor;
 class ATunaSweeperWardrobeActor;
+class ATunaSweeperQuestRewardLockerActor;
 class ATunaSweeperDebugArmoryActor;
 struct FInputActionValue;
 
@@ -134,6 +135,11 @@ public:
 	bool IsDebugArmoryInteractionValid() const;
 	bool GetDebugArmoryCatalog(TArray<FTunaSweeperItemDefinition>& OutItems) const;
 
+	bool OpenQuestRewardLockerPanel(ATunaSweeperQuestRewardLockerActor* LockerActor);
+	bool TryReceiveQuestReward(int32 Index);
+	void CloseQuestRewardLockerPanel();
+	bool IsQuestRewardLockerInteractionValid() const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 
@@ -190,11 +196,15 @@ public:
 protected:
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaWardrobeInteractionTest;
+	friend class FTunaQuestRewardLockerInteractionTest;
 	friend class FTunaDebugArmoryTest;
 	void UpdateDebugArmoryInteraction();
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperDebugArmoryActor> ActiveDebugArmoryActor;
 	void UpdateWardrobeInteraction();
+	void UpdateQuestRewardLockerInteraction();
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ATunaSweeperQuestRewardLockerActor> ActiveQuestRewardLockerActor;
 
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperWardrobeActor> ActiveWardrobeActor;

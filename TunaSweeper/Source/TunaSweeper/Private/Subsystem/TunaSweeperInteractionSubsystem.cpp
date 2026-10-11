@@ -28,6 +28,7 @@
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Interaction/TunaSweeperWardrobeActor.h"
+#include "Interaction/TunaSweeperQuestRewardLockerActor.h"
 #include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -332,6 +333,13 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::ShopOpen:
 		bHandled = HandleShopOpenInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::QuestRewardLockerOpen:
+	{
+		ATunaSweeperQuestRewardLockerActor* Locker = Cast<ATunaSweeperQuestRewardLockerActor>(Interactable->GetOwner());
+		ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+		bHandled = Locker && Controller && Controller->OpenQuestRewardLockerPanel(Locker);
+		break;
+	}
 	case ETunaSweeperInteractionType::DebugArmoryOpen:
 #if !UE_BUILD_SHIPPING
 		if (auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner()))
@@ -508,6 +516,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 			Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner());
 	}
 
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::QuestRewardLockerOpen)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
+			Cast<ATunaSweeperQuestRewardLockerActor>(Interactable->GetOwner());
+	}
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WardrobeOpen)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&

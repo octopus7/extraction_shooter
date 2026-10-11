@@ -523,6 +523,7 @@ void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayRea
 		StartupLogoWidget = nullptr;
 	}
 	ActiveWardrobeActor.Reset();
+	ActiveQuestRewardLockerActor.Reset();
 	ActiveDebugArmoryActor.Reset();
 	if (TutorialPopupWidget)
 	{
@@ -701,6 +702,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 	UpdateWardrobeInteraction();
+	UpdateQuestRewardLockerInteraction();
 	UpdateDebugArmoryInteraction();
 	if (TutorialPopupWidget || TryShowBunkerBasicsTutorial() || TryShowRaidCombatTutorial()) return;
 

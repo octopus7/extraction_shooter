@@ -12,6 +12,11 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	const bool bQuestMode = ActiveHudMode == ETunaSweeperHudMode::Quest;
 	const bool bResearchMode = ActiveHudMode == ETunaSweeperHudMode::Research;
 	const bool bWardrobeMode = ActiveHudMode == ETunaSweeperHudMode::Wardrobe;
+	const bool bQuestRewardLockerMode = ActiveHudMode == ETunaSweeperHudMode::QuestRewardLocker;
+	if (!bQuestRewardLockerMode)
+	{
+		if (ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer())) Controller->CloseQuestRewardLockerPanel();
+	}
 	const bool bDebugArmoryMode = ActiveHudMode == ETunaSweeperHudMode::DebugArmory;
 	if (!bDebugArmoryMode)
 	{
@@ -38,7 +43,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (TopStatusReserveWidget)
 	{
-		const bool bShowTopStatusReserve = bUtilityModeOpen && !bWardrobeMode && !bDebugArmoryMode && !(bQuestMode && bQuestPanelOpenedFromInteraction);
+		const bool bShowTopStatusReserve = bUtilityModeOpen && !bWardrobeMode && !bDebugArmoryMode && !bQuestRewardLockerMode && !(bQuestMode && bQuestPanelOpenedFromInteraction);
 		SetTransitionedWidgetVisibility(
 			TopStatusReserveWidget,
 			bShowTopStatusReserve ? ESlateVisibility::Visible : ESlateVisibility::Collapsed,
@@ -185,6 +190,13 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 			bUtilityModeOpen && bResearchMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
 			ETunaSweeperHudTransitionEdge::Right);
 	}
+	if (QuestRewardLockerPanelWidget)
+	{
+		QuestRewardLockerPanelWidget->SetIsEnabled(bQuestRewardLockerMode);
+		SetTransitionedWidgetVisibility(QuestRewardLockerPanelWidget,
+			bQuestRewardLockerMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			ETunaSweeperHudTransitionEdge::Right);
+	}
 	if (DebugArmoryPanelWidget)
 	{
 		DebugArmoryPanelWidget->SetIsEnabled(bDebugArmoryMode);
@@ -225,7 +237,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	{
 		SetTransitionedWidgetVisibility(
 			UnsupportedModePanel,
-			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode && !bResearchMode && !bWardrobeMode && !bDebugArmoryMode
+			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode && !bResearchMode && !bWardrobeMode && !bDebugArmoryMode && !bQuestRewardLockerMode
 				? ESlateVisibility::HitTestInvisible
 				: ESlateVisibility::Collapsed,
 			UnsupportedModePanelTransitionEdge);
@@ -988,6 +1000,33 @@ void UTunaSweeperGameHudWidget::EnsureMapPanelWidget()
 		CanvasSlot->SetOffsets(FMargin(0.0f));
 		CanvasSlot->SetAlignment(FVector2D(0.0f, 0.0f));
 		CanvasSlot->SetZOrder(-5);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureQuestRewardLockerPanelWidget()
+{
+	if (QuestRewardLockerPanelWidget || !WidgetTree)
+	{
+		return;
+	}
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+	QuestRewardLockerPanelWidget = CreateWidget<UTunaSweeperQuestRewardLockerPanelWidget>(
+		GetOwningPlayer(), UTunaSweeperQuestRewardLockerPanelWidget::StaticClass());
+	if (!QuestRewardLockerPanelWidget)
+	{
+		return;
+	}
+	QuestRewardLockerPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	if (UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(QuestRewardLockerPanelWidget))
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D::ZeroVector);
+		CanvasSlot->SetOffsets(FMargin(0.0f));
+		CanvasSlot->SetZOrder(20);
 	}
 }
 

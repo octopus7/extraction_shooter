@@ -562,3 +562,13 @@ ui.editor.open_level.basement,地下室,地下室,Подвал,Porão
 ui.editor.open_level.tooltip,在编辑器中打开{0}关卡。,在編輯器中開啟{0}關卡。,Открыть уровень {0} в редакторе.,Abrir o nível {0} no editor.
 ui.rail.arrival_time_format,{Minutes}:{Seconds},{Minutes}:{Seconds},{Minutes}:{Seconds},{Minutes}:{Seconds}
 ui.rail.arrival_unavailable,--:--,--:--,--:--,--:--
+ui.interaction.quest_reward_locker,打开奖励柜,開啟獎勵櫃,Открыть шкаф наград,Abrir armário de recompensas
+ui.quest_reward_locker.title,奖励柜,獎勵櫃,Шкаф наград,Armário de recompensas
+ui.quest_reward_locker.description,背包装不下的任务奖励。腾出空间后领取。,背包裝不下的任務獎勵。騰出空間後領取。,Награды заданий не поместились в сумку. Освободите место и заберите их.,Recompensas que não couberam na bolsa. Libere espaço para recebê-las.
+ui.quest_reward_locker.empty,没有待领取的奖励。,沒有待領取的獎勵。,Нет ожидающих наград.,Nenhuma recompensa pendente.
+ui.quest_reward_locker.receive,领取,領取,Забрать,Receber
+ui.quest_reward_locker.quantity,数量：{0},數量：{0},Количество: {0},Quantidade: {0}
+ui.quest_reward_locker.close,关闭,關閉,Закрыть,Fechar
+ui.quest_reward_locker.no_space,背包空间不足。奖励仍在柜中。,背包空間不足。獎勵仍在櫃中。,В сумке недостаточно места. Награда осталась в шкафу.,Espaço insuficiente na bolsa. A recompensa continua no armário.
+ui.quest_reward_locker.unnamed_item,物品,物品,Предмет,Item
+ui.quest.submit,提交,提交,Сдать,Entregar
