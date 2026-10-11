@@ -352,12 +352,9 @@ void UTunaSweeperMemoWidget::RebuildMemoList(const TArray<FTunaSweeperMemoListEn
 			continue;
 		}
 
-		const FString LabelText = Entry.bAcquired
-			? FString::Printf(TEXT("#%02d  %s"), Entry.MemoId, *Entry.Title.ToString())
-			: FString(TEXT("???"));
 		EntryWidget->InitializeMemoEntry(
 			Entry.MemoId,
-			FText::FromString(LabelText),
+			Entry.Title,
 			Entry.bAcquired,
 			Entry.MemoId == SelectedMemoId,
 			FTunaSweeperMemoEntryClickedDelegate::CreateUObject(this, &UTunaSweeperMemoWidget::SetSelectedMemoId));
@@ -412,10 +409,7 @@ void UTunaSweeperMemoWidget::ApplySelectedMemo(const TArray<FTunaSweeperMemoList
 
 	if (DetailTitleText)
 	{
-		DetailTitleText->SetText(FText::FromString(FString::Printf(
-			TEXT("#%02d  %s"),
-			SelectedEntry->MemoId,
-			*SelectedEntry->Title.ToString())));
+		DetailTitleText->SetText(SelectedEntry->Title);
 	}
 	if (DetailBodyText)
 	{

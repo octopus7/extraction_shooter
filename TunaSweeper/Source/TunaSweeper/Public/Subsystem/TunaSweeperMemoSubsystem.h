@@ -30,6 +30,7 @@ public:
 	int32 GetFirstAcquiredMemoId();
 
 private:
+    FText ResolveMemoTitle(int32 MemoId) const;
     void ResetLoadedMemoDefinitions();
     FString GetMemoDefinitionsJsonPath() const;
     TMap<int32, FTunaSweeperMemoDefinition> MemoDefinitionsById;

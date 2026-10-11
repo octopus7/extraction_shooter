@@ -12,12 +12,10 @@ struct TUNASWEEPER_API FTunaSweeperMemoDefinition
 	int32 MemoId = INDEX_NONE;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Memo")
-	FName TitleStringKey;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Memo")
 	FName BodyStringKey;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Memo")
+	// Derived from the shared localized title format and MemoId.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "TunaSweeper|Memo")
 	FText Title;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Memo", meta = (MultiLine = "true"))

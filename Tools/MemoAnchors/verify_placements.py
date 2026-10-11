@@ -16,19 +16,21 @@ def verify_data():
     data = ROOT/'TunaSweeper/Content/Data'
     rows = json.loads((data/'MemoDefinitions.json').read_text(encoding='utf-8-sig'))
     assert [r['memo_id'] for r in rows] == list(range(1,61)), 'Expected exactly IDs 1 through 60'
-    keys = set()
+    keys = {'memo.title_format'}
     for row in rows:
-        for part in ['title','body']:
-            key = f"memo.{row['memo_id']}.{part}"
-            assert row[part+'_string_key'] == key
-            keys.add(key)
+        assert 'title_string_key' not in row, 'Memo titles must use the shared format'
+        key = f"memo.{row['memo_id']}.body"
+        assert row['body_string_key'] == key
+        keys.add(key)
     for path in [data/'MemoTextStrings.csv', data/'Translations/MemoTextStrings.csv']:
         with path.open(encoding='utf-8-sig', newline='') as f:
             translations = list(csv.DictReader(f))
-        assert len(translations) == 120 and {r['string_key'] for r in translations} == keys
+        assert len(translations) == 61 and {r['string_key'] for r in translations} == keys
         for row in translations:
             assert all(value and value.strip() for value in row.values()), f'Empty translation: {row}'
-    return {'definitions': 60, 'string_keys': 120, 'languages': 7}
+            if row['string_key'] == 'memo.title_format':
+                assert all(value.count('{Number}') == 1 for lang, value in row.items() if lang != 'string_key')
+    return {'definitions': 60, 'string_keys': 61, 'languages': 7}
 
 def verify_maps():
     import unreal

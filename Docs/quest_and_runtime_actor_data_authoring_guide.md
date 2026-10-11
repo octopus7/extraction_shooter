@@ -92,7 +92,7 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 | `EnemySpawns.json` | 앵커 기반 적 선택 | `level_name`, `placement_id`, `profile_id` |
 | `EnemySpawnProfiles.json` | 적 클래스/로드아웃 | `profile_id`, `enemy_class`, `combat_profile_id` |
 | `LootContainerSpawns.json` | 앵커 또는 기존 좌표 기반 루트 컨테이너 | 앵커: `level_name`, `placement_id`, 정의/내용 ID |
-| `MemoDefinitions.json` | 메모 본문과 제목 키 | `memo_id`, `title_string_key`, `body_string_key` |
+| `MemoDefinitions.json` | 메모 번호와 본문 키 | `memo_id`, `body_string_key` |
 | `MemoTextStrings.csv` | 메모 다국어 원문 | `string_key,ko,en,ja` |
 | `DifficultyDefinitions.json` | 난이도 키와 적→플레이어 피해 배율 | `difficulty_stage`, 텍스트 키, `enemy_incoming_damage_multiplier` |
 | `DifficultyTextStrings.csv` | 난이도 다국어 원문 | `string_key,ko,en,ja` |
@@ -125,7 +125,7 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 MemoId는 `MemoDefinitions.json`에 있어야 한다. 공용 배치 앵커의 Memo 타입, PlacementId 및 MemoSpawns.json은 사용하지 않는다.
 획득 시 즉시 저장하며 저장 실패 시 재시도할 수 있도록 메모를 남긴다. 획득한 ID는 같은 저장 슬롯에서 재진입·사망·재실행 후에도 숨겨진다. 새 슬롯에서 배치를 확인할 수 있다.
 
-`MemoDefinitions.json`에는 표시 문장을 직접 쓰지 않는다. 제목과 본문은 각각 `title_string_key`, `body_string_key`로 `MemoTextStrings.csv`를 참조한다. CSV 헤더는 정확히 `string_key,ko,en,ja`이며 키 중복이나 번역 누락은 데이터 오류로 취급한다. 언어 변경 시 메모 목록과 현재 본문은 같은 키를 현재 언어로 다시 해석한다.
+`MemoDefinitions.json`에는 표시 문장을 직접 쓰지 않는다. 본문은 `body_string_key`로 `MemoTextStrings.csv`를 참조한다. 개별 제목 키는 없으며 공통 `memo.title_format`의 `{Number}`에 최소 세 자리로 0 채움한 MemoId를 넣는다(예: `메모 001`). CSV 헤더는 정확히 `string_key,ko,en,ja`이며 키 중복이나 번역 누락은 데이터 오류로 취급한다. 언어 변경 시 메모 목록과 현재 본문은 같은 키를 현재 언어로 다시 해석한다.
 
 `DifficultyDefinitions.json`의 `enemy_incoming_damage_multiplier`도 `10000 = 1.0배`인 정수 비율이다. 이 값은 확률이 아니므로 `10000` 위로 제한하지 않는다. 현재 1/2/3단계 값은 `5000`, `10000`, `20000`이다. 적 진영으로 귀속된 원시 피해에 배율을 적용하고 정수 체력 단위로 한 번 반올림한 뒤 플레이어 방어력을 뺀다. 플레이어·아군·환경 피해에는 적용하지 않는다.
 

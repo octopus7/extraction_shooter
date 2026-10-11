@@ -12,6 +12,7 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/ScopeExit.h"
+#include "Subsystem/TunaSweeperMemoSubsystem.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperMemoAnchorContractTest,
     "TunaSweeper.Memo.IndependentAnchorContract",
@@ -76,6 +77,36 @@ bool FTunaSweeperMemoLifecycleTest::RunTest(const FString& Parameters)
         Context.OwningGameInstance = nullptr; FContextAccess::Attach(Game, nullptr);
         GEngine->DestroyWorldContext(World); World->RemoveFromRoot();
     };
+    {
+        const auto OriginalLanguage = Game->GetCurrentTextLanguage();
+        ON_SCOPE_EXIT { Game->SetCurrentTextLanguage(OriginalLanguage, false); };
+        auto* Memos = Game->GetSubsystem<UTunaSweeperMemoSubsystem>();
+        if (!TestNotNull(TEXT("Memo subsystem exists"), Memos)) return false;
+        TestNull(TEXT("Definitions no longer expose per-memo title keys"),
+            FindFProperty<FProperty>(FTunaSweeperMemoDefinition::StaticStruct(), TEXT("TitleStringKey")));
+        Game->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::Korean, false);
+        const int32 Ids[] = {1, 10, 60};
+        const TCHAR* Titles[] = {TEXT("메모 001"), TEXT("메모 010"), TEXT("메모 060")};
+        for (int32 Index = 0; Index < UE_ARRAY_COUNT(Ids); ++Index)
+        {
+            FTunaSweeperMemoDefinition Definition;
+            TestTrue(TEXT("Body-only definition loads"), Memos->TryGetMemoDefinition(Ids[Index], Definition));
+            TestEqual(TEXT("Shared Korean title has three-digit number"), Definition.Title.ToString(), FString(Titles[Index]));
+        }
+        Game->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::English, false);
+        FTunaSweeperMemoDefinition Definition;
+        Memos->TryGetMemoDefinition(10, Definition);
+        TestEqual(TEXT("Title refreshes after language switch"), Definition.Title.ToString(), FString(TEXT("Memo 010")));
+        TArray<FTunaSweeperMemoListEntry> Entries;
+        Memos->GetMemoListEntries(Entries);
+        TestEqual(TEXT("All reserved memos remain listed"), Entries.Num(), 60);
+        const auto* Entry = Entries.FindByPredicate([](const auto& Item) { return Item.MemoId == 10; });
+        if (TestNotNull(TEXT("Unacquired memo 10 remains listed"), Entry))
+        {
+            TestFalse(TEXT("Reading title does not acquire memo"), Entry->bAcquired);
+            TestEqual(TEXT("List and detail share title"), Entry->Title.ToString(), Definition.Title.ToString());
+        }
+    }
     auto Spawn = [World](int32 Id)
     {
         auto* Actor = World->SpawnActor<ATunaSweeperMemoAnchor>();

@@ -61,7 +61,7 @@ bool FTunaSweeperDifficultyAndNarrativeTextDataTest::RunTest(const FString& Para
 	UTunaSweeperTextSubsystem* TextSubsystem = NewObject<UTunaSweeperTextSubsystem>(GameInstance);
 	TestTrue(TEXT("UI, memo, and difficulty text CSV files load together"), TextSubsystem->LoadTextData());
 	FText ResolvedText;
-	TestTrue(TEXT("Memo Korean title resolves"), TextSubsystem->TryGetTextByKey(TEXT("memo.1.title"), ETunaSweeperItemTextLanguage::Korean, ResolvedText));
+	TestTrue(TEXT("Memo shared Korean title format resolves"), TextSubsystem->TryGetTextByKey(TEXT("memo.title_format"), ETunaSweeperItemTextLanguage::Korean, ResolvedText));
 	TestTrue(TEXT("Memo English body resolves"), TextSubsystem->TryGetTextByKey(TEXT("memo.20.body"), ETunaSweeperItemTextLanguage::English, ResolvedText));
 	TestTrue(TEXT("Memo Japanese body resolves"), TextSubsystem->TryGetTextByKey(TEXT("memo.10.body"), ETunaSweeperItemTextLanguage::Japanese, ResolvedText));
 	TestTrue(TEXT("Difficulty Korean title resolves"), TextSubsystem->TryGetTextByKey(TEXT("difficulty.stage.1.title"), ETunaSweeperItemTextLanguage::Korean, ResolvedText));
