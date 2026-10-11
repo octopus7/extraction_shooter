@@ -104,6 +104,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyInteractionCompleted(FName InteractionEventId, FName InteractionTypeName);
 
+	// Only a validated arrival trigger reports this. Modes never complete each other's objectives.
+	void NotifyLocationReached(FName LocationId, bool bMountedVehicleArrival);
+
 	// One eligible quest per interaction; an already submitted quest can retry its reward without consuming again.
 	bool TrySubmitItemsToProvider(FName ProviderId, int32& OutQuestId, bool bSaveImmediately = true);
 	bool TryGetItemSubmissionQuestForProvider(FName ProviderId, int32& OutQuestId) const;
@@ -134,6 +137,7 @@ public:
 private:
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperDeliveryTest;
+	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestLootPlacementTest;
 	friend class FTunaSweeperQuestTranslationTest;
 	friend class FTunaSweeperStoryQuestTest;

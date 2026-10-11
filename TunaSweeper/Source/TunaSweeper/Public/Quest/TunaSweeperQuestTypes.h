@@ -23,7 +23,9 @@ enum class ETunaSweeperObjectiveType : uint8
 	BunkerRescueReturn UMETA(DisplayName = "Bunker Rescue Return"),
 	WarpPointUsed UMETA(DisplayName = "Warp Point Used"),
 	ItemSubmitted UMETA(DisplayName = "Item Submitted"),
-	ExtractionReturn UMETA(DisplayName = "Extraction Return")
+	ExtractionReturn UMETA(DisplayName = "Extraction Return"),
+	LocationReached UMETA(DisplayName = "Location Reached"),
+	VehicleLocationReached UMETA(DisplayName = "Vehicle Location Reached")
 };
 
 UENUM(BlueprintType)
@@ -151,6 +153,10 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName TargetWarpPointId = NAME_None;
+
+	// Arrival objectives name one destination each and always require one visit.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName LocationId = NAME_None;
 };
 
 USTRUCT(BlueprintType)

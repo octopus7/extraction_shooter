@@ -202,3 +202,28 @@ v1 목표 타입:
 ### 수락 즉시 완료하는 전달형 퀘스트
 
 `complete_on_accept: true`를 명시하고 `objectives`는 비워 둔다. 수락 시 `RewardAvailable`이 되며 보상은 자동 지급하지 않는다. `completion_provider_id`로 지정한 NPC에서 보상을 수령해야 `RewardCompleted`가 되어 후속 퀘스트가 해금된다. 목표와 해당 옵션의 혼용은 로더 오류로 처리한다. 옵션이 없는 목표 미정의 퀘스트는 계속 실행 등록에서 제외한다.
+
+### 역·차량 도착 트리거
+
+`ATunaSweeperQuestArrivalTrigger`를 네이티브 액터로 배치하거나 BP 자식으로 사용한다. `ArrivalArea` 박스는 플레이어 중심 위치를 검사하며 회전·크기·높이를 반영한다. 게임 중 충돌과 길찾기를 방해하지 않는다. 목적지마다 안정적인 `LocationId`를 지정하고, 다른 장소에 같은 ID를 재사용하지 않는다.
+
+- 일반 모드(`bRequireMountedVehicle=false`): `location_reached` 목표에 보고한다. 도보 또는 탑승 중인 실제 로컬 플레이어가 영역 안에 있으면 인정한다. 빈 열차·차량과 NPC만 도착한 경우에는 진행되지 않는다.
+- 차량 모드(`true`): `vehicle_location_reached` 목표에만 보고한다. 살아 있는 로컬 플레이어가 파괴되지 않은 ATV의 실제 좌석에 부착되어 있어야 한다. 선택 항목 `RequiredVehicleTag`로 배치 차량을 제한할 수 있다.
+- `RequiredCompletedQuestIds`: 모든 지정 퀘스트가 보상 수령 완료(`RewardCompleted`)여야 한다. `RequiredCompletedProgressIds`: 모든 지정 월드 진행 ID가 `Completed`여야 한다. 빈 배열은 제한 없음이며 잘못된 ID·없는 상태는 판정을 차단한다. 복구/급유 완료 조건을 연결할 수 있지만 실시간 연료 잔량을 검사하는 기능은 아니다.
+- 매 프레임 물리 갱신 이후 현재 플레이어 위치를 확인한다. 이미 영역 안에서 수락·로드·탑승·선행 완료가 일어나도 다음 판정에 반영한다. 영역을 통과한 과거 경로를 추정하지 않으므로 고속 차량 경로에는 프레임 간 이동보다 충분히 넓은 영역을 배치한다.
+
+목표는 아래처럼 연결한다. 예시 ID·문자열 키는 설명용이며 실제 데이터에 등록하지 않았다. UI 문구는 해당 데이터셋 문자열 테이블에 등록한 키로 연결한다.
+
+```json
+{
+  "objective_id": "visit_east",
+  "type": "location_reached",
+  "location_id": "example.station.east",
+  "required_count": 1,
+  "text_string_key": "example.objective.visit_east"
+}
+```
+
+차량 목표는 `type`을 `vehicle_location_reached`로 바꾼다. 두 타입은 서로의 목표를 진행시키지 않는다. 두 역 방문은 각기 다른 `location_id`를 갖는 목표 두 개로 작성한다. 도착 목표의 `required_count`는 생략 또는 1만 허용하며 장소 없는 정의·반복 횟수·잘못된 숫자 형식은 거절한다. 수락 중인 퀘스트만 진행하고 같은 장소의 재판정은 중복 저장·보상 지급을 일으키지 않는다. 저장은 기존 목표 진행값을 사용한다.
+
+이 기능의 선행 구현에는 실제 퀘스트 데이터, 맵 배치, 복구/연료 시스템, 전용 BP 에셋이 포함되지 않는다. 편집기에서 네이티브 `TunaSweeperQuestArrivalTrigger` 액터를 직접 배치해 설정할 수 있다.

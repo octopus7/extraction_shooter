@@ -82,6 +82,12 @@ namespace TunaSweeperQuestData
 	bool ReadObjectiveType(const FString& RawType, ETunaSweeperObjectiveType& OutType)
 	{
 		const FString Type = RawType.TrimStartAndEnd().ToLower();
+		if (Type == TEXT("location_reached") || Type == TEXT("vehicle_location_reached"))
+		{
+			OutType = Type == TEXT("location_reached")
+				? ETunaSweeperObjectiveType::LocationReached : ETunaSweeperObjectiveType::VehicleLocationReached;
+			return true;
+		}
 		if (Type == TEXT("extraction_return"))
 		{
 			OutType = ETunaSweeperObjectiveType::ExtractionReturn;
@@ -182,6 +188,13 @@ namespace TunaSweeperQuestData
 		OutObjective.Text = ReadTextField(JsonObject, TEXT("text"));
 		double RequiredCount = 1.0;
 		const bool bHasRequiredCount = JsonObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
+		OutObjective.LocationId = ReadNameField(JsonObject, TEXT("location_id"));
+		const bool bArrival = OutObjective.Type == ETunaSweeperObjectiveType::LocationReached ||
+			OutObjective.Type == ETunaSweeperObjectiveType::VehicleLocationReached;
+		if (bArrival && (!JsonObject->HasTypedField<EJson::String>(TEXT("location_id")) ||
+			OutObjective.LocationId.IsNone() || RequiredCount != 1.0 ||
+			(JsonObject->HasField(TEXT("required_count")) &&
+				!JsonObject->HasTypedField<EJson::Number>(TEXT("required_count"))))) return false;
 		if (OutObjective.Type == ETunaSweeperObjectiveType::ItemSubmitted &&
 			(!bHasRequiredCount || !FMath::IsFinite(RequiredCount) || RequiredCount < 1 ||
 			RequiredCount > MAX_int32 || FMath::FloorToDouble(RequiredCount) != RequiredCount)) return false;
@@ -935,6 +948,18 @@ void UTunaSweeperQuestSubsystem::NotifyInteractionCompleted(FName InteractionEve
 			return DoesObjectiveMatchInteractionCompleted(Objective, InteractionEventId, InteractionTypeName);
 		},
 		1);
+}
+
+void UTunaSweeperQuestSubsystem::NotifyLocationReached(FName LocationId, bool bMountedVehicleArrival)
+{
+	if (LocationId.IsNone()) return;
+	const auto ArrivalType = bMountedVehicleArrival
+		? ETunaSweeperObjectiveType::VehicleLocationReached : ETunaSweeperObjectiveType::LocationReached;
+	AdvanceMatchingObjectives(
+		[LocationId, ArrivalType](const FTunaSweeperObjectiveDefinition& Objective)
+		{
+			return Objective.Type == ArrivalType && Objective.LocationId == LocationId && Objective.RequiredCount == 1;
+		}, 1);
 }
 
 void UTunaSweeperQuestSubsystem::AddCoins(int32 Amount, bool bSaveImmediately)

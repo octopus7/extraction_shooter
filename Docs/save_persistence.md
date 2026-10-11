@@ -457,3 +457,10 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 
 - 목적지 제출은 기존 `item_submitted` 목표의 진행값과 인벤토리 저장을 사용한다. 필요한 수량의 소모와 해당 목표 진행값 변경을 마친 뒤 인벤토리 관찰자·저장 경로에 알린다.
 - 저장 복원 후 이미 달성한 목표에는 재제출하지 않는다. 목적지 액터는 별도 완료 상태를 저장하지 않고 퀘스트·인벤토리 이벤트에서 상호작용 가능 여부를 재계산한다. 새 저장 필드나 버전 변경은 없다.
+
+### 역·차량 도착 목표
+
+- `location_reached` / `vehicle_location_reached`는 기존 `NumericQuestProgressStates`의 퀘스트 ID·목표 ID·`CurrentCount`로 저장한다. 목적지별 목표는 0 또는 1이며 도착 액터에 별도의 방문 완료 플래그를 저장하지 않는다.
+- 맵 재진입·트리거 재생성·저장 복원 후에도 목표 진행값이 중복 방문을 막는다. 수락 전 방문은 기억하지 않으며 수락 시점에 여전히 영역 안이면 다시 판정한다.
+- 배치의 `LocationId`와 목표의 `location_id`, 안정적인 `objective_id`를 유지한다. 지역 번호를 런타임 퀘스트 ID에 인코딩하지 않는다.
+- 선택 선행 조건은 기존 퀘스트 보상 완료 상태와 `WorldProgressStates`의 완료 상태를 읽는다. 새 차량 복구/급유 저장 필드나 실시간 연료 상태는 추가하지 않는다. 저장 스키마 버전 변경 없음.
