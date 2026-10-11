@@ -600,3 +600,14 @@ ui.passage.separator," + "," + "," + "
 ui.interaction.deliver_parcel,배달하기,Deliver,配達する
 ui.item_info.volatile_warning,기지로 가져갈 수 없습니다.,Cannot be brought back to base.,拠点には持ち帰れません。
 ui.interaction.use_facility,시설 이용,Use facility,施設を使う
+ui.quest_cheat.title,퀘스트 치트,Quest Cheats,クエストチート
+ui.quest_cheat.description,현재 선택된 세이브 슬롯의 퀘스트 진행을 편집합니다. 보상 아이템·돈은 지급하지 않습니다.,Edit quest progress in the selected save slot. No items or coins are granted.,選択中のセーブスロットの進行を編集します。アイテムや通貨は付与しません。
+ui.quest_cheat.slot,현재 슬롯: {0} / {1},Current slot: {0} / {1},現在のスロット: {0} / {1}
+ui.quest_cheat.id,퀘스트 ID,Quest ID,クエストID
+ui.quest_cheat.locked,게임 실행 중에는 사용할 수 없습니다. 플레이를 종료하세요.,Unavailable while the game is running. End the play session.,ゲーム実行中は使用できません。プレイを終了してください。
+ui.quest_cheat.complete,해당 퀘스트까지 완료,Complete through this quest,このクエストまで完了
+ui.quest_cheat.prerequisites,선행 퀘스트만 완료,Complete prerequisites only,前提クエストのみ完了
+ui.quest_cheat.selection_invalid,현재 선택된 세이브 슬롯을 읽을 수 없습니다.,Unable to read the selected save slot.,選択中のセーブスロットを読み込めません。
+ui.quest_cheat.selection_changed,선택된 슬롯이 바뀌었습니다. 표시된 슬롯을 확인하고 다시 실행하세요.,The selected slot changed. Check the displayed slot and try again.,スロットが変更されました。表示を確認して再実行してください。
+ui.quest_cheat.success,{0}개 퀘스트 완료 상태를 저장했습니다. 원본 세이브 백업도 보관했습니다.,Saved completion for {0} quests. A backup of the original save was kept.,{0}件の完了状態を保存しました。元のセーブもバックアップしました。
+ui.quest_cheat.error,변경하지 못했습니다. 오류 코드: {0},Changes could not be saved. Error code: {0},変更を保存できませんでした。エラーコード: {0}

@@ -543,3 +543,14 @@ ui.passage.separator," + "," + "," + "," + "
 ui.interaction.deliver_parcel,交付包裹,交付包裹,Доставить посылку,Entregar encomenda
 ui.item_info.volatile_warning,无法带回基地。,無法帶回基地。,Нельзя принести на базу.,Não pode ser levado de volta à base.
 ui.interaction.use_facility,使用设施,使用設施,Использовать объект,Usar instalação
+ui.quest_cheat.title,任务作弊,任務作弊,Читы заданий,Trapaças de missões
+ui.quest_cheat.description,编辑当前存档槽的任务进度。不发放物品或货币。,編輯目前存檔欄位的任務進度。不發放物品或貨幣。,Изменение заданий выбранного сохранения без выдачи предметов и монет.,Edite as missões do slot selecionado sem conceder itens ou moedas.
+ui.quest_cheat.slot,当前存档：{0} / {1},目前存檔：{0} / {1},Текущее сохранение: {0} / {1},Slot atual: {0} / {1}
+ui.quest_cheat.id,任务 ID,任務 ID,ID задания,ID da missão
+ui.quest_cheat.locked,游戏运行时无法使用。请先结束游戏。,遊戲執行時無法使用。請先結束遊戲。,Недоступно во время игры. Завершите игровой сеанс.,Indisponível durante o jogo. Encerre a sessão.
+ui.quest_cheat.complete,完成至此任务,完成至此任務,Завершить вплоть до этого задания,Concluir até esta missão
+ui.quest_cheat.prerequisites,仅完成前置任务,僅完成前置任務,Завершить только предыдущие задания,Concluir apenas os pré-requisitos
+ui.quest_cheat.selection_invalid,无法读取所选存档槽。,無法讀取所選存檔欄位。,Не удалось прочитать выбранное сохранение.,Não foi possível ler o slot selecionado.
+ui.quest_cheat.selection_changed,所选存档已更改。请确认显示的存档后重试。,所選存檔已變更。請確認顯示的存檔後重試。,Сохранение изменилось. Проверьте выбранный слот и повторите попытку.,O slot selecionado mudou. Confira o slot exibido e tente novamente.
+ui.quest_cheat.success,已保存 {0} 个任务的完成状态，并保留原存档备份。,已儲存 {0} 個任務的完成狀態，並保留原存檔備份。,Сохранено завершение заданий: {0}. Создана резервная копия.,Conclusão de {0} missões salva. Uma cópia do arquivo original foi guardada.
+ui.quest_cheat.error,无法保存更改。错误代码：{0},無法儲存變更。錯誤代碼：{0},Не удалось сохранить изменения. Код ошибки: {0},Não foi possível salvar as alterações. Código de erro: {0}
