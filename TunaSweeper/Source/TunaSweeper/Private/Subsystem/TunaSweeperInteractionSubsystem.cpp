@@ -752,6 +752,10 @@ bool UTunaSweeperInteractionSubsystem::HandleLootContainerOpenInteraction(
 	}
 
 	LootContainerActor->PlayOpenAnimation();
+	if (LootContainerActor->CollectContentsOnOpen(TunaGameInstance))
+	{
+		return true;
+	}
 	TunaPlayerController->OpenLootContainerPanel(ContainerInstance);
 	return true;
 }

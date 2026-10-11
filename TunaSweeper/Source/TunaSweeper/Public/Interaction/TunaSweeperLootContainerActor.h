@@ -53,6 +53,9 @@ public:
 
 	bool OpenRuntimeContainer(UTunaSweeperGameInstance* TunaGameInstance, FTunaSweeperLootContainerInstance& OutInstance);
 
+	// Return true when opening was fully handled without the manual loot panel.
+	virtual bool CollectContentsOnOpen(UTunaSweeperGameInstance* TunaGameInstance) { return false; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	UTunaSweeperInteractableComponent* GetInteractableComponent() const { return InteractableComponent; }
 
