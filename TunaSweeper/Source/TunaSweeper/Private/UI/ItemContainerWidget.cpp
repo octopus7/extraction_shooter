@@ -1200,7 +1200,9 @@ void UStorageContainerWidget::EnsureStorageFilterControls()
 		AddStorageFilterButton(ETunaSweeperStorageFilter::Consumable);
 		AddStorageFilterButton(ETunaSweeperStorageFilter::Gear);
 		AddStorageFilterButton(ETunaSweeperStorageFilter::Material);
-		AddStorageFilterButton(ETunaSweeperStorageFilter::Blueprint);
+		// No blueprint items currently exist in storage. Keep the category and handlers;
+		// restore this button when blueprint items return.
+		// AddStorageFilterButton(ETunaSweeperStorageFilter::Blueprint);
 		AddStorageFilterButton(ETunaSweeperStorageFilter::Other);
 	}
 
