@@ -103,6 +103,14 @@ switch ($Mode) {
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\QuestTextStrings.csv') -Destination (Join-Path $stagedDirectory 'Data')
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\ScenarioDefinitions.json') -Destination (Join-Path $stagedDirectory 'Data')
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\ScenarioTextStrings.csv') -Destination (Join-Path $stagedDirectory 'Data')
+        foreach ($fileName in @('QuestTextStrings.csv', 'ScenarioTextStrings.csv')) {
+            $sourcePath = Join-Path $mainSourceDirectory (Join-Path 'Data\Translations' $fileName)
+            if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
+                $translationDirectory = Join-Path $stagedDirectory 'Data\Translations'
+                New-Item -ItemType Directory -Path $translationDirectory -Force | Out-Null
+                Copy-Item -LiteralPath $sourcePath -Destination $translationDirectory
+            }
+        }
         foreach ($fileName in $optionalRuntimeDataFiles) {
             $sourcePath = Join-Path $mainSourceDirectory (Join-Path 'Data' $fileName)
             if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
