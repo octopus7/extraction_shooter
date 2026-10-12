@@ -516,3 +516,10 @@ No items, coins, experience, dialogue, or world-progress rewards are executed by
 - 고용량 콘덴서 1개 소모와 `world.passage.raid_lift` 완료는 기존 재료 소비 트랜잭션 안에서 함께 갱신하고 저장한다. 같은 진행 ID의 리프트는 복구 상태를 공유하며 중복 수리는 차감하지 않는다. 저장 스키마를 추가하지 않는다.
 - 목적지 선택의 도착 그룹(Forest, VillageEast, VillageWest, Plains)은 게임 인스턴스의 일회성 메모리 상태다. 해당 맵의 최초 시작 지점 선택에서 소비하고, 다른 목적지·일반 이동·로드 완료·이동 실패 시 남은 요청을 지운다. 저장 슬롯에 직렬화하지 않는다.
 - 일반 이동은 전용 리프트 시작 지점을 후보에서 제외한다. 리프트 이동은 선택한 그룹만 사용하며 없는 그룹을 다른 지역이나 원점으로 대체하지 않는다. 레이드 간 인벤토리와 생존 수치 보존은 기존 이동 경로를 따른다.
+
+## Editor quest cheat inspection and target reset
+
+- `quest-inspect` reads the selected slot and active quest catalog without writing the save. It reports quest IDs, title string keys/resolved titles and persisted states, distinguishing unmet prerequisites from available quests.
+- `quest-reset` uses the existing versioned offline save transaction, exact backup and expected-hash checks. After ancestor validation/completion it removes only the target numeric quest progress (including objective counts) and clears tracking if it points to that target. Legacy quest IDs are migrated in memory before editing.
+- Descendants, unrelated quests, world progress, scenario flags and already granted rewards remain unchanged. No items, coins or XP are granted. Existing save schema is unchanged. Runtime auto-accept rules still apply after loading.
+- The editor panel disables operations during play, polls selected-slot/file changes and refreshes immediately after a cheat. It never writes when listing quests.

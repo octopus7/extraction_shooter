@@ -4,6 +4,7 @@
 #include "Editor.h"
 #include "Framework/Docking/TabManager.h"
 #include "HAL/PlatformProcess.h"
+#include "HAL/FileManager.h"
 #include "Inventory/TunaSweeperSaveTool.h"
 #include "Quest/TunaSweeperQuestId.h"
 #include "Widgets/Input/NumericTypeInterface.h"
@@ -15,6 +16,7 @@
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/Views/SListView.h"
 
 namespace TunaSweeperQuestCheatEditor
 {
@@ -70,18 +72,53 @@ namespace TunaSweeperQuestCheatEditor
                         + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 12)
                         [ SNew(SNumericEntryBox<int32>).TypeInterface(MakeShared<FQuestIdTypeInterface>()).MinValue(1).MaxValue(MAX_int32).AllowSpin(false)
                             .Value_Lambda([this]() -> TOptional<int32> { return QuestId; })
-                            .OnValueChanged_Lambda([this](int32 Value) { QuestId = Value; }) ]
+                            .OnValueChanged_Lambda([this](int32 Value)
+                            {
+                                QuestId = Value;
+                                if (QuestList)
+                                {
+                                    QuestList->ClearSelection();
+                                    if (const auto* Row = QuestRows.FindByPredicate([Value](const auto& Entry) { return Entry->GetIntegerField(TEXT("questId")) == Value; }))
+                                        QuestList->SetSelection(*Row);
+                                }
+                            }) ]
                         + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)
                         [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.complete")))
                             .OnClicked_Lambda([this] { return Apply(true); }) ]
                         + SVerticalBox::Slot().AutoHeight()
                         [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.prerequisites")))
                             .OnClicked_Lambda([this] { return Apply(false); }) ]
+                        + SVerticalBox::Slot().AutoHeight().Padding(0, 6, 0, 0)
+                        [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.reset")))
+                            .ToolTipText(Text(TEXT("ui.quest_cheat.reset_help")))
+                            .OnClicked_Lambda([this] { return Apply(false, true); }) ]
                     ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 6)
+                    [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.refresh")))
+                        .IsEnabled_Lambda([] { return !IsLocked(); })
+                        .OnClicked_Lambda([this] { RefreshSelection(); RefreshQuests(true); return FReply::Handled(); }) ]
+                    + SVerticalBox::Slot().AutoHeight()
+                    [ SNew(STextBlock).Text_Lambda([this] { return ListStatus; }).AutoWrapText(true) ]
+                    + SVerticalBox::Slot().FillHeight(1).Padding(0, 6, 0, 0)
+                    [ SAssignNew(QuestList, SListView<TSharedPtr<FJsonObject>>)
+                        .ListItemsSource(&QuestRows).SelectionMode(ESelectionMode::Single)
+                        .IsEnabled_Lambda([] { return !IsLocked(); })
+                        .OnGenerateRow_Lambda([](TSharedPtr<FJsonObject> Row, const TSharedRef<STableViewBase>& Owner)
+                        {
+                            const FString Title = Row->GetStringField(TEXT("title"));
+                            return SNew(STableRow<TSharedPtr<FJsonObject>>, Owner).Padding(6)
+                                [ SNew(STextBlock).Text(FText::Format(Text(TEXT("ui.quest_cheat.row")),
+                                    FText::FromString(TunaSweeperQuestId::Format(Row->GetIntegerField(TEXT("questId")))),
+                                    Title.IsEmpty() ? Text(TEXT("ui.quest_cheat.untitled")) : FText::FromString(Title),
+                                    Text(*Row->GetStringField(TEXT("statusKey"))))) ];
+                        })
+                        .OnSelectionChanged_Lambda([this](TSharedPtr<FJsonObject> Row, ESelectInfo::Type)
+                        { if (Row && !IsLocked()) QuestId = Row->GetIntegerField(TEXT("questId")); }) ]
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)
                     [ SNew(STextBlock).Text_Lambda([this] { return Status; }).AutoWrapText(true) ]
                 ]
             ];
+            RefreshQuests(true);
         }
         virtual void Tick(const FGeometry& Geometry, double Time, float Delta) override
         {
@@ -96,8 +133,38 @@ namespace TunaSweeperQuestCheatEditor
                 ? FText::Format(Text(TEXT("ui.quest_cheat.slot")), FText::FromString(Selection->GetStringField(TEXT("flavor"))),
                     FText::AsNumber(Selection->GetIntegerField(TEXT("slot"))))
                 : Text(TEXT("ui.quest_cheat.selection_invalid"));
+            if (QuestList) RefreshQuests(false);
         }
-        FReply Apply(bool bIncludeTarget)
+        void RefreshQuests(bool bForce)
+        {
+            if (IsLocked()) return;
+            const FString Path = Selection && Selection->GetBoolField(TEXT("ok")) ? Selection->GetStringField(TEXT("savePath")) : FString();
+            const FDateTime Timestamp = Path.IsEmpty() ? FDateTime::MinValue() : IFileManager::Get().GetTimeStamp(*Path);
+            if (!bForce && Path == ListedPath && Timestamp == ListedTimestamp) return;
+            ListedPath = Path; ListedTimestamp = Timestamp;
+            QuestRows.Reset();
+            ListStatus = Text(TEXT("ui.quest_cheat.selection_invalid"));
+            if (!Path.IsEmpty())
+            {
+                auto Request = MakeShared<FJsonObject>();
+                Request->SetNumberField(TEXT("version"), 1);
+                Request->SetStringField(TEXT("operation"), TEXT("quest-inspect"));
+                Request->SetStringField(TEXT("savePath"), Path);
+                Request->SetStringField(TEXT("flavor"), Selection->GetStringField(TEXT("flavor")));
+                Request->SetNumberField(TEXT("slot"), Selection->GetIntegerField(TEXT("slot")));
+                const auto Result = TunaSweeperSaveTool::Execute(Request);
+                if (Result->GetBoolField(TEXT("ok")))
+                {
+                    for (const auto& Value : Result->GetArrayField(TEXT("quests"))) QuestRows.Add(Value->AsObject());
+                    ListStatus = Text(TEXT("ui.quest_cheat.list_header"));
+                }
+                else ListStatus = FText::Format(Text(TEXT("ui.quest_cheat.error")), FText::FromString(Result->GetStringField(TEXT("code"))));
+            }
+            QuestList->RequestListRefresh();
+            if (const auto* Selected = QuestRows.FindByPredicate([this](const auto& Row) { return Row->GetIntegerField(TEXT("questId")) == QuestId; }))
+                QuestList->SetSelection(*Selected);
+        }
+        FReply Apply(bool bIncludeTarget, bool bReset = false)
         {
             if (IsLocked()) { Status = Text(TEXT("ui.quest_cheat.locked")); return FReply::Handled(); }
             const auto Current = TunaSweeperSaveTool::GetQuestCheatSelection();
@@ -106,7 +173,7 @@ namespace TunaSweeperQuestCheatEditor
             { RefreshSelection(); Status = Text(TEXT("ui.quest_cheat.selection_changed")); return FReply::Handled(); }
             auto Request = MakeShared<FJsonObject>();
             Request->SetNumberField(TEXT("version"), 1);
-            Request->SetStringField(TEXT("operation"), TEXT("quest-complete"));
+            Request->SetStringField(TEXT("operation"), bReset ? TEXT("quest-reset") : TEXT("quest-complete"));
             Request->SetStringField(TEXT("savePath"), Current->GetStringField(TEXT("savePath")));
             Request->SetStringField(TEXT("flavor"), Current->GetStringField(TEXT("flavor")));
             Request->SetNumberField(TEXT("slot"), Current->GetIntegerField(TEXT("slot")));
@@ -120,14 +187,19 @@ namespace TunaSweeperQuestCheatEditor
                 Result = TunaSweeperSaveTool::Execute(Request);
             }
             if (Result->GetBoolField(TEXT("ok")) && Result->GetBoolField(TEXT("committed")))
-                Status = FText::Format(Text(TEXT("ui.quest_cheat.success")), FText::AsNumber(Result->GetArrayField(TEXT("completedQuestIds")).Num()));
+                Status = bReset ? Text(TEXT("ui.quest_cheat.reset_success")) : FText::Format(Text(TEXT("ui.quest_cheat.success")), FText::AsNumber(Result->GetArrayField(TEXT("completedQuestIds")).Num()));
             else Status = FText::Format(Text(TEXT("ui.quest_cheat.error")), FText::FromString(Result->GetStringField(TEXT("code"))));
+            RefreshQuests(true);
             return FReply::Handled();
         }
         int32 QuestId = 1;
         double NextRefresh = 0;
         TSharedPtr<FJsonObject> Selection;
-        FText SelectionText, Status;
+        FText SelectionText, Status, ListStatus;
+        FString ListedPath;
+        FDateTime ListedTimestamp = FDateTime::MinValue();
+        TArray<TSharedPtr<FJsonObject>> QuestRows;
+        TSharedPtr<SListView<TSharedPtr<FJsonObject>>> QuestList;
     };
 }
 

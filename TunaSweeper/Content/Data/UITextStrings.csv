@@ -636,3 +636,15 @@ ui.lift.village_east,마을 동쪽,Village East,村の東
 ui.lift.village_west,마을 서쪽,Village West,村の西
 ui.lift.plains,평원,Plains,平原
 ui.lift.cancel,취소,Cancel,キャンセル
+ui.quest_cheat.reset,대상 초기화 + 선행 완료,Reset target and complete prerequisites,対象を初期化して前提を完了
+ui.quest_cheat.reset_help,선택한 퀘스트의 진행과 추적을 지우고 선행 체인을 완료합니다. 후속 퀘스트와 지급된 보상은 유지합니다.,Clear the selected quest progress and tracking and complete its prerequisites. Later quests and granted rewards remain unchanged.,選択したクエストの進行と追跡を消去し前提を完了します。後続クエストと受取済み報酬は維持します。
+ui.quest_cheat.reset_success,대상 퀘스트를 초기화하고 선행 퀘스트를 완료했습니다.,Target reset and prerequisites completed.,対象を初期化し前提クエストを完了しました。
+ui.quest_cheat.refresh,목록 새로고침,Refresh list,一覧を更新
+ui.quest_cheat.list_header,퀘스트 ID / 제목 / 현재 상태 — 선택하면 치트 대상에 적용됩니다.,Quest ID / Title / Current state — select a row to target it.,クエストID / タイトル / 現在の状態 — 選択すると操作対象になります。
+ui.quest_cheat.row,{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2}
+ui.quest_cheat.untitled,제목 없음,Untitled,タイトルなし
+ui.quest_cheat.state.locked,수락 불가,Unavailable,受注不可
+ui.quest_cheat.state.available,수락 가능,Available,受注可能
+ui.quest_cheat.state.accepted,진행 중,In progress,進行中
+ui.quest_cheat.state.reward,보상 대기,Reward pending,報酬待ち
+ui.quest_cheat.state.completed,보상 완료,Reward claimed,報酬受取済み

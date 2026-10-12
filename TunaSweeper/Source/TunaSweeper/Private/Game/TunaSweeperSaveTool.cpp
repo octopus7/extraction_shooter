@@ -12,6 +12,8 @@
 #include "JsonObjectConverter.h"
 #include "Misc/SecureHash.h"
 #include "UObject/StrongObjectPtr.h"
+#include "Internationalization/Culture.h"
+#include "Internationalization/Internationalization.h"
 
 namespace TunaSweeperSaveTool::Internal
 {
@@ -104,7 +106,8 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	int32 Version = 0;
 	FString Op;
 	if (!Request || !Integer(Request, TEXT("version"), Version, 1, 1) || !Request->TryGetStringField(TEXT("operation"), Op)) return Result(TEXT("invalid_request"));
-	const bool bQuestEdit = Op == TEXT("quest-complete");
+	const bool bQuestReset = Op == TEXT("quest-reset");
+	const bool bQuestEdit = Op == TEXT("quest-complete") || bQuestReset;
 	const bool bEdit = Op == TEXT("add") || Op == TEXT("preset-apply") || bQuestEdit;
 	if (bQuestEdit && GEngine)
 	{
@@ -113,7 +116,7 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	}
 	bool bCommit = false;
 	if (Request->HasField(TEXT("commit")) && (!bEdit || !Request->TryGetBoolField(TEXT("commit"), bCommit) || Request->Values[TEXT("commit")]->Type != EJson::Boolean)) return Result(TEXT("invalid_request"));
-	const bool bRead = Op == TEXT("inspect") || Op == TEXT("validate") || Op == TEXT("preset-export");
+	const bool bRead = Op == TEXT("inspect") || Op == TEXT("validate") || Op == TEXT("preset-export") || Op == TEXT("quest-inspect");
 	if (!(bRead || bEdit || Op == TEXT("catalog") || Op == TEXT("list"))) return Result(TEXT("unknown_operation"));
 	if (Op == TEXT("catalog") && !Fields(Request, { TEXT("version"), TEXT("operation") })) return Result(TEXT("invalid_request"));
 	if (Op == TEXT("list") && !Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("directory") })) return Result(TEXT("invalid_request"));
@@ -184,6 +187,46 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	FString Expected;
 	if (Request->HasField(TEXT("expectedHash")) && (!Request->TryGetStringField(TEXT("expectedHash"), Expected) || !Expected.Equals(OriginalHash, ESearchCase::IgnoreCase))) return Result(TEXT("stale_save"));
 	const FString Validation = Validate(*Save, *Data);
+	if (Op == TEXT("quest-inspect"))
+	{
+		if (Flavor != TunaSweeperBuildFlavor::GetName().ToString()) return Result(TEXT("quest_dataset_mismatch"));
+		TStrongObjectPtr<UTunaSweeperQuestSubsystem> Quests(NewObject<UTunaSweeperQuestSubsystem>(Owner.Get()));
+		TArray<FTunaSweeperQuestDefinition> Definitions;
+		if (!Quests->LoadQuestData() || !Quests->GetAllQuestDefinitions(Definitions)) return Result(TEXT("quest_data_unavailable"));
+		Save->MigrateLegacyQuestIds(); // Inspection migrates only the in-memory copy.
+		Definitions.Sort([](const auto& A, const auto& B) { return A.QuestId < B.QuestId; });
+		TMap<int32, ETunaSweeperQuestState> States;
+		for (const auto& Progress : Save->NumericQuestProgressStates) States.Add(Progress.QuestId, Progress.State);
+		TArray<TSharedPtr<FJsonValue>> Rows;
+		ETunaSweeperItemTextLanguage Language = ETunaSweeperItemTextLanguage::English;
+		TunaSweeperLanguage::TryParseLanguageCode(FInternationalization::Get().GetCurrentCulture()->GetName(), Language);
+		for (const auto& Definition : Definitions)
+		{
+			auto Row = MakeShared<FJsonObject>();
+			Row->SetNumberField(TEXT("questId"), Definition.QuestId);
+			Row->SetStringField(TEXT("titleStringKey"), Definition.TitleStringKey.ToString());
+			FText Title;
+			Quests->TryGetQuestTextByKey(Definition.TitleStringKey, Language, Title);
+			Row->SetStringField(TEXT("title"), Title.ToString());
+			const auto* SavedState = States.Find(Definition.QuestId);
+			const auto State = SavedState ? *SavedState : ETunaSweeperQuestState::Available;
+			const TCHAR* StatusKey = TEXT("ui.quest_cheat.state.locked");
+			switch (State)
+			{
+			case ETunaSweeperQuestState::Accepted: StatusKey = TEXT("ui.quest_cheat.state.accepted"); break;
+			case ETunaSweeperQuestState::RewardAvailable: StatusKey = TEXT("ui.quest_cheat.state.reward"); break;
+			case ETunaSweeperQuestState::RewardCompleted: StatusKey = TEXT("ui.quest_cheat.state.completed"); break;
+			case ETunaSweeperQuestState::Available:
+				if (!Definition.RequiredCompletedQuestIds.ContainsByPredicate([&](int32 Id)
+					{ const auto* Parent = States.Find(Id); return !Parent || *Parent != ETunaSweeperQuestState::RewardCompleted; }))
+					StatusKey = TEXT("ui.quest_cheat.state.available");
+				break;
+			}
+			Row->SetStringField(TEXT("statusKey"), StatusKey);
+			Rows.Add(MakeShared<FJsonValueObject>(Row));
+		}
+		auto R = Result(); R->SetArrayField(TEXT("quests"), Rows); return R;
+	}
 	if (Op == TEXT("inspect") || Op == TEXT("validate"))
 	{
 		auto R = Result(Op == TEXT("validate") && !Validation.IsEmpty() ? Validation : TEXT("ok"));
@@ -207,11 +250,17 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 		if (!Integer(Request, TEXT("questId"), QuestId, 1, MAX_int32) ||
 			!Request->TryGetBoolField(TEXT("includeTarget"), bIncludeTarget) || Request->Values[TEXT("includeTarget")]->Type != EJson::Boolean)
 			return Result(TEXT("invalid_request"));
+		if (bQuestReset && bIncludeTarget) return Result(TEXT("invalid_request"));
 		if (Flavor != TunaSweeperBuildFlavor::GetName().ToString()) return Result(TEXT("quest_dataset_mismatch"));
 		TStrongObjectPtr<UTunaSweeperQuestSubsystem> Quests(NewObject<UTunaSweeperQuestSubsystem>(Owner.Get()));
 		TArray<FTunaSweeperQuestDefinition> Definitions;
 		if (!Quests->LoadQuestData() || !Quests->GetAllQuestDefinitions(Definitions)) return Result(TEXT("quest_data_unavailable"));
 		Error = TunaSweeperQuestCheat::Apply(*Save, Definitions, QuestId, bIncludeTarget, CompletedQuestIds);
+		if (Error.IsEmpty() && bQuestReset)
+		{
+			Save->NumericQuestProgressStates.RemoveAll([QuestId](const auto& Row) { return Row.QuestId == QuestId; });
+			if (Save->NumericTrackedQuestId == QuestId) Save->NumericTrackedQuestId = 0;
+		}
 	}
 	else if (Op == TEXT("add")) Error = Add(*Save, *Data, Request);
 	else

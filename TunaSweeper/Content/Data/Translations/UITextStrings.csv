@@ -579,3 +579,15 @@ ui.lift.village_east,村庄东侧,村莊東側,Восток деревни,Leste
 ui.lift.village_west,村庄西侧,村莊西側,Запад деревни,Oeste da vila
 ui.lift.plains,平原,平原,Равнины,Planícies
 ui.lift.cancel,取消,取消,Отмена,Cancelar
+ui.quest_cheat.reset,重置目标并完成前置任务,重設目標並完成前置任務,Сбросить задание и завершить предыдущие,Redefinir alvo e concluir pré-requisitos
+ui.quest_cheat.reset_help,清除所选任务的进度和追踪并完成前置任务。保留后续任务和已发放奖励。,清除所選任務的進度和追蹤並完成前置任務。保留後續任務和已發放獎勵。,Удаляет прогресс и отслеживание задания и завершает предыдущие. Последующие задания и выданные награды сохраняются.,Limpa o progresso e rastreamento da missão e conclui os pré-requisitos. Missões posteriores e recompensas recebidas são mantidas.
+ui.quest_cheat.reset_success,已重置目标并完成前置任务。,已重設目標並完成前置任務。,Задание сброшено. Предыдущие задания завершены.,Alvo redefinido e pré-requisitos concluídos.
+ui.quest_cheat.refresh,刷新列表,重新整理清單,Обновить список,Atualizar lista
+ui.quest_cheat.list_header,任务ID / 标题 / 当前状态 — 选择一行设为目标。,任務ID / 標題 / 目前狀態 — 選取一列設為目標。,ID / Название / Состояние — выберите строку для изменения.,ID / Título / Estado atual — selecione uma linha como alvo.
+ui.quest_cheat.row,{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2}
+ui.quest_cheat.untitled,无标题,無標題,Без названия,Sem título
+ui.quest_cheat.state.locked,不可接受,無法接受,Недоступно,Indisponível
+ui.quest_cheat.state.available,可接受,可接受,Доступно,Disponível
+ui.quest_cheat.state.accepted,进行中,進行中,В процессе,Em andamento
+ui.quest_cheat.state.reward,待领取奖励,待領取獎勵,Ожидает награды,Recompensa pendente
+ui.quest_cheat.state.completed,已领取奖励,已領取獎勵,Награда получена,Recompensa recebida
