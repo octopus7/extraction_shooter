@@ -523,3 +523,9 @@ No items, coins, experience, dialogue, or world-progress rewards are executed by
 - `quest-reset` uses the existing versioned offline save transaction, exact backup and expected-hash checks. After ancestor validation/completion it removes only the target numeric quest progress (including objective counts) and clears tracking if it points to that target. Legacy quest IDs are migrated in memory before editing.
 - Descendants, unrelated quests, world progress, scenario flags and already granted rewards remain unchanged. No items, coins or XP are granted. Existing save schema is unchanged. Runtime auto-accept rules still apply after loading.
 - The editor panel disables operations during play, polls selected-slot/file changes and refreshes immediately after a cheat. It never writes when listing quests.
+
+## Editor quest prerequisite audit and repair
+
+- `quest-audit` reads the selected slot without writing it and checks ancestor chains of all started numeric quests. Available/unaccepted branches are not errors. Reports include incomplete prerequisite edges and structural failures (cycles or missing definitions).
+- `quest-fix` requires the audited `expectedHash`, validates the complete batch before mutating it, and uses existing backup and atomic-save checks. Only unmet prerequisites become RewardCompleted with filled objective counts; tracking of those completed quests is cleared. No reward delivery or runtime events occur. Other progress and existing rewards are preserved.
+- Cycles/missing definitions block the entire repair. The editor shows Fix only for repairable audit results, invalidates the result after save/slot changes or other cheats, and audits again after successful repair. Existing play locks remain in effect. No save schema changes.

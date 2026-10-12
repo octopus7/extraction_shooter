@@ -17,6 +17,8 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Views/SListView.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SScrollBox.h"
 
 namespace TunaSweeperQuestCheatEditor
 {
@@ -97,6 +99,17 @@ namespace TunaSweeperQuestCheatEditor
                     [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.refresh")))
                         .IsEnabled_Lambda([] { return !IsLocked(); })
                         .OnClicked_Lambda([this] { RefreshSelection(); RefreshQuests(true); return FReply::Handled(); }) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)
+                    [ SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot().AutoWidth()
+                        [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.check")))
+                            .IsEnabled_Lambda([] { return !IsLocked(); })
+                            .OnClicked_Lambda([this] { return CheckPrerequisites(); }) ]
+                        + SHorizontalBox::Slot().AutoWidth().Padding(6, 0, 0, 0)
+                        [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.fix")))
+                            .Visibility_Lambda([this] { return bCanFix ? EVisibility::Visible : EVisibility::Collapsed; })
+                            .IsEnabled_Lambda([] { return !IsLocked(); })
+                            .OnClicked_Lambda([this] { return FixPrerequisites(); }) ] ]
                     + SVerticalBox::Slot().AutoHeight()
                     [ SNew(STextBlock).Text_Lambda([this] { return ListStatus; }).AutoWrapText(true) ]
                     + SVerticalBox::Slot().FillHeight(1).Padding(0, 6, 0, 0)
@@ -116,6 +129,12 @@ namespace TunaSweeperQuestCheatEditor
                         { if (Row && !IsLocked()) QuestId = Row->GetIntegerField(TEXT("questId")); }) ]
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)
                     [ SNew(STextBlock).Text_Lambda([this] { return Status; }).AutoWrapText(true) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 8, 0, 0)
+                    [ SNew(SBox).MaxDesiredHeight(200)
+                        .Visibility_Lambda([this] { return AuditLog.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible; })
+                        [ SNew(SBorder).Padding(8)
+                            [ SNew(SScrollBox) + SScrollBox::Slot()
+                                [ SNew(STextBlock).Text_Lambda([this] { return AuditLog; }).AutoWrapText(true) ] ] ] ]
                 ]
             ];
             RefreshQuests(true);
@@ -141,6 +160,7 @@ namespace TunaSweeperQuestCheatEditor
             const FString Path = Selection && Selection->GetBoolField(TEXT("ok")) ? Selection->GetStringField(TEXT("savePath")) : FString();
             const FDateTime Timestamp = Path.IsEmpty() ? FDateTime::MinValue() : IFileManager::Get().GetTimeStamp(*Path);
             if (!bForce && Path == ListedPath && Timestamp == ListedTimestamp) return;
+            InvalidateAudit();
             ListedPath = Path; ListedTimestamp = Timestamp;
             QuestRows.Reset();
             ListStatus = Text(TEXT("ui.quest_cheat.selection_invalid"));
@@ -163,6 +183,90 @@ namespace TunaSweeperQuestCheatEditor
             QuestList->RequestListRefresh();
             if (const auto* Selected = QuestRows.FindByPredicate([this](const auto& Row) { return Row->GetIntegerField(TEXT("questId")) == QuestId; }))
                 QuestList->SetSelection(*Selected);
+        }
+        void InvalidateAudit()
+        {
+            bCanFix = false; AuditHash.Empty(); AuditPath.Empty();
+            if (!AuditLog.IsEmpty()) AuditLog = Text(TEXT("ui.quest_cheat.audit.stale"));
+        }
+        TSharedPtr<FJsonObject> AuditRequest(const TCHAR* Operation)
+        {
+            if (IsLocked()) { AuditLog = Text(TEXT("ui.quest_cheat.locked")); return nullptr; }
+            const auto Current = TunaSweeperSaveTool::GetQuestCheatSelection();
+            if (!Current->GetBoolField(TEXT("ok")) || !Selection || !Selection->GetBoolField(TEXT("ok")) ||
+                Current->GetStringField(TEXT("savePath")) != Selection->GetStringField(TEXT("savePath")))
+            { InvalidateAudit(); RefreshSelection(); AuditLog = Text(TEXT("ui.quest_cheat.selection_changed")); return nullptr; }
+            auto Request = MakeShared<FJsonObject>();
+            Request->SetNumberField(TEXT("version"), 1);
+            Request->SetStringField(TEXT("operation"), Operation);
+            Request->SetStringField(TEXT("savePath"), Current->GetStringField(TEXT("savePath")));
+            Request->SetStringField(TEXT("flavor"), Current->GetStringField(TEXT("flavor")));
+            Request->SetNumberField(TEXT("slot"), Current->GetIntegerField(TEXT("slot")));
+            return Request;
+        }
+        FReply CheckPrerequisites()
+        {
+            auto Request = AuditRequest(TEXT("quest-audit"));
+            if (!Request) return FReply::Handled();
+            // Bring the list timestamp up to date before retaining the audit hash.
+            RefreshQuests(true);
+            const auto Result = TunaSweeperSaveTool::Execute(Request);
+            bCanFix = false; AuditHash.Empty(); AuditPath.Empty();
+            if (!Result->GetBoolField(TEXT("ok")))
+            {
+                AuditLog = FText::Format(Text(TEXT("ui.quest_cheat.error")), FText::FromString(Result->GetStringField(TEXT("code"))));
+                return FReply::Handled();
+            }
+            AuditHash = Result->GetStringField(TEXT("sourceHash")); AuditPath = Request->GetStringField(TEXT("savePath"));
+            bCanFix = Result->GetBoolField(TEXT("canFix"));
+            TArray<FText> Lines;
+            for (const auto& Value : Result->GetArrayField(TEXT("issues")))
+            {
+                const auto Row = Value->AsObject();
+                const FString Code = Row->GetStringField(TEXT("code"));
+                const TCHAR* Key = TEXT("ui.quest_cheat.audit.incomplete");
+                if (Code == TEXT("quest_cycle")) Key = TEXT("ui.quest_cheat.audit.cycle");
+                else if (Code == TEXT("quest_prerequisite_missing")) Key = TEXT("ui.quest_cheat.audit.missing");
+                else if (Code == TEXT("quest_not_found")) Key = TEXT("ui.quest_cheat.audit.unknown");
+                auto Title = [&](const TCHAR* Field)
+                {
+                    const FString ValueText = Row->GetStringField(Field);
+                    return ValueText.IsEmpty() ? Text(TEXT("ui.quest_cheat.untitled")) : FText::FromString(ValueText);
+                };
+                Lines.Add(FText::Format(Text(Key),
+                    FText::FromString(TunaSweeperQuestId::Format(Row->GetIntegerField(TEXT("questId")))), Title(TEXT("title")),
+                    FText::FromString(TunaSweeperQuestId::Format(Row->GetIntegerField(TEXT("prerequisiteId")))), Title(TEXT("prerequisiteTitle")),
+                    Text(*Row->GetStringField(TEXT("stateKey")))));
+            }
+            if (Lines.IsEmpty()) Lines.Add(Text(TEXT("ui.quest_cheat.audit.clean")));
+            else if (!bCanFix) Lines.Add(Text(TEXT("ui.quest_cheat.audit.blocked")));
+            AuditLog = FText::Join(FText::FromString(TEXT("\n")), Lines);
+            return FReply::Handled();
+        }
+        FReply FixPrerequisites()
+        {
+            if (!bCanFix) return FReply::Handled();
+            auto Request = AuditRequest(TEXT("quest-fix"));
+            if (!Request) return FReply::Handled();
+            if (AuditHash.IsEmpty() || AuditPath != Request->GetStringField(TEXT("savePath")))
+            { InvalidateAudit(); return FReply::Handled(); }
+            Request->SetStringField(TEXT("expectedHash"), AuditHash);
+            Request->SetBoolField(TEXT("commit"), true);
+            bCanFix = false;
+            const auto Result = TunaSweeperSaveTool::Execute(Request);
+            if (!Result->GetBoolField(TEXT("ok")) || !Result->GetBoolField(TEXT("committed")))
+            {
+                InvalidateAudit();
+                AuditLog = Result->GetStringField(TEXT("code")) == TEXT("stale_save")
+                    ? Text(TEXT("ui.quest_cheat.audit.stale"))
+                    : FText::Format(Text(TEXT("ui.quest_cheat.error")), FText::FromString(Result->GetStringField(TEXT("code"))));
+                return FReply::Handled();
+            }
+            const int32 Count = Result->GetArrayField(TEXT("completedQuestIds")).Num();
+            CheckPrerequisites();
+            AuditLog = FText::Join(FText::FromString(TEXT("\n")),
+                TArray<FText>{FText::Format(Text(TEXT("ui.quest_cheat.audit.fixed")), FText::AsNumber(Count)), AuditLog});
+            return FReply::Handled();
         }
         FReply Apply(bool bIncludeTarget, bool bReset = false)
         {
@@ -196,6 +300,9 @@ namespace TunaSweeperQuestCheatEditor
         double NextRefresh = 0;
         TSharedPtr<FJsonObject> Selection;
         FText SelectionText, Status, ListStatus;
+        FText AuditLog;
+        bool bCanFix = false;
+        FString AuditHash, AuditPath;
         FString ListedPath;
         FDateTime ListedTimestamp = FDateTime::MinValue();
         TArray<TSharedPtr<FJsonObject>> QuestRows;

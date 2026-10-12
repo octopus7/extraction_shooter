@@ -591,3 +591,14 @@ ui.quest_cheat.state.available,可接受,可接受,Доступно,Disponível
 ui.quest_cheat.state.accepted,进行中,進行中,В процессе,Em andamento
 ui.quest_cheat.state.reward,待领取奖励,待領取獎勵,Ожидает награды,Recompensa pendente
 ui.quest_cheat.state.completed,已领取奖励,已領取獎勵,Награда получена,Recompensa recebida
+ui.quest_cheat.check,检查,檢查,Проверить,Verificar
+ui.quest_cheat.fix,修复,修復,Исправить,Corrigir
+ui.quest_cheat.audit.clean,检查完成：前置任务进度无异常。,檢查完成：前置任務進度無異常。,Проверка завершена: нарушений прогресса нет.,Verificação concluída: nenhum problema nos pré-requisitos.
+ui.quest_cheat.audit.incomplete,{0} [{1}]：前置任务 {2} [{3}] 尚未领取奖励。当前状态：{4}。,{0} [{1}]：前置任務 {2} [{3}] 尚未領取獎勵。目前狀態：{4}。,{0} [{1}]: награда за предыдущее задание {2} [{3}] не получена. Состояние: {4}.,{0} [{1}]: a recompensa do pré-requisito {2} [{3}] não foi recebida. Estado atual: {4}.
+ui.quest_cheat.audit.cycle,{0} [{1}] → {2} [{3}]：前置关系循环。请修改任务定义。,{0} [{1}] → {2} [{3}]：前置關係循環。請修改任務定義。,{0} [{1}] → {2} [{3}]: цикл зависимостей. Исправьте определения заданий.,{0} [{1}] → {2} [{3}]: ciclo de pré-requisitos. Corrija as definições das missões.
+ui.quest_cheat.audit.missing,{0} [{1}]：前置ID {2} 没有定义。请修改任务定义。,{0} [{1}]：前置ID {2} 沒有定義。請修改任務定義。,{0} [{1}]: определение предыдущего задания {2} отсутствует. Исправьте определения.,{0} [{1}]: o pré-requisito {2} não tem definição. Corrija as definições das missões.
+ui.quest_cheat.audit.unknown,任务 {0} 有进度记录但没有定义。无法自动修复。,任務 {0} 有進度記錄但沒有定義。無法自動修復。,У задания {0} есть прогресс но нет определения. Автоисправление недоступно.,A missão {0} tem progresso salvo mas não tem definição. Não é possível corrigir automaticamente.
+ui.quest_cheat.audit.unaccepted,未接受,未接受,Не принято,Não aceita
+ui.quest_cheat.audit.blocked,存在无法自动修复的问题，无法使用修复。,存在無法自動修復的問題，無法使用修復。,Есть проблема которую нельзя исправить автоматически. Исправление недоступно.,Há um problema que não pode ser corrigido automaticamente. Correção indisponível.
+ui.quest_cheat.audit.stale,存档槽或内容已改变。请重新检查。,存檔欄位或內容已變更。請重新檢查。,Слот или сохранение изменились. Выполните проверку заново.,O slot ou o arquivo salvo mudou. Verifique novamente.
+ui.quest_cheat.audit.fixed,已完成 {0} 个前置任务，未发放奖励。,已完成 {0} 個前置任務，未發放獎勵。,Завершено предыдущих заданий: {0}. Награды не выданы.,{0} missões de pré-requisito concluídas sem conceder recompensas.

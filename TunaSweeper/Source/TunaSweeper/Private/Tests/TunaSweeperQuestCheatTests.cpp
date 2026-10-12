@@ -14,6 +14,122 @@
 #include "Misc/Paths.h"
 #include "Kismet/GameplayStatics.h"
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperQuestCheatAuditTest, "TunaSweeper.QuestCheat.PrerequisiteAudit",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaSweeperQuestCheatAuditTest::RunTest(const FString& Parameters)
+{
+    using namespace TunaSweeperQuestCheat;
+    TArray<FTunaSweeperQuestDefinition> Definitions;
+    for (int32 Id = 1; Id <= 7; ++Id)
+    {
+        auto& D = Definitions.AddDefaulted_GetRef(); D.QuestId = Id;
+        auto& O = D.Objectives.AddDefaulted_GetRef(); O.ObjectiveId = TEXT("goal"); O.RequiredCount = 3;
+    }
+    Definitions[1].RequiredCompletedQuestIds = {1};
+    Definitions[2].RequiredCompletedQuestIds = {2};
+    Definitions[3].RequiredCompletedQuestIds = {3};
+    Definitions[4].RequiredCompletedQuestIds = {6}; // Unaccepted branch is not an error.
+    auto* Save = NewObject<UTunaSweeperSaveGame>();
+    Save->QuestCoinBalance = 42; Save->TotalExperiencePoints = 73; Save->NumericTrackedQuestId = 2;
+    auto& Root = Save->NumericQuestProgressStates.AddDefaulted_GetRef(); Root.QuestId = 4; Root.State = ETunaSweeperQuestState::Accepted;
+    auto& Pending = Save->NumericQuestProgressStates.AddDefaulted_GetRef(); Pending.QuestId = 2; Pending.State = ETunaSweeperQuestState::RewardAvailable;
+    auto& Other = Save->NumericQuestProgressStates.AddDefaulted_GetRef(); Other.QuestId = 7; Other.State = ETunaSweeperQuestState::Accepted;
+    TArray<uint8> Before, After;
+    UGameplayStatics::SaveGameToMemory(Save, Before);
+    FPrerequisiteAudit Report;
+    TestTrue(TEXT("Audit succeeds"), Audit(*Save, Definitions, Report).IsEmpty());
+    TestTrue(TEXT("Repair offered for missing ancestors"), Report.bCanFix);
+    TestEqual(TEXT("Every broken edge reported once"), Report.Issues.Num(), 3);
+    TestTrue(TEXT("Only three missing ancestors fixed"), Report.FixQuestIds == TArray<int32>({1, 2, 3}));
+    TestTrue(TEXT("Reward pending is not completed"), Report.Issues.ContainsByPredicate([](const auto& I)
+        { return I.QuestId == 3 && I.PrerequisiteId == 2 && I.PrerequisiteState == ETunaSweeperQuestState::RewardAvailable; }));
+    UGameplayStatics::SaveGameToMemory(Save, After);
+    TestTrue(TEXT("Audit never mutates save"), Before == After);
+    TArray<int32> Fixed;
+    TestTrue(TEXT("Repair succeeds"), Repair(*Save, Definitions, Fixed).IsEmpty());
+    TestTrue(TEXT("Exact repair set"), Fixed == TArray<int32>({1, 2, 3}));
+    auto Find = [&](int32 Id) { return Save->NumericQuestProgressStates.FindByPredicate([Id](const auto& P) { return P.QuestId == Id; }); };
+    for (int32 Id : {1, 2, 3})
+        if (const auto* Progress = Find(Id))
+        {
+            TestEqual(TEXT("Ancestor reward completed"), Progress->State, ETunaSweeperQuestState::RewardCompleted);
+            TestTrue(TEXT("Ancestor objectives filled"), Progress->ObjectiveProgress.Num() == 1 && Progress->ObjectiveProgress[0].CurrentCount == 3);
+        }
+        else AddError(TEXT("Repaired ancestor missing"));
+    TestEqual(TEXT("Started target retained"), Find(4)->State, ETunaSweeperQuestState::Accepted);
+    TestEqual(TEXT("Unrelated progress retained"), Find(7)->State, ETunaSweeperQuestState::Accepted);
+    TestEqual(TEXT("Completed ancestor tracking cleared"), Save->NumericTrackedQuestId, 0);
+    TestEqual(TEXT("No coins awarded"), Save->QuestCoinBalance, 42);
+    TestEqual(TEXT("No XP awarded"), Save->TotalExperiencePoints, int64(73));
+    TestTrue(TEXT("Post repair audit succeeds"), Audit(*Save, Definitions, Report).IsEmpty());
+    TestTrue(TEXT("Fixed save has no issues or fix button"), Report.Issues.IsEmpty() && !Report.bCanFix);
+    TestTrue(TEXT("Second repair no-op"), Repair(*Save, Definitions, Fixed).IsEmpty() && Fixed.IsEmpty());
+    UGameplayStatics::SaveGameToMemory(Save, Before);
+    Definitions[0].RequiredCompletedQuestIds = {4};
+    Audit(*Save, Definitions, Report);
+    TestTrue(TEXT("Cycle is explained and not fixable"), !Report.bCanFix && Report.Issues.ContainsByPredicate([](const auto& I) { return I.Code == TEXT("quest_cycle"); }));
+    TestFalse(TEXT("Cycle blocks repair"), Repair(*Save, Definitions, Fixed).IsEmpty());
+    Definitions[0].RequiredCompletedQuestIds = {999};
+    Audit(*Save, Definitions, Report);
+    TestTrue(TEXT("Missing definition explained and not fixable"), !Report.bCanFix && Report.Issues.ContainsByPredicate([](const auto& I) { return I.PrerequisiteId == 999 && I.Code == TEXT("quest_prerequisite_missing"); }));
+    TestFalse(TEXT("Missing definition blocks repair"), Repair(*Save, Definitions, Fixed).IsEmpty());
+    UGameplayStatics::SaveGameToMemory(Save, After);
+    TestTrue(TEXT("Invalid graph never partially repaired"), Before == After);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperQuestCheatAuditSaveTest, "TunaSweeper.QuestCheat.AuditTransaction",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaSweeperQuestCheatAuditSaveTest::RunTest(const FString& Parameters)
+{
+    auto* Owner = NewObject<UGameInstance>();
+    auto* Quests = NewObject<UTunaSweeperQuestSubsystem>(Owner);
+    TArray<FTunaSweeperQuestDefinition> Definitions;
+    if (!TestTrue(TEXT("Catalog loads"), Quests->LoadQuestData() && Quests->GetAllQuestDefinitions(Definitions))) return false;
+    const auto* Target = Definitions.FindByPredicate([](const auto& D) { return !D.RequiredCompletedQuestIds.IsEmpty(); });
+    if (!Target) { AddWarning(TEXT("No prerequisite quest in active catalog.")); return true; }
+    const FString Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Automation/QuestAudit") / FGuid::NewGuid().ToString() / TEXT("TunaSweeperSave_Slot01.sav"));
+    auto* Save = NewObject<UTunaSweeperSaveGame>(); Save->BuildFlavor = TunaSweeperBuildFlavor::GetName();
+    Save->InventorySlots.SetNum(40); Save->EquipmentSlots.SetNum(8); Save->QuestCoinBalance = 77;
+    auto& Progress = Save->NumericQuestProgressStates.AddDefaulted_GetRef(); Progress.QuestId = Target->QuestId; Progress.State = ETunaSweeperQuestState::Accepted;
+    auto Validator = [](const USaveGame& S) { return S.GetClass() == UTunaSweeperSaveGame::StaticClass(); };
+    if (!TestTrue(TEXT("Broken fixture saved"), TunaSweeperSafeSave::SaveGameFileFailClosed(Save, Path, Validator))) return false;
+    auto Request = MakeShared<FJsonObject>();
+    Request->SetNumberField(TEXT("version"), 1); Request->SetStringField(TEXT("operation"), TEXT("quest-audit"));
+    Request->SetStringField(TEXT("savePath"), Path); Request->SetStringField(TEXT("flavor"), Save->BuildFlavor.ToString()); Request->SetNumberField(TEXT("slot"), 1);
+    TArray<uint8> Original, Bytes; FFileHelper::LoadFileToArray(Original, *Path);
+    auto Report = TunaSweeperSaveTool::Execute(Request);
+    if (!TestTrue(TEXT("Audit operation supported"), Report->GetBoolField(TEXT("ok")))) return false;
+    TestTrue(TEXT("Fix exposed only for repairable issues"), Report->GetBoolField(TEXT("canFix")) && !Report->GetArrayField(TEXT("issues")).IsEmpty());
+    FFileHelper::LoadFileToArray(Bytes, *Path); TestTrue(TEXT("Audit read-only"), Original == Bytes);
+    Request->SetStringField(TEXT("operation"), TEXT("quest-fix"));
+    Request->SetStringField(TEXT("expectedHash"), TEXT("stale"));
+    TestEqual(TEXT("Fix refuses stale audit"), TunaSweeperSaveTool::Execute(Request)->GetStringField(TEXT("code")), FString(TEXT("stale_save")));
+    Request->SetStringField(TEXT("expectedHash"), Report->GetStringField(TEXT("sourceHash")));
+    auto Result = TunaSweeperSaveTool::Execute(Request);
+    if (!TestTrue(TEXT("Fix preview succeeds"), Result->GetBoolField(TEXT("ok")))) return false;
+    FFileHelper::LoadFileToArray(Bytes, *Path); TestTrue(TEXT("Fix preview read-only"), Original == Bytes);
+    Request->SetBoolField(TEXT("commit"), true);
+    Result = TunaSweeperSaveTool::Execute(Request);
+    if (!TestTrue(TEXT("Fix commits"), Result->GetBoolField(TEXT("ok")) && Result->GetBoolField(TEXT("committed")))) return false;
+    FFileHelper::LoadFileToArray(Bytes, *Result->GetStringField(TEXT("backupPath"))); TestTrue(TEXT("Backup preserves broken save exactly"), Original == Bytes);
+    auto* Reload = Cast<UTunaSweeperSaveGame>(TunaSweeperSafeSave::LoadVerifiedSaveFile(Path, Validator));
+    if (!TestNotNull(TEXT("Repaired save reloads"), Reload)) return false;
+    const auto* Root = Reload->NumericQuestProgressStates.FindByPredicate([&](const auto& P) { return P.QuestId == Target->QuestId; });
+    TestTrue(TEXT("Target remains accepted"), Root && Root->State == ETunaSweeperQuestState::Accepted);
+    TestEqual(TEXT("No rewards granted"), Reload->QuestCoinBalance, 77);
+    Request->RemoveField(TEXT("commit")); Request->RemoveField(TEXT("expectedHash")); Request->SetStringField(TEXT("operation"), TEXT("quest-audit"));
+    Report = TunaSweeperSaveTool::Execute(Request);
+    if (TestTrue(TEXT("Recheck succeeds"), Report->GetBoolField(TEXT("ok"))))
+        TestTrue(TEXT("Recheck clears issues and hides fix"), Report->GetArrayField(TEXT("issues")).IsEmpty() && !Report->GetBoolField(TEXT("canFix")));
+    Request->SetStringField(TEXT("operation"), TEXT("quest-fix")); Request->SetStringField(TEXT("expectedHash"), Report->GetStringField(TEXT("sourceHash")));
+    UWorld* World = UWorld::CreateWorld(EWorldType::PIE, false);
+    FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::PIE); Context.SetCurrentWorld(World);
+    TestEqual(TEXT("Fix blocked while playing"), TunaSweeperSaveTool::Execute(Request)->GetStringField(TEXT("code")), FString(TEXT("game_running")));
+    World->DestroyWorld(false); GEngine->DestroyWorldContext(World); World->RemoveFromRoot();
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperQuestCheatGraphTest, "TunaSweeper.QuestCheat.Ancestors",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaSweeperQuestCheatGraphTest::RunTest(const FString& Parameters)

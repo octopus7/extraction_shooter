@@ -648,3 +648,14 @@ ui.quest_cheat.state.available,수락 가능,Available,受注可能
 ui.quest_cheat.state.accepted,진행 중,In progress,進行中
 ui.quest_cheat.state.reward,보상 대기,Reward pending,報酬待ち
 ui.quest_cheat.state.completed,보상 완료,Reward claimed,報酬受取済み
+ui.quest_cheat.check,검사,Check,検査
+ui.quest_cheat.fix,Fix,Fix,修正
+ui.quest_cheat.audit.clean,검사 완료: 선행 퀘스트 진행에 문제가 없습니다.,Check complete: no prerequisite progress issues.,検査完了：前提クエストの進行に問題はありません。
+ui.quest_cheat.audit.incomplete,{0} [{1}]: 선행 {2} [{3}]가 보상 완료되지 않았습니다. 현재 상태: {4}.,{0} [{1}]: prerequisite {2} [{3}] has not had its reward claimed. Current state: {4}.,{0} [{1}]：前提 {2} [{3}] の報酬が未受取です。現在：{4}。
+ui.quest_cheat.audit.cycle,{0} [{1}] → {2} [{3}]: 선행 연결이 순환합니다. 정의를 수정해야 합니다.,{0} [{1}] → {2} [{3}]: prerequisite cycle. Correct the quest definitions.,{0} [{1}] → {2} [{3}]：前提が循環しています。定義を修正してください。
+ui.quest_cheat.audit.missing,{0} [{1}]: 선행 ID {2}의 정의가 없습니다. 정의를 수정해야 합니다.,{0} [{1}]: prerequisite ID {2} has no definition. Correct the quest definitions.,{0} [{1}]：前提ID {2} の定義がありません。定義を修正してください。
+ui.quest_cheat.audit.unknown,진행 기록이 있는 퀘스트 {0}의 정의가 없습니다. 자동 수정할 수 없습니다.,Quest {0} has saved progress but no definition. Automatic repair is unavailable.,進行記録のあるクエスト {0} の定義がありません。自動修正できません。
+ui.quest_cheat.audit.unaccepted,미수락,Not accepted,未受注
+ui.quest_cheat.audit.blocked,자동 수정할 수 없는 문제가 있어 Fix를 사용할 수 없습니다.,Fix is unavailable because an issue cannot be repaired automatically.,自動修正できない問題があるため修正は使用できません。
+ui.quest_cheat.audit.stale,슬롯 또는 저장 내용이 변경됐습니다. 다시 검사하세요.,The slot or save has changed. Run Check again.,スロットまたは保存内容が変更されました。再検査してください。
+ui.quest_cheat.audit.fixed,선행 퀘스트 {0}개를 완료 처리했습니다. 보상은 지급하지 않았습니다.,Completed {0} prerequisite quests without granting rewards.,前提クエスト {0} 件を完了しました。報酬は付与していません。
