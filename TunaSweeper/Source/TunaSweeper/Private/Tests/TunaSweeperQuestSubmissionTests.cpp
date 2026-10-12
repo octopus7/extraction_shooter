@@ -161,6 +161,12 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Panel->InitializeQuest(201, TEXT("provider.recipient"));
 	TestEqual(TEXT("Completion NPC has no bulk acceptance candidates"), Panel->GetAcceptAllQuestIds().Num(), 0);
 	TestFalse(TEXT("Completion NPC cannot accept giver quest"), Panel->IsPrimaryButtonEnabled(201));
+	TArray<FTunaSweeperQuestDefinition> VisibleOffers;
+	Panel->BuildFilteredQuestDefinitions(*Quests, VisibleOffers);
+	TestTrue(TEXT("Completion NPC hides another giver's unaccepted quest"), VisibleOffers.IsEmpty());
+	TestEqual(TEXT("Completion NPC available badge excludes another giver"),
+		Panel->CountVisibleQuestsForFilter(UTunaSweeperQuestWidget::EQuestListFilter::Available), 0);
+
 	Panel->InitializeQuest(201, TEXT("provider.mole"));
 	TestTrue(TEXT("Giver still offers quest with separate completion NPC"),
 		Quests->TryResolveQuestForProvider(TEXT("provider.mole"), 0, ResolvedQuest));
@@ -179,6 +185,11 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	Offered.RequiredCompletedQuestIds = { 203 };
 	Quests->QuestDefinitions.Add(204, Offered);
 	TestEqual(TEXT("Only eligible quests for this NPC count"), Panel->GetAcceptAllQuestIds().Num(), 2);
+	Panel->BuildFilteredQuestDefinitions(*Quests, VisibleOffers);
+	TestEqual(TEXT("NPC offer list contains only its two eligible quests"), VisibleOffers.Num(), 2);
+	TestEqual(TEXT("NPC available badge matches offer list"),
+		Panel->CountVisibleQuestsForFilter(UTunaSweeperQuestWidget::EQuestListFilter::Available), 2);
+
 	Panel->RefreshQuestView();
 	TestEqual(TEXT("Two available quests show bulk action"), Panel->AcceptAllButton->GetVisibility(), ESlateVisibility::Visible);
 	Panel->InitializeQuest(201);

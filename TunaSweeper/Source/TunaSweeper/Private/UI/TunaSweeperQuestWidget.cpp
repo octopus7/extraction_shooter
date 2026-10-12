@@ -1056,6 +1056,7 @@ int32 UTunaSweeperQuestWidget::CountVisibleQuestsForFilter(EQuestListFilter Filt
 		case EQuestListFilter::Available:
 			if (bShowAvailableTab &&
 				State == ETunaSweeperQuestState::Available &&
+				(InteractionProviderId.IsNone() || QuestDefinition.ProviderId == InteractionProviderId) &&
 				QuestSubsystem->CanAcceptQuest(QuestDefinition.QuestId))
 			{
 				++Count;
@@ -1246,6 +1247,7 @@ bool UTunaSweeperQuestWidget::IsQuestVisibleInActiveFilter(
 	case EQuestListFilter::Available:
 		return bShowAvailableTab &&
 			State == ETunaSweeperQuestState::Available &&
+			(InteractionProviderId.IsNone() || QuestDefinition.ProviderId == InteractionProviderId) &&
 			QuestSubsystem.CanAcceptQuest(QuestDefinition.QuestId);
 	case EQuestListFilter::InProgress:
 		return State == ETunaSweeperQuestState::Accepted || State == ETunaSweeperQuestState::RewardAvailable;
