@@ -44,6 +44,7 @@ public:
 		int32& OutFocusedIndex) const;
 
 private:
+	friend class FTunaSweeperQuestLockerTest;
 	void RefreshFocusedInteractable();
 	void GatherCandidateInteractablesForOwner(
 		const AActor* Owner,

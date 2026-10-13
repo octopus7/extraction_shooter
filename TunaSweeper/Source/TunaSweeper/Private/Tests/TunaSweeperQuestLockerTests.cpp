@@ -16,10 +16,14 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "Components/Button.h"
+#include "Component/TunaSweeperQuestMarkerComponent.h"
+#include "Player/TunaSweeperPlayerController.h"
+#include "GameFramework/Pawn.h"
 
 namespace TunaSweeperQuestData
 {
 	bool ParseObjective(const TSharedPtr<FJsonObject>& JsonObject, FTunaSweeperObjectiveDefinition& OutObjective);
+	void NormalizeNpcDeliveryObjectives(FTunaSweeperQuestDefinition& Definition);
 }
 
 namespace TunaSweeperQuestLockerTests
@@ -65,6 +69,12 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
 	if (!TestNotNull(TEXT("Quest subsystem"), Quests)) return false;
 
     Quests->LoadQuestData(false);
+    TArray<FTunaSweeperQuestDefinition> LoadedDefinitions;
+    Quests->GetAllQuestDefinitions(LoadedDefinitions);
+    for (const auto& Loaded : LoadedDefinitions)
+        for (const auto& Goal : Loaded.Objectives)
+            TestFalse(TEXT("Loader normalizes NPC hand-ins"), Goal.Type == ETunaSweeperObjectiveType::ItemSubmitted &&
+                !Loaded.GetCompletionProviderId().IsNone() && Goal.TargetProviderId == Loaded.GetCompletionProviderId());
     Quests->QuestDefinitions.Reset();
     Quests->QuestProgressById.Reset();
     Game->ItemInstancesByUid.Reset();
@@ -74,7 +84,7 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     Game->StorageSlots[0].ItemUid = Stored;
     FTunaSweeperQuestDefinition Quest;
     Quest.QuestId = 99001;
-    Quest.ProviderId = TEXT("provider.test");
+    Quest.ProviderId = TEXT("provider.mole");
     FTunaSweeperObjectiveDefinition Objective;
     Objective.ObjectiveId = TEXT("supply");
     Objective.Type = ETunaSweeperObjectiveType::ItemSubmitted;
@@ -82,6 +92,14 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     Objective.RequiredCount = 1;
     Objective.TargetProviderId = Quest.ProviderId;
     Quest.Objectives.Add(Objective);
+    auto MixedDefinition = Quest;
+    MixedDefinition.CompletionProviderId = TEXT("provider.recipient");
+    MixedDefinition.Objectives[0].TargetProviderId = MixedDefinition.CompletionProviderId;
+    MixedDefinition.Objectives.Add(Objective);
+    MixedDefinition.Objectives[1].TargetProviderId = TEXT("delivery.destination");
+    TunaSweeperQuestData::NormalizeNpcDeliveryObjectives(MixedDefinition);
+    TestEqual(TEXT("Explicit completion NPC hand-in normalized"), MixedDefinition.Objectives[0].Type, ETunaSweeperObjectiveType::ItemPossessed);
+    TestEqual(TEXT("World delivery remains submitted at destination"), MixedDefinition.Objectives[1].Type, ETunaSweeperObjectiveType::ItemSubmitted);
     Quests->QuestDefinitions.Add(Quest.QuestId, Quest);
     Quests->SetQuestState(Quest.QuestId, ETunaSweeperQuestState::Accepted);
     int32 Submitted = 0;
@@ -103,7 +121,8 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
 
     Quests->QuestDefinitions.Reset(); Quests->QuestProgressById.Reset();
     Quest.QuestId = 99002;
-    Quest.Objectives[0].Type = ETunaSweeperObjectiveType::ItemPossessed;
+    TunaSweeperQuestData::NormalizeNpcDeliveryObjectives(Quest);
+    TestEqual(TEXT("Legacy NPC delivery uses ownership readiness"), Quest.Objectives[0].Type, ETunaSweeperObjectiveType::ItemPossessed);
     Quest.Rewards.Items = {Reward};
     Quests->QuestDefinitions.Add(Quest.QuestId, Quest);
     TestTrue(TEXT("Quest can be accepted with an already owned item"), Quests->AcceptQuest(Quest.QuestId));
@@ -116,9 +135,30 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Storage ownership makes quest ready"), Quests->CanClaimQuestReward(Quest.QuestId));
     TestFalse(TEXT("Wrong provider cannot submit possession quest"), Quests->TrySubmitItemsToProvider(TEXT("provider.wrong"), Submitted, false));
     TestTrue(TEXT("Correct provider finds possession quest"), Quests->TrySubmitItemsToProvider(Quest.ProviderId, Submitted, false));
+    World->InitializeActorsForPlay(FURL());
+    auto* Npc = World->SpawnActor<ATunaSweeperMoleCompanionActor>();
+    auto* Controller = World->SpawnActor<ATunaSweeperPlayerController>();
+    auto* Pawn = World->SpawnActor<APawn>();
+    if (!TestNotNull(TEXT("Delivery NPC"), Npc) || !TestNotNull(TEXT("Controller"), Controller) || !TestNotNull(TEXT("Pawn"), Pawn)) return false;
+    Controller->Possess(Pawn);
+    Npc->DispatchBeginPlay();
+    auto* Marker = Npc->FindComponentByClass<UTunaSweeperQuestMarkerComponent>();
+    TestTrue(TEXT("Owned item shows gold quest notice"), Marker && Marker->IsVisible());
+    auto* Interactions = World->GetSubsystem<UTunaSweeperInteractionSubsystem>();
+    auto* Interactable = Npc->FindComponentByClass<UTunaSweeperInteractableComponent>();
+    if (!TestNotNull(TEXT("Interactions"), Interactions) || !TestNotNull(TEXT("Quest interactable"), Interactable)) return false;
+    TestTrue(TEXT("NPC quest interaction handled"), Interactions->HandleQuestInteraction(Interactable, Pawn));
+    TestEqual(TEXT("Interaction must not claim reward"), Quests->GetQuestState(Quest.QuestId), ETunaSweeperQuestState::RewardAvailable);
+    TestFalse(TEXT("Interaction must not consume the delivery item"), Game->StorageSlots[0].IsEmpty());
+    TestEqual(TEXT("Interaction must not grant an item reward"), Game->CountInventoryItemById(3004), 0);
+    auto* Panel = CreateWidget<UTunaSweeperQuestWidget>(Game.Get());
+    if (!TestNotNull(TEXT("Quest reward UI"), Panel)) return false;
+    Panel->InitializeQuest(Quest.QuestId, Quest.ProviderId);
+    TestTrue(TEXT("Reward button enabled only in matching NPC UI"), Panel->IsPrimaryButtonEnabled(Quest.QuestId));
     bool Reentered = false;
     const auto Handle = Game->OnInventoryStateChanged.AddLambda([&] { Reentered |= Quests->ClaimQuestReward(Quest.QuestId); });
-    TestTrue(TEXT("Submission and return reward commit"), Quests->ClaimQuestReward(Quest.QuestId));
+    Panel->HandlePrimaryButtonClicked();
+    TestEqual(TEXT("Explicit UI reward click completes delivery"), Quests->GetQuestState(Quest.QuestId), ETunaSweeperQuestState::RewardCompleted);
     Game->OnInventoryStateChanged.Remove(Handle);
     TestFalse(TEXT("Inventory observer cannot double claim"), Reentered);
     TestTrue(TEXT("Submission consumes from storage"), Game->StorageSlots[0].IsEmpty());
@@ -159,6 +199,7 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     Quest.QuestId = 99005; Quest.Objectives.SetNum(1);
     Quests->QuestDefinitions.Add(Quest.QuestId, Quest);
     FTunaSweeperNumericQuestProgressSaveData Legacy;
+    Legacy.bOwnershipReadinessRecorded = true;
     Legacy.QuestId = Quest.QuestId; Legacy.State = ETunaSweeperQuestState::RewardAvailable;
     FTunaSweeperObjectiveProgressSaveData LegacyCount;
     LegacyCount.ObjectiveId = Quest.Objectives[0].ObjectiveId; LegacyCount.CurrentCount = 1;
@@ -168,13 +209,31 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     Game->CompleteInventoryStateInitialization();
     TestFalse(TEXT("Loaded stale acquisition completion is not ownership"), Quests->CanClaimQuestReward(Quest.QuestId));
 
+    Legacy.bOwnershipReadinessRecorded = false;
+    Quests->LoadQuestProgressFromSave({Legacy}, 0, 0);
+    TestTrue(TEXT("Old submitted items preserve completion without owning them again"), Quests->CanClaimQuestReward(Quest.QuestId));
+    const auto Migrated = Quests->QuestProgressById.FindChecked(Quest.QuestId);
+    TestTrue(TEXT("Migrated progress records ownership version"), Migrated.bOwnershipReadinessRecorded);
+    Quests->LoadQuestProgressFromSave({Migrated}, 0, 0);
+    TestTrue(TEXT("Submitted credit survives another load"), Quests->ClaimQuestReward(Quest.QuestId));
+
     auto* Save = NewObject<UTunaSweeperSaveGame>();
+    Save->NumericQuestProgressStates = {Migrated};
     Save->PendingQuestRewards = {Reward};
     TArray<uint8> Bytes;
     TestTrue(TEXT("Escrow serializes with save"), UGameplayStatics::SaveGameToMemory(Save, Bytes));
     auto* Restored = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
     if (TestNotNull(TEXT("Escrow save roundtrip"), Restored))
     {
+        TestEqual(TEXT("Quest progress roundtrip"), Restored->NumericQuestProgressStates.Num(), 1);
+        if (Restored->NumericQuestProgressStates.Num() == 1)
+        {
+            const auto& RestoredQuest = Restored->NumericQuestProgressStates[0];
+            TestTrue(TEXT("Ownership version persists"), RestoredQuest.bOwnershipReadinessRecorded);
+            TestEqual(TEXT("Submitted objective persists"), RestoredQuest.ObjectiveProgress.Num(), 1);
+            if (RestoredQuest.ObjectiveProgress.Num() == 1)
+                TestEqual(TEXT("Submitted credit persists"), RestoredQuest.ObjectiveProgress[0].SubmittedItemCount, 1);
+        }
         TestEqual(TEXT("Pending reward persists"), Restored->PendingQuestRewards.Num(), 1);
         if (Restored->PendingQuestRewards.Num() == 1)
         { TestEqual(TEXT("Item ID persists"), Restored->PendingQuestRewards[0].ItemId, 3004); TestEqual(TEXT("Quantity persists"), Restored->PendingQuestRewards[0].Quantity, 1); }

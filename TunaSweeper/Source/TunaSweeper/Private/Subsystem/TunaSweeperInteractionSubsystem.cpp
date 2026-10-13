@@ -825,18 +825,7 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			int32 SubmittedQuest = 0;
-			if (Quests->TrySubmitItemsToProvider(ProviderId, SubmittedQuest))
-			{
-				const FTunaSweeperQuestDefinition* Definition = Quests->FindQuestDefinition(SubmittedQuest);
-				if (Definition && !ProviderId.IsNone() && Definition->GetCompletionProviderId() == ProviderId &&
-					Quests->CanClaimQuestReward(SubmittedQuest))
-				{
-					if (Quests->ClaimQuestReward(SubmittedQuest))
-						TunaPlayerController->PlayQuestPresentation(SubmittedQuest, ETunaSweeperQuestPresentationTrigger::OnRewardClaim);
-					else TunaPlayerController->OpenQuestPanel(SubmittedQuest, ProviderId);
-				}
-				return true;
-			}
+			// Opening an NPC panel must not consume delivery items or claim rewards.
 			if (Quests->TryGetItemSubmissionQuestForProvider(ProviderId, SubmittedQuest))
 			{
 				TunaPlayerController->OpenQuestPanel(SubmittedQuest, ProviderId);

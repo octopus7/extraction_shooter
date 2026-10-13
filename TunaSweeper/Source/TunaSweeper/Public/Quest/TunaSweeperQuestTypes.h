@@ -244,6 +244,9 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FTunaSweeperQuestRewardDefinition Rewards;
 
+	// Runtime metadata for migrating previously submitted NPC items.
+	TSet<FName> LegacyNpcSubmissionObjectiveIds;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperQuestPresentationStep> AcceptPresentationSteps;
 
@@ -261,6 +264,9 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveProgressSaveData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest", meta = (ClampMin = "0", UIMin = "0"))
 	int32 CurrentCount = 0;
+
+	UPROPERTY()
+	int32 SubmittedItemCount = 0;
 };
 
 // Original serialized schema retained only for old save migration.
@@ -286,6 +292,9 @@ struct TUNASWEEPER_API FTunaSweeperNumericQuestProgressSaveData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	int32 QuestId = 0;
+
+	UPROPERTY()
+	bool bOwnershipReadinessRecorded = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	ETunaSweeperQuestState State = ETunaSweeperQuestState::Available;

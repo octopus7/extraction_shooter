@@ -97,6 +97,7 @@ protected:
 
 private:
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperQuestLockerTest;
 	FName InteractionProviderId = NAME_None;
 
 	UFUNCTION()

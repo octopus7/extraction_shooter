@@ -33,6 +33,22 @@ namespace TunaSweeperQuestProviders
 
 namespace TunaSweeperQuestData
 {
+	void NormalizeNpcDeliveryObjectives(FTunaSweeperQuestDefinition& Definition)
+	{
+		const FName Recipient = Definition.GetCompletionProviderId();
+		if (Recipient.IsNone()) return;
+		for (auto& Objective : Definition.Objectives)
+		{
+			// NPC hand-ins become ready from ownership and consume at explicit reward claim.
+			// World-destination deliveries keep their separate submission interaction.
+			if (Objective.Type == ETunaSweeperObjectiveType::ItemSubmitted && Objective.TargetProviderId == Recipient)
+			{
+				Definition.LegacyNpcSubmissionObjectiveIds.Add(Objective.ObjectiveId);
+				Objective.Type = ETunaSweeperObjectiveType::ItemPossessed;
+			}
+		}
+	}
+
 	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
 	{
 		return Row.IsValidIndex(CellIndex)
@@ -613,7 +629,10 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
         if (Objective.Type != ETunaSweeperObjectiveType::ItemPossessed) continue;
         FTunaSweeperItemStack Requirement;
         Requirement.ItemId = Objective.ItemId;
-        Requirement.Quantity = Objective.RequiredCount;
+        const auto& Progress = GetOrCreateQuestProgress(QuestId);
+        const auto* Saved = Progress.ObjectiveProgress.FindByPredicate([&](const auto& Value) { return Value.ObjectiveId == Objective.ObjectiveId; });
+        Requirement.Quantity = Objective.RequiredCount - (Saved ? FMath::Clamp(Saved->SubmittedItemCount, 0, Objective.RequiredCount) : 0);
+        if (Requirement.Quantity == 0) continue;
         Requirements.Add(Requirement);
     }
     if (!Requirements.IsEmpty() && (!TunaGameInstance || !TunaGameInstance->TryConsumeQuestItems(Requirements, [] {}, false))) return false;
@@ -1083,6 +1102,7 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 		FTunaSweeperNumericQuestProgressSaveData LoadedProgress;
 		LoadedProgress.QuestId = SavedProgress.QuestId;
 		LoadedProgress.State = SavedProgress.State;
+		LoadedProgress.bOwnershipReadinessRecorded = true;
 
 		for (const FTunaSweeperObjectiveDefinition& Objective : Definition->Objectives)
 		{
@@ -1098,6 +1118,11 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 			LoadedObjectiveProgress.CurrentCount = SavedObjectiveProgress
 				? FMath::Clamp(SavedObjectiveProgress->CurrentCount, 0, FMath::Max(1, Objective.RequiredCount))
 				: 0;
+			if (SavedObjectiveProgress && Objective.Type == ETunaSweeperObjectiveType::ItemPossessed)
+			{
+				const bool bLegacySubmission = !SavedProgress.bOwnershipReadinessRecorded && Definition->LegacyNpcSubmissionObjectiveIds.Contains(Objective.ObjectiveId);
+				LoadedObjectiveProgress.SubmittedItemCount = FMath::Clamp(bLegacySubmission ? SavedObjectiveProgress->CurrentCount : SavedObjectiveProgress->SubmittedItemCount, 0, Objective.RequiredCount);
+			}
 			LoadedProgress.ObjectiveProgress.Add(LoadedObjectiveProgress);
 		}
 
@@ -1219,6 +1244,8 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 				}
 			}
 		}
+
+		TunaSweeperQuestData::NormalizeNpcDeliveryObjectives(Definition);
 
 		const TSharedPtr<FJsonObject>* RewardObject = nullptr;
 		if (QuestObject->TryGetObjectField(TEXT("rewards"), RewardObject) && RewardObject && RewardObject->IsValid())
@@ -1682,6 +1709,7 @@ FTunaSweeperNumericQuestProgressSaveData& UTunaSweeperQuestSubsystem::GetOrCreat
 	{
 		FTunaSweeperNumericQuestProgressSaveData NewProgress;
 		NewProgress.QuestId = QuestId;
+		NewProgress.bOwnershipReadinessRecorded = true;
 
 		if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
 		{

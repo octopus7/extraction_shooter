@@ -31,8 +31,6 @@ bool UTunaSweeperQuestSubsystem::ReconcilePossessionObjectives(bool bShowComplet
             if (Objective.Type != ETunaSweeperObjectiveType::ItemPossessed) continue;
             if (!RemainingByItem.Contains(Objective.ItemId)) RemainingByItem.Add(Objective.ItemId, Game->CountQuestSubmissionItemById(Objective.ItemId));
             int32& Available = RemainingByItem.FindChecked(Objective.ItemId);
-            const int32 Count = FMath::Min(Available, Objective.RequiredCount);
-            Available -= Count;
             auto* Saved = Progress.ObjectiveProgress.FindByPredicate([&](const auto& Value) { return Value.ObjectiveId == Objective.ObjectiveId; });
             if (!Saved)
             {
@@ -41,6 +39,10 @@ bool UTunaSweeperQuestSubsystem::ReconcilePossessionObjectives(bool bShowComplet
                 Progress.ObjectiveProgress.Add(New);
                 Saved = &Progress.ObjectiveProgress.Last();
             }
+            const int32 Credit = FMath::Clamp(Saved->SubmittedItemCount, 0, Objective.RequiredCount);
+            const int32 Owned = FMath::Min(Available, Objective.RequiredCount - Credit);
+            Available -= Owned;
+            const int32 Count = Credit + Owned;
             bChanged |= Saved->CurrentCount != Count;
             Saved->CurrentCount = Count;
         }
