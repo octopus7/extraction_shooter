@@ -552,3 +552,9 @@ Snapshots are independent, exact-byte copies under `Saved/DeveloperSaveSnapshots
 Restore requires a readable, valid current slot and a CRC-valid snapshot whose exact save class, dataset, slot and supported save version match. It rejects path traversal and rechecks current bytes before writing, retains the current slot as a separate automatic backup, and uses the existing candidate/previous fail-closed save writer. Restored gameplay fields and original saved time are retained. Load the selected slot in the next play session to use the restored state; there is no live in-memory replacement. A pre-restore backup can be selected to undo a restore.
 
 The snapshot includes all gameplay-slot fields (inventory, storage, pending rewards, quests and world progress). Account-global achievements, outfit unlocks, language/settings and other slots are not captured or rolled back. These developer snapshots are outside the active SaveGames/cloud-save root and are not packaged or tracked in Git.
+
+## Quest-gated NPC food exchange and item reward notices
+
+- Optional resident NPC feeding is unlocked from the existing prerequisite quest RewardCompleted state; no separate unlock flag is saved.
+- A feeding exchange consumes exactly one carried item (inventory or auxiliary bag, never storage) and grants its configured reward before inventory notifications and the normal item-state save boundary. Invalid or unavailable exchanges leave inventory unchanged. Full inventory uses the existing persisted PendingQuestRewards receiving storage.
+- Item reward notifications use an independent transient FIFO channel. Each reward entry displays for one second; the queue and delayed speech timers are not serialized. World cleanup discards reward notices, and NPC EndPlay cancels delayed speech. Save version and slot schema are unchanged.

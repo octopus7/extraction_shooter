@@ -144,6 +144,7 @@ private:
 	bool bReconcilingWorldProgress = false;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperQuestLockerTest;
+	friend class FTunaSweeperFeedingRewardsTest;
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperQuestArrivalTest;

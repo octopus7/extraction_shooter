@@ -29,6 +29,7 @@
 #include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Interaction/TunaSweeperWardrobeActor.h"
 #include "Interaction/TunaSweeperQuestRewardLockerActor.h"
+#include "Interaction/TunaSweeperNpcFeedingComponent.h"
 #include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -333,6 +334,10 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::ShopOpen:
 		bHandled = HandleShopOpenInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::NpcFeeding:
+		if (auto* Feeding = Cast<UTunaSweeperNpcFeedingComponent>(Interactable))
+			return Feeding->TryFeed(InstigatorPawn);
+		return false;
 	case ETunaSweeperInteractionType::QuestRewardLockerOpen:
 	{
 		ATunaSweeperQuestRewardLockerActor* Locker = Cast<ATunaSweeperQuestRewardLockerActor>(Interactable->GetOwner());
@@ -439,6 +444,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return false;
 	}
 
+	if (const auto* Feeding = Cast<UTunaSweeperNpcFeedingComponent>(Interactable); Feeding && !Feeding->IsUnlocked()) return false;
 	const auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner());
 	if (Armory && !ATunaSweeperDebugArmoryActor::IsArmoryEnabled()) return false;
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DebugArmoryOpen)

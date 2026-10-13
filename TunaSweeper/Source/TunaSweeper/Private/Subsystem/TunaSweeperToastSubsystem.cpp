@@ -1,18 +1,23 @@
 #include "Subsystem/TunaSweeperToastSubsystem.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Engine/World.h"
+#include "Engine/Texture2D.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperToastWidget.h"
 
 void UTunaSweeperToastSubsystem::Deinitialize()
 {
+	FWorldDelegates::OnWorldCleanup.Remove(WorldCleanupHandle);
 	ClearToasts();
 	Super::Deinitialize();
 }
 
 void UTunaSweeperToastSubsystem::Tick(float DeltaTime)
 {
+	TickRewardToasts(DeltaTime);
 	if (!bToastActive)
 	{
 		StartNextToast();
@@ -37,7 +42,7 @@ TStatId UTunaSweeperToastSubsystem::GetStatId() const
 
 bool UTunaSweeperToastSubsystem::IsTickable() const
 {
-	return !HasAnyFlags(RF_ClassDefaultObject) && (bToastActive || ToastQueue.Num() > 0);
+	return !HasAnyFlags(RF_ClassDefaultObject) && (bToastActive || ToastQueue.Num() > 0 || bRewardActive || RewardQueue.Num() > 0);
 }
 
 bool UTunaSweeperToastSubsystem::ShowToast(const FText& MessageText, float DurationSeconds)
@@ -109,6 +114,7 @@ bool UTunaSweeperToastSubsystem::ShowQuestAcceptedToast(const FText& QuestTitle)
 
 void UTunaSweeperToastSubsystem::ClearToasts()
 {
+	ClearRewardToasts();
 	ToastQueue.Reset();
 	bToastActive = false;
 	ActiveToastElapsedSeconds = 0.0f;
@@ -223,4 +229,69 @@ FText UTunaSweeperToastSubsystem::ResolveToastText(FName StringKey, const FText&
 	return TunaGameInstance
 		? TunaGameInstance->ResolveLocalizedText(StringKey, FallbackText)
 		: FallbackText;
+}
+
+void UTunaSweeperToastSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+    Super::Initialize(Collection);
+    WorldCleanupHandle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::HandleWorldCleanup);
+}
+
+void UTunaSweeperToastSubsystem::HandleWorldCleanup(UWorld* World, bool, bool)
+{
+    if (World && World->IsGameWorld() && World->GetGameInstance() == GetGameInstance()) ClearRewardToasts();
+}
+
+bool UTunaSweeperToastSubsystem::ShowItemRewardToast(int32 ItemId, int32 Quantity)
+{
+    FTunaSweeperItemDefinition Definition;
+    auto* Game = GetGameInstance();
+    auto* Data = Game ? Game->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+    if (Quantity <= 0 || !Data || !Data->TryGetItemDefinition(ItemId, Definition)) return false;
+    RewardQueue.Add({ItemId, Quantity});
+    if (!bRewardActive) StartNextRewardToast();
+    return true;
+}
+
+bool UTunaSweeperToastSubsystem::StartNextRewardToast()
+{
+    if (bRewardActive || RewardQueue.IsEmpty()) return false;
+    auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+    if (!Game || !Game->GetWorld()) return false;
+    if (!RewardToastWidget) RewardToastWidget = CreateWidget<UTunaSweeperToastWidget>(Game, UTunaSweeperToastWidget::StaticClass());
+    if (!RewardToastWidget) return false;
+    if (!RewardToastWidget->IsInViewport()) RewardToastWidget->AddToViewport(ToastViewportZOrder + 1);
+    RewardToastWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+    ActiveReward = RewardQueue[0];
+    RewardQueue.RemoveAt(0);
+    auto* Data = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+    FText Name;
+    FTunaSweeperItemDefinition Definition;
+    Data->TryGetItemNameText(ActiveReward.ItemId, Game->GetCurrentTextLanguage(), Name);
+    Data->TryGetItemDefinition(ActiveReward.ItemId, Definition);
+    RewardToastWidget->SetRewardPresentation(
+        FText::Format(Game->ResolveLocalizedText(TEXT("ui.toast.item_reward"), FText::GetEmpty()), Name, FText::AsNumber(ActiveReward.Quantity)),
+        LoadObject<UTexture2D>(nullptr, *Data->BuildItemIconObjectPath(Definition)));
+    RewardToastWidget->SetToastOpacity(1.0f);
+    RewardElapsed = 0.0f;
+    bRewardActive = true;
+    return true;
+}
+
+void UTunaSweeperToastSubsystem::TickRewardToasts(float DeltaTime)
+{
+    if (!bRewardActive) { StartNextRewardToast(); return; }
+    RewardElapsed += FMath::Max(0.0f, DeltaTime);
+    if (RewardElapsed < 1.0f) return;
+    bRewardActive = false;
+    ActiveReward = {};
+    if (RewardToastWidget) RewardToastWidget->SetToastOpacity(0.0f);
+    // Each queued item receives its own full second, even after a long frame.
+    StartNextRewardToast();
+}
+
+void UTunaSweeperToastSubsystem::ClearRewardToasts()
+{
+    RewardQueue.Reset(); ActiveReward = {}; RewardElapsed = 0.0f; bRewardActive = false;
+    if (RewardToastWidget) { RewardToastWidget->RemoveFromParent(); RewardToastWidget = nullptr; }
 }

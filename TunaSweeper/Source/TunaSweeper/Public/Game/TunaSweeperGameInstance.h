@@ -273,6 +273,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperQuestLockerTest;
+	friend class FTunaSweeperFeedingRewardsTest;
 	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestWorldActorsTest;
 	friend class FTunaSweeperShopQuestUnlockTest;
@@ -694,6 +695,8 @@ public:
 	// Consume the whole batch, then commit related state before inventory observers/save requests run.
 	bool TryConsumeInventoryItems(const TArray<FTunaSweeperItemStack>& Requirements, TFunctionRef<void()> OnConsumed);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	bool ExchangeCarriedItemForReward(int32 FoodItemId, int32 RewardItemId);
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards, bool bNotifyAndSave = true);
 

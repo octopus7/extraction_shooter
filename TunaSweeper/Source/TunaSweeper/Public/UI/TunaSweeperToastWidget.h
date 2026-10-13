@@ -7,6 +7,7 @@
 class UBorder;
 class UImage;
 class UTextBlock;
+class UTexture2D;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperToastWidget : public UUserWidget
@@ -16,6 +17,7 @@ class TUNASWEEPER_API UTunaSweeperToastWidget : public UUserWidget
 public:
 	void SetToastMessage(const FText& MessageText);
 	void SetToastOpacity(float InOpacity);
+	void SetRewardPresentation(const FText& Message, UTexture2D* Texture);
 
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
@@ -32,4 +34,5 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> ToastText;
+	UPROPERTY(Transient) TObjectPtr<UImage> RewardIcon;
 };

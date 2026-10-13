@@ -13,13 +13,21 @@ struct FTunaSweeperToastRequest
 	float DurationSeconds = 2.0f;
 };
 
+struct FTunaSweeperItemRewardToastRequest
+{
+	int32 ItemId = 0;
+	int32 Quantity = 0;
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperToastSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
 
 public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+	bool ShowItemRewardToast(int32 ItemId, int32 Quantity);
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
 	virtual bool IsTickable() const override;
@@ -43,6 +51,17 @@ public:
 	void ClearToasts();
 
 private:
+	friend class FTunaSweeperFeedingRewardsTest;
+	bool StartNextRewardToast();
+	void TickRewardToasts(float DeltaTime);
+	void ClearRewardToasts();
+	void HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
+	UPROPERTY(Transient) TObjectPtr<UTunaSweeperToastWidget> RewardToastWidget;
+	TArray<FTunaSweeperItemRewardToastRequest> RewardQueue;
+	FTunaSweeperItemRewardToastRequest ActiveReward;
+	float RewardElapsed = 0.0f;
+	bool bRewardActive = false;
+	FDelegateHandle WorldCleanupHandle;
 	bool EnsureToastWidget();
 	bool StartNextToast();
 	void FinishActiveToast();

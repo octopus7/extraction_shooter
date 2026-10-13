@@ -5,6 +5,8 @@
 #include "Quest/TunaSweeperQuestTypes.h"
 #include "TunaSweeperQuestPresenceNpcActor.generated.h"
 
+class UTunaSweeperNpcFeedingComponent;
+
 UENUM(BlueprintType)
 enum class ETunaSweeperQuestNpcPresenceRole : uint8
 {
@@ -19,6 +21,9 @@ class TUNASWEEPER_API ATunaSweeperQuestPresenceNpcActor : public ATunaSweeperFac
 	GENERATED_BODY()
 public:
 	ATunaSweeperQuestPresenceNpcActor();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Feeding")
+	TObjectPtr<UTunaSweeperNpcFeedingComponent> FeedingComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Presence", meta = (ClampMin = "1"))
 	int32 PresenceQuestId = 0;

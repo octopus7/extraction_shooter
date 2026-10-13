@@ -5,6 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperNpcFeedingComponent.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 ATunaSweeperQuestPresenceNpcActor::ATunaSweeperQuestPresenceNpcActor()
@@ -16,6 +17,9 @@ ATunaSweeperQuestPresenceNpcActor::ATunaSweeperQuestPresenceNpcActor()
 	BodyCollision->SetRelativeLocation(FVector(0, 0, 32));
 	QuestInteractableComponent->SetRelativeLocation(FVector(0, 0, 60));
 	QuestMarkerComponent->SetMarkerHeight(85.0f);
+	FeedingComponent = CreateDefaultSubobject<UTunaSweeperNpcFeedingComponent>(TEXT("FeedingInteraction"));
+	FeedingComponent->SetupAttachment(GetRootComponent());
+	FeedingComponent->SetRelativeLocation(FVector(0, 0, 60));
 }
 
 bool ATunaSweeperQuestPresenceNpcActor::EvaluatePresence(
@@ -57,6 +61,7 @@ void ATunaSweeperQuestPresenceNpcActor::RefreshQuestPresence()
 		Quests->CanAcceptQuest(PresenceQuestId), Quests->GetQuestState(PresenceQuestId));
 	SetActorHiddenInGame(!bPresent);
 	SetActorEnableCollision(bPresent);
+	FeedingComponent->RefreshAvailability();
 	// Interaction subsystem excludes hidden owners. Also clear markers immediately.
 	QuestInteractableComponent->SetVisibility(bPresent, true);
 	QuestInteractableComponent->SetComponentTickEnabled(bPresent);

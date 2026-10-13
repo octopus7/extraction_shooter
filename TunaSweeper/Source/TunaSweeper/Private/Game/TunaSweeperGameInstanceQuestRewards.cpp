@@ -1,4 +1,5 @@
 #include "Game/TunaSweeperGameInstance.h"
+#include "Subsystem/TunaSweeperToastSubsystem.h"
 
 int32 UTunaSweeperGameInstance::CountQuestSubmissionItemById(int32 ItemId)
 {
@@ -115,6 +116,8 @@ bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperIt
             }
         }
     }
+    if (auto* Toasts = GetSubsystem<UTunaSweeperToastSubsystem>())
+        for (const auto& Entry : Rewards) Toasts->ShowItemRewardToast(Entry.ItemId, Entry.Quantity);
     if (bNotifyAndSave && !Rewards.IsEmpty())
     {
         NotifyQuestItemMutation();
@@ -146,5 +149,29 @@ bool UTunaSweeperGameInstance::ReceivePendingQuestReward(int32 Index)
     NotifyQuestItemMutation();
     // Receiving and removal from escrow belong to the same save, including in the base.
     SaveGameStateInternal();
+    return true;
+}
+
+// Consumption and reward grant share one mutation/save boundary, including escrow overflow.
+bool UTunaSweeperGameInstance::ExchangeCarriedItemForReward(int32 FoodItemId, int32 RewardItemId)
+{
+    EnsureInventoryStateInitialized();
+    FTunaSweeperItemStack Food; Food.ItemId = FoodItemId; Food.Quantity = 1;
+    FTunaSweeperItemStack Reward; Reward.ItemId = RewardItemId; Reward.Quantity = 1;
+    if (IsCombatTestSession() || bQuestRewardTransferInProgress ||
+        !ValidateQuestItemRewards({Food, Reward}) || CountInventoryItemById(FoodItemId) < 1) return false;
+    const auto PreviousItems = ItemInstancesByUid;
+    const auto PreviousInventory = PlayerInventorySlots;
+    const auto PreviousBags = AuxiliaryBagSlots;
+    if (ConsumeInventoryAmmoByItemId(FoodItemId, 1) != 1 || !GrantQuestItemRewards({Reward}, false))
+    {
+        ItemInstancesByUid = PreviousItems;
+        PlayerInventorySlots = PreviousInventory;
+        AuxiliaryBagSlots = PreviousBags;
+        return false;
+    }
+    ClearSelectedItemIfInvalid();
+    MarkItemStateMutationForSave();
+    NotifyQuestItemMutation();
     return true;
 }

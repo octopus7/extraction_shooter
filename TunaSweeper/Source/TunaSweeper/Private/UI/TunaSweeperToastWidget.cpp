@@ -5,6 +5,7 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
+#include "Components/SizeBox.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
@@ -149,4 +150,34 @@ void UTunaSweeperToastWidget::EnsureToastLayout()
 		ToastSlot->SetSize(FVector2D(560.0f, 72.0f));
 		ToastSlot->SetZOrder(0);
 	}
+}
+
+void UTunaSweeperToastWidget::SetRewardPresentation(const FText& Message, UTexture2D* Texture)
+{
+    EnsureToastLayout();
+    if (!ToastPanel || !ToastText) return;
+    auto* Content = Cast<UOverlay>(ToastPanel->GetContent());
+    if (!Content) return;
+    if (!RewardIcon)
+    {
+        RewardIcon = WidgetTree->ConstructWidget<UImage>();
+        auto* IconFrame = WidgetTree->ConstructWidget<USizeBox>();
+        IconFrame->SetWidthOverride(36); IconFrame->SetHeightOverride(36);
+        IconFrame->SetContent(RewardIcon);
+        auto* IconSlot = Content->AddChildToOverlay(IconFrame);
+        IconSlot->SetHorizontalAlignment(HAlign_Left); IconSlot->SetVerticalAlignment(VAlign_Center);
+        IconSlot->SetPadding(FMargin(24, 0, 0, 0));
+    }
+    RewardIcon->SetBrushFromTexture(Texture);
+    ToastText->SetText(Message);
+    ToastText->SetJustification(ETextJustify::Left);
+    ToastText->SetWrapTextAt(280);
+    if (auto* TextSlot = Cast<UOverlaySlot>(ToastText->Slot)) TextSlot->SetPadding(FMargin(76, 10, 24, 10));
+    if (auto* PanelSlot = Cast<UCanvasPanelSlot>(ToastPanel->Slot))
+    {
+        PanelSlot->SetAnchors(FAnchors(1.0f, 0.30f));
+        PanelSlot->SetAlignment(FVector2D(1.0f, 0.0f));
+        PanelSlot->SetPosition(FVector2D(-32.0f, 0.0f));
+        PanelSlot->SetSize(FVector2D(400.0f, 80.0f));
+    }
 }
