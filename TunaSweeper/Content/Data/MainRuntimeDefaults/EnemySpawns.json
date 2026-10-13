@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "placement_id": 1,
+    "profile_id": "enemy.forest_gray_robot",
+    "spawn_chance": 10000,
+    "level_name": "RaidForest",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 2,
+    "profile_id": "enemy.forest_blue_robot",
+    "spawn_chance": 10000,
+    "level_name": "RaidForest",
+    "condition_id": "always"
+  }
+]

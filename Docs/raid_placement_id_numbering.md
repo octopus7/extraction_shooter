@@ -67,3 +67,5 @@ This section is a review aid, not an allocation registry. The maps and runtime d
 - Existing IDs were not recycled or renumbered for cosmetic reasons.
 
 See `Docs/raid_placement_anchors.md` for the anchor/runtime contract and JSON schema examples.
+
+For logical level `RaidForest` (`/Game/MainRaid/RaidForest`), Enemy IDs `1` (gray robot) and `2` (blue robot) are allocated near the primary power facility. Each has one anchor and a guaranteed spawn row in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`; the corresponding profiles are in `EnemySpawnProfiles.json`. These public Main defaults apply when no dataset-specific placement override exists.

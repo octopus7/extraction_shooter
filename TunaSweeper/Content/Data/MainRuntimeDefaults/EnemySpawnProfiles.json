@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "profile_id": "enemy.forest_gray_robot",
+    "enemy_class": "/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_BrightGray.BP_QuadrupedGunEnemy_BrightGray_C",
+    "combat_profile_id": "enemy.rifle_anchor",
+    "faction_id": 10,
+    "squad_id": "squad.forest_power",
+    "squad_slot": 0,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8009,
+    "weapon_item_id": 1002,
+    "ammo_item_id": 2002,
+    "reserve_ammo_count": 60,
+    "loot_loaded_ammo_deduction_ratio": 0.4,
+    "loot_loaded_ammo_flat_deduction": 2,
+    "experience_value": 65,
+    "max_health": 60.0
+  },
+  {
+    "profile_id": "enemy.forest_blue_robot",
+    "enemy_class": "/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Blue.BP_QuadrupedGunEnemy_Blue_C",
+    "combat_profile_id": "enemy.rifle_anchor",
+    "faction_id": 10,
+    "squad_id": "squad.forest_power",
+    "squad_slot": 1,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8009,
+    "weapon_item_id": 1002,
+    "ammo_item_id": 2002,
+    "reserve_ammo_count": 60,
+    "loot_loaded_ammo_deduction_ratio": 0.4,
+    "loot_loaded_ammo_flat_deduction": 2,
+    "experience_value": 65,
+    "max_health": 60.0
+  }
+]
