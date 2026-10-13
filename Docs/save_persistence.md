@@ -479,17 +479,17 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 - BeginPlay에서 저장된 퀘스트 상태를 즉시 적용하고, 퀘스트 변경·저장 불러오기·새 게임 초기화 알림으로 다시 계산한다. 기본 해금 및 조명 완료 기준은 보상 수령까지 끝난 `RewardCompleted`다.
 - 시설의 `UnlockConditions` 및 조명 컨트롤러의 `LightGroups`는 BP/레벨 저작 데이터다. 시설 서비스에서 별도 영속 데이터를 추가할 경우 해당 데이터의 저장 규칙을 별도로 정의한다. 기본 시설 템플릿의 사용 이벤트 자체는 영속 상태를 만들지 않는다.
 
-## 상점 상품 퀘스트 해금
-
-- 상품 해금은 `required_completed_quest_ids`와 기존 `NumericQuestProgressStates`의 `RewardCompleted` 상태를 조회해 계산한다. 별도 상품 해금 저장 플래그나 저장 버전 변경은 없다.
-- 잠긴 상품을 목록에서 숨겨도 재고의 원래 `ShopId`·`SlotIndex`·`ItemId` 키를 유지한다. 기존 재고 저장값을 재사용하며 해금·재잠금·저장 불러오기·상점 재개방으로 재고를 초기화하지 않는다.
-- 퀘스트 상태 복원 또는 새 게임 초기화 후 열린 상점 목록도 다시 계산하고 구매 경로는 현재 상태를 재검증한다. 기존 저장 재고가 있으므로 상품 배열 순서와 아이템 정체성을 임의로 바꾸지 않는다.
-
 ## Editor-only quest completion cheat
 
 The quest cheat edits the last selected existing save slot in the active dataset only while gameplay is stopped. It validates the complete prerequisite graph before changing `NumericQuestProgressStates`. The inclusive action completes the target and every ancestor; the prerequisites-only action preserves the target's existing state. Edited rows use `RewardCompleted` and objective counts at their required values. Tracking is cleared only when the tracked quest is among the completed IDs. Legacy numeric IDs follow the existing migration helper.
 
 No items, coins, experience, dialogue, or world-progress rewards are executed by this editor operation. Unrelated slot data remains intact. Subsequent gameplay load keeps its existing quest-derived reconciliation behavior. The offline save tool validates identity/version, compares the source hash, creates a byte-identical `.tool-backup-*` backup, and writes through the existing fail-closed save path. PIE/SIE, pending play, editor standalone, and Launcher sessions lock the UI; the mutation callback rechecks the lock and the save backend rejects live gameplay worlds. No new save fields or schema version are introduced. See [quest cheat usage](quest_cheats.md).
+
+## 상점 상품 퀘스트 해금
+
+- 상품 해금은 `required_completed_quest_ids`와 기존 `NumericQuestProgressStates`의 `RewardCompleted` 상태를 조회해 계산한다. 별도 상품 해금 저장 플래그나 저장 버전 변경은 없다.
+- 잠긴 상품을 목록에서 숨겨도 재고의 원래 `ShopId`·`SlotIndex`·`ItemId` 키를 유지한다. 기존 재고 저장값을 재사용하며 해금·재잠금·저장 불러오기·상점 재개방으로 재고를 초기화하지 않는다.
+- 퀘스트 상태 복원 또는 새 게임 초기화 후 열린 상점 목록도 다시 계산하고 구매 경로는 현재 상태를 재검증한다. 기존 저장 재고가 있으므로 상품 배열 순서와 아이템 정체성을 임의로 바꾸지 않는다.
 
 ### 저장된 월드 완료 상태를 사용하는 퀘스트 목표
 
@@ -502,6 +502,7 @@ No items, coins, experience, dialogue, or world-progress rewards are executed by
 
 - 실제 게임 월드 도착 시 숲은 `region.forest`, 마을은 `region.village`, 평원은 `region.plains`를 기존 도전과제 저장의 `ReachedLocationIds`에 기록한다. 도전과제 01·07·19의 해금은 기존 저장 경로를 사용하며 새 필드나 스키마 변경은 없다.
 - 이동 요청만으로 진입 기록을 만들지 않는다. 개발용 `RaidMap`은 이 세 지역 기록을 만들지 않으며 같은 월드의 준비 완료 알림 반복은 중복 처리하지 않는다. 이전 버전에서 기록되지 않은 방문은 다음 실제 입장 때 판정한다.
+
 
 ### 퀘스트 소유 조건과 미수령 보상 보관함
 
@@ -516,6 +517,7 @@ No items, coins, experience, dialogue, or world-progress rewards are executed by
 - 고용량 콘덴서 1개 소모와 `world.passage.raid_lift` 완료는 기존 재료 소비 트랜잭션 안에서 함께 갱신하고 저장한다. 같은 진행 ID의 리프트는 복구 상태를 공유하며 중복 수리는 차감하지 않는다. 저장 스키마를 추가하지 않는다.
 - 목적지 선택의 도착 그룹(Forest, VillageEast, VillageWest, Plains)은 게임 인스턴스의 일회성 메모리 상태다. 해당 맵의 최초 시작 지점 선택에서 소비하고, 다른 목적지·일반 이동·로드 완료·이동 실패 시 남은 요청을 지운다. 저장 슬롯에 직렬화하지 않는다.
 - 일반 이동은 전용 리프트 시작 지점을 후보에서 제외한다. 리프트 이동은 선택한 그룹만 사용하며 없는 그룹을 다른 지역이나 원점으로 대체하지 않는다. 레이드 간 인벤토리와 생존 수치 보존은 기존 이동 경로를 따른다.
+
 
 ## Editor quest cheat inspection and target reset
 
