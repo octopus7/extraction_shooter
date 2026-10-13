@@ -79,26 +79,18 @@ bool FTunaSweeperRaidLiftRepairTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Wrong part cannot repair lift"), Lift->RepairPassage(false));
     TestEqual(TEXT("Rejected repair preserves unrelated part"), Game->CountInventoryItemById(6010), 1);
     TestFalse(TEXT("Rejected repair does not unlock lift"), Lift->IsPassageUnlocked());
-    TestTrue(TEXT("Capacitors added"), Game->AddItemToFirstAvailableInventorySlot(6025, 2));
-    TestFalse(TEXT("Capacitors alone cannot repair lift"), Lift->RepairPassage(false));
-    TestEqual(TEXT("Missing magnets preserves capacitors"), Game->CountInventoryItemById(6025), 2);
     Game->ResetPlayerSlotArrays();
     TestTrue(TEXT("Electromagnets added"), Game->AddItemToFirstAvailableInventorySlot(6026, 3));
     TestFalse(TEXT("Electromagnets alone cannot repair lift"), Lift->RepairPassage(false));
     TestEqual(TEXT("Missing capacitor preserves electromagnets"), Game->CountInventoryItemById(6026), 3);
     Game->ResetPlayerSlotArrays();
     TestTrue(TEXT("Capacitors restored"), Game->AddItemToFirstAvailableInventorySlot(6025, 2));
-    TestTrue(TEXT("One electromagnet added"), Game->AddItemToFirstAvailableInventorySlot(6026, 1));
-    TestFalse(TEXT("One electromagnet is insufficient"), Lift->RepairPassage(false));
-    TestEqual(TEXT("Insufficient magnets preserves capacitors"), Game->CountInventoryItemById(6025), 2);
-    TestEqual(TEXT("Insufficient magnets preserves electromagnet"), Game->CountInventoryItemById(6026), 1);
-    TestTrue(TEXT("Additional electromagnets added"), Game->AddItemToFirstAvailableInventorySlot(6026, 2));
-    TestTrue(TEXT("One capacitor and two electromagnets repair lift"), Lift->RepairPassage(false));
+    TestTrue(TEXT("Capacitor alone repairs lift without electromagnets"), Lift->RepairPassage(false));
     TestEqual(TEXT("Exactly one capacitor is consumed"), Game->CountInventoryItemById(6025), 1);
-    TestEqual(TEXT("Exactly two electromagnets are consumed"), Game->CountInventoryItemById(6026), 1);
+    TestTrue(TEXT("Electromagnets remain available as items"), Game->AddItemToFirstAvailableInventorySlot(6026, 3));
     TestFalse(TEXT("Duplicate repair is rejected"), Lift->RepairPassage(false));
     TestEqual(TEXT("Duplicate repair preserves remaining capacitor"), Game->CountInventoryItemById(6025), 1);
-    TestEqual(TEXT("Duplicate repair preserves remaining electromagnet"), Game->CountInventoryItemById(6026), 1);
+    TestEqual(TEXT("Duplicate repair preserves unrelated electromagnets"), Game->CountInventoryItemById(6026), 3);
     FTunaSweeperWorldProgressSaveData Saved;
     TestTrue(TEXT("Repair produces persisted world progress"), Game->TryGetWorldProgressState(TEXT("world.passage.raid_lift"), Saved));
     const auto SavedProgress = Game->WorldProgressStatesById;
@@ -110,7 +102,7 @@ bool FTunaSweeperRaidLiftRepairTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Restored progression unlocks every lift instance"), Restored->IsPassageUnlocked());
     TestFalse(TEXT("Restored lift cannot consume another capacitor"), Restored->RepairPassage(false));
     TestEqual(TEXT("Restored lift preserves remaining capacitor"), Game->CountInventoryItemById(6025), 1);
-    TestEqual(TEXT("Restored lift preserves remaining electromagnet"), Game->CountInventoryItemById(6026), 1);
+    TestEqual(TEXT("Restored lift preserves unrelated electromagnets"), Game->CountInventoryItemById(6026), 3);
     return true;
 }
 #endif

@@ -178,10 +178,45 @@
   },
   {
     "id": 8018,
-    "memo_ko": "모터 1개 확정 보급",
+    "memo_ko": "모터 및 전기 관련 재료 확정 보급",
     "items": [
       {
         "item_id": 6024,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6012,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6015,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6016,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6023,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6025,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6026,
+        "quantity": 2,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6029,
         "quantity": 1,
         "drop_chance": 10000
       }

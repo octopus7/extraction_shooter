@@ -16,9 +16,6 @@ ATunaSweeperRaidLiftActor::ATunaSweeperRaidLiftActor()
     Part.ItemId = 6025;
     Part.Quantity = 1;
     RepairParts.Add(Part);
-    Part.ItemId = 6026;
-    Part.Quantity = 2;
-    RepairParts.Add(Part);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     VisualMesh->SetStaticMesh(Cube.Object);
     VisualMesh->SetRelativeLocation(FVector(0, 0, 10));
