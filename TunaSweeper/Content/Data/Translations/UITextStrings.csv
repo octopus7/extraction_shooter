@@ -602,3 +602,5 @@ ui.quest_cheat.audit.unaccepted,未接受,未接受,Не принято,Não ace
 ui.quest_cheat.audit.blocked,存在无法自动修复的问题，无法使用修复。,存在無法自動修復的問題，無法使用修復。,Есть проблема которую нельзя исправить автоматически. Исправление недоступно.,Há um problema que não pode ser corrigido automaticamente. Correção indisponível.
 ui.quest_cheat.audit.stale,存档槽或内容已改变。请重新检查。,存檔欄位或內容已變更。請重新檢查。,Слот или сохранение изменились. Выполните проверку заново.,O slot ou o arquivo salvo mudou. Verifique novamente.
 ui.quest_cheat.audit.fixed,已完成 {0} 个前置任务，未发放奖励。,已完成 {0} 個前置任務，未發放獎勵。,Завершено предыдущих заданий: {0}. Награды не выданы.,{0} missões de pré-requisito concluídas sem conceder recompensas.
+ui.quest_cheat.flavor.main,主版本,主版本,Основная,Principal
+ui.quest_cheat.flavor.demo,演示版,試玩版,Демо,Demo

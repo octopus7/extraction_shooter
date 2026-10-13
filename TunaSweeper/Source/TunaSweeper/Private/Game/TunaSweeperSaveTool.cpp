@@ -12,8 +12,6 @@
 #include "JsonObjectConverter.h"
 #include "Misc/SecureHash.h"
 #include "UObject/StrongObjectPtr.h"
-#include "Internationalization/Culture.h"
-#include "Internationalization/Internationalization.h"
 
 namespace TunaSweeperSaveTool::Internal
 {
@@ -201,8 +199,7 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 		TunaSweeperQuestCheat::FPrerequisiteAudit Audit;
 		const FString Error = TunaSweeperQuestCheat::Audit(*Save, Definitions, Audit);
 		if (!Error.IsEmpty()) return Result(Error);
-		ETunaSweeperItemTextLanguage Language = ETunaSweeperItemTextLanguage::English;
-		TunaSweeperLanguage::TryParseLanguageCode(FInternationalization::Get().GetCurrentCulture()->GetName(), Language);
+		const auto Language = ETunaSweeperItemTextLanguage::Korean;
 		auto TitleOf = [&](int32 Id)
 		{
 			FText Title;
@@ -242,8 +239,7 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 		TMap<int32, ETunaSweeperQuestState> States;
 		for (const auto& Progress : Save->NumericQuestProgressStates) States.Add(Progress.QuestId, Progress.State);
 		TArray<TSharedPtr<FJsonValue>> Rows;
-		ETunaSweeperItemTextLanguage Language = ETunaSweeperItemTextLanguage::English;
-		TunaSweeperLanguage::TryParseLanguageCode(FInternationalization::Get().GetCurrentCulture()->GetName(), Language);
+		const auto Language = ETunaSweeperItemTextLanguage::Korean;
 		for (const auto& Definition : Definitions)
 		{
 			auto Row = MakeShared<FJsonObject>();

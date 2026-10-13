@@ -39,7 +39,7 @@ namespace TunaSweeperQuestCheatEditor
 
     FText Text(const TCHAR* Key)
     {
-        return TunaSweeperEditorText::Resolve(Key);
+        return TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::Korean);
     }
 
     struct FQuestIdTypeInterface : TDefaultNumericTypeInterface<int32>
@@ -149,7 +149,7 @@ namespace TunaSweeperQuestCheatEditor
         {
             Selection = TunaSweeperSaveTool::GetQuestCheatSelection();
             SelectionText = Selection->GetBoolField(TEXT("ok"))
-                ? FText::Format(Text(TEXT("ui.quest_cheat.slot")), FText::FromString(Selection->GetStringField(TEXT("flavor"))),
+                ? FText::Format(Text(TEXT("ui.quest_cheat.slot")), Text(Selection->GetStringField(TEXT("flavor")) == TEXT("Demo") ? TEXT("ui.quest_cheat.flavor.demo") : TEXT("ui.quest_cheat.flavor.main")),
                     FText::AsNumber(Selection->GetIntegerField(TEXT("slot"))))
                 : Text(TEXT("ui.quest_cheat.selection_invalid"));
             if (QuestList) RefreshQuests(false);
