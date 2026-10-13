@@ -186,5 +186,16 @@
         "drop_chance": 10000
       }
     ]
+  },
+  {
+    "id": 8019,
+    "memo_ko": "고구마 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 3007,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]
