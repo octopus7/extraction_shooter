@@ -1055,5 +1055,17 @@
     "category_tag": "item.category.material",
     "weight_kg": 1.2,
     "max_stack_category_key": "stack.high_output_power_converter"
+  },
+  {
+    "id": 6030,
+    "name_string_key": "item.power_control_server",
+    "description_string_key": "item.power_control_server.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_PowerControlServer.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 2.0,
+    "max_stack_category_key": "stack.power_control_server"
   }
 ]

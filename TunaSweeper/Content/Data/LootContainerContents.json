@@ -219,7 +219,8 @@
         "item_id": 6029,
         "quantity": 1,
         "drop_chance": 10000
-      }
+      },
+      { "item_id": 6030, "quantity": 1, "drop_chance": 10000 }
     ]
   },
   {

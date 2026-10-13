@@ -175,3 +175,5 @@ item.toot_toot_yellow.desc,노란빛을 띠는 뿡뿡.,A yellow-tinted puff.,黄
 item.toot_toot_pink.desc,분홍빛을 띠는 뿡뿡.,A pink-tinted puff.,ピンクがかったぷぅ。
 item.high_output_power_converter,"고출력 전력 변환 모듈","High-Output Power Converter Module","高出力電力変換モジュール"
 item.high_output_power_converter.desc,"손상된 전력 변환 장치를 복구해 설비에 공급할 수 있는 전력을 늘리는 모듈.","A module that restores a damaged power converter so it can supply more power to equipment.","損傷した電力変換装置を修復し、設備へ供給できる電力を増やすモジュール。"
+item.power_control_server,"전력 제어 서버","Power Control Server","電力制御サーバー"
+item.power_control_server.desc,"감자 그림이 그려진 검은 금속 상자. 관제실의 전력 배분과 설비 제어를 담당하는 서버다.","A black metal box bearing a potato illustration. This server manages power distribution and equipment control in the control room.","ジャガイモの絵が描かれた黒い金属箱。管制室の電力配分と設備制御を担うサーバー。"

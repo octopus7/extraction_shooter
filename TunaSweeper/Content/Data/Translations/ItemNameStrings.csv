@@ -173,3 +173,5 @@ item.toot_toot_yellow.desc,带着黄色的噗噗。,帶著黃色的噗噗。,П�
 item.toot_toot_pink.desc,带着粉色的噗噗。,帶著粉紅色的噗噗。,Пуф с розовым оттенком.,Um pfft de tom rosa.
 item.high_output_power_converter,"高功率电力转换模块","高功率電力轉換模組","Модуль преобразования питания высокой мощности","Módulo conversor de energia de alta potência"
 item.high_output_power_converter.desc,"修复受损电力转换装置以提高设备供电能力的模块。","修復受損電力轉換裝置以提高設備供電能力的模組。","Модуль для ремонта преобразователя и восстановления мощности питания оборудования.","Um módulo que restaura um conversor danificado para fornecer mais energia aos equipamentos."
+item.power_control_server,"电力控制服务器","電力控制伺服器","Сервер управления питанием","Servidor de controle de energia"
+item.power_control_server.desc,"印有土豆图案的黑色金属箱。用于控制室配电和设备控制的服务器。","印有馬鈴薯圖案的黑色金屬箱。用於控制室配電和設備控制的伺服器。","Чёрный металлический ящик с рисунком картофелины. Сервер управляет распределением питания и оборудованием диспетчерской.","Uma caixa de metal preta com um desenho de batata. O servidor gerencia a distribuição de energia e os equipamentos da sala de controle."
