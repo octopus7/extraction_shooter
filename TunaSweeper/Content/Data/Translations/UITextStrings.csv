@@ -572,7 +572,7 @@ ui.quest_reward_locker.close,关闭,關閉,Закрыть,Fechar
 ui.quest_reward_locker.no_space,背包空间不足。物品仍在终端中。,背包空間不足。物品仍在終端中。,В сумке недостаточно места. Предмет остался в терминале.,Espaço insuficiente na bolsa. O item permanece no terminal.
 ui.quest_reward_locker.unnamed_item,物品,物品,Предмет,Item
 ui.quest.submit,带去,帶去,Принести,Levar
-ui.lift.title,选择升降机目的地,選擇升降機目的地,Выберите пункт назначения,Escolha o destino do elevador
+ui.lift.title,选择目的地,選擇目的地,Выберите пункт назначения,Escolha o destino
 ui.lift.choose,使用升降机,使用升降機,Использовать подъёмник,Usar elevador
 ui.lift.forest,森林,森林,Лес,Floresta
 ui.lift.village_east,村庄东侧,村莊東側,Восток деревни,Leste da vila

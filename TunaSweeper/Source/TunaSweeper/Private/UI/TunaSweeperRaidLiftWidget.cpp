@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperRaidLiftWidget.h"
 #include "Interaction/TunaSweeperRaidLiftActor.h"
 #include "Blueprint/WidgetTree.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
@@ -64,9 +65,18 @@ TSharedRef<SWidget> UTunaSweeperRaidLiftWidget::RebuildWidget()
             }
         }
         auto* Close = WidgetTree->ConstructWidget<UButton>();
-        Close->SetContent(Text(TEXT("ui.lift.cancel"), 20));
+        Close->SetContent(Text(TEXT("ui.lift.cancel"), 24));
         TunaSweeperUIStyle::ApplyButton(Close, TunaSweeperUIStyle::EButtonRole::Secondary);
-        auto* CloseSlot = Column->AddChildToVerticalBox(Close);
+        FButtonStyle CloseStyle = Close->GetStyle();
+        CloseStyle.SetNormal(FSlateRoundedBoxBrush(FLinearColor(0.65f, 0.12f, 0.28f), 12.0f));
+        CloseStyle.SetHovered(FSlateRoundedBoxBrush(FLinearColor(0.80f, 0.20f, 0.40f), 12.0f));
+        CloseStyle.SetPressed(FSlateRoundedBoxBrush(FLinearColor(0.45f, 0.07f, 0.18f), 12.0f));
+        Close->SetStyle(CloseStyle);
+        auto* CloseFrame = WidgetTree->ConstructWidget<USizeBox>();
+        CloseFrame->SetWidthOverride(180);
+        CloseFrame->SetHeightOverride(64);
+        CloseFrame->SetContent(Close);
+        auto* CloseSlot = Column->AddChildToVerticalBox(CloseFrame);
         CloseSlot->SetPadding(FMargin(8, 24));
         CloseSlot->SetHorizontalAlignment(HAlign_Center);
         Close->OnClicked.AddDynamic(this, &ThisClass::Cancel);
