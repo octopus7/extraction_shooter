@@ -757,7 +757,8 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	}
 
 	TryFlushPendingBunkerItemStateSave();
-	if (ControlledCharacter->IsAimExternallyControlled()) return;
+	// Cursor deprojection runs outside the engine look-input path, so honor its modal UI lock here too.
+	if (IsLookInputIgnored() || ControlledCharacter->IsAimExternallyControlled()) return;
 
 	FVector AimPoint;
 	FHitResult AimHit;
