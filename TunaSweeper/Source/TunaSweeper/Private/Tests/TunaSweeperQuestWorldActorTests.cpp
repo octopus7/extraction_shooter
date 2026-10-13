@@ -9,6 +9,8 @@
 #include "Engine/SpotLight.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Environment/TunaSweeperBoilingPotActor.h"
+#include "NiagaraComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperQuestFacilityActor.h"
@@ -96,7 +98,16 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	TestFalse(TEXT("Before completion point light is off"), Point->GetLightComponent()->IsVisible());
 	TestFalse(TEXT("Before completion spot light is off"), Spot->GetLightComponent()->IsVisible());
 	TestTrue(TEXT("Unlisted light is preserved"), Untouched->GetLightComponent()->IsVisible());
+	auto* Pot = World->SpawnActor<ATunaSweeperBoilingPotActor>();
+	Pot->RequiredCompletedQuestId = 910001; Pot->DispatchBeginPlay();
+	auto* Steam = Pot->FindComponentByClass<UNiagaraComponent>();
+	TestFalse(TEXT("Reward waiting keeps pot cold"), Pot->IsBoiling());
+	TestFalse(TEXT("Locked pot steam is hidden"), Steam->IsVisible());
+	Pot->SetBoiling(true);
+	TestFalse(TEXT("Direct boiling request cannot bypass kitchen lock"), Pot->IsBoiling());
 	Quests->ClaimQuestReward(910001);
+	TestTrue(TEXT("Kitchen reward starts boiling immediately"), Pot->IsBoiling());
+	TestTrue(TEXT("Kitchen reward reveals steam"), Steam->IsVisible());
 	TestTrue(TEXT("Reward event immediately unlocks facility"), Facility->IsFacilityUnlocked());
 	TestEqual(TEXT("Reward event immediately enables prompt"), Interaction->GetInteractionType(), ETunaSweeperInteractionType::QuestFacilityUse);
 	TestFalse(TEXT("Localized label resolves"), Interaction->GetInteractionDisplayName().IsEmpty());
@@ -132,10 +143,19 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	TArray<FTunaSweeperNumericQuestProgressSaveData> Saved; int32 Tracked = 0, Coins = 0;
 	Quests->ExportQuestProgressForSave(Saved, Tracked, Coins);
 	Quests->ResetQuestProgressForNewGame();
+	TestFalse(TEXT("New game stops boiling"), Pot->IsBoiling());
+	TestFalse(TEXT("New game hides residual steam"), Steam->IsVisible());
 	TestFalse(TEXT("New game immediately relocks facility"), Facility->IsFacilityUnlocked());
 	TestEqual(TEXT("New game clears prompt"), Interaction->GetInteractionType(), ETunaSweeperInteractionType::None);
 	TestFalse(TEXT("New game restores lights before state"), Point->GetLightComponent()->IsVisible());
 	Quests->LoadQuestProgressFromSave(Saved, Tracked, Coins);
+	TestTrue(TEXT("Loaded kitchen unlock restores boiling"), Pot->IsBoiling());
+	Pot->SetBoiling(false);
+	Quests->LoadQuestProgressFromSave(Saved, Tracked, Coins);
+	TestFalse(TEXT("Explicitly stopped pot stays stopped on refresh"), Pot->IsBoiling());
+	Pot->Destroy(); Pot = World->SpawnActor<ATunaSweeperBoilingPotActor>();
+	Pot->RequiredCompletedQuestId = 910001; Pot->DispatchBeginPlay();
+	TestTrue(TEXT("Pot created after save load restores boiling"), Pot->IsBoiling());
 	TestTrue(TEXT("Loading save restores facility prompt"), Interaction->GetInteractionType() == ETunaSweeperInteractionType::QuestFacilityUse);
 	TestTrue(TEXT("Loading save restores lights without another completion event"), Point->GetLightComponent()->IsVisible());
 	Controller->Destroy(); Controller = World->SpawnActor<ATunaSweeperQuestLightController>();

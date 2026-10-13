@@ -4,6 +4,8 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 
@@ -49,6 +51,7 @@ ATunaSweeperBoilingPotActor::ATunaSweeperBoilingPotActor()
 	SteamEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SteamEffect"));
 	SteamEffectComponent->SetupAttachment(SteamOrigin);
 	SteamEffectComponent->SetAutoActivate(false);
+	SteamEffectComponent->SetVisibility(false);
 	SteamEffectComponent->SetRelativeScale3D(FVector(SteamVisualScale));
 
 }
@@ -71,7 +74,23 @@ void ATunaSweeperBoilingPotActor::BeginPlay()
 			GetTypeHash(FMath::RoundToInt(GetActorLocation().Y)),
 			GetTypeHash(FMath::RoundToInt(GetActorLocation().Z))));
 	RattleRandom.Initialize(HashCombineFast(RattleSeed, LocationHash));
+	if (auto* Game = GetGameInstance())
+		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			Quests->OnQuestProgressChanged.AddUObject(this, &ThisClass::RefreshQuestBoiling);
 	SetBoiling(bStartBoiling);
+}
+
+void ATunaSweeperBoilingPotActor::EndPlay(const EEndPlayReason::Type Reason)
+{
+	if (auto* Game = GetGameInstance())
+		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			Quests->OnQuestProgressChanged.RemoveAll(this);
+	Super::EndPlay(Reason);
+}
+
+void ATunaSweeperBoilingPotActor::RefreshQuestBoiling()
+{
+	SetBoiling(bBoilingRequested);
 }
 
 void ATunaSweeperBoilingPotActor::Tick(float DeltaSeconds)
@@ -117,26 +136,34 @@ void ATunaSweeperBoilingPotActor::Tick(float DeltaSeconds)
 
 void ATunaSweeperBoilingPotActor::SetBoiling(bool bEnabled)
 {
-	bBoiling = bEnabled;
+	bBoilingRequested = bEnabled;
+	const auto* Game = GetGameInstance();
+	const auto* Quests = Game ? Game->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
+	const bool bUnlocked = RequiredCompletedQuestId == 0 ||
+		(Quests && Quests->FindQuestDefinition(RequiredCompletedQuestId) &&
+		 Quests->GetQuestState(RequiredCompletedQuestId) == ETunaSweeperQuestState::RewardCompleted);
+	const bool bWasBoiling = bBoiling;
+	bBoiling = bEnabled && bUnlocked;
 	SetActorTickEnabled(bBoiling);
 
 	if (SteamEffectComponent)
 	{
+		SteamEffectComponent->SetVisibility(bBoiling);
 		if (bBoiling)
 		{
-			SteamEffectComponent->Activate(true);
+			if (!bWasBoiling) SteamEffectComponent->Activate(true);
 		}
 		else
 		{
-			SteamEffectComponent->Deactivate();
+			SteamEffectComponent->DeactivateImmediate();
 		}
 	}
 
-	if (bBoiling)
+	if (bBoiling && !bWasBoiling)
 	{
 		TimeUntilNextBurst = GetRandomRange(0.05f, 0.2f);
 	}
-	else
+	else if (!bBoiling)
 	{
 		bRattleBurstActive = false;
 		ResetLidTransform();

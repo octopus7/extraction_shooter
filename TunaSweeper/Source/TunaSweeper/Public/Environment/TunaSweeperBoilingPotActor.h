@@ -22,7 +22,12 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	virtual void Tick(float DeltaSeconds) override;
+
+	// Zero opts out for decorative pots; kitchen completion requires reward claimed.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boiling Pot|State", meta = (ClampMin = "0"))
+	int32 RequiredCompletedQuestId = 13;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Boiling Pot")
 	void SetBoiling(bool bEnabled);
@@ -113,6 +118,8 @@ protected:
 	float SteamVisualScale = 0.25f;
 
 private:
+	void RefreshQuestBoiling();
+	bool bBoilingRequested = false;
 	void ApplyPresentation();
 	void StartRattleBurst();
 	void FinishRattleBurst();
