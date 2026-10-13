@@ -27,5 +27,6 @@
   "stack.feather": 10,
   "stack.heating_coil": 10,
   "stack.motor": 10,
-  "stack.high_capacity_capacitor": 10
+  "stack.high_capacity_capacitor": 10,
+  "stack.super_electromagnet": 10
 }

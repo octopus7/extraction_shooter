@@ -166,4 +166,6 @@ item.heating_coil.desc,전기를 열로 바꾸는 가열 부품.,A heating eleme
 item.motor,모터,Motor,モーター
 item.motor.desc,전기로 장치를 움직이는 소형 모터.,A compact electric motor for driving machinery.,電気で装置を動かす小型モーター。
 item.high_capacity_capacitor,고용량 콘덴서,High-Capacity Capacitor,大容量コンデンサー
-item.high_capacity_capacitor.desc,리프트의 전력 장치를 복구하는 데 사용하는 고용량 콘덴서.,A high-capacity capacitor used to repair a lift power unit.,リフトの電源装置の修理に使う大容量コンデンサー。
+item.high_capacity_capacitor.desc,전력 장치를 복구하거나 리프트를 수리하는 데 사용하는 고용량 콘덴서.,A high-capacity capacitor used to restore power systems or repair lifts.,電力設備の復旧やリフトの修理に使う大容量コンデンサー。
+item.super_electromagnet,초강력 전자석,Super Electromagnet,超強力電磁石
+item.super_electromagnet.desc,리프트를 수리하는 데 사용하는 초강력 전자석.,A super electromagnet used to repair a lift.,リフトの修理に使う超強力電磁石。

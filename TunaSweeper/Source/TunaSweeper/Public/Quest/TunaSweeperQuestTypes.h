@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/SoftObjectPath.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperQuestTypes.generated.h"
 
@@ -143,6 +144,10 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName EnemyId = NAME_None;
+
+	// Exact classes only: color variants can inherit another color's Blueprint.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FSoftClassPath> EnemyClassPaths;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName InteractionEventId = NAME_None;

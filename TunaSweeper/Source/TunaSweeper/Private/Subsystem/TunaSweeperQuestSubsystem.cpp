@@ -235,6 +235,22 @@ namespace TunaSweeperQuestData
 		OutObjective.SourceLevelName = ReadNameField(JsonObject, TEXT("source_level"));
 		OutObjective.TargetLevelName = ReadNameField(JsonObject, TEXT("target_level"));
 		OutObjective.EnemyId = ReadNameField(JsonObject, TEXT("enemy_id"));
+		OutObjective.EnemyClassPaths.Reset();
+		if (JsonObject->HasField(TEXT("enemy_class_paths")))
+		{
+			const TArray<TSharedPtr<FJsonValue>>* ClassPaths = nullptr;
+			// An invalid filter must never silently turn into an unrestricted kill objective.
+			if (!JsonObject->TryGetArrayField(TEXT("enemy_class_paths"), ClassPaths) || !ClassPaths || ClassPaths->IsEmpty())
+				return false;
+			for (const TSharedPtr<FJsonValue>& Value : *ClassPaths)
+			{
+				FString ClassPath;
+				if (!Value.IsValid() || !Value->TryGetString(ClassPath) ||
+					!ClassPath.Contains(TEXT(".")) || ClassPath.Contains(TEXT(":")) ||
+					!FPackageName::IsValidObjectPath(ClassPath)) return false;
+				OutObjective.EnemyClassPaths.AddUnique(FSoftClassPath(ClassPath));
+			}
+		}
 		OutObjective.InteractionEventId = ReadNameField(JsonObject, TEXT("interaction_event_id"));
 		OutObjective.WarpPointId = ReadNameField(JsonObject, TEXT("warp_point_id"));
 		OutObjective.TargetWarpPointId = ReadNameField(JsonObject, TEXT("target_warp_point_id"));
@@ -994,12 +1010,12 @@ void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity
 		bSaveImmediately);
 }
 
-void UTunaSweeperQuestSubsystem::NotifyEnemyKilled(FName EnemyId)
+void UTunaSweeperQuestSubsystem::NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass)
 {
 	AdvanceMatchingObjectives(
-		[this, EnemyId](const FTunaSweeperObjectiveDefinition& Objective)
+		[this, EnemyId, EnemyClass](const FTunaSweeperObjectiveDefinition& Objective)
 		{
-			return DoesObjectiveMatchEnemyKilled(Objective, EnemyId);
+			return DoesObjectiveMatchEnemyKilled(Objective, EnemyId, EnemyClass);
 		},
 		1);
 }
@@ -1526,10 +1542,13 @@ bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchItemAcquired(
 
 bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchEnemyKilled(
 	const FTunaSweeperObjectiveDefinition& Objective,
-	FName EnemyId) const
+	FName EnemyId,
+	const UClass* EnemyClass) const
 {
 	return Objective.Type == ETunaSweeperObjectiveType::EnemyKilled &&
-		(Objective.EnemyId.IsNone() || Objective.EnemyId == EnemyId);
+		(Objective.EnemyId.IsNone() || Objective.EnemyId == EnemyId) &&
+		(Objective.EnemyClassPaths.IsEmpty() ||
+			(EnemyClass && Objective.EnemyClassPaths.Contains(FSoftClassPath(EnemyClass))));
 }
 
 bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchInteractionCompleted(

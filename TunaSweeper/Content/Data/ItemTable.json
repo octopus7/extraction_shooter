@@ -1007,5 +1007,17 @@
     "category_tag": "item.category.material",
     "weight_kg": 0.8,
     "max_stack_category_key": "stack.high_capacity_capacitor"
+  },
+  {
+    "id": 6026,
+    "name_string_key": "item.super_electromagnet",
+    "description_string_key": "item.super_electromagnet.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_SuperElectromagnet.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 1.5,
+    "max_stack_category_key": "stack.super_electromagnet"
   }
 ]

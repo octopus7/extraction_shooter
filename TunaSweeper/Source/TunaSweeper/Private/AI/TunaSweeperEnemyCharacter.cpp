@@ -1304,7 +1304,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			}
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
-				QuestSubsystem->NotifyEnemyKilled(EnemyId);
+				QuestSubsystem->NotifyEnemyKilled(EnemyId, GetClass());
 			}
 			if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance))
 			{
