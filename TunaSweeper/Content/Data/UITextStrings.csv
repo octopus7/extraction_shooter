@@ -628,7 +628,7 @@ ui.quest_reward_locker.quantity,수량: {0},Quantity: {0},数量：{0}
 ui.quest_reward_locker.close,닫기,Close,閉じる
 ui.quest_reward_locker.no_space,가방 공간이 부족합니다. 물품은 수령함에 남아 있습니다.,Not enough bag space. The item remains in the terminal.,バッグの空きが足りません。物品は受取端末に残っています。
 ui.quest_reward_locker.unnamed_item,아이템,Item,アイテム
-ui.quest.submit,제출,Submit,納品
+ui.quest.submit,가져다 주기,Bring items,持っていく
 ui.lift.title,리프트 목적지 선택,Choose lift destination,リフトの行き先を選択
 ui.lift.choose,리프트 이용,Use lift,リフトを使う
 ui.lift.forest,숲,Forest,森
