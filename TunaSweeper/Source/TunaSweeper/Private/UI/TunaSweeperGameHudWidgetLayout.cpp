@@ -1155,15 +1155,36 @@ void UTunaSweeperGameHudWidget::EnsureQuestPanelWidgets()
 			return;
 		}
 
+		// Fit the 16:9 design surface uniformly; ultrawide space stays outside the panel.
+		// The HUD's large mode title remains on the root canvas at the upper left.
+		constexpr float ReferenceWidth = 1920.0f;
+		constexpr float ReferenceHeight = 1080.0f;
+		UScaleBox* FitBox = WidgetTree->ConstructWidget<UScaleBox>();
+		USizeBox* ReferenceBox = WidgetTree->ConstructWidget<USizeBox>();
+		UCanvasPanel* ReferenceCanvas = WidgetTree->ConstructWidget<UCanvasPanel>();
+		FitBox->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ReferenceBox->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ReferenceCanvas->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		FitBox->SetStretch(EStretch::ScaleToFit);
+		ReferenceBox->SetWidthOverride(ReferenceWidth);
+		ReferenceBox->SetHeightOverride(ReferenceHeight);
+		ReferenceBox->SetContent(ReferenceCanvas);
+		UScaleBoxSlot* FitSlot = CastChecked<UScaleBoxSlot>(FitBox->AddChild(ReferenceBox));
+		FitSlot->SetHorizontalAlignment(HAlign_Center);
+		FitSlot->SetVerticalAlignment(VAlign_Center);
+		UCanvasPanelSlot* SurfaceSlot = RootCanvas->AddChildToCanvas(FitBox);
+		SurfaceSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+		SurfaceSlot->SetOffsets(FMargin(0.0f));
+		SurfaceSlot->SetZOrder(20);
+
 		OutWidget->SetVisibility(ESlateVisibility::Collapsed);
-		UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(OutWidget);
-		if (CanvasSlot)
-		{
-			CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
-			CanvasSlot->SetAlignment(FVector2D::ZeroVector);
-			CanvasSlot->SetOffsets(Margins);
-			CanvasSlot->SetZOrder(20);
-		}
+		UCanvasPanelSlot* CanvasSlot = ReferenceCanvas->AddChildToCanvas(OutWidget);
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+		CanvasSlot->SetPosition(FVector2D::ZeroVector);
+		CanvasSlot->SetSize(FVector2D(
+			ReferenceWidth - Margins.Left - Margins.Right,
+			ReferenceHeight - Margins.Top - Margins.Bottom));
 	};
 
 	AddQuestWidgetToCanvas(
