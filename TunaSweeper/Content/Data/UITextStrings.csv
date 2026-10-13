@@ -682,3 +682,4 @@ ui.save_snapshot.error,처리하지 못했습니다: {0}\n저장 파일과 선�
 ui.interaction.go_outside,밖으로 이동,Go outside,外へ移動
 ui.interaction.feed,먹이 주기,Feed,エサをあげる
 ui.toast.item_reward,보상: {0} ×{1},Reward: {0} ×{1},報酬：{0} ×{1}
+ui.interaction.go_to_base,기지로 이동,Go to base,基地へ移動
