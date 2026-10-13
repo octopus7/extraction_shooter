@@ -197,5 +197,27 @@
         "drop_chance": 10000
       }
     ]
+  },
+  {
+    "id": 8020,
+    "memo_ko": "개 사료 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 6007,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
+  },
+  {
+    "id": 8021,
+    "memo_ko": "고양이 사료 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 6008,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]
