@@ -32,5 +32,22 @@
     "loot_loaded_ammo_flat_deduction": 2,
     "experience_value": 65,
     "max_health": 60.0
+  },
+  {
+    "profile_id": "enemy.forest_red_robot",
+    "enemy_class": "/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Red.BP_QuadrupedGunEnemy_Red_C",
+    "combat_profile_id": "enemy.rifle_anchor",
+    "faction_id": 10,
+    "squad_id": "squad.forest_power",
+    "squad_slot": 2,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8009,
+    "weapon_item_id": 1002,
+    "ammo_item_id": 2002,
+    "reserve_ammo_count": 60,
+    "loot_loaded_ammo_deduction_ratio": 0.4,
+    "loot_loaded_ammo_flat_deduction": 2,
+    "experience_value": 65,
+    "max_health": 60.0
   }
 ]

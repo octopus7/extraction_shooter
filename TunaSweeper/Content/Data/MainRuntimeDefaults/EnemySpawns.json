@@ -12,5 +12,12 @@
     "spawn_chance": 10000,
     "level_name": "RaidForest",
     "condition_id": "always"
+  },
+  {
+    "placement_id": 3,
+    "profile_id": "enemy.forest_red_robot",
+    "spawn_chance": 10000,
+    "level_name": "RaidForest",
+    "condition_id": "always"
   }
 ]
