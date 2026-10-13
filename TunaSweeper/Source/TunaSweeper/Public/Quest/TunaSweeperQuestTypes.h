@@ -218,6 +218,13 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FText Description;
 
+	// Presentation only; never creates or changes a completion objective.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName ObjectiveDisplayStringKey = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText ObjectiveDisplayText;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	bool bAutoTrackOnAccept = true;
 

@@ -52,7 +52,18 @@ bool FTunaSweeperStoryQuestTest::RunTest(const FString& Parameters)
         FTunaSweeperQuestDefinition::StaticStruct(), TEXT("bCompleteOnAccept"));
     if (!TestNotNull(TEXT("Explicit completion-on-accept option exists"), CompleteOnAccept)) return false;
     CompleteOnAccept->SetPropertyValue_InContainer(&Immediate, true);
+    Immediate.ObjectiveDisplayStringKey = TEXT("test.handoff.display");
+    FTunaSweeperQuestTextString Display;
+    Display.StringKey = Immediate.ObjectiveDisplayStringKey;
+    Display.Korean = FText::FromString(TEXT("Test handoff"));
+    Display.English = Display.Korean;
+    Display.Japanese = Display.Korean;
+    Quests->QuestTextStringsByKey.Add(Display.StringKey, Display);
     Quests->QuestDefinitions.Add(902, Immediate);
+    FTunaSweeperQuestDefinition Presented;
+    TestTrue(TEXT("Presentation definition resolves"), Quests->TryGetQuestDefinition(902, Presented));
+    TestEqual(TEXT("Display text resolves by string key"), Presented.ObjectiveDisplayText.ToString(), Display.English.ToString());
+    TestTrue(TEXT("Display text does not create objectives"), Presented.Objectives.IsEmpty());
     FTunaSweeperQuestDefinition Followup;
     Followup.QuestId = 903;
     Followup.RequiredCompletedQuestIds.Add(902);

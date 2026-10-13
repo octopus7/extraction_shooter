@@ -1175,6 +1175,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		Definition.TitleStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("title_string_key"));
 		Definition.Title = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("title"));
 		Definition.DescriptionStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("description_string_key"));
+		Definition.ObjectiveDisplayStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("objective_display_string_key"));
 		Definition.Description = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("description"));
 		Definition.ProviderId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("provider_id"));
 		Definition.CompletionProviderId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("completion_provider_id"));
@@ -1411,6 +1412,7 @@ void UTunaSweeperQuestSubsystem::ResolveDefinitionText(FTunaSweeperQuestDefiniti
 {
 	Definition.Title = ResolveQuestText(Definition.TitleStringKey, Definition.Title);
 	Definition.Description = ResolveQuestText(Definition.DescriptionStringKey, Definition.Description);
+	Definition.ObjectiveDisplayText = ResolveQuestText(Definition.ObjectiveDisplayStringKey);
 	for (FTunaSweeperObjectiveDefinition& Objective : Definition.Objectives)
 	{
 		Objective.Text = ResolveQuestText(Objective.TextStringKey, Objective.Text);

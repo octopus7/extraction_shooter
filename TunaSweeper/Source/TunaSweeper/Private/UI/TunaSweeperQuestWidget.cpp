@@ -1353,6 +1353,11 @@ FText UTunaSweeperQuestWidget::BuildObjectiveText(
 	TArray<FTunaSweeperObjectiveProgressView> ObjectiveProgress;
 	if (!QuestSubsystem.GetQuestObjectiveProgress(InQuestId, ObjectiveProgress) || ObjectiveProgress.Num() <= 0)
 	{
+		FTunaSweeperQuestDefinition Definition;
+		if (QuestSubsystem.TryGetQuestDefinition(InQuestId, Definition) && !Definition.ObjectiveDisplayText.IsEmpty())
+		{
+			return Definition.ObjectiveDisplayText;
+		}
 		return GetQuestText(FName(TEXT("quest.ui.no_reward")));
 	}
 
