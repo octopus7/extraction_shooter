@@ -104,6 +104,7 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	int32 Version = 0;
 	FString Op;
 	if (!Request || !Integer(Request, TEXT("version"), Version, 1, 1) || !Request->TryGetStringField(TEXT("operation"), Op)) return Result(TEXT("invalid_request"));
+	if (Op.StartsWith(TEXT("snapshot-"))) return ExecuteSnapshot(Request);
 	const bool bQuestReset = Op == TEXT("quest-reset");
 	const bool bQuestFix = Op == TEXT("quest-fix");
 	const bool bQuestAudit = Op == TEXT("quest-audit");

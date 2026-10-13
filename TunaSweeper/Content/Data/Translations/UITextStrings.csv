@@ -607,3 +607,17 @@ ui.quest_cheat.flavor.demo,演示版,試玩版,Демо,Demo
 ui.storage.underground_fault,地下仓储输送装置故障,地下倉儲輸送裝置故障,Неисправность системы транспортировки подземного склада,Falha no sistema de transporte do depósito subterrâneo
 ui.storage.underground_fault_help,修复输送装置后即可使用额外的储物空间。,修復輸送裝置後即可使用額外的儲物空間。,Отремонтируйте систему транспортировки для доступа к дополнительному месту хранения.,Repare o sistema de transporte para acessar mais espaço de armazenamento.
 ui.interaction.control_room_return,返回入口,返回入口,Вернуться ко входу,Voltar à entrada
+ui.save_snapshot.title,存档快照,存檔快照,Снимки сохранений,Snapshots de saves
+ui.save_snapshot.help,保存当前槽位最后保存的状态。不包含账号共用的成就和设置。,保存目前欄位最後儲存的狀態。不包含帳號共用的成就和設定。,Сохранить последнее записанное состояние текущего слота. Общие достижения и настройки аккаунта не включаются.,Guarda o último estado salvo do slot atual. Não inclui conquistas e configurações da conta.
+ui.save_snapshot.locked,请结束游玩后创建或恢复快照。,請結束遊玩後建立或還原快照。,Остановите игру перед созданием или восстановлением снимка.,Encerre a sessão para criar ou restaurar snapshots.
+ui.save_snapshot.create,创建当前槽位快照,建立目前欄位快照,Создать снимок текущего слота,Criar snapshot do slot atual
+ui.save_snapshot.restore,恢复选中快照,還原選取的快照,Восстановить выбранный снимок,Restaurar snapshot selecionado
+ui.save_snapshot.row,{0} · {1},{0} · {1},{0} · {1},{0} · {1}
+ui.save_snapshot.automatic,恢复前自动备份,還原前自動備份,Автокопия перед восстановлением,Backup automático antes da restauração
+ui.save_snapshot.manual,手动快照,手動快照,Ручной снимок,Snapshot manual
+ui.save_snapshot.empty,此槽位没有快照。,此欄位沒有快照。,Для этого слота нет снимков.,Não há snapshots deste slot.
+ui.save_snapshot.created,已创建最后保存状态的快照。,已建立最後儲存狀態的快照。,Создан снимок последнего сохранённого состояния.,Snapshot do último estado salvo criado.
+ui.save_snapshot.restored,已恢复。下次游玩时加载此槽位。恢复前的状态也已自动备份。,已還原。下次遊玩時載入此欄位。還原前的狀態也已自動備份。,Восстановлено. Загрузите слот при следующем запуске. Предыдущее состояние сохранено в автокопии.,Restaurado. Carregue este slot na próxima sessão. O estado anterior também foi copiado.
+ui.save_snapshot.confirm,{0}\n恢复 {1} 的快照？当前状态将自动备份。,{0}\n還原 {1} 的快照？目前狀態將自動備份。,{0}\nВосстановить снимок от {1}? Текущее состояние будет скопировано.,{0}\nRestaurar o snapshot de {1}? O estado atual terá um backup.
+ui.save_snapshot.selection_changed,所选槽位已变更。请检查列表后重试。,所選欄位已變更。請檢查清單後重試。,Выбранный слот изменился. Проверьте список и повторите.,O slot selecionado mudou. Confira a lista e tente novamente.
+ui.save_snapshot.error,操作失败：{0}\n请检查存档和所选槽位。,操作失敗：{0}\n請檢查存檔和所選欄位。,Операция не выполнена: {0}\nПроверьте файл сохранения и выбранный слот.,Falha na operação: {0}\nConfira o arquivo de save e o slot selecionado.

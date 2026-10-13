@@ -665,3 +665,17 @@ ui.quest_cheat.audit.fixed,선행 퀘스트 {0}개를 완료 처리했습니다.
 ui.quest_cheat.flavor.main,메인,Main,メイン
 ui.quest_cheat.flavor.demo,데모,Demo,デモ
 ui.interaction.control_room_return,원래 위치로 돌아가기,Return to the entrance,入口へ戻る
+ui.save_snapshot.title,세이브 스냅샷,Save Snapshots,セーブスナップショット
+ui.save_snapshot.help,현재 슬롯에 마지막으로 저장된 상태를 보관합니다. 계정 공용 도전과제·설정은 포함하지 않습니다.,Preserve the last saved state of the current slot. Account-wide achievements and settings are excluded.,現在のスロットの最終保存状態を保管します。アカウント共通の実績や設定は含みません。
+ui.save_snapshot.locked,플레이를 종료한 뒤 스냅샷을 생성하거나 복구할 수 있습니다.,Stop play before creating or restoring snapshots.,プレイ終了後にスナップショットを作成・復元できます。
+ui.save_snapshot.create,현재 슬롯 스냅샷 생성,Snapshot Current Slot,現在のスロットを保存
+ui.save_snapshot.restore,선택한 스냅샷 복구,Restore Selected Snapshot,選択したスナップショットを復元
+ui.save_snapshot.row,{0} · {1},{0} · {1},{0} · {1}
+ui.save_snapshot.automatic,복구 전 자동 백업,Automatic pre-restore backup,復元前の自動バックアップ
+ui.save_snapshot.manual,수동 스냅샷,Manual snapshot,手動スナップショット
+ui.save_snapshot.empty,이 슬롯에 보관된 스냅샷이 없습니다.,No snapshots for this slot.,このスロットのスナップショットはありません。
+ui.save_snapshot.created,현재 슬롯의 마지막 저장 상태를 스냅샷으로 보관했습니다.,Snapshot of the last saved state created.,最終保存状態のスナップショットを作成しました。
+ui.save_snapshot.restored,복구했습니다. 다음 플레이에서 해당 슬롯을 불러오세요. 복구 전 상태도 자동 백업으로 보관했습니다.,Restored. Load this slot in the next play session. The previous state was also backed up.,復元しました。次のプレイでこのスロットを読み込んでください。復元前の状態も自動保存しました。
+ui.save_snapshot.confirm,{0}\n{1} 스냅샷으로 복구할까요? 현재 상태는 자동 백업됩니다.,{0}\nRestore the snapshot from {1}? The current state will be backed up.,{0}\n{1} のスナップショットに復元しますか？現在の状態は自動保存されます。
+ui.save_snapshot.selection_changed,선택 슬롯이 변경되었습니다. 목록을 확인하고 다시 시도하세요.,The selected slot changed. Check the list and try again.,スロットが変更されました。一覧を確認して再試行してください。
+ui.save_snapshot.error,처리하지 못했습니다: {0}\n저장 파일과 선택 슬롯을 확인하세요.,Operation failed: {0}\nCheck the save file and selected slot.,処理できませんでした: {0}\nセーブファイルとスロットを確認してください。

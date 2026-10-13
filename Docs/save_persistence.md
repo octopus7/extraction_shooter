@@ -540,3 +540,13 @@ No items, coins, experience, dialogue, or world-progress rewards are executed by
 - 메인 데이터셋에서 지하 창고 개방 전에는 앞 20칸만 사용할 수 있다. 창고 자체는 처음부터 열 수 있고, 개방 상태는 기존 퀘스트 보상 수령 완료 상태에서 계산한다. 데모는 기존 용량 정책을 유지한다.
 - StorageSlots와 StorageSlotCapacity의 원본 저장 형식·수량은 유지한다. 기존 저장의 제한 범위 밖 물품은 삭제하거나 이동하지 않고 그대로 보존하며, 개방 후 다시 접근할 수 있다. 별도 개방 bool을 중복 저장하지 않는다.
 - 제한은 UI뿐 아니라 슬롯 이동·정렬·제작 재료·퀘스트 제출에도 적용한다. 개방 보상 수령 알림으로 목록과 접근 범위를 즉시 갱신하고, 재접속 시 저장된 퀘스트 상태에서 복원한다.
+
+## Editor development slot snapshots (2026-10-14)
+
+The editor-only TunaSweeper > 세이브 스냅샷 tool reads the active dataset and last selected slot using the existing selected-slot settings. It copies the last committed gameplay slot, not unsaved PIE memory. Snapshot creation and restore are disabled during queued/running PIE and editor-launched standalone sessions. Runtime builds expose no snapshot menu or API.
+
+Snapshots are independent, exact-byte copies under `Saved/DeveloperSaveSnapshots/<Main|Demo>/SlotNN/<source-path-hash>/`. Local creation time and a GUID identify each copy; source-root isolation prevents mixing accounts/workspaces that use the same slot number. The list includes manual snapshots and automatic pre-restore backups. No gameplay schema/version changes are introduced.
+
+Restore requires a readable, valid current slot and a CRC-valid snapshot whose exact save class, dataset, slot and supported save version match. It rejects path traversal and rechecks current bytes before writing, retains the current slot as a separate automatic backup, and uses the existing candidate/previous fail-closed save writer. Restored gameplay fields and original saved time are retained. Load the selected slot in the next play session to use the restored state; there is no live in-memory replacement. A pre-restore backup can be selected to undo a restore.
+
+The snapshot includes all gameplay-slot fields (inventory, storage, pending rewards, quests and world progress). Account-global achievements, outfit unlocks, language/settings and other slots are not captured or rolled back. These developer snapshots are outside the active SaveGames/cloud-save root and are not packaged or tracked in Git.

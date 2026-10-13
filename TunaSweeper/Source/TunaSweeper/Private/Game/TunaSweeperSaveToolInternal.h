@@ -19,5 +19,6 @@ namespace TunaSweeperSaveTool::Internal
 	FString Add(UTunaSweeperSaveGame& Save, UTunaSweeperItemDataSubsystem& Data, const FObject& Request);
 	FString ApplyPreset(UTunaSweeperSaveGame& Save, UTunaSweeperItemDataSubsystem& Data, const FObject& Preset);
 	FObject ExportPreset(UTunaSweeperSaveGame& Save);
+	FObject ExecuteSnapshot(const FObject& Request);
 }
 #endif
