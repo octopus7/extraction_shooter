@@ -141,7 +141,8 @@ private:
 	FText GetPrimaryButtonText(int32 InQuestId) const;
 	FText GetEmptyListText() const;
 	FText BuildObjectiveText(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 InQuestId) const;
-	FText BuildRewardText(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 InQuestId) const;
+	FText BuildRewardText(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 InQuestId, bool bIncludeItems = true) const;
+	void UpdateRewardItemRows(const UTunaSweeperQuestSubsystem* QuestSubsystem, int32 InQuestId);
 	bool IsPrimaryButtonEnabled(int32 InQuestId) const;
 
 	UPROPERTY(Transient)

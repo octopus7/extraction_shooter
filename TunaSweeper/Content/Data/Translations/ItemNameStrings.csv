@@ -167,3 +167,7 @@ item.high_capacity_capacitor,大容量电容器,大容量電容器,Конден�
 item.high_capacity_capacitor.desc,用于恢复供电系统或修复升降机的大容量电容器。,用於恢復供電系統或修復升降機的大容量電容器。,Конденсатор большой ёмкости для восстановления электроснабжения или ремонта подъёмников.,Um capacitor de alta capacidade usado para restaurar sistemas de energia ou reparar elevadores.
 item.super_electromagnet,超强电磁铁,超強電磁鐵,Сверхмощный электромагнит,Super eletroímã
 item.super_electromagnet.desc,用于修复升降机的超强电磁铁。,用於修復升降機的超強電磁鐵。,Сверхмощный электромагнит для ремонта подъёмника.,Um super eletroímã usado para reparar um elevador.
+item.toot_toot_yellow,黄色噗噗,黃色噗噗,Жёлтый пуф,Pfft Amarelo
+item.toot_toot_pink,粉色噗噗,粉紅噗噗,Розовый пуф,Pfft Rosa
+item.toot_toot_yellow.desc,带着黄色的噗噗。,帶著黃色的噗噗。,Пуф с жёлтым оттенком.,Um pfft de tom amarelo.
+item.toot_toot_pink.desc,带着粉色的噗噗。,帶著粉紅色的噗噗。,Пуф с розовым оттенком.,Um pfft de tom rosa.

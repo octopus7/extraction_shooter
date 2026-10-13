@@ -46,3 +46,4 @@ quest.rescue_cart_return.objective.return_by_rescue_cart,乘救护车返回地�
 quest.warp_point_used_test.title,测试传送点,測試傳送點,Проверка точки телепортации,Verificação do uso de ponto de teletransporte
 quest.warp_point_used_test.description,用于验证传送点目标的数据，未连接实际任务提供者或流程。,用於驗證傳送點目標的數據，未連接實際任務提供者或流程。,Тестовые данные для цели с точкой телепортации. Не связаны с действующим заданием.,Dados de validação do objetivo de usar um ponto de teletransporte. Não estão vinculados a um personagem que ofereça missões nem ao fluxo real de progressão.
 quest.warp_point_used_test.objective.use_raid_warp_point_a,使用传送点,使用傳送點,Использовать точку телепортации,Usar um ponto de teletransporte
+ui.quest.item_reward,{0} ×{1},{0} ×{1},{0} ×{1},{0} ×{1}

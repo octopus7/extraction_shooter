@@ -169,3 +169,7 @@ item.high_capacity_capacitor,고용량 콘덴서,High-Capacity Capacitor,大容�
 item.high_capacity_capacitor.desc,전력 장치를 복구하거나 리프트를 수리하는 데 사용하는 고용량 콘덴서.,A high-capacity capacitor used to restore power systems or repair lifts.,電力設備の復旧やリフトの修理に使う大容量コンデンサー。
 item.super_electromagnet,초강력 전자석,Super Electromagnet,超強力電磁石
 item.super_electromagnet.desc,리프트를 수리하는 데 사용하는 초강력 전자석.,A super electromagnet used to repair a lift.,リフトの修理に使う超強力電磁石。
+item.toot_toot_yellow,노란 뿡뿡,Yellow Pfft,黄色いぷぅ
+item.toot_toot_pink,분홍 뿡뿡,Pink Pfft,ピンクのぷぅ
+item.toot_toot_yellow.desc,노란빛을 띠는 뿡뿡.,A yellow-tinted puff.,黄色がかったぷぅ。
+item.toot_toot_pink.desc,분홍빛을 띠는 뿡뿡.,A pink-tinted puff.,ピンクがかったぷぅ。

@@ -1019,5 +1019,29 @@
     "category_tag": "item.category.material",
     "weight_kg": 1.5,
     "max_stack_category_key": "stack.super_electromagnet"
+  },
+  {
+    "id": 6027,
+    "name_string_key": "item.toot_toot_yellow",
+    "description_string_key": "item.toot_toot_yellow.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_TootYellow.uasset",
+    "category_tag": "item.category.material",
+    "max_stack_category_key": "stack.toot_toot",
+    "weight_kg": 0
+  },
+  {
+    "id": 6028,
+    "name_string_key": "item.toot_toot_pink",
+    "description_string_key": "item.toot_toot_pink.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_TootPink.uasset",
+    "category_tag": "item.category.material",
+    "max_stack_category_key": "stack.toot_toot",
+    "weight_kg": 0
   }
 ]

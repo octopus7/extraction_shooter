@@ -16,6 +16,15 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "Components/Button.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/VerticalBox.h"
+#include "Components/HorizontalBox.h"
+#include "Components/SizeBox.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Rendering/SlateRenderer.h"
 #include "Component/TunaSweeperQuestMarkerComponent.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "GameFramework/Pawn.h"
@@ -160,6 +169,27 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     Panel->InitializeQuest(Quest.QuestId, Quest.ProviderId);
     TestTrue(TEXT("Completion-derived reward label appears with item rewards"),
         Panel->BuildRewardText(*Quests, Quest.QuestId).ToString().Contains(TEXT("Storage access reward")));
+    auto* RewardItems = Cast<UVerticalBox>(Panel->WidgetTree->FindWidget(TEXT("QuestDetailRewardItems")));
+    if (!TestNotNull(TEXT("Item reward rows exist"), RewardItems)) return false;
+    TestEqual(TEXT("One item has one reward row"), RewardItems->GetChildrenCount(), 1);
+    auto* RewardRow = Cast<UHorizontalBox>(RewardItems->GetChildAt(0));
+    auto* IconBox = RewardRow ? Cast<USizeBox>(RewardRow->GetChildAt(0)) : nullptr;
+    auto* Icon = IconBox ? Cast<UImage>(IconBox->GetChildAt(0)) : nullptr;
+    auto* Label = RewardRow ? Cast<UTextBlock>(RewardRow->GetChildAt(1)) : nullptr;
+    if (!TestNotNull(TEXT("Reward icon"), Icon) || !TestNotNull(TEXT("Reward name beside icon"), Label)) return false;
+    TestNotNull(TEXT("Reward icon resolves item texture"), Icon->GetBrush().GetResourceObject());
+    const float LineHeight = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->GetMaxCharacterHeight(Label->GetFont(), 1.0f);
+    TestEqual(TEXT("Icon width matches font height"), IconBox->GetWidthOverride(), LineHeight);
+    TestEqual(TEXT("Icon height matches font height"), IconBox->GetHeightOverride(), LineHeight);
+    TestTrue(TEXT("Quantity remains separate from image"), Label->GetText().ToString().Contains(TEXT("1")));
+    TestEqual(TEXT("Non-item reward text is preserved without duplicated item text"), Panel->BuildRewardText(*Quests, Quest.QuestId, false).ToString(), FString(TEXT("Storage access reward")));
+    Quests->QuestDefinitions[Quest.QuestId].Rewards.Items.Add(Reward);
+    Panel->UpdateRewardItemRows(Quests, Quest.QuestId);
+    TestEqual(TEXT("Each item gets its own row"), RewardItems->GetChildrenCount(), 2);
+    Panel->UpdateRewardItemRows(nullptr, Quest.QuestId);
+    TestEqual(TEXT("Deselection clears stale icons"), RewardItems->GetChildrenCount(), 0);
+    Quests->QuestDefinitions[Quest.QuestId].Rewards.Items.Pop();
+    Panel->UpdateDetailView();
     TestTrue(TEXT("Reward button enabled only in matching NPC UI"), Panel->IsPrimaryButtonEnabled(Quest.QuestId));
     bool Reentered = false;
     const auto Handle = Game->OnInventoryStateChanged.AddLambda([&] { Reentered |= Quests->ClaimQuestReward(Quest.QuestId); });

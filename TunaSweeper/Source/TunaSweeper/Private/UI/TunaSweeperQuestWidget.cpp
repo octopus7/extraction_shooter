@@ -5,6 +5,8 @@
 #include "Components/Button.h"
 #include "Components/ButtonSlot.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Image.h"
+#include "Engine/Texture2D.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
@@ -1194,8 +1196,10 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	}
 	if (DetailRewardText)
 	{
-		DetailRewardText->SetText(bHasQuest && QuestSubsystem ? BuildRewardText(*QuestSubsystem, QuestId) : FText::GetEmpty());
+		DetailRewardText->SetText(bHasQuest && QuestSubsystem ? BuildRewardText(*QuestSubsystem, QuestId, false) : FText::GetEmpty());
+		DetailRewardText->SetVisibility(DetailRewardText->GetText().IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::SelfHitTestInvisible);
 	}
+	UpdateRewardItemRows(bHasQuest ? QuestSubsystem : nullptr, QuestId);
 	if (PrimaryButtonText)
 	{
 		PrimaryButtonText->SetText(bHasQuest ? GetPrimaryButtonText(QuestId) : FText::GetEmpty());
@@ -1372,9 +1376,64 @@ FText UTunaSweeperQuestWidget::BuildObjectiveText(
 	return FText::FromString(FString::Join(ObjectiveLines, LINE_TERMINATOR));
 }
 
+void UTunaSweeperQuestWidget::UpdateRewardItemRows(const UTunaSweeperQuestSubsystem* QuestSubsystem, int32 InQuestId)
+{
+	if (!WidgetTree || !DetailRewardText) return;
+	auto* Parent = Cast<UVerticalBox>(DetailRewardText->GetParent());
+	if (!Parent) return;
+	auto* Items = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("QuestDetailRewardItems")));
+	if (!Items)
+	{
+		// Also upgrade existing Blueprint widget trees without rebuilding their layout.
+		Items = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("QuestDetailRewardItems"));
+		Parent->AddChildToVerticalBox(Items);
+	}
+	Items->ClearChildren();
+	FTunaSweeperQuestDefinition Quest;
+	if (!QuestSubsystem || !QuestSubsystem->TryGetQuestDefinition(InQuestId, Quest)) return;
+	const auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+	auto* Data = Game ? Game->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+	const auto Language = Game ? Game->GetCurrentTextLanguage() : ETunaSweeperItemTextLanguage::English;
+	const FSlateFontInfo Font = DetailRewardText->GetFont();
+	const float IconSize = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->GetMaxCharacterHeight(Font, 1.0f);
+	for (const auto& Reward : Quest.Rewards.Items)
+	{
+		if (Reward.ItemId == INDEX_NONE || Reward.Quantity <= 0) continue;
+		FText Name;
+		if (!Data || !Data->TryGetItemNameText(Reward.ItemId, Language, Name))
+		{
+			Name = FText::FromString(FString::Printf(TEXT("%s %d"), *GetQuestText(TEXT("quest.ui.item_fallback")).ToString(), Reward.ItemId));
+		}
+		auto* Row = WidgetTree->ConstructWidget<UHorizontalBox>();
+		auto* IconBox = WidgetTree->ConstructWidget<USizeBox>();
+		IconBox->SetWidthOverride(IconSize);
+		IconBox->SetHeightOverride(IconSize);
+		auto* Icon = WidgetTree->ConstructWidget<UImage>();
+		FTunaSweeperItemDefinition Definition;
+		if (Data && Data->TryGetItemDefinition(Reward.ItemId, Definition))
+		{
+			Icon->SetBrushFromTexture(LoadObject<UTexture2D>(nullptr, *Data->BuildItemIconObjectPath(Definition)));
+		}
+		Icon->SetVisibility(ESlateVisibility::HitTestInvisible);
+		IconBox->AddChild(Icon);
+		auto* IconSlot = Row->AddChildToHorizontalBox(IconBox);
+		IconSlot->SetVerticalAlignment(VAlign_Center);
+		IconSlot->SetPadding(FMargin(0, 0, 6, 0));
+		auto* Label = WidgetTree->ConstructWidget<UTextBlock>();
+		Label->SetFont(Font);
+		Label->SetColorAndOpacity(DetailRewardText->GetColorAndOpacity());
+		Label->SetAutoWrapText(true);
+		Label->SetText(FText::Format(GetQuestText(TEXT("ui.quest.item_reward")), Name, FText::AsNumber(Reward.Quantity)));
+		auto* TextSlot = Row->AddChildToHorizontalBox(Label);
+		TextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		TextSlot->SetVerticalAlignment(VAlign_Center);
+		Items->AddChildToVerticalBox(Row);
+	}
+}
+
 FText UTunaSweeperQuestWidget::BuildRewardText(
 	const UTunaSweeperQuestSubsystem& QuestSubsystem,
-	int32 InQuestId) const
+	int32 InQuestId, bool bIncludeItems) const
 {
 	FTunaSweeperQuestDefinition QuestDefinition;
 	if (!QuestSubsystem.TryGetQuestDefinition(InQuestId, QuestDefinition))
@@ -1404,7 +1463,7 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 		: ETunaSweeperItemTextLanguage::English;
 	for (const FTunaSweeperItemStack& ItemReward : QuestDefinition.Rewards.Items)
 	{
-		if (ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
+		if (!bIncludeItems || ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
 		{
 			continue;
 		}
@@ -1419,7 +1478,7 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 				ItemReward.ItemId));
 		}
 
-		RewardParts.Add(FString::Printf(TEXT("%s x%d"), *ItemName.ToString(), FMath::Max(1, ItemReward.Quantity)));
+		RewardParts.Add(FText::Format(GetQuestText(TEXT("ui.quest.item_reward")), ItemName, FText::AsNumber(ItemReward.Quantity)).ToString());
 	}
 
 	UTunaSweeperHousingSubsystem* HousingSubsystem = TunaGameInstance
@@ -1447,6 +1506,11 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 			*FacilityName.ToString()));
 	}
 
+	if (!bIncludeItems && RewardParts.IsEmpty() && QuestDefinition.Rewards.Items.ContainsByPredicate(
+		[](const FTunaSweeperItemStack& Item) { return Item.ItemId != INDEX_NONE && Item.Quantity > 0; }))
+	{
+		return FText::GetEmpty();
+	}
 	return RewardParts.Num() > 0
 		? FText::FromString(FString::Join(RewardParts, TEXT(" / ")))
 		: GetQuestText(FName(TEXT("quest.ui.no_reward")));
