@@ -35,7 +35,8 @@
   },
   {
     "profile_id": "enemy.forest_red_robot",
-    "enemy_class": "/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Red.BP_QuadrupedGunEnemy_Red_C",
+    "enemy_class": "/Game/Blueprints/Enemies/Bosses/BP_Region1Boss_Red.BP_Region1Boss_Red_C",
+    "enemy_id": "enemy.region1.boss",
     "combat_profile_id": "enemy.rifle_anchor",
     "faction_id": 10,
     "squad_id": "squad.forest_power",

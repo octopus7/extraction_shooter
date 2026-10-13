@@ -28,6 +28,7 @@ YT/thumb_dev_c_001.png
 # Access-restricted Main data repository and transient packaging data
 /TunaSweeper/External/MainPayload/
 /TunaSweeper/Content/Data/MainPayloadStaged/
+/TunaSweeper/Saved_Region1BossQA/
 
 # Node / frontend tools
 **/node_modules/

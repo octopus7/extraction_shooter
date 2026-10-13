@@ -97,6 +97,8 @@ The achievement container persists independently of gameplay slots:
 - internally unlocked achievement ids;
 - platform unlock confirmations used to avoid duplicate writes.
 
+Named raid bosses use an optional spawn-profile `enemy_id` as the same stable kill identity for quest objectives and the account-global first-kill achievement. Missing IDs retain the existing per-raid instance ID; actor instance tags remain seed-specific. Existing quest counters and killed-enemy IDs persist this progress without a save schema change.
+
 Facts are saved immediately when first observed, regardless of whether a current JSON definition consumes them. Loading a new definition can therefore unlock an achievement retroactively. New game, save-slot selection, and slot deletion must not reset this container. The platform publisher may merge remote unlocks into it, while failed or unavailable platform writes remain derivable as pending from locally unlocked ids without a matching platform confirmation.
 
 Version 1 files load and upgrade on the next successful write. The candidate/previous replacement validator accepts both supported versions so the existing v1 primary can be preserved during migration. Reserved achievement `14` is excluded from restored/captured unlocks and platform synchronization. New unlock notifications and platform writes wait for a successful local save; failed writes retain dirty progress for retry without duplicate notifications.

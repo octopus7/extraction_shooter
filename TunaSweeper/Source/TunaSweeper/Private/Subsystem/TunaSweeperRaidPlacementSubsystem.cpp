@@ -246,7 +246,8 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 				continue;
 			}
 			SpawnedEnemy->ConfigureCombatProfile(CombatProfile, Profile->FactionId, Profile->SquadId, Profile->SquadSlot);
-			SpawnedEnemy->ConfigureSpawnData(Profile->BodyMaterial, MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId), Profile->DropContainerDefinitionId, Profile->DropContentsId, Profile->MaxHealth, Profile->ExperienceValue, Profile->BleedingChanceBonus, Profile->BleedingDurationBonusSeconds, Profile->WeaponItemId, Profile->AmmoItemId, Profile->ReserveAmmoCount, Profile->LootLoadedAmmoDeductionRatio, Profile->LootLoadedAmmoFlatDeduction);
+			const FName EnemyId = Profile->EnemyId.IsNone() ? MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId) : Profile->EnemyId;
+			SpawnedEnemy->ConfigureSpawnData(Profile->BodyMaterial, EnemyId, Profile->DropContainerDefinitionId, Profile->DropContentsId, Profile->MaxHealth, Profile->ExperienceValue, Profile->BleedingChanceBonus, Profile->BleedingDurationBonusSeconds, Profile->WeaponItemId, Profile->AmmoItemId, Profile->ReserveAmmoCount, Profile->LootLoadedAmmoDeductionRatio, Profile->LootLoadedAmmoFlatDeduction);
 			SpawnedEnemy->Tags.AddUnique(MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId));
 			if (Profile->BodyArmorItemId != INDEX_NONE) SpawnedEnemy->BodyArmorItemId = Profile->BodyArmorItemId;
 			if (Profile->HeadArmorItemId != INDEX_NONE) SpawnedEnemy->HeadArmorItemId = Profile->HeadArmorItemId;
@@ -380,6 +381,7 @@ bool UTunaSweeperRaidPlacementSubsystem::LoadEnemyProfiles(const FString& JsonPa
 		}
 		FEnemySpawnProfile Profile;
 		Profile.ProfileId = FName(*ProfileIdString.TrimStartAndEnd());
+		Profile.EnemyId = TunaSweeperRaidPlacement::ReadOptionalName(JsonObject, TEXT("enemy_id"));
 		Profile.CombatProfileId = FName(*CombatProfileIdString.TrimStartAndEnd());
 		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
 		Profile.EnemyClass = TSoftClassPtr<ATunaSweeperEnemyCharacter>(FSoftObjectPath(EnemyClassPath.TrimStartAndEnd()));

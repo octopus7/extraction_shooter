@@ -41,6 +41,8 @@ private:
 	struct FEnemySpawnProfile
 	{
 		FName ProfileId;
+		// Optional kill identity shared by quests and achievements across raids.
+		FName EnemyId;
 		TSoftClassPtr<ATunaSweeperEnemyCharacter> EnemyClass;
 		TSoftObjectPtr<UMaterialInterface> BodyMaterial;
 		FName CombatProfileId;
