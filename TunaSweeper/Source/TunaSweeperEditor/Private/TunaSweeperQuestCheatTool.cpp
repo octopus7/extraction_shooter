@@ -11,6 +11,7 @@
 #include "ToolMenus.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/SBoxPanel.h"
@@ -111,6 +112,13 @@ namespace TunaSweeperQuestCheatEditor
                             .IsEnabled_Lambda([] { return !IsLocked(); })
                             .OnClicked_Lambda([this] { return FixPrerequisites(); }) ] ]
                     + SVerticalBox::Slot().AutoHeight()
+                    [ SNew(SCheckBox)
+                        .IsEnabled_Lambda([] { return !IsLocked(); })
+                        .IsChecked_Lambda([this] { return bActiveOnly ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
+                        .OnCheckStateChanged_Lambda([this](ECheckBoxState State)
+                        { bActiveOnly = State == ECheckBoxState::Checked; ApplyListFilter(); })
+                        [ SNew(STextBlock).Text(Text(TEXT("ui.quest_cheat.active_only"))) ] ]
+                    + SVerticalBox::Slot().AutoHeight()
                     [ SNew(STextBlock).Text_Lambda([this] { return ListStatus; }).AutoWrapText(true) ]
                     + SVerticalBox::Slot().FillHeight(1).Padding(0, 6, 0, 0)
                     [ SAssignNew(QuestList, SListView<TSharedPtr<FJsonObject>>)
@@ -162,7 +170,7 @@ namespace TunaSweeperQuestCheatEditor
             if (!bForce && Path == ListedPath && Timestamp == ListedTimestamp) return;
             InvalidateAudit();
             ListedPath = Path; ListedTimestamp = Timestamp;
-            QuestRows.Reset();
+            AllQuestRows.Reset();
             ListStatus = Text(TEXT("ui.quest_cheat.selection_invalid"));
             if (!Path.IsEmpty())
             {
@@ -175,11 +183,24 @@ namespace TunaSweeperQuestCheatEditor
                 const auto Result = TunaSweeperSaveTool::Execute(Request);
                 if (Result->GetBoolField(TEXT("ok")))
                 {
-                    for (const auto& Value : Result->GetArrayField(TEXT("quests"))) QuestRows.Add(Value->AsObject());
+                    for (const auto& Value : Result->GetArrayField(TEXT("quests"))) AllQuestRows.Add(Value->AsObject());
                     ListStatus = Text(TEXT("ui.quest_cheat.list_header"));
                 }
                 else ListStatus = FText::Format(Text(TEXT("ui.quest_cheat.error")), FText::FromString(Result->GetStringField(TEXT("code"))));
             }
+            ApplyListFilter();
+        }
+        void ApplyListFilter()
+        {
+            QuestRows.Reset();
+            for (const auto& Row : AllQuestRows)
+            {
+                const FString StateKey = Row->GetStringField(TEXT("statusKey"));
+                if (!bActiveOnly || StateKey == TEXT("ui.quest_cheat.state.available") ||
+                    StateKey == TEXT("ui.quest_cheat.state.accepted") || StateKey == TEXT("ui.quest_cheat.state.reward"))
+                    QuestRows.Add(Row);
+            }
+            QuestList->ClearSelection();
             QuestList->RequestListRefresh();
             if (const auto* Selected = QuestRows.FindByPredicate([this](const auto& Row) { return Row->GetIntegerField(TEXT("questId")) == QuestId; }))
                 QuestList->SetSelection(*Selected);
@@ -297,6 +318,8 @@ namespace TunaSweeperQuestCheatEditor
             return FReply::Handled();
         }
         int32 QuestId = 1;
+        // Panel-local preference: default on for each newly constructed editor tab, never saved.
+        bool bActiveOnly = true;
         double NextRefresh = 0;
         TSharedPtr<FJsonObject> Selection;
         FText SelectionText, Status, ListStatus;
@@ -306,6 +329,7 @@ namespace TunaSweeperQuestCheatEditor
         FString ListedPath;
         FDateTime ListedTimestamp = FDateTime::MinValue();
         TArray<TSharedPtr<FJsonObject>> QuestRows;
+        TArray<TSharedPtr<FJsonObject>> AllQuestRows;
         TSharedPtr<SListView<TSharedPtr<FJsonObject>>> QuestList;
     };
 }
