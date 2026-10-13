@@ -522,7 +522,7 @@ bool UTunaSweeperGameInstance::TryConsumeSingleItemFromSlot(const FTunaSweeperIt
 	}
 
 	TArray<FTunaSweeperInventorySlot>* Slots = GetMutableSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		return false;
 	}
@@ -624,8 +624,10 @@ int32 UTunaSweeperGameInstance::CountWorkbenchIngredientItemById(int32 ItemId) c
 	int32 ItemCount = 0;
 	auto CountInSlots = [this, ItemId, &ItemCount](const TArray<FTunaSweeperInventorySlot>& Slots)
 	{
-		for (const FTunaSweeperInventorySlot& Slot : Slots)
+		for (int32 Index = 0; Index < Slots.Num(); ++Index)
 		{
+			if (&Slots == &StorageSlots && Index >= GetAccessibleStorageSlotCount()) break;
+			const FTunaSweeperInventorySlot& Slot = Slots[Index];
 			const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(Slot.ItemUid);
 			if (ItemInstance && ItemInstance->ItemId == ItemId)
 			{
@@ -650,8 +652,10 @@ int32 UTunaSweeperGameInstance::ConsumeWorkbenchIngredientItemById(int32 ItemId,
 	int32 RemainingAmount = RequestedAmount;
 	auto ConsumeInSlots = [this, ItemId, &RemainingAmount](TArray<FTunaSweeperInventorySlot>& Slots)
 	{
-		for (FTunaSweeperInventorySlot& Slot : Slots)
+		for (int32 Index = 0; Index < Slots.Num(); ++Index)
 		{
+			if (&Slots == &StorageSlots && Index >= GetAccessibleStorageSlotCount()) break;
+			FTunaSweeperInventorySlot& Slot = Slots[Index];
 			if (RemainingAmount <= 0)
 			{
 				break;

@@ -534,3 +534,9 @@ No items, coins, experience, dialogue, or world-progress rewards are executed by
 - `quest-audit` reads the selected slot without writing it and checks ancestor chains of all started numeric quests. Available/unaccepted branches are not errors. Reports include incomplete prerequisite edges and structural failures (cycles or missing definitions).
 - `quest-fix` requires the audited `expectedHash`, validates the complete batch before mutating it, and uses existing backup and atomic-save checks. Only unmet prerequisites become RewardCompleted with filled objective counts; tracking of those completed quests is cleared. No reward delivery or runtime events occur. Other progress and existing rewards are preserved.
 - Cycles/missing definitions block the entire repair. The editor shows Fix only for repairable audit results, invalidates the result after save/slot changes or other cheats, and audits again after successful repair. Existing play locks remain in effect. No save schema changes.
+
+### 지하 창고 접근 범위
+
+- 메인 데이터셋에서 지하 창고 개방 전에는 앞 20칸만 사용할 수 있다. 창고 자체는 처음부터 열 수 있고, 개방 상태는 기존 퀘스트 보상 수령 완료 상태에서 계산한다. 데모는 기존 용량 정책을 유지한다.
+- StorageSlots와 StorageSlotCapacity의 원본 저장 형식·수량은 유지한다. 기존 저장의 제한 범위 밖 물품은 삭제하거나 이동하지 않고 그대로 보존하며, 개방 후 다시 접근할 수 있다. 별도 개방 bool을 중복 저장하지 않는다.
+- 제한은 UI뿐 아니라 슬롯 이동·정렬·제작 재료·퀘스트 제출에도 적용한다. 개방 보상 수령 알림으로 목록과 접근 범위를 즉시 갱신하고, 재접속 시 저장된 퀘스트 상태에서 복원한다.

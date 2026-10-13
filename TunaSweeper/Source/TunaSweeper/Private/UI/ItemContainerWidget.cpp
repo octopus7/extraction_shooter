@@ -3,14 +3,20 @@
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/Border.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/PanelWidget.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Components/VerticalBox.h"
+#include "Components/UniformGridPanel.h"
+#include "Components/UniformGridSlot.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
@@ -628,12 +634,12 @@ namespace ItemContainerUi
 		return bMoved;
 	}
 
-	int32 CountOccupiedSlots(const TArray<FTunaSweeperInventorySlot>& Slots)
+	int32 CountOccupiedSlots(const TArray<FTunaSweeperInventorySlot>& Slots, int32 Capacity)
 	{
 		int32 OccupiedSlotCount = 0;
-		for (const FTunaSweeperInventorySlot& Slot : Slots)
+		for (int32 SlotIndex = 0; SlotIndex < FMath::Min(Slots.Num(), Capacity); ++SlotIndex)
 		{
-			if (Slot.ItemUid.IsValid())
+			if (Slots[SlotIndex].ItemUid.IsValid())
 			{
 				++OccupiedSlotCount;
 			}
@@ -792,6 +798,20 @@ void UItemContainerWidget::ApplyContainerPanelSize(int32 RowCount, float EntryHe
 		ItemContainerUi::ResolveHeaderHeight(SlotSource) + RowCount * EntryHeight);
 }
 
+bool UStorageContainerWidget::NativeOnDrop(
+	const FGeometry& InGeometry,
+	const FDragDropEvent& InDragDropEvent,
+	UDragDropOperation* InOperation)
+{
+	if (StorageFaultPanel && StorageFaultPanel->GetVisibility() != ESlateVisibility::Collapsed &&
+		StorageFaultPanel->GetCachedGeometry().IsUnderLocation(InDragDropEvent.GetScreenSpacePosition()))
+	{
+		// Consume the drop without moving an item, including any stale hovered slot reference.
+		return true;
+	}
+	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
 void UStorageContainerWidget::RefreshHeaderControls()
 {
 	Super::RefreshHeaderControls();
@@ -799,6 +819,8 @@ void UStorageContainerWidget::RefreshHeaderControls()
 	EnsureStorageFilterControls();
 	RefreshStorageSortButton();
 	RefreshStorageFilterControls();
+	EnsureStorageFaultPanel();
+	RefreshStorageFaultPanel();
 }
 
 void UStorageContainerWidget::RebuildCompactedSlotView(
@@ -815,7 +837,8 @@ void UStorageContainerWidget::RebuildCompactedSlotView(
 		return;
 	}
 
-	for (int32 SlotIndex = 0; SlotIndex < Slots->Num(); ++SlotIndex)
+	const int32 AccessibleSlotCount = FMath::Min(Slots->Num(), TunaGameInstance->GetAccessibleStorageSlotCount());
+	for (int32 SlotIndex = 0; SlotIndex < AccessibleSlotCount; ++SlotIndex)
 	{
 		const FTunaSweeperInventorySlot& StorageSlot = (*Slots)[SlotIndex];
 		if (!StorageSlot.ItemUid.IsValid())
@@ -869,7 +892,10 @@ int32 UStorageContainerWidget::ResolveCompactedOccupancyDenominator(
 	int32 Capacity,
 	int32 TotalOccupiedSlotCount) const
 {
-	return TotalOccupiedSlotCount;
+	const UTunaSweeperGameInstance* Game = GetGameInstance<UTunaSweeperGameInstance>();
+	return Game && !Game->IsUndergroundStorageUnlocked()
+		? Game->GetAccessibleStorageSlotCount()
+		: TotalOccupiedSlotCount;
 }
 
 bool UStorageContainerWidget::TryResolveCompactedDropSlotFromCursor(
@@ -925,6 +951,135 @@ void UStorageContainerWidget::ApplyContainerPanelSize(int32 RowCount, float Entr
 	{
 		RootSizeBox->ClearMinDesiredHeight();
 	}
+}
+
+void UStorageContainerWidget::EnsureStorageFaultPanel()
+{
+	if (StorageFaultPanel || !WidgetTree || !ContainerTileView || !ContainerTileView->GetParent())
+	{
+		return;
+	}
+
+	// Keep the fault area outside the list, so it cannot scroll or expose locked slot targets.
+	UPanelWidget* TileParent = ContainerTileView->GetParent();
+	const int32 TileIndex = TileParent->GetChildIndex(ContainerTileView);
+	TArray<TPair<UWidget*, UPanelSlot*>> FollowingChildren;
+	for (int32 Index = TileIndex + 1; Index < TileParent->GetChildrenCount(); ++Index)
+	{
+		UWidget* Child = TileParent->GetChildAt(Index);
+		FollowingChildren.Emplace(Child, Child->Slot);
+	}
+	UPanelSlot* TileSlotTemplate = ContainerTileView->Slot;
+	while (TileParent->GetChildrenCount() > TileIndex)
+	{
+		TileParent->RemoveChildAt(TileIndex);
+	}
+	UVerticalBox* Body = WidgetTree->ConstructWidget<UVerticalBox>();
+	TileParent->AddChild(Body, TileSlotTemplate);
+	for (const auto& ChildAndSlot : FollowingChildren)
+	{
+		TileParent->AddChild(ChildAndSlot.Key, ChildAndSlot.Value);
+	}
+	StorageGridSizeBox = WidgetTree->ConstructWidget<USizeBox>();
+	StorageGridSizeBox->SetContent(ContainerTileView);
+	Body->AddChildToVerticalBox(StorageGridSizeBox)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+
+	StorageFaultPanel = WidgetTree->ConstructWidget<UBorder>();
+	StorageFaultPanel->SetBrushColor(FLinearColor(0.014f, 0.019f, 0.022f, 1.0f));
+	StorageFaultPanel->SetPadding(FMargin(0.0f));
+	StorageFaultPanel->SetClipping(EWidgetClipping::ClipToBounds);
+	UVerticalBoxSlot* FaultSlot = Body->AddChildToVerticalBox(StorageFaultPanel);
+	FaultSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	FaultSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 0.0f));
+
+	UOverlay* FaultOverlay = WidgetTree->ConstructWidget<UOverlay>();
+	StorageFaultPanel->SetContent(FaultOverlay);
+	UUniformGridPanel* GhostGrid = WidgetTree->ConstructWidget<UUniformGridPanel>();
+	GhostGrid->SetSlotPadding(FMargin(3.0f));
+	UOverlaySlot* GhostSlot = FaultOverlay->AddChildToOverlay(GhostGrid);
+	GhostSlot->SetHorizontalAlignment(HAlign_Fill);
+	GhostSlot->SetVerticalAlignment(VAlign_Fill);
+	for (int32 Index = 0; Index < 15; ++Index)
+	{
+		UBorder* GhostCell = WidgetTree->ConstructWidget<UBorder>();
+		GhostCell->SetBrushColor(FLinearColor(0.026f, 0.034f, 0.038f, 1.0f));
+		GhostCell->SetPadding(FMargin(1.0f));
+		UBorder* CellInterior = WidgetTree->ConstructWidget<UBorder>();
+		CellInterior->SetBrushColor(FLinearColor(0.019f, 0.025f, 0.029f, 1.0f));
+		GhostCell->SetContent(CellInterior);
+		GhostGrid->AddChildToUniformGrid(GhostCell, Index / 5, Index % 5);
+	}
+
+	UVerticalBox* Message = WidgetTree->ConstructWidget<UVerticalBox>();
+	UOverlaySlot* MessageSlot = FaultOverlay->AddChildToOverlay(Message);
+	MessageSlot->SetHorizontalAlignment(HAlign_Fill);
+	MessageSlot->SetVerticalAlignment(VAlign_Center);
+	MessageSlot->SetPadding(FMargin(22.0f, 16.0f));
+	StorageFaultTitle = WidgetTree->ConstructWidget<UTextBlock>();
+	TunaSweeperUIStyle::ApplyLabel(StorageFaultTitle, 20);
+	StorageFaultTitle->SetColorAndOpacity(FSlateColor(FLinearColor(0.72f, 0.49f, 0.20f, 1.0f)));
+	StorageFaultTitle->SetJustification(ETextJustify::Center);
+	StorageFaultTitle->SetAutoWrapText(true);
+	Message->AddChildToVerticalBox(StorageFaultTitle);
+	StorageFaultHelp = WidgetTree->ConstructWidget<UTextBlock>();
+	TunaSweeperUIStyle::ApplyLabel(StorageFaultHelp, 15);
+	StorageFaultHelp->SetColorAndOpacity(FSlateColor(FLinearColor(0.40f, 0.44f, 0.45f, 1.0f)));
+	StorageFaultHelp->SetJustification(ETextJustify::Center);
+	StorageFaultHelp->SetAutoWrapText(true);
+	Message->AddChildToVerticalBox(StorageFaultHelp)->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+
+	UHorizontalBox* Caution = WidgetTree->ConstructWidget<UHorizontalBox>();
+	UOverlaySlot* CautionSlot = FaultOverlay->AddChildToOverlay(Caution);
+	CautionSlot->SetHorizontalAlignment(HAlign_Fill);
+	CautionSlot->SetVerticalAlignment(VAlign_Top);
+	for (int32 Index = 0; Index < 24; ++Index)
+	{
+		USizeBox* StripeSize = WidgetTree->ConstructWidget<USizeBox>();
+		StripeSize->SetHeightOverride(3.0f);
+		UBorder* Stripe = WidgetTree->ConstructWidget<UBorder>();
+		Stripe->SetBrushColor(Index % 2 == 0
+			? FLinearColor(0.55f, 0.36f, 0.13f, 1.0f)
+			: FLinearColor(0.055f, 0.060f, 0.063f, 1.0f));
+		StripeSize->SetContent(Stripe);
+		Caution->AddChildToHorizontalBox(StripeSize)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	}
+}
+
+void UStorageContainerWidget::RefreshStorageFaultPanel()
+{
+	const UTunaSweeperGameInstance* Game = GetGameInstance<UTunaSweeperGameInstance>();
+	const bool bLocked = SlotSource == ETunaSweeperItemSlotSource::Storage && Game &&
+		!Game->IsUndergroundStorageUnlocked();
+	if (ContainerTileView)
+	{
+		ContainerTileView->SetScrollbarVisibility(bLocked ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+		ContainerTileView->SetIsPointerScrollingEnabled(!bLocked);
+		ContainerTileView->SetIsGamepadScrollingEnabled(!bLocked);
+		ContainerTileView->SetAllowOverScroll(!bLocked);
+		if (bLocked)
+		{
+			ContainerTileView->SetScrollOffset(0.0f);
+		}
+	}
+	if (!StorageFaultPanel || !StorageGridSizeBox)
+	{
+		return;
+	}
+	StorageFaultPanel->SetVisibility(bLocked ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	if (UVerticalBoxSlot* GridSlot = Cast<UVerticalBoxSlot>(StorageGridSizeBox->Slot))
+	{
+		GridSlot->SetSize(FSlateChildSize(bLocked ? ESlateSizeRule::Automatic : ESlateSizeRule::Fill));
+	}
+	if (bLocked)
+	{
+		StorageGridSizeBox->SetHeightOverride(ItemContainerUi::ContainerTileHeight * 4.0f);
+	}
+	else
+	{
+		StorageGridSizeBox->ClearHeightOverride();
+	}
+	StorageFaultTitle->SetText(ItemContainerUi::ResolveUiText(Game, TEXT("ui.storage.underground_fault"), TEXT("")));
+	StorageFaultHelp->SetText(ItemContainerUi::ResolveUiText(Game, TEXT("ui.storage.underground_fault_help"), TEXT("")));
 }
 
 void UStorageContainerWidget::EnsureStorageSortButton()
@@ -1509,7 +1664,7 @@ bool UItemContainerWidget::TryResolveDropSlotFromCursor(
 	}
 
 	const int32 Capacity = SlotSource == ETunaSweeperItemSlotSource::Storage && TunaGameInstance
-		? TunaGameInstance->GetStorageSlots().Num()
+		? TunaGameInstance->GetAccessibleStorageSlotCount()
 		: (TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
 			? TunaGameInstance->GetActiveLootContainerSlots().Num()
 			: FMath::Max(0, ContainerInstance.Capacity));
@@ -1674,8 +1829,12 @@ void UItemContainerWidget::PopulateContainerItems()
 	RebuildCompactedSlotView(Slots, TunaGameInstance, ItemDataSubsystem);
 	const bool bCompactedSlotView = UsesCompactedSlotView();
 	int32 Capacity = Slots ? Slots->Num() : FMath::Max(0, ContainerInstance.Capacity);
+	if (SlotSource == ETunaSweeperItemSlotSource::Storage && TunaGameInstance)
+	{
+		Capacity = FMath::Min(Capacity, TunaGameInstance->GetAccessibleStorageSlotCount());
+	}
 	int32 OccupiedSlotCount = Slots
-		? ItemContainerUi::CountOccupiedSlots(*Slots)
+		? ItemContainerUi::CountOccupiedSlots(*Slots, Capacity)
 		: ItemContainerUi::CountOccupiedStacks(ContainerInstance.Items);
 	const int32 TotalOccupiedSlotCountBeforeCompaction = Slots
 		? OccupiedSlotCount

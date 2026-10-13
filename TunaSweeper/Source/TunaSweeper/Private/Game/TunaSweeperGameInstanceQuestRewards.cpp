@@ -6,8 +6,10 @@ int32 UTunaSweeperGameInstance::CountQuestSubmissionItemById(int32 ItemId)
     int64 Count = 0;
     TSet<FGuid> Seen;
     for (const auto* Slots : { &PlayerInventorySlots, &AuxiliaryBagSlots, &StorageSlots })
-        for (const auto& Slot : *Slots)
+        for (int32 Index = 0; Index < Slots->Num(); ++Index)
         {
+            if (Slots == &StorageSlots && Index >= GetAccessibleStorageSlotCount()) break;
+            const auto& Slot = (*Slots)[Index];
             if (Seen.Contains(Slot.ItemUid)) continue;
             Seen.Add(Slot.ItemUid);
             const auto* Item = ItemInstancesByUid.Find(Slot.ItemUid);
@@ -36,8 +38,10 @@ bool UTunaSweeperGameInstance::TryConsumeQuestItems(
     {
         int32 Remaining = Entry.Value;
         for (auto* Slots : { &PlayerInventorySlots, &AuxiliaryBagSlots, &StorageSlots })
-            for (auto& Slot : *Slots)
+            for (int32 Index = 0; Index < Slots->Num(); ++Index)
             {
+                if (Slots == &StorageSlots && Index >= GetAccessibleStorageSlotCount()) break;
+                auto& Slot = (*Slots)[Index];
                 auto* Item = ItemInstancesByUid.Find(Slot.ItemUid);
                 if (!Item || Item->ItemId != Entry.Key || Remaining <= 0) continue;
                 const int32 Taken = FMath::Min(Remaining, FMath::Max(0, Item->Quantity));

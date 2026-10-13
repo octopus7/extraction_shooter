@@ -181,6 +181,10 @@ struct TUNASWEEPER_API FTunaSweeperQuestRewardDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FName> WorkbenchRecipeUnlocks;
+
+	// Describes a reward whose gameplay effect is derived from quest completion.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName DisplayStringKey = NAME_None;
 };
 
 USTRUCT(BlueprintType)

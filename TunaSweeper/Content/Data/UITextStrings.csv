@@ -195,6 +195,8 @@ ui.shop.title,상점,Shop,ショップ
 ui.shop.debug_refresh_stock,갱신,Refresh,更新
 ui.shop.sell_button,F키 판매,Sell with F,Fキーで売却
 ui.storage.title,창고,Storage,倉庫
+ui.storage.underground_fault,지하 보관시설 이송 장치 고장,Underground storage transfer system out of order,地下保管施設の搬送装置が故障しています
+ui.storage.underground_fault_help,이송 장치를 수리하면 추가 보관 공간을 사용할 수 있습니다.,Repair the transfer system to access additional storage space.,搬送装置を修理すると追加の保管スペースを利用できます。
 ui.storage.filter.all,전체,All,すべて
 ui.storage.filter.weapon,무기,Weapon,武器
 ui.storage.filter.ammo,탄약,Ammo,弾薬

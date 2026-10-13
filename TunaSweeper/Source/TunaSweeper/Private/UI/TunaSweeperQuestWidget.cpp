@@ -1383,6 +1383,10 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 	}
 
 	TArray<FString> RewardParts;
+	if (!QuestDefinition.Rewards.DisplayStringKey.IsNone())
+	{
+		RewardParts.Add(GetQuestText(QuestDefinition.Rewards.DisplayStringKey).ToString());
+	}
 	if (QuestDefinition.Rewards.Coins > 0)
 	{
 		RewardParts.Add(FString::Printf(

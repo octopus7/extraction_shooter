@@ -530,7 +530,7 @@ bool UTunaSweeperGameInstance::TryResolveItemAttachmentDrop(
 
 	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
 	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{
@@ -583,7 +583,7 @@ bool UTunaSweeperGameInstance::ApplyItemAttachmentDrop(
 
 	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
 	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{
@@ -915,7 +915,7 @@ bool UTunaSweeperGameInstance::TryMergeItemStacksBetweenSlots(
 
 	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
 	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{

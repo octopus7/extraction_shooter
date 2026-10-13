@@ -1,5 +1,6 @@
 #include "TunaSweeperGameInstanceShared.h"
 #include "Combat/TunaSweeperArmor.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
 {
@@ -124,7 +125,7 @@ bool UTunaSweeperGameInstance::TryGetSlotItemInstance(
 {
 	EnsureInventoryStateInitialized();
 	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		OutItemInstance = FTunaSweeperItemInstance();
 		return false;
@@ -140,7 +141,7 @@ bool UTunaSweeperGameInstance::TryGetSlotItemUid(
 {
 	EnsureInventoryStateInitialized();
 	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		OutItemUid.Invalidate();
 		return false;
@@ -178,7 +179,7 @@ bool UTunaSweeperGameInstance::CanSlotAcceptItem(const FTunaSweeperItemSlotRefer
 	}
 
 	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		return false;
 	}
@@ -212,7 +213,7 @@ bool UTunaSweeperGameInstance::CanUseItemInSlot(
 	}
 
 	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		return false;
 	}
@@ -253,7 +254,7 @@ float UTunaSweeperGameInstance::GetItemUseSecondsInSlot(const FTunaSweeperItemSl
 {
 	EnsureInventoryStateInitialized();
 	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
-	if (!SlotReference.IsValid() || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		return 0.0f;
 	}
@@ -289,7 +290,7 @@ bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotRefere
 	}
 
 	TArray<FTunaSweeperInventorySlot>* Slots = GetMutableSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		return false;
 	}
@@ -431,7 +432,7 @@ bool UTunaSweeperGameInstance::CanStackItemBetweenSlots(
 
 	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
 	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{
@@ -494,7 +495,7 @@ bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 
 	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
 	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{
@@ -637,7 +638,7 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 
 	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
 	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{
@@ -826,7 +827,7 @@ bool UTunaSweeperGameInstance::CanSplitItemStackBetweenSlots(
 
 	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
 	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
 	{
@@ -903,7 +904,7 @@ bool UTunaSweeperGameInstance::SplitItemStackBetweenSlots(
 
 	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
 	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
-	if (!SourceSlots || !TargetSlots ||
+	if (!IsItemSlotAccessible(SourceSlot) || !IsItemSlotAccessible(TargetSlot) || !SourceSlots || !TargetSlots ||
 		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
 		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex) ||
 		!(*TargetSlots)[TargetSlot.SlotIndex].IsEmpty())
@@ -964,7 +965,7 @@ bool UTunaSweeperGameInstance::RemoveItemFromSlot(
 	}
 
 	TArray<FTunaSweeperInventorySlot>* Slots = GetMutableSlotsForSource(SlotReference.Source);
-	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	if (!IsItemSlotAccessible(SlotReference) || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
 	{
 		return false;
 	}
@@ -1201,17 +1202,20 @@ void UTunaSweeperGameInstance::CompactStorageSlots()
 {
 	EnsureInventoryStateInitialized();
 
+	const int32 AccessibleCount = FMath::Min(GetAccessibleStorageSlotCount(), StorageSlots.Num());
 	TArray<FGuid> MovableItemUids;
-	for (const FTunaSweeperInventorySlot& Slot : StorageSlots)
+	for (int32 Index = 0; Index < AccessibleCount; ++Index)
 	{
+		const FTunaSweeperInventorySlot& Slot = StorageSlots[Index];
 		if (!Slot.bSortLocked && Slot.ItemUid.IsValid())
 		{
 			MovableItemUids.Add(Slot.ItemUid);
 		}
 	}
 
-	for (FTunaSweeperInventorySlot& Slot : StorageSlots)
+	for (int32 Index = 0; Index < AccessibleCount; ++Index)
 	{
+		FTunaSweeperInventorySlot& Slot = StorageSlots[Index];
 		if (!Slot.bSortLocked)
 		{
 			Slot.Clear();
@@ -1219,8 +1223,9 @@ void UTunaSweeperGameInstance::CompactStorageSlots()
 	}
 
 	int32 MovableItemIndex = 0;
-	for (FTunaSweeperInventorySlot& Slot : StorageSlots)
+	for (int32 Index = 0; Index < AccessibleCount; ++Index)
 	{
+		FTunaSweeperInventorySlot& Slot = StorageSlots[Index];
 		if (Slot.bSortLocked)
 		{
 			continue;
@@ -1234,6 +1239,24 @@ void UTunaSweeperGameInstance::CompactStorageSlots()
 
 	BroadcastInventoryStateChanged();
 	MarkItemStateMutationForSave();
+}
+
+bool UTunaSweeperGameInstance::IsUndergroundStorageUnlocked() const
+{
+    if (TunaSweeperBuildFlavor::IsDemo()) return true;
+    const auto* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>();
+    return Quests && Quests->GetQuestState(14) == ETunaSweeperQuestState::RewardCompleted;
+}
+
+int32 UTunaSweeperGameInstance::GetAccessibleStorageSlotCount() const
+{
+    return IsUndergroundStorageUnlocked() ? StorageSlotCapacity : FMath::Min(20, StorageSlotCapacity);
+}
+
+bool UTunaSweeperGameInstance::IsItemSlotAccessible(const FTunaSweeperItemSlotReference& SlotReference) const
+{
+    return SlotReference.IsValid() && (SlotReference.Source != ETunaSweeperItemSlotSource::Storage ||
+        SlotReference.SlotIndex < GetAccessibleStorageSlotCount());
 }
 
 int32 UTunaSweeperGameInstance::GetStorageSlotCapacity()

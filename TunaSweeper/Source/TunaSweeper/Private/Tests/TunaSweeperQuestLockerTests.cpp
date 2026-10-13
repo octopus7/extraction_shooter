@@ -124,6 +124,10 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     TunaSweeperQuestData::NormalizeNpcDeliveryObjectives(Quest);
     TestEqual(TEXT("Legacy NPC delivery uses ownership readiness"), Quest.Objectives[0].Type, ETunaSweeperObjectiveType::ItemPossessed);
     Quest.Rewards.Items = {Reward};
+    Quest.Rewards.DisplayStringKey = TEXT("test.reward.storage_access");
+    FTunaSweeperQuestTextString RewardLabel;
+    RewardLabel.Korean = RewardLabel.English = RewardLabel.Japanese = FText::FromString(TEXT("Storage access reward"));
+    Quests->QuestTextStringsByKey.Add(Quest.Rewards.DisplayStringKey, RewardLabel);
     Quests->QuestDefinitions.Add(Quest.QuestId, Quest);
     TestTrue(TEXT("Quest can be accepted with an already owned item"), Quests->AcceptQuest(Quest.QuestId));
     TestTrue(TEXT("Existing ownership makes quest ready"), Quests->CanClaimQuestReward(Quest.QuestId));
@@ -154,6 +158,8 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     auto* Panel = CreateWidget<UTunaSweeperQuestWidget>(Game.Get());
     if (!TestNotNull(TEXT("Quest reward UI"), Panel)) return false;
     Panel->InitializeQuest(Quest.QuestId, Quest.ProviderId);
+    TestTrue(TEXT("Completion-derived reward label appears with item rewards"),
+        Panel->BuildRewardText(*Quests, Quest.QuestId).ToString().Contains(TEXT("Storage access reward")));
     TestTrue(TEXT("Reward button enabled only in matching NPC UI"), Panel->IsPrimaryButtonEnabled(Quest.QuestId));
     bool Reentered = false;
     const auto Handle = Game->OnInventoryStateChanged.AddLambda([&] { Reentered |= Quests->ClaimQuestReward(Quest.QuestId); });

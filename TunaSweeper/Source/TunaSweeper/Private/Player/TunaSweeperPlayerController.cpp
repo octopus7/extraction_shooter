@@ -219,7 +219,7 @@ namespace TunaSweeperHoveredItemInteraction
 		}
 
 		const TArray<FTunaSweeperInventorySlot>& StorageSlots = TunaGameInstance->GetStorageSlots();
-		for (int32 SlotIndex = 0; SlotIndex < StorageSlots.Num(); ++SlotIndex)
+		for (int32 SlotIndex = 0; SlotIndex < FMath::Min(StorageSlots.Num(), TunaGameInstance->GetAccessibleStorageSlotCount()); ++SlotIndex)
 		{
 			if (!StorageSlots[SlotIndex].IsEmpty())
 			{

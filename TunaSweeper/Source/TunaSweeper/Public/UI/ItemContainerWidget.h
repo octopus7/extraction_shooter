@@ -13,6 +13,7 @@ class UButton;
 class UDragDropOperation;
 class UHorizontalBox;
 class UImage;
+class UBorder;
 class UTunaSweeperGameInstance;
 class UTunaSweeperCurrencyDisplayWidget;
 struct FTunaSweeperItemSlotReference;
@@ -36,6 +37,7 @@ class TUNASWEEPER_API UItemContainerWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	friend class FTunaSweeperShopQuestUnlockTest;
+	friend class FTunaSweeperUndergroundStorageTest;
 	void HandleShopQuestProgressChanged();
 
 protected:
@@ -125,12 +127,17 @@ UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UStorageContainerWidget : public UItemContainerWidget
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperUndergroundStorageTest;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Storage")
 	void SetStorageView();
 
 protected:
+	virtual bool NativeOnDrop(
+		const FGeometry& InGeometry,
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
 	virtual void RefreshHeaderControls() override;
 	virtual void RebuildCompactedSlotView(
 		const TArray<FTunaSweeperInventorySlot>* Slots,
@@ -147,6 +154,21 @@ protected:
 	virtual void ApplyContainerPanelSize(int32 RowCount, float EntryHeight) override;
 
 private:
+	void EnsureStorageFaultPanel();
+	void RefreshStorageFaultPanel();
+
+	UPROPERTY(Transient)
+	TObjectPtr<USizeBox> StorageGridSizeBox;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> StorageFaultPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> StorageFaultTitle;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> StorageFaultHelp;
+
 	void EnsureStorageSortButton();
 	void RefreshStorageSortButton();
 	void EnsureStorageFilterControls();

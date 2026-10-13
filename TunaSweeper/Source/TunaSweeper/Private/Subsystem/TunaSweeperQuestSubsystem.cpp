@@ -1250,6 +1250,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		const TSharedPtr<FJsonObject>* RewardObject = nullptr;
 		if (QuestObject->TryGetObjectField(TEXT("rewards"), RewardObject) && RewardObject && RewardObject->IsValid())
 		{
+			Definition.Rewards.DisplayStringKey = TunaSweeperQuestData::ReadNameField(*RewardObject, TEXT("display_string_key"));
 			double Coins = 0.0;
 			(*RewardObject)->TryGetNumberField(TEXT("coins"), Coins);
 			Definition.Rewards.Coins = FMath::Max(0, FMath::RoundToInt(Coins));

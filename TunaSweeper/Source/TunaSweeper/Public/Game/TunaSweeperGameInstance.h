@@ -271,6 +271,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperArmorPenetrationTest;
 	friend class FTunaSweeperPowerFacilityTest;
 	friend class FTunaSweeperQuestSubmissionTest;
+	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperQuestArrivalTest;
 	friend class FTunaSweeperQuestWorldActorsTest;
@@ -712,6 +713,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Storage")
 	int32 GetStorageSlotCapacity();
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Storage")
+	bool IsUndergroundStorageUnlocked() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Storage")
+	int32 GetAccessibleStorageSlotCount() const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
 	bool SetStorageSlotCapacity(int32 NewCapacity, bool bSaveImmediately = false);
 
@@ -964,6 +971,7 @@ private:
 	int32 GetDefaultStorageSlotCapacity() const;
 	int32 GetMaxStorageSlotCapacity() const;
 	int32 NormalizeStorageSlotCapacity(int32 RequestedCapacity) const;
+	bool IsItemSlotAccessible(const FTunaSweeperItemSlotReference& SlotReference) const;
 	int32 GetShopStockQuantity(
 		int32 ShopId,
 		int32 SlotIndex,
