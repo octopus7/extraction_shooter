@@ -477,6 +477,7 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 
 - 시설 상호작용 해금 여부와 조명 그룹 상태는 기존 `NumericQuestProgressStates`의 퀘스트 상태에서 계산한다. 액터 자체에 해금/점등 플래그를 저장하지 않으며 저장 스키마 변경은 없다.
 - BeginPlay에서 저장된 퀘스트 상태를 즉시 적용하고, 퀘스트 변경·저장 불러오기·새 게임 초기화 알림으로 다시 계산한다. 기본 해금 및 조명 완료 기준은 보상 수령까지 끝난 `RewardCompleted`다.
+- BunkerMap의 BaseFacilityQuestLights는 작업실(010)·욕실(011)·침실(012)·식당(013)의 보상 수령 완료 상태를 각 조명에 적용한다. 맵 저장 기본 상태는 이 네 조명 꺼짐이며, Center·LaundryRoom·BedroomWall·Out1·Out2는 컨트롤러 대상에서 제외해 상시 켜짐을 유지한다. 에디터 눈 아이콘 대신 라이트 컴포넌트 가시성을 설정한다.
 - 시설의 `UnlockConditions` 및 조명 컨트롤러의 `LightGroups`는 BP/레벨 저작 데이터다. 시설 서비스에서 별도 영속 데이터를 추가할 경우 해당 데이터의 저장 규칙을 별도로 정의한다. 기본 시설 템플릿의 사용 이벤트 자체는 영속 상태를 만들지 않는다.
 
 ## Editor-only quest completion cheat
