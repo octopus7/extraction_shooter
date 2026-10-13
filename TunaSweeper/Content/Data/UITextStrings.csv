@@ -664,3 +664,4 @@ ui.quest_cheat.audit.stale,슬롯 또는 저장 내용이 변경됐습니다. �
 ui.quest_cheat.audit.fixed,선행 퀘스트 {0}개를 완료 처리했습니다. 보상은 지급하지 않았습니다.,Completed {0} prerequisite quests without granting rewards.,前提クエスト {0} 件を完了しました。報酬は付与していません。
 ui.quest_cheat.flavor.main,메인,Main,メイン
 ui.quest_cheat.flavor.demo,데모,Demo,デモ
+ui.interaction.control_room_return,원래 위치로 돌아가기,Return to the entrance,入口へ戻る

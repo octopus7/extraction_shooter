@@ -606,3 +606,4 @@ ui.quest_cheat.flavor.main,主版本,主版本,Основная,Principal
 ui.quest_cheat.flavor.demo,演示版,試玩版,Демо,Demo
 ui.storage.underground_fault,地下仓储输送装置故障,地下倉儲輸送裝置故障,Неисправность системы транспортировки подземного склада,Falha no sistema de transporte do depósito subterrâneo
 ui.storage.underground_fault_help,修复输送装置后即可使用额外的储物空间。,修復輸送裝置後即可使用額外的儲物空間。,Отремонтируйте систему транспортировки для доступа к дополнительному месту хранения.,Repare o sistema de transporte para acessar mais espaço de armazenamento.
+ui.interaction.control_room_return,返回入口,返回入口,Вернуться ко входу,Voltar à entrada
