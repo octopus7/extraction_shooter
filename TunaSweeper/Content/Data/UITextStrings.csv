@@ -679,3 +679,4 @@ ui.save_snapshot.restored,복구했습니다. 다음 플레이에서 해당 슬�
 ui.save_snapshot.confirm,{0}\n{1} 스냅샷으로 복구할까요? 현재 상태는 자동 백업됩니다.,{0}\nRestore the snapshot from {1}? The current state will be backed up.,{0}\n{1} のスナップショットに復元しますか？現在の状態は自動保存されます。
 ui.save_snapshot.selection_changed,선택 슬롯이 변경되었습니다. 목록을 확인하고 다시 시도하세요.,The selected slot changed. Check the list and try again.,スロットが変更されました。一覧を確認して再試行してください。
 ui.save_snapshot.error,처리하지 못했습니다: {0}\n저장 파일과 선택 슬롯을 확인하세요.,Operation failed: {0}\nCheck the save file and selected slot.,処理できませんでした: {0}\nセーブファイルとスロットを確認してください。
+ui.interaction.go_outside,밖으로 이동,Go outside,外へ移動

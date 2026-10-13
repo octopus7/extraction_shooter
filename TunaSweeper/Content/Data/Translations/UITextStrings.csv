@@ -621,3 +621,4 @@ ui.save_snapshot.restored,已恢复。下次游玩时加载此槽位。恢复前
 ui.save_snapshot.confirm,{0}\n恢复 {1} 的快照？当前状态将自动备份。,{0}\n還原 {1} 的快照？目前狀態將自動備份。,{0}\nВосстановить снимок от {1}? Текущее состояние будет скопировано.,{0}\nRestaurar o snapshot de {1}? O estado atual terá um backup.
 ui.save_snapshot.selection_changed,所选槽位已变更。请检查列表后重试。,所選欄位已變更。請檢查清單後重試。,Выбранный слот изменился. Проверьте список и повторите.,O slot selecionado mudou. Confira a lista e tente novamente.
 ui.save_snapshot.error,操作失败：{0}\n请检查存档和所选槽位。,操作失敗：{0}\n請檢查存檔和所選欄位。,Операция не выполнена: {0}\nПроверьте файл сохранения и выбранный слот.,Falha na operação: {0}\nConfira o arquivo de save e o slot selecionado.
+ui.interaction.go_outside,前往外面,前往外面,Выйти наружу,Sair
