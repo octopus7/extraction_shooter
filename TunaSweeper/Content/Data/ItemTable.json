@@ -1043,5 +1043,17 @@
     "category_tag": "item.category.material",
     "max_stack_category_key": "stack.toot_toot",
     "weight_kg": 0
+  },
+  {
+    "id": 6029,
+    "name_string_key": "item.high_output_power_converter",
+    "description_string_key": "item.high_output_power_converter.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_HighOutputPowerConverter.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 1.2,
+    "max_stack_category_key": "stack.high_output_power_converter"
   }
 ]

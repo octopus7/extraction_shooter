@@ -28,5 +28,6 @@
   "stack.heating_coil": 10,
   "stack.motor": 10,
   "stack.high_capacity_capacitor": 10,
-  "stack.super_electromagnet": 10
+  "stack.super_electromagnet": 10,
+  "stack.high_output_power_converter": 10
 }

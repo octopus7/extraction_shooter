@@ -173,3 +173,5 @@ item.toot_toot_yellow,노란 뿡뿡,Yellow Pfft,黄色いぷぅ
 item.toot_toot_pink,분홍 뿡뿡,Pink Pfft,ピンクのぷぅ
 item.toot_toot_yellow.desc,노란빛을 띠는 뿡뿡.,A yellow-tinted puff.,黄色がかったぷぅ。
 item.toot_toot_pink.desc,분홍빛을 띠는 뿡뿡.,A pink-tinted puff.,ピンクがかったぷぅ。
+item.high_output_power_converter,"고출력 전력 변환 모듈","High-Output Power Converter Module","高出力電力変換モジュール"
+item.high_output_power_converter.desc,"손상된 전력 변환 장치를 복구해 설비에 공급할 수 있는 전력을 늘리는 모듈.","A module that restores a damaged power converter so it can supply more power to equipment.","損傷した電力変換装置を修復し、設備へ供給できる電力を増やすモジュール。"

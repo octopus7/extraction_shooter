@@ -171,3 +171,5 @@ item.toot_toot_yellow,黄色噗噗,黃色噗噗,Жёлтый пуф,Pfft Amarelo
 item.toot_toot_pink,粉色噗噗,粉紅噗噗,Розовый пуф,Pfft Rosa
 item.toot_toot_yellow.desc,带着黄色的噗噗。,帶著黃色的噗噗。,Пуф с жёлтым оттенком.,Um pfft de tom amarelo.
 item.toot_toot_pink.desc,带着粉色的噗噗。,帶著粉紅色的噗噗。,Пуф с розовым оттенком.,Um pfft de tom rosa.
+item.high_output_power_converter,"高功率电力转换模块","高功率電力轉換模組","Модуль преобразования питания высокой мощности","Módulo conversor de energia de alta potência"
+item.high_output_power_converter.desc,"修复受损电力转换装置以提高设备供电能力的模块。","修復受損電力轉換裝置以提高設備供電能力的模組。","Модуль для ремонта преобразователя и восстановления мощности питания оборудования.","Um módulo que restaura um conversor danificado para fornecer mais energia aos equipamentos."
