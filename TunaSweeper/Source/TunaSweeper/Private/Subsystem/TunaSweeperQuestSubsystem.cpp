@@ -235,6 +235,13 @@ namespace TunaSweeperQuestData
 		OutObjective.SourceLevelName = ReadNameField(JsonObject, TEXT("source_level"));
 		OutObjective.TargetLevelName = ReadNameField(JsonObject, TEXT("target_level"));
 		OutObjective.EnemyId = ReadNameField(JsonObject, TEXT("enemy_id"));
+		OutObjective.bRequiresVehicleCollision = false;
+		if (JsonObject->HasField(TEXT("requires_vehicle_collision")))
+		{
+			if (OutObjective.Type != ETunaSweeperObjectiveType::EnemyKilled ||
+				!JsonObject->HasTypedField<EJson::Boolean>(TEXT("requires_vehicle_collision")) ||
+				!JsonObject->TryGetBoolField(TEXT("requires_vehicle_collision"), OutObjective.bRequiresVehicleCollision)) return false;
+		}
 		OutObjective.EnemyClassPaths.Reset();
 		if (JsonObject->HasField(TEXT("enemy_class_paths")))
 		{
@@ -1010,12 +1017,12 @@ void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity
 		bSaveImmediately);
 }
 
-void UTunaSweeperQuestSubsystem::NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass)
+void UTunaSweeperQuestSubsystem::NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass, bool bByVehicleCollision)
 {
 	AdvanceMatchingObjectives(
-		[this, EnemyId, EnemyClass](const FTunaSweeperObjectiveDefinition& Objective)
+		[this, EnemyId, EnemyClass, bByVehicleCollision](const FTunaSweeperObjectiveDefinition& Objective)
 		{
-			return DoesObjectiveMatchEnemyKilled(Objective, EnemyId, EnemyClass);
+			return DoesObjectiveMatchEnemyKilled(Objective, EnemyId, EnemyClass, bByVehicleCollision);
 		},
 		1);
 }
@@ -1543,9 +1550,11 @@ bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchItemAcquired(
 bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchEnemyKilled(
 	const FTunaSweeperObjectiveDefinition& Objective,
 	FName EnemyId,
-	const UClass* EnemyClass) const
+	const UClass* EnemyClass,
+	bool bByVehicleCollision) const
 {
 	return Objective.Type == ETunaSweeperObjectiveType::EnemyKilled &&
+		(!Objective.bRequiresVehicleCollision || bByVehicleCollision) &&
 		(Objective.EnemyId.IsNone() || Objective.EnemyId == EnemyId) &&
 		(Objective.EnemyClassPaths.IsEmpty() ||
 			(EnemyClass && Objective.EnemyClassPaths.Contains(FSoftClassPath(EnemyClass))));

@@ -16,6 +16,8 @@ class TUNASWEEPER_API UTunaSweeperQuestMarkerComponent : public UProceduralMeshC
 public:
 	UTunaSweeperQuestMarkerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void PostLoad() override;
+	virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
 	virtual void OnRegister() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -84,20 +86,21 @@ public:
 	TObjectPtr<UMaterialInterface> HaloMaterial;
 
 private:
+	void ResetMarkerMaterials();
 	void CreateMarkerMaterials();
 	void UpdateMaterialParameters(float AnimatedGlowStrength);
 	void FaceLocalPlayerCamera();
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, DuplicateTransient)
 	TObjectPtr<UMaterialInstanceDynamic> GoldMaterialInstance;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, DuplicateTransient)
 	TObjectPtr<UMaterialInstanceDynamic> RimMaterialInstance;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, DuplicateTransient)
 	TObjectPtr<UMaterialInstanceDynamic> ExclamationMaterialInstance;
 
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, DuplicateTransient)
 	TObjectPtr<UMaterialInstanceDynamic> HaloMaterialInstance;
 
 	float AnimationTime = 0.0f;

@@ -99,7 +99,7 @@ public:
 	void NotifyItemAcquired(int32 ItemId, int32 Quantity, bool bSaveImmediately = true);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
-	void NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass = nullptr);
+	void NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass = nullptr, bool bByVehicleCollision = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyInteractionCompleted(FName InteractionEventId, FName InteractionTypeName);
@@ -138,6 +138,7 @@ public:
 
 private:
 	friend class FTunaSweeperQuestEnemyClassTest;
+	friend struct FTunaSweeperRoadkillTestScene;
 	friend class FTunaSweeperQuestWorldProgressTest;
 	void HandleWorldProgressChanged();
 	bool ReconcileWorldProgressObjectives(bool bShowCompletionToast);
@@ -177,7 +178,7 @@ private:
 	bool DoesObjectiveMatchBunkerRescueReturn(const FTunaSweeperObjectiveDefinition& Objective, FName SourceLevelName, FName TargetLevelName) const;
 	bool DoesObjectiveMatchWarpPointUsed(const FTunaSweeperObjectiveDefinition& Objective, FName LevelName, FName WarpPointId, FName TargetWarpPointId) const;
 	bool DoesObjectiveMatchItemAcquired(const FTunaSweeperObjectiveDefinition& Objective, int32 ItemId) const;
-	bool DoesObjectiveMatchEnemyKilled(const FTunaSweeperObjectiveDefinition& Objective, FName EnemyId, const UClass* EnemyClass) const;
+	bool DoesObjectiveMatchEnemyKilled(const FTunaSweeperObjectiveDefinition& Objective, FName EnemyId, const UClass* EnemyClass, bool bByVehicleCollision) const;
 	bool DoesObjectiveMatchInteractionCompleted(const FTunaSweeperObjectiveDefinition& Objective, FName InteractionEventId, FName InteractionTypeName) const;
 	bool AdvanceObjectiveProgress(int32 QuestId, FName ObjectiveId, int32 Amount);
 	void AdvanceMatchingObjectives(

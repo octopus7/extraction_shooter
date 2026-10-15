@@ -150,6 +150,9 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 	TArray<FSoftClassPath> EnemyClassPaths;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	bool bRequiresVehicleCollision = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName InteractionEventId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")

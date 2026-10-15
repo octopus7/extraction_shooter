@@ -120,7 +120,7 @@ v1 목표 타입:
 - `level_travel`: 레벨 이동 요청 성공. `source_level`, `target_level`로 필터링한다.
 - `item_acquired`: 플레이어가 아이템을 획득했을 때. `item_id`가 비어 있으면 모든 아이템을 허용한다.
 - `item_submitted`: 지정 NPC에게 아이템을 제출했을 때. 양의 정수 `item_id`, `required_count`와 비어 있지 않은 `target_provider_id`를 명시한다. 획득/일반 상호작용 이벤트로 완료되지 않는다.
-- `enemy_killed`: 플레이어가 적을 처치했을 때. `enemy_id`가 비어 있으면 모든 적 처치를 허용한다.
+- `enemy_killed`: 플레이어가 적을 처치했을 때. 선택적 `enemy_id`와 `enemy_class_paths`는 함께 적용하며, 클래스 경로는 실제 적 클래스와 정확히 일치해야 한다. 선택적 Boolean `requires_vehicle_collision`의 기본값은 `false`다. `true`이면 살아 있는 플레이어 운전자가 탑승한 ATV의 충돌 피해로 처치해야 진행된다. 총격, 다른 AI의 처치, 이미 죽은 적에 대한 반복 피해는 충돌 처치로 인정하지 않는다. 이 필드는 `enemy_killed`에서만 허용하며 Boolean 이외의 JSON 값은 로더 오류로 처리한다.
 - `interaction_completed`: 상호작용 처리가 성공했을 때. `interaction_event_id`나 `interaction_type`으로 필터링한다.
 - `warp_point_used`: 워프 포인트 액터가 플레이어 워프를 성공시켰을 때. `source_level`, `warp_point_id`, `target_warp_point_id`로 필터링한다. `source_level`은 워프가 발생한 현재 맵을 의미한다.
 

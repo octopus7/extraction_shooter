@@ -1,0 +1,108 @@
+{
+  "assets": [
+    {
+      "name": "SM_DeliveryRobot_Body",
+      "vertices": 4072,
+      "uv_channels": 1,
+      "slots": [
+        "BodyAtlas",
+        "Eyes"
+      ],
+      "bounds": [
+        -48.5,
+        -50.0,
+        24.999998092651367,
+        53.0,
+        50.0,
+        106.50000762939453
+      ],
+      "expected_bounds": [
+        -48.5,
+        -50.0,
+        24.999998092651367,
+        52.999996185302734,
+        50.0,
+        106.50000762939453
+      ],
+      "import_rotation": "pitch=0,yaw=-90,roll=0"
+    },
+    {
+      "name": "SM_DeliveryRobot_Wheel",
+      "vertices": 6720,
+      "uv_channels": 1,
+      "slots": [
+        "BodyAtlas"
+      ],
+      "bounds": [
+        -32.0,
+        -10.500000953674316,
+        -32.0,
+        32.0,
+        10.500000953674316,
+        32.0
+      ],
+      "expected_bounds": [
+        -32.0,
+        -10.500000953674316,
+        -32.0,
+        32.0,
+        10.500000953674316,
+        32.0
+      ],
+      "import_rotation": "pitch=0,yaw=-90,roll=0"
+    },
+    {
+      "name": "SM_RabbitTrike_Body",
+      "vertices": 6176,
+      "uv_channels": 1,
+      "slots": [
+        "BodyAtlas",
+        "Eyes"
+      ],
+      "bounds": [
+        -101.0,
+        -56.999996185302734,
+        26.66911506652832,
+        97.0,
+        57.00000762939453,
+        151.6189727783203
+      ],
+      "expected_bounds": [
+        -101.0,
+        -57.0,
+        26.66911506652832,
+        97.0,
+        57.0,
+        151.6189727783203
+      ],
+      "import_rotation": "pitch=0,yaw=-90,roll=0"
+    },
+    {
+      "name": "SM_RabbitTrike_Wheel",
+      "vertices": 6720,
+      "uv_channels": 1,
+      "slots": [
+        "BodyAtlas"
+      ],
+      "bounds": [
+        -30.000001907348633,
+        -12.500000953674316,
+        -30.000001907348633,
+        30.000001907348633,
+        12.500000953674316,
+        30.000001907348633
+      ],
+      "expected_bounds": [
+        -30.000001907348633,
+        -12.5,
+        -30.000001907348633,
+        30.000001907348633,
+        12.5,
+        30.000001907348633
+      ],
+      "import_rotation": "pitch=0,yaw=-90,roll=0"
+    }
+  ],
+  "body_emissive_connected": false,
+  "eye_parent": "/Game/Characters/Region2Robots/Materials/M_RobotEyes.M_RobotEyes"
+}

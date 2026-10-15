@@ -101,6 +101,8 @@ void ATunaSweeperATVActor::BeginPlay()
 	// Apply the contact policy to existing saved Blueprint/map instances as well.
 	ConfigureContactCollision();
 	VehicleMovement->AddTickPrerequisiteActor(this);
+	PreviousCollisionLocation = ChassisCollision->GetComponentLocation();
+	bHasCollisionLocation = true;
 	MountComponent->OnMounted.AddDynamic(this, &ATunaSweeperATVActor::HandleRiderChanged);
 	MountComponent->OnDismounted.AddDynamic(this, &ATunaSweeperATVActor::HandleRiderChanged);
 	ClearDriveInput();
@@ -154,6 +156,7 @@ void ATunaSweeperATVActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	UpdateDamageSmoke(DeltaSeconds);
+	UpdateCollisionDamage(DeltaSeconds);
 	if (bVehicleDestroyed) return;
 	if (!CanAcceptDriveInput())
 	{

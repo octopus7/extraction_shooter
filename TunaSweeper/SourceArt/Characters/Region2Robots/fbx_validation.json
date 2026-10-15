@@ -1,0 +1,76 @@
+[
+  {
+    "file": "SM_DeliveryRobot_Body.fbx",
+    "triangles": 2308,
+    "material_slots": [
+      "BodyAtlas",
+      "Eyes"
+    ],
+    "dimensions_m": [
+      1.0,
+      1.0149999856948853,
+      0.815000057220459
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "uv_valid": true
+  },
+  {
+    "file": "SM_DeliveryRobot_Wheel.fbx",
+    "triangles": 3956,
+    "material_slots": [
+      "BodyAtlas"
+    ],
+    "dimensions_m": [
+      0.21000002324581146,
+      0.6399999856948853,
+      0.6399999856948853
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "uv_valid": true
+  },
+  {
+    "file": "SM_RabbitTrike_Body.fbx",
+    "triangles": 3184,
+    "material_slots": [
+      "BodyAtlas",
+      "Eyes"
+    ],
+    "dimensions_m": [
+      1.1399999856948853,
+      1.9800000190734863,
+      1.2494986057281494
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "uv_valid": true
+  },
+  {
+    "file": "SM_RabbitTrike_Wheel.fbx",
+    "triangles": 3956,
+    "material_slots": [
+      "BodyAtlas"
+    ],
+    "dimensions_m": [
+      0.25,
+      0.6000000238418579,
+      0.6000000238418579
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "uv_valid": true
+  }
+]

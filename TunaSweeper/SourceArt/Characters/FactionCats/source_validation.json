@@ -1,0 +1,70 @@
+{
+  "blender": "4.5.12 LTS",
+  "passed": true,
+  "assets": [
+    {
+      "name": "MarineCat",
+      "source": {
+        "vertices": 446,
+        "triangles": 616,
+        "dimensions_cm": [
+          72.00000286102295,
+          63.00000250339508,
+          95.99999785423279
+        ],
+        "uv_channels": 1,
+        "material_slots": 1,
+        "min_uv_triangle_area": 0.0078125,
+        "finite_unit_tangents": true,
+        "integer_3cm_grid": true
+      },
+      "fbx_roundtrip": {
+        "vertices": 446,
+        "triangles": 616,
+        "dimensions_cm": [
+          72.00000882148743,
+          63.00000250339508,
+          95.99999785423279
+        ],
+        "uv_channels": 1,
+        "material_slots": 1,
+        "min_uv_triangle_area": 0.0078125,
+        "finite_unit_tangents": true,
+        "integer_3cm_grid": true
+      },
+      "passed": true
+    },
+    {
+      "name": "PirateCat",
+      "source": {
+        "vertices": 470,
+        "triangles": 660,
+        "dimensions_cm": [
+          69.00000274181366,
+          69.00000274181366,
+          95.99999785423279
+        ],
+        "uv_channels": 1,
+        "material_slots": 1,
+        "min_uv_triangle_area": 0.0078125,
+        "finite_unit_tangents": true,
+        "integer_3cm_grid": true
+      },
+      "fbx_roundtrip": {
+        "vertices": 470,
+        "triangles": 660,
+        "dimensions_cm": [
+          69.0000057220459,
+          69.00000870227814,
+          95.99999785423279
+        ],
+        "uv_channels": 1,
+        "material_slots": 1,
+        "min_uv_triangle_area": 0.0078125,
+        "finite_unit_tangents": true,
+        "integer_3cm_grid": true
+      },
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "axis_contract": "+X forward, +Y right, +Z up; UE cm; body origin ground center; wheel origin axle center",
+  "atlas": "Textures/T_Region2Robots_Atlas.png",
+  "body_material_slots": [
+    "BodyAtlas",
+    "Eyes"
+  ],
+  "assets": [
+    {
+      "model": "DeliveryRobot",
+      "wheel_count": 2,
+      "wheel_centers_cm": [
+        [
+          0,
+          -48,
+          32
+        ],
+        [
+          0,
+          48,
+          32
+        ]
+      ],
+      "wheel_radius_cm": 32,
+      "meshes": {
+        "SM_DeliveryRobot_Body": {
+          "triangles": 2308,
+          "vertices": 1192,
+          "uv_channels": 1,
+          "uv_coordinates": 4552,
+          "materials": [
+            "BodyAtlas",
+            "Eyes"
+          ],
+          "dimensions_blender_m": [
+            1.0,
+            1.0149999856948853,
+            0.815000057220459
+          ],
+          "expected_ue_dimensions_cm": [
+            101.49999618530273,
+            100.0,
+            81.50000953674316
+          ],
+          "expected_ue_bounds_cm": [
+            -48.5,
+            -50.0,
+            24.999998092651367,
+            52.999996185302734,
+            50.0,
+            106.50000762939453
+          ]
+        },
+        "SM_DeliveryRobot_Wheel": {
+          "triangles": 3956,
+          "vertices": 2016,
+          "uv_channels": 1,
+          "uv_coordinates": 7584,
+          "materials": [
+            "BodyAtlas"
+          ],
+          "dimensions_blender_m": [
+            0.21000002324581146,
+            0.6399999856948853,
+            0.6399999856948853
+          ],
+          "expected_ue_dimensions_cm": [
+            64.0,
+            21.000001907348633,
+            64.0
+          ],
+          "expected_ue_bounds_cm": [
+            -32.0,
+            -10.500000953674316,
+            -32.0,
+            32.0,
+            10.500000953674316,
+            32.0
+          ]
+        }
+      }
+    },
+    {
+      "model": "RabbitTrike",
+      "wheel_count": 3,
+      "wheel_centers_cm": [
+        [
+          77,
+          0,
+          30
+        ],
+        [
+          -65,
+          -46,
+          30
+        ],
+        [
+          -65,
+          46,
+          30
+        ]
+      ],
+      "wheel_radius_cm": 30,
+      "meshes": {
+        "SM_RabbitTrike_Body": {
+          "triangles": 3184,
+          "vertices": 1648,
+          "uv_channels": 1,
+          "uv_coordinates": 6320,
+          "materials": [
+            "BodyAtlas",
+            "Eyes"
+          ],
+          "dimensions_blender_m": [
+            1.1399999856948853,
+            1.9800000190734863,
+            1.2494986057281494
+          ],
+          "expected_ue_dimensions_cm": [
+            198.0,
+            114.0,
+            124.94985771179199
+          ],
+          "expected_ue_bounds_cm": [
+            -101.0,
+            -57.0,
+            26.66911506652832,
+            97.0,
+            57.0,
+            151.6189727783203
+          ]
+        },
+        "SM_RabbitTrike_Wheel": {
+          "triangles": 3956,
+          "vertices": 2016,
+          "uv_channels": 1,
+          "uv_coordinates": 7584,
+          "materials": [
+            "BodyAtlas"
+          ],
+          "dimensions_blender_m": [
+            0.25,
+            0.6000000238418579,
+            0.6000000238418579
+          ],
+          "expected_ue_dimensions_cm": [
+            60.000003814697266,
+            25.0,
+            60.000003814697266
+          ],
+          "expected_ue_bounds_cm": [
+            -30.000001907348633,
+            -12.5,
+            -30.000001907348633,
+            30.000001907348633,
+            12.5,
+            30.000001907348633
+          ]
+        }
+      }
+    }
+  ],
+  "import_settings": {
+    "convert_scene": true,
+    "force_front_x_axis": false,
+    "import_rotation_yaw": -90,
+    "explanation": "Blender source axes (-UEy,-UEx,UEz). Explicit yaw -90 required with legacy FBX importer; runtime body and wheel component rotations remain identity."
+  }
+}

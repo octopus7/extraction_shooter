@@ -19,5 +19,47 @@
     "spawn_chance": 10000,
     "level_name": "RaidForest",
     "condition_id": "always"
+  },
+  {
+    "placement_id": 1,
+    "profile_id": "enemy.marine_delivery",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 2,
+    "profile_id": "enemy.marine_delivery",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 3,
+    "profile_id": "enemy.pirate_delivery",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 4,
+    "profile_id": "enemy.pirate_delivery",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 5,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 6,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
   }
 ]

@@ -1,5 +1,8 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Vehicle/TunaSweeperVehicleCollisionDamageType.h"
+#include "Vehicle/TunaSweeperATVActor.h"
+#include "Vehicle/TunaSweeperVehicleMountComponent.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/DamageEvents.h"
 
 #include "AI/TunaSweeperEnemyAIController.h"
@@ -297,9 +300,12 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 	}
 	if (CurrentHealth <= 0.0f)
 	{
-		HandleDeath(EventInstigator, DamageCauser);
-		if (EventInstigator && EventInstigator->IsLocalPlayerController() &&
-			DamageEvent.DamageTypeClass && DamageEvent.DamageTypeClass->IsChildOf(UTunaSweeperVehicleCollisionDamageType::StaticClass()))
+		const auto* Vehicle = Cast<ATunaSweeperATVActor>(DamageCauser);
+		const auto* Driver = Vehicle && Vehicle->MountComponent ? Vehicle->MountComponent->GetRider() : nullptr;
+		const bool bByVehicleCollision = Driver && !Driver->IsDead() && Driver->GetController() == EventInstigator &&
+			DamageEvent.DamageTypeClass && DamageEvent.DamageTypeClass->IsChildOf(UTunaSweeperVehicleCollisionDamageType::StaticClass());
+		HandleDeath(EventInstigator, DamageCauser, bByVehicleCollision);
+		if (EventInstigator && EventInstigator->IsLocalPlayerController() && bByVehicleCollision)
 		{
 			if (auto* Achievements = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperAchievementSubsystem>() : nullptr)
 				Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::VehicleCollisionKill, NAME_None);
@@ -1267,7 +1273,7 @@ void ATunaSweeperEnemyCharacter::SpawnMeleeImpactBurst(
 		SpawnParameters);
 }
 
-void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AActor* DamageCauser)
+void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AActor* DamageCauser, bool bByVehicleCollision)
 {
 	if (bIsDead)
 	{
@@ -1304,7 +1310,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			}
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
-				QuestSubsystem->NotifyEnemyKilled(EnemyId, GetClass());
+				QuestSubsystem->NotifyEnemyKilled(EnemyId, GetClass(), bByVehicleCollision);
 			}
 			if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance))
 			{

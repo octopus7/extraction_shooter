@@ -189,6 +189,20 @@ UTunaSweeperQuestMarkerComponent::UTunaSweeperQuestMarkerComponent(const FObject
 	}
 }
 
+void UTunaSweeperQuestMarkerComponent::PostLoad()
+{
+	Super::PostLoad();
+	// Older assets saved MIDs through the inherited, non-transient OverrideMaterials array.
+	// Drop those references before a Blueprint template can be instanced into another package.
+	ResetMarkerMaterials();
+}
+
+void UTunaSweeperQuestMarkerComponent::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+	Super::PostDuplicate(DuplicateMode == EDuplicateMode::PIE);
+	ResetMarkerMaterials();
+}
+
 void UTunaSweeperQuestMarkerComponent::OnRegister()
 {
 	Super::OnRegister();
@@ -266,12 +280,44 @@ void UTunaSweeperQuestMarkerComponent::RebuildMarker()
 	CreateMarkerMaterials();
 }
 
+void UTunaSweeperQuestMarkerComponent::ResetMarkerMaterials()
+{
+	for (int32 Slot = 0; Slot < GetNumOverrideMaterials(); ++Slot)
+	{
+		if (auto* MID = Cast<UMaterialInstanceDynamic>(GetMaterial(Slot)); MID && MID->GetOuter() == this)
+		{
+			MID->SetFlags(RF_Transient | RF_DuplicateTransient);
+		}
+	}
+	GoldMaterialInstance = nullptr;
+	RimMaterialInstance = nullptr;
+	ExclamationMaterialInstance = nullptr;
+	HaloMaterialInstance = nullptr;
+	EmptyOverrideMaterials();
+	SetMaterial(TunaSweeperQuestMarker::MedalSection, SurfaceMaterial);
+	SetMaterial(TunaSweeperQuestMarker::RimSection, SurfaceMaterial);
+	SetMaterial(TunaSweeperQuestMarker::FaceSection, SurfaceMaterial);
+	SetMaterial(TunaSweeperQuestMarker::ExclamationSection, SurfaceMaterial);
+	SetMaterial(TunaSweeperQuestMarker::HaloSection, HaloMaterial);
+}
+
 void UTunaSweeperQuestMarkerComponent::CreateMarkerMaterials()
 {
-	GoldMaterialInstance = SurfaceMaterial ? UMaterialInstanceDynamic::Create(SurfaceMaterial, this) : nullptr;
-	RimMaterialInstance = SurfaceMaterial ? UMaterialInstanceDynamic::Create(SurfaceMaterial, this) : nullptr;
-	ExclamationMaterialInstance = SurfaceMaterial ? UMaterialInstanceDynamic::Create(SurfaceMaterial, this) : nullptr;
-	HaloMaterialInstance = HaloMaterial ? UMaterialInstanceDynamic::Create(HaloMaterial, this) : nullptr;
+	ResetMarkerMaterials();
+	// Property edits also rebuild Blueprint defaults and component archetypes. Those must
+	// reference persistent assets only; per-instance animation is created on registration.
+	if (IsTemplate()) return;
+	const auto CreateTransientMaterial = [this](UMaterialInterface* Parent) -> UMaterialInstanceDynamic*
+	{
+		if (!Parent) return nullptr;
+		auto* MID = UMaterialInstanceDynamic::Create(Parent, this);
+		MID->SetFlags(RF_Transient | RF_DuplicateTransient);
+		return MID;
+	};
+	GoldMaterialInstance = CreateTransientMaterial(SurfaceMaterial);
+	RimMaterialInstance = CreateTransientMaterial(SurfaceMaterial);
+	ExclamationMaterialInstance = CreateTransientMaterial(SurfaceMaterial);
+	HaloMaterialInstance = CreateTransientMaterial(HaloMaterial);
 
 	SetMaterial(TunaSweeperQuestMarker::MedalSection, GoldMaterialInstance);
 	SetMaterial(TunaSweeperQuestMarker::RimSection, RimMaterialInstance);

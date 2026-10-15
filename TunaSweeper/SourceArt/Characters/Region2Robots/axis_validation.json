@@ -1,0 +1,158 @@
+{
+  "basis": "UE5.7 FbxMainImport.cpp ConvertScene + FbxUtilsImport.cpp ConvertPos; explicit import yaw=-90",
+  "requires_ue_bounds_confirmation": false,
+  "assets": [
+    {
+      "mesh": "SM_DeliveryRobot_Body",
+      "fbx_axes": {
+        "UpAxis": 2,
+        "UpAxisSign": 1,
+        "FrontAxis": 1,
+        "FrontAxisSign": 1,
+        "CoordAxis": 0,
+        "CoordAxisSign": -1
+      },
+      "blender_dimensions_m": [
+        1.0,
+        1.0149999856948853,
+        0.815000057220459
+      ],
+      "default_ue_dimensions_cm": [
+        100.0,
+        101.49999618530273,
+        81.50000953674316
+      ],
+      "corrected_ue_dimensions_cm": [
+        101.49999618530273,
+        100.0,
+        81.50000953674316
+      ],
+      "corrected_ue_bounds_cm": [
+        -48.5,
+        -50.0,
+        24.999998092651367,
+        52.999996185302734,
+        50.0,
+        106.50000762939453
+      ],
+      "corrected_eye_mean_cm": [
+        49.399997983660015,
+        0.0,
+        77.99999618530273
+      ],
+      "required_import_yaw_deg": -90
+    },
+    {
+      "mesh": "SM_DeliveryRobot_Wheel",
+      "fbx_axes": {
+        "UpAxis": 2,
+        "UpAxisSign": 1,
+        "FrontAxis": 1,
+        "FrontAxisSign": 1,
+        "CoordAxis": 0,
+        "CoordAxisSign": -1
+      },
+      "blender_dimensions_m": [
+        0.21000002324581146,
+        0.6399999856948853,
+        0.6399999856948853
+      ],
+      "default_ue_dimensions_cm": [
+        21.000001907348633,
+        64.0,
+        64.0
+      ],
+      "corrected_ue_dimensions_cm": [
+        64.0,
+        21.000001907348633,
+        64.0
+      ],
+      "corrected_ue_bounds_cm": [
+        -32.0,
+        -10.500000953674316,
+        -32.0,
+        32.0,
+        10.500000953674316,
+        32.0
+      ],
+      "corrected_eye_mean_cm": [],
+      "required_import_yaw_deg": -90
+    },
+    {
+      "mesh": "SM_RabbitTrike_Body",
+      "fbx_axes": {
+        "UpAxis": 2,
+        "UpAxisSign": 1,
+        "FrontAxis": 1,
+        "FrontAxisSign": 1,
+        "CoordAxis": 0,
+        "CoordAxisSign": -1
+      },
+      "blender_dimensions_m": [
+        1.1399999856948853,
+        1.9800000190734863,
+        1.2494986057281494
+      ],
+      "default_ue_dimensions_cm": [
+        114.0,
+        198.0,
+        124.94985771179199
+      ],
+      "corrected_ue_dimensions_cm": [
+        198.0,
+        114.0,
+        124.94985771179199
+      ],
+      "corrected_ue_bounds_cm": [
+        -101.0,
+        -57.0,
+        26.66911506652832,
+        97.0,
+        57.0,
+        151.6189727783203
+      ],
+      "corrected_eye_mean_cm": [
+        47.99999918256487,
+        0.0,
+        100.999997820173
+      ],
+      "required_import_yaw_deg": -90
+    },
+    {
+      "mesh": "SM_RabbitTrike_Wheel",
+      "fbx_axes": {
+        "UpAxis": 2,
+        "UpAxisSign": 1,
+        "FrontAxis": 1,
+        "FrontAxisSign": 1,
+        "CoordAxis": 0,
+        "CoordAxisSign": -1
+      },
+      "blender_dimensions_m": [
+        0.25,
+        0.6000000238418579,
+        0.6000000238418579
+      ],
+      "default_ue_dimensions_cm": [
+        25.0,
+        60.000003814697266,
+        60.000003814697266
+      ],
+      "corrected_ue_dimensions_cm": [
+        60.000003814697266,
+        25.0,
+        60.000003814697266
+      ],
+      "corrected_ue_bounds_cm": [
+        -30.000001907348633,
+        -12.5,
+        -30.000001907348633,
+        30.000001907348633,
+        12.5,
+        30.000001907348633
+      ],
+      "corrected_eye_mean_cm": [],
+      "required_import_yaw_deg": -90
+    }
+  ]
+}

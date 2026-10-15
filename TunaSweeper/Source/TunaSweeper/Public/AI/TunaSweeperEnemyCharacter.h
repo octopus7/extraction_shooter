@@ -338,7 +338,7 @@ private:
 		FTunaSweeperLootContainerInstance& OutContainerInstance,
 		TArray<FGuid>& OutRuntimeItemUids) const;
 	int32 ResolveLootLoadedAmmoCount(int32& OutSourceLoadedAmmoCount, int32& OutDeductedLoadedAmmoCount) const;
-	void HandleDeath(AController* KillerController, AActor* DamageCauser);
+	void HandleDeath(AController* KillerController, AActor* DamageCauser, bool bByVehicleCollision);
 	bool TryStartDeathRagdoll();
 	void FinalizeDeath();
 	void InitializeDeathDissolveMaterials();

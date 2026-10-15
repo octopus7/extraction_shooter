@@ -288,6 +288,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 #endif
 	friend class FTunaSweeperQuestWorldProgressTest;
 	friend class FTunaSweeperQuestEnemyClassTest;
+	friend struct FTunaSweeperRoadkillTestScene;
 	friend class FTunaSweeperOutfitSaveTest;
 	friend class FTunaSweeperOutfitSaveFailureTest;
 	friend class FTunaSweeperOutfitUnlockTest;

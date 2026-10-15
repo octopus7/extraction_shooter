@@ -266,5 +266,41 @@
       { "item_id": 6021, "quantity": 1, "drop_chance": 10000 },
       { "item_id": 6032, "quantity": 1, "drop_chance": 10000 }
     ]
+  },
+  {
+    "id": 8023,
+    "memo_ko": "토끼 삼륜 로봇 확정 전리품: 망가진 점화 플러그, 타이어, 상위 AR/SMG, 2등급 머리/몸 방어구 각 1개",
+    "items": [
+      {
+        "item_id": 6015,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 6018,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 1007,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 1008,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 5006,
+        "quantity": 1,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 5001,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]

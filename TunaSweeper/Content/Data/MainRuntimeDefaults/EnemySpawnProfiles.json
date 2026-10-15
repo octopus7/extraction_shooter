@@ -50,5 +50,49 @@
     "loot_loaded_ammo_flat_deduction": 2,
     "experience_value": 65,
     "max_health": 60.0
+  },
+  {
+    "profile_id": "enemy.marine_delivery",
+    "enemy_class": "/Game/Characters/Region2Robots/BP_DeliveryRobot_Marine.BP_DeliveryRobot_Marine_C",
+    "enemy_id": "enemy.marine_delivery",
+    "combat_profile_id": "enemy.delivery_robot",
+    "faction_id": 20,
+    "squad_id": "squad.marine_delivery",
+    "squad_slot": 0,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8009,
+    "experience_value": 50,
+    "max_health": 50
+  },
+  {
+    "profile_id": "enemy.pirate_delivery",
+    "enemy_class": "/Game/Characters/Region2Robots/BP_DeliveryRobot_Pirate.BP_DeliveryRobot_Pirate_C",
+    "enemy_id": "enemy.pirate_delivery",
+    "combat_profile_id": "enemy.delivery_robot",
+    "faction_id": 21,
+    "squad_id": "squad.pirate_delivery",
+    "squad_slot": 0,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8009,
+    "experience_value": 50,
+    "max_health": 50
+  },
+  {
+    "profile_id": "enemy.rabbit_trike",
+    "enemy_class": "/Game/Characters/Region2Robots/BP_RabbitTrike.BP_RabbitTrike_C",
+    "enemy_id": "enemy.rabbit_trike",
+    "combat_profile_id": "enemy.rabbit_trike",
+    "faction_id": 22,
+    "squad_id": "squad.rabbit_trike",
+    "squad_slot": 0,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8023,
+    "experience_value": 80,
+    "max_health": 100,
+    "weapon_item_id": 1007,
+    "ammo_item_id": 2002,
+    "reserve_ammo_count": 60,
+    "loot_loaded_ammo_deduction_ratio": 0.4,
+    "loot_loaded_ammo_flat_deduction": 2
   }
 ]

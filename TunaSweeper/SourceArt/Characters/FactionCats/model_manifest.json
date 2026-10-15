@@ -1,0 +1,238 @@
+{
+  "palette": [
+    {
+      "name": "ink",
+      "srgb": [
+        23,
+        28,
+        39
+      ]
+    },
+    {
+      "name": "navy",
+      "srgb": [
+        29,
+        57,
+        94
+      ]
+    },
+    {
+      "name": "blue",
+      "srgb": [
+        55,
+        104,
+        145
+      ]
+    },
+    {
+      "name": "ivory",
+      "srgb": [
+        236,
+        229,
+        211
+      ]
+    },
+    {
+      "name": "white",
+      "srgb": [
+        253,
+        248,
+        233
+      ]
+    },
+    {
+      "name": "grey",
+      "srgb": [
+        148,
+        164,
+        169
+      ]
+    },
+    {
+      "name": "grey_dark",
+      "srgb": [
+        97,
+        119,
+        129
+      ]
+    },
+    {
+      "name": "pink",
+      "srgb": [
+        224,
+        142,
+        141
+      ]
+    },
+    {
+      "name": "gold",
+      "srgb": [
+        224,
+        169,
+        65
+      ]
+    },
+    {
+      "name": "ginger",
+      "srgb": [
+        206,
+        132,
+        67
+      ]
+    },
+    {
+      "name": "ginger_dark",
+      "srgb": [
+        149,
+        82,
+        46
+      ]
+    },
+    {
+      "name": "burgundy",
+      "srgb": [
+        111,
+        39,
+        52
+      ]
+    },
+    {
+      "name": "red",
+      "srgb": [
+        183,
+        54,
+        54
+      ]
+    },
+    {
+      "name": "teal",
+      "srgb": [
+        89,
+        185,
+        189
+      ]
+    },
+    {
+      "name": "leather",
+      "srgb": [
+        76,
+        53,
+        44
+      ]
+    },
+    {
+      "name": "cream",
+      "srgb": [
+        242,
+        209,
+        156
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "name": "SM_MarineCat",
+      "voxel_cell_cm": 3,
+      "max_grid": [
+        32,
+        32,
+        32
+      ],
+      "occupied_voxels": 6714,
+      "exposed_unit_faces": 3172,
+      "merged_surface_quads": 308,
+      "vertices": 446,
+      "triangles": 616,
+      "bounds_cm": [
+        [
+          -36.000001430511475,
+          36.000001430511475
+        ],
+        [
+          -30.000001192092896,
+          33.000001311302185
+        ],
+        [
+          0.0,
+          95.99999785423279
+        ]
+      ],
+      "dimensions_cm": [
+        72.0,
+        63.0,
+        96.0
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "palette_texture": "T_FactionCatsPalette.png",
+      "palette_size_px": [
+        128,
+        8
+      ],
+      "palette_opaque": true,
+      "internal_faces": 0,
+      "uv_triangle_min_area": 0.0078125,
+      "degenerate_uv_triangles": 0,
+      "all_tangents_finite": true,
+      "forward_blender": "+X",
+      "up_blender": "+Z",
+      "fbx_export_axis_forward": "-Y",
+      "fbx_export_axis_up": "Z",
+      "pivot": "ground at z=0, voxel lattice XY centered",
+      "provider_id": "provider.marine_cat",
+      "npc_id": "npc.marine_cat"
+    },
+    {
+      "name": "SM_PirateCat",
+      "voxel_cell_cm": 3,
+      "max_grid": [
+        32,
+        32,
+        32
+      ],
+      "occupied_voxels": 6987,
+      "exposed_unit_faces": 3418,
+      "merged_surface_quads": 330,
+      "vertices": 470,
+      "triangles": 660,
+      "bounds_cm": [
+        [
+          -36.000001430511475,
+          33.000001311302185
+        ],
+        [
+          -33.000001311302185,
+          36.000001430511475
+        ],
+        [
+          0.0,
+          95.99999785423279
+        ]
+      ],
+      "dimensions_cm": [
+        69.0,
+        69.0,
+        96.0
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "palette_texture": "T_FactionCatsPalette.png",
+      "palette_size_px": [
+        128,
+        8
+      ],
+      "palette_opaque": true,
+      "internal_faces": 0,
+      "uv_triangle_min_area": 0.0078125,
+      "degenerate_uv_triangles": 0,
+      "all_tangents_finite": true,
+      "forward_blender": "+X",
+      "up_blender": "+Z",
+      "fbx_export_axis_forward": "-Y",
+      "fbx_export_axis_up": "Z",
+      "pivot": "ground at z=0, voxel lattice XY centered",
+      "provider_id": "provider.pirate_cat",
+      "npc_id": "npc.pirate_cat"
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "passed": true,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "asset_checks": [
+    {
+      "mesh": "/Game/Characters/Region2Robots/Meshes/SM_DeliveryRobot_Body.SM_DeliveryRobot_Body",
+      "bounds_cm": [
+        -48.5,
+        -50.0,
+        24.999998092651367,
+        53.0,
+        50.0,
+        106.50000762939453
+      ],
+      "slots": [
+        "BodyAtlas",
+        "Eyes"
+      ],
+      "uv_channels": 1
+    },
+    {
+      "mesh": "/Game/Characters/Region2Robots/Meshes/SM_DeliveryRobot_Wheel.SM_DeliveryRobot_Wheel",
+      "bounds_cm": [
+        -32.0,
+        -10.500000953674316,
+        -32.0,
+        32.0,
+        10.500000953674316,
+        32.0
+      ],
+      "slots": [
+        "BodyAtlas"
+      ],
+      "uv_channels": 1
+    },
+    {
+      "mesh": "/Game/Characters/Region2Robots/Meshes/SM_RabbitTrike_Body.SM_RabbitTrike_Body",
+      "bounds_cm": [
+        -101.0,
+        -56.999996185302734,
+        26.66911506652832,
+        97.0,
+        57.00000762939453,
+        151.6189727783203
+      ],
+      "slots": [
+        "BodyAtlas",
+        "Eyes"
+      ],
+      "uv_channels": 1
+    },
+    {
+      "mesh": "/Game/Characters/Region2Robots/Meshes/SM_RabbitTrike_Wheel.SM_RabbitTrike_Wheel",
+      "bounds_cm": [
+        -30.000001907348633,
+        -12.500000953674316,
+        -30.000001907348633,
+        30.000001907348633,
+        12.500000953674316,
+        30.000001907348633
+      ],
+      "slots": [
+        "BodyAtlas"
+      ],
+      "uv_channels": 1
+    }
+  ],
+  "blueprints": [
+    {
+      "bp": "BP_DeliveryRobot_Marine",
+      "enemy_id": "enemy.marine_delivery",
+      "faction_id": 20,
+      "visible_wheels": 2,
+      "eye_material": "/Game/Characters/Region2Robots/Materials/MI_RobotEyes_MarineBlue.MI_RobotEyes_MarineBlue",
+      "body_nonemissive": true
+    },
+    {
+      "bp": "BP_DeliveryRobot_Pirate",
+      "enemy_id": "enemy.pirate_delivery",
+      "faction_id": 21,
+      "visible_wheels": 2,
+      "eye_material": "/Game/Characters/Region2Robots/Materials/MI_RobotEyes_PirateRed.MI_RobotEyes_PirateRed",
+      "body_nonemissive": true
+    },
+    {
+      "bp": "BP_RabbitTrike",
+      "enemy_id": "enemy.rabbit_trike",
+      "faction_id": 22,
+      "visible_wheels": 3,
+      "eye_material": "/Game/Characters/Region2Robots/Materials/MI_RobotEyes_RabbitAmber.MI_RobotEyes_RabbitAmber",
+      "body_nonemissive": true
+    }
+  ],
+  "texture_dimensions": [
+    {
+      "texture": "/Game/Characters/Region2Robots/Textures/T_Region2Robots_Atlas.T_Region2Robots_Atlas",
+      "actual": [
+        1024,
+        1024
+      ],
+      "expected": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "texture": "/Game/Characters/FactionCats/T_FactionCatsPalette.T_FactionCatsPalette",
+      "actual": [
+        128,
+        8
+      ],
+      "expected": [
+        128,
+        8
+      ]
+    }
+  ],
+  "material_shader_statistics": [
+    {
+      "material": "/Game/Characters/FactionCats/M_FactionCats.M_FactionCats",
+      "pixel_instructions": 186,
+      "vertex_instructions": 153
+    },
+    {
+      "material": "/Game/Characters/Region2Robots/Materials/M_RobotBodyAtlas.M_RobotBodyAtlas",
+      "pixel_instructions": 189,
+      "vertex_instructions": 153
+    },
+    {
+      "material": "/Game/Characters/Region2Robots/Materials/M_RobotEyes.M_RobotEyes",
+      "pixel_instructions": 189,
+      "vertex_instructions": 148
+    },
+    {
+      "material": "/Game/Characters/Region2Robots/Materials/MI_RobotBodyAtlas.MI_RobotBodyAtlas",
+      "pixel_instructions": 189,
+      "vertex_instructions": 153
+    },
+    {
+      "material": "/Game/Characters/Region2Robots/Materials/MI_RobotEyes_MarineBlue.MI_RobotEyes_MarineBlue",
+      "pixel_instructions": 189,
+      "vertex_instructions": 148
+    },
+    {
+      "material": "/Game/Characters/Region2Robots/Materials/MI_RobotEyes_PirateRed.MI_RobotEyes_PirateRed",
+      "pixel_instructions": 189,
+      "vertex_instructions": 148
+    },
+    {
+      "material": "/Game/Characters/Region2Robots/Materials/MI_RobotEyes_RabbitAmber.MI_RobotEyes_RabbitAmber",
+      "pixel_instructions": 189,
+      "vertex_instructions": 148
+    }
+  ],
+  "map": "/Game/MainRaid/RaidVillage",
+  "placements": [
+    {
+      "label": "Village_MarineDelivery_01",
+      "placement_id": 1,
+      "profile_id": "enemy.marine_delivery",
+      "position_cm": [
+        500.0,
+        -3600.0,
+        229.63339297294624
+      ]
+    },
+    {
+      "label": "Village_MarineDelivery_02",
+      "placement_id": 2,
+      "profile_id": "enemy.marine_delivery",
+      "position_cm": [
+        500.0,
+        -2700.0,
+        218.8823101954804
+      ]
+    },
+    {
+      "label": "Village_PirateDelivery_01",
+      "placement_id": 3,
+      "profile_id": "enemy.pirate_delivery",
+      "position_cm": [
+        3700.0,
+        -600.0,
+        223.4396742403169
+      ]
+    },
+    {
+      "label": "Village_PirateDelivery_02",
+      "placement_id": 4,
+      "profile_id": "enemy.pirate_delivery",
+      "position_cm": [
+        3700.0,
+        300.0,
+        223.45788884620015
+      ]
+    },
+    {
+      "label": "Village_RabbitTrike_01",
+      "placement_id": 5,
+      "profile_id": "enemy.rabbit_trike",
+      "position_cm": [
+        500.0,
+        3300.0,
+        247.14997745207074
+      ]
+    },
+    {
+      "label": "Village_RabbitTrike_02",
+      "placement_id": 6,
+      "profile_id": "enemy.rabbit_trike",
+      "position_cm": [
+        500.0,
+        4200.0,
+        252.78639163187836
+      ]
+    }
+  ],
+  "station_count": 3,
+  "arrival_actor_count": 3,
+  "navigation_bounds_count": 1,
+  "navigation_recast_count": 1,
+  "navigation_local_paths": [
+    {
+      "label": "Village_MarineDelivery_01",
+      "profile_id": "enemy.marine_delivery",
+      "projected_start_cm": [
+        500.0,
+        -3600.0,
+        182.55749956013838
+      ],
+      "reachable_target_cm": [
+        650.0,
+        -3600.0,
+        183.19736417010384
+      ],
+      "path_length_cm": 150.0013647495218,
+      "agent_class": "/Game/Characters/Region2Robots/BP_DeliveryRobot_Marine.BP_DeliveryRobot_Marine_C",
+      "partial": false
+    },
+    {
+      "label": "Village_MarineDelivery_02",
+      "profile_id": "enemy.marine_delivery",
+      "projected_start_cm": [
+        500.0,
+        -2700.0,
+        171.15895999999987
+      ],
+      "reachable_target_cm": [
+        650.0,
+        -2700.0,
+        171.15895999999987
+      ],
+      "path_length_cm": 150.0,
+      "agent_class": "/Game/Characters/Region2Robots/BP_DeliveryRobot_Marine.BP_DeliveryRobot_Marine_C",
+      "partial": false
+    },
+    {
+      "label": "Village_PirateDelivery_01",
+      "profile_id": "enemy.pirate_delivery",
+      "projected_start_cm": [
+        3700.0,
+        -600.0,
+        171.15895999999987
+      ],
+      "reachable_target_cm": [
+        3850.0,
+        -600.0,
+        171.15895999999987
+      ],
+      "path_length_cm": 150.0,
+      "agent_class": "/Game/Characters/Region2Robots/BP_DeliveryRobot_Pirate.BP_DeliveryRobot_Pirate_C",
+      "partial": false
+    },
+    {
+      "label": "Village_PirateDelivery_02",
+      "profile_id": "enemy.pirate_delivery",
+      "projected_start_cm": [
+        3700.0,
+        300.0,
+        171.15895999999987
+      ],
+      "reachable_target_cm": [
+        3850.0,
+        300.0,
+        171.15895999999987
+      ],
+      "path_length_cm": 150.0,
+      "agent_class": "/Game/Characters/Region2Robots/BP_DeliveryRobot_Pirate.BP_DeliveryRobot_Pirate_C",
+      "partial": false
+    },
+    {
+      "label": "Village_RabbitTrike_01",
+      "profile_id": "enemy.rabbit_trike",
+      "projected_start_cm": [
+        500.0,
+        3300.0,
+        179.6799512356939
+      ],
+      "reachable_target_cm": [
+        650.0,
+        3300.0,
+        179.15145580459892
+      ],
+      "path_length_cm": 150.0009310218463,
+      "agent_class": "/Game/Characters/Region2Robots/BP_RabbitTrike.BP_RabbitTrike_C",
+      "partial": false
+    },
+    {
+      "label": "Village_RabbitTrike_02",
+      "profile_id": "enemy.rabbit_trike",
+      "projected_start_cm": [
+        500.0,
+        4200.0,
+        189.44505986504709
+      ],
+      "reachable_target_cm": [
+        650.0,
+        4200.0,
+        188.00106526315776
+      ],
+      "path_length_cm": 150.00695024034815,
+      "agent_class": "/Game/Characters/Region2Robots/BP_RabbitTrike.BP_RabbitTrike_C",
+      "partial": false
+    }
+  ],
+  "navigation_projection_and_agent_paths_passed": true,
+  "packages_unchanged": true,
+  "elapsed_seconds": 2.16
+}

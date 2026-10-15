@@ -11,6 +11,7 @@ class UNiagaraComponent;
 class UNiagaraSystem;
 class UStaticMesh;
 class USoundBase;
+class ATunaSweeperEnemyCharacter;
 
 UENUM(BlueprintType)
 enum class ETunaSweeperATVDamageState : uint8 { Healthy, Damaged, Critical, Destroyed };
@@ -93,7 +94,20 @@ public:
 	TObjectPtr<USkeletalMeshComponent> VehicleMesh;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV")
 	TObjectPtr<UTunaSweeperVehicleMountComponent> MountComponent;
+	/** Occupied chassis impacts above this horizontal speed can damage hostile enemies. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Collision", meta=(ClampMin="1", Units="cm/s"))
+	float CollisionDamageMinSpeed = 350.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Collision", meta=(ClampMin="0"))
+	float CollisionDamagePerSpeed = 0.15f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Collision", meta=(ClampMin="0"))
+	float CollisionDamageMaximum = 250.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Collision", meta=(ClampMin="0.05", Units="s"))
+	float CollisionDamageCooldown = 0.75f;
 private:
+	void UpdateCollisionDamage(float DeltaSeconds);
+	FVector PreviousCollisionLocation = FVector::ZeroVector;
+	bool bHasCollisionLocation = false;
+	TMap<TWeakObjectPtr<ATunaSweeperEnemyCharacter>, double> NextCollisionDamageTime;
 	void CreateDamageComponents();
 	void UpdateDamageSmoke(float DeltaSeconds);
 	void DestroyVehicle();
