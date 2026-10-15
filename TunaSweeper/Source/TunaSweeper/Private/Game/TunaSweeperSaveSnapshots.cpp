@@ -9,12 +9,39 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Misc/SecureHash.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace TunaSweeperSaveTool::Internal
 {
     namespace Snapshots
     {
+        FString ReadNote(const FString& SnapshotPath)
+        {
+            const FString Path = SnapshotPath + TEXT(".json");
+            const int64 Size = IFileManager::Get().FileSize(*Path);
+            FString Json, Note;
+            TSharedPtr<FJsonObject> Metadata;
+            if (Size > 0 && Size <= 64 * 1024 && FFileHelper::LoadFileToString(Json, *Path) &&
+                FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Metadata) && Metadata &&
+                Metadata->TryGetStringField(TEXT("note"), Note) && Note.Len() <= 2048) return Note;
+            // Old snapshots have no sidecar; damaged notes must not hide valid save copies.
+            return FString();
+        }
+
+        bool WriteNote(const FString& SnapshotPath, const FString& Note)
+        {
+            if (Note.IsEmpty()) return true;
+            auto Metadata = MakeShared<FJsonObject>();
+            Metadata->SetNumberField(TEXT("version"), 1);
+            Metadata->SetStringField(TEXT("note"), Note);
+            FString Json;
+            return FJsonSerializer::Serialize(Metadata, TJsonWriterFactory<>::Create(&Json)) &&
+                FFileHelper::SaveStringToFile(Json, *(SnapshotPath + TEXT(".json")), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM) &&
+                ReadNote(SnapshotPath) == Note;
+        }
+
         bool Read(const FString& Path, TArray<uint8>& Bytes)
         {
             const int64 Size = IFileManager::Get().FileSize(*Path);
@@ -62,9 +89,16 @@ namespace TunaSweeperSaveTool::Internal
     {
         const FString Op = Request->GetStringField(TEXT("operation"));
         const bool bRestore = Op == TEXT("snapshot-restore");
-        if (Op != TEXT("snapshot-list") && Op != TEXT("snapshot-create") && !bRestore) return Result(TEXT("unknown_operation"));
-        if (!Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot"), TEXT("snapshotId") }) ||
-            (!bRestore && Request->HasField(TEXT("snapshotId")))) return Result(TEXT("invalid_request"));
+        const bool bDelete = Op == TEXT("snapshot-delete");
+        const bool bCreate = Op == TEXT("snapshot-create");
+        if (Op != TEXT("snapshot-list") && !bCreate && !bRestore && !bDelete) return Result(TEXT("unknown_operation"));
+        if (!Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot"), TEXT("snapshotId"), TEXT("note") }) ||
+            (!bRestore && !bDelete && Request->HasField(TEXT("snapshotId"))) ||
+            (!bCreate && Request->HasField(TEXT("note")))) return Result(TEXT("invalid_request"));
+        FString Note;
+        if (Request->HasField(TEXT("note")) && (Request->Values[TEXT("note")]->Type != EJson::String || !Request->TryGetStringField(TEXT("note"), Note) ||
+            Note.Len() > 2048)) return Result(TEXT("invalid_request"));
+        Note.TrimStartAndEndInline();
         if (GEngine)
             for (const FWorldContext& Context : GEngine->GetWorldContexts())
                 if (Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::Game) return Result(TEXT("game_running"));
@@ -103,19 +137,39 @@ namespace TunaSweeperSaveTool::Internal
                 Row->SetStringField(TEXT("createdAt"), FString::Printf(TEXT("%s-%s-%s %s:%s:%s"),
                     *Stamp.Mid(0, 4), *Stamp.Mid(4, 2), *Stamp.Mid(6, 2), *Stamp.Mid(9, 2), *Stamp.Mid(11, 2), *Stamp.Mid(13, 2)));
                 Row->SetBoolField(TEXT("beforeRestore"), Id.StartsWith(TEXT("before-restore-")));
+                Row->SetStringField(TEXT("note"), Snapshots::ReadNote(Directory / Id));
                 Rows.Add(MakeShared<FJsonValueObject>(Row));
             }
             auto R = Result(); R->SetArrayField(TEXT("snapshots"), Rows); R->SetStringField(TEXT("directory"), Directory); return R;
+        }
+        if (bDelete)
+        {
+            FString Id;
+            if (!Request->TryGetStringField(TEXT("snapshotId"), Id) || !Snapshots::ValidId(Id)) return Result(TEXT("invalid_snapshot"));
+            const FString Copy = Directory / Id, Metadata = Copy + TEXT(".json");
+            const bool bCopyExists = IFileManager::Get().FileExists(*Copy);
+            const bool bMetadataExists = IFileManager::Get().FileExists(*Metadata);
+            if (!bCopyExists && !bMetadataExists) return Result(TEXT("invalid_snapshot"));
+            // Delete only files derived from a validated ID in this slot's isolated directory.
+            // A leftover sidecar can be retried without ever touching the active gameplay save.
+            if (bCopyExists && !IFileManager::Get().Delete(*Copy, true, false)) return Result(TEXT("snapshot_delete_failed"));
+            if (bMetadataExists && !IFileManager::Get().Delete(*Metadata, true, false)) return Result(TEXT("snapshot_delete_failed"));
+            return Result();
         }
         TArray<uint8> Original;
         if (!Snapshots::Read(Path, Original)) return Result(TEXT("save_unreadable"));
         TStrongObjectPtr<USaveGame> Current(TunaSweeperSafeSave::LoadVerifiedSaveFile(Path, Validator));
         if (!Current) return Result(TEXT("save_invalid"));
-        if (!bRestore)
+        if (bCreate)
         {
             FString Copy;
             if (!Snapshots::WriteCopy(Directory, Original, false, Copy)) return Result(TEXT("backup_failed"));
-            if (!TunaSweeperSafeSave::LoadVerifiedSaveFile(Copy, Validator)) return Result(TEXT("save_invalid"));
+            if (!TunaSweeperSafeSave::LoadVerifiedSaveFile(Copy, Validator) || !Snapshots::WriteNote(Copy, Note))
+            {
+                IFileManager::Get().Delete(*(Copy + TEXT(".json")));
+                IFileManager::Get().Delete(*Copy);
+                return Result(TEXT("backup_failed"));
+            }
             auto R = Result(); R->SetStringField(TEXT("snapshotId"), FPaths::GetCleanFilename(Copy));
             R->SetStringField(TEXT("snapshotPath"), Copy); return R;
         }

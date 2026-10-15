@@ -667,7 +667,14 @@ ui.quest_cheat.flavor.demo,데모,Demo,デモ
 ui.interaction.control_room_return,원래 위치로 돌아가기,Return to the entrance,入口へ戻る
 ui.save_snapshot.title,세이브 스냅샷,Save Snapshots,セーブスナップショット
 ui.save_snapshot.help,현재 슬롯에 마지막으로 저장된 상태를 보관합니다. 계정 공용 도전과제·설정은 포함하지 않습니다.,Preserve the last saved state of the current slot. Account-wide achievements and settings are excluded.,現在のスロットの最終保存状態を保管します。アカウント共通の実績や設定は含みません。
-ui.save_snapshot.locked,플레이를 종료한 뒤 스냅샷을 생성하거나 복구할 수 있습니다.,Stop play before creating or restoring snapshots.,プレイ終了後にスナップショットを作成・復元できます。
+ui.save_snapshot.locked,플레이를 종료한 뒤 스냅샷을 생성·복구·삭제할 수 있습니다.,Stop play before creating or restoring or deleting snapshots.,プレイ終了後にスナップショットを作成・復元・削除できます。
+ui.save_snapshot.note_hint,메모 입력 (선택 · 최대 2048자),Memo (optional · up to 2048 characters),メモ（任意・最大2048文字）
+ui.save_snapshot.note_empty,메모 없음,No memo,メモなし
+ui.save_snapshot.note_row,메모: {0},Memo: {0},メモ：{0}
+ui.save_snapshot.note_too_long,메모는 2048자 이내로 입력하세요.,Keep the memo within 2048 characters.,メモは2048文字以内で入力してください。
+ui.save_snapshot.delete,선택한 스냅샷 삭제,Delete Selected Snapshot,選択したスナップショットを削除
+ui.save_snapshot.delete_confirm,{0}\n{1}\n이 스냅샷과 메모를 삭제할까요? 삭제는 되돌릴 수 없습니다. 현재 세이브는 유지됩니다.,{0}\n{1}\nDelete this snapshot and its memo? This cannot be undone. The current save is preserved.,{0}\n{1}\nこのスナップショットとメモを削除しますか？元には戻せません。現在のセーブは維持されます。
+ui.save_snapshot.deleted,선택한 스냅샷과 메모를 삭제했습니다.,Selected snapshot and memo deleted.,選択したスナップショットとメモを削除しました。
 ui.save_snapshot.create,현재 슬롯 스냅샷 생성,Snapshot Current Slot,現在のスロットを保存
 ui.save_snapshot.restore,선택한 스냅샷 복구,Restore Selected Snapshot,選択したスナップショットを復元
 ui.save_snapshot.row,{0} · {1},{0} · {1},{0} · {1}

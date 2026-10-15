@@ -9,6 +9,7 @@
 #include "ToolMenus.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SCompoundWidget.h"
@@ -19,7 +20,22 @@ namespace TunaSweeperSaveSnapshotEditor
 {
     const FName TabId(TEXT("TunaSweeperSaveSnapshots"));
     TArray<FProcHandle> StandaloneProcesses;
-    FText Text(const TCHAR* Key) { return TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::Korean); }
+    FText Text(const TCHAR* Key)
+    {
+        return FText::FromString(TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::Korean)
+            .ToString().Replace(TEXT("\\n"), TEXT("\n")));
+    }
+    FText SnapshotTitle(const TSharedPtr<FJsonObject>& Row)
+    {
+        return FText::Format(Text(TEXT("ui.save_snapshot.row")), FText::FromString(Row->GetStringField(TEXT("createdAt"))),
+            Text(Row->GetBoolField(TEXT("beforeRestore")) ? TEXT("ui.save_snapshot.automatic") : TEXT("ui.save_snapshot.manual")));
+    }
+    FText SnapshotNote(const TSharedPtr<FJsonObject>& Row)
+    {
+        FString Note; Row->TryGetStringField(TEXT("note"), Note);
+        return FText::Format(Text(TEXT("ui.save_snapshot.note_row")), Note.IsEmpty() ?
+            Text(TEXT("ui.save_snapshot.note_empty")) : FText::FromString(Note));
+    }
     bool IsLocked()
     {
         bool bStandalone = false;
@@ -48,16 +64,29 @@ namespace TunaSweeperSaveSnapshotEditor
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
                     [ SNew(STextBlock).Text(Text(TEXT("ui.save_snapshot.locked")))
                         .Visibility_Lambda([] { return IsLocked() ? EVisibility::Visible : EVisibility::Collapsed; }) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
+                    [ SAssignNew(NoteInput, SEditableTextBox)
+                        .HintText(Text(TEXT("ui.save_snapshot.note_hint")))
+                        .IsEnabled_Lambda([this] { return Ready(); })
+                        .OnVerifyTextChanged_Lambda([](const FText& Value, FText& OutError)
+                        {
+                            if (Value.ToString().Len() <= 2048) return true;
+                            OutError = Text(TEXT("ui.save_snapshot.note_too_long")); return false;
+                        }) ]
                     + SVerticalBox::Slot().AutoHeight()
                     [ SNew(SHorizontalBox)
                         + SHorizontalBox::Slot().AutoWidth()
                         [ SNew(SButton).Text(Text(TEXT("ui.save_snapshot.create")))
-                            .IsEnabled_Lambda([this] { return Ready(); })
+                            .IsEnabled_Lambda([this] { return Ready() && NoteInput->GetText().ToString().Len() <= 2048; })
                             .OnClicked_Lambda([this] { return Create(); }) ]
                         + SHorizontalBox::Slot().AutoWidth().Padding(8, 0)
                         [ SNew(SButton).Text(Text(TEXT("ui.save_snapshot.restore")))
                             .IsEnabled_Lambda([this] { return Ready() && Selected.IsValid(); })
                             .OnClicked_Lambda([this] { return Restore(); }) ]
+                        + SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 8, 0)
+                        [ SNew(SButton).Text(Text(TEXT("ui.save_snapshot.delete")))
+                            .IsEnabled_Lambda([this] { return Ready() && Selected.IsValid(); })
+                            .OnClicked_Lambda([this] { return Delete(); }) ]
                         + SHorizontalBox::Slot().AutoWidth()
                         [ SNew(SButton).Text(Text(TEXT("ui.quest_cheat.refresh")))
                             .IsEnabled_Lambda([] { return !IsLocked(); })
@@ -69,9 +98,11 @@ namespace TunaSweeperSaveSnapshotEditor
                         .OnGenerateRow_Lambda([](TSharedPtr<FJsonObject> Row, const TSharedRef<STableViewBase>& Owner)
                         {
                             return SNew(STableRow<TSharedPtr<FJsonObject>>, Owner).Padding(8)
-                                [ SNew(STextBlock).Text(FText::Format(Text(TEXT("ui.save_snapshot.row")),
-                                    FText::FromString(Row->GetStringField(TEXT("createdAt"))),
-                                    Text(Row->GetBoolField(TEXT("beforeRestore")) ? TEXT("ui.save_snapshot.automatic") : TEXT("ui.save_snapshot.manual")))) ];
+                                [ SNew(SVerticalBox)
+                                    + SVerticalBox::Slot().AutoHeight()
+                                    [ SNew(STextBlock).Text(SnapshotTitle(Row)) ]
+                                    + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
+                                    [ SNew(STextBlock).Text(SnapshotNote(Row)).AutoWrapText(true).ToolTipText(SnapshotNote(Row)) ] ];
                         })
                         .OnSelectionChanged_Lambda([this](TSharedPtr<FJsonObject> Row, ESelectInfo::Type) { Selected = Row; }) ]
                     + SVerticalBox::Slot().AutoHeight()
@@ -127,9 +158,28 @@ namespace TunaSweeperSaveSnapshotEditor
         {
             Refresh(false);
             if (!Ready()) return FReply::Handled();
-            auto R = TunaSweeperSaveTool::Execute(Request(TEXT("snapshot-create")));
-            if (R->GetBoolField(TEXT("ok"))) { Refresh(true); Status = Text(TEXT("ui.save_snapshot.created")); }
+            auto CreateRequest = Request(TEXT("snapshot-create"));
+            CreateRequest->SetStringField(TEXT("note"), NoteInput->GetText().ToString());
+            auto R = TunaSweeperSaveTool::Execute(CreateRequest);
+            if (R->GetBoolField(TEXT("ok"))) { NoteInput->SetText(FText::GetEmpty()); Refresh(true); Status = Text(TEXT("ui.save_snapshot.created")); }
             else Error(R);
+            return FReply::Handled();
+        }
+        FReply Delete()
+        {
+            Refresh(false);
+            if (!Ready() || !Selected) return FReply::Handled();
+            const FString Path = ListedPath;
+            const FString Id = Selected->GetStringField(TEXT("snapshotId"));
+            if (FMessageDialog::Open(EAppMsgType::YesNo, FText::Format(Text(TEXT("ui.save_snapshot.delete_confirm")),
+                SnapshotTitle(Selected), SnapshotNote(Selected))) != EAppReturnType::Yes) return FReply::Handled();
+            Refresh(false);
+            if (!Ready() || Path != ListedPath) { Status = Text(TEXT("ui.save_snapshot.selection_changed")); return FReply::Handled(); }
+            auto R = Request(TEXT("snapshot-delete")); R->SetStringField(TEXT("snapshotId"), Id);
+            auto Result = TunaSweeperSaveTool::Execute(R);
+            Refresh(true);
+            if (Result->GetBoolField(TEXT("ok"))) Status = Text(TEXT("ui.save_snapshot.deleted"));
+            else Error(Result);
             return FReply::Handled();
         }
         FReply Restore()
@@ -154,6 +204,7 @@ namespace TunaSweeperSaveSnapshotEditor
         TSharedPtr<FJsonObject> Selection, Selected;
         TArray<TSharedPtr<FJsonObject>> Rows;
         TSharedPtr<SListView<TSharedPtr<FJsonObject>>> List;
+        TSharedPtr<SEditableTextBox> NoteInput;
     };
 }
 
@@ -198,6 +249,12 @@ bool FTunaSweeperSaveSnapshotEditorTest::RunTest(const FString& Parameters)
 {
     using namespace TunaSweeperSaveSnapshotEditor;
     if (!GEditor || IsLocked()) { AddError(TEXT("Requires an idle editor.")); return false; }
+    TestTrue(TEXT("Delete confirmation renders CSV line breaks"), Text(TEXT("ui.save_snapshot.delete_confirm")).ToString().Contains(TEXT("\n")));
+    auto MemoRow = MakeShared<FJsonObject>();
+    MemoRow->SetStringField(TEXT("note"), TEXT("한글 메모 — 낙석 개방 전"));
+    TestTrue(TEXT("List text includes the full Korean memo"), SnapshotNote(MemoRow).ToString().Contains(TEXT("한글 메모 — 낙석 개방 전")));
+    MemoRow->RemoveField(TEXT("note"));
+    TestTrue(TEXT("Older rows visibly identify missing memos"), SnapshotNote(MemoRow).ToString().Contains(Text(TEXT("ui.save_snapshot.note_empty")).ToString()));
     auto Tab = FGlobalTabmanager::Get()->TryInvokeTab(TabId);
     TestTrue(TEXT("Snapshot editor tab can be opened without mutating saves"), Tab.IsValid());
     if (Tab) Tab->RequestCloseTab();
