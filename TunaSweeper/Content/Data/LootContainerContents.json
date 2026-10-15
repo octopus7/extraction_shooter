@@ -258,12 +258,13 @@
   },
   {
     "id": 8022,
-    "memo_ko": "시설 복구 자재 확정 보급: 목재 2개, 전열코일/깃털/수도 밸브 각 1개",
+    "memo_ko": "시설 복구 자재 확정 보급: 목재 2개, 전열코일/깃털/수도 밸브/탁상시계 각 1개",
     "items": [
       { "item_id": 6002, "quantity": 2, "drop_chance": 10000 },
       { "item_id": 6023, "quantity": 1, "drop_chance": 10000 },
       { "item_id": 6022, "quantity": 1, "drop_chance": 10000 },
-      { "item_id": 6021, "quantity": 1, "drop_chance": 10000 }
+      { "item_id": 6021, "quantity": 1, "drop_chance": 10000 },
+      { "item_id": 6032, "quantity": 1, "drop_chance": 10000 }
     ]
   }
 ]

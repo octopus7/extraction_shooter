@@ -11,7 +11,7 @@ assert u.SystemLibrary.is_unattended()
 assert Path(u.Paths.project_saved_dir()).resolve().name=='Saved_FacilitySupplyQA'
 MAP=ROOT/'TunaSweeper/Content/MainRaid/RaidForest.umap'
 baseline=hashlib.sha256(MAP.read_bytes()).hexdigest()
-expected={6002:2,6023:1,6022:1,6021:1}
+expected={6002:2,6023:1,6022:1,6021:1,6032:1}
 data=json.loads((ROOT/'TunaSweeper/Content/Data/LootContainerContents.json').read_text(encoding='utf8'))
 assert len({r['id'] for r in data})==len(data)
 row=next(r for r in data if r['id']==8022)
@@ -52,7 +52,7 @@ def tick(dt):
             for index in range(100):
                 result=a.build_container_instance()
                 if isinstance(result,tuple):result=next(x for x in result if isinstance(x,u.TunaSweeperLootContainerInstance))
-                assert result and result.capacity>=4
+                assert result and result.capacity>=len(expected)
                 assert {s.item_id:s.quantity for s in result.items}==expected,index
             report['actual_loot_generation_runs']=100
             pawn=u.GameplayStatics.get_player_pawn(game,0);assert pawn
