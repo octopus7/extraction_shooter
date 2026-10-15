@@ -1,4 +1,5 @@
 #include "UI/TunaSweeperQuestWidget.h"
+#include "Quest/TunaSweeperQuestId.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
@@ -176,7 +177,9 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 	UVerticalBox* EntryStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("QuestEntryStack"));
 	EntryLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestEntryLabelText"));
 	EntryStateText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestEntryStateText"));
-	if (!EntrySizeBox || !EntryButton || !EntryStack || !EntryLabelText || !EntryStateText)
+	UHorizontalBox* StateRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("QuestEntryStateRow"));
+	EntryIdText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestEntryIdText"));
+	if (!EntrySizeBox || !EntryButton || !EntryStack || !EntryLabelText || !EntryStateText || !StateRow || !EntryIdText)
 	{
 		return;
 	}
@@ -206,7 +209,21 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 	EntryStateText->SetJustification(ETextJustify::Left);
 	EntryStateText->SetAutoWrapText(false);
 	TunaSweeperUIFont::ApplyFont(EntryStateText, 13);
-	if (UVerticalBoxSlot* StateSlot = EntryStack->AddChildToVerticalBox(EntryStateText))
+	EntryIdText->SetFont(EntryStateText->GetFont());
+	EntryIdText->SetJustification(ETextJustify::Right);
+	EntryIdText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 0.5f)));
+	if (UHorizontalBoxSlot* StatusSlot = StateRow->AddChildToHorizontalBox(EntryStateText))
+	{
+		StatusSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
+		StatusSlot->SetVerticalAlignment(VAlign_Center);
+		StatusSlot->SetPadding(FMargin(0.0f, 0.0f, 8.0f, 0.0f));
+	}
+	if (UHorizontalBoxSlot* IdSlot = StateRow->AddChildToHorizontalBox(EntryIdText))
+	{
+		IdSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Automatic));
+		IdSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UVerticalBoxSlot* StateSlot = EntryStack->AddChildToVerticalBox(StateRow))
 	{
 		StateSlot->SetHorizontalAlignment(HAlign_Fill);
 		StateSlot->SetPadding(FMargin(10.0f, 0.0f, 10.0f, 8.0f));
@@ -215,6 +232,11 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 
 void UTunaSweeperQuestListEntryWidget::RefreshEntryView()
 {
+	if (EntryIdText)
+	{
+		EntryIdText->SetText(FText::AsCultureInvariant(TunaSweeperQuestId::Format(QuestId)));
+	}
+
 	if (EntryButton)
 	{
 		TunaSweeperUIStyle::ApplyButton(

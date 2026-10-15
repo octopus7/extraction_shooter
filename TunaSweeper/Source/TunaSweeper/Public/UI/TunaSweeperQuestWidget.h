@@ -52,6 +52,9 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> EntryStateText;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> EntryIdText;
+
 	FTunaSweeperQuestEntryClickedDelegate ClickedDelegate;
 	int32 QuestId = 0;
 	FText Label;
