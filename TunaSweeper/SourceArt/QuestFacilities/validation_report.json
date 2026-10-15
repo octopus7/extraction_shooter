@@ -1,0 +1,199 @@
+{
+  "validation_tool": "Blender 4.5.12 LTS fresh independent processes",
+  "checked_utc": "2026-10-15T19:57:53.6179451Z",
+  "all_passed": true,
+  "results": [
+    {
+      "file": "SM_AIVendingMachine.blend",
+      "passed": true,
+      "dimensions_cm": [
+        100.0,
+        100.0,
+        150.0
+      ],
+      "bounds_m": [
+        [
+          -0.5,
+          0.5
+        ],
+        [
+          -0.5,
+          0.5
+        ],
+        [
+          0.0,
+          1.5
+        ]
+      ],
+      "vertices": 216,
+      "triangles": 428,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "minimum_uv_polygon_area": 2.2002698896184114E-06,
+      "max_grid_error_cells": 0,
+      "normals_tangents_finite": true,
+      "all_mesh_triangle_areas_positive": true,
+      "texture": "T_AIVendingMachine_BaseColor.png",
+      "front_axis": "+X",
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "file": "SM_AIVendingMachine.fbx",
+      "passed": true,
+      "dimensions_cm": [
+        100.00001,
+        100.00001,
+        150.0
+      ],
+      "bounds_m": [
+        [
+          -0.5000000596046448,
+          0.5000000596046448
+        ],
+        [
+          -0.5000000596046448,
+          0.5000000596046448
+        ],
+        [
+          0.0,
+          1.5
+        ]
+      ],
+      "vertices": 216,
+      "triangles": 428,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "minimum_uv_polygon_area": 2.2002698896184114E-06,
+      "max_grid_error_cells": 0,
+      "normals_tangents_finite": true,
+      "all_mesh_triangle_areas_positive": true,
+      "texture": "T_AIVendingMachine_BaseColor.png",
+      "front_axis": "+X",
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        -0.0,
+        8.742277657347586E-08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "file": "SM_ATVPowerCabinet.blend",
+      "passed": true,
+      "dimensions_cm": [
+        70.0,
+        100.0,
+        160.0
+      ],
+      "bounds_m": [
+        [
+          -0.3499999940395355,
+          0.3499999940395355
+        ],
+        [
+          -0.5,
+          0.5
+        ],
+        [
+          0.0,
+          1.600000023841858
+        ]
+      ],
+      "vertices": 512,
+      "triangles": 256,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "minimum_uv_polygon_area": 0.019599995994568076,
+      "max_grid_error_cells": 9.5367431640625E-07,
+      "normals_tangents_finite": true,
+      "all_mesh_triangle_areas_positive": true,
+      "texture": "T_ATVPowerCabinet_Palette.png",
+      "front_axis": "+X",
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "file": "SM_ATVPowerCabinet.fbx",
+      "passed": true,
+      "dimensions_cm": [
+        70.0,
+        100.00001,
+        160.0
+      ],
+      "bounds_m": [
+        [
+          -0.3500000238418579,
+          0.3500000238418579
+        ],
+        [
+          -0.5000000596046448,
+          0.5000000596046448
+        ],
+        [
+          0.0,
+          1.600000023841858
+        ]
+      ],
+      "vertices": 512,
+      "triangles": 256,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "minimum_uv_polygon_area": 0.019599995994568076,
+      "max_grid_error_cells": 1.1920928955078125E-06,
+      "normals_tangents_finite": true,
+      "all_mesh_triangle_areas_positive": true,
+      "texture": "T_ATVPowerCabinet_Palette.png",
+      "front_axis": "+X",
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        -0.0,
+        8.742277657347586E-08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ]
+}

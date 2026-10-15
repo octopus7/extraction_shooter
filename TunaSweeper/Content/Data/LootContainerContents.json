@@ -271,6 +271,7 @@
     "id": 8023,
     "memo_ko": "토끼 삼륜 로봇 확정 전리품: 망가진 점화 플러그, 타이어, 상위 AR/SMG, 2등급 머리/몸 방어구 각 1개",
     "items": [
+      { "item_id": 7004, "quantity_min": 1, "quantity_max": 3, "drop_chance": 10000 },
       {
         "item_id": 6015,
         "quantity": 1,

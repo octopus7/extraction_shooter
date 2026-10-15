@@ -21,6 +21,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Special Vehicle Spawner")
 	TSubclassOf<ATunaSweeperATVActor> VehicleClass;
 
+	/** Optional persistent facility requirement; None preserves unconditional spawning. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Special Vehicle Spawner")
+	FName RequiredWorldProgressObjectId = NAME_None;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "Special Vehicle Spawner")
 	TObjectPtr<ATunaSweeperATVActor> SpawnedVehicle;
 
@@ -28,15 +32,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Special Vehicle Spawner")
 	ATunaSweeperATVActor* SpawnVehicle();
 
-	/** Currently always true. Future quest-dependent BP policy can override this. */
+	/** Checks the optional saved world-progress requirement; Blueprint policy may extend this. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Special Vehicle Spawner")
 	bool ShouldSpawnVehicle() const;
 	virtual bool ShouldSpawnVehicle_Implementation() const;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	void HandleWorldProgressChanged();
+
 	UPROPERTY(Transient)
 	bool bSpawnedThisVisit = false;
 };

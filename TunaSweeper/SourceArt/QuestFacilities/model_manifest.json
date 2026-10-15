@@ -1,0 +1,138 @@
+{
+  "format_version": 1,
+  "authored_with": "Blender 4.5.12 LTS",
+  "assets": [
+    {
+      "dimensions_cm": [
+        100.0,
+        100.0,
+        150.0
+      ],
+      "vertices": 216,
+      "triangles": 428,
+      "polygons": 218,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "front_axis": "+X",
+      "up_axis": "+Z",
+      "pivot": "bottom center",
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "voxel": false,
+      "construction": "Single rounded cuboid; all display, buttons, products, slot and side emblem are UV atlas detail.",
+      "atlas": "atlas_layout.json",
+      "texture_resolution": [
+        2048,
+        2048
+      ],
+      "bevel_radius_cm": 5,
+      "base_color_texture": "T_AIVendingMachine_BaseColor.png",
+      "fbx_export": {
+        "axis_forward": "-Y",
+        "axis_up": "Z",
+        "unit_scale_meters": 1,
+        "apply_scale_options": "FBX_SCALE_UNITS"
+      },
+      "ue_import": {
+        "uniform_scale": 1,
+        "force_front_x_axis": false,
+        "convert_scene": true,
+        "convert_scene_unit": true,
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "generate_lightmap_uvs": true,
+        "collision": "simple box or auto convex",
+        "texture_srgb": true
+      }
+    },
+    {
+      "dimensions_cm": [
+        70.0,
+        100.0,
+        160.0
+      ],
+      "vertices": 512,
+      "triangles": 256,
+      "polygons": 128,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "front_axis": "+X",
+      "up_axis": "+Z",
+      "pivot": "bottom center",
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "voxel": true,
+      "cell_size_cm": 5,
+      "grid_bounds_cells": {
+        "min": [
+          -7,
+          -10,
+          0
+        ],
+        "max": [
+          7,
+          10,
+          32
+        ]
+      },
+      "grid_extent_cells": [
+        14,
+        20,
+        32
+      ],
+      "occupied_cells": 6673,
+      "palette_resolution": [
+        128,
+        128
+      ],
+      "palette_color_cells": [
+        4,
+        4
+      ],
+      "meshing": "Greedy merged equal-color exposed surfaces; no interior faces; opaque single palette material",
+      "palette_uvs": "Area-bearing quads inside one swatch, intentional overlap",
+      "base_color_texture": "T_ATVPowerCabinet_Palette.png",
+      "fbx_export": {
+        "axis_forward": "-Y",
+        "axis_up": "Z",
+        "unit_scale_meters": 1,
+        "apply_scale_options": "FBX_SCALE_UNITS"
+      },
+      "ue_import": {
+        "uniform_scale": 1,
+        "force_front_x_axis": false,
+        "convert_scene": true,
+        "convert_scene_unit": true,
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "generate_lightmap_uvs": true,
+        "collision": "simple box or auto convex",
+        "texture_srgb": true,
+        "texture_filter": "Nearest",
+        "texture_mip_gen_settings": "NoMipmaps",
+        "material_blend_mode": "Opaque"
+      }
+    }
+  ],
+  "validation_report": "validation_report.json",
+  "previews": [
+    "SM_AIVendingMachine_preview.png",
+    "SM_AIVendingMachine_front.png",
+    "SM_ATVPowerCabinet_preview.png",
+    "SM_ATVPowerCabinet_front.png"
+  ],
+  "preview_note": "Blend files contain a separate studio floor, camera and lights. Only the SM_ object is exported in each FBX.",
+  "texture_note": "Opaque RGB textures. The vending atlas contains graphical symbols only, no player-facing language strings."
+}

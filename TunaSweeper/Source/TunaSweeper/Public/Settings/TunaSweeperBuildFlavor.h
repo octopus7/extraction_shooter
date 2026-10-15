@@ -18,6 +18,7 @@ namespace TunaSweeperBuildFlavor
 	TUNASWEEPER_API FString GetStagedMainPayloadRoot();
 	TUNASWEEPER_API FString GetMainPayloadRoot();
 	TUNASWEEPER_API FString GetQuestDefinitionsPath();
+	TUNASWEEPER_API FString GetShopDefinitionsPath();
 	TUNASWEEPER_API void GetQuestTextStringPaths(TArray<FString>& OutPaths);
 	TUNASWEEPER_API FString GetScenarioDefinitionsPath();
 	TUNASWEEPER_API FString GetScenarioTextStringsPath();

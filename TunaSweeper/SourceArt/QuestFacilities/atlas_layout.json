@@ -1,0 +1,43 @@
+{
+  "size": 2048,
+  "regions_pixels_top_left": {
+    "front": [
+      32,
+      32,
+      672,
+      992
+    ],
+    "left": [
+      704,
+      32,
+      1344,
+      992
+    ],
+    "right": [
+      1376,
+      32,
+      2016,
+      992
+    ],
+    "back": [
+      32,
+      1056,
+      672,
+      2016
+    ],
+    "top": [
+      704,
+      1056,
+      1344,
+      1696
+    ],
+    "bottom": [
+      1376,
+      1056,
+      2016,
+      1696
+    ]
+  },
+  "gutter_pixels": 16,
+  "texture_authorship": "procedural vector-style painted UV atlas, no user-facing text"
+}

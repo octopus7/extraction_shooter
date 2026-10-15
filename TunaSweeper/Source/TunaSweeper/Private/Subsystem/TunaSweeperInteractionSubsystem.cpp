@@ -37,6 +37,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperShopActor.h"
+#include "Interaction/TunaSweeperQuestVendingActor.h"
 #include "Interaction/TunaSweeperDebugArmoryActor.h"
 #include "Interaction/TunaSweeperStorageActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
@@ -71,6 +72,7 @@ namespace TunaSweeperInteractionQuestEvents
 
 	int32 ResolveQuestIdForActor(const AActor* Actor)
 	{
+		if (const auto* Vending = Cast<ATunaSweeperQuestVendingActor>(Actor)) return Vending->ResolveQuestId();
 		if (const ATunaSweeperMoleCompanionActor* MoleActor = Cast<ATunaSweeperMoleCompanionActor>(Actor))
 		{
 			return MoleActor->ResolveQuestId();
@@ -86,6 +88,7 @@ namespace TunaSweeperInteractionQuestEvents
 
 	FName ResolveQuestProviderIdForActor(const AActor* Actor)
 	{
+		if (const auto* Vending = Cast<ATunaSweeperQuestVendingActor>(Actor)) return Vending->GetQuestProviderId();
 		if (const auto* Mole = Cast<ATunaSweeperMoleCompanionActor>(Actor)) return Mole->GetQuestProviderId();
 		if (const auto* Npc = Cast<ATunaSweeperFacilityNpcActor>(Actor)) return Npc->GetQuestProviderId();
 		return NAME_None;
@@ -490,6 +493,8 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::ShopOpen)
 	{
+		if (const auto* Vending = Cast<ATunaSweeperQuestVendingActor>(Interactable->GetOwner());
+			Vending && !Vending->IsShopAvailable()) return false;
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
 
@@ -1000,6 +1005,9 @@ bool UTunaSweeperInteractionSubsystem::HandleShopOpenInteraction(
 	{
 		return false;
 	}
+
+	if (const auto* Vending = Cast<ATunaSweeperQuestVendingActor>(ShopActor);
+		Vending && !Vending->IsShopAvailable()) return false;
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
 	if (!TunaPlayerController)

@@ -2,6 +2,7 @@
 
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Vehicle/TunaSweeperATVActor.h"
 
 ATunaSweeperSpecialVehicleSpawner::ATunaSweeperSpecialVehicleSpawner()
@@ -14,12 +15,30 @@ ATunaSweeperSpecialVehicleSpawner::ATunaSweeperSpecialVehicleSpawner()
 void ATunaSweeperSpecialVehicleSpawner::BeginPlay()
 {
 	Super::BeginPlay();
+	if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+		Game->OnWorldProgressChanged.AddUObject(this, &ThisClass::HandleWorldProgressChanged);
+	SpawnVehicle();
+}
+
+void ATunaSweeperSpecialVehicleSpawner::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+		Game->OnWorldProgressChanged.RemoveAll(this);
+	Super::EndPlay(EndPlayReason);
+}
+
+void ATunaSweeperSpecialVehicleSpawner::HandleWorldProgressChanged()
+{
 	SpawnVehicle();
 }
 
 bool ATunaSweeperSpecialVehicleSpawner::ShouldSpawnVehicle_Implementation() const
 {
-	return true;
+	if (RequiredWorldProgressObjectId.IsNone()) return true;
+	const auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	FTunaSweeperWorldProgressSaveData State;
+	return Game && Game->TryGetWorldProgressState(RequiredWorldProgressObjectId, State)
+		&& State.State == ETunaSweeperWorldProgressState::Completed;
 }
 
 ATunaSweeperATVActor* ATunaSweeperSpecialVehicleSpawner::SpawnVehicle()

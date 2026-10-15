@@ -141,7 +141,7 @@ item.rabbit_battery,兔子图案电池,兔子圖案電池,Аккумулятор
 item.rabbit_battery.desc,印有兔子图案的电池。,印有兔子圖案的電池。,Аккумулятор с изображением кролика.,Uma bateria marcada com a imagem de um coelho.
 item.maintenance_tool_set,维修工具套装,維修工具組,Набор ремонтных инструментов,Kit de ferramentas de manutenção
 item.maintenance_tool_set.desc,用于机械维修的成套工具。,用於機械維修的成套工具。,Набор инструментов для обслуживания механизмов.,Um conjunto de ferramentas para a manutenção de máquinas.
-item.industrial_lubricant,工业润滑油,工業潤滑油,Промышленная смазка,Lubrificante industrial
+item.industrial_lubricant,润滑油,潤滑油,Смазочное масло,Óleo lubrificante
 item.industrial_lubricant.desc,减少机械零件之间摩擦的润滑油。,減少機械零件之間摩擦的潤滑油。,Смазка для уменьшения трения между деталями механизмов.,Lubrificante que reduz o atrito entre peças de máquinas.
 item.broken_spark_plug,损坏的火花塞,損壞的火星塞,Сломанная свеча зажигания,Vela de ignição quebrada
 item.broken_spark_plug.desc,已损坏的火花塞，不能作为正常替换零件使用。,已損壞的火星塞，不能作為正常替換零件使用。,"Повреждённая свеча зажигания, непригодная для замены рабочей детали.",Uma vela de ignição danificada que não serve como peça de reposição funcional.
@@ -179,3 +179,5 @@ item.concentrated_explosive,高浓缩炸药,高濃縮炸藥,Концентрир
 item.concentrated_explosive.desc,装有计时器的玻璃瓶。放置在落石上后会在5秒后爆炸并清除道路。,裝有計時器的玻璃瓶。放置在落石上後會在5秒後爆炸並清除道路。,Стеклянная бутылка с таймером. Установите её на завале — через пять секунд взрыв расчистит путь.,Uma garrafa de vidro com temporizador. Instale nas pedras caídas para abrir caminho após cinco segundos.
 item.desk_clock,台钟,座鐘,Настольные часы,Relógio de mesa
 item.desk_clock.desc,可在工作台上用作制作材料的小台钟。,可在工作臺上用作製作材料的小座鐘。,Небольшие настольные часы. Можно использовать как материал для изготовления предметов на верстаке.,Um pequeno relógio de mesa que pode ser usado como material de fabricação na bancada.
+item.rabbit_token,兔子代币,兔子代幣,Кроличий жетон,Ficha de coelho
+item.rabbit_token.desc,兔子三轮机器人携带的自动售货机代币。,兔子三輪機器人攜帶的自動販賣機代幣。,Жетон для торгового автомата из кроличьего трицикла.,Uma ficha de máquina de vendas carregada por um triciclo coelho.

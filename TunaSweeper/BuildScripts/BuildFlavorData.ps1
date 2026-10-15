@@ -13,6 +13,7 @@ $mainSourceDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirector
 $stagedDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'Content\Data\MainPayloadStaged'))
 $contentDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'Content'))
 $optionalRuntimeDataFiles = @(
+    'ShopDefinitions.json',
     'EnemySpawns.json',
     'LootContainerSpawns.json',
     'MemoSpawns.json'
@@ -72,6 +73,18 @@ function Assert-MainPayloadValid {
     $scenarioHeader = Get-Content -LiteralPath $scenarioStringsPath -TotalCount 1
     if ($scenarioHeader.Trim() -ne 'string_key,ko,en,ja') {
         throw 'Main ScenarioTextStrings.csv header must be string_key,ko,en,ja.'
+    }
+    foreach ($fileName in $optionalRuntimeDataFiles) {
+        $optionalPath = Join-Path $mainSourceDirectory (Join-Path 'Data' $fileName)
+        if (Test-Path -LiteralPath $optionalPath -PathType Leaf) {
+            try {
+                $optionalJson = Get-Content -LiteralPath $optionalPath -Raw
+                if ([string]::IsNullOrWhiteSpace($optionalJson)) { throw 'Empty JSON document.' }
+                $null = $optionalJson | ConvertFrom-Json -ErrorAction Stop
+            } catch {
+                throw "Optional Main runtime data must contain valid JSON: $fileName"
+            }
+        }
     }
 }
 

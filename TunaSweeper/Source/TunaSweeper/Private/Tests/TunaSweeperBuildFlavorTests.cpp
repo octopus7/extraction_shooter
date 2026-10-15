@@ -59,6 +59,7 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 		TEXT("DemoRaidMap asset exists"),
 		FPaths::FileExists(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Maps/DemoRaidMap.umap"))));
 
+	TestTrue(TEXT("Demo shop data remains public"), TunaSweeperBuildFlavor::GetShopDefinitionsPath().EndsWith(TEXT("Content/Data/ShopDefinitions.json")));
 	Settings->bUseBoxRaidLevel = true;
 	TestEqual(
 		TEXT("Demo box raid option uses DemoBoxRaidMap"),
@@ -74,6 +75,10 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 
 	Settings->BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
 	TestFalse(TEXT("Full target is Main flavor"), TunaSweeperBuildFlavor::IsDemo());
+	const FString MainShops = FPaths::Combine(TunaSweeperBuildFlavor::GetMainPayloadRoot(), TEXT("Data/ShopDefinitions.json"));
+	TestEqual(TEXT("Main shops use optional private dataset with legacy fallback"),
+		TunaSweeperBuildFlavor::GetShopDefinitionsPath(), FPaths::FileExists(MainShops) ? MainShops :
+		FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/ShopDefinitions.json"))));
 	TestEqual(TEXT("Main flavor name"), TunaSweeperBuildFlavor::GetName(), FName(TEXT("Main")));
 	TestTrue(
 		TEXT("Full game saves use FullGame root without changing serialized Main identity"),

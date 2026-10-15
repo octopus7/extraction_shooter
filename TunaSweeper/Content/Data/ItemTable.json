@@ -1091,5 +1091,16 @@
     "category_tag": "item.category.material",
     "weight_kg": 0.3,
     "max_stack_category_key": "stack.desk_clock"
+  },
+  {
+    "id": 7004,
+    "name_string_key": "item.rabbit_token",
+    "description_string_key": "item.rabbit_token.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_RabbitToken.uasset",
+    "category_tag": "item.category.currency",
+    "weight_kg": 0.01
   }
 ]

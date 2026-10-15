@@ -278,3 +278,12 @@ BP의 `ArrivalFlagIcon` Billboard는 레벨 뷰포트에서 흰색 깃발로 위
 ### 완료 효과의 보상 안내
 
 퀘스트 rewards의 선택 필드 display_string_key는 퀘스트 문자열 테이블에서 해석해 보상 영역에 표시한다. 아이템·코인·시설 보상과 함께 표시할 수 있으며, 문자열 자체가 게임 상태를 변경하지는 않는다. 완료 상태를 사용하는 시스템의 효과를 안내하는 용도다.
+
+
+### 퀘스트 자판기와 교체 가능한 시설 메시
+
+- `/Game/Interaction/QuestFacilities/BP_AIVendingMachine_Field`와 `BP_AIVendingMachine_Base`는 현장/기지 역할별 자판기다. `VisualMesh`를 교체할 수 있으며 퀘스트 제공자·첫 만남·이전 퀘스트 ID는 BP 속성으로 관리한다. 이전 퀘스트의 보상 수령 후 현장 개체가 사라지고 기지 개체의 상점이 열린다.
+- 일반 퀘스트 상호작용은 제공자 ID로 라우팅한다. 상점과 퀘스트 상호작용은 별도 컴포넌트이며, 상점 실행은 기지 맵 및 이전 완료 상태를 모두 확인한다.
+- `/Game/Interaction/QuestFacilities/BP_ATVWarehousePower`는 기존 전력 복구 시설을 사용한다. `FacilityMesh`를 교체할 수 있다. 시설과 차량 생성기의 월드 진행 ID를 일치시킨다.
+- Main 데이터셋에는 선택적으로 `Data/ShopDefinitions.json`을 둘 수 있다. 존재하면 Main에서 사용하고, 없으면 공개 기본 상점 파일을 사용한다. Demo는 항상 공개 파일을 사용한다. Main 준비 스크립트는 해당 선택 파일을 패키징 입력에 포함하며 빈 JSON·문법 오류는 중단한다.
+- 에셋·배치의 읽기 전용 재검증 절차는 `Tools/QuestFacilities/README.md`를 참고한다.

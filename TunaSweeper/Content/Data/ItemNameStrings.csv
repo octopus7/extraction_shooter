@@ -143,7 +143,7 @@ item.rabbit_battery,토끼 그림 배터리,Rabbit-Label Battery,ウサギ柄の
 item.rabbit_battery.desc,토끼 그림이 표시된 배터리.,A battery marked with a rabbit picture.,ウサギの絵が描かれたバッテリー。
 item.maintenance_tool_set,정비 공구 세트,Maintenance Tool Set,整備工具セット
 item.maintenance_tool_set.desc,기계 정비에 필요한 공구를 모아 둔 세트.,A set of tools for maintaining machinery.,機械整備に必要な工具をまとめたセット。
-item.industrial_lubricant,산업용 윤활유,Industrial Lubricant,工業用潤滑油
+item.industrial_lubricant,윤활오일,Lubricating Oil,潤滑オイル
 item.industrial_lubricant.desc,기계 부품 사이의 마찰을 줄이는 윤활유.,Lubricant that reduces friction between machine parts.,機械部品の摩擦を減らす潤滑油。
 item.broken_spark_plug,망가진 점화 플러그,Broken Spark Plug,壊れたスパークプラグ
 item.broken_spark_plug.desc,손상되어 정상 부품으로 사용할 수 없는 점화 플러그.,A damaged spark plug that cannot be used as a working replacement.,破損しており交換部品としては使えないスパークプラグ。
@@ -181,3 +181,5 @@ item.concentrated_explosive,고농축 폭발물,Concentrated Explosive,高濃縮
 item.concentrated_explosive.desc,시한장치가 붙은 유리병. 낙석에 설치하면 5초 후 폭발해 길을 연다.,A glass bottle with a timer. Install it on fallen rocks to clear the way after a five-second countdown.,時限装置付きのガラス瓶。落石に設置すると5秒後に爆発して道を開く。
 item.desk_clock,탁상시계,Desk Clock,置き時計
 item.desk_clock.desc,작업대에서 제작 재료로 사용할 수 있는 작은 탁상시계.,A small desk clock that can be used as a crafting material at a workbench.,作業台で製作素材として使える小さな置き時計。
+item.rabbit_token,토끼코인,Rabbit Token,ウサギコイン
+item.rabbit_token.desc,토끼 바이크가 지니고 있던 자판기용 코인.,A vending-machine token carried by a rabbit trike.,ウサギ三輪ロボットが持っていた自販機用コイン。

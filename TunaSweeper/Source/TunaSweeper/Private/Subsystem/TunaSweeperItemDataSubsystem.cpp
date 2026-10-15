@@ -1,5 +1,6 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Settings/TunaSweeperLanguage.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperAdditionalTranslations.h"
 #include "Combat/TunaSweeperBurnTypes.h"
 
@@ -43,7 +44,6 @@ namespace TunaSweeperItemDataFiles
 	const TCHAR* ItemNameStringsCsvRelativePath = TEXT("Data/ItemNameStrings.csv");
 	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
 	const TCHAR* LootContainerContentsJsonRelativePath = TEXT("Data/LootContainerContents.json");
-	const TCHAR* ShopDefinitionsJsonRelativePath = TEXT("Data/ShopDefinitions.json");
 	const TCHAR* WorkbenchRecipesJsonRelativePath = TEXT("Data/WorkbenchRecipes.json");
 	const TCHAR* WorkbenchDismantleRecipesJsonRelativePath = TEXT("Data/WorkbenchDismantleRecipes.json");
 
@@ -1819,7 +1819,7 @@ FString UTunaSweeperItemDataSubsystem::GetLootContainerContentsJsonPath() const
 
 FString UTunaSweeperItemDataSubsystem::GetShopDefinitionsJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ShopDefinitionsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetShopDefinitionsPath();
 }
 
 FString UTunaSweeperItemDataSubsystem::GetWorkbenchRecipesJsonPath() const

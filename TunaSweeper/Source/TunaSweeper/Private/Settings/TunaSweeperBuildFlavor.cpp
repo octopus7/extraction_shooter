@@ -119,6 +119,12 @@ namespace TunaSweeperBuildFlavor
 			: FPaths::Combine(GetMainPayloadRoot(), TEXT("Data"), TEXT("QuestDefinitions.json"));
 	}
 
+	FString GetShopDefinitionsPath()
+	{
+		const FString MainPath = FPaths::Combine(GetMainPayloadRoot(), TEXT("Data"), TEXT("ShopDefinitions.json"));
+		return !IsDemo() && FPaths::FileExists(MainPath) ? MainPath : GetPublicDataPath(TEXT("ShopDefinitions.json"));
+	}
+
 	void GetQuestTextStringPaths(TArray<FString>& OutPaths)
 	{
 		OutPaths.Reset();
