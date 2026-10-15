@@ -16,6 +16,7 @@ class TUNASWEEPER_API UTunaSweeperRaidExperienceReturnSubsystem : public UGameIn
 
 public:
 	virtual void Deinitialize() override;
+	void CancelReturnPresentation();
 
 	bool StartReturnPresentation(
 		UObject* WorldContextObject,

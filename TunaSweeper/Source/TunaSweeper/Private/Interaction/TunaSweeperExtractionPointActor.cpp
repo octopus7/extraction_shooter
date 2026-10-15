@@ -5,8 +5,11 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -158,6 +161,14 @@ void ATunaSweeperExtractionPointActor::OnConstruction(const FTransform& Transfor
 void ATunaSweeperExtractionPointActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (GEngine)
+	{
+		ExtractionTravelFailureHandle = GEngine->OnTravelFailure().AddWeakLambda(this,
+			[this](UWorld* World, ETravelFailure::Type, const FString&)
+			{
+				if (World == GetWorld() && bExtractionTriggered) CancelExtraction();
+			});
+	}
 
 	RefreshExtractionComponents();
 	ApplyFallbackParticleMaterials();
@@ -168,6 +179,11 @@ void ATunaSweeperExtractionPointActor::BeginPlay()
 
 void ATunaSweeperExtractionPointActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (GEngine) GEngine->OnTravelFailure().Remove(ExtractionTravelFailureHandle);
+	if (EndPlayReason == EEndPlayReason::Destroyed && bExtractionTriggered)
+		CancelExtraction();
+	else
+		ReleaseExtractionProtection();
 	CurrentHoldSeconds = 0.0f;
 	UpdateHudProgressWidget();
 
@@ -242,6 +258,8 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 		return false;
 	}
 
+	// Establish protection before persistence, rewards or any input-locking presentation.
+	if (!BeginExtractionProtection(InstigatorPawn)) return false;
 	bExtractionTriggered = true;
 	if (GetGameInstance())
 	{
@@ -610,6 +628,60 @@ bool ATunaSweeperExtractionPointActor::CanExtractPawn(const APawn* Pawn) const
 
 	const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(Pawn);
 	return !TunaCharacter || !TunaCharacter->IsDead();
+}
+
+bool ATunaSweeperExtractionPointActor::BeginExtractionProtection(APawn* Pawn)
+{
+	APlayerController* Controller = Pawn ? Cast<APlayerController>(Pawn->GetController()) : nullptr;
+	UWorld* World = GetWorld();
+	if (!Controller || !World) return false;
+
+	ProtectedPawn = Pawn;
+	bProtectedPawnWasDamageable = Pawn->CanBeDamaged();
+	Pawn->SetCanBeDamaged(false);
+	ExtractionPauseController = Controller;
+	if (!World->IsPaused())
+	{
+		// World pause also stops movement components, animation attacks and timer-driven AI.
+		// Presentation widgets still tick through Slate, and the transition subsystem ticks while paused.
+		bOwnsExtractionPause = Controller->SetPause(true,
+			FCanUnpause::CreateWeakLambda(this, [this] { return !bOwnsExtractionPause; }));
+		if (!World->IsPaused())
+		{
+			ReleaseExtractionProtection();
+			return false;
+		}
+	}
+	return true;
+}
+
+void ATunaSweeperExtractionPointActor::ReleaseExtractionProtection()
+{
+	if (APawn* Pawn = ProtectedPawn.Get()) Pawn->SetCanBeDamaged(bProtectedPawnWasDamageable);
+	ProtectedPawn.Reset();
+	const bool bReleasePause = bOwnsExtractionPause;
+	bOwnsExtractionPause = false;
+	if (bReleasePause)
+	{
+		if (APlayerController* Controller = ExtractionPauseController.Get()) Controller->SetPause(false);
+	}
+	ExtractionPauseController.Reset();
+}
+
+void ATunaSweeperExtractionPointActor::CancelExtraction()
+{
+	bExtractionTriggered = false;
+	ResetHoldProgress();
+	if (UGameInstance* Instance = GetGameInstance())
+	{
+		if (auto* Experience = Instance->GetSubsystem<UTunaSweeperRaidExperienceReturnSubsystem>())
+			Experience->CancelReturnPresentation();
+		if (auto* Transition = Instance->GetSubsystem<UTunaSweeperLevelTransitionSubsystem>())
+			Transition->CancelTransition();
+		if (auto* Quests = Instance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			Quests->CancelExtractionReturn();
+	}
+	ReleaseExtractionProtection();
 }
 
 void ATunaSweeperExtractionPointActor::StopPawnForExtraction(APawn* Pawn) const

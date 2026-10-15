@@ -18,6 +18,14 @@ void UTunaSweeperRaidExperienceReturnSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+void UTunaSweeperRaidExperienceReturnSubsystem::CancelReturnPresentation()
+{
+	if (!bReturnPresentationActive) return;
+	if (TargetLevelPreloadHandle.IsValid()) TargetLevelPreloadHandle->CancelHandle();
+	TargetLevelPreloadHandle.Reset();
+	FinishAndClearWidget();
+}
+
 bool UTunaSweeperRaidExperienceReturnSubsystem::StartReturnPresentation(
 	UObject* WorldContextObject,
 	FName InTargetLevelName,

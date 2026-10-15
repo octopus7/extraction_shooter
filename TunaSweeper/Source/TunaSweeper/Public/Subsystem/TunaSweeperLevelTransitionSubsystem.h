@@ -22,6 +22,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
 	virtual bool IsTickable() const override;
+	virtual bool IsTickableWhenPaused() const override { return true; }
+	void CancelTransition() { if (IsTransitionActive()) FinishTransition(); }
 	bool IsTransitionActive() const { return Phase != ETransitionPhase::Idle; }
 
 	bool StartTransition(

@@ -5,6 +5,7 @@
 #include "TunaSweeperExtractionPointActor.generated.h"
 
 class APawn;
+class APlayerController;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UMediaSource;
@@ -209,6 +210,15 @@ private:
 	bool IsPawnInsideExtractionArea(const APawn* Pawn) const;
 	bool CanExtractPawn(const APawn* Pawn) const;
 	void StopPawnForExtraction(APawn* Pawn) const;
+	bool BeginExtractionProtection(APawn* Pawn);
+	void ReleaseExtractionProtection();
+	void CancelExtraction();
+
+	TWeakObjectPtr<APawn> ProtectedPawn;
+	TWeakObjectPtr<APlayerController> ExtractionPauseController;
+	bool bProtectedPawnWasDamageable = true;
+	bool bOwnsExtractionPause = false;
+	FDelegateHandle ExtractionTravelFailureHandle;
 	FText ResolveTransitionMessage() const;
 	void UpdateFallbackParticleEffect(float DeltaSeconds);
 	void ApplyFallbackParticleMaterials();

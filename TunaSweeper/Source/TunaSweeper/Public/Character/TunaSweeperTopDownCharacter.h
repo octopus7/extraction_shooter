@@ -201,7 +201,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
-	bool IsDamageInvulnerable() const { return bIsRolling; }
+	bool IsDamageInvulnerable() const { return bIsRolling || !CanBeDamaged(); }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
