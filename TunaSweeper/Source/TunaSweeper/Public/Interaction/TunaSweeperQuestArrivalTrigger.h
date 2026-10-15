@@ -7,6 +7,13 @@
 class UBoxComponent;
 class ATunaSweeperTopDownCharacter;
 
+UENUM(BlueprintType)
+enum class ETunaSweeperArrivalVehicleCondition : uint8
+{
+	None,
+	ATV
+};
+
 /** Reports a local player's presence at a destination to accepted quest objectives.
  * Progress belongs to the quest save, never to this actor's lifetime. */
 UCLASS(Blueprintable)
@@ -27,12 +34,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest Arrival")
 	FName LocationId;
 
-	// False reports location_reached; true reports vehicle_location_reached only.
+	// None accepts any arrival; ATV requires the player to be riding an intact ATV.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest Arrival")
-	bool bRequireMountedVehicle = false;
+	ETunaSweeperArrivalVehicleCondition VehicleCondition = ETunaSweeperArrivalVehicleCondition::None;
 
 	// Optional placed-vehicle identity. Empty accepts any intact ATV with this player in its seat.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest Arrival", meta = (EditCondition = "bRequireMountedVehicle"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest Arrival", meta = (EditCondition = "VehicleCondition == ETunaSweeperArrivalVehicleCondition::ATV"))
 	FName RequiredVehicleTag;
 
 	// Optional authoring gates. Every quest must have its reward claimed.

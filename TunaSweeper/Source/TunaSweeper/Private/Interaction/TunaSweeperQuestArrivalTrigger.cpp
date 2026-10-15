@@ -37,7 +37,8 @@ bool ATunaSweeperQuestArrivalTrigger::CanReportArrival(const ATunaSweeperTopDown
 	if (LocalPosition.ContainsNaN() || Extent.GetMin() <= 0.0 || Scale.GetMin() <= UE_SMALL_NUMBER ||
 		FMath::Abs(LocalPosition.X) > Extent.X || FMath::Abs(LocalPosition.Y) > Extent.Y ||
 		FMath::Abs(LocalPosition.Z) > Extent.Z) return false;
-	if (!bRequireMountedVehicle) return true;
+	if (VehicleCondition == ETunaSweeperArrivalVehicleCondition::None) return true;
+	if (VehicleCondition != ETunaSweeperArrivalVehicleCondition::ATV) return false;
 
 	const auto* Mount = Character->GetVehicleMount();
 	const auto* Vehicle = IsValid(Mount) ? Cast<ATunaSweeperATVActor>(Mount->GetOwner()) : nullptr;
@@ -71,6 +72,7 @@ void ATunaSweeperQuestArrivalTrigger::CheckArrivals()
 	{
 		const auto* Controller = It->Get();
 		const auto* Character = Controller ? Cast<ATunaSweeperTopDownCharacter>(Controller->GetPawn()) : nullptr;
-		if (CanReportArrival(Character)) Quests->NotifyLocationReached(LocationId, bRequireMountedVehicle);
+		if (CanReportArrival(Character))
+			Quests->NotifyLocationReached(LocationId, VehicleCondition == ETunaSweeperArrivalVehicleCondition::ATV);
 	}
 }

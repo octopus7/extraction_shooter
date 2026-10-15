@@ -11496,3 +11496,9 @@
 - 작업대 분해·설계도 등록을 공통 `bEnableWorkbenchExtraModes = false`로 비활성화했다. 상호작용 표시·요청, 패널 진입, 작업 모드 변경 및 아이템 처리 경로에 적용했다.
 - 기존 위젯·컴포넌트·데이터·구현을 보존하고 `TunaSweeperWorkbenchFeatures.h`에 true 변경 후 재빌드로 복구하는 주석을 남겼다.
 - UE 5.7 TunaSweeperEditor 빌드 성공. 기존 고농축 폭발물 제조 자동화 검사 1개 통과. 실제 화면 수동 확인은 하지 않았다.
+
+## 2026-10-16 01:48:55 (소요시간: 00:08:32)
+
+- 요청: 도착 트리거의 탑승물 조건을 None/ATV enum으로 선택하고 재사용 BP 및 세 승강장 도착 영역을 구성.
+- 구현: VehicleCondition enum, 잘못된 enum 값 차단, BP_QuestArrivalTrigger 및 RaidVillage 세 역별 트리거 배치. 트리거를 각 역에 부착해 역 이동 시 함께 이동하며 승강장·옆 철로를 포함. 일회성 생성기 제거 및 읽기 전용 에셋 검증 도구 유지.
+- 검증: UE5.7 Editor 빌드 성공, TunaSweeper.Quest.Arrival 3개 테스트 성공(오류 없음; 기존 UI 키 중복·합성 월드 viewport 경고), 생성기 제거 후 새 프로세스로 BP/enum/영역/부모 역/미변경 저장 상태 검사 통과. 다른 대화의 후속 빌드와 조율하여 일반 에디터 재실행 보류.

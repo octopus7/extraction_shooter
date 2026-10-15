@@ -34,6 +34,10 @@ bool FTunaSweeperQuestArrivalContractTest::RunTest(const FString& Parameters)
 		StaticEnum<ETunaSweeperObjectiveType>()->GetValueByNameString(TEXT("LocationReached")) != INDEX_NONE);
 	TestTrue(TEXT("Mounted arrival is distinct from walking arrival"),
 		StaticEnum<ETunaSweeperObjectiveType>()->GetValueByNameString(TEXT("VehicleLocationReached")) != INDEX_NONE);
+	TestEqual(TEXT("Arrival has exactly None and ATV conditions"),
+		StaticEnum<ETunaSweeperArrivalVehicleCondition>()->NumEnums() - 1, 2);
+	TestEqual(TEXT("Default arrival does not require a mount"),
+		GetDefault<ATunaSweeperQuestArrivalTrigger>()->VehicleCondition, ETunaSweeperArrivalVehicleCondition::None);
 	return true;
 }
 
@@ -138,7 +142,7 @@ bool FTunaSweeperQuestArrivalTest::RunTest(const FString& Parameters)
 	auto* West = World->SpawnActor<ATunaSweeperQuestArrivalTrigger>(); West->LocationId = TEXT("test.west");
 	West->SetActorLocation(FVector(2000, 0, 0));
 	auto* North = World->SpawnActor<ATunaSweeperQuestArrivalTrigger>(); North->LocationId = TEXT("test.north");
-	North->bRequireMountedVehicle = true;
+	North->VehicleCondition = ETunaSweeperArrivalVehicleCondition::ATV;
 	North->RequiredCompletedQuestIds = {Fuel.QuestId};
 	North->RequiredCompletedProgressIds = {TEXT("test.vehicle.repaired"), TEXT("test.vehicle.fueled")};
 	North->RequiredVehicleTag = TEXT("test.quest.vehicle");
@@ -216,9 +220,11 @@ bool FTunaSweeperQuestArrivalTest::RunTest(const FString& Parameters)
 	Player->SetActorLocation(FVector(0, 150, 90)); North->CheckArrivals();
 	TestEqual(TEXT("Walking still fails with every prerequisite satisfied"), Quests->GetObjectiveProgressCount(Drive.QuestId, TEXT("drive")), 0);
 	TestTrue(TEXT("Mounting inside the arrival area works"), ATV->MountComponent->TryMount(Player));
-	North->bRequireMountedVehicle = false; North->CheckArrivals();
+	North->VehicleCondition = ETunaSweeperArrivalVehicleCondition::None; North->CheckArrivals();
 	TestEqual(TEXT("Normal trigger cannot bypass vehicle mode and its gates"), Quests->GetObjectiveProgressCount(Drive.QuestId, TEXT("drive")), 0);
-	North->bRequireMountedVehicle = true;
+	North->VehicleCondition = static_cast<ETunaSweeperArrivalVehicleCondition>(255); North->CheckArrivals();
+	TestEqual(TEXT("Invalid vehicle condition cannot grant arrival"), Quests->GetObjectiveProgressCount(Drive.QuestId, TEXT("drive")), 0);
+	North->VehicleCondition = ETunaSweeperArrivalVehicleCondition::ATV;
 	Controller->UnPossess(); North->CheckArrivals();
 	TestEqual(TEXT("Empty/uncontrolled vehicle gives no credit"), Quests->GetObjectiveProgressCount(Drive.QuestId, TEXT("drive")), 0);
 	Controller->Possess(Player);
