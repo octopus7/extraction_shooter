@@ -6,12 +6,9 @@
 #include "Misc/ScopeExit.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
-#include "Engine/DamageEvents.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
-#include "Interaction/TunaSweeperBombObstacleActor.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
-#include "Weapon/TunaSweeperThrowableDamageType.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace TunaSweeperQuestData
@@ -113,17 +110,11 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     Quests->NotifyInteractionCompleted(TEXT("test.passage.gate"), NAME_None);
     TestEqual(TEXT("Wrong object, incomplete state and generic interaction give no credit"), Quests->GetQuestState(GateId), ETunaSweeperQuestState::Accepted);
 
-    auto* Obstacle = World->SpawnActor<ATunaSweeperBombObstacleActor>();
-    Obstacle->ProgressObjectId = TEXT("test.passage.gate");
-    FDamageEvent Bullet;
-    Obstacle->TakeDamage(999, Bullet, nullptr, nullptr);
-    TestEqual(TEXT("Ordinary damage cannot complete gate quest"), Quests->GetQuestState(GateId), ETunaSweeperQuestState::Accepted);
-    FDamageEvent Bomb(UTunaSweeperGrenadeDamageType::StaticClass());
-    Obstacle->TakeDamage(1, Bomb, nullptr, nullptr);
-    TestEqual(TEXT("Actual bomb destruction completes accepted gate objective"), Quests->GetQuestState(GateId), ETunaSweeperQuestState::RewardAvailable);
+    Game->UpdateWorldProgressState(TEXT("test.passage.gate"), NAME_None, ETunaSweeperWorldProgressState::Completed, 1, 1, false);
+    TestEqual(TEXT("World completion completes accepted gate objective"), Quests->GetQuestState(GateId), ETunaSweeperQuestState::RewardAvailable);
     TestEqual(TEXT("World completion does not auto-accept another quest"), Quests->GetQuestState(LateId), ETunaSweeperQuestState::Available);
     TestEqual(TEXT("Completion does not grant reward"), Quests->GetCoinBalance(), 0);
-    TestTrue(TEXT("Late acceptance recognizes already destroyed obstacle"), Quests->AcceptQuest(LateId));
+    TestTrue(TEXT("Late acceptance recognizes already completed world object"), Quests->AcceptQuest(LateId));
     TestEqual(TEXT("Late quest is ready for reward"), Quests->GetQuestState(LateId), ETunaSweeperQuestState::RewardAvailable);
     TestFalse(TEXT("Completed world object cannot bypass quest prerequisites"), Quests->AcceptQuest(LockedId));
     Quests->AcceptQuest(PrerequisiteId);

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 기지 | 숲 | 기존 출구에서 F 상호작용 |
 | 숲 | 기지 | `Forest_BaseEntrance`에서 F 상호작용 |
-| 숲 | 마을 | 앞의 폭파 장애물을 수류탄 또는 다이너마이트 피해로 파괴한 뒤 통로에서 F 상호작용 |
+| 숲 | 마을 | 기존 통로 완료 상태를 확인한 뒤 F 상호작용. 장애물 구현 제거로 새 완료 수단은 미연결 |
 | 숲 | 평원 | 승강기에서 고장력 강선 케이블(6010) 1개와 임시 재료 뿡뿡(6006) 1개를 함께 소모해 수리한 뒤 F 이동 상호작용 |
 | 숲·마을·평원 | 기지 | 익스트랙션 포인트에서 4초 대기 완료 |
 
@@ -22,20 +22,19 @@
 | --- | --- | --- |
 | RaidForest | Forest_BaseEntrance | -9080.16, -2334.13, 335.87 |
 | RaidForest | Forest_VillagePassage | 7142.86, 1388.89, -0.31 |
-| RaidForest | Forest_VillageBombObstacle | 6742.86, 1388.89, -15.27 |
 | RaidForest | Forest_PlainsLift | 5158.73, -4761.90, 351.25 |
 | RaidForest | RaidForest_Extraction_1 | -3968.25, 1984.13, 58.40 |
 | RaidVillage | RaidVillage_Extraction_1 | -1845, -485, 163.06 |
 | RaidVillage | RaidVillage_Extraction_2 | 1080, 1260, 152.49 |
 | RaidPlains | RaidPlains_Extraction_1 | 992.06, 1785.71, 51.63 |
 
-`/Game/MainRaid/RegionTravel`에 `BP_ForestReturn`, `BP_ForestToVillage`, `BP_ForestBombObstacle`, `BP_ForestToPlainsLift`가 있다. 메시·재료는 같은 폴더의 복셀 형태 임시 애셋이다. 익스트랙션은 기존 `/Game/Interaction/BP_ExtractionPoint`를 사용하고 각 포인트 위치에 복셀 표시대를 별도 배치했다. 위치를 바꿀 때에는 같은 번호의 `ExtractionVoxel` 액터도 함께 옮긴다. 모든 익스트랙션 목적지는 `BunkerMap`이다.
+`/Game/MainRaid/RegionTravel`에 `BP_ForestReturn`, `BP_ForestToVillage`, `BP_ForestToPlainsLift`가 있다. 메시·재료는 같은 폴더의 복셀 형태 임시 애셋이다. 익스트랙션은 기존 `/Game/Interaction/BP_ExtractionPoint`를 사용하고 각 포인트 위치에 복셀 표시대를 별도 배치했다. 위치를 바꿀 때에는 같은 번호의 `ExtractionVoxel` 액터도 함께 옮긴다. 모든 익스트랙션 목적지는 `BunkerMap`이다.
 
-통로 BP의 `Destination`, `Repair Parts`를 편집할 수 있다. 장애물과 마을 통로의 저장 ID `region.forest.village.obstacle`은 반드시 일치해야 한다. 승강기는 `region.forest.plains.lift`를 사용한다. 복제해 독립 통로로 쓸 때에는 새 저장 ID를 부여한다.
+통로 BP의 `Destination`, `Repair Parts`를 편집할 수 있다. 마을 통로는 기존 저장 ID `region.forest.village.obstacle`을 계속 읽는다. 2026-10-15에 기존 폭파 장애물의 맵 배치, BP 및 전용 C++ 클래스를 제거했다. 대체 상태 변경 액터는 아직 연결하지 않았으며, 기존 저장 상태와 통로의 해금 조건은 유지한다. 승강기는 `region.forest.plains.lift`를 사용한다. 복제해 독립 통로로 쓸 때에는 새 저장 ID를 부여한다.
 
 ## 상태 유지
 
-- 폭파·수리 완료는 기존 `WorldProgressStates`에 저장하여 다시 입장해도 유지한다.
+- 통로·수리 완료 상태는 기존 `WorldProgressStates`에 저장하여 다시 입장해도 유지한다.
 - 승강기는 두 재료가 모두 있을 때만 한 번에 소모한다. 일부만 있을 때 소모하거나 이동하지 않는다.
 - 지역 사이 이동은 레이드의 연속이다. 체력·허기·수분 비율과 레이드 경험치, 처치 수, 플레이 시간을 유지한다. 로딩·일시정지 시간을 업적용 플레이 시간에 더하지 않는다.
 - 기지 귀환의 저장·경험치 정산과 익스트랙션 도착 확정 판정은 기존 경로를 사용한다.

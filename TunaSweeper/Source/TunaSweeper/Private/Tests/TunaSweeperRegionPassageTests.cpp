@@ -3,11 +3,8 @@
 #include "Misc/ScopeExit.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
-#include "Engine/DamageEvents.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
-#include "Interaction/TunaSweeperBombObstacleActor.h"
-#include "Weapon/TunaSweeperThrowableDamageType.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,7 +17,7 @@ struct FContextAccess : UGameInstance
     { auto Member = &FContextAccess::WorldContext; Instance->*Member = Context; }
 };
 }
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperRegionPassageTest, "TunaSweeper.Region.PassageRepairAndBomb",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperRegionPassageTest, "TunaSweeper.Region.PassageRepairAndProgress",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaSweeperRegionPassageTest::RunTest(const FString& Parameters)
 {
@@ -59,20 +56,12 @@ bool FTunaSweeperRegionPassageTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("New lift instance restores completed state"), Reloaded->IsPassageUnlocked());
     auto* Gate = World->SpawnActor<ATunaSweeperRegionLinkActor>();
     Gate->RequiredProgressId = TEXT("test.region.obstacle");
-    auto* Obstacle = World->SpawnActor<ATunaSweeperBombObstacleActor>();
-    Obstacle->ProgressObjectId = Gate->RequiredProgressId;
     TestFalse(TEXT("Locked gate cannot be bypassed through travel call"), Gate->TravelToTargetLevel(nullptr));
-    FDamageEvent Bullet;
-    TestEqual(TEXT("Ordinary damage cannot break obstacle"), Obstacle->TakeDamage(999, Bullet, nullptr, nullptr), 0.0f);
-    TestTrue(TEXT("Ordinary damage preserves collision"), Obstacle->GetActorEnableCollision());
-    FDamageEvent Bomb(UTunaSweeperGrenadeDamageType::StaticClass());
-    TestTrue(TEXT("Bomb breaks obstacle"), Obstacle->TakeDamage(1, Bomb, nullptr, nullptr) > 0);
-    TestFalse(TEXT("Bomb disables obstacle collision"), Obstacle->GetActorEnableCollision());
-    TestTrue(TEXT("Bomb unlocks paired gate"), Gate->IsPassageUnlocked());
-    auto* RestoredObstacle = World->SpawnActor<ATunaSweeperBombObstacleActor>();
-    RestoredObstacle->ProgressObjectId = Obstacle->ProgressObjectId;
-    RestoredObstacle->RefreshObstacle();
-    TestFalse(TEXT("Destroyed obstacle stays gone on recreation"), RestoredObstacle->GetActorEnableCollision());
+    Game->UpdateWorldProgressState(Gate->RequiredProgressId, NAME_None, ETunaSweeperWorldProgressState::Completed, 1, 1, false);
+    TestTrue(TEXT("Completed world progress unlocks paired gate"), Gate->IsPassageUnlocked());
+    auto* RestoredGate = World->SpawnActor<ATunaSweeperRegionLinkActor>();
+    RestoredGate->RequiredProgressId = Gate->RequiredProgressId;
+    TestTrue(TEXT("New gate instance restores completed state"), RestoredGate->IsPassageUnlocked());
     auto* Vitals = NewObject<UTunaSweeperVitalsComponent>(Lift);
     Game->PendingRegionVitalsDestination = FName(*UGameplayStatics::GetCurrentLevelName(World, true));
     Game->PendingRegionVitalsRatios = FVector(0.25, 0.1, 0.2);
