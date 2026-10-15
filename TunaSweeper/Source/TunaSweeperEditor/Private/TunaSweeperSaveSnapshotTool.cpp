@@ -25,16 +25,17 @@ namespace TunaSweeperSaveSnapshotEditor
         return FText::FromString(TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::Korean)
             .ToString().Replace(TEXT("\\n"), TEXT("\n")));
     }
-    FText SnapshotTitle(const TSharedPtr<FJsonObject>& Row)
-    {
-        return FText::Format(Text(TEXT("ui.save_snapshot.row")), FText::FromString(Row->GetStringField(TEXT("createdAt"))),
-            Text(Row->GetBoolField(TEXT("beforeRestore")) ? TEXT("ui.save_snapshot.automatic") : TEXT("ui.save_snapshot.manual")));
-    }
     FText SnapshotNote(const TSharedPtr<FJsonObject>& Row)
     {
         FString Note; Row->TryGetStringField(TEXT("note"), Note);
-        return FText::Format(Text(TEXT("ui.save_snapshot.note_row")), Note.IsEmpty() ?
-            Text(TEXT("ui.save_snapshot.note_empty")) : FText::FromString(Note));
+        Note.ReplaceInline(TEXT("\r"), TEXT(" "));
+        Note.ReplaceInline(TEXT("\n"), TEXT(" "));
+        return Note.IsEmpty() ? Text(TEXT("ui.save_snapshot.note_empty")) : FText::FromString(Note);
+    }
+    FText SnapshotTitle(const TSharedPtr<FJsonObject>& Row)
+    {
+        return FText::Format(Text(TEXT("ui.save_snapshot.row")), FText::FromString(Row->GetStringField(TEXT("createdAt"))),
+            SnapshotNote(Row));
     }
     bool IsLocked()
     {
@@ -77,7 +78,7 @@ namespace TunaSweeperSaveSnapshotEditor
                     [ SNew(SHorizontalBox)
                         + SHorizontalBox::Slot().AutoWidth()
                         [ SNew(SButton).Text(Text(TEXT("ui.save_snapshot.create")))
-                            .IsEnabled_Lambda([this] { return Ready() && NoteInput->GetText().ToString().Len() <= 2048; })
+                            .IsEnabled_Lambda([this] { return CanCreate(); })
                             .OnClicked_Lambda([this] { return Create(); }) ]
                         + SHorizontalBox::Slot().AutoWidth().Padding(8, 0)
                         [ SNew(SButton).Text(Text(TEXT("ui.save_snapshot.restore")))
@@ -98,11 +99,7 @@ namespace TunaSweeperSaveSnapshotEditor
                         .OnGenerateRow_Lambda([](TSharedPtr<FJsonObject> Row, const TSharedRef<STableViewBase>& Owner)
                         {
                             return SNew(STableRow<TSharedPtr<FJsonObject>>, Owner).Padding(8)
-                                [ SNew(SVerticalBox)
-                                    + SVerticalBox::Slot().AutoHeight()
-                                    [ SNew(STextBlock).Text(SnapshotTitle(Row)) ]
-                                    + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
-                                    [ SNew(STextBlock).Text(SnapshotNote(Row)).AutoWrapText(true).ToolTipText(SnapshotNote(Row)) ] ];
+                                [ SNew(STextBlock).Text(SnapshotTitle(Row)).ToolTipText(SnapshotTitle(Row)) ];
                         })
                         .OnSelectionChanged_Lambda([this](TSharedPtr<FJsonObject> Row, ESelectInfo::Type) { Selected = Row; }) ]
                     + SVerticalBox::Slot().AutoHeight()
@@ -118,6 +115,12 @@ namespace TunaSweeperSaveSnapshotEditor
         }
     private:
         bool Ready() const { return !IsLocked() && Selection && Selection->GetBoolField(TEXT("ok")); }
+        bool CanCreate() const
+        {
+            if (!Ready() || !NoteInput.IsValid()) return false;
+            const FString Note = NoteInput->GetText().ToString();
+            return Note.Len() <= 2048 && !Note.TrimStartAndEnd().IsEmpty();
+        }
         TSharedPtr<FJsonObject> Request(const TCHAR* Operation) const
         {
             auto R = MakeShared<FJsonObject>();
@@ -157,7 +160,7 @@ namespace TunaSweeperSaveSnapshotEditor
         FReply Create()
         {
             Refresh(false);
-            if (!Ready()) return FReply::Handled();
+            if (!CanCreate()) return FReply::Handled();
             auto CreateRequest = Request(TEXT("snapshot-create"));
             CreateRequest->SetStringField(TEXT("note"), NoteInput->GetText().ToString());
             auto R = TunaSweeperSaveTool::Execute(CreateRequest);
@@ -172,7 +175,7 @@ namespace TunaSweeperSaveSnapshotEditor
             const FString Path = ListedPath;
             const FString Id = Selected->GetStringField(TEXT("snapshotId"));
             if (FMessageDialog::Open(EAppMsgType::YesNo, FText::Format(Text(TEXT("ui.save_snapshot.delete_confirm")),
-                SnapshotTitle(Selected), SnapshotNote(Selected))) != EAppReturnType::Yes) return FReply::Handled();
+                FText::FromString(Selected->GetStringField(TEXT("createdAt"))), SnapshotNote(Selected))) != EAppReturnType::Yes) return FReply::Handled();
             Refresh(false);
             if (!Ready() || Path != ListedPath) { Status = Text(TEXT("ui.save_snapshot.selection_changed")); return FReply::Handled(); }
             auto R = Request(TEXT("snapshot-delete")); R->SetStringField(TEXT("snapshotId"), Id);

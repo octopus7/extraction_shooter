@@ -610,7 +610,7 @@ ui.interaction.control_room_return,返回入口,返回入口,Вернуться 
 ui.save_snapshot.title,存档快照,存檔快照,Снимки сохранений,Snapshots de saves
 ui.save_snapshot.help,保存当前槽位最后保存的状态。不包含账号共用的成就和设置。,保存目前欄位最後儲存的狀態。不包含帳號共用的成就和設定。,Сохранить последнее записанное состояние текущего слота. Общие достижения и настройки аккаунта не включаются.,Guarda o último estado salvo do slot atual. Não inclui conquistas e configurações da conta.
 ui.save_snapshot.locked,请结束游玩后创建、恢复或删除快照。,請結束遊玩後建立、還原或刪除快照。,Остановите игру перед созданием или восстановлением или удалением снимка.,Encerre a sessão para criar ou restaurar ou excluir snapshots.
-ui.save_snapshot.note_hint,备注（可选 · 最多2048字）,備註（選填 · 最多2048字）,Заметка (необязательно · до 2048 символов),Nota (opcional · até 2048 caracteres)
+ui.save_snapshot.note_hint,备注（必填 · 最多2048字）,備註（必填 · 最多2048字）,Заметка (обязательно · до 2048 символов),Nota (obrigatória · até 2048 caracteres)
 ui.save_snapshot.note_empty,无备注,無備註,Без заметки,Sem nota
 ui.save_snapshot.note_row,备注：{0},備註：{0},Заметка: {0},Nota: {0}
 ui.save_snapshot.note_too_long,备注不得超过2048字。,備註不得超過2048字。,Заметка должна содержать не более 2048 символов.,A nota deve ter no máximo 2048 caracteres.
