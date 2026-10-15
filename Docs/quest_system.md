@@ -228,6 +228,8 @@ v1 목표 타입:
 
 재사용 BP는 `/Game/Interaction/BP_QuestArrivalTrigger`다. 마을의 세 승강장에는 역별 도착 영역을 배치하며, 연결되는 퀘스트 목표와 문자열은 해당 데이터셋에서 관리한다. 복구/연료 시스템은 이 트리거가 직접 구현하지 않는다. 편집기에서 네이티브 `TunaSweeperQuestArrivalTrigger` 액터를 직접 배치해 설정할 수도 있다.
 
+BP의 `ArrivalFlagIcon` Billboard는 레벨 뷰포트에서 흰색 깃발로 위치를 표시한다. 에디터 전용·게임 중 숨김·충돌 없음으로 설정한다. 텍스처 `/Game/Editor/Icons/Flag`는 UE 5.7의 `PerformanceCaptureWorkflow/Content/Common/Icons/Flag.uasset`을 복사한 기존 엔진 리소스이며 플러그인 활성화 없이 사용한다.
+
 ### 퀘스트 조건 시설 액터
 
 - 콘텐츠 브라우저의 `/Game/Interaction/QuestFacility/BP_QuestFacility`를 배치한다. 기반 클래스는 `ATunaSweeperQuestFacilityActor`이며 648삼각형 복셀 새끼 멧돼지 임시 메시를 기본으로 사용한다. `VisualMesh`는 시설 모델로 교체할 수 있다. 실제 시설 서비스나 특정 퀘스트 ID는 템플릿에 지정하지 않는다.
