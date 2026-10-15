@@ -1,7 +1,13 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Settings/TunaSweeperWorkbenchFeatures.h"
 
 void UTunaSweeperGameInstance::SetActiveWorkbench(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
 {
+	if (!TunaSweeperWorkbenchFeatures::IsModeEnabled(WorkbenchMode))
+	{
+		return;
+	}
+
 	EnsureInventoryStateInitialized();
 
 	if (WorkbenchId <= 0)
@@ -20,6 +26,11 @@ void UTunaSweeperGameInstance::SetActiveWorkbench(int32 WorkbenchId, ETunaSweepe
 
 void UTunaSweeperGameInstance::SetActiveWorkbenchMode(ETunaSweeperWorkbenchMode WorkbenchMode)
 {
+	if (!TunaSweeperWorkbenchFeatures::IsModeEnabled(WorkbenchMode))
+	{
+		return;
+	}
+
 	if (!bHasActiveWorkbench)
 	{
 		return;
@@ -198,7 +209,7 @@ bool UTunaSweeperGameInstance::GetActiveWorkbenchDismantleCandidates(
 {
 	EnsureInventoryStateInitialized();
 	OutCandidateViews.Reset();
-	if (!bHasActiveWorkbench)
+	if (!TunaSweeperWorkbenchFeatures::bEnableWorkbenchExtraModes || !bHasActiveWorkbench)
 	{
 		return false;
 	}
@@ -231,7 +242,7 @@ bool UTunaSweeperGameInstance::TryGetWorkbenchDismantleCandidateFromSlot(
 {
 	EnsureInventoryStateInitialized();
 	OutCandidateView = FTunaSweeperWorkbenchDismantleCandidateView();
-	if (!bHasActiveWorkbench ||
+	if (!TunaSweeperWorkbenchFeatures::bEnableWorkbenchExtraModes || !bHasActiveWorkbench ||
 		!SlotReference.IsValid() ||
 		!IsWorkbenchItemSlotSourceAllowedForDismantle(SlotReference.Source))
 	{
@@ -296,7 +307,7 @@ bool UTunaSweeperGameInstance::GetActiveWorkbenchBlueprintItems(
 {
 	EnsureInventoryStateInitialized();
 	OutBlueprintItemViews.Reset();
-	if (!bHasActiveWorkbench)
+	if (!TunaSweeperWorkbenchFeatures::bEnableWorkbenchExtraModes || !bHasActiveWorkbench)
 	{
 		return false;
 	}
@@ -353,7 +364,7 @@ bool UTunaSweeperGameInstance::TryRegisterWorkbenchBlueprintFromSlot(
 	bool bSaveImmediately)
 {
 	EnsureInventoryStateInitialized();
-	if (!bHasActiveWorkbench ||
+	if (!TunaSweeperWorkbenchFeatures::bEnableWorkbenchExtraModes || !bHasActiveWorkbench ||
 		!SlotReference.IsValid() ||
 		!IsWorkbenchItemSlotSourceAllowedForBlueprintRegister(SlotReference.Source))
 	{

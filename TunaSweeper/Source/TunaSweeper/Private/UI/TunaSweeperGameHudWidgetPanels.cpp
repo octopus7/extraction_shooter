@@ -1,4 +1,5 @@
 #include "TunaSweeperGameHudWidgetShared.h"
+#include "Settings/TunaSweeperWorkbenchFeatures.h"
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
 {
@@ -171,7 +172,7 @@ void UTunaSweeperGameHudWidget::ShowShopPanel(int32 ShopId)
 
 void UTunaSweeperGameHudWidget::ShowWorkbenchPanel(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
 {
-	if (!IsBunkerMap())
+	if (!IsBunkerMap() || !TunaSweeperWorkbenchFeatures::IsModeEnabled(WorkbenchMode))
 	{
 		return;
 	}

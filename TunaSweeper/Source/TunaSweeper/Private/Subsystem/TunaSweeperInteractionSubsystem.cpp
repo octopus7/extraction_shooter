@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
+#include "Settings/TunaSweeperWorkbenchFeatures.h"
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -495,6 +496,13 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchOpen)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
+	}
+
+	if (!TunaSweeperWorkbenchFeatures::bEnableWorkbenchExtraModes &&
+		(Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchDismantle ||
+		 Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchBlueprintRegister))
+	{
+		return false;
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchCraft ||
