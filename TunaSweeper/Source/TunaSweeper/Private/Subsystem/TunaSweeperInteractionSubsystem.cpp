@@ -8,6 +8,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperBlockedIntakeScreenActor.h"
 #include "Interaction/TunaSweeperPowerFacilityActor.h"
+#include "Interaction/TunaSweeperRockfallBarrierActor.h"
 #include "Interaction/TunaSweeperQuestFacilityActor.h"
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
@@ -883,6 +884,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 	if (auto* Delivery = Cast<ATunaSweeperDeliveryDestinationActor>(ProgressOwner)) return Delivery->Deliver(InstigatorPawn);
 	if (auto* Passage = Cast<ATunaSweeperRegionLinkActor>(ProgressOwner)) return Passage->RepairPassage(true);
 	if (auto* PowerFacility = Cast<ATunaSweeperPowerFacilityActor>(ProgressOwner)) return PowerFacility->Repair(true);
+	if (auto* Rockfall = Cast<ATunaSweeperRockfallBarrierActor>(ProgressOwner)) return Rockfall->ArmExplosive(true);
 
 	if (ATunaSweeperBlockedIntakeScreenActor* IntakeScreenActor = Cast<ATunaSweeperBlockedIntakeScreenActor>(ProgressOwner))
 	{

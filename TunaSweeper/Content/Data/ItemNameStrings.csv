@@ -177,3 +177,7 @@ item.high_output_power_converter,"고출력 전력 변환 모듈","High-Output P
 item.high_output_power_converter.desc,"손상된 전력 변환 장치를 복구해 설비에 공급할 수 있는 전력을 늘리는 모듈.","A module that restores a damaged power converter so it can supply more power to equipment.","損傷した電力変換装置を修復し、設備へ供給できる電力を増やすモジュール。"
 item.power_control_server,"전력 제어 서버","Power Control Server","電力制御サーバー"
 item.power_control_server.desc,"감자 그림이 그려진 검은 금속 상자. 관제실의 전력 배분과 설비 제어를 담당하는 서버다.","A black metal box bearing a potato illustration. This server manages power distribution and equipment control in the control room.","ジャガイモの絵が描かれた黒い金属箱。管制室の電力配分と設備制御を担うサーバー。"
+item.concentrated_explosive,고농축 폭발물,Concentrated Explosive,高濃縮爆薬
+item.concentrated_explosive.desc,시한장치가 붙은 유리병. 낙석에 설치하면 5초 후 폭발해 길을 연다.,A glass bottle with a timer. Install it on fallen rocks to clear the way after a five-second countdown.,時限装置付きのガラス瓶。落石に設置すると5秒後に爆発して道を開く。
+item.desk_clock,탁상시계,Desk Clock,置き時計
+item.desk_clock.desc,작업대에서 제작 재료로 사용할 수 있는 작은 탁상시계.,A small desk clock that can be used as a crafting material at a workbench.,作業台で製作素材として使える小さな置き時計。

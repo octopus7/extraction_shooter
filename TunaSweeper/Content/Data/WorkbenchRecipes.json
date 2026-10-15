@@ -30,5 +30,23 @@
         "quantity": 1
       }
     ]
+  },
+  {
+    "recipe_id": "recipe.concentrated_explosive",
+    "workbench_id": 1,
+    "name_string_key": "item.concentrated_explosive",
+    "output_item_id": 6031,
+    "output_quantity": 1,
+    "auto_unlocked": true,
+    "ingredients": [
+      {
+        "item_id": 6028,
+        "quantity": 1
+      },
+      {
+        "item_id": 6032,
+        "quantity": 1
+      }
+    ]
   }
 ]

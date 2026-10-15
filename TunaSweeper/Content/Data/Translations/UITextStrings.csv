@@ -625,3 +625,6 @@ ui.interaction.go_outside,前往外面,前往外面,Выйти наружу,Sair
 ui.interaction.feed,喂食,餵食,Покормить,Alimentar
 ui.toast.item_reward,奖励：{0} ×{1},獎勵：{0} ×{1},Награда: {0} ×{1},Recompensa: {0} ×{1}
 ui.interaction.go_to_base,前往基地,前往基地,Вернуться на базу,Ir para a base
+ui.interaction.install_concentrated_explosive,安装高浓缩炸药,安裝高濃縮炸藥,Установить концентрированную взрывчатку,Instalar explosivo concentrado
+ui.rockfall.countdown,{0},{0},{0},{0}
+ui.rockfall.save_failed,无法保存进度。请稍后重试。,無法儲存進度。請稍後重試。,Не удалось сохранить прогресс. Повторите попытку позже.,Não foi possível salvar o progresso. Tente novamente em instantes.

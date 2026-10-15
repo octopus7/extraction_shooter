@@ -175,3 +175,7 @@ item.high_output_power_converter,"高功率电力转换模块","高功率電力�
 item.high_output_power_converter.desc,"修复受损电力转换装置以提高设备供电能力的模块。","修復受損電力轉換裝置以提高設備供電能力的模組。","Модуль для ремонта преобразователя и восстановления мощности питания оборудования.","Um módulo que restaura um conversor danificado para fornecer mais energia aos equipamentos."
 item.power_control_server,"电力控制服务器","電力控制伺服器","Сервер управления питанием","Servidor de controle de energia"
 item.power_control_server.desc,"印有土豆图案的黑色金属箱。用于控制室配电和设备控制的服务器。","印有馬鈴薯圖案的黑色金屬箱。用於控制室配電和設備控制的伺服器。","Чёрный металлический ящик с рисунком картофелины. Сервер управляет распределением питания и оборудованием диспетчерской.","Uma caixa de metal preta com um desenho de batata. O servidor gerencia a distribuição de energia e os equipamentos da sala de controle."
+item.concentrated_explosive,高浓缩炸药,高濃縮炸藥,Концентрированная взрывчатка,Explosivo concentrado
+item.concentrated_explosive.desc,装有计时器的玻璃瓶。放置在落石上后会在5秒后爆炸并清除道路。,裝有計時器的玻璃瓶。放置在落石上後會在5秒後爆炸並清除道路。,Стеклянная бутылка с таймером. Установите её на завале — через пять секунд взрыв расчистит путь.,Uma garrafa de vidro com temporizador. Instale nas pedras caídas para abrir caminho após cinco segundos.
+item.desk_clock,台钟,座鐘,Настольные часы,Relógio de mesa
+item.desk_clock.desc,可在工作台上用作制作材料的小台钟。,可在工作臺上用作製作材料的小座鐘。,Небольшие настольные часы. Можно использовать как материал для изготовления предметов на верстаке.,Um pequeno relógio de mesa que pode ser usado como material de fabricação na bancada.

@@ -471,7 +471,7 @@ Practice dummy body/head armor tiers are authored in Blueprint defaults and map 
 
 - 숲→마을 장애물의 폭파 완료는 `WorldProgressStates[region.forest.village.obstacle]`, 숲→평원 승강기의 수리 완료는 `[region.forest.plains.lift]`에 저장한다. 모두 기존 `Completed` 상태를 사용하며 저장 스키마 변경은 없다.
 - 두 수리 재료를 모두 확보했을 때만 인벤토리 소모와 완료 상태 변경을 함께 처리하고 저장한다. 일부 재료만 가진 실패 시도와 이미 완료된 승강기의 재시도는 소모하지 않는다.
-- 2026-10-15 기존 폭파 장애물의 배치·BP·전용 클래스를 제거했다. `region.forest.village.obstacle`의 기존 저장값과 통로의 완료 상태 조회는 보존하며 새 완료 수단은 미연결이다. 승강기는 재입장 시 이동 가능 상태로 복원한다. 독립 통로에는 새 저장 ID가 필요하다.
+- 2026-10-15 기존 폭파 장애물 대신 낙석 BP를 연결했다. `region.forest.village.obstacle`의 기존 완료 저장은 그대로 인정한다. 승강기는 재입장 시 이동 가능 상태로 복원한다. 독립 통로에는 새 저장 ID가 필요하다.
 - 숲·마을·평원 간 이동은 같은 레이드 세션이다. 체력·허기·수분 비율을 목적지가 일치하는 새 플레이어에게 한 번 전달한다. 전달 대기값은 `GameInstance` 런타임에만 두며 저장 파일에는 추가하지 않는다. 기지 귀환의 허기·수분 최소 회복 규칙을 지역 이동에 적용하지 않는다.
 - 지역 이동 중 레이드 경험치를 정산하지 않는다. 업적용 처치 수와 누적 플레이 시간을 이어가되 로딩·일시정지 시간은 합산하지 않는다. 기지 귀환·사망 등 기존 종료 경로는 유지한다. 자세한 배치는 `Docs/region_travel.md`를 따른다.
 
@@ -564,3 +564,11 @@ The snapshot includes all gameplay-slot fields (inventory, storage, pending rewa
 ### Extraction completion protection
 
 Once the extraction hold completes, the source world is paused and the extracting pawn's damage flag is disabled before persistence and return presentation begin. This freezes enemy movement, animation-driven attacks and attack timers; projectile and direct damage checks also respect the disabled damage flag. Slate experience presentation and the level-transition subsystem continue while the world is paused. Travel failure or extraction actor removal cancels the presentation and restores only the pause/damage state owned by this extraction. These guards are transient, are not written into a save, and do not grant invulnerability to the new pawn in the destination world.
+
+### 아이템 장전형 터널 낙석
+
+- 기존 `WorldProgressStates[region.forest.village.obstacle]`에 `InProgress` + `ProgressQuantity=1`이면 장전, `Completed`이면 개방이다. 저장 스키마·버전 변경은 없다.
+- 장전 트랜잭션은 소지품 1개 소모와 월드 상태를 먼저 저장하고 성공 후 변경 알림을 발행한다. 저장 실패 시 아이템 인스턴스·인벤토리·보조 가방·월드 진행을 원복하며 타이머를 시작하지 않는다.
+- 장전 상태로 로드하면 추가 아이템 없이 5초 카운트다운을 재개한다. 남은 시간·경고 머티리얼·피해는 저장하지 않는다. 종료 시 이전 월드의 타이머를 해제한다.
+- 폭발 완료 저장이 실패하면 길을 막은 채 1초마다 재시도한다. 성공 이후에만 한 번 피해·이펙트를 적용한다. 이미 완료된 저장 복원에는 피해·이펙트가 없다.
+- 월드 상태를 저장한 후 퀘스트 알림을 보내므로 저장의 퀘스트 목표가 아직 갱신 전일 수 있다. 기존 로더의 월드 목표 재조정으로 복구하며 보상은 자동 지급하지 않는다.

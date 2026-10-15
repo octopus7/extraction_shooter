@@ -270,6 +270,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperEquipmentDataTest;
 	friend class FTunaSweeperArmorPenetrationTest;
 	friend class FTunaSweeperPowerFacilityTest;
+	friend class FTunaSweeperRockfallTest;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperQuestLockerTest;
@@ -282,6 +283,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperRegionPassageTest;
 #if WITH_DEV_AUTOMATION_TESTS
+	friend class FTunaSweeperConcentratedExplosiveCraftTest;
 	friend class FTunaSweeperRaidLiftRepairTest;
 #endif
 	friend class FTunaSweeperQuestWorldProgressTest;
@@ -876,6 +878,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void NotifyActiveLootContainerUiClosed();
 	void SaveGameState();
+
+	// Rockfall installation/completion: publish only after the inventory + world-state save succeeds.
+	bool CommitRockfallProgress(FName ObjectId, int32 ExplosiveItemId, bool bComplete, bool bSaveImmediately = true);
 	/** Temporary equipment for the local boss lab; restored when its game mode ends. */
 	void BeginCombatTestSession();
 	void ResetCombatTestLoadout();

@@ -683,3 +683,6 @@ ui.interaction.go_outside,밖으로 이동,Go outside,外へ移動
 ui.interaction.feed,먹이 주기,Feed,エサをあげる
 ui.toast.item_reward,보상: {0} ×{1},Reward: {0} ×{1},報酬：{0} ×{1}
 ui.interaction.go_to_base,기지로 이동,Go to base,基地へ移動
+ui.interaction.install_concentrated_explosive,고농축 폭발물 설치,Install concentrated explosive,高濃縮爆薬を設置
+ui.rockfall.countdown,{0},{0},{0}
+ui.rockfall.save_failed,진행 상황을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.,Could not save progress. Please try again shortly.,進行状況を保存できませんでした。しばらくしてから再試行してください。

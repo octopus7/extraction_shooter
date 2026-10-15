@@ -30,7 +30,7 @@
 
 `/Game/MainRaid/RegionTravel`에 `BP_ForestReturn`, `BP_ForestToVillage`, `BP_ForestToPlainsLift`가 있다. 메시·재료는 같은 폴더의 복셀 형태 임시 애셋이다. 익스트랙션은 기존 `/Game/Interaction/BP_ExtractionPoint`를 사용하고 각 포인트 위치에 복셀 표시대를 별도 배치했다. 위치를 바꿀 때에는 같은 번호의 `ExtractionVoxel` 액터도 함께 옮긴다. 모든 익스트랙션 목적지는 `BunkerMap`이다.
 
-통로 BP의 `Destination`, `Repair Parts`를 편집할 수 있다. 마을 통로는 기존 저장 ID `region.forest.village.obstacle`을 계속 읽는다. 2026-10-15에 기존 폭파 장애물의 맵 배치, BP 및 전용 C++ 클래스를 제거했다. 대체 상태 변경 액터는 아직 연결하지 않았으며, 기존 저장 상태와 통로의 해금 조건은 유지한다. 승강기는 `region.forest.plains.lift`를 사용한다. 복제해 독립 통로로 쓸 때에는 새 저장 ID를 부여한다.
+통로 BP의 `Destination`, `Repair Parts`를 편집할 수 있다. 마을 통로는 기존 저장 ID `region.forest.village.obstacle`을 계속 읽는다. 2026-10-15 기존 폭파 장애물 대신 `/Game/Interaction/Rockfall/BP_ForestRockfallBarrier`를 연결했다. 터널 남쪽 400cm인 (6742.86, 1388.89, 0)에 `Forest_TunnelRockfall`로 배치했으며, 기존 저장 상태와 통로의 해금 조건은 유지한다. 승강기는 `region.forest.plains.lift`를 사용한다. 복제해 독립 통로로 쓸 때에는 새 저장 ID를 부여한다.
 
 ## 상태 유지
 
@@ -80,3 +80,12 @@
 | 19 | `/Game/MainRaid/RaidPlains` | `region.plains` |
 
 개발용 `RaidMap`은 위 세 도전과제에 포함하지 않는다. 플랫폼 도전과제 ID 연결은 기존 상태를 유지한다.
+
+## 터널 낙석과 고농축 폭발물 (2026-10-15)
+
+- 좌우 절벽은 영구 유지하고 중앙 낙석과 차단 충돌만 제거한다. BP의 메시·위치·폭발 반경과 피해는 에디터에서 조정할 수 있다.
+- 고농축 폭발물(6031) 1개를 소지하고 상호작용하면 소모·장전 상태를 함께 저장한다. 5초 뒤 폭발하며, 완료 저장에 성공해야 통로 개방·이펙트·피해를 적용한다.
+- 지면에는 처음부터 반경 400cm의 흐린 붉은 최대 영역이 표시되고, 내부가 1초 동안 차오른다. 전용 줄무늬 텍스처의 UV 이동과 경계 맥동은 폭발까지 유지한다. 피해 기본값은 중심 60·외곽 15이며 설치자도 대상이다.
+- 장전 도중 종료하면 다음 로드에서 추가 소모 없이 5초를 다시 센다. 이미 개방된 저장에서는 폭발이나 피해를 반복하지 않는다.
+- 작업대 1에서 분홍 뿡뿡(6028) 1개 + 탁상시계(6032) 1개로 고농축 폭발물 1개를 제작한다. 레시피는 기본 공개한다.
+- 아이콘 원본은 `TunaSweeper/SourceArt/UI/Items/Rockfall`, UE 텍스처는 `/Game/UI/Icons/T_UIIcon_ConcentratedExplosive`와 `T_UIIcon_DeskClock`이다. 탁상시계는 흰 앞 테두리·푸른 도색·철색 금속으로 표현한다.
