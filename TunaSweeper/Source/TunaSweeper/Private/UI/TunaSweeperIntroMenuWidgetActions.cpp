@@ -309,11 +309,15 @@ void UTunaSweeperIntroMenuWidget::HandleDeleteCurrentSaveDataClicked()
 	{
 		ToastSubsystem->ShowToast(bDeleted
 			? ResolveUiText(
-				FName(TEXT("ui.toast.save_slot_deleted")),
-				FText::FromString(TEXT("삭제 되었습니다")))
+				FName(TEXT("ui.toast.save_slot_deleted")), FText::GetEmpty())
 			: ResolveUiText(
-				FName(TEXT("ui.toast.save_delete_failed")),
-				FText::FromString(TEXT("저장 데이터를 삭제하지 못했습니다."))));
+				FName(TEXT("ui.toast.save_delete_failed")), FText::GetEmpty()));
+	}
+
+	if (bDeleted)
+	{
+		ShowMainMenu();
+		return;
 	}
 
 	RefreshMainMenu();
