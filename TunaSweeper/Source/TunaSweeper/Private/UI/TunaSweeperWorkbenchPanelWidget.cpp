@@ -6,9 +6,12 @@
 #include "Components/BorderSlot.h"
 #include "Components/Button.h"
 #include "Components/ButtonSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/ListView.h"
 #include "Components/ListViewBase.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/VerticalBox.h"
@@ -28,6 +31,7 @@ namespace TunaSweeperWorkbenchPanel
 	const FLinearColor NormalTextColor(0.90f, 0.94f, 0.98f, 1.0f);
 	const FLinearColor MissingTextColor(0.92f, 0.18f, 0.12f, 1.0f);
 	constexpr float TargetTileEntrySize = 96.0f;
+	constexpr float IngredientIconSize = 28.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -947,7 +951,30 @@ void UTunaSweeperWorkbenchPanelWidget::RefreshCraftDetails()
 					TunaSweeperWorkbenchPanel::ResolveItemName(TunaGameInstance, ItemDataSubsystem, Ingredient.ItemId, Language),
 					FText::AsNumber(FMath::Max(0, Ingredient.AvailableQuantity)),
 					FText::AsNumber(FMath::Max(1, Ingredient.RequiredQuantity))));
-				if (UVerticalBoxSlot* IngredientSlot = CraftIngredientList->AddChildToVerticalBox(IngredientText))
+				UHorizontalBox* IngredientRow = WidgetTree->ConstructWidget<UHorizontalBox>();
+				IngredientRow->SetVisibility(ESlateVisibility::HitTestInvisible);
+				USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>();
+				IconBox->SetWidthOverride(TunaSweeperWorkbenchPanel::IngredientIconSize);
+				IconBox->SetHeightOverride(TunaSweeperWorkbenchPanel::IngredientIconSize);
+				UImage* IngredientIcon = WidgetTree->ConstructWidget<UImage>();
+				UTexture2D* IconTexture = nullptr;
+				FTunaSweeperItemDefinition IngredientDefinition;
+				if (ItemDataSubsystem && ItemDataSubsystem->TryGetItemDefinition(Ingredient.ItemId, IngredientDefinition))
+				{
+					const FString IconPath = ItemDataSubsystem->BuildItemIconObjectPath(IngredientDefinition);
+					if (!IconPath.IsEmpty())
+					{
+						IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(IconPath)).LoadSynchronous();
+					}
+				}
+				IngredientIcon->SetBrushFromTexture(IconTexture);
+				IngredientIcon->SetVisibility(IconTexture ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+				IconBox->SetContent(IngredientIcon);
+				UHorizontalBoxSlot* IconSlot = IngredientRow->AddChildToHorizontalBox(IconBox);
+				IconSlot->SetVerticalAlignment(VAlign_Center);
+				IconSlot->SetPadding(FMargin(0.0f, 0.0f, 6.0f, 0.0f));
+				IngredientRow->AddChildToHorizontalBox(IngredientText)->SetVerticalAlignment(VAlign_Center);
+				if (UVerticalBoxSlot* IngredientSlot = CraftIngredientList->AddChildToVerticalBox(IngredientRow))
 				{
 					IngredientSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 4.0f));
 				}
