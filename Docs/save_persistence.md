@@ -388,6 +388,8 @@ Ability-stat research is persisted per save slot through `AppliedResearchNodeIds
 
 ATV durability (`MaxDurability` configuration / transient `CurrentDurability`), destruction latch, smoke timers, delayed explosion timer/trigger latch and detached debris are session-local vehicle state. They follow the existing non-persistent ATV placement/movement policy and reset on a fresh level load. No save-owned fields or migration are added by the vehicle damage implementation.
 
+`BP_SpecialATVSpawner` creates its configured ATV Blueprint once on game BeginPlay. The spawned vehicle reference and successful-spawn latch are transient: repeated spawn calls cannot duplicate a vehicle or replace a destroyed one in the same level visit; entering a fresh level creates a new ATV. Editor worlds never spawn a gameplay ATV. The current `ShouldSpawnVehicle` Blueprint policy always returns true; future quest-dependent behavior can override it and call `SpawnVehicle` when eligibility changes. No quest condition or persistent spawner state is currently introduced. The tire Billboard is editor-only and hidden in game.
+
 When adding a field that should survive save/load:
 
 1. Add the field to a save-owned USTRUCT/UCLASS or explicitly copy it into one.
