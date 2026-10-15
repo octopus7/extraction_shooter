@@ -1074,26 +1074,9 @@ int32 UTunaSweeperQuestWidget::CountVisibleQuestsForFilter(EQuestListFilter Filt
 	int32 Count = 0;
 	for (const FTunaSweeperQuestDefinition& QuestDefinition : AllDefinitions)
 	{
-		const ETunaSweeperQuestState State = QuestSubsystem->GetQuestState(QuestDefinition.QuestId);
-		switch (Filter)
+		if (IsQuestVisibleForFilter(*QuestSubsystem, QuestDefinition, Filter))
 		{
-		case EQuestListFilter::Available:
-			if (bShowAvailableTab &&
-				State == ETunaSweeperQuestState::Available &&
-				(InteractionProviderId.IsNone() || QuestDefinition.ProviderId == InteractionProviderId) &&
-				QuestSubsystem->CanAcceptQuest(QuestDefinition.QuestId))
-			{
-				++Count;
-			}
-			break;
-		case EQuestListFilter::InProgress:
-			if (State == ETunaSweeperQuestState::Accepted || State == ETunaSweeperQuestState::RewardAvailable)
-			{
-				++Count;
-			}
-			break;
-		default:
-			break;
+			++Count;
 		}
 	}
 
@@ -1256,19 +1239,29 @@ void UTunaSweeperQuestWidget::BuildFilteredQuestDefinitions(
 
 	for (const FTunaSweeperQuestDefinition& QuestDefinition : AllDefinitions)
 	{
-		if (IsQuestVisibleInActiveFilter(QuestSubsystem, QuestDefinition))
+		if (IsQuestVisibleForFilter(QuestSubsystem, QuestDefinition, ActiveFilter))
 		{
 			OutQuestDefinitions.Add(QuestDefinition);
 		}
 	}
 }
 
-bool UTunaSweeperQuestWidget::IsQuestVisibleInActiveFilter(
+bool UTunaSweeperQuestWidget::IsQuestVisibleForFilter(
 	const UTunaSweeperQuestSubsystem& QuestSubsystem,
-	const FTunaSweeperQuestDefinition& QuestDefinition) const
+	const FTunaSweeperQuestDefinition& QuestDefinition,
+	EQuestListFilter Filter) const
 {
+	// NPC entry scopes every tab. Inventory entry has no provider and remains global.
+	// Include a separate completion NPC so handoff quests remain visible there.
+	if (!InteractionProviderId.IsNone() &&
+		QuestDefinition.ProviderId != InteractionProviderId &&
+		QuestDefinition.GetCompletionProviderId() != InteractionProviderId)
+	{
+		return false;
+	}
+
 	const ETunaSweeperQuestState State = QuestSubsystem.GetQuestState(QuestDefinition.QuestId);
-	switch (ActiveFilter)
+	switch (Filter)
 	{
 	case EQuestListFilter::Available:
 		return bShowAvailableTab &&

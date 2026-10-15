@@ -337,6 +337,68 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 	FieldNpc->Destroy();
 	BaseNpc->Destroy();
 
+	// NPC lists must isolate every tab, including already accepted and achieved quests.
+	// A separate completion NPC remains relevant; inventory entry still shows all quests.
+	Quests->QuestDefinitions.Reset();
+	const FName ListProviders[] = { TEXT("provider.mole"), TEXT("provider.pirate_cat"),
+		TEXT("provider.marine_cat"), TEXT("provider.baby_boar") };
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(ListProviders); ++Index)
+	{
+		FTunaSweeperQuestDefinition Definition;
+		Definition.QuestId = 301 + Index;
+		Definition.ProviderId = ListProviders[Index];
+		if (Index == 3) Definition.CompletionProviderId = ListProviders[0];
+		FTunaSweeperObjectiveDefinition Objective;
+		Objective.ObjectiveId = TEXT("defeat_target");
+		Objective.Type = ETunaSweeperObjectiveType::EnemyKilled;
+		Objective.RequiredCount = 2;
+		Definition.Objectives.Add(Objective);
+		Quests->QuestDefinitions.Add(Definition.QuestId, Definition);
+	}
+	for (const auto State : { ETunaSweeperQuestState::Accepted,
+		ETunaSweeperQuestState::RewardAvailable, ETunaSweeperQuestState::RewardCompleted })
+	{
+		TArray<FTunaSweeperNumericQuestProgressSaveData> ListProgress;
+		for (int32 Index = 0; Index < UE_ARRAY_COUNT(ListProviders); ++Index)
+		{
+			FTunaSweeperNumericQuestProgressSaveData Row;
+			Row.QuestId = 301 + Index;
+			Row.State = State;
+			if (State != ETunaSweeperQuestState::Accepted)
+			{
+				FTunaSweeperObjectiveProgressSaveData Objective;
+				Objective.ObjectiveId = TEXT("defeat_target");
+				Objective.CurrentCount = 2;
+				Row.ObjectiveProgress.Add(Objective);
+			}
+			ListProgress.Add(Row);
+		}
+		Quests->LoadQuestProgressFromSave(ListProgress, 0, 0);
+		for (int32 ProviderIndex = 0; ProviderIndex <= UE_ARRAY_COUNT(ListProviders); ++ProviderIndex)
+		{
+			const FName Provider = ProviderIndex < UE_ARRAY_COUNT(ListProviders) ? ListProviders[ProviderIndex] : NAME_None;
+			// Deliberately pass another NPC's selected ID to exercise stale selection cleanup.
+			Panel->InitializeQuest(302, Provider);
+			TArray<FTunaSweeperQuestDefinition> Visible;
+			Panel->BuildFilteredQuestDefinitions(*Quests, Visible);
+			const int32 Expected = Provider.IsNone() ? 4 : ProviderIndex == 0 ? 2 : 1;
+			const FString Case = FString::Printf(TEXT("Provider %s state %d"), *Provider.ToString(), static_cast<int32>(State));
+			TestEqual(Case + TEXT(" list count"), Visible.Num(), Expected);
+			for (const auto& Definition : Visible)
+			{
+				TestTrue(Case + TEXT(" excludes unrelated NPC quests"), Provider.IsNone() ||
+					Definition.ProviderId == Provider || Definition.GetCompletionProviderId() == Provider);
+			}
+			TestTrue(Case + TEXT(" selection belongs to visible list"),
+				Visible.ContainsByPredicate([Panel](const auto& Definition) { return Definition.QuestId == Panel->QuestId; }));
+			if (State != ETunaSweeperQuestState::RewardCompleted)
+			{
+				TestEqual(Case + TEXT(" progress badge matches list"),
+					Panel->CountVisibleQuestsForFilter(UTunaSweeperQuestWidget::EQuestListFilter::InProgress), Expected);
+			}
+		}
+	}
+
 	const FString ValidObjective = TEXT(R"({"objective_id":"test","type":"item_submitted","item_id":6002,"required_count":2,"target_provider_id":"provider.recipient"})");
 	for (const FString& Json : { ValidObjective.Replace(TEXT("6002"), TEXT("-1")),
 		ValidObjective.Replace(TEXT(":2,"), TEXT(":2.5,")), ValidObjective.Replace(TEXT(":2,"), TEXT(":0,")),

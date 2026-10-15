@@ -136,9 +136,10 @@ private:
 	void BuildFilteredQuestDefinitions(
 		const UTunaSweeperQuestSubsystem& QuestSubsystem,
 		TArray<FTunaSweeperQuestDefinition>& OutQuestDefinitions) const;
-	bool IsQuestVisibleInActiveFilter(
+	bool IsQuestVisibleForFilter(
 		const UTunaSweeperQuestSubsystem& QuestSubsystem,
-		const FTunaSweeperQuestDefinition& QuestDefinition) const;
+		const FTunaSweeperQuestDefinition& QuestDefinition,
+		EQuestListFilter Filter) const;
 	FText GetQuestText(FName StringKey, const FText& FallbackText = FText::GetEmpty()) const;
 	FText GetStateText(int32 InQuestId) const;
 	FText GetPrimaryButtonText(int32 InQuestId) const;
