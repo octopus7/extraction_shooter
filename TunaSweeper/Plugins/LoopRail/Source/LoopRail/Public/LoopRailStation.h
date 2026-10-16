@@ -27,6 +27,8 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<UStaticMeshComponent> ArrivalMarkerBody;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival") TObjectPtr<UCapsuleComponent> ArrivalMarkerCollision;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival") bool bShowArrivalDisplay = true;
+    /** Fixed world heading of the monument face; opposite the default camera viewing direction. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="LoopRail|Arrival", meta=(Units="deg")) float ArrivalMarkerWorldYaw = 180;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="120", Units="cm")) float ArrivalMarkerHeight = 220;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="40", Units="cm")) float ArrivalMarkerWidth = 100;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail|Arrival", meta=(ClampMin="10", Units="cm")) float ArrivalMarkerDepth = 25;

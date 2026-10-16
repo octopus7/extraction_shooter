@@ -169,7 +169,7 @@ bool UTunaSweeperRailInteractionComponent::ResolveTravel(APawn* Pawn, ALoopRailS
     if (!Capsule || !Movement || !Capsule->IsQueryCollisionEnabled()) return false;
     float Radius, HalfHeight;
     Capsule->GetScaledCapsuleSize(Radius, HalfHeight);
-    // Land beside the monument on the platform, clear of its rotating body and train sweep.
+    // Land beside the monument on the platform, clear of its body and train sweep.
     const FVector Floor = Station->ArrivalMarkerPivot->GetComponentLocation() - Station->GetActorForwardVector() * 180.f;
     FCollisionQueryParams Query(SCENE_QUERY_STAT(RailArrival), false, Character);
     const FCollisionResponseParams Responses(Capsule->GetCollisionResponseToChannels());

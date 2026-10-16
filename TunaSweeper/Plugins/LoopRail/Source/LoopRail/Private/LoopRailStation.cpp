@@ -5,8 +5,6 @@
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Materials/MaterialInterface.h"
-#include "Camera/PlayerCameraManager.h"
-#include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
 #include "Internationalization/Internationalization.h"
@@ -92,6 +90,8 @@ void ALoopRailStation::UpdateArrivalDisplayTransform()
     const float Depth = FMath::Max(10.f, ArrivalMarkerDepth);
     const FVector Base(450-FMath::Max(200.f, PlatformLength)*.5, Side*(115+FMath::Max(100.f, PlatformWidth)*.5), 60);
     ArrivalMarkerPivot->SetRelativeLocation(Base);
+    // Placement heading is independent of the platform heading and the moving camera.
+    ArrivalMarkerPivot->SetWorldRotation(FRotator(0, ArrivalMarkerWorldYaw, 0));
     ArrivalMarkerBody->SetRelativeLocation(FVector(0, 0, Height*.5f));
     ArrivalMarkerBody->SetRelativeScale3D(FVector(Depth, Width, Height)/100.f);
     // A fixed round footprint keeps collision identical for all viewing directions/clients.
@@ -114,13 +114,6 @@ void ALoopRailStation::Tick(float DeltaSeconds)
     ArrivalMarkerBody->SetVisibility(bShowArrivalDisplay && bShowPlatform);
     ArrivalMarkerCollision->SetCollisionEnabled(bShowArrivalDisplay && bShowPlatform ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
     if (!bShowArrivalDisplay || !bShowPlatform) return;
-    if (const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0))
-    {
-        FVector Facing = Camera->GetCameraLocation()-ArrivalMarkerPivot->GetComponentLocation();
-        Facing.Z = 0;
-        // Keep the existing yaw directly overhead; never tip the grounded body toward the camera.
-        if (!Facing.IsNearlyZero()) ArrivalMarkerPivot->SetWorldRotation(FRotator(0, Facing.Rotation().Yaw, 0));
-    }
     DisplayRefreshRemaining -= DeltaSeconds;
     if (DisplayRefreshRemaining <= 0)
     {
