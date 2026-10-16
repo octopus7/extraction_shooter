@@ -1,0 +1,83 @@
+{
+  "mesh": "SM_EthanolSilo",
+  "purpose": "Replaceable ethanol quest facility placeholder",
+  "dimensions_cm": [
+    280,
+    270,
+    350
+  ],
+  "tank_diameter_cm": 240,
+  "bounds_cm": [
+    [
+      -140,
+      140
+    ],
+    [
+      -135,
+      135
+    ],
+    [
+      0,
+      350
+    ]
+  ],
+  "vertices": 812,
+  "triangles": 1560,
+  "material_slots": 1,
+  "uv_layers": 1,
+  "front_axis": "+X",
+  "up_axis": "+Z",
+  "pivot": "bottom center",
+  "origin": [
+    0,
+    0,
+    0
+  ],
+  "voxel": false,
+  "base_color_texture": "T_EthanolSilo_BaseColor.png",
+  "texture_resolution": [
+    1024,
+    1024
+  ],
+  "texture_alpha": "fully opaque",
+  "material": "M_EthanolSilo",
+  "uv_mapping": "Cylindrical tank strips and roof bands; area-bearing box/pipe islands reuse atlas swatches intentionally. Control face has a dedicated graphic atlas tile. No text labels.",
+  "fbx_export": {
+    "axis_up": "Z",
+    "axis_forward": "-Y",
+    "unit_scale_meters": 1,
+    "triangulated": true,
+    "exported_objects": [
+      "SM_EthanolSilo"
+    ],
+    "apply_scale_options": "FBX_SCALE_UNITS"
+  },
+  "ue_import": {
+    "convert_scene_unit": true,
+    "generate_lightmap_uvs": true,
+    "texture_srgb": true,
+    "metallic": 0.18,
+    "uniform_scale": 1,
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "collision": "Create simple boxes/cylinder or auto convex in UE; no UCX mesh supplied",
+    "material_blend_mode": "Opaque",
+    "texture_mip_gen_settings": "FromTextureGroup",
+    "force_front_x_axis": false,
+    "texture_filter": "Default",
+    "convert_scene": true,
+    "roughness": 0.7
+  },
+  "blend_preview": "PreviewFloor, lights and camera retained only for rendering; FBX exports the silo mesh alone",
+  "files": [
+    "SM_EthanolSilo.blend",
+    "SM_EthanolSilo.fbx",
+    "T_EthanolSilo_BaseColor.png",
+    "SM_EthanolSilo_preview.png",
+    "SM_EthanolSilo_front.png",
+    "validation_report.json"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "validation_tool": "Blender 4.5.12 LTS, fresh independent processes",
+  "checked_utc": "2026-10-16T14:54:32.1002361Z",
+  "all_passed": true,
+  "visual_review": "Perspective and front PNGs inspected; rounded silhouette, front pipes and control panel readable",
+  "results": [
+    {
+      "file": "SM_EthanolSilo.blend",
+      "dimensions_cm": [
+        280.0,
+        270.0,
+        350.0
+      ],
+      "bounds_m": [
+        [
+          -1.399999976158142,
+          1.399999976158142
+        ],
+        [
+          -1.350000023841858,
+          1.350000023841858
+        ],
+        [
+          0.0,
+          3.5
+        ]
+      ],
+      "vertices": 812,
+      "polygons": 1560,
+      "triangles": 1560,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "minimum_uv_triangle_area": 9.809954125117315E-05,
+      "minimum_mesh_triangle_area_m2": 0.00019112623704131693,
+      "nonmanifold_edges": 0,
+      "normals_tangents_finite_and_unit": true,
+      "signed_volume_m3": 16.533495653451194,
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "front_axis": "+X",
+      "up_axis": "+Z",
+      "texture_size": [
+        1024,
+        1024
+      ],
+      "texture_channels": 4,
+      "texture_path_resolves": true,
+      "passed": true
+    },
+    {
+      "file": "SM_EthanolSilo.fbx",
+      "dimensions_cm": [
+        280.0,
+        270.0,
+        350.0
+      ],
+      "bounds_m": [
+        [
+          -1.4000000953674316,
+          1.4000000953674316
+        ],
+        [
+          -1.3500001430511475,
+          1.3500001430511475
+        ],
+        [
+          0.0,
+          3.5
+        ]
+      ],
+      "vertices": 812,
+      "polygons": 1560,
+      "triangles": 1560,
+      "material_slots": 1,
+      "uv_layers": 1,
+      "minimum_uv_triangle_area": 9.809954125117315E-05,
+      "minimum_mesh_triangle_area_m2": 0.00019112623704131693,
+      "nonmanifold_edges": 0,
+      "normals_tangents_finite_and_unit": true,
+      "signed_volume_m3": 16.533495653451194,
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        -0.0,
+        8.742277657347586E-08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "front_axis": "+X",
+      "up_axis": "+Z",
+      "texture_size": [
+        1024,
+        1024
+      ],
+      "texture_channels": 4,
+      "texture_path_resolves": true,
+      "passed": true
+    }
+  ],
+  "post_cleanup_validation": {
+    "fbx": "PASS",
+    "one_off_generators_removed": true,
+    "checked_utc": "2026-10-16T14:55:06.7752323Z",
+    "blend": "PASS",
+    "alpha_max": 1,
+    "alpha_min": 1
+  }
+}

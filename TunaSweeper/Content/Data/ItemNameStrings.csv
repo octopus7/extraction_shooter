@@ -133,8 +133,8 @@ item.dog_food,개 사료,Dog Food,ドッグフード
 item.dog_food.desc,개를 위한 포장 사료.,Packaged food for dogs.,犬用の包装された餌。
 item.cat_food,고양이 사료,Cat Food,キャットフード
 item.cat_food.desc,고양이를 위한 포장 사료.,Packaged food for cats.,猫用の包装された餌。
-item.fermented_fuel,발효 연료,Fermented Fuel,発酵燃料
-item.fermented_fuel.desc,발효 공정으로 얻은 연료가 담긴 용기.,A container of fuel produced through fermentation.,発酵工程で得た燃料が入った容器。
+item.fermented_fuel,에탄올,Ethanol,エタノール
+item.fermented_fuel.desc,고구마를 발효해 만든 에탄올 연료.,Ethanol fuel produced by fermenting sweet potatoes.,サツマイモを発酵させて作ったエタノール燃料。
 item.high_tensile_cable,고장력 강선 케이블,High-Tensile Steel Cable,高張力鋼線ケーブル
 item.high_tensile_cable.desc,무거운 하중을 견디도록 꼬아 만든 강선 케이블.,Twisted steel cable made to withstand heavy loads.,重い荷重に耐えられるように撚り合わせた鋼線ケーブル。
 item.toad_jar,두꺼비 유리병,Toad Jar,ヒキガエル入りの瓶

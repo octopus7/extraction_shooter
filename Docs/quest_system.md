@@ -287,3 +287,11 @@ BP의 `ArrivalFlagIcon` Billboard는 레벨 뷰포트에서 흰색 깃발로 위
 - `/Game/Interaction/QuestFacilities/BP_ATVWarehousePower`는 기존 전력 복구 시설을 사용한다. `FacilityMesh`를 교체할 수 있다. 시설과 차량 생성기의 월드 진행 ID를 일치시킨다.
 - Main 데이터셋에는 선택적으로 `Data/ShopDefinitions.json`을 둘 수 있다. 존재하면 Main에서 사용하고, 없으면 공개 기본 상점 파일을 사용한다. Demo는 항상 공개 파일을 사용한다. Main 준비 스크립트는 해당 선택 파일을 패키징 입력에 포함하며 빈 JSON·문법 오류는 중단한다.
 - 에셋·배치의 읽기 전용 재검증 절차는 `Tools/QuestFacilities/README.md`를 참고한다.
+
+### 수리 후 생산하는 시설
+
+- `ATunaSweeperPowerFacilityActor.RequiredItems`에 여러 재료를 지정할 수 있다. 빈 배열이면 기존 단일 재료 속성을 사용한다. 다중 재료 설명은 지역화 키로 표시한다.
+- `ATunaSweeperEthanolFacilityActor`는 수리 후 같은 상호작용을 반복 생산으로 전환한다. 입력/출력 아이템과 수량, 생산/재료 부족 안내는 BP 속성으로 설정한다. 재료 부족 시 플레이어 말풍선으로 안내한다.
+- `/Game/Interaction/QuestFacilities/Ethanol/BP_EthanolFacility`의 `FacilityMesh`는 교체 가능하다. 사일로 원본과 UV 텍스처는 `TunaSweeper/SourceArt/QuestFacilities/Ethanol`에 있다.
+- 실제 목표는 시설의 월드 진행 완료를 사용하고, 퀘스트 보상 수령은 기존 NPC UI에서 별도로 처리한다. 시설 생산 자체가 퀘스트 보상을 자동 수령하지 않는다.
+- 읽기 전용 에셋 검증 절차는 `Tools/EthanolFacility/README.md`에 있다.

@@ -270,7 +270,9 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperEquipmentDataTest;
 	friend class FTunaSweeperArmorPenetrationTest;
 	friend class FTunaSweeperPowerFacilityTest;
+	friend class FTunaSweeperPowerFacilityMaterialsTest;
 	friend class FTunaSweeperRockfallTest;
+	friend class FTunaSweeperEthanolFacilityTest;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperQuestLockerTest;
@@ -884,6 +886,11 @@ public:
 
 	// Rockfall installation/completion: publish only after the inventory + world-state save succeeds.
 	bool CommitRockfallProgress(FName ObjectId, int32 ExplosiveItemId, bool bComplete, bool bSaveImmediately = true);
+	bool ProduceFacilityBatch(FName ObjectId, int32 InputItemId, int32 InputQuantity,
+		int32 OutputItemId, int32 OutputQuantity, bool bSaveImmediately = true);
+	// Repair material payment and world completion are a single durable transaction.
+	bool CommitPowerFacilityRepair(FName ObjectId, const TArray<FTunaSweeperItemStack>& Requirements,
+		bool bConsumeItems, bool bSaveImmediately = true);
 	/** Temporary equipment for the local boss lab; restored when its game mode ends. */
 	void BeginCombatTestSession();
 	void ResetCombatTestLoadout();

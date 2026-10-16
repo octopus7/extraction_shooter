@@ -1150,6 +1150,14 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 		}
 
 		QuestProgressById.Add(LoadedProgress.QuestId, LoadedProgress);
+		// A revised definition can replace objectives from an older unclaimed save.
+		// Revalidate readiness so a missing new objective cannot bypass its world action.
+		if (LoadedProgress.State == ETunaSweeperQuestState::RewardAvailable &&
+			!(Definition->bCompleteOnAccept && Definition->Objectives.IsEmpty()) &&
+			!AreAllObjectivesComplete(LoadedProgress.QuestId))
+		{
+			SetQuestState(LoadedProgress.QuestId, ETunaSweeperQuestState::Accepted);
+		}
 		if (LoadedProgress.State == ETunaSweeperQuestState::RewardCompleted)
 		{
 			if (UGameInstance* GameInstance = GetGameInstance())

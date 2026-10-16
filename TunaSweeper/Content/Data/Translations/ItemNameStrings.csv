@@ -131,8 +131,8 @@ item.dog_food,狗粮,狗糧,Корм для собак,Ração para cães
 item.dog_food.desc,供狗食用的包装饲料。,供狗食用的包裝飼料。,Упакованный корм для собак.,Ração embalada para cães.
 item.cat_food,猫粮,貓糧,Корм для кошек,Ração para gatos
 item.cat_food.desc,供猫食用的包装饲料。,供貓食用的包裝飼料。,Упакованный корм для кошек.,Ração embalada para gatos.
-item.fermented_fuel,发酵燃料,發酵燃料,Топливо брожения,Combustível fermentado
-item.fermented_fuel.desc,装有通过发酵工艺制成的燃料的容器。,裝有透過發酵製程製成的燃料的容器。,"Ёмкость с топливом, полученным в процессе брожения.",Um recipiente de combustível produzido por fermentação.
+item.fermented_fuel,乙醇,乙醇,Этанол,Etanol
+item.fermented_fuel.desc,红薯发酵制成的乙醇燃料。,由地瓜發酵製成的乙醇燃料。,Этаноловое топливо из ферментированного батата.,Combustível de etanol produzido pela fermentação de batatas-doces.
 item.high_tensile_cable,高强度钢丝缆,高強度鋼絲纜,Высокопрочный стальной трос,Cabo de aço de alta resistência
 item.high_tensile_cable.desc,绞合制成的钢丝缆，可承受重载。,絞合製成的鋼絲纜，可承受重載。,"Витой стальной трос, рассчитанный на большие нагрузки.",Cabo de aço trançado para suportar cargas pesadas.
 item.toad_jar,蟾蜍玻璃瓶,蟾蜍玻璃瓶,Банка с жабой,Pote com sapo

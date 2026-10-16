@@ -10,6 +10,19 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "UObject/UnrealType.h"
+#include "UObject/StrongObjectPtr.h"
+
+namespace PowerFacilityTests
+{
+struct FContextAccess : UGameInstance
+{
+	static void Attach(UGameInstance* Instance, FWorldContext* Context)
+	{
+		auto Member = &FContextAccess::WorldContext;
+		Instance->*Member = Context;
+	}
+};
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperPowerFacilityTest,
 	"TunaSweeper.Interaction.PowerFacility.RepairAndRestore",
@@ -93,6 +106,99 @@ bool FTunaSweeperPowerFacilityTest::RunTest(const FString& Parameters)
 	Name(Other, TEXT("ProgressObjectId"), TEXT("test.power.b"));
 	Refresh(Other);
 	TestTrue(TEXT("Separate facility remains broken"), Other->FindComponentByClass<UParticleSystemComponent>()->IsVisible());
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperPowerFacilityMaterialsTest,
+	"TunaSweeper.Interaction.PowerFacility.MaterialTransaction",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperPowerFacilityMaterialsTest::RunTest(const FString& Parameters)
+{
+	// Catches partial payment, duplicate undercharging, and completion leaking out of failed saves.
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
+	Context.SetCurrentWorld(World);
+	TStrongObjectPtr<UTunaSweeperGameInstance> Game(NewObject<UTunaSweeperGameInstance>(GEngine));
+	PowerFacilityTests::FContextAccess::Attach(Game.Get(), &Context);
+	Context.OwningGameInstance = Game.Get();
+	World->SetGameInstance(Game.Get());
+	Game->bInventoryStateInitialized = true;
+	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Refuse saves before touching user files.
+	Game->UGameInstance::Init();
+	ON_SCOPE_EXIT
+	{
+		World->DestroyWorld(false);
+		Game->UGameInstance::Shutdown();
+		World->SetGameInstance(nullptr);
+		Context.OwningGameInstance = nullptr;
+		PowerFacilityTests::FContextAccess::Attach(Game.Get(), nullptr);
+		GEngine->DestroyWorldContext(World);
+		World->RemoveFromRoot();
+	};
+	Game->ResetPlayerSlotArrays();
+	Game->WorldProgressStatesById.Reset();
+	auto* Facility = World->SpawnActor<ATunaSweeperPowerFacilityActor>();
+	if (!TestNotNull(TEXT("Material facility spawns"), Facility)) return false;
+	Facility->ProgressObjectId = TEXT("test.facility.materials");
+	Facility->bRequireActiveQuest = false;
+	Facility->RequiredItemId = 3004; // Nonempty array must override the legacy requirement.
+	Facility->RequiredItems = {{6020, 1}, {6002, 1}, {6002, 1}};
+	TestTrue(TEXT("Supply the first material"), Game->AddItemToFirstAvailableInventorySlot(6020, 2));
+	TestTrue(TEXT("Supply only part of the second material"), Game->AddItemToFirstAvailableInventorySlot(6002, 1));
+	TestFalse(TEXT("Duplicate requirements are aggregated before checking ownership"), Facility->CanRepair());
+	TestFalse(TEXT("Missing material rejects repair"), Facility->Repair(false));
+	TestEqual(TEXT("Missing material keeps the first stack"), Game->CountInventoryItemById(6020), 2);
+	TestEqual(TEXT("Missing material keeps the second stack"), Game->CountInventoryItemById(6002), 1);
+	TestTrue(TEXT("Supply all materials"), Game->AddItemToFirstAvailableInventorySlot(6002, 2));
+	Facility->bRequireActiveQuest = true;
+	TestFalse(TEXT("Materials never bypass the quest gate"), Facility->Repair(false));
+	Facility->bRequireActiveQuest = false;
+	for (const auto& Invalid : TArray<FTunaSweeperItemStack>{{0, 1}, {6020, 0}, {6020, -1}, {6020, MAX_int32}})
+	{
+		Facility->RequiredItems.Add(Invalid);
+		TestFalse(TEXT("Invalid or overflowing requirements fail closed"), Facility->Repair(false));
+		Facility->RequiredItems.Pop();
+	}
+	int32 ProgressNotifications = 0;
+	int32 InventoryNotifications = 0;
+	Game->OnWorldProgressChanged.AddLambda([&] { ++ProgressNotifications; });
+	Game->OnInventoryStateChanged.AddLambda([&] { ++InventoryNotifications; });
+	TestTrue(TEXT("Complete materials allow repair without the legacy item"), Facility->CanRepair());
+	TestFalse(TEXT("Failed save aborts repair"), Facility->Repair(true));
+	TestEqual(TEXT("Failed save restores first stack"), Game->CountInventoryItemById(6020), 2);
+	TestEqual(TEXT("Failed save restores second stack"), Game->CountInventoryItemById(6002), 3);
+	TestFalse(TEXT("Failed save keeps facility broken"), Facility->IsRepaired());
+	TestFalse(TEXT("Failed save leaves no synthetic world progress"), Game->WorldProgressStatesById.Contains(Facility->ProgressObjectId));
+	TestEqual(TEXT("Failed save publishes no completion"), ProgressNotifications, 0);
+	TestEqual(TEXT("Failed save publishes no inventory changes"), InventoryNotifications, 0);
+	TestTrue(TEXT("Retry repairs with every material"), Facility->Repair(false));
+	TestEqual(TEXT("Repair consumes first requirement once"), Game->CountInventoryItemById(6020), 1);
+	TestEqual(TEXT("Repair consumes the aggregated second requirement"), Game->CountInventoryItemById(6002), 1);
+	TestEqual(TEXT("Successful repair publishes completion once"), ProgressNotifications, 1);
+	TestEqual(TEXT("Successful repair publishes inventory once"), InventoryNotifications, 1);
+	TestFalse(TEXT("Repeated repair consumes nothing"), Facility->Repair(false));
+	TestEqual(TEXT("Repeat retains first remaining material"), Game->CountInventoryItemById(6020), 1);
+	TestEqual(TEXT("Repeat retains second remaining material"), Game->CountInventoryItemById(6002), 1);
+	auto* Restored = World->SpawnActor<ATunaSweeperPowerFacilityActor>();
+	Restored->ProgressObjectId = Facility->ProgressObjectId;
+	Restored->RefreshFacilityState();
+	TestTrue(TEXT("Recreated facility restores completion"), Restored->IsRepaired());
+	auto* Legacy = World->SpawnActor<ATunaSweeperPowerFacilityActor>();
+	Legacy->ProgressObjectId = TEXT("test.facility.legacy");
+	Legacy->bRequireActiveQuest = false;
+	Legacy->RequiredItemId = 6020;
+	TestTrue(TEXT("Empty array retains the legacy single-item repair"), Legacy->Repair(false));
+	TestEqual(TEXT("Legacy repair consumes its single material"), Game->CountInventoryItemById(6020), 0);
+	auto* Reusable = World->SpawnActor<ATunaSweeperPowerFacilityActor>();
+	Reusable->ProgressObjectId = TEXT("test.facility.reusable");
+	Reusable->bRequireActiveQuest = false;
+	Reusable->bConsumeRequiredItem = false;
+	Reusable->RequiredItems = {{6002, 1}};
+	TestTrue(TEXT("Nonconsuming requirements allow repair"), Reusable->Repair(false));
+	TestEqual(TEXT("Nonconsuming repair keeps its material"), Game->CountInventoryItemById(6002), 1);
+	Game->OnWorldProgressChanged.Clear();
+	Game->OnInventoryStateChanged.Clear();
 	return true;
 }
 #endif

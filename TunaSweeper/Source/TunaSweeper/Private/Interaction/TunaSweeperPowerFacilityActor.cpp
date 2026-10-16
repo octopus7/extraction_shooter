@@ -82,14 +82,42 @@ bool ATunaSweeperPowerFacilityActor::IsRepairInteractionAvailable() const
 	});
 }
 
+bool ATunaSweeperPowerFacilityActor::BuildRepairRequirements(TArray<FTunaSweeperItemStack>& OutRequirements) const
+{
+	OutRequirements.Reset();
+	if (!bRequiresItem) return true;
+	const TArray<FTunaSweeperItemStack> Source = RequiredItems.IsEmpty()
+		? TArray<FTunaSweeperItemStack>{{RequiredItemId, RequiredItemQuantity}} : RequiredItems;
+	for (const auto& Requirement : Source)
+	{
+		if (Requirement.ItemId <= 0 || Requirement.Quantity <= 0) return false;
+		auto* Existing = OutRequirements.FindByPredicate([&](const FTunaSweeperItemStack& Item)
+		{
+			return Item.ItemId == Requirement.ItemId;
+		});
+		if (Existing)
+		{
+			if (Requirement.Quantity > MAX_int32 - Existing->Quantity) return false;
+			Existing->Quantity += Requirement.Quantity;
+		}
+		else OutRequirements.Add(Requirement);
+	}
+	return true;
+}
+
 bool ATunaSweeperPowerFacilityActor::CanRepair() const
 {
 	auto* Game = GetTunaGameInstance();
 	if (!Game || bRepairInProgress || !IsRepairInteractionAvailable()) return false;
-	if (!bRequiresItem) return true;
-	const int32 Owned = bConsumeRequiredItem ? Game->CountInventoryItemById(RequiredItemId)
-		: Game->CountCarriedItemById(RequiredItemId);
-	return RequiredItemId > 0 && Owned >= FMath::Max(1, RequiredItemQuantity);
+	TArray<FTunaSweeperItemStack> Requirements;
+	if (!BuildRepairRequirements(Requirements)) return false;
+	for (const auto& Requirement : Requirements)
+	{
+		const int32 Owned = bConsumeRequiredItem ? Game->CountInventoryItemById(Requirement.ItemId)
+			: Game->CountCarriedItemById(Requirement.ItemId);
+		if (Owned < Requirement.Quantity) return false;
+	}
+	return true;
 }
 
 bool ATunaSweeperPowerFacilityActor::Repair(bool bSaveImmediately)
@@ -98,14 +126,10 @@ bool ATunaSweeperPowerFacilityActor::Repair(bool bSaveImmediately)
 	if (!CanRepair()) return false;
 	TGuardValue<bool> RepairGuard(bRepairInProgress, true);
 	auto* Game = GetTunaGameInstance();
-	const int32 Quantity = FMath::Max(1, RequiredItemQuantity);
-	if (bRequiresItem && bConsumeRequiredItem && Game->ConsumeInventoryItemById(RequiredItemId, Quantity) != Quantity)
-	{
-		RefreshFacilityState();
-		return false;
-	}
-	const bool bUpdated = Game->UpdateWorldProgressState(ProgressObjectId, TEXT("world_progress.power_facility"),
-		ETunaSweeperWorldProgressState::Completed, 1, 1, bSaveImmediately);
+	TArray<FTunaSweeperItemStack> Requirements;
+	if (!BuildRepairRequirements(Requirements)) return false;
+	const bool bUpdated = Game->CommitPowerFacilityRepair(ProgressObjectId, Requirements,
+		bConsumeRequiredItem, bSaveImmediately);
 	RefreshFacilityState();
 	return bUpdated;
 }
@@ -121,8 +145,11 @@ void ATunaSweeperPowerFacilityActor::RefreshFacilityState()
 		bRepaired = false;
 		if (auto* Game = GetTunaGameInstance(); Game && !ProgressObjectId.IsNone())
 		{
-			const auto State = Game->GetOrCreateWorldProgressState(ProgressObjectId, TEXT("world_progress.power_facility"), 0, 1);
-			bRepaired = State.State == ETunaSweeperWorldProgressState::Completed;
+			// Load saved state without creating a placeholder completion record during presentation.
+			Game->GetInventorySlots();
+			FTunaSweeperWorldProgressSaveData State;
+			bRepaired = Game->TryGetWorldProgressState(ProgressObjectId, State) &&
+				State.State == ETunaSweeperWorldProgressState::Completed;
 		}
 	}
 	ApplyPresentation();
@@ -148,18 +175,22 @@ void ATunaSweeperPowerFacilityActor::ApplyPresentation()
 		bAvailable ? ETunaSweeperInteractionType::WorldProgress : ETunaSweeperInteractionType::None,
 		bAvailable ? Label : FText::GetEmpty(), bAvailable ? InteractionStringKey : NAME_None);
 	Interactable->SetObjectiveEventId(bAvailable ? RepairObjectiveEventId : NAME_None);
+	TArray<FTunaSweeperItemStack> Requirements;
+	const bool bSingleRequirement = BuildRepairRequirements(Requirements) && Requirements.Num() == 1;
 	UTexture2D* Icon = nullptr;
 	if (auto* Items = Game ? Game->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
-		Items && bRequiresItem && RequiredItemId > 0)
+		Items && bSingleRequirement)
 	{
 		FTunaSweeperItemDefinition Item;
-		if (Items->TryGetItemDefinition(RequiredItemId, Item))
+		if (Items->TryGetItemDefinition(Requirements[0].ItemId, Item))
 		{
 			const FString Path = Items->BuildItemIconObjectPath(Item);
 			if (!Path.IsEmpty()) Icon = LoadObject<UTexture2D>(nullptr, *Path);
 		}
 	}
-	Interactable->SetInteractionRequirementPreview(Icon, FMath::Max(1, RequiredItemQuantity), bAvailable && bRequiresItem);
+	// Multi-material facilities use their localized interaction key to describe the complete recipe.
+	Interactable->SetInteractionRequirementPreview(Icon, bSingleRequirement ? Requirements[0].Quantity : 0,
+		bAvailable && bSingleRequirement);
 	Interactable->SetMarkerCompleted(bRepaired);
 }
 

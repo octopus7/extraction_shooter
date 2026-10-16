@@ -138,6 +138,7 @@ public:
 
 private:
 	friend class FTunaSweeperQuestEnemyClassTest;
+	friend class FTunaSweeperEthanolFacilityTest;
 	friend struct FTunaSweeperRoadkillTestScene;
 	friend class FTunaSweeperQuestWorldProgressTest;
 	void HandleWorldProgressChanged();

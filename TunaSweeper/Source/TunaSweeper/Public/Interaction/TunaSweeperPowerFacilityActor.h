@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperPowerFacilityActor.generated.h"
 
 class UParticleSystemComponent;
@@ -14,6 +15,7 @@ UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPowerFacilityActor : public AActor
 {
 	GENERATED_BODY()
+	friend class FTunaSweeperPowerFacilityMaterialsTest;
 public:
 	ATunaSweeperPowerFacilityActor();
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -28,7 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Power Facility")
 	bool Repair(bool bSaveImmediately = true);
 	UFUNCTION(BlueprintCallable, Category = "Power Facility")
-	void RefreshFacilityState();
+	virtual void RefreshFacilityState();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -58,6 +60,9 @@ protected:
 	int32 RequiredItemId = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Facility|Repair", meta = (ClampMin = "1", EditCondition = "bRequiresItem"))
 	int32 RequiredItemQuantity = 1;
+	// Nonempty arrays override the legacy item/quantity pair; duplicate item IDs are summed.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Facility|Repair", meta = (EditCondition = "bRequiresItem"))
+	TArray<FTunaSweeperItemStack> RequiredItems;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Facility|Repair", meta = (EditCondition = "bRequiresItem"))
 	bool bConsumeRequiredItem = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Facility|Presentation")
@@ -66,6 +71,7 @@ protected:
 	bool bPreviewRepairedInEditor = false;
 
 private:
+	bool BuildRepairRequirements(TArray<FTunaSweeperItemStack>& OutRequirements) const;
 	bool IsRepairInteractionAvailable() const;
 	void ApplyPresentation();
 	UTunaSweeperGameInstance* GetTunaGameInstance() const;

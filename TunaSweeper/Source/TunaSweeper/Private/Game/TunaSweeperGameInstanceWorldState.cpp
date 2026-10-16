@@ -1,5 +1,68 @@
 #include "TunaSweeperGameInstanceShared.h"
 
+bool UTunaSweeperGameInstance::CommitPowerFacilityRepair(FName ObjectId,
+	const TArray<FTunaSweeperItemStack>& Requirements, bool bConsumeItems, bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+	if (ObjectId.IsNone()) return false;
+	const auto* Existing = WorldProgressStatesById.Find(ObjectId);
+	if (Existing && Existing->State == ETunaSweeperWorldProgressState::Completed) return false;
+	TMap<int32, int32> Totals;
+	auto* Items = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	for (const auto& Requirement : Requirements)
+	{
+		FTunaSweeperItemDefinition Definition;
+		if (Requirement.ItemId <= 0 || Requirement.Quantity <= 0 || !Items ||
+			!Items->TryGetItemDefinition(Requirement.ItemId, Definition)) return false;
+		int32& Total = Totals.FindOrAdd(Requirement.ItemId);
+		if (Requirement.Quantity > MAX_int32 - Total) return false;
+		Total += Requirement.Quantity;
+	}
+	for (const auto& Total : Totals)
+	{
+		const int32 Owned = bConsumeItems ? CountInventoryItemById(Total.Key) : CountCarriedItemById(Total.Key);
+		if (Owned < Total.Value) return false;
+	}
+	const auto PreviousItems = ItemInstancesByUid;
+	const auto PreviousInventory = PlayerInventorySlots;
+	const auto PreviousBags = AuxiliaryBagSlots;
+	const auto PreviousProgress = WorldProgressStatesById;
+	const auto Rollback = [&]()
+	{
+		ItemInstancesByUid = PreviousItems;
+		PlayerInventorySlots = PreviousInventory;
+		AuxiliaryBagSlots = PreviousBags;
+		WorldProgressStatesById = PreviousProgress;
+	};
+	if (bConsumeItems)
+	{
+		for (const auto& Total : Totals)
+		{
+			if (ConsumeInventoryAmmoByItemId(Total.Key, Total.Value) != Total.Value)
+			{
+				Rollback();
+				return false;
+			}
+		}
+	}
+	FTunaSweeperWorldProgressSaveData State;
+	State.ObjectId = ObjectId;
+	State.InfoId = TEXT("world_progress.power_facility");
+	State.State = ETunaSweeperWorldProgressState::Completed;
+	State.ProgressQuantity = 1;
+	WorldProgressStatesById.Add(ObjectId, State);
+	if (bSaveImmediately && !SaveGameStateInternal())
+	{
+		Rollback();
+		return false;
+	}
+	ClearSelectedItemIfInvalid();
+	// Quest reconciliation and observers only see a completion after the durable transaction succeeds.
+	OnWorldProgressChanged.Broadcast();
+	if (bConsumeItems && !Totals.IsEmpty()) BroadcastInventoryStateChanged();
+	return true;
+}
+
 FTunaSweeperWorldProgressSaveData UTunaSweeperGameInstance::GetOrCreateWorldProgressState(
 	FName ObjectId,
 	FName InfoId,
