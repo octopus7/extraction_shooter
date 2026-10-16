@@ -13,6 +13,7 @@
 #include "Interaction/TunaSweeperRockfallBarrierActor.h"
 #include "Interaction/TunaSweeperQuestFacilityActor.h"
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
+#include "Interaction/TunaSweeperParcelContainerActor.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
 #include "Interaction/TunaSweeperCrowbarWallRackActor.h"
 #include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
@@ -803,10 +804,6 @@ bool UTunaSweeperInteractionSubsystem::HandleLootContainerOpenInteraction(
 	}
 
 	LootContainerActor->PlayOpenAnimation();
-	if (LootContainerActor->CollectContentsOnOpen(TunaGameInstance))
-	{
-		return true;
-	}
 	TunaPlayerController->OpenLootContainerPanel(ContainerInstance);
 	return true;
 }
@@ -905,6 +902,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 		return ProgressActor->RepairUsingAvailableRequiredItems(true);
 	}
 	if (auto* Warehouse = Cast<ATunaSweeperFoodWarehouseActor>(ProgressOwner)) return Warehouse->TakeFood();
+	if (auto* Parcel = Cast<ATunaSweeperParcelContainerActor>(ProgressOwner)) return Parcel->PickUp(InstigatorPawn);
 	if (auto* Delivery = Cast<ATunaSweeperDeliveryDestinationActor>(ProgressOwner)) return Delivery->Deliver(InstigatorPawn);
 	if (auto* Passage = Cast<ATunaSweeperRegionLinkActor>(ProgressOwner)) return Passage->RepairPassage(true);
 	if (auto* EthanolFacility = Cast<ATunaSweeperEthanolFacilityActor>(ProgressOwner); EthanolFacility && EthanolFacility->IsRepaired())

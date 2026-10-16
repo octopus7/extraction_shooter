@@ -137,6 +137,7 @@ public:
     bool HasPossessionObjectives(int32 QuestId) const;
 
 private:
+	friend class FTunaSweeperParcelCollectionTest;
 	friend class FTunaSweeperQuestEnemyClassTest;
 	friend class FTunaSweeperEthanolFacilityTest;
 	friend struct FTunaSweeperRoadkillTestScene;

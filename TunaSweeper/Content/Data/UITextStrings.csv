@@ -723,3 +723,4 @@ ui.world_cheat.object.ethanol,마을 에탄올 생산 시설,Village ethanol fac
 ui.world_cheat.object.rail_west,서역 윤활,West station lubrication,西駅の潤滑
 ui.world_cheat.object.rail_north,북역 윤활,North station lubrication,北駅の潤滑
 ui.world_cheat.object.rail_east,동역 윤활,East station lubrication,東駅の潤滑
+ui.interaction.pickup_parcel,택배상자 줍기,Pick up parcel,配達箱を拾う
