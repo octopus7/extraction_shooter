@@ -1,3 +1,4 @@
+Asset purpose: 원목 (Raw Wood); preserved separately from the processed lumber item icon.
 Generator: built-in image_gen; native transparent background.
 Style references inspected: existing food/material icons, especially T_UIIcon_SweetPotato, T_UIIcon_Motor and chatgpt/Icons/icons_pro_1.png.
 Original icon preserved: T_UIIcon_ValuablesCrate.
