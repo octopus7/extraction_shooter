@@ -165,6 +165,10 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 	UpdateMouseCursorForReloadGauge(false);
 	while (!DamageNumberPopups.IsEmpty()) RemoveDamageNumberPopupAt(DamageNumberPopups.Num() - 1);
 
+	DeliveryDestinations.Reset();
+	DeliveryIndicatorTargets.Reset();
+	DeliveryIndicatorIcons.Reset();
+	DeliveryIndicatorScanCountdown = 0.f;
 	Super::NativeDestruct();
 }
 
@@ -187,6 +191,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 		TickHeadphoneNoiseRipples(InDeltaTime);
 	}
 	TickDamageNumberPopups(InDeltaTime);
+	RefreshDeliveryIndicators(InDeltaTime);
 	Invalidate(EInvalidateWidgetReason::Paint);
 }
 
@@ -308,6 +313,7 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		}
 	}
 
+	DrawDeliveryIndicators(AllottedGeometry, OutDrawElements, CurrentLayerId);
 	DrawHeadphoneNoiseRipples(AllottedGeometry, OutDrawElements, CurrentLayerId);
 	DrawEnemyCombatDebugOverlay(AllottedGeometry, OutDrawElements, CurrentLayerId);
 

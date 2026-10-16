@@ -9,6 +9,8 @@
 #include "TunaSweeperGameHudWidget.generated.h"
 
 class AActor;
+class ATunaSweeperDeliveryDestinationActor;
+class UTexture2D;
 class ATunaSweeperTopDownCharacter;
 struct FGeometry;
 class UTunaSweeperHudBottomStatusWidget;
@@ -378,6 +380,18 @@ protected:
 	FVector2D ExtractionProgressWidgetSize = FVector2D(180.0f, 36.0f);
 
 private:
+	struct FDeliveryIndicatorTarget
+	{
+		TWeakObjectPtr<ATunaSweeperDeliveryDestinationActor> Destination;
+		int32 ItemId = 0;
+	};
+	void RefreshDeliveryIndicators(float DeltaTime);
+	void DrawDeliveryIndicators(const FGeometry& Geometry, FSlateWindowElementList& Elements, int32& Layer) const;
+	TArray<TWeakObjectPtr<ATunaSweeperDeliveryDestinationActor>> DeliveryDestinations;
+	TArray<FDeliveryIndicatorTarget> DeliveryIndicatorTargets;
+	float DeliveryIndicatorScanCountdown = 0.f;
+	UPROPERTY(Transient)
+	TMap<int32, TObjectPtr<UTexture2D>> DeliveryIndicatorIcons;
 	friend class FTunaSweeperPauseHudTransitionTest;
 	friend class FTunaSweeperHeadshotFeedbackTest;
 	friend class FTunaSweeperWardrobePanelTest;

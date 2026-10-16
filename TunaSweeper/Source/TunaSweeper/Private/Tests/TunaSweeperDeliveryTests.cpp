@@ -1,5 +1,6 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
+#include "UI/TunaSweeperDeliveryIndicator.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
@@ -82,6 +83,26 @@ bool FTunaSweeperDeliveryTest::RunTest(const FString& Parameters)
     auto* Destination = World->SpawnActor<ATunaSweeperDeliveryDestinationActor>();
     Destination->QuestId = 900004; Destination->ObjectiveId = TEXT("deliver"); Destination->DestinationId = TEXT("delivery.test");
     Destination->DispatchBeginPlay();
+    int32 NavigationItemId = 0;
+    TestTrue(TEXT("Carried active delivery has navigation target"), TunaSweeperDeliveryIndicator::TryGetItemId(Destination, NavigationItemId));
+    TestEqual(TEXT("Navigation uses the objective item icon"), NavigationItemId, 6011);
+    const int32 CarriedSlot = Game->PlayerInventorySlots.IndexOfByPredicate([&](const auto& Slot) {
+        const auto* Item = Game->ItemInstancesByUid.Find(Slot.ItemUid);
+        return Item && Item->ItemId == 6011;
+    });
+    if (!TestTrue(TEXT("Carried parcel slot exists"), CarriedSlot != INDEX_NONE)) return false;
+    Game->StorageSlots.SetNum(1);
+    Swap(Game->StorageSlots[0], Game->PlayerInventorySlots[CarriedSlot]);
+    TestTrue(TEXT("Storage still satisfies ordinary submission"), Destination->CanDeliver());
+    TestFalse(TEXT("Storage-only parcel does not show delivery navigation"), TunaSweeperDeliveryIndicator::TryGetItemId(Destination, NavigationItemId));
+    Swap(Game->StorageSlots[0], Game->PlayerInventorySlots[CarriedSlot]);
+    Destination->SetActorHiddenInGame(true);
+    TestFalse(TEXT("Hidden destinations cannot advertise a marker"), TunaSweeperDeliveryIndicator::TryGetItemId(Destination, NavigationItemId));
+    Destination->SetActorHiddenInGame(false);
+    TestEqual(TEXT("Remove carried parcel for navigation check"), Game->ConsumeInventoryItemById(6011, 1), 1);
+    TestFalse(TEXT("Losing parcel immediately removes navigation target"), TunaSweeperDeliveryIndicator::TryGetItemId(Destination, NavigationItemId));
+    TestTrue(TEXT("Restore carried parcel"), Game->AddItemToFirstAvailableInventorySlot(6011, 1));
+    TestTrue(TEXT("Regaining parcel restores navigation target"), TunaSweeperDeliveryIndicator::TryGetItemId(Destination, NavigationItemId));
     FActorSpawnParameters Spawn; Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     auto* Pawn = World->SpawnActor<ADefaultPawn>(Spawn);
     auto* Controller = World->SpawnActor<APlayerController>(); Controller->Possess(Pawn);
@@ -97,6 +118,7 @@ bool FTunaSweeperDeliveryTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Destination is visible"), !Destination->IsHidden());
     TestTrue(TEXT("Player interacts at destination"), Destination->Deliver(Pawn));
     TestFalse(TEXT("Completed destination disables delivery"), Destination->CanDeliver());
+    TestFalse(TEXT("Submission immediately removes navigation target"), TunaSweeperDeliveryIndicator::TryGetItemId(Destination, NavigationItemId));
     TestEqual(TEXT("Second delivery consumes exactly one"), Game->CountInventoryItemById(6011), 0);
     return true;
 }
