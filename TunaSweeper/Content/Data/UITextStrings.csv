@@ -697,3 +697,6 @@ ui.ethanol.produce,에탄올 생산 (고구마 2개 → 1개),Produce ethanol (2
 ui.ethanol.no_material,고구마가 부족하다!,Not enough sweet potatoes!,サツマイモが足りない！
 ui.ethanol.repair,수리,Repair,修理
 ui.interaction.required_quantity,×{0},×{0},×{0}
+ui.rail.lubricate,윤활오일 사용,Apply lubricating oil,潤滑オイルを使う
+ui.rail.travel_next,다음 역으로 이동,Travel to next station,次の駅へ移動
+ui.rail.need_oil,윤활오일이 필요해.,I need lubricating oil.,潤滑オイルが必要だ。

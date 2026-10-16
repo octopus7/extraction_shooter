@@ -155,6 +155,23 @@ void ALoopRailTrain::SetRunning(bool bEnabled)
     if (!bEnabled) CurrentSpeed = 0;
     PublishState(); ForceNetUpdate();
 }
+bool ALoopRailTrain::ArriveAtStation(ALoopRailStation* Station, float MinimumDwellSeconds)
+{
+    if (!HasAuthority() || !IsValid(Station) || Station->IsActorBeingDestroyed() ||
+        Station->GetWorld() != GetWorld() || !Station->bEnabled || Station->Track != Track || !HasUsableTrack() ||
+        !FMath::IsFinite(MinimumDwellSeconds) || !FMath::IsFinite(Station->DwellSeconds)) return false;
+    HeadDistance = LoopRailMotion::Wrap(Station->GetStopDistance(), Track->GetLength());
+    CurrentSpeed = 0;
+    DwellRemaining = FMath::Max3(1.f, MinimumDwellSeconds, Station->DwellSeconds);
+    SinceDeparture = 0;
+    CurrentStation = Station;
+    bRunning = true;
+    UpdateVehicles();
+    PublishState();
+    ForceNetUpdate();
+    OnStationArrived.Broadcast(Station);
+    return true;
+}
 double ALoopRailTrain::GetConsistLength() const
 { const int32 Count = FMath::Clamp(VehicleCount, 1, 16); return VehicleLength*Count + FMath::Max(0.f, VehicleGap)*(Count-1); }
 bool ALoopRailTrain::HasUsableTrack() const

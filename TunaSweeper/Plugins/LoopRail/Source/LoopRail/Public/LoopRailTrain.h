@@ -55,6 +55,8 @@ public:
     UFUNCTION(BlueprintCallable, CallInEditor, Category="LoopRail") void RebuildTrain();
     UFUNCTION(BlueprintCallable, Category="LoopRail") void ResetTrain();
     UFUNCTION(BlueprintCallable, Category="LoopRail") void SetRunning(bool bEnabled);
+    /** Immediately arrive, with the complete consist stopped and a fresh station dwell. */
+    UFUNCTION(BlueprintCallable, Category="LoopRail") bool ArriveAtStation(ALoopRailStation* Station, float MinimumDwellSeconds = 1.0f);
     UFUNCTION(BlueprintPure, Category="LoopRail") double GetHeadDistance() const { return HeadDistance; }
     UFUNCTION(BlueprintPure, Category="LoopRail") float GetSpeed() const { return CurrentSpeed; }
     UFUNCTION(BlueprintPure, Category="LoopRail") bool IsDwelling() const { return DwellRemaining > 0; }

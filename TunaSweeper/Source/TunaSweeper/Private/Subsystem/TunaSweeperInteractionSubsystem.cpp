@@ -23,6 +23,7 @@
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLadderTransferActor.h"
+#include "Interaction/TunaSweeperRailInteractionComponent.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperMemoAnchor.h"
@@ -285,6 +286,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	bool bHandled = false;
 	switch (RequestedInteractionType)
 	{
+	case ETunaSweeperInteractionType::RailStation:
+		if (auto* Rail = Cast<UTunaSweeperRailInteractionComponent>(Interactable)) return Rail->Interact(InstigatorPawn);
+		return false;
 	case ETunaSweeperInteractionType::ItemPickup:
 		bHandled = HandlePickupItemInteraction(Interactable);
 		break;
@@ -451,6 +455,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	}
 
 	if (const auto* Feeding = Cast<UTunaSweeperNpcFeedingComponent>(Interactable); Feeding && !Feeding->IsUnlocked()) return false;
+	if (const auto* Rail = Cast<UTunaSweeperRailInteractionComponent>(Interactable); Rail && !Rail->CanOffer()) return false;
 	const auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner());
 	if (Armory && !ATunaSweeperDebugArmoryActor::IsArmoryEnabled()) return false;
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DebugArmoryOpen)

@@ -141,6 +141,7 @@ private:
 	friend class FTunaSweeperEthanolFacilityTest;
 	friend struct FTunaSweeperRoadkillTestScene;
 	friend class FTunaSweeperQuestWorldProgressTest;
+	friend class FTunaSweeperRailInteractionTest;
 	void HandleWorldProgressChanged();
 	bool ReconcileWorldProgressObjectives(bool bShowCompletionToast);
 	bool bReconcilingWorldProgress = false;

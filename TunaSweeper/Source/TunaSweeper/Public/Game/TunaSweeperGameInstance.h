@@ -270,6 +270,8 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperEquipmentDataTest;
 	friend class FTunaSweeperArmorPenetrationTest;
 	friend class FTunaSweeperPowerFacilityTest;
+	friend class FTunaSweeperRailInteractionTest;
+	friend class FTunaSweeperRailTravelTest;
 	friend class FTunaSweeperPowerFacilityMaterialsTest;
 	friend class FTunaSweeperRockfallTest;
 	friend class FTunaSweeperEthanolFacilityTest;
