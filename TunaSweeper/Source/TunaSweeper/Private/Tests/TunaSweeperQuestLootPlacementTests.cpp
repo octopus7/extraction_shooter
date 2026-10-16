@@ -74,10 +74,15 @@ bool FTunaSweeperQuestLootPlacementTest::RunTest(const FString& Parameters)
 	TestFalse(TEXT("Accepted parcel is visible"), Container->IsHidden());
 	for (auto State : {ETunaSweeperQuestState::RewardAvailable, ETunaSweeperQuestState::RewardCompleted, ETunaSweeperQuestState::Available})
 	{
+		// RewardAvailable is revalidated against saved objective counts on load.
+		FTunaSweeperObjectiveProgressSaveData Completed;
+		Completed.ObjectiveId = Objective.ObjectiveId; Completed.CurrentCount = 1;
+		Progress.ObjectiveProgress = {Completed};
 		Progress.State = State; Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
 		TestTrue(TEXT("Inactive parcel hides on progress event"), Container->IsHidden());
 		TestFalse(TEXT("Hidden parcel collision disabled"), Container->GetActorEnableCollision());
 	}
+	Progress.ObjectiveProgress.Reset();
 	Progress.State = ETunaSweeperQuestState::Accepted; Quests->LoadQuestProgressFromSave({Progress}, 0, 0);
 	TestEqual(TEXT("Reactivation retains original container rather than refilling"), Runtime.Container.Get(), Container);
 	TestFalse(TEXT("Reactivation shows same parcel"), Container->IsHidden());

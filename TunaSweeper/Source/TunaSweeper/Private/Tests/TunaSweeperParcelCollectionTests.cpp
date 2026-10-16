@@ -3,6 +3,8 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Engine/StaticMesh.h"
+#include "Components/StaticMeshComponent.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 
@@ -56,6 +58,16 @@ bool FTunaSweeperParcelCollectionTest::RunTest(const FString& Parameters)
     auto* Ordinary = World->SpawnActor<ATunaSweeperLootContainerActor>();
     TestFalse(TEXT("Ordinary containers keep manual looting"), Ordinary->CollectContentsOnOpen(Game));
     TestFalse(TEXT("Cannot collect another container's active contents"), Parcel->CollectContentsOnOpen(Game));
+    auto* ParcelClass = LoadClass<ATunaSweeperParcelContainerActor>(nullptr,
+        TEXT("/Game/Interaction/Parcels/BP_Parcel_ToadJar.BP_Parcel_ToadJar_C"));
+    if (!TestNotNull(TEXT("Authored parcel BP loads"), ParcelClass)) return false;
+    auto* AuthoredParcel = World->SpawnActor<ATunaSweeperParcelContainerActor>(ParcelClass);
+    auto* Replacement = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    if (!TestNotNull(TEXT("Replacement mesh"), Replacement)) return false;
+    AuthoredParcel->GetBodyMeshComponent()->SetStaticMesh(Replacement);
+    AuthoredParcel->SetContainerDataIds(7004, 8014);
+    TestTrue(TEXT("BP component mesh replacement survives data refresh"),
+        AuthoredParcel->GetBodyMeshComponent()->GetStaticMesh() == Replacement);
     return true;
 }
 #endif

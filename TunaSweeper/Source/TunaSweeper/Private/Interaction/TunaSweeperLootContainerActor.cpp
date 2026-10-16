@@ -290,6 +290,11 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 	{
 		return;
 	}
+	if (bUseComponentMeshPresentation)
+	{
+		ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
+		return;
+	}
 
 	if (BodyMeshOverride)
 	{

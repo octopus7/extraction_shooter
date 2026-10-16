@@ -274,6 +274,49 @@ bool UTunaSweeperGameInstance::ClearInventoryAndSaveInternal(bool bNotifyChanges
 	return bSaved;
 }
 
+void UTunaSweeperGameInstance::RemoveVolatileItemsOnBaseArrival(FName ArrivedLevelName)
+{
+	if (ArrivedLevelName != TunaSweeperBuildFlavor::GetBunkerLevelName() || IsCombatTestSession()) return;
+	EnsureInventoryStateInitialized();
+	auto* Items = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (!Items) return;
+
+	// Only carried items expire. The storage and the outgoing world's loot are not cargo.
+	TSet<FGuid> Carried;
+	CollectItemUidsFromSlots(PlayerInventorySlots, Carried);
+	CollectItemUidsFromSlots(EquipmentSlots, Carried);
+	CollectItemUidsFromSlots(AuxiliaryBagSlots, Carried);
+	CollectItemUidsFromSlots(UsableQuickSlots, Carried);
+	bool bRemoved = false;
+	for (const FGuid& Uid : Carried)
+	{
+		const auto* Item = ItemInstancesByUid.Find(Uid);
+		FTunaSweeperItemDefinition Definition;
+		if (Item && Items->TryGetItemDefinition(Item->ItemId, Definition) && Definition.IsVolatile())
+		{
+			ItemInstancesByUid.Remove(Uid);
+			bRemoved = true;
+		}
+	}
+	if (!bRemoved) return;
+	RemoveInvalidSlotReferences(PlayerInventorySlots);
+	RemoveInvalidSlotReferences(EquipmentSlots);
+	RemoveInvalidSlotReferences(AuxiliaryBagSlots);
+	RemoveInvalidSlotReferences(UsableQuickSlots);
+	for (auto& Pair : ItemInstancesByUid)
+	{
+		for (auto& Attachment : Pair.Value.AttachmentSlots)
+			if (!ItemInstancesByUid.Contains(Attachment.Value)) Attachment.Value.Invalidate();
+	}
+	ClearHoveredItemSlot();
+	ClearSelectedItemIfInvalid();
+	RefreshSelectedWeaponAttachmentSlots();
+	bPendingBunkerItemStateSave = true;
+	BroadcastInventoryStateChanged();
+	// Persist the sanitized inventory; a failed write stays pending for the next save.
+	FlushPendingBunkerItemStateSave();
+}
+
 void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName)
 {
 	bPendingRaidTutorial = false;

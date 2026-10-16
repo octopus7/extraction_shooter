@@ -2,6 +2,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Misc/PackageName.h"
 #include "UObject/UObjectGlobals.h"
 
@@ -49,7 +50,12 @@ void UTunaSweeperRaidArrivalSubsystem::Initialize(FSubsystemCollectionBase& Coll
     PostLoadHandle = FCoreUObjectDelegates::PostLoadMapWithWorld.AddWeakLambda(this, [this](UWorld* World)
     {
         // Initial player spawning precedes PostLoadMap. Expire unused requests too.
-        if (World && World->GetGameInstance() == GetGameInstance()) Pending.Reset();
+        if (World && World->GetGameInstance() == GetGameInstance())
+        {
+            Pending.Reset();
+            if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+                Game->RemoveVolatileItemsOnBaseArrival(NormalizeArrivalLevel(FName(*World->GetMapName())));
+        }
     });
     if (GEngine) TravelFailureHandle = GEngine->OnTravelFailure().AddWeakLambda(this,
         [this](UWorld* World, ETravelFailure::Type, const FString&)

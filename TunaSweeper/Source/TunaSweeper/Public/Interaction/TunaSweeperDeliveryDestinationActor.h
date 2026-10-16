@@ -5,6 +5,7 @@
 #include "TunaSweeperDeliveryDestinationActor.generated.h"
 
 class UTunaSweeperInteractableComponent;
+class UStaticMeshComponent;
 
 /** Place at a delivery destination. Item and quantity belong to the quest definition. */
 UCLASS(BlueprintType, Blueprintable)
@@ -28,6 +29,9 @@ public:
 	FName DestinationId;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Delivery")
 	TObjectPtr<UTunaSweeperInteractableComponent> Interactable;
+	// Replace this component's static mesh/material in a BP without changing delivery logic.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Delivery")
+	TObjectPtr<UStaticMeshComponent> VisualMesh;
 private:
 	void RefreshInteraction();
 };

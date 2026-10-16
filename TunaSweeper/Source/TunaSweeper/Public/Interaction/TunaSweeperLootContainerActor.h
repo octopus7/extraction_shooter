@@ -116,6 +116,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Meshes", meta = (DisplayName = "Lid Mesh"))
 	TObjectPtr<UStaticMesh> LidMeshOverride;
 
+	// Enable for authored BP meshes: keep their component transforms and materials
+	// instead of replacing them with the generic container-table presentation.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Meshes")
+	bool bUseComponentMeshPresentation = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Lid Animation", meta = (MakeEditWidget = true))
 	FVector LidPivotRelativeLocation = FVector(0.0f, -40.0f, 55.0f);
 

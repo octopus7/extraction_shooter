@@ -1,6 +1,7 @@
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
 
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
@@ -9,6 +10,9 @@
 ATunaSweeperDeliveryDestinationActor::ATunaSweeperDeliveryDestinationActor()
 {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
+	VisualMesh->SetupAttachment(RootComponent);
+	VisualMesh->SetCollisionProfileName(TEXT("BlockAll"));
 	Interactable = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("Interactable"));
 	Interactable->SetupAttachment(RootComponent);
 	Interactable->SetRelativeLocation(FVector(0, 0, 80));

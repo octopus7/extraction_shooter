@@ -283,6 +283,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperQuestVendingTest;
 	friend class FTunaSweeperSpecialVehicleWorldProgressTest;
 	friend class FTunaSweeperParcelCollectionTest;
+	friend class FTunaSweeperVolatileArrivalTest;
 	friend class FTunaSweeperMemoLifecycleTest;
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperRegionPassageTest;
@@ -903,6 +904,8 @@ public:
 	/** Explicit, confirmed menu exit: raid loss or a full bunker save. */
 	bool SaveForGameplayExit(bool bAbandonRaid);
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
+	// Called only after an actual map load, never when travel is merely requested.
+	void RemoveVolatileItemsOnBaseArrival(FName ArrivedLevelName);
 	bool HasPendingRaidTutorial() const { return bPendingRaidTutorial; }
 	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
 	void ConsumePendingRegionVitals(UTunaSweeperVitalsComponent* Vitals);
