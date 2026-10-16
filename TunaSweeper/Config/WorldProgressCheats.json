@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "entries": [
+    { "objectId": "BP_BunkerPipe_Broken_C_1", "infoId": "bunker_pipe", "nameKey": "ui.world_cheat.object.base_pipe", "flavor": "Both", "requiredQuantity": 1 },
+    { "objectId": "world.passage.raid_lift", "infoId": "world_progress.region_passage", "nameKey": "ui.world_cheat.object.raid_lift", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "region.forest.village.obstacle", "infoId": "world_progress.rockfall", "nameKey": "ui.world_cheat.object.rockfall", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "region.forest.plains.lift", "infoId": "world_progress.region_passage", "nameKey": "ui.world_cheat.object.plains_lift", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "power.facility.primary", "infoId": "world_progress.power_facility", "nameKey": "ui.world_cheat.object.forest_power", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "facility.village.atv_warehouse", "infoId": "world_progress.power_facility", "nameKey": "ui.world_cheat.object.atv_power", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "facility.village.ethanol", "infoId": "world_progress.power_facility", "nameKey": "ui.world_cheat.object.ethanol", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "rail.lubrication.village_01", "infoId": "world_progress.power_facility", "nameKey": "ui.world_cheat.object.rail_west", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "rail.lubrication.village_02", "infoId": "world_progress.power_facility", "nameKey": "ui.world_cheat.object.rail_north", "flavor": "Main", "requiredQuantity": 1 },
+    { "objectId": "rail.lubrication.village_03", "infoId": "world_progress.power_facility", "nameKey": "ui.world_cheat.object.rail_east", "flavor": "Main", "requiredQuantity": 1 }
+  ]
+}

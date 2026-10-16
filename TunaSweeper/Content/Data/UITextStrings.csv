@@ -700,3 +700,26 @@ ui.interaction.required_quantity,×{0},×{0},×{0}
 ui.rail.lubricate,윤활오일 사용,Apply lubricating oil,潤滑オイルを使う
 ui.rail.travel_next,다음 역으로 이동,Travel to next station,次の駅へ移動
 ui.rail.need_oil,윤활오일이 필요해.,I need lubricating oil.,潤滑オイルが必要だ。
+ui.world_cheat.title,월드 진행 치트,World Progress Cheats,ワールド進行チート
+ui.world_cheat.description,선택한 슬롯의 월드 진행을 항목별로 변경합니다. 다음 플레이에서 저장을 불러오면 반영됩니다.,Edit each world object in the selected slot. Changes apply when the save is loaded in the next play session.,選択スロットのワールド進行を個別に変更します。次回プレイでセーブを読み込むと反映されます。
+ui.world_cheat.notes,퀘스트·아이템·보상은 직접 변경하지 않습니다. 완료한 퀘스트 목표를 되돌리려면 퀘스트 치트도 사용하세요. 철도는 한 역이라도 완료이면 전체 역에 다시 반영되므로 미윤활로 되돌릴 때 세 역을 모두 초기화하세요. 낙석의 진행 수량 1은 장전 상태입니다.,"Quests, items and rewards are not edited. Use Quest Cheats separately to reset credited objectives. Railway completion spreads from any completed station: reset all three stations to remove lubrication. Rockfall progress quantity 1 means armed.",クエスト・アイテム・報酬は直接変更しません。達成済み目標のリセットにはクエストチートも使用してください。鉄道は1駅でも完了すると全駅に反映されるため、未潤滑に戻す際は3駅とも初期化してください。落石の進行数1は装填済みです。
+ui.world_cheat.saved_object,기존 월드 기록,Saved world object,保存済みワールド記録
+ui.world_cheat.state.unrecorded,기록 없음,Not recorded,記録なし
+ui.world_cheat.state.in_progress,미완료,Incomplete,未完了
+ui.world_cheat.state.completed,완료,Completed,完了
+ui.world_cheat.row,{0} · {1} · 수량 {2},{0} · {1} · Quantity {2},{0} · {1} · 数量 {2}
+ui.world_cheat.reset,초기화,Reset,初期化
+ui.world_cheat.quantity,진행 수량,Progress quantity,進行数
+ui.world_cheat.in_progress,미완료로 적용,Apply incomplete,未完了として適用
+ui.world_cheat.complete,완료로 적용,Apply completed,完了として適用
+ui.world_cheat.success,선택 항목을 저장했습니다. 변경 전 원본은 자동 백업되었습니다.,Saved the selected object. The original save was backed up automatically.,選択項目を保存しました。変更前のセーブは自動バックアップ済みです。
+ui.world_cheat.object.base_pipe,기지 배관 수리,Base pipe repair,拠点の配管修理
+ui.world_cheat.object.raid_lift,레이드 리프트 복구,Raid lift repair,レイドリフト修理
+ui.world_cheat.object.rockfall,숲–마을 터널 낙석,Forest–village tunnel rockfall,森–村トンネルの落石
+ui.world_cheat.object.plains_lift,숲–평원 승강기,Forest–plains lift,森–平原の昇降機
+ui.world_cheat.object.forest_power,숲 전력 시설,Forest power facility,森の電力設備
+ui.world_cheat.object.atv_power,마을 ATV 창고 전력,Village ATV warehouse power,村のATV倉庫の電力
+ui.world_cheat.object.ethanol,마을 에탄올 생산 시설,Village ethanol facility,村のエタノール生産設備
+ui.world_cheat.object.rail_west,서역 윤활,West station lubrication,西駅の潤滑
+ui.world_cheat.object.rail_north,북역 윤활,North station lubrication,北駅の潤滑
+ui.world_cheat.object.rail_east,동역 윤활,East station lubrication,東駅の潤滑

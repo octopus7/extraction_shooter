@@ -109,20 +109,23 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	const bool bQuestFix = Op == TEXT("quest-fix");
 	const bool bQuestAudit = Op == TEXT("quest-audit");
 	const bool bQuestEdit = Op == TEXT("quest-complete") || bQuestReset || bQuestFix;
-	const bool bEdit = Op == TEXT("add") || Op == TEXT("preset-apply") || bQuestEdit;
-	if (bQuestEdit && GEngine)
+	const bool bWorldEdit = Op == TEXT("world-set");
+	const bool bEdit = Op == TEXT("add") || Op == TEXT("preset-apply") || bQuestEdit || bWorldEdit;
+	if ((bQuestEdit || bWorldEdit) && GEngine)
 	{
 		for (const FWorldContext& Context : GEngine->GetWorldContexts())
 			if (Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::Game) return Result(TEXT("game_running"));
 	}
 	bool bCommit = false;
 	if (Request->HasField(TEXT("commit")) && (!bEdit || !Request->TryGetBoolField(TEXT("commit"), bCommit) || Request->Values[TEXT("commit")]->Type != EJson::Boolean)) return Result(TEXT("invalid_request"));
-	const bool bRead = Op == TEXT("inspect") || Op == TEXT("validate") || Op == TEXT("preset-export") || Op == TEXT("quest-inspect") || bQuestAudit;
+	const bool bRead = Op == TEXT("inspect") || Op == TEXT("validate") || Op == TEXT("preset-export") || Op == TEXT("quest-inspect") || Op == TEXT("world-inspect") || bQuestAudit;
 	if (!(bRead || bEdit || Op == TEXT("catalog") || Op == TEXT("list"))) return Result(TEXT("unknown_operation"));
 	if (Op == TEXT("catalog") && !Fields(Request, { TEXT("version"), TEXT("operation") })) return Result(TEXT("invalid_request"));
 	if (Op == TEXT("list") && !Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("directory") })) return Result(TEXT("invalid_request"));
 	if (bRead && !Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot") })) return Result(TEXT("invalid_request"));
-	if (bEdit && !bQuestEdit && !Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot"), TEXT("commit"), TEXT("expectedHash"), Op == TEXT("add") ? TEXT("items") : TEXT("preset") })) return Result(TEXT("invalid_request"));
+	if (bEdit && !bQuestEdit && !bWorldEdit && !Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot"), TEXT("commit"), TEXT("expectedHash"), Op == TEXT("add") ? TEXT("items") : TEXT("preset") })) return Result(TEXT("invalid_request"));
+	if (bWorldEdit && (!Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot"), TEXT("commit"), TEXT("expectedHash"), TEXT("objectId"), TEXT("state"), TEXT("quantity") }) ||
+		(bCommit && !Request->HasTypedField<EJson::String>(TEXT("expectedHash"))))) return Result(TEXT("invalid_request"));
 
 	if (bQuestEdit && !bQuestFix && !Fields(Request, { TEXT("version"), TEXT("operation"), TEXT("savePath"), TEXT("flavor"), TEXT("slot"), TEXT("commit"), TEXT("expectedHash"), TEXT("questId"), TEXT("includeTarget") })) return Result(TEXT("invalid_request"));
 	if (bQuestFix && (!Request->HasTypedField<EJson::String>(TEXT("expectedHash")) ||
@@ -190,6 +193,13 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	FString Expected;
 	if (Request->HasField(TEXT("expectedHash")) && (!Request->TryGetStringField(TEXT("expectedHash"), Expected) || !Expected.Equals(OriginalHash, ESearchCase::IgnoreCase))) return Result(TEXT("stale_save"));
 	const FString Validation = Validate(*Save, *Data);
+	if (Op == TEXT("world-inspect"))
+	{
+		if (!Validation.IsEmpty()) return Result(Validation);
+		auto R = InspectWorldProgress(*Save);
+		R->SetStringField(TEXT("sourceHash"), OriginalHash);
+		return R;
+	}
 	if (bQuestAudit)
 	{
 		if (Flavor != TunaSweeperBuildFlavor::GetName().ToString()) return Result(TEXT("quest_dataset_mismatch"));
@@ -284,7 +294,8 @@ TSharedPtr<FJsonObject> TunaSweeperSaveTool::Execute(const TSharedPtr<FJsonObjec
 	}
 	FString Error;
 	TArray<int32> CompletedQuestIds;
-	if (bQuestFix)
+	if (bWorldEdit) Error = SetWorldProgress(*Save, Request);
+	else if (bQuestFix)
 	{
 		if (Flavor != TunaSweeperBuildFlavor::GetName().ToString()) return Result(TEXT("quest_dataset_mismatch"));
 		TStrongObjectPtr<UTunaSweeperQuestSubsystem> Quests(NewObject<UTunaSweeperQuestSubsystem>(Owner.Get()));

@@ -18,6 +18,8 @@ bool FTunaSweeperEditorTextLifetimeTest::RunTest(const FString& Parameters)
 	const TCHAR* Key = TEXT("ui.editor.open_level.raid_forest");
 	TestFalse(TEXT("Level menu resolves its localized text"), TunaSweeperLevelOpenTool::MenuText(Key).IsEmpty());
 	TestFalse(TEXT("Quest menu resolves its localized text"), TunaSweeperQuestCheatEditor::Text(TEXT("ui.quest_cheat.title")).IsEmpty());
+	TestEqual(TEXT("World cheat menu resolves its string key"), TunaSweeperEditorText::Resolve(TEXT("ui.world_cheat.title"),
+		ETunaSweeperItemTextLanguage::English).ToString(), FString(TEXT("World Progress Cheats")));
 	const FText English = TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::English);
 	const FText Korean = TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::Korean);
 	TestNotEqual(TEXT("Language-specific cache preserves translations"), English.ToString(), Korean.ToString());

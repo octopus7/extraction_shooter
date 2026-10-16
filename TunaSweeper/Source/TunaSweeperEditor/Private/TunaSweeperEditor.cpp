@@ -2,6 +2,7 @@
 #include "TunaSweeperBuildTargetTool.h"
 #include "TunaSweeperEnemyAIDebugTool.h"
 #include "TunaSweeperQuestCheatTool.h"
+#include "TunaSweeperWorldProgressCheatTool.h"
 #include "TunaSweeperSaveSnapshotTool.h"
 #include "TunaSweeperFMSoundTool.h"
 #include "TunaSweeperGlbTextureExtractorTool.h"
@@ -56,6 +57,8 @@ public:
 
 		QuestCheatTool = MakeUnique<FTunaSweeperQuestCheatTool>();
 		QuestCheatTool->Startup();
+		WorldProgressCheatTool = MakeUnique<FTunaSweeperWorldProgressCheatTool>();
+		WorldProgressCheatTool->Startup();
 		SaveSnapshotTool = MakeUnique<FTunaSweeperSaveSnapshotTool>();
 		SaveSnapshotTool->Startup();
 
@@ -92,6 +95,11 @@ public:
 			FMSoundTool.Reset();
 		}
 
+		if (WorldProgressCheatTool)
+		{
+			WorldProgressCheatTool->Shutdown();
+			WorldProgressCheatTool.Reset();
+		}
 		if (QuestCheatTool)
 		{
 			QuestCheatTool->Shutdown();
@@ -122,6 +130,7 @@ private:
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
 	TUniquePtr<FTunaSweeperEnemyAIDebugTool> EnemyAIDebugTool;
 	TUniquePtr<FTunaSweeperQuestCheatTool> QuestCheatTool;
+	TUniquePtr<FTunaSweeperWorldProgressCheatTool> WorldProgressCheatTool;
 	TUniquePtr<FTunaSweeperSaveSnapshotTool> SaveSnapshotTool;
 	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
 	TUniquePtr<FTunaSweeperGlbTextureExtractorTool> GlbTextureExtractorTool;
