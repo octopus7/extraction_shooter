@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "Interaction/TunaSweeperRequirementPreview.h"
 #include "TunaSweeperInteractableComponent.generated.h"
 
 class UTunaSweeperInteractionMarkerWidget;
@@ -119,6 +120,8 @@ public:
 		int32 InRequiredQuantity,
 		bool bInShowRequirement);
 
+	void SetInteractionRequirementPreviews(const TArray<FTunaSweeperRequirementPreview>& InRequirements, bool bInShowRequirement);
+
 	void SetMarkerCompleted(bool bInMarkerCompleted);
 
 protected:
@@ -169,9 +172,7 @@ private:
 	TObjectPtr<UWidgetComponent> MarkerWidgetComponent;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> RequirementIconTexture;
-
-	int32 RequirementQuantity = 0;
+	TArray<FTunaSweeperRequirementPreview> RequirementPreviews;
 	bool bShowRequirementPreview = false;
 	bool bMarkerCompleted = false;
 

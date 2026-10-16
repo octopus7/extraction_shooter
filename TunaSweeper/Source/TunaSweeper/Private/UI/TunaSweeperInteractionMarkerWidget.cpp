@@ -13,6 +13,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Rendering/Texture2DResource.h"
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
@@ -335,17 +336,59 @@ void UTunaSweeperInteractionMarkerWidget::SetRequirementPreview(
 	int32 InRequiredQuantity,
 	bool bInShowRequirement)
 {
-	const int32 NewRequiredQuantity = FMath::Max(0, InRequiredQuantity);
-	const bool bRequirementChanged =
-		CachedRequirementIconTexture.Get() != InIconTexture ||
-		CachedRequiredQuantity != NewRequiredQuantity ||
-		bCachedShowRequirement != bInShowRequirement;
+	SetRequirementPreviews({{InIconTexture, FMath::Max(0, InRequiredQuantity)}}, bInShowRequirement);
+}
 
-	CachedRequirementIconTexture = InIconTexture;
-	CachedRequiredQuantity = NewRequiredQuantity;
+void UTunaSweeperInteractionMarkerWidget::SetRequirementPreviews(
+	const TArray<FTunaSweeperRequirementPreview>& InRequirements, bool bInShowRequirement)
+{
+	TArray<FTunaSweeperRequirementPreview> ValidRequirements;
+	for (const auto& Requirement : InRequirements)
+		if (Requirement.Quantity > 0) ValidRequirements.Add(Requirement);
+	const bool bChanged = CachedRequirements != ValidRequirements || bCachedShowRequirement != bInShowRequirement;
+	CachedRequirements = MoveTemp(ValidRequirements);
 	bCachedShowRequirement = bInShowRequirement;
-	bMultiOptionListDirty = bMultiOptionListDirty || bRequirementChanged;
+	bMultiOptionListDirty |= bChanged;
+	bRequirementContentDirty |= bChanged;
+	if (bRequirementContentDirty && RequirementRoot)
+	{
+		PopulateRequirementContent(Cast<UHorizontalBox>(RequirementRoot.Get()), 22.0f);
+		bRequirementContentDirty = false;
+	}
 	ApplyState();
+}
+
+void UTunaSweeperInteractionMarkerWidget::PopulateRequirementContent(UHorizontalBox* Content, float IconSize)
+{
+	if (!Content || !WidgetTree) return;
+	Content->ClearChildren();
+	auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+	const FText QuantityFormat = Game
+		? Game->ResolveLocalizedText(TEXT("ui.interaction.required_quantity"), FText::GetEmpty()) : FText::GetEmpty();
+	for (const auto& Requirement : CachedRequirements)
+	{
+		if (Requirement.Icon)
+		{
+			auto* IconBox = WidgetTree->ConstructWidget<USizeBox>();
+			auto* Icon = WidgetTree->ConstructWidget<UImage>();
+			IconBox->SetWidthOverride(IconSize);
+			IconBox->SetHeightOverride(IconSize);
+			Icon->SetBrushFromTexture(Requirement.Icon, true);
+			Icon->SetColorAndOpacity(FLinearColor::White);
+			IconBox->SetContent(Icon);
+			auto* IconSlot = Content->AddChildToHorizontalBox(IconBox);
+			IconSlot->SetVerticalAlignment(VAlign_Center);
+			IconSlot->SetPadding(FMargin(Content->GetChildrenCount() > 1 ? 10.0f : 0.0f, 0, 0, 0));
+		}
+		auto* Quantity = WidgetTree->ConstructWidget<UTextBlock>();
+		Quantity->SetText(QuantityFormat.IsEmpty() ? FText::AsNumber(Requirement.Quantity)
+			: FText::Format(QuantityFormat, FText::AsNumber(Requirement.Quantity)));
+		ApplyRuntimeTextFont(Quantity, DisplayNameText, -1.0f);
+		Quantity->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
+		auto* QuantitySlot = Content->AddChildToHorizontalBox(Quantity);
+		QuantitySlot->SetVerticalAlignment(VAlign_Center);
+		QuantitySlot->SetPadding(FMargin(Requirement.Icon ? 3.0f : 10.0f, 0, 0, 0));
+	}
 }
 
 void UTunaSweeperInteractionMarkerWidget::SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha)
@@ -552,6 +595,7 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 			UHorizontalBox::StaticClass(),
 			TEXT("RequirementRoot_Runtime"));
 		RequirementRoot = RequirementHorizontalBox;
+		bRequirementContentDirty = true;
 	}
 
 	if (!RequirementHorizontalBox)
@@ -559,55 +603,10 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 		return;
 	}
 
-	if (!RequirementIconImage)
+	if (bRequirementContentDirty)
 	{
-		USizeBox* RequirementIconBox = WidgetTree->ConstructWidget<USizeBox>(
-			USizeBox::StaticClass(),
-			TEXT("RequirementIconBox_Runtime"));
-		RequirementIconImage = WidgetTree->ConstructWidget<UImage>(
-			UImage::StaticClass(),
-			TEXT("RequirementIconImage_Runtime"));
-		if (RequirementIconBox && RequirementIconImage)
-		{
-			RequirementIconBox->SetWidthOverride(22.0f);
-			RequirementIconBox->SetHeightOverride(22.0f);
-			RequirementIconBox->SetContent(RequirementIconImage);
-			if (UHorizontalBoxSlot* IconSlot = RequirementHorizontalBox->AddChildToHorizontalBox(RequirementIconBox))
-			{
-				IconSlot->SetHorizontalAlignment(HAlign_Center);
-				IconSlot->SetVerticalAlignment(VAlign_Center);
-			}
-		}
-	}
-
-	if (!RequirementQuantityText)
-	{
-		RequirementQuantityText = WidgetTree->ConstructWidget<UTextBlock>(
-			UTextBlock::StaticClass(),
-			TEXT("RequirementQuantityText_Runtime"));
-		if (RequirementQuantityText)
-		{
-			RequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
-			ApplyRuntimeTextFont(RequirementQuantityText, DisplayNameText, -1.0f);
-			RequirementQuantityText->SetJustification(ETextJustify::Left);
-
-			if (UHorizontalBoxSlot* QuantitySlot = RequirementHorizontalBox->AddChildToHorizontalBox(RequirementQuantityText))
-			{
-				QuantitySlot->SetPadding(FMargin(4.0f, 0.0f, 0.0f, 0.0f));
-				QuantitySlot->SetHorizontalAlignment(HAlign_Left);
-				QuantitySlot->SetVerticalAlignment(VAlign_Center);
-			}
-		}
-	}
-	else
-	{
-		RequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
-	}
-
-	if (RequirementIconImage)
-	{
-		RequirementIconImage->SetColorAndOpacity(RequirementForegroundColor);
-		RequirementIconImage->SetBrushTintColor(FSlateColor(RequirementForegroundColor));
+		PopulateRequirementContent(RequirementHorizontalBox, 22.0f);
+		bRequirementContentDirty = false;
 	}
 
 	if (RequirementBackground && RequirementRoot && RequirementBackground->GetContent() != RequirementRoot)
@@ -718,7 +717,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 	{
 		const bool bFocused = OptionIndex == CachedFocusedOptionIndex;
 		const bool bShowFocusedCycleIndicator = bFocused && bCanCycleOptions;
-		const bool bShowRequirementInRow = bFocused && bCachedShowRequirement && CachedRequiredQuantity > 0;
+		const bool bShowRequirementInRow = bFocused && bCachedShowRequirement && !CachedRequirements.IsEmpty();
 
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(
 			UHorizontalBox::StaticClass(),
@@ -865,55 +864,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 				RowRequirementBackground->SetContent(RowRequirementContent);
 			}
 
-			if (CachedRequirementIconTexture)
-			{
-				USizeBox* RowRequirementIconBox = WidgetTree->ConstructWidget<USizeBox>(
-					USizeBox::StaticClass(),
-					*FString::Printf(TEXT("InteractionOptionRequirementIconBox_%d"), OptionIndex));
-				UImage* RowRequirementIcon = WidgetTree->ConstructWidget<UImage>(
-					UImage::StaticClass(),
-					*FString::Printf(TEXT("InteractionOptionRequirementIcon_%d"), OptionIndex));
-
-				if (RowRequirementIconBox && RowRequirementIcon)
-				{
-					RowRequirementIconBox->SetWidthOverride(18.0f);
-					RowRequirementIconBox->SetHeightOverride(18.0f);
-					RowRequirementIcon->SetBrushFromTexture(CachedRequirementIconTexture, true);
-					RowRequirementIcon->SetColorAndOpacity(FLinearColor::White);
-					RowRequirementIcon->SetBrushTintColor(FSlateColor(FLinearColor::White));
-					RowRequirementIconBox->SetContent(RowRequirementIcon);
-					if (RowRequirementContent)
-					{
-						if (UHorizontalBoxSlot* RequirementIconSlot = RowRequirementContent->AddChildToHorizontalBox(RowRequirementIconBox))
-						{
-							RequirementIconSlot->SetHorizontalAlignment(HAlign_Left);
-							RequirementIconSlot->SetVerticalAlignment(VAlign_Center);
-						}
-					}
-				}
-			}
-
-			UTextBlock* RowRequirementQuantityText = WidgetTree->ConstructWidget<UTextBlock>(
-				UTextBlock::StaticClass(),
-				*FString::Printf(TEXT("InteractionOptionRequirementQuantity_%d"), OptionIndex));
-			if (RowRequirementQuantityText)
-			{
-				RowRequirementQuantityText->SetText(FText::Format(
-					FText::FromString(TEXT("x{0}")),
-					FText::AsNumber(CachedRequiredQuantity)));
-				RowRequirementQuantityText->SetJustification(ETextJustify::Left);
-				ApplyRuntimeTextFont(RowRequirementQuantityText, DisplayNameText, -1.0f);
-				RowRequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
-				if (RowRequirementContent)
-				{
-					if (UHorizontalBoxSlot* RequirementQuantitySlot = RowRequirementContent->AddChildToHorizontalBox(RowRequirementQuantityText))
-					{
-						RequirementQuantitySlot->SetPadding(FMargin(CachedRequirementIconTexture ? 3.0f : 0.0f, 0.0f, 0.0f, 0.0f));
-						RequirementQuantitySlot->SetHorizontalAlignment(HAlign_Left);
-						RequirementQuantitySlot->SetVerticalAlignment(VAlign_Center);
-					}
-				}
-			}
+			PopulateRequirementContent(RowRequirementContent, 18.0f);
 		}
 		const bool bUseSeparateRequirementInRow = bShowRequirementInRow && RowRequirementBackground;
 
@@ -1103,7 +1054,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		}
 	}
 
-	const bool bShowRequirement = bShowLabelContent && !bUseMultiOptionList && bCachedShowRequirement && CachedRequiredQuantity > 0;
+	const bool bShowRequirement = bShowLabelContent && !bUseMultiOptionList && bCachedShowRequirement && !CachedRequirements.IsEmpty();
 	if (RequirementBackground)
 	{
 		RequirementBackground->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
@@ -1119,30 +1070,5 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 	{
 		RequirementRoot->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 		ApplyPaintOpacity(RequirementRoot, 1.0f);
-	}
-
-	if (RequirementIconImage)
-	{
-		if (bShowRequirement && CachedRequirementIconTexture)
-		{
-			RequirementIconImage->SetBrushFromTexture(CachedRequirementIconTexture, true);
-			RequirementIconImage->SetOpacity(1.0f);
-		}
-		else
-		{
-			RequirementIconImage->SetBrushFromTexture(nullptr, false);
-			RequirementIconImage->SetOpacity(0.0f);
-		}
-		ApplyPaintOpacity(RequirementIconImage, 1.0f);
-	}
-
-	if (RequirementQuantityText)
-	{
-		RequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
-		RequirementQuantityText->SetText(
-			bShowRequirement
-				? FText::Format(FText::FromString(TEXT("x{0}")), FText::AsNumber(CachedRequiredQuantity))
-				: FText::GetEmpty());
-		ApplyPaintOpacity(RequirementQuantityText, 1.0f);
 	}
 }

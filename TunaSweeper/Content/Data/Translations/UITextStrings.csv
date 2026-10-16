@@ -637,4 +637,5 @@ ui.rockfall.countdown,{0},{0},{0},{0}
 ui.rockfall.save_failed,无法保存进度。请稍后重试。,無法儲存進度。請稍後重試。,Не удалось сохранить прогресс. Повторите попытку позже.,Não foi possível salvar o progresso. Tente novamente em instantes.
 ui.ethanol.produce,生产乙醇（2个红薯 → 1份）,生產乙醇（2個地瓜 → 1份）,Произвести этанол (2 батата → 1),Produzir etanol (2 batatas-doces → 1)
 ui.ethanol.no_material,红薯不够！,地瓜不夠！,Не хватает батата!,Faltam batatas-doces!
-ui.ethanol.repair,修理（1个黄色噗噗、2份木材）,修理（1個黃色噗噗、2份木材）,"Ремонт (1 жёлтый пук, 2 древесины)","Reparar (1 Pum amarelo, 2 madeiras)"
+ui.ethanol.repair,修理,修理,Ремонт,Reparar
+ui.interaction.required_quantity,×{0},×{0},×{0},×{0}

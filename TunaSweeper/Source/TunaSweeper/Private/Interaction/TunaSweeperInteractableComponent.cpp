@@ -259,8 +259,13 @@ void UTunaSweeperInteractableComponent::SetInteractionRequirementPreview(
 	int32 InRequiredQuantity,
 	bool bInShowRequirement)
 {
-	RequirementIconTexture = InIconTexture;
-	RequirementQuantity = FMath::Max(0, InRequiredQuantity);
+	SetInteractionRequirementPreviews({{InIconTexture, FMath::Max(0, InRequiredQuantity)}}, bInShowRequirement);
+}
+
+void UTunaSweeperInteractableComponent::SetInteractionRequirementPreviews(
+	const TArray<FTunaSweeperRequirementPreview>& InRequirements, bool bInShowRequirement)
+{
+	RequirementPreviews = InRequirements;
 	bShowRequirementPreview = bInShowRequirement;
 	ApplyMarkerState();
 }
@@ -455,7 +460,7 @@ void UTunaSweeperInteractableComponent::ApplyMarkerState()
 			MarkerWidget->SetMarkerText(ResolveInteractionDisplayName());
 		}
 
-		MarkerWidget->SetRequirementPreview(RequirementIconTexture, RequirementQuantity, bShowRequirementPreview);
+		MarkerWidget->SetRequirementPreviews(RequirementPreviews, bShowRequirementPreview);
 		MarkerWidget->SetMarkerOpened(bMarkerCompleted);
 		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale, LabelAlpha);
 	}

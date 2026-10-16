@@ -1,4 +1,11 @@
 #if WITH_DEV_AUTOMATION_TESTS
+#include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
+#include "Components/HorizontalBox.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Engine/Texture2D.h"
+#include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -164,6 +171,56 @@ bool FTunaSweeperPowerFacilityMaterialsTest::RunTest(const FString& Parameters)
 	int32 InventoryNotifications = 0;
 	Game->OnWorldProgressChanged.AddLambda([&] { ++ProgressNotifications; });
 	Game->OnInventoryStateChanged.AddLambda([&] { ++InventoryNotifications; });
+	Facility->RefreshFacilityState();
+	auto* PreviewProperty = FindFProperty<FArrayProperty>(UTunaSweeperInteractableComponent::StaticClass(), TEXT("RequirementPreviews"));
+	if (!TestNotNull(TEXT("Interaction exposes material preview array"), PreviewProperty)) return false;
+	const auto* Previews = PreviewProperty->ContainerPtrToValuePtr<TArray<FTunaSweeperRequirementPreview>>(Facility->Interactable);
+	if (!TestEqual(TEXT("Multi-material repair previews both distinct items"), Previews->Num(), 2)) return false;
+	TestNotNull(TEXT("First material resolves its registered icon"), (*Previews)[0].Icon.Get());
+	TestNotNull(TEXT("Second material resolves its registered icon"), (*Previews)[1].Icon.Get());
+	TestEqual(TEXT("First material shows actual cost"), (*Previews)[0].Quantity, 1);
+	TestEqual(TEXT("Duplicate material shows summed actual cost"), (*Previews)[1].Quantity, 2);
+
+	// Check the actual visible widget hierarchy, including multi -> single -> hidden transitions.
+	TStrongObjectPtr<UTunaSweeperInteractionMarkerWidget> Marker(CreateWidget<UTunaSweeperInteractionMarkerWidget>(Game.Get()));
+	if (!TestNotNull(TEXT("Requirement marker creates"), Marker.Get())) return false;
+	auto* Tree = Marker->WidgetTree.Get();
+	auto* Root = Tree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MarkerRoot"));
+	Tree->RootWidget = Root;
+	auto* Label = Tree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LabelBackground"));
+	auto* Text = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DisplayNameText"));
+	Label->SetContent(Text);
+	Root->AddChild(Label);
+	auto Slate = Marker->TakeWidget();
+	Marker->SetMarkerText(Game->ResolveLocalizedText(TEXT("ui.ethanol.repair"), FText::GetEmpty()));
+	Marker->SetMarkerPresentation(1.0f, 1.0f, 1.0f);
+	Marker->SetRequirementPreviews(*Previews, true);
+	auto VisibleIconCount = [&]()
+	{
+		int32 Count = 0;
+		TArray<UWidget*> Widgets;
+		Tree->GetAllWidgets(Widgets);
+		for (auto* Widget : Widgets)
+		{
+			auto* Icon = Cast<UImage>(Widget);
+			if (!Icon || !Cast<UTexture2D>(Icon->GetBrush().GetResourceObject())) continue;
+			bool bVisible = true;
+			for (UWidget* Parent = Widget; Parent; Parent = Parent->GetParent())
+				bVisible &= Parent->GetVisibility() != ESlateVisibility::Collapsed && Parent->GetVisibility() != ESlateVisibility::Hidden;
+			if (bVisible) ++Count;
+		}
+		return Count;
+	};
+	TestEqual(TEXT("Focused repair row renders both material icons"), VisibleIconCount(), 2);
+	Marker->SetRequirementPreview((*Previews)[0].Icon, 2, true);
+	TestEqual(TEXT("Single-material production replaces old repair icons"), VisibleIconCount(), 1);
+	Marker->SetRequirementPreview(nullptr, 0, false);
+	TestEqual(TEXT("Unavailable interaction removes all requirement icons"), VisibleIconCount(), 0);
+	Marker->SetRequirementPreviews(*Previews, true);
+	Marker->SetInteractionOptions({}, INDEX_NONE);
+	TestEqual(TEXT("Plain marker also renders both material icons"), VisibleIconCount(), 2);
+	Marker->SetRequirementPreviews({}, false);
+	TestEqual(TEXT("Plain marker clears its requirements"), VisibleIconCount(), 0);
 	TestTrue(TEXT("Complete materials allow repair without the legacy item"), Facility->CanRepair());
 	TestFalse(TEXT("Failed save aborts repair"), Facility->Repair(true));
 	TestEqual(TEXT("Failed save restores first stack"), Game->CountInventoryItemById(6020), 2);

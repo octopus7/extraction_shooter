@@ -176,21 +176,25 @@ void ATunaSweeperPowerFacilityActor::ApplyPresentation()
 		bAvailable ? Label : FText::GetEmpty(), bAvailable ? InteractionStringKey : NAME_None);
 	Interactable->SetObjectiveEventId(bAvailable ? RepairObjectiveEventId : NAME_None);
 	TArray<FTunaSweeperItemStack> Requirements;
-	const bool bSingleRequirement = BuildRepairRequirements(Requirements) && Requirements.Num() == 1;
-	UTexture2D* Icon = nullptr;
-	if (auto* Items = Game ? Game->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
-		Items && bSingleRequirement)
+	TArray<FTunaSweeperRequirementPreview> Previews;
+	if (BuildRepairRequirements(Requirements))
 	{
-		FTunaSweeperItemDefinition Item;
-		if (Items->TryGetItemDefinition(Requirements[0].ItemId, Item))
+		auto* Items = Game ? Game->GetSubsystem<UTunaSweeperItemDataSubsystem>() : nullptr;
+		for (const auto& Requirement : Requirements)
 		{
-			const FString Path = Items->BuildItemIconObjectPath(Item);
-			if (!Path.IsEmpty()) Icon = LoadObject<UTexture2D>(nullptr, *Path);
+			UTexture2D* Icon = nullptr;
+			FTunaSweeperItemDefinition Item;
+			if (Items && Items->TryGetItemDefinition(Requirement.ItemId, Item))
+			{
+				const FString Path = Items->BuildItemIconObjectPath(Item);
+				if (!Path.IsEmpty()) Icon = LoadObject<UTexture2D>(nullptr, *Path);
+			}
+			Previews.Add({Icon, Requirement.Quantity});
 		}
 	}
-	// Multi-material facilities use their localized interaction key to describe the complete recipe.
-	Interactable->SetInteractionRequirementPreview(Icon, bSingleRequirement ? Requirements[0].Quantity : 0,
-		bAvailable && bSingleRequirement);
+	// Preview every material using the same requirements that repair actually consumes.
+	Interactable->SetInteractionRequirementPreviews(Previews, bAvailable);
+
 	Interactable->SetMarkerCompleted(bRepaired);
 }
 

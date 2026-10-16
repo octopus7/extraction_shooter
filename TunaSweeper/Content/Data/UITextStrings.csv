@@ -695,4 +695,5 @@ ui.rockfall.countdown,{0},{0},{0}
 ui.rockfall.save_failed,진행 상황을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.,Could not save progress. Please try again shortly.,進行状況を保存できませんでした。しばらくしてから再試行してください。
 ui.ethanol.produce,에탄올 생산 (고구마 2개 → 1개),Produce ethanol (2 sweet potatoes → 1),エタノール生産（サツマイモ2個 → 1個）
 ui.ethanol.no_material,고구마가 부족하다!,Not enough sweet potatoes!,サツマイモが足りない！
-ui.ethanol.repair,"수리 (노란 뿡뿡 1개, 목재 2개)","Repair (1 Yellow Pfft, 2 Wood)",修理（黄色いぷぅ1個、木材2個）
+ui.ethanol.repair,수리,Repair,修理
+ui.interaction.required_quantity,×{0},×{0},×{0}

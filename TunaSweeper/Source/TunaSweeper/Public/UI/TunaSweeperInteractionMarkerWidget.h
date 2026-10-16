@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "Styling/SlateBrush.h"
+#include "Interaction/TunaSweeperRequirementPreview.h"
 #include "TunaSweeperInteractionMarkerWidget.generated.h"
 
 class UTextBlock;
@@ -27,6 +28,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	void SetRequirementPreview(UTexture2D* InIconTexture, int32 InRequiredQuantity, bool bInShowRequirement);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
+	void SetRequirementPreviews(const TArray<FTunaSweeperRequirementPreview>& InRequirements, bool bInShowRequirement);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	void SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha);
@@ -67,6 +71,7 @@ protected:
 	TObjectPtr<UTextBlock> RequirementQuantityText;
 
 private:
+	void PopulateRequirementContent(UHorizontalBox* Content, float IconSize);
 	void CacheNamedWidgets();
 	void EnsureRequirementWidgets();
 	void EnsureSingleLabelContent();
@@ -86,7 +91,7 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> MultiOptionRows;
 	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> CachedRequirementIconTexture;
+	TArray<FTunaSweeperRequirementPreview> CachedRequirements;
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedOpenedCheckTexture;
 	UPROPERTY(Transient)
@@ -97,7 +102,7 @@ private:
 	TObjectPtr<UImage> CachedRingBrushImageWidget;
 	UPROPERTY(Transient)
 	TObjectPtr<UImage> CachedFilledBrushImageWidget;
-	int32 CachedRequiredQuantity = 0;
+	bool bRequirementContentDirty = true;
 	int32 CachedFocusedOptionIndex = INDEX_NONE;
 	float FocusScaleElapsedSeconds = 1.0f;
 	bool bMultiOptionListDirty = true;
