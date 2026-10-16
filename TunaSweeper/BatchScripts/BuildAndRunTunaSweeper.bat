@@ -33,12 +33,29 @@ if not exist "%BUILD_BAT%" (
     exit /b 1
 )
 
+rem Different engine installations have separate build mutexes but share UBT's default log.
+rem Use a unique project-local log per invocation so concurrent UE 5.7/5.8 builds cannot lock it.
+set "BUILD_LOG_DIR=%~dp0..\Saved\Logs\Build"
+if not exist "%BUILD_LOG_DIR%" mkdir "%BUILD_LOG_DIR%"
+if not exist "%BUILD_LOG_DIR%" (
+    echo Could not create build log directory: "%BUILD_LOG_DIR%"
+    exit /b 1
+)
+set "BUILD_RUN_ID="
+for /f %%I in ('powershell.exe -NoProfile -NonInteractive -Command "[Guid]::NewGuid().ToString('N')"') do set "BUILD_RUN_ID=%%I"
+if not defined BUILD_RUN_ID (
+    echo Could not generate a unique build log name.
+    exit /b 1
+)
+set "BUILD_LOG=%BUILD_LOG_DIR%\Build-%BUILD_RUN_ID%.log"
+
 echo Building %TARGET% %PLATFORM% %CONFIGURATION%
 echo Project: "%PROJECT_FILE%"
 echo Unreal: "%BUILD_BAT%"
+echo Build log: "%BUILD_LOG%"
 echo.
 
-call "%BUILD_BAT%" %TARGET% %PLATFORM% %CONFIGURATION% -Project="%PROJECT_FILE%" -WaitMutex
+call "%BUILD_BAT%" %TARGET% %PLATFORM% %CONFIGURATION% -Project="%PROJECT_FILE%" -WaitMutex "-Log=%BUILD_LOG%"
 set "BUILD_EXIT_CODE=%ERRORLEVEL%"
 
 echo.

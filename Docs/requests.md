@@ -11572,3 +11572,10 @@
 - 요청: 기존 돼지 저금통 C++ 액터를 배치 가능한 BP 에셋으로 생성.
 - 구현: /Game/Interaction/BP_PiggyBank 생성. TunaSweeperPiggyBankActor를 상속하여 지급량 1,000과 기존 지급·저금·출금 및 돼지 메시 구성 유지. 레벨 배치와 런타임 코드는 변경하지 않음.
 - 검증: 생성 스크립트 제거 후 새 UE 5.7 프로세스에서 BP 로드·컴파일, 기본값, 메시 9개와 상호작용 3개 확인. 렌더링 없는 에디터의 임시 액터 배치 검사는 엔진 오류로 실패하여 저장된 기본 컴포넌트 직접 검사로 확인. 임시 스크립트 제거 완료.
+
+## 2026-10-17 04:49:16 (소요시간: 00:01:45)
+
+- 요청: 에디터 빌드 BAT가 UnrealBuildTool BackupLogFile의 파일 점유 IOException으로 실패하는 문제 확인·해결.
+- 원인: 기본 AppData UBT 로그는 엔진 버전 간 공유되지만 WaitMutex는 엔진 설치별로 구분되어 병렬 빌드의 로그 교체 충돌을 막지 못함. 현재 점유 프로세스는 확인 시 이미 종료된 상태라 특정 프로세스는 단정하지 않음.
+- 수정: BuildAndRunTunaSweeper.bat가 매 실행 GUID 이름의 Saved/Logs/Build 로그를 만들고 -Log로 전달. 기존 WaitMutex 및 성공 후 에디터 실행 유지. 직접 빌드 시 동일 로그 분리 규칙을 에디터 조율 문서에 추가.
+- 검증: 수정 BAT 실제 실행 성공(Target is up to date), 전용 로그의 Result: Succeeded 확인 및 Git ignore 확인. 에디터 실행 단계 완료.

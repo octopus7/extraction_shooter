@@ -8,6 +8,8 @@ Read and follow these rules before checking, opening, reusing, or closing an edi
 
 ## Open and reuse
 
+- Build logs: UnrealBuildTool's default AppData log is shared across engine installations, while its build mutex is scoped to the installation. Pass a unique `-Log=<project>/Saved/Logs/Build/<unique-name>.log` for each direct `Build.bat` invocation to avoid log rotation collisions during UE 5.7/5.8 parallel work. `BatchScripts/BuildAndRunTunaSweeper.bat` does this automatically. Keep `-WaitMutex` for build serialization within an engine installation.
+
 - When opening Unreal Editor for Computer Use, explicitly open `TunaSweeper/TunaSweeper.uproject` (absolute path: `D:/github/extraction_shooter/TunaSweeper/TunaSweeper.uproject`). Reuse an existing editor for this project when available; do not launch Unreal Editor without specifying the project.
 - After a build finishes and Unreal Editor can be launched, open the editor for `TunaSweeper/TunaSweeper.uproject` unless the user says not to or another conversation still needs it closed under the closure coordination rules below.
 - When the user's entire message is exactly `빌드` or `build` (with no other text), do not add a request-log entry. Build the project, then open the Unreal Editor when it can be launched and no coordinated closed-editor work is pending.
