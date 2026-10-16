@@ -562,6 +562,8 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	{
 		return true;
 	}
+	if (const auto* Vending = Cast<ATunaSweeperQuestVendingActor>(Interactable->GetOwner());
+		Vending && Vending->IsAwaitingDeparture()) return true;
 
 	if (TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Interactable->GetOwner()) > 0)
 	{
@@ -833,6 +835,9 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 	{
 		return false;
 	}
+	// A departing field machine only says goodbye; never route later provider quests here.
+	if (auto* Vending = Cast<ATunaSweeperQuestVendingActor>(QuestOwner); Vending && Vending->IsAwaitingDeparture())
+		return Vending->ShowDepartureDialogue();
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
 	if (!TunaPlayerController)

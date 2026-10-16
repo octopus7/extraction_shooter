@@ -582,7 +582,7 @@ Once the extraction hold completes, the source world is paused and the extractin
 
 ### 퀘스트 자판기 이전과 시설 조건 차량 생성
 
-- `ATunaSweeperQuestVendingActor`의 현장/기지 역할은 기존 퀘스트 보상 수령 완료 상태에서 출현을 계산한다. 수락·소유 목표 달성만으로 이전하지 않으며, 보상 수령·새 게임·저장 복원 알림에서 메시·충돌·상호작용을 함께 갱신한다. 이전 bool을 따로 저장하지 않는다.
+- `ATunaSweeperQuestVendingActor`의 기지 역할은 이전 퀘스트 보상 수령 완료 시 즉시 출현한다. 현장 역할은 이번 방문에서 보였던 경우 보상 수령 후에도 메시·충돌을 유지하고 인사 대화만 제공한다. 현장 액터가 언로드된 뒤 다시 생성되면 저장된 완료 상태에 따라 숨는다. 방문 유지 bool은 액터 메모리에만 두며 저장하지 않는다. 수락·소유 목표 달성만으로 이전하지 않는다.
 - `ATunaSweeperSpecialVehicleSpawner.RequiredWorldProgressObjectId`가 지정되면 기존 월드 진행 상태의 `Completed`에서만 생성한다. 복구 알림으로 즉시 생성하고 재방문 시 저장된 시설 상태를 다시 확인한다. 빈 ID는 기존 동작이다. 한 방문에서 한 번만 생성하는 제한은 유지한다.
 - 자판기 상품 해금은 기존 퀘스트 완료 조건을 재사용하며 재고·코인은 기존 상점 저장 경로를 사용한다. 신규 저장 필드나 버전 변경은 없다.
 

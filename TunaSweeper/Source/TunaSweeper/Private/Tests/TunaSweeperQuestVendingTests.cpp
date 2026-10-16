@@ -161,13 +161,27 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Claim returns exactly one module as reward"), Game->CountInventoryItemById(Module.ItemId), 1);
 	TestFalse(TEXT("Relocation cannot be claimed twice"), Quests->ClaimQuestReward(Relocation.QuestId));
 	TestEqual(TEXT("Repeated claim cannot duplicate returned module"), Game->CountInventoryItemById(Module.ItemId), 1);
-	TestTrue(TEXT("Claim immediately removes field machine"), Field->IsHidden());
-	TestFalse(TEXT("Absent field machine cannot collide"), Field->GetActorEnableCollision());
+	TestFalse(TEXT("Claim retains field machine for the current visit"), Field->IsHidden());
+	TestTrue(TEXT("Remaining field machine keeps collision"), Field->GetActorEnableCollision());
 	TestFalse(TEXT("Claim immediately reveals base machine"), Base->IsHidden());
 	TestTrue(TEXT("Base machine has collision"), Base->GetActorEnableCollision());
 	TestTrue(TEXT("Base shop unlocks after claim"), Base->IsShopAvailable());
 	TestTrue(TEXT("Normal interaction subsystem offers unlocked shop"), Interactions->CanOfferInteraction(Base->GetInteractableComponent()));
-	TestFalse(TEXT("Relocated field machine cannot open quests"), Interactions->CanOfferInteraction(Field->GetQuestInteractableComponent()));
+	TestTrue(TEXT("Remaining field machine offers farewell interaction"), Interactions->CanOfferInteraction(Field->GetQuestInteractableComponent()));
+	TestTrue(TEXT("Remaining field machine enters departure dialogue mode"), Field->IsAwaitingDeparture());
+	TestFalse(TEXT("Resident never enters departure dialogue mode"), Base->IsAwaitingDeparture());
+	FTunaSweeperQuestTextString Farewell;
+	Farewell.StringKey = Field->DepartureStringKey;
+	Farewell.Korean = FText::FromString(TEXT("Test farewell KO"));
+	Farewell.English = FText::FromString(TEXT("Test farewell EN"));
+	Farewell.Japanese = FText::FromString(TEXT("Test farewell JA"));
+	Quests->QuestTextStringsByKey.Add(Farewell.StringKey, Farewell);
+	Game->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::Korean, false);
+	TestEqual(TEXT("Departure dialogue resolves current language"), Field->GetDepartureText().ToString(), Farewell.Korean.ToString());
+	Game->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::English, false);
+	TestEqual(TEXT("Departure dialogue follows language changes"), Field->GetDepartureText().ToString(), Farewell.English.ToString());
+	TestEqual(TEXT("Departure uses localized talk prompt"), Field->GetQuestInteractableComponent()->GetInteractionDisplayName().ToString(),
+		Game->ResolveLocalizedText(TEXT("ui.interaction.mole_dialogue"), FText::GetEmpty()).ToString());
 
 	// Future quests remain usable beside the base shop.
 	FTunaSweeperQuestDefinition FollowUp = Relocation;
@@ -178,6 +192,7 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	Quests->OnQuestProgressChanged.Broadcast();
 	TestTrue(TEXT("Resident exposes subsequent quest interaction"), Interactions->CanOfferInteraction(Base->GetQuestInteractableComponent()));
 	TestEqual(TEXT("Resident routes next provider quest"), Base->ResolveQuestId(), FollowUp.QuestId);
+	TestEqual(TEXT("Departing field machine cannot route subsequent quests"), Field->ResolveQuestId(), 0);
 	TestTrue(TEXT("Resident retains shop beside quest interaction"), Interactions->CanOfferInteraction(Base->GetInteractableComponent()));
 
 	TStrongObjectPtr<UTunaSweeperSaveGame> Save(NewObject<UTunaSweeperSaveGame>());
@@ -191,7 +206,17 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Loading fresh progress removes resident"), Base->IsHidden());
 	TestFalse(TEXT("Loading fresh progress removes shop availability"), Base->IsShopAvailable());
 	Quests->LoadQuestProgressFromSave(Loaded->NumericQuestProgressStates, Loaded->NumericTrackedQuestId, Loaded->QuestCoinBalance);
-	TestTrue(TEXT("Loading relocated save removes field machine"), Field->IsHidden());
+	TestFalse(TEXT("Progress refresh does not end the current field visit"), Field->IsHidden());
+	auto* RevisitedField = World->SpawnActor<ATunaSweeperQuestVendingActor>(Spawn);
+	if (!TestNotNull(TEXT("New visit recreates field actor"), RevisitedField)) return false;
+	RevisitedField->FirstMeetingQuestId = First.QuestId;
+	RevisitedField->RelocationQuestId = Relocation.QuestId;
+	RevisitedField->QuestProviderId = First.ProviderId;
+	RevisitedField->DispatchBeginPlay();
+	TestTrue(TEXT("Next visit hides relocated field machine"), RevisitedField->IsHidden());
+	TestFalse(TEXT("Next visit removes field collision"), RevisitedField->GetActorEnableCollision());
+	TestFalse(TEXT("Next visit cannot offer farewell or quests"), Interactions->CanOfferInteraction(RevisitedField->GetQuestInteractableComponent()));
+	RevisitedField->Destroy();
 	TestFalse(TEXT("Loading relocated save restores resident"), Base->IsHidden());
 	TestTrue(TEXT("Loading relocated save restores shop"), Base->IsShopAvailable());
 	TestEqual(TEXT("Load does not grant rewards again"), Quests->GetCoinBalance(), 7);

@@ -34,6 +34,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Vending")
 	ETunaSweeperQuestVendingRole PresenceRole = ETunaSweeperQuestVendingRole::FieldOffer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest|Vending")
+	FName DepartureStringKey = TEXT("vending.relocation.farewell");
+
+	UFUNCTION(BlueprintPure, Category = "Quest|Vending")
+	bool IsAwaitingDeparture() const;
+
+	UFUNCTION(BlueprintPure, Category = "Quest|Vending")
+	FText GetDepartureText() const;
+
+	bool ShowDepartureDialogue();
+
 	UFUNCTION(BlueprintPure, Category = "Quest|Vending")
 	int32 ResolveQuestId() const;
 
@@ -64,4 +75,7 @@ protected:
 
 private:
 	bool IsQuestPresent() const;
+	// Visit-local only: an already visible field machine leaves when this actor is unloaded.
+	// Never save this flag; a newly loaded field actor uses completed quest progress immediately.
+	bool bFieldPresentThisVisit = false;
 };
