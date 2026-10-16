@@ -341,7 +341,10 @@ void UTunaSweeperMemoWidget::RebuildMemoList(const TArray<FTunaSweeperMemoListEn
 		return;
 	}
 
+	// Cancel a deferred scroll before replacing its target widgets.
+	MemoListScrollBox->ScrollWidgetIntoView(nullptr);
 	MemoListScrollBox->ClearChildren();
+	UTunaSweeperMemoListEntryWidget* SelectedEntryWidget = nullptr;
 	for (const FTunaSweeperMemoListEntry& Entry : Entries)
 	{
 		UTunaSweeperMemoListEntryWidget* EntryWidget = CreateWidget<UTunaSweeperMemoListEntryWidget>(
@@ -359,6 +362,15 @@ void UTunaSweeperMemoWidget::RebuildMemoList(const TArray<FTunaSweeperMemoListEn
 			Entry.MemoId == SelectedMemoId,
 			FTunaSweeperMemoEntryClickedDelegate::CreateUObject(this, &UTunaSweeperMemoWidget::SetSelectedMemoId));
 		MemoListScrollBox->AddChild(EntryWidget);
+		if (Entry.MemoId == SelectedMemoId)
+		{
+			SelectedEntryWidget = EntryWidget;
+		}
+	}
+	if (SelectedEntryWidget)
+	{
+		// Scroll on the next layout pass, once the newly built row has its geometry.
+		MemoListScrollBox->ScrollWidgetIntoView(SelectedEntryWidget, false);
 	}
 }
 
