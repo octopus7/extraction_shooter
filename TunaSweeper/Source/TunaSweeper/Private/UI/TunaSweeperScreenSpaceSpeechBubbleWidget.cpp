@@ -1,24 +1,16 @@
 #include "UI/TunaSweeperScreenSpaceSpeechBubbleWidget.h"
 
-#include "Blueprint/WidgetTree.h"
-#include "Components/Image.h"
-#include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
-#include "Engine/Texture2D.h"
-#include "UI/TunaSweeperUIFont.h"
+#include "Components/Image.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "UObject/StrongObjectPtr.h"
 
 namespace TunaSweeperScreenSpaceSpeechBubble
 {
-	constexpr float MinimumBodyWidth = 160.0f;
-	constexpr float MinimumBodyHeight = 56.0f;
-	constexpr float MaximumBodyWidth = 420.0f;
-	constexpr float TextWrapWidth = 376.0f;
-	constexpr float TailSize = 34.0f;
-	constexpr float TailReserve = 24.0f;
-	constexpr float TailTipRadius = 16.0f;
-
 	FVector2D DirectionVector(const ETunaSweeperSpeechBubbleTailDirection Direction)
 	{
 		switch (Direction)
@@ -35,7 +27,7 @@ namespace TunaSweeperScreenSpaceSpeechBubble
 		}
 	}
 
-	FMargin BodyPadding(const ETunaSweeperSpeechBubbleTailDirection Direction)
+	FMargin BodyPadding(const ETunaSweeperSpeechBubbleTailDirection Direction, const float TailReserve)
 	{
 		const FVector2D Vector = DirectionVector(Direction);
 		return FMargin(
@@ -43,22 +35,6 @@ namespace TunaSweeperScreenSpaceSpeechBubble
 			Vector.Y < 0.0f ? TailReserve : 0.0f,
 			Vector.X > 0.0f ? TailReserve : 0.0f,
 			Vector.Y > 0.0f ? TailReserve : 0.0f);
-	}
-
-	float TailAngle(const ETunaSweeperSpeechBubbleTailDirection Direction)
-	{
-		switch (Direction)
-		{
-		case ETunaSweeperSpeechBubbleTailDirection::Down: return 0.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::DownRight: return -45.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::Right: return -90.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::UpRight: return -135.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::Up: return 180.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::UpLeft: return 135.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::Left: return 90.0f;
-		case ETunaSweeperSpeechBubbleTailDirection::DownLeft: return 45.0f;
-		default: return 0.0f;
-		}
 	}
 
 	EHorizontalAlignment HorizontalAlignment(const FVector2D& Direction)
@@ -77,123 +53,38 @@ void UTunaSweeperScreenSpaceSpeechBubbleWidget::Configure(
 	const ETunaSweeperSpeechBubbleTailDirection InTailDirection)
 {
 	PendingText = InText;
+	bHasPendingText = true;
 	TailDirection = InTailDirection;
-	EnsureWidgetTree();
 	ApplyPresentation();
 }
 
-TSharedRef<SWidget> UTunaSweeperScreenSpaceSpeechBubbleWidget::RebuildWidget()
+void UTunaSweeperScreenSpaceSpeechBubbleWidget::NativePreConstruct()
 {
-	EnsureWidgetTree();
-	TSharedRef<SWidget> RebuiltWidget = Super::RebuildWidget();
+	Super::NativePreConstruct();
+	if (IsDesignTime())
+	{
+		TailDirection = PreviewTailDirection;
+		TStrongObjectPtr<UGameInstance> Owner(NewObject<UGameInstance>());
+		TStrongObjectPtr<UTunaSweeperTextSubsystem> Strings(NewObject<UTunaSweeperTextSubsystem>(Owner.Get()));
+		FText PreviewText;
+		Strings->TryGetTextByKey(PreviewTextStringKey, ETunaSweeperItemTextLanguage::Korean, PreviewText);
+		if (BubbleText) BubbleText->SetText(PreviewText);
+	}
 	ApplyPresentation();
-	return RebuiltWidget;
-}
-
-void UTunaSweeperScreenSpaceSpeechBubbleWidget::EnsureWidgetTree()
-{
-	if (!WidgetTree)
-	{
-		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
-	}
-
-	if (!WidgetTree->RootWidget || !RootOverlay || !BodyBox || !BodyImage || !BubbleText || !TailBox || !TailImage)
-	{
-		BuildNativeWidgetTree();
-	}
-}
-
-void UTunaSweeperScreenSpaceSpeechBubbleWidget::BuildNativeWidgetTree()
-{
-	if (!WidgetTree)
-	{
-		return;
-	}
-
-	RootOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("SpeechBubbleRoot"));
-	TailBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("TailBox"));
-	TailImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("TailImage"));
-	BodyBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BodyBox"));
-	UOverlay* BodyOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("BodyOverlay"));
-	BodyImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("BodyImage"));
-	BubbleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BubbleText"));
-	if (!RootOverlay || !TailBox || !TailImage || !BodyBox || !BodyOverlay || !BodyImage || !BubbleText)
-	{
-		return;
-	}
-
-	WidgetTree->RootWidget = RootOverlay;
-	RootOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
-
-	TailBox->SetWidthOverride(TunaSweeperScreenSpaceSpeechBubble::TailSize);
-	TailBox->SetHeightOverride(TunaSweeperScreenSpaceSpeechBubble::TailSize);
-	TailBox->SetContent(TailImage);
-	RootOverlay->AddChildToOverlay(TailBox);
-
-	BodyBox->SetMinDesiredWidth(TunaSweeperScreenSpaceSpeechBubble::MinimumBodyWidth);
-	BodyBox->SetMinDesiredHeight(TunaSweeperScreenSpaceSpeechBubble::MinimumBodyHeight);
-	BodyBox->SetMaxDesiredWidth(TunaSweeperScreenSpaceSpeechBubble::MaximumBodyWidth);
-	BodyBox->SetContent(BodyOverlay);
-	RootOverlay->AddChildToOverlay(BodyBox);
-
-	if (UOverlaySlot* BackgroundSlot = BodyOverlay->AddChildToOverlay(BodyImage))
-	{
-		BackgroundSlot->SetHorizontalAlignment(HAlign_Fill);
-		BackgroundSlot->SetVerticalAlignment(VAlign_Fill);
-	}
-	if (UOverlaySlot* TextSlot = BodyOverlay->AddChildToOverlay(BubbleText))
-	{
-		TextSlot->SetPadding(FMargin(22.0f, 12.0f));
-		TextSlot->SetHorizontalAlignment(HAlign_Fill);
-		TextSlot->SetVerticalAlignment(VAlign_Center);
-	}
-
-	BubbleText->SetAutoWrapText(true);
-	BubbleText->SetWrapTextAt(TunaSweeperScreenSpaceSpeechBubble::TextWrapWidth);
-	BubbleText->SetJustification(ETextJustify::Center);
-	BubbleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.055f, 0.065f, 0.075f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(BubbleText, 20.0f);
 }
 
 void UTunaSweeperScreenSpaceSpeechBubbleWidget::ApplyPresentation()
 {
-	if (!BubbleText || !BodyImage || !TailImage)
-	{
-		return;
-	}
-
-	BubbleText->SetText(PendingText);
-	TunaSweeperUIFont::ApplyFont(BubbleText, 20.0f);
-
-	if (!BodyTexture)
-	{
-		BodyTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/SpeechBubble/T_SpeechBubble_Body.T_SpeechBubble_Body"));
-	}
-	if (!TailTexture)
-	{
-		TailTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/SpeechBubble/T_SpeechBubble_Tail.T_SpeechBubble_Tail"));
-	}
-
-	if (BodyTexture)
-	{
-		BodyImage->SetBrushFromTexture(BodyTexture, false);
-		FSlateBrush BodyBrush = BodyImage->GetBrush();
-		BodyBrush.DrawAs = ESlateBrushDrawType::Box;
-		BodyBrush.Margin = FMargin(0.125f, 0.25f);
-		BodyImage->SetBrush(BodyBrush);
-	}
-	if (TailTexture)
-	{
-		TailImage->SetBrushFromTexture(TailTexture, false);
-	}
-
+	// Fonts, brushes, colors and sizing belong to the serialized WBP hierarchy.
+	if (BubbleText && bHasPendingText) BubbleText->SetText(PendingText);
 	ApplyTailLayout();
+	UpdateShapeMaterial();
 	InvalidateLayoutAndVolatility();
 }
 
 void UTunaSweeperScreenSpaceSpeechBubbleWidget::ApplyTailLayout()
 {
-	if (!RootOverlay || !BodyBox || !TailBox)
+	if (!BodyBox || !TailBox)
 	{
 		return;
 	}
@@ -203,7 +94,7 @@ void UTunaSweeperScreenSpaceSpeechBubbleWidget::ApplyTailLayout()
 
 	if (UOverlaySlot* BodySlot = Cast<UOverlaySlot>(BodyBox->Slot))
 	{
-		BodySlot->SetPadding(TunaSweeperScreenSpaceSpeechBubble::BodyPadding(TailDirection));
+		BodySlot->SetPadding(TunaSweeperScreenSpaceSpeechBubble::BodyPadding(TailDirection, FMath::Max(0.0f, TailReserve)));
 		BodySlot->SetHorizontalAlignment(HAlign_Fill);
 		BodySlot->SetVerticalAlignment(VAlign_Fill);
 	}
@@ -215,25 +106,52 @@ void UTunaSweeperScreenSpaceSpeechBubbleWidget::ApplyTailLayout()
 		TailSlot->SetVerticalAlignment(TunaSweeperScreenSpaceSpeechBubble::VerticalAlignment(Direction));
 	}
 
-	TailBox->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-	TailBox->SetRenderTransformAngle(TunaSweeperScreenSpaceSpeechBubble::TailAngle(TailDirection));
+	// TailBox is a designer sizing guide. The background draws the union of the
+	// body and tail in one pass, so there is never an internal outline at the join.
+}
+
+void UTunaSweeperScreenSpaceSpeechBubbleWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	UpdateShapeMaterial();
+}
+
+void UTunaSweeperScreenSpaceSpeechBubbleWidget::UpdateShapeMaterial() const
+{
+	if (!BodyImage || !BodyBox || !TailBox) return;
+	auto* Material = BodyImage->GetDynamicMaterial();
+	if (!Material) return;
+	const FVector2D BodySize = BodyBox->GetDesiredSize();
+	const FVector2D TailSize = TailBox->GetDesiredSize();
+	const bool bHasTail = TailDirection != ETunaSweeperSpeechBubbleTailDirection::None;
+	const float Reserve = FMath::Max(0.0f, TailReserve);
+	const FMargin TailPadding = TunaSweeperScreenSpaceSpeechBubble::BodyPadding(TailDirection, Reserve);
+	const FVector2D Size(
+		FMath::Max(BodySize.X + TailPadding.Left + TailPadding.Right, bHasTail ? TailSize.X : 0.0),
+		FMath::Max(BodySize.Y + TailPadding.Top + TailPadding.Bottom, bHasTail ? TailSize.Y : 0.0));
+	const FVector2D Direction = TunaSweeperScreenSpaceSpeechBubble::DirectionVector(TailDirection);
+	const FVector2D Tip = CalculateLocalAnchorPoint(TailDirection, BodySize, TailSize, Reserve, FMath::Max(0.0f, TailTipInset));
+	Material->SetVectorParameterValue(TEXT("WidgetSize"), FLinearColor(Size.X, Size.Y, 0, 0));
+	Material->SetVectorParameterValue(TEXT("BodyPadding"), FLinearColor(TailPadding.Left, TailPadding.Top, TailPadding.Right, TailPadding.Bottom));
+	Material->SetVectorParameterValue(TEXT("TailDirection"), FLinearColor(Direction.X, Direction.Y, bHasTail ? 1.0f : 0.0f, 0));
+	Material->SetVectorParameterValue(TEXT("TailGeometry"), FLinearColor(Tip.X, Tip.Y, TailSize.X, TailSize.Y));
 }
 
 FVector2D UTunaSweeperScreenSpaceSpeechBubbleWidget::GetLocalAnchorPoint() const
 {
-	FVector2D BodySize(TunaSweeperScreenSpaceSpeechBubble::MinimumBodyWidth, TunaSweeperScreenSpaceSpeechBubble::MinimumBodyHeight);
-	if (BodyBox)
-	{
-		const FVector2D DesiredSize = BodyBox->GetDesiredSize();
-		BodySize.X = FMath::Max(BodySize.X, DesiredSize.X);
-		BodySize.Y = FMath::Max(BodySize.Y, DesiredSize.Y);
-	}
-	return CalculateLocalAnchorPoint(TailDirection, BodySize);
+	UpdateShapeMaterial();
+	const FVector2D BodySize = BodyBox ? BodyBox->GetDesiredSize() : FVector2D::ZeroVector;
+	const FVector2D TailSize = TailBox ? TailBox->GetDesiredSize() : FVector2D::ZeroVector;
+	return CalculateLocalAnchorPoint(TailDirection, BodySize, TailSize,
+		FMath::Max(0.0f, TailReserve), FMath::Max(0.0f, TailTipInset));
 }
 
 FVector2D UTunaSweeperScreenSpaceSpeechBubbleWidget::CalculateLocalAnchorPoint(
 	const ETunaSweeperSpeechBubbleTailDirection InTailDirection,
-	const FVector2D& BodySize)
+	const FVector2D& BodySize,
+	const FVector2D& TailSize,
+	const float InTailReserve,
+	const float InTailTipInset)
 {
 	if (InTailDirection == ETunaSweeperSpeechBubbleTailDirection::None)
 	{
@@ -241,25 +159,30 @@ FVector2D UTunaSweeperScreenSpaceSpeechBubbleWidget::CalculateLocalAnchorPoint(
 	}
 
 	const FVector2D Direction = TunaSweeperScreenSpaceSpeechBubble::DirectionVector(InTailDirection);
-	const FMargin Padding = TunaSweeperScreenSpaceSpeechBubble::BodyPadding(InTailDirection);
-	const FVector2D RootSize(BodySize.X + Padding.Left + Padding.Right, BodySize.Y + Padding.Top + Padding.Bottom);
+	const FMargin TailPadding = TunaSweeperScreenSpaceSpeechBubble::BodyPadding(InTailDirection, InTailReserve);
+	const FVector2D RootSize(
+		FMath::Max(BodySize.X + TailPadding.Left + TailPadding.Right, TailSize.X),
+		FMath::Max(BodySize.Y + TailPadding.Top + TailPadding.Bottom, TailSize.Y));
 	FVector2D TailCenter = RootSize * 0.5f;
 	if (Direction.X < 0.0f)
 	{
-		TailCenter.X = TunaSweeperScreenSpaceSpeechBubble::TailSize * 0.5f;
+		TailCenter.X = TailSize.X * 0.5f;
 	}
 	else if (Direction.X > 0.0f)
 	{
-		TailCenter.X = RootSize.X - TunaSweeperScreenSpaceSpeechBubble::TailSize * 0.5f;
+		TailCenter.X = RootSize.X - TailSize.X * 0.5f;
 	}
 	if (Direction.Y < 0.0f)
 	{
-		TailCenter.Y = TunaSweeperScreenSpaceSpeechBubble::TailSize * 0.5f;
+		TailCenter.Y = TailSize.Y * 0.5f;
 	}
 	else if (Direction.Y > 0.0f)
 	{
-		TailCenter.Y = RootSize.Y - TunaSweeperScreenSpaceSpeechBubble::TailSize * 0.5f;
+		TailCenter.Y = RootSize.Y - TailSize.Y * 0.5f;
 	}
 
-	return TailCenter + Direction * TunaSweeperScreenSpaceSpeechBubble::TailTipRadius;
+	const FVector2D TipRadius(
+		FMath::Max(0.0, TailSize.X * 0.5 - InTailTipInset),
+		FMath::Max(0.0, TailSize.Y * 0.5 - InTailTipInset));
+	return TailCenter + Direction * TipRadius;
 }

@@ -93,6 +93,10 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperSpeechBubbleLayerWidget> LayerWidget;
 
+	UPROPERTY()
+	TSoftClassPtr<UTunaSweeperScreenSpaceSpeechBubbleWidget> BubbleWidgetClass = TSoftClassPtr<UTunaSweeperScreenSpaceSpeechBubbleWidget>(
+		FSoftObjectPath(TEXT("/Game/UI/SpeechBubble/WBP_CharacterSpeechBubble.WBP_CharacterSpeechBubble_C")));
+
 	TArray<FActiveSpeechBubble> ActiveBubbles;
 	FDelegateHandle WorldCleanupHandle;
 };

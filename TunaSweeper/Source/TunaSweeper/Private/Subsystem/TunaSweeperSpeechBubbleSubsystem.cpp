@@ -113,9 +113,10 @@ FGuid UTunaSweeperSpeechBubbleSubsystem::ShowBubble(
 		return FGuid();
 	}
 
+	const TSubclassOf<UTunaSweeperScreenSpaceSpeechBubbleWidget> WidgetClass = BubbleWidgetClass.LoadSynchronous();
+	if (!WidgetClass) return FGuid();
 	UTunaSweeperScreenSpaceSpeechBubbleWidget* Widget = CreateWidget<UTunaSweeperScreenSpaceSpeechBubbleWidget>(
-		GetGameInstance(),
-		UTunaSweeperScreenSpaceSpeechBubbleWidget::StaticClass());
+		GetGameInstance(), WidgetClass);
 	if (!Widget)
 	{
 		return FGuid();

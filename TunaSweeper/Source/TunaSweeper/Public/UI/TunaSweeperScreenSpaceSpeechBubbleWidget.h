@@ -6,19 +6,18 @@
 
 #include "TunaSweeperScreenSpaceSpeechBubbleWidget.generated.h"
 
-class UImage;
-class UOverlay;
 class USizeBox;
 class UTextBlock;
-class UTexture2D;
+class UImage;
 
-/** Native, asset-backed speech bubble displayed by the screen-space bubble subsystem. */
+/** Behavior for WBP_CharacterSpeechBubble; its presentation is authored in the Designer. */
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperScreenSpaceSpeechBubbleWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Speech Bubble")
 	void Configure(const FText& InText, ETunaSweeperSpeechBubbleTailDirection InTailDirection);
 	FVector2D GetLocalAnchorPoint() const;
 	ETunaSweeperSpeechBubbleTailDirection GetTailDirection() const { return TailDirection; }
@@ -26,41 +25,48 @@ public:
 	/** Exposed for deterministic anchor-alignment automation tests. */
 	static FVector2D CalculateLocalAnchorPoint(
 		ETunaSweeperSpeechBubbleTailDirection InTailDirection,
-		const FVector2D& BodySize);
+		const FVector2D& BodySize,
+		const FVector2D& TailSize = FVector2D(34.0f, 34.0f),
+		float TailReserve = 24.0f,
+		float TailTipInset = 1.0f);
+
+	/** Space reserved between the body and the outer edge on the active tail side. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speech Bubble", meta = (ClampMin = "0"))
+	float TailReserve = 24.0f;
+
+	/** Inset between the tail sizing guide edge and its visible tip. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speech Bubble", meta = (ClampMin = "0"))
+	float TailTipInset = 1.0f;
+
+	/** Existing localized string used only by the Designer preview. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speech Bubble|Preview")
+	FName PreviewTextStringKey = TEXT("ui.vehicle.no_fuel");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speech Bubble|Preview")
+	ETunaSweeperSpeechBubbleTailDirection PreviewTailDirection = ETunaSweeperSpeechBubbleTailDirection::Down;
 
 protected:
-	virtual TSharedRef<SWidget> RebuildWidget() override;
+	virtual void NativePreConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
-	void EnsureWidgetTree();
-	void BuildNativeWidgetTree();
 	void ApplyPresentation();
 	void ApplyTailLayout();
+	void UpdateShapeMaterial() const;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UOverlay> RootOverlay;
-
-	UPROPERTY(Transient)
-	TObjectPtr<USizeBox> BodyBox;
-
-	UPROPERTY(Transient)
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> BodyImage;
 
-	UPROPERTY(Transient)
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<USizeBox> BodyBox;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> BubbleText;
 
-	UPROPERTY(Transient)
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<USizeBox> TailBox;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UImage> TailImage;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> BodyTexture;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> TailTexture;
-
 	FText PendingText;
+	bool bHasPendingText = false;
 	ETunaSweeperSpeechBubbleTailDirection TailDirection = ETunaSweeperSpeechBubbleTailDirection::Down;
 };
