@@ -460,9 +460,7 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	{
 		if (QuestSubsystem->AcceptQuest(ActingQuestId))
 		{
-			QuestId = ActingQuestId;
-			ActiveFilter = EQuestListFilter::InProgress;
-			SetSavedSelectedQuestId(ActiveFilter, QuestId);
+			SelectQuestAfterAction(*QuestSubsystem, ActingQuestId, false);
 			if (TunaPlayerController)
 			{
 				TunaPlayerController->PlayQuestPresentation(ActingQuestId, ETunaSweeperQuestPresentationTrigger::OnAccept);
@@ -473,14 +471,7 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	{
 		if (QuestSubsystem->ClaimQuestReward(ActingQuestId))
 		{
-			QuestId = ActingQuestId;
-			ActiveFilter = EQuestListFilter::RewardCompleted;
-			SetSavedSelectedQuestId(ActiveFilter, QuestId);
-			if (bShowAvailableTab && CountVisibleQuestsForFilter(EQuestListFilter::Available) > 0)
-			{
-				ActiveFilter = EQuestListFilter::Available;
-				QuestId = GetSavedSelectedQuestId(ActiveFilter);
-			}
+			SelectQuestAfterAction(*QuestSubsystem, ActingQuestId, true);
 			if (TunaPlayerController)
 			{
 				TunaPlayerController->PlayQuestPresentation(ActingQuestId, ETunaSweeperQuestPresentationTrigger::OnRewardClaim);
@@ -489,6 +480,45 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	}
 
 	RefreshQuestView();
+}
+
+void UTunaSweeperQuestWidget::SelectQuestAfterAction(
+	const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 ActingQuestId, bool bRewardClaimed)
+{
+	ActiveFilter = bRewardClaimed ? EQuestListFilter::RewardCompleted : EQuestListFilter::InProgress;
+	QuestId = ActingQuestId;
+	SetSavedSelectedQuestId(ActiveFilter, QuestId);
+
+	// GetAllQuestDefinitions uses the same stable ordering as the visible list.
+	TArray<FTunaSweeperQuestDefinition> Definitions;
+	QuestSubsystem.GetAllQuestDefinitions(Definitions);
+	int32 BestPriority = 3;
+	for (const FTunaSweeperQuestDefinition& Definition : Definitions)
+	{
+		int32 CandidatePriority = 3;
+		EQuestListFilter CandidateFilter = EQuestListFilter::Available;
+		if (IsQuestVisibleForFilter(QuestSubsystem, Definition, EQuestListFilter::Available))
+		{
+			CandidatePriority = !bRewardClaimed || Definition.RequiredCompletedQuestIds.Contains(ActingQuestId) ? 0 : 2;
+		}
+		else if (bRewardClaimed &&
+			IsQuestVisibleForFilter(QuestSubsystem, Definition, EQuestListFilter::InProgress) &&
+			!InteractionProviderId.IsNone() && Definition.GetCompletionProviderId() == InteractionProviderId &&
+			QuestSubsystem.CanClaimQuestReward(Definition.QuestId))
+		{
+			CandidatePriority = 1;
+			CandidateFilter = EQuestListFilter::InProgress;
+		}
+
+		if (CandidatePriority < BestPriority)
+		{
+			BestPriority = CandidatePriority;
+			ActiveFilter = CandidateFilter;
+			QuestId = Definition.QuestId;
+			if (CandidatePriority == 0) break;
+		}
+	}
+	SetSavedSelectedQuestId(ActiveFilter, QuestId);
 }
 
 TArray<int32> UTunaSweeperQuestWidget::GetAcceptAllQuestIds() const
@@ -523,9 +553,7 @@ void UTunaSweeperQuestWidget::HandleAcceptAllClicked()
 	}
 	if (FirstAccepted > 0)
 	{
-		ActiveFilter = EQuestListFilter::InProgress;
-		QuestId = FirstAccepted;
-		SetSavedSelectedQuestId(ActiveFilter, QuestId);
+		SelectQuestAfterAction(*Quests, FirstAccepted, false);
 	}
 	RefreshQuestView();
 }

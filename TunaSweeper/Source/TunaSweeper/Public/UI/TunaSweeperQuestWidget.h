@@ -119,6 +119,7 @@ private:
 	void HandleAcceptAllClicked();
 
 	TArray<int32> GetAcceptAllQuestIds() const;
+	void SelectQuestAfterAction(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 ActingQuestId, bool bRewardClaimed);
 	void EnsureAcceptAllButton();
 
 	void BuildQuestWidget();
