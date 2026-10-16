@@ -7,6 +7,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperRailDisplaySubsystem.h"
+#include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interaction/TunaSweeperRailInteractionComponent.h"
@@ -87,19 +88,27 @@ bool FTunaSweeperRailInteractionTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Supply oil"), Game->AddItemToFirstAvailableInventorySlot(6014, 3));
     TestFalse(TEXT("Failed save rejects oil use"), Oil[0]->Lubricate(true));
     TestEqual(TEXT("Failed save refunds all oil"), Game->CountInventoryItemById(6014), 3);
+    TestEqual(TEXT("Failed save leaves no station completed"), Game->WorldProgressStatesById.Num(), 0);
     TestFalse(TEXT("Failed save never unlocks travel"), Travel[1]->IsTravelUnlocked());
     TestTrue(TEXT("Oil works before accepting quest"), Oil[0]->Lubricate(false));
     TestEqual(TEXT("Exactly one oil consumed"), Game->CountInventoryItemById(6014), 2);
     TestFalse(TEXT("Same station cannot charge again"), Oil[0]->Lubricate(false));
     for (auto* Component : Travel) TestTrue(TEXT("First oil immediately unlocks every station"), Component->CanOffer());
     TestTrue(TEXT("Later quest acceptance recognizes saved lubrication"), Quest->AcceptQuest(Definition.QuestId));
-    TestEqual(TEXT("First station is not full quest completion"), Quest->GetQuestState(Definition.QuestId), ETunaSweeperQuestState::Accepted);
+    TestEqual(TEXT("One oil completes all station objectives before reward claim"), Quest->GetQuestState(Definition.QuestId), ETunaSweeperQuestState::RewardAvailable);
     TArray<FTunaSweeperObjectiveProgressView> Objectives;
     Quest->GetQuestObjectiveProgress(Definition.QuestId, Objectives);
-    TestTrue(TEXT("First objective already complete"), Objectives.Num() == 3 && Objectives[0].bCompleted);
-    TestTrue(TEXT("Second station remains repairable after unlock"), Oil[1]->Lubricate(false));
-    TestTrue(TEXT("Third station completes independently"), Oil[2]->Lubricate(false));
+    TestTrue(TEXT("Every station objective already complete"), Objectives.Num() == 3 && Objectives[0].bCompleted && Objectives[1].bCompleted && Objectives[2].bCompleted);
+    for (auto* Component : Oil)
+    {
+        TestFalse(TEXT("Oil option disappears at every station before reward claim"), Component->CanOffer());
+        TestFalse(TEXT("Interaction menu excludes every oil option"), World->GetSubsystem<UTunaSweeperInteractionSubsystem>()->CanOfferInteraction(Component));
+        TestFalse(TEXT("Another station cannot consume a second oil"), Component->Lubricate(false));
+    }
+    TestEqual(TEXT("Entire circuit costs exactly one oil"), Game->CountInventoryItemById(6014), 2);
     TestEqual(TEXT("All three world records complete quest"), Quest->GetQuestState(Definition.QuestId), ETunaSweeperQuestState::RewardAvailable);
+    TestTrue(TEXT("Reward can be claimed independently"), Quest->ClaimQuestReward(Definition.QuestId));
+    for (auto* Component : Oil) TestFalse(TEXT("Claiming reward does not reoffer oil"), Component->CanOffer());
     auto* Save = NewObject<UTunaSweeperSaveGame>();
     Game->WorldProgressStatesById.GenerateValueArray(Save->WorldProgressStates);
     TArray<uint8> SaveBytes;
@@ -108,9 +117,31 @@ bool FTunaSweeperRailInteractionTest::RunTest(const FString& Parameters)
     if (!TestNotNull(TEXT("Serialized world records reload"), RestoredSave)) return false;
     Game->WorldProgressStatesById.Reset();
     TestFalse(TEXT("Fresh world state remains locked even with completed quest"), Travel[2]->IsTravelUnlocked());
+    for (auto* Component : Oil) TestTrue(TEXT("Claimed quest alone never counts as paid lubrication"), Component->CanOffer());
     for (const auto& State : RestoredSave->WorldProgressStates) Game->WorldProgressStatesById.Add(State.ObjectId, State);
     auto* Reloaded = RailTests::AddInteraction(CastChecked<ALoopRailStation>(Travel[2]->GetOwner()), true);
     TestTrue(TEXT("Restored world records unlock recreated component"), Reloaded->IsTravelUnlocked());
+    for (auto* Component : Oil) TestFalse(TEXT("Restored world records hide oil at every station"), Component->CanOffer());
+    // Older saves contain only the station where oil was originally used.
+    Game->WorldProgressStatesById.Reset();
+    const FName LegacyId = Oil[0]->ProgressId(CastChecked<ALoopRailStation>(Oil[0]->GetOwner()));
+    const auto* Legacy = RestoredSave->WorldProgressStates.FindByPredicate([&](const auto& State) { return State.ObjectId == LegacyId; });
+    if (!TestNotNull(TEXT("Saved paid station"), Legacy)) return false;
+    Game->WorldProgressStatesById.Add(LegacyId, *Legacy);
+    for (auto* Component : Oil) TestFalse(TEXT("Legacy paid circuit immediately hides all oil options"), Component->CanOffer());
+    TestFalse(TEXT("Failed legacy migration is rejected"), Oil[1]->ReconcileSharedLubrication(true));
+    TestEqual(TEXT("Failed migration retains only original paid record"), Game->WorldProgressStatesById.Num(), 1);
+    TestTrue(TEXT("Legacy paid circuit completes every station record"), Oil[1]->ReconcileSharedLubrication(false));
+    TestEqual(TEXT("Legacy migration fills three station records"), Game->WorldProgressStatesById.Num(), 3);
+    TestEqual(TEXT("Legacy migration consumes no further oil"), Game->CountInventoryItemById(6014), 2);
+    TestFalse(TEXT("Legacy migration is idempotent"), Oil[1]->ReconcileSharedLubrication(false));
+    Quest->QuestProgressById.Reset();
+    TestTrue(TEXT("Migrated save accepts quest later"), Quest->AcceptQuest(Definition.QuestId));
+    TestEqual(TEXT("Migrated records complete objectives without reward claim"), Quest->GetQuestState(Definition.QuestId), ETunaSweeperQuestState::RewardAvailable);
+    auto* OtherTrack = World->SpawnActor<ALoopRailTrack>();
+    auto* OtherStation = RailTests::AddStation(World, OtherTrack, 9);
+    auto* OtherOil = RailTests::AddInteraction(OtherStation, false);
+    TestTrue(TEXT("An unrelated circuit still needs its own oil"), OtherOil->CanOffer());
     for (int32 I = 0; I < 3; ++I)
         TestEqual(TEXT("Only forward next station including wraparound"), Travel[I]->GetNextStation(),
             Cast<ALoopRailStation>(Travel[(I + 1) % 3]->GetOwner()));

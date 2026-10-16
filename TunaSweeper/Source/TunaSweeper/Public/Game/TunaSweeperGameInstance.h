@@ -894,6 +894,9 @@ public:
 	// Repair material payment and world completion are a single durable transaction.
 	bool CommitPowerFacilityRepair(FName ObjectId, const TArray<FTunaSweeperItemStack>& Requirements,
 		bool bConsumeItems, bool bSaveImmediately = true);
+	// Complete a linked group with one payment/save; failure restores every record and item.
+	bool CommitPowerFacilityRepairs(const TArray<FName>& ObjectIds, const TArray<FTunaSweeperItemStack>& Requirements,
+		bool bConsumeItems, bool bSaveImmediately = true);
 	/** Temporary equipment for the local boss lab; restored when its game mode ends. */
 	void BeginCombatTestSession();
 	void ResetCombatTestLoadout();

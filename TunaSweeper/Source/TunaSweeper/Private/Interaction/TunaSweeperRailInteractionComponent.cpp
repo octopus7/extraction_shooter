@@ -37,6 +37,7 @@ void UTunaSweeperRailInteractionComponent::BeginPlay()
     if (auto* Game = Cast<UTunaSweeperGameInstance>(GetWorld()->GetGameInstance()))
     {
         Game->GetInventorySlots();
+        ReconcileSharedLubrication();
         Game->OnWorldProgressChanged.AddUObject(this, &ThisClass::RefreshState);
         Game->OnInventoryStateChanged.AddUObject(this, &ThisClass::RefreshState);
         Game->OnLanguageChanged.AddUObject(this, &ThisClass::RefreshState);
@@ -58,10 +59,27 @@ void UTunaSweeperRailInteractionComponent::EndPlay(const EEndPlayReason::Type Re
 
 bool UTunaSweeperRailInteractionComponent::IsLubricated() const
 {
-    const auto* Game = GetWorld() ? Cast<UTunaSweeperGameInstance>(GetWorld()->GetGameInstance()) : nullptr;
-    FTunaSweeperWorldProgressSaveData State;
-    return Game && Game->TryGetWorldProgressState(ProgressId(Cast<ALoopRailStation>(GetOwner())), State) &&
-        State.State == ETunaSweeperWorldProgressState::Completed;
+    // Lubrication belongs to the circuit, including older saves with only one station recorded.
+    return IsTravelUnlocked();
+}
+
+TArray<FName> UTunaSweeperRailInteractionComponent::GetCircuitProgressIds() const
+{
+    TArray<FName> Result;
+    const auto* Source = Cast<ALoopRailStation>(GetOwner());
+    if (!Source || !IsValid(Source->Track)) return Result;
+    for (TActorIterator<ALoopRailStation> It(GetWorld()); It; ++It)
+        if (It->Track == Source->Track && !It->IsActorBeingDestroyed() && !ProgressId(*It).IsNone())
+            Result.AddUnique(ProgressId(*It));
+    return Result;
+}
+
+bool UTunaSweeperRailInteractionComponent::ReconcileSharedLubrication(bool bSaveImmediately)
+{
+    auto* Game = GetWorld() ? Cast<UTunaSweeperGameInstance>(GetWorld()->GetGameInstance()) : nullptr;
+    // Preserve existing paid progress and complete the remaining records without another oil.
+    return Game && IsTravelUnlocked() &&
+        Game->CommitPowerFacilityRepairs(GetCircuitProgressIds(), {}, false, bSaveImmediately);
 }
 
 bool UTunaSweeperRailInteractionComponent::IsTravelUnlocked() const
@@ -127,7 +145,7 @@ bool UTunaSweeperRailInteractionComponent::Lubricate(bool bSaveImmediately)
     if (!Game || bTravelInteraction || bLubricating || !CanOffer() || OilItemId <= 0) return false;
     TGuardValue<bool> Guard(bLubricating, true);
     // Existing transaction rolls payment and world completion back together if saving fails.
-    return Game->CommitPowerFacilityRepair(ProgressId(Cast<ALoopRailStation>(GetOwner())), {{OilItemId, 1}}, true, bSaveImmediately);
+    return Game->CommitPowerFacilityRepairs(GetCircuitProgressIds(), {{OilItemId, 1}}, true, bSaveImmediately);
 }
 
 bool UTunaSweeperRailInteractionComponent::Interact(APawn* Pawn)

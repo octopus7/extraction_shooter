@@ -31,6 +31,8 @@ public:
 private:
     friend class FTunaSweeperRailInteractionTest;
     friend class FTunaSweeperRailTravelTest;
+    TArray<FName> GetCircuitProgressIds() const;
+    bool ReconcileSharedLubrication(bool bSaveImmediately = true);
     bool ResolveTravel(APawn* Pawn, ALoopRailStation*& Station, ALoopRailTrain*& Train, FVector& Location) const;
     bool ExecuteTravel(APawn* Pawn);
     bool StartTravel(APawn* Pawn);

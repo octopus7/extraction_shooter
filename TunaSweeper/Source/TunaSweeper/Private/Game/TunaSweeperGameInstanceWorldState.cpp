@@ -3,10 +3,21 @@
 bool UTunaSweeperGameInstance::CommitPowerFacilityRepair(FName ObjectId,
 	const TArray<FTunaSweeperItemStack>& Requirements, bool bConsumeItems, bool bSaveImmediately)
 {
+	return CommitPowerFacilityRepairs({ObjectId}, Requirements, bConsumeItems, bSaveImmediately);
+}
+
+bool UTunaSweeperGameInstance::CommitPowerFacilityRepairs(const TArray<FName>& ObjectIds,
+	const TArray<FTunaSweeperItemStack>& Requirements, bool bConsumeItems, bool bSaveImmediately)
+{
 	EnsureInventoryStateInitialized();
-	if (ObjectId.IsNone()) return false;
-	const auto* Existing = WorldProgressStatesById.Find(ObjectId);
-	if (Existing && Existing->State == ETunaSweeperWorldProgressState::Completed) return false;
+	TSet<FName> PendingIds;
+	for (const FName ObjectId : ObjectIds)
+	{
+		if (ObjectId.IsNone()) return false;
+		const auto* Existing = WorldProgressStatesById.Find(ObjectId);
+		if (!Existing || Existing->State != ETunaSweeperWorldProgressState::Completed) PendingIds.Add(ObjectId);
+	}
+	if (PendingIds.IsEmpty()) return false;
 	TMap<int32, int32> Totals;
 	auto* Items = GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	for (const auto& Requirement : Requirements)
@@ -45,12 +56,15 @@ bool UTunaSweeperGameInstance::CommitPowerFacilityRepair(FName ObjectId,
 			}
 		}
 	}
-	FTunaSweeperWorldProgressSaveData State;
-	State.ObjectId = ObjectId;
-	State.InfoId = TEXT("world_progress.power_facility");
-	State.State = ETunaSweeperWorldProgressState::Completed;
-	State.ProgressQuantity = 1;
-	WorldProgressStatesById.Add(ObjectId, State);
+	for (const FName ObjectId : PendingIds)
+	{
+		FTunaSweeperWorldProgressSaveData State;
+		State.ObjectId = ObjectId;
+		State.InfoId = TEXT("world_progress.power_facility");
+		State.State = ETunaSweeperWorldProgressState::Completed;
+		State.ProgressQuantity = 1;
+		WorldProgressStatesById.Add(ObjectId, State);
+	}
 	if (bSaveImmediately && !SaveGameStateInternal())
 	{
 		Rollback();
