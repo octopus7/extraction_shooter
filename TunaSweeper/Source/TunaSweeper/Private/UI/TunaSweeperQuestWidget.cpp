@@ -268,44 +268,54 @@ void UTunaSweeperQuestListEntryWidget::HandleEntryClicked()
 	}
 }
 
-void UTunaSweeperQuestWidget::InitializeQuest(int32 InQuestId, FName InInteractionProviderId)
+void UTunaSweeperQuestWidget::InitializeQuest(int32 /*InQuestId*/, FName InInteractionProviderId)
 {
 	InteractionProviderId = InInteractionProviderId;
-	ActiveFilter = GetDefaultFilter();
-	QuestId = InQuestId;
+	ActiveFilter = EQuestListFilter::RewardCompleted;
+	QuestId = 0;
 
-	if ((QuestId > 0))
+	// Every entry path, including item submission, uses the same initial selection.
+	// The caller's quest hint must not override a more useful action at this NPC.
+	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
+		: nullptr)
 	{
-		if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
-			? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
-			: nullptr)
+		TArray<FTunaSweeperQuestDefinition> Definitions;
+		QuestSubsystem->GetAllQuestDefinitions(Definitions);
+		int32 BestPriority = 4;
+		for (const FTunaSweeperQuestDefinition& Definition : Definitions)
 		{
-			switch (QuestSubsystem->GetQuestState(QuestId))
+			int32 CandidatePriority = 4;
+			EQuestListFilter CandidateFilter = EQuestListFilter::RewardCompleted;
+			if (IsQuestVisibleForFilter(*QuestSubsystem, Definition, EQuestListFilter::InProgress))
 			{
-			case ETunaSweeperQuestState::Accepted:
-			case ETunaSweeperQuestState::RewardAvailable:
-				ActiveFilter = EQuestListFilter::InProgress;
-				break;
-			case ETunaSweeperQuestState::RewardCompleted:
-				ActiveFilter = EQuestListFilter::RewardCompleted;
-				break;
-			case ETunaSweeperQuestState::Available:
-			default:
-				ActiveFilter = bShowAvailableTab ? EQuestListFilter::Available : GetDefaultFilter();
-				break;
+				const bool bRewardAtProvider = InteractionProviderId.IsNone() ||
+					Definition.GetCompletionProviderId() == InteractionProviderId;
+				CandidatePriority = bRewardAtProvider && QuestSubsystem->CanClaimQuestReward(Definition.QuestId) ? 0 : 2;
+				CandidateFilter = EQuestListFilter::InProgress;
+			}
+			else if (IsQuestVisibleForFilter(*QuestSubsystem, Definition, EQuestListFilter::Available))
+			{
+				CandidatePriority = 1;
+				CandidateFilter = EQuestListFilter::Available;
+			}
+			else if (IsQuestVisibleForFilter(*QuestSubsystem, Definition, EQuestListFilter::RewardCompleted))
+			{
+				CandidatePriority = 3;
+			}
+
+			if (CandidatePriority < BestPriority)
+			{
+				BestPriority = CandidatePriority;
+				ActiveFilter = CandidateFilter;
+				QuestId = Definition.QuestId;
+				if (CandidatePriority == 0) break;
 			}
 		}
 	}
 
 	NormalizeActiveFilter();
-	if ((QuestId > 0))
-	{
-		SetSavedSelectedQuestId(ActiveFilter, QuestId);
-	}
-	else
-	{
-		QuestId = GetSavedSelectedQuestId(ActiveFilter);
-	}
+	SetSavedSelectedQuestId(ActiveFilter, QuestId);
 	RefreshQuestView();
 }
 

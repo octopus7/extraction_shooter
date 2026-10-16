@@ -399,6 +399,71 @@ bool FTunaSweeperQuestSubmissionTest::RunTest(const FString& Parameters)
 		}
 	}
 
+	// Entry selection must ignore a caller's submission shortcut or stale selected ID.
+	Quests->QuestDefinitions.Reset();
+	Quests->QuestProgressById.Reset();
+	const FName EntryProvider(TEXT("provider.entry"));
+	for (int32 Id = 401; Id <= 407; ++Id)
+	{
+		FTunaSweeperQuestDefinition Definition;
+		Definition.QuestId = Id;
+		Definition.ProviderId = EntryProvider;
+		Quests->QuestDefinitions.Add(Id, Definition);
+	}
+	Quests->QuestDefinitions[401].Objectives.Add(DeliveryObjective);
+	Quests->QuestDefinitions[401].Objectives[0].TargetProviderId = EntryProvider;
+	Quests->QuestDefinitions[405].ProviderId = TEXT("provider.other");
+	Quests->QuestDefinitions[405].SortOrder = -10;
+	Quests->QuestDefinitions[406].RequiredCompletedQuestIds = { 999 };
+	Quests->QuestDefinitions[406].SortOrder = -20;
+	Quests->QuestDefinitions[407].CompletionProviderId = TEXT("provider.other");
+	Quests->QuestDefinitions[407].SortOrder = -30;
+	for (int32 Id : { 401, 403, 404, 405, 407 })
+	{
+		FTunaSweeperNumericQuestProgressSaveData Row;
+		Row.QuestId = Id;
+		Row.State = Id == 401 ? ETunaSweeperQuestState::Accepted :
+			Id == 404 ? ETunaSweeperQuestState::RewardCompleted : ETunaSweeperQuestState::RewardAvailable;
+		Quests->QuestProgressById.Add(Id, Row);
+	}
+	int32 SubmissionHint = 0;
+	TestTrue(TEXT("Submission path supplies a pending delivery hint"),
+		Quests->TryGetItemSubmissionQuestForProvider(EntryProvider, SubmissionHint));
+	TestEqual(TEXT("Submission hint identifies delivery"), SubmissionHint, 401);
+	Panel->InitializeQuest(SubmissionHint, EntryProvider);
+	TestEqual(TEXT("Claimable reward outranks pending delivery and available quest"), Panel->QuestId, 403);
+	TestEqual(TEXT("Reward entry opens progress tab"), Panel->ActiveFilter,
+		UTunaSweeperQuestWidget::EQuestListFilter::InProgress);
+	Quests->QuestProgressById[403].State = ETunaSweeperQuestState::RewardCompleted;
+	Panel->InitializeQuest(SubmissionHint, EntryProvider);
+	TestEqual(TEXT("Available quest outranks pending delivery and reward at another NPC"), Panel->QuestId, 402);
+	TestEqual(TEXT("Offer entry opens available tab"), Panel->ActiveFilter,
+		UTunaSweeperQuestWidget::EQuestListFilter::Available);
+	Quests->QuestDefinitions.Remove(407);
+	FTunaSweeperNumericQuestProgressSaveData AcceptedOffer;
+	AcceptedOffer.QuestId = 402;
+	AcceptedOffer.State = ETunaSweeperQuestState::Accepted;
+	Quests->QuestProgressById.Add(402, AcceptedOffer);
+	Panel->InitializeQuest(404, EntryProvider);
+	TestEqual(TEXT("Progress outranks completed selection hint"), Panel->QuestId, 401);
+	TestEqual(TEXT("Progress entry opens progress tab"), Panel->ActiveFilter,
+		UTunaSweeperQuestWidget::EQuestListFilter::InProgress);
+	Quests->QuestProgressById[401].State = ETunaSweeperQuestState::RewardCompleted;
+	Quests->QuestProgressById[402].State = ETunaSweeperQuestState::RewardCompleted;
+	Panel->InitializeQuest(0, EntryProvider);
+	TestEqual(TEXT("Completed-only entry opens completed tab"), Panel->ActiveFilter,
+		UTunaSweeperQuestWidget::EQuestListFilter::RewardCompleted);
+	TestEqual(TEXT("Equal-priority entries follow list order"), Panel->QuestId, 401);
+
+	auto* MenuPanel = CreateWidget<UTunaSweeperMenuQuestWidget>(Game.Get());
+	if (TestNotNull(TEXT("Menu quest panel"), MenuPanel))
+	{
+		MenuPanel->InitializeQuest(404);
+		TestEqual(TEXT("Menu entry prioritizes reward without an available tab"), MenuPanel->QuestId, 405);
+		TestEqual(TEXT("Menu reward opens progress tab"), MenuPanel->ActiveFilter,
+			UTunaSweeperQuestWidget::EQuestListFilter::InProgress);
+	}
+
 	const FString ValidObjective = TEXT(R"({"objective_id":"test","type":"item_submitted","item_id":6002,"required_count":2,"target_provider_id":"provider.recipient"})");
 	for (const FString& Json : { ValidObjective.Replace(TEXT("6002"), TEXT("-1")),
 		ValidObjective.Replace(TEXT(":2,"), TEXT(":2.5,")), ValidObjective.Replace(TEXT(":2,"), TEXT(":0,")),
