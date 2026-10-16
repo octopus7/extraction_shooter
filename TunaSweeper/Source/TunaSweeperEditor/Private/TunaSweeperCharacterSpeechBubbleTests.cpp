@@ -18,6 +18,12 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "HAL/FileManager.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Fonts/FontCache.h"
+#include "Engine/Font.h"
+#include "Engine/GameInstance.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaCharacterSpeechBubbleDesignerTest,
     "TunaSweeper.UI.SpeechBubble.DesignerAsset",
@@ -168,6 +174,65 @@ bool FTunaCharacterSpeechBubbleSilhouetteTest::RunTest(const FString& Parameters
                 Join.A > 250 && FMath::Abs(int32(Join.R)-Center.R) < 5
                 && FMath::Abs(int32(Join.G)-Center.G) < 5);
         }
+    }
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaCharacterSpeechBubbleLocalizedPreviewTest,
+    "TunaSweeper.UI.SpeechBubble.LocalizedPreview",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaCharacterSpeechBubbleLocalizedPreviewTest::RunTest(const FString& Parameters)
+{
+    auto* Class = LoadClass<UTunaSweeperScreenSpaceSpeechBubbleWidget>(nullptr,
+        TEXT("/Game/UI/SpeechBubble/WBP_CharacterSpeechBubble.WBP_CharacterSpeechBubble_C"));
+    if (!TestNotNull(TEXT("Saved bubble class"), Class)) return false;
+    TStrongObjectPtr<UGameInstance> Owner(NewObject<UGameInstance>());
+    TStrongObjectPtr<UTunaSweeperTextSubsystem> Strings(NewObject<UTunaSweeperTextSubsystem>(Owner.Get()));
+    FText Message;
+    if (!TestTrue(TEXT("Preview uses a localized key"), Strings->TryGetTextByKey(
+        TEXT("ui.vehicle.no_fuel"), ETunaSweeperItemTextLanguage::Korean, Message))) return false;
+    FWidgetRenderer Renderer(true);
+    for (bool bDesigner : {true, false})
+    {
+        TStrongObjectPtr<UTunaSweeperScreenSpaceSpeechBubbleWidget> Widget(
+            CreateWidget<UTunaSweeperScreenSpaceSpeechBubbleWidget>(GEditor->GetEditorWorldContext().World(), Class));
+        if (bDesigner) Widget->SetDesignerFlags(EWidgetDesignFlags::Designing | EWidgetDesignFlags::ExecutePreConstruct);
+        else Widget->Configure(Message, ETunaSweeperSpeechBubbleTailDirection::Down);
+        auto Slate = Widget->TakeWidget();
+        Widget->ForceLayoutPrepass();
+        auto* Text = Cast<UTextBlock>(Widget->WidgetTree->FindWidget(TEXT("BubbleText")));
+        auto* Image = Cast<UImage>(Widget->WidgetTree->FindWidget(TEXT("BodyImage")));
+        TestTrue(TEXT("Localized text reaches the widget"), Text->GetText().EqualTo(Message));
+        TestNotNull(TEXT("Font is a serialized asset, not a transient composite"), Cast<UFont>(Text->GetFont().FontObject));
+        auto& Characters = FSlateApplication::Get().GetRenderer()->GetFontCache()->GetCharacterList(Text->GetFont(), 1.0f);
+        for (TCHAR Character : Message.ToString())
+        {
+            if (FChar::IsWhitespace(Character)) continue;
+            const auto& Glyph = Characters.GetCharacter(Character, EFontFallback::FF_NoFallback);
+            TestTrue(TEXT("Korean glyph is available without last-resort substitution"), Glyph.GlyphIndex != 0
+                && Glyph.FallbackLevel == EFontFallback::FF_NoFallback);
+            TestTrue(TEXT("Korean glyph comes from the project's Nanum font"), Glyph.FontData
+                && Glyph.FontData->GetFontFilename().Contains(TEXT("NanumSquareRound")));
+        }
+        const FVector2D Size = Widget->GetDesiredSize();
+        // No runtime tick or subsystem anchor update: this is the Designer path.
+        const FLinearColor MaterialSize = Image->GetDynamicMaterial()->K2_GetVectorParameterValue(TEXT("WidgetSize"));
+        TestTrue(TEXT("Background has layout dimensions before the first paint"),
+            FMath::IsNearlyEqual(double(MaterialSize.R), Size.X, 0.1)
+            && FMath::IsNearlyEqual(double(MaterialSize.G), Size.Y, 0.1));
+        TStrongObjectPtr<UTextureRenderTarget2D> Target(Renderer.DrawWidget(Slate, Size));
+        FlushRenderingCommands();
+        if (GShaderCompilingManager) GShaderCompilingManager->FinishAllCompilation();
+        FlushRenderingCommands();
+        Renderer.DrawWidget(Target.Get(), Slate, Size, 0.0f);
+        FlushRenderingCommands();
+        TArray<FColor> Pixels;
+        Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels);
+        TestTrue(TEXT("Preview body is visible"), Pixels[10*Target->SizeX+Target->SizeX/2].A > 250);
+        TestTrue(TEXT("Preview corner is transparent"), Pixels[0].A < 128);
+        TArray64<uint8> PNG;
+        FImageUtils::PNGCompressImageArray(Target->SizeX, Target->SizeY, Pixels, PNG);
+        FFileHelper::SaveArrayToFile(PNG, *(FPaths::ProjectSavedDir() / TEXT("Tests/CharacterSpeechBubble")
+            / (bDesigner ? TEXT("localized_designer.png") : TEXT("localized_runtime.png"))));
     }
     return true;
 }

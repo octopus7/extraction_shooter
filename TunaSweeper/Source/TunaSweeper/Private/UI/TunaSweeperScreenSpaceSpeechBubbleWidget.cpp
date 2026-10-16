@@ -78,6 +78,10 @@ void UTunaSweeperScreenSpaceSpeechBubbleWidget::ApplyPresentation()
 	// Fonts, brushes, colors and sizing belong to the serialized WBP hierarchy.
 	if (BubbleText && bHasPendingText) BubbleText->SetText(PendingText);
 	ApplyTailLayout();
+	// The Designer does not route NativeTick. Measure the rebuilt children before
+	// initializing the material, rather than leaving its dimensions at zero.
+	if (BodyBox) BodyBox->ForceLayoutPrepass();
+	if (TailBox) TailBox->ForceLayoutPrepass();
 	UpdateShapeMaterial();
 	InvalidateLayoutAndVolatility();
 }
