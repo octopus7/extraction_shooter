@@ -109,6 +109,7 @@ bool FHopperPlayStep::Update()
  auto* P=Hopper->GetPresentation();
  if(Step==0)
  {
+  Hopper->bEndCombatOnMechDestruction=false; // This legacy fixture explicitly covers the optional pilot phase.
   Test->TestEqual(TEXT("Boarding completes in the live world"),Hopper->GetCombatPhase(),EHopperCombatPhase::Mech);
   Test->TestNotNull(TEXT("Left weapon attached"),Hopper->GetArmModule(true));
   Test->TestNotNull(TEXT("Right weapon attached"),Hopper->GetArmModule(false));

@@ -31,6 +31,7 @@ bool FHopperCombatOwnershipTest::RunTest(const FString& Parameters)
         World->RemoveFromRoot();
         return false;
     }
+    Hopper->bEndCombatOnMechDestruction = false;
     Hopper->bInitializingBase = false;
     Hopper->Phase = EHopperCombatPhase::Mech;
     TestFalse(TEXT("Mounted mech uses ranged AI"), Hopper->UsesMeleeAttack());
@@ -122,6 +123,7 @@ bool FHopperTransitionClearanceTest::RunTest(const FString& Parameters)
         World->RemoveFromRoot();
         return false;
     }
+    Hopper->bEndCombatOnMechDestruction = false;
     Hopper->bInitializingBase = false;
     Hopper->BoardingSeconds = .5f;
     Hopper->GetCapsuleComponent()->SetCanEverAffectNavigation(true);

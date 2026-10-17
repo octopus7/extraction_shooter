@@ -29,6 +29,8 @@ public:
  FVector GetPilotMuzzleLocation() const;
  void SetGunVisible(bool bVisible);
  void SetMechActive(bool bActive);
+ void KeepOpenCockpitWreck();
+ float GetHatchOpenAlpha() const { return HatchOpen; }
  float GetMaxStableWalkSpeed() const;
  virtual void TickComponent(float DeltaTime,ELevelTick TickType,FActorComponentTickFunction* ThisTickFunction) override;
  UFUNCTION(BlueprintPure,Category="Hopper") USkeletalMeshComponent* GetPilotMesh() const { return Pilot; }

@@ -61,6 +61,9 @@ public:
     float DisembarkSeconds = 1.4f;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Hopper|Phases")
     bool bStartMounted = false;
+    /** Default encounter ends with the disabled mech; optional pilot combat remains available for variants. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Hopper|Phases")
+    bool bEndCombatOnMechDestruction = true;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Hopper|Movement", meta=(ClampMin="0"))
     float MechMoveSpeed = 35.f;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Hopper|Movement", meta=(ClampMin="0"))
@@ -75,6 +78,7 @@ protected:
     virtual void Tick(float DeltaSeconds) override;
     virtual void EndPlay(EEndPlayReason::Type Reason) override;
     virtual void OnDeathPresentationStarted() override;
+    virtual bool ShouldKeepDefeatedBody() const override { return bEndCombatOnMechDestruction && MechHealth <= 0.f; }
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Hopper")
     TObjectPtr<UHopperPresentationComponent> Presentation;
 private:

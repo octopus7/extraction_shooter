@@ -131,6 +131,14 @@ float UHopperPresentationComponent::GetMaxStableWalkSpeed() const
  // One full alternating cycle plus support time must fit the planted leg reach.
  return FMath::Max(0.f,Horizontal-8.f)/FMath::Max(.1f,2.f*StepDuration+.08f-.22f);
 }
+void UHopperPresentationComponent::KeepOpenCockpitWreck()
+{
+ // Keep the pilot seated, including defeats during the boarding animation.
+ SeatPilot();
+ bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
+ SetGunVisible(false);
+ SetHatchOpen(1.f);
+}
 void UHopperPresentationComponent::SetMechActive(bool bActive) { bMechActive=bActive && !bWreck; }
 void UHopperPresentationComponent::SetGunVisible(bool bVisible) { if (Gun) Gun->SetVisibility(bVisible); }
 FVector UHopperPresentationComponent::GetPilotMuzzleLocation() const

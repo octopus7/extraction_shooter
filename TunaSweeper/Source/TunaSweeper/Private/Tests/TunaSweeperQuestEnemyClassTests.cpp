@@ -1,6 +1,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "AI/Hopper/HopperEnemyCharacter.h"
+#include "AI/Hopper/HopperPresentationComponent.h"
 #include "Dom/JsonObject.h"
 #include "Engine/DamageEvents.h"
 #include "Engine/Engine.h"
@@ -132,6 +134,35 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Legacy ID filter rejects other placements"), Quests->GetObjectiveProgressCount(LegacyId, TEXT("kill")), 0);
     Quests->NotifyEnemyKilled(TEXT("placement.1")); Quests->NotifyEnemyKilled(TEXT("placement.1"));
     TestEqual(TEXT("Legacy callers still advance ID-only quests"), Quests->GetQuestState(LegacyId), ETunaSweeperQuestState::RewardAvailable);
+    UClass* HopperClass = LoadClass<ATunaSweeperHopperEnemyCharacter>(nullptr,
+        TEXT("/Game/Characters/Hopper/BP_HopperEnemy.BP_HopperEnemy_C"));
+    if (!TestNotNull(TEXT("Actual hopper BP"), HopperClass)) return false;
+    constexpr int32 HopperId = 900304;
+    AddQuest(HopperId, FString::Printf(TEXT(",\"enemy_class_paths\":[\"%s\"]"), *HopperClass->GetPathName()));
+    constexpr int32 HopperCompleteId = 900305;
+    Quests->QuestDefinitions.Add(HopperCompleteId, Quests->QuestDefinitions[HopperId]);
+    Quests->QuestDefinitions[HopperCompleteId].QuestId = HopperCompleteId;
+    Quests->QuestDefinitions[HopperCompleteId].Objectives[0].RequiredCount = 1;
+    TestTrue(TEXT("Accept single mech objective"), Quests->AcceptQuest(HopperCompleteId));
+    TestTrue(TEXT("Accept mech defeat objective"), Quests->AcceptQuest(HopperId));
+    FActorSpawnParameters HopperSpawn;
+    HopperSpawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    auto* Hopper = World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(HopperClass, FVector::ZeroVector, FRotator::ZeroRotator, HopperSpawn);
+    if (!TestNotNull(TEXT("Actual hopper BP instance"), Hopper)) return false;
+    Hopper->TakeDamage(Hopper->GetMechHealth()-1.f, FDamageEvent(), Killer, nullptr);
+    TestEqual(TEXT("Surviving mech does not count as a kill"), Quests->GetObjectiveProgressCount(HopperId, TEXT("kill")), 0);
+    Hopper->TakeDamage(1.f, FDamageEvent(), Killer, nullptr);
+    TestTrue(TEXT("Mech zero health ends combat immediately"), Hopper->IsDead());
+    TestFalse(TEXT("Open cockpit wreck remains in level"), Hopper->IsActorBeingDestroyed());
+    TestEqual(TEXT("Destroyed mech leaves cockpit open"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);
+    Hopper->GetPresentation()->TickComponent(5.f, LEVELTICK_All, nullptr);
+    TestEqual(TEXT("Cockpit does not close again after defeat"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);
+    TestEqual(TEXT("Mech destruction immediately credits one kill"), Quests->GetObjectiveProgressCount(HopperId, TEXT("kill")), 1);
+    Hopper->TakeDamage(9999.f, FDamageEvent(), Killer, nullptr);
+    TestEqual(TEXT("Wreck cannot credit duplicate kills"), Quests->GetObjectiveProgressCount(HopperId, TEXT("kill")), 1);
+    TestEqual(TEXT("No pilot combat follows mech defeat"), Hopper->GetCombatPhase(), EHopperCombatPhase::Dead);
+    TestEqual(TEXT("One mech defeat immediately enables reward claim"), Quests->GetQuestState(HopperCompleteId), ETunaSweeperQuestState::RewardAvailable);
+    TestEqual(TEXT("Mech kill does not automatically grant quest rewards"), Quests->GetCoinBalance(), 7);
     return true;
 }
 #endif

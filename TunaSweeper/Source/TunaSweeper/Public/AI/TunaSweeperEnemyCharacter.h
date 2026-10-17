@@ -161,6 +161,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void OnDeathPresentationStarted();
+	virtual bool ShouldKeepDefeatedBody() const { return false; }
+	void HandleDeath(AController* KillerController, AActor* DamageCauser, bool bByVehicleCollision);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> VisualMesh;
@@ -338,7 +340,6 @@ private:
 		FTunaSweeperLootContainerInstance& OutContainerInstance,
 		TArray<FGuid>& OutRuntimeItemUids) const;
 	int32 ResolveLootLoadedAmmoCount(int32& OutSourceLoadedAmmoCount, int32& OutDeductedLoadedAmmoCount) const;
-	void HandleDeath(AController* KillerController, AActor* DamageCauser, bool bByVehicleCollision);
 	bool TryStartDeathRagdoll();
 	void FinalizeDeath();
 	void InitializeDeathDissolveMaterials();

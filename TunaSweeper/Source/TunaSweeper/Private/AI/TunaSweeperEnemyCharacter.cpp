@@ -1334,6 +1334,7 @@ void ATunaSweeperEnemyCharacter::OnDeathPresentationStarted()
 
 bool ATunaSweeperEnemyCharacter::TryStartDeathRagdoll()
 {
+	if (ShouldKeepDefeatedBody()) return false;
 	UWorld* World = GetWorld();
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
 	const float RagdollDuration = FMath::Max(0.0f, DeathRagdollDurationSeconds);
@@ -1410,7 +1411,7 @@ void ATunaSweeperEnemyCharacter::FinalizeDeath()
 	SpawnDeathLootContainer(PendingDeathDamageCauser.Get());
 	PendingDeathDamageCauser.Reset();
 	SetActorEnableCollision(false);
-	Destroy();
+	if (!ShouldKeepDefeatedBody()) Destroy();
 }
 
 void ATunaSweeperEnemyCharacter::SpawnDeathNiagaraEffect()

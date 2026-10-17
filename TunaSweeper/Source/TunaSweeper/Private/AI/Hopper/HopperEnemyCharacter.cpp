@@ -172,7 +172,15 @@ float ATunaSweeperHopperEnemyCharacter::TakeDamage(float Amount, const FDamageEv
         AActor* Suspect = InstigatorController ? InstigatorController->GetPawn() : (Causer && Causer->GetOwner() ? Causer->GetOwner() : Causer);
         if (Suspect) AI->NotifyDamageTaken(Suspect);
     }
-    if (MechHealth <= 0) BeginMechDestruction();
+    if (MechHealth <= 0)
+    {
+        BeginMechDestruction();
+        if (bEndCombatOnMechDestruction)
+        {
+            Phase = EHopperCombatPhase::Dead;
+            HandleDeath(InstigatorController, Causer, false);
+        }
+    }
     return Applied;
 }
 
@@ -475,6 +483,7 @@ void ATunaSweeperHopperEnemyCharacter::OnDeathPresentationStarted()
     Presentation->SetMechActive(false);
     Presentation->SetGunVisible(false);
     Presentation->SetPilotLocomotion(false);
+    if (ShouldKeepDefeatedBody()) Presentation->KeepOpenCockpitWreck();
 }
 
 void ATunaSweeperHopperEnemyCharacter::EndPlay(EEndPlayReason::Type Reason)
