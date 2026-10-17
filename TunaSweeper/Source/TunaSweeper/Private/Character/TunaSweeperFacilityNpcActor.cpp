@@ -8,6 +8,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperNpcBarterComponent.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -56,6 +57,10 @@ ATunaSweeperFacilityNpcActor::ATunaSweeperFacilityNpcActor()
 		FText::FromString(TEXT("Quest")),
 		InteractionMarkerWidgetClass,
 		FName(TEXT("ui.quest.interaction_name")));
+
+	BarterComponent = CreateDefaultSubobject<UTunaSweeperNpcBarterComponent>(TEXT("BarterComponent"));
+	BarterComponent->SetupAttachment(SceneRoot);
+	BarterComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 156.0f));
 
 	QuestMarkerComponent = CreateDefaultSubobject<UTunaSweeperQuestMarkerComponent>(TEXT("QuestMarker"));
 	QuestMarkerComponent->SetupAttachment(SceneRoot);

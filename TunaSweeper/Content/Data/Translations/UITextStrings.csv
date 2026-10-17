@@ -642,3 +642,6 @@ ui.interaction.required_quantity,×{0},×{0},×{0},×{0}
 ui.rail.lubricate,使用润滑油,使用潤滑油,Применить смазочное масло,Aplicar óleo lubrificante
 ui.rail.travel_next,前往下一站,前往下一站,Отправиться на следующую станцию,Ir para a próxima estação
 ui.rail.need_oil,需要润滑油。,需要潤滑油。,Нужно смазочное масло.,Preciso de óleo lubrificante.
+ui.interaction.fermented_fuel_supply,供应发酵燃料,供應發酵燃料,Поставка ферментированного топлива,Fornecer combustível fermentado
+ui.barter.ethanol_shortage,需要2份乙醇！,需要2份乙醇！,Нужно 2 ед. этанола!,Preciso de 2 unidades de etanol!
+ui.barter.failed,现在无法交换。,現在無法交換。,Сейчас обмен невозможен.,Não é possível trocar agora.

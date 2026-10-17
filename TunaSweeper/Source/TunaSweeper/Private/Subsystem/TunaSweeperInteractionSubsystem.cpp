@@ -35,6 +35,7 @@
 #include "Interaction/TunaSweeperWardrobeActor.h"
 #include "Interaction/TunaSweeperQuestRewardLockerActor.h"
 #include "Interaction/TunaSweeperNpcFeedingComponent.h"
+#include "Interaction/TunaSweeperNpcBarterComponent.h"
 #include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -345,6 +346,10 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::ShopOpen:
 		bHandled = HandleShopOpenInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::NpcBarter:
+		if (auto* Barter = Cast<UTunaSweeperNpcBarterComponent>(Interactable))
+			return Barter->TryBarter(InstigatorPawn);
+		return false;
 	case ETunaSweeperInteractionType::NpcFeeding:
 		if (auto* Feeding = Cast<UTunaSweeperNpcFeedingComponent>(Interactable))
 			return Feeding->TryFeed(InstigatorPawn);
@@ -456,6 +461,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	}
 
 	if (const auto* Feeding = Cast<UTunaSweeperNpcFeedingComponent>(Interactable); Feeding && !Feeding->IsUnlocked()) return false;
+	if (const auto* Barter = Cast<UTunaSweeperNpcBarterComponent>(Interactable); Barter && !Barter->IsUnlocked()) return false;
 	if (const auto* Rail = Cast<UTunaSweeperRailInteractionComponent>(Interactable); Rail && !Rail->CanOffer()) return false;
 	const auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner());
 	if (Armory && !ATunaSweeperDebugArmoryActor::IsArmoryEnabled()) return false;

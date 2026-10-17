@@ -7,11 +7,20 @@ bool UTunaSweeperGameInstance::ProduceFacilityBatch(FName ObjectId, int32 InputI
 {
     EnsureInventoryStateInitialized();
     const auto* Progress = WorldProgressStatesById.Find(ObjectId);
+    if (ObjectId.IsNone() || !Progress || Progress->State != ETunaSweeperWorldProgressState::Completed) return false;
+    return ExchangeCarriedItemBatch(InputItemId, InputQuantity, OutputItemId, OutputQuantity, bSaveImmediately);
+}
+
+bool UTunaSweeperGameInstance::ExchangeCarriedItemBatch(int32 InputItemId, int32 InputQuantity,
+    int32 OutputItemId, int32 OutputQuantity, bool bSaveImmediately)
+{
+    if (bQuestRewardTransferInProgress) return false;
+    TGuardValue<bool> TransferGuard(bQuestRewardTransferInProgress, true);
+    EnsureInventoryStateInitialized();
     auto* Items = GetSubsystem<UTunaSweeperItemDataSubsystem>();
     FTunaSweeperItemDefinition InputDefinition;
     FTunaSweeperItemDefinition OutputDefinition;
-    if (ObjectId.IsNone() || !Progress || Progress->State != ETunaSweeperWorldProgressState::Completed ||
-        InputItemId <= 0 || OutputItemId <= 0 || InputQuantity <= 0 || OutputQuantity <= 0 ||
+    if (InputItemId <= 0 || OutputItemId <= 0 || InputQuantity <= 0 || OutputQuantity <= 0 ||
         !Items || !Items->TryGetItemDefinition(InputItemId, InputDefinition) ||
         !Items->TryGetItemDefinition(OutputItemId, OutputDefinition) ||
         CountInventoryItemById(InputItemId) < InputQuantity) return false;

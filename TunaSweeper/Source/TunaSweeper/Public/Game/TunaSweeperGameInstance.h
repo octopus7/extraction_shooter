@@ -275,6 +275,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperPowerFacilityMaterialsTest;
 	friend class FTunaSweeperRockfallTest;
 	friend class FTunaSweeperEthanolFacilityTest;
+	friend class FTunaSweeperNpcBarterTest;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperQuestLockerTest;
@@ -892,6 +893,9 @@ public:
 	// Rockfall installation/completion: publish only after the inventory + world-state save succeeds.
 	bool CommitRockfallProgress(FName ObjectId, int32 ExplosiveItemId, bool bComplete, bool bSaveImmediately = true);
 	bool ProduceFacilityBatch(FName ObjectId, int32 InputItemId, int32 InputQuantity,
+		int32 OutputItemId, int32 OutputQuantity, bool bSaveImmediately = true);
+	// Carried items only; rollback payment and reward together on capacity/save failure.
+	bool ExchangeCarriedItemBatch(int32 InputItemId, int32 InputQuantity,
 		int32 OutputItemId, int32 OutputQuantity, bool bSaveImmediately = true);
 	// Repair material payment and world completion are a single durable transaction.
 	bool CommitPowerFacilityRepair(FName ObjectId, const TArray<FTunaSweeperItemStack>& Requirements,

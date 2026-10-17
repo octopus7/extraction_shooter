@@ -724,3 +724,6 @@ ui.world_cheat.object.rail_west,서역 윤활,West station lubrication,西駅の
 ui.world_cheat.object.rail_north,북역 윤활,North station lubrication,北駅の潤滑
 ui.world_cheat.object.rail_east,동역 윤활,East station lubrication,東駅の潤滑
 ui.interaction.pickup_parcel,택배상자 줍기,Pick up parcel,配達箱を拾う
+ui.interaction.fermented_fuel_supply,발효연료 공급,Supply fermented fuel,発酵燃料を供給
+ui.barter.ethanol_shortage,에탄올 2개가 필요하다!,I need 2 ethanol!,エタノールが2個必要だ！
+ui.barter.failed,지금은 교환할 수 없다.,I can't exchange this right now.,今は交換できない。
