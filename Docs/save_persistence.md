@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Workbench crafting objective progress
+
+`workbench_recipe_crafted` counts successful crafting operations for one exact `recipe_id`, after ingredients are consumed and all output items fit. Acquisition, possession, a different recipe, failed crafting, and crafting before quest acceptance do not advance it. A multi-item output counts as one operation. The count uses the existing numeric quest objective progress and is included in the normal crafting save; no new save fields or version migration are needed. The new objective enum value is appended so existing ordinals remain unchanged.
+
+Recipe unlock rewards and returned material rewards use the existing claimed-quest and unlocked-recipe persistence. `recipe.rocket_launcher` remains a stable recipe ID; its unlock state is restored through the existing reward reconciliation. No extra crafting-history save or retroactive credit is introduced.
+
 ## Integer quest identity (2026-10-10)
 
 Runtime quest identities, prerequisite references, tracking, objective submission, scenario quest conditions, and claimed-quest achievement facts now use positive `int32` IDs; `0` means unset. Objective, provider, achievement, and localization keys retain their existing name types. Display formatting may pad an ID to at least three digits without changing the saved integer.

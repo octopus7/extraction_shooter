@@ -66,5 +66,31 @@
         "quantity": 1
       }
     ]
+  },
+  {
+    "recipe_id": "recipe.rocket_launcher",
+    "workbench_id": 1,
+    "name_string_key": "item.rocket_launcher",
+    "output_item_id": 6019,
+    "output_quantity": 1,
+    "auto_unlocked": false,
+    "ingredients": [
+      {
+        "item_id": 6033,
+        "quantity": 1
+      },
+      {
+        "item_id": 6027,
+        "quantity": 1
+      },
+      {
+        "item_id": 6028,
+        "quantity": 1
+      },
+      {
+        "item_id": 6016,
+        "quantity": 1
+      }
+    ]
   }
 ]

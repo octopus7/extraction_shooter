@@ -181,3 +181,5 @@ item.desk_clock,台钟,座鐘,Настольные часы,Relógio de mesa
 item.desk_clock.desc,可在工作台上用作制作材料的小台钟。,可在工作臺上用作製作材料的小座鐘。,Небольшие настольные часы. Можно использовать как материал для изготовления предметов на верстаке.,Um pequeno relógio de mesa que pode ser usado como material de fabricação na bancada.
 item.rabbit_token,兔子代币,兔子代幣,Кроличий жетон,Ficha de coelho
 item.rabbit_token.desc,兔子三轮机器人携带的自动售货机代币。,兔子三輪機器人攜帶的自動販賣機代幣。,Жетон для торгового автомата из кроличьего трицикла.,Uma ficha de máquina de vendas carregada por um triciclo coelho.
+item.empty_launcher_tube,空发射管,空發射管,Пустая пусковая труба,Tubo lançador vazio
+item.empty_launcher_tube.desc,从兔子摩托车回收的空发射管。用于制作火箭发射器。,從兔子摩托車回收的空發射管。用於製作火箭發射器。,Пустая пусковая труба с кроличьего мотоцикла. Используется для изготовления ракетной пусковой установки.,Um tubo lançador vazio recuperado de uma moto de coelho. Usado para fabricar um lançador de foguetes.

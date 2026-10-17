@@ -1,0 +1,12 @@
+Generator: built-in image_gen, native transparent background.
+Source: T_UIIcon_EmptyLauncherTube_Source.png
+Import image: T_UIIcon_EmptyLauncherTube.png (256x256, resized only; generated alpha preserved)
+Intended Unreal asset: /Game/UI/Icons/T_UIIcon_EmptyLauncherTube
+
+Use case: stylized-concept.
+Asset type: square inventory crafting-material icon for the fictional game TunaSweeper.
+Primary request: A single EMPTY LAUNCHER TUBE, a salvaged inert metal tube component, clearly distinct from a complete weapon. Render only the hollow cylindrical tube housing with two simple reinforcing metal collars and small mounting tabs. The near opening faces lower-left and shows a thick lip and plainly empty dark hollow interior; the tube runs diagonally toward upper-right. No rocket or ammunition, no pistol grip, no trigger, no sight, no shoulder strap.
+Style: polished hand-painted game item illustration, softly stylized believable metal, clean confident silhouette, smooth broad lighting and moderate painterly shading, matching illustrated crafting-material and food icons. Olive drab painted metal with a few broad worn gray edges, dark charcoal inner bore, restrained warm highlights; no microtexture noise, no glitter or dense scratches.
+Composition: one isolated centered object, three-quarter view, entire object visible with 8% transparent padding around all sides, fills most of square frame, readable at 256 pixels.
+Background: native transparent alpha everywhere outside the object, no ground plane, no backdrop, no cast shadow.
+Constraints: purely fictional visual game prop, no construction diagram, no cutaway, no dimensions, no instructions, no lettering, no numbers, no logos, no watermark, no frame, no other objects.

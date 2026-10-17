@@ -98,6 +98,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyItemAcquired(int32 ItemId, int32 Quantity, bool bSaveImmediately = true);
 
+	// Workbench calls this only after committing ingredients and output; its transaction saves both states.
+	void NotifyWorkbenchRecipeCrafted(FName RecipeId);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass = nullptr, bool bByVehicleCollision = false);
 
@@ -138,6 +141,7 @@ public:
 
 private:
 	friend class FTunaSweeperParcelCollectionTest;
+	friend class FTunaSweeperQuestCraftTest;
 	friend class FTunaSweeperQuestEnemyClassTest;
 	friend class FTunaSweeperEthanolFacilityTest;
 	friend struct FTunaSweeperRoadkillTestScene;

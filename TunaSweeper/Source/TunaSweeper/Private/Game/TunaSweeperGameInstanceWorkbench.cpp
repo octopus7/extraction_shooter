@@ -194,6 +194,7 @@ bool UTunaSweeperGameInstance::TryCraftActiveWorkbenchRecipe(int32 RecipeSlotInd
 	MarkItemEverAcquired(RecipeDefinition.OutputItemId);
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
+		QuestSubsystem->NotifyWorkbenchRecipeCrafted(RecipeDefinition.RecipeId);
 		QuestSubsystem->NotifyItemAcquired(
 			RecipeDefinition.OutputItemId,
 			RecipeDefinition.OutputQuantity,

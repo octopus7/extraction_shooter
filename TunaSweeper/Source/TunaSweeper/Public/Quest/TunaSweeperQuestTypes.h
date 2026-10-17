@@ -28,7 +28,8 @@ enum class ETunaSweeperObjectiveType : uint8
 	LocationReached UMETA(DisplayName = "Location Reached"),
 	VehicleLocationReached UMETA(DisplayName = "Vehicle Location Reached"),
 	WorldProgressCompleted UMETA(DisplayName = "World Progress Completed"),
-	ItemPossessed UMETA(DisplayName = "Item Possessed")
+	ItemPossessed UMETA(DisplayName = "Item Possessed"),
+	WorkbenchRecipeCrafted UMETA(DisplayName = "Workbench Recipe Crafted")
 };
 
 UENUM(BlueprintType)
@@ -138,6 +139,9 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName RecipeId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName TargetProviderId = NAME_None;

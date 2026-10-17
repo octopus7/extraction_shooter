@@ -291,6 +291,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperRegionPassageTest;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperConcentratedExplosiveCraftTest;
+	friend class FTunaSweeperQuestCraftTest;
 	friend class FTunaSweeperRaidLiftRepairTest;
 #endif
 	friend class FTunaSweeperQuestWorldProgressTest;

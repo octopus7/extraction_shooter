@@ -98,6 +98,11 @@ namespace TunaSweeperQuestData
 	bool ReadObjectiveType(const FString& RawType, ETunaSweeperObjectiveType& OutType)
 	{
 		const FString Type = RawType.TrimStartAndEnd().ToLower();
+		if (Type == TEXT("workbench_recipe_crafted"))
+		{
+			OutType = ETunaSweeperObjectiveType::WorkbenchRecipeCrafted;
+			return true;
+		}
 		if (Type == TEXT("world_progress_completed"))
 		{
 			OutType = ETunaSweeperObjectiveType::WorldProgressCompleted;
@@ -214,6 +219,12 @@ namespace TunaSweeperQuestData
 		OutObjective.Text = ReadTextField(JsonObject, TEXT("text"));
 		double RequiredCount = 1.0;
 		const bool bHasRequiredCount = JsonObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
+		OutObjective.RecipeId = ReadNameField(JsonObject, TEXT("recipe_id"));
+		if (OutObjective.Type == ETunaSweeperObjectiveType::WorkbenchRecipeCrafted &&
+			(!JsonObject->HasTypedField<EJson::String>(TEXT("recipe_id")) || OutObjective.RecipeId.IsNone() ||
+				(JsonObject->HasField(TEXT("required_count")) && !JsonObject->HasTypedField<EJson::Number>(TEXT("required_count"))) ||
+				!FMath::IsFinite(RequiredCount) || RequiredCount < 1 || RequiredCount > MAX_int32 ||
+				FMath::FloorToDouble(RequiredCount) != RequiredCount)) return false;
 		OutObjective.LocationId = ReadNameField(JsonObject, TEXT("location_id"));
 		OutObjective.WorldProgressId = ReadNameField(JsonObject, TEXT("world_progress_id"));
 		if (OutObjective.Type == ETunaSweeperObjectiveType::WorldProgressCompleted &&
@@ -1015,6 +1026,16 @@ void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity
 		},
 		Quantity,
 		bSaveImmediately);
+}
+
+void UTunaSweeperQuestSubsystem::NotifyWorkbenchRecipeCrafted(FName RecipeId)
+{
+	if (RecipeId.IsNone()) return;
+	AdvanceMatchingObjectives(
+		[RecipeId](const FTunaSweeperObjectiveDefinition& Objective)
+		{
+			return Objective.Type == ETunaSweeperObjectiveType::WorkbenchRecipeCrafted && Objective.RecipeId == RecipeId;
+		}, 1, false);
 }
 
 void UTunaSweeperQuestSubsystem::NotifyEnemyKilled(FName EnemyId, UClass* EnemyClass, bool bByVehicleCollision)

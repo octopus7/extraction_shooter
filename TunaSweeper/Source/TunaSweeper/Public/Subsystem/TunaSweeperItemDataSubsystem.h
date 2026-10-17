@@ -552,6 +552,8 @@ public:
 
 private:
 	friend class FTunaSweeperWeaponConfigurationDataTest;
+	friend class FTunaSweeperQuestCraftTest;
+	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperShopQuestUnlockTest;
 	friend class FTunaSweeperWeaponDefinitionsTest;
 	bool ParseWeaponDefinitions(const FString& Json);

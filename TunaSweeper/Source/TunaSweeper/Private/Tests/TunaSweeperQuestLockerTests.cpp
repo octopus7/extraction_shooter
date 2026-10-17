@@ -13,6 +13,7 @@
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "Components/Button.h"
@@ -133,6 +134,16 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     TunaSweeperQuestData::NormalizeNpcDeliveryObjectives(Quest);
     TestEqual(TEXT("Legacy NPC delivery uses ownership readiness"), Quest.Objectives[0].Type, ETunaSweeperObjectiveType::ItemPossessed);
     Quest.Rewards.Items = {Reward};
+    auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+    if (!TestNotNull(TEXT("Item data subsystem"), Items)) return false;
+    FTunaSweeperWorkbenchRecipeDefinition ReturnedMaterialRecipe;
+    ReturnedMaterialRecipe.RecipeId = TEXT("recipe.test.returned_material");
+    ReturnedMaterialRecipe.WorkbenchId = 1;
+    ReturnedMaterialRecipe.OutputItemId = 3004;
+    ReturnedMaterialRecipe.bAutoUnlocked = false;
+    Items->WorkbenchRecipeDefinitionsById.Add(ReturnedMaterialRecipe.RecipeId, ReturnedMaterialRecipe);
+    Quest.Rewards.WorkbenchRecipeUnlocks = {ReturnedMaterialRecipe.RecipeId};
+    TestFalse(TEXT("Returned-material recipe starts locked"), Game->IsWorkbenchRecipeUnlocked(ReturnedMaterialRecipe.RecipeId));
     Quest.Rewards.DisplayStringKey = TEXT("test.reward.storage_access");
     FTunaSweeperQuestTextString RewardLabel;
     RewardLabel.Korean = RewardLabel.English = RewardLabel.Japanese = FText::FromString(TEXT("Storage access reward"));
@@ -140,6 +151,7 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     Quests->QuestDefinitions.Add(Quest.QuestId, Quest);
     TestTrue(TEXT("Quest can be accepted with an already owned item"), Quests->AcceptQuest(Quest.QuestId));
     TestTrue(TEXT("Existing ownership makes quest ready"), Quests->CanClaimQuestReward(Quest.QuestId));
+    TestFalse(TEXT("Ownership alone does not unlock recipe"), Game->IsWorkbenchRecipeUnlocked(ReturnedMaterialRecipe.RecipeId));
     Game->ConsumeInventoryItemById(3004, 1);
     TestFalse(TEXT("Spending item revokes readiness"), Quests->CanClaimQuestReward(Quest.QuestId));
     TestFalse(TEXT("Missing ownership blocks claim"), Quests->ClaimQuestReward(Quest.QuestId));
@@ -164,6 +176,7 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Interaction must not claim reward"), Quests->GetQuestState(Quest.QuestId), ETunaSweeperQuestState::RewardAvailable);
     TestFalse(TEXT("Interaction must not consume the delivery item"), Game->StorageSlots[0].IsEmpty());
     TestEqual(TEXT("Interaction must not grant an item reward"), Game->CountInventoryItemById(3004), 0);
+    TestFalse(TEXT("NPC interaction does not unlock recipe"), Game->IsWorkbenchRecipeUnlocked(ReturnedMaterialRecipe.RecipeId));
     auto* Panel = CreateWidget<UTunaSweeperQuestWidget>(Game.Get());
     if (!TestNotNull(TEXT("Quest reward UI"), Panel)) return false;
     Panel->InitializeQuest(Quest.QuestId, Quest.ProviderId);
@@ -199,7 +212,10 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Inventory observer cannot double claim"), Reentered);
     TestTrue(TEXT("Submission consumes from storage"), Game->StorageSlots[0].IsEmpty());
     TestEqual(TEXT("Reward returns one item to inventory"), Game->CountInventoryItemById(3004), 1);
+    TestTrue(TEXT("Same reward claim unlocks returned-material recipe"), Game->IsWorkbenchRecipeUnlocked(ReturnedMaterialRecipe.RecipeId));
     TestFalse(TEXT("Completed quest cannot claim again"), Quests->ClaimQuestReward(Quest.QuestId));
+    TestEqual(TEXT("Repeated claim cannot duplicate returned material"), Game->CountInventoryItemById(3004), 1);
+    TestTrue(TEXT("Repeated claim leaves recipe unlocked"), Game->IsWorkbenchRecipeUnlocked(ReturnedMaterialRecipe.RecipeId));
 
     // Same item across two requirements must not be counted twice.
     Quest.QuestId = 99003;
