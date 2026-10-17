@@ -128,6 +128,7 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Repeated event does not grant coins"), Quests->GetCoinBalance(), 5);
 
     auto* Lift = World->SpawnActor<ATunaSweeperRegionLinkActor>();
+    Lift->bUseSlidingDoors = true;
     Lift->RequiredProgressId = TEXT("test.passage.lift");
     FTunaSweeperItemStack Cable; Cable.ItemId = 6010; Cable.Quantity = 1;
     FTunaSweeperItemStack Other; Other.ItemId = 6006; Other.Quantity = 1;
@@ -143,6 +144,9 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
                 Game->CountInventoryItemById(Cable.ItemId) == 0 && Game->CountInventoryItemById(Other.ItemId) == 0;
     });
     TestTrue(TEXT("Actual two-part repair succeeds"), Lift->RepairPassage(false));
+    TestEqual(TEXT("Repair begins with closed sliding doors"), Lift->GetDoorOpenAlpha(), 0.f);
+    Lift->Tick(Lift->DoorOpenSeconds);
+    TestEqual(TEXT("Actual repair automatically opens the doors"), Lift->GetDoorOpenAlpha(), 1.f);
     Quests->OnQuestProgressChanged.Remove(Observer);
     TestTrue(TEXT("Observers see materials consumed, passage open and objective complete together"), bObservedConsistentCompletion);
     TestEqual(TEXT("Repair completes objective once"), Quests->GetObjectiveProgressCount(LiftId, TEXT("open")), 1);

@@ -89,3 +89,12 @@
 - 장전 도중 종료하면 다음 로드에서 추가 소모 없이 5초를 다시 센다. 이미 개방된 저장에서는 폭발이나 피해를 반복하지 않는다.
 - 작업대 1에서 분홍 뿡뿡(6028) 1개 + 탁상시계(6032) 1개로 고농축 폭발물 1개를 제작한다. 레시피는 기본 공개한다.
 - 아이콘 원본은 `TunaSweeper/SourceArt/UI/Items/Rockfall`, UE 텍스처는 `/Game/UI/Icons/T_UIIcon_ConcentratedExplosive`와 `T_UIIcon_DeskClock`이다. 탁상시계는 흰 앞 테두리·푸른 도색·철색 금속으로 표현한다.
+
+
+## 수리 승강기 메시 교체와 입구 (2026-10-18)
+
+`/Game/MainRaid/RegionTravel/BP_ForestToPlainsLift`의 `VisualMesh`는 문을 제외한 고정 본체, `LeftDoorMesh`와 `RightDoorMesh`는 좌우 문이다. 세 컴포넌트의 Static Mesh와 로컬 위치·크기를 각각 편집할 수 있다. 임시 본체는 `/Game/MainRaid/RegionTravel/SM_RepairableLift_Body`이며 원본 OBJ는 `SourceArt/Props/RepairableLift`에 있다. 바닥과 벽을 포함하고 내부가 비어 있어야 하며, 교체 본체도 출입구를 막지 않는 충돌을 설정한다.
+
+입구는 액터 로컬 +X 방향이다. 문 메시의 정렬을 유지한 채 부모 `LeftDoorSlide`와 `RightDoorSlide`가 `LeftDoorOpenOffset`/`RightDoorOpenOffset`만큼 이동한다. `DoorOpenSeconds`로 개폐 시간을, `PreviewDoorsOpen`으로 에디터 표시를 조정한다. `TravelInterior` 박스는 실내 판정 범위, `RepairInteractionPoint`와 `InteriorInteractionPoint`는 각각 수리·이동 상호작용의 위치다.
+
+수리 전에는 입구에서 기존 재료 수리 상호작용을 제공한다. 수리 완료 알림을 받으면 문이 자동으로 좌우로 열리고, 완전히 열린 후 실내에 들어간 플레이어에게만 평원행 F 상호작용을 제공한다. 실내 진입 자체로 이동하지 않는다. 저장된 수리 완료 상태에서는 처음부터 문을 열어 두고, 월드 진행 초기화 시 다시 닫는다. 일반 지역 통로는 `UseSlidingDoors=false`를 유지한다.
