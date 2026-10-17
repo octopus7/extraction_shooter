@@ -285,6 +285,8 @@ Workbench recipe unlocks are persisted per save slot through `UTunaSweeperSaveGa
 
 Each entry is a stable recipe id from `Content/Data/WorkbenchRecipes.json`. Recipes with `auto_unlocked` remain available without being written to the save. Non-default recipes can be added by quest rewards or by registering a blueprint item whose item definition points at a `BlueprintRecipeId`; older saves also derive missing unlocks from already completed quest rewards during load.
 
+`recipe.vehicle_spark_plug` uses this same per-slot unlock mechanism and starts locked. Its addition does not change the save schema; existing completed quest rewards are reconciled through the same load path.
+
 ### World Progress Objects
 
 Bunker pipe repair unlocks from the existing `demo.water_intake.blocked_screen` completed state. Before crowbar debris clearing, the pipe uses its intact mesh and has no repair interaction; after clearing it uses the damaged mesh and allows repair. This presentation is derived again on load without a new save field. An already completed pipe repair still restores the repaired replacement, including older saves.

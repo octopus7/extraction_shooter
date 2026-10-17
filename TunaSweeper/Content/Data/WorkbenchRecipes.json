@@ -48,5 +48,23 @@
         "quantity": 1
       }
     ]
+  },
+  {
+    "recipe_id": "recipe.vehicle_spark_plug",
+    "workbench_id": 1,
+    "name_string_key": "item.vehicle_spark_plug",
+    "output_item_id": 6016,
+    "output_quantity": 1,
+    "auto_unlocked": false,
+    "ingredients": [
+      {
+        "item_id": 6015,
+        "quantity": 1
+      },
+      {
+        "item_id": 6027,
+        "quantity": 1
+      }
+    ]
   }
 ]
