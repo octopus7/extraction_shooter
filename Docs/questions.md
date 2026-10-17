@@ -8135,3 +8135,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 전원 시설과 ATV 스포너가 각각 BP 애셋으로 존재하고 앞서 이름은 레벨 배치 이름인가?
 - 답변: 각각 BP_ATVWarehousePower(/Game/Interaction/QuestFacilities), BP_SpecialATVSpawner(/Game/Blueprints/Spawners) 애셋이 존재한다. 확인한 마을 인스턴스 라벨은 각각 Quest_ATV_Warehouse_Power, Village_Start_SpecialATVSpawner이며 BP 애셋 이름과 별개다.
+
+
+## 2026-10-18 03:56:21 (소요시간: 00:02:57)
+
+- 질문: 미식 참치 통조림의 기존 획득처가 있는가?
+- 답변: 아이템 정의만 있고 기존 상자·상점·제조 획득 연결은 없었다. 요청에 따라 양쪽 역 근처 상자 획득처를 추가했다.

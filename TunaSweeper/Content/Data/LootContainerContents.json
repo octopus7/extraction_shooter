@@ -315,5 +315,16 @@
         "drop_chance": 10000
       }
     ]
+  },
+  {
+    "id": 8025,
+    "memo_ko": "미식 참치 통조림 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 6035,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]

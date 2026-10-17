@@ -75,3 +75,5 @@ For logical level `RaidVillage` (`/Game/MainRaid/RaidVillage`), Enemy IDs `1–2
 RaidVillage Loot Container IDs `1000` and `1001` are retired after converting their parcel boxes to directly placed dedicated pickup Blueprints. Do not reuse those IDs. Parcel pickup Blueprints do not use raid placement IDs or loot-container spawn rows.
 
 RaidVillage Enemy ID `7` is the Hopper boss (`/Game/Characters/Hopper/BP_HopperEnemy`), placed directly north of the north station (`village_02`) in `Region2/EnemyAnchors`. Its guaranteed spawn uses `enemy.village_hopper_boss` in the public Main runtime defaults; the anchor owns its transform.
+
+RaidVillage Loot Container IDs `1002` and `1003` are placed near the west (`village_01`) and east (`village_03`) stations in `Region2/LootAnchors`. They use the reusable anchor Blueprint; transforms belong only to the map. Retired IDs `1000` and `1001` remain unused.
