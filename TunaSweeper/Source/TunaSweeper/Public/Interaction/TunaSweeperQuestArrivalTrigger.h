@@ -23,6 +23,9 @@ class TUNASWEEPER_API ATunaSweeperQuestArrivalTrigger : public AActor
 public:
 	ATunaSweeperQuestArrivalTrigger();
 	virtual void Tick(float DeltaSeconds) override;
+#if WITH_EDITOR
+	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
+#endif
 
 	// Also callable after scripted relocation; validates position and all conditions again.
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest Arrival")

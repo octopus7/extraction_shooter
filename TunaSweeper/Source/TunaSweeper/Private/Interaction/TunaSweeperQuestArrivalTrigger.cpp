@@ -8,6 +8,9 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Vehicle/TunaSweeperATVActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
+#if WITH_EDITOR
+#include "DrawDebugHelpers.h"
+#endif
 
 ATunaSweeperQuestArrivalTrigger::ATunaSweeperQuestArrivalTrigger()
 {
@@ -24,6 +27,19 @@ ATunaSweeperQuestArrivalTrigger::ATunaSweeperQuestArrivalTrigger()
 void ATunaSweeperQuestArrivalTrigger::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+#if WITH_EDITOR
+	// The non-colliding detection box is otherwise invisible in PIE. Show the exact
+	// transformed bounds while authoring, and only for a selected actor during PIE.
+	// Never draw this authoring aid in standalone or packaged games.
+	if (ArrivalArea && GetWorld() &&
+		(GetWorld()->WorldType == EWorldType::Editor ||
+		 (GetWorld()->WorldType == EWorldType::PIE && IsSelected())))
+	{
+		DrawDebugBox(GetWorld(), ArrivalArea->GetComponentLocation(),
+			ArrivalArea->GetScaledBoxExtent(), ArrivalArea->GetComponentQuat(),
+			FColor::Cyan, false, 0.f, SDPG_Foreground, 2.f);
+	}
+#endif
 	CheckArrivals();
 }
 
