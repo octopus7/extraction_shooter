@@ -92,5 +92,23 @@
         "quantity": 1
       }
     ]
+  },
+  {
+    "recipe_id": "recipe.high_output_motor",
+    "workbench_id": 1,
+    "name_string_key": "item.high_output_motor",
+    "output_item_id": 6034,
+    "output_quantity": 1,
+    "auto_unlocked": false,
+    "ingredients": [
+      {
+        "item_id": 6026,
+        "quantity": 1
+      },
+      {
+        "item_id": 6024,
+        "quantity": 1
+      }
+    ]
   }
 ]

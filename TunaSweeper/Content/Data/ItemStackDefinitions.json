@@ -33,5 +33,6 @@
   "stack.power_control_server": 10,
   "stack.concentrated_explosive": 10,
   "stack.desk_clock": 10,
-  "stack.empty_launcher_tube": 1
+  "stack.empty_launcher_tube": 1,
+  "stack.high_output_motor": 10
 }
