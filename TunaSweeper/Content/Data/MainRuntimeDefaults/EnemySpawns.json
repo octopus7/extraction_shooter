@@ -61,5 +61,12 @@
     "spawn_chance": 10000,
     "level_name": "RaidVillage",
     "condition_id": "always"
+  },
+  {
+    "placement_id": 7,
+    "profile_id": "enemy.village_hopper_boss",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
   }
 ]

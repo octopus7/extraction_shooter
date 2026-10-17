@@ -204,5 +204,16 @@
     "cross_reposition_chance": 0.0,
     "cross_reposition_cooldown_seconds": 6.0,
     "cross_reposition_orbit_radius": 150.0
+  },
+  {
+    "profile_id": "enemy.hopper",
+    "attack_mode": "ranged",
+    "role": "anchor",
+    "movement_speed": 35.0,
+    "turn_speed_degrees_per_second": 35.0,
+    "attack_facing_tolerance_degrees": 10.0,
+    "melee_attack_damage": 8.0,
+    "shot_interval_seconds_min": 0.3,
+    "shot_interval_seconds_max": 0.4
   }
 ]

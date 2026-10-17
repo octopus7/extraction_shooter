@@ -94,5 +94,14 @@
     "reserve_ammo_count": 60,
     "loot_loaded_ammo_deduction_ratio": 0.4,
     "loot_loaded_ammo_flat_deduction": 2
+  },
+  {
+    "profile_id": "enemy.village_hopper_boss",
+    "enemy_class": "/Game/Characters/Hopper/BP_HopperEnemy.BP_HopperEnemy_C",
+    "enemy_id": "enemy.region2.boss",
+    "combat_profile_id": "enemy.hopper",
+    "faction_id": 22,
+    "experience_value": 30,
+    "max_health": 30.0
   }
 ]

@@ -73,3 +73,5 @@ For logical level `RaidForest` (`/Game/MainRaid/RaidForest`), Enemy IDs `1` (gra
 For logical level `RaidVillage` (`/Game/MainRaid/RaidVillage`), Enemy IDs `1–2` are marine delivery robots, `3–4` are pirate delivery robots, and `5–6` are rabbit trikes. Each has one anchor in the `Region2/EnemyAnchors` folder and a guaranteed spawn row in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`. The map owns their transforms; matching profiles are in `EnemySpawnProfiles.json`. These IDs are independent of the same numbers in other logical levels.
 
 RaidVillage Loot Container IDs `1000` and `1001` are retired after converting their parcel boxes to directly placed dedicated pickup Blueprints. Do not reuse those IDs. Parcel pickup Blueprints do not use raid placement IDs or loot-container spawn rows.
+
+RaidVillage Enemy ID `7` is the Hopper boss (`/Game/Characters/Hopper/BP_HopperEnemy`), placed directly north of the north station (`village_02`) in `Region2/EnemyAnchors`. Its guaranteed spawn uses `enemy.village_hopper_boss` in the public Main runtime defaults; the anchor owns its transform.
