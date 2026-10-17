@@ -8021,3 +8021,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 아직 사용하지 않던 뿡뿡은 무슨 색인가?
 - 답변: 노란 뿡뿡(6027)이다. 분홍 뿡뿡(6028)은 기존 농축 폭약 제조 재료로 사용 중이다.
+
+## 2026-10-17 09:25:05 (소요시간: 00:00:57)
+
+- 질문: ATV_Warehouse_Power BP가 ATV 스폰과 가용 상태까지 제어하는가?
+- 답변: 전원 시설 BP는 수리 상호작용과 facility.village.atv_warehouse 완료 저장을 담당한다. 별도 Village_Start_SpecialATVSpawner(BP_SpecialATVSpawner)가 같은 ID의 완료 기록을 조건으로 BP_ATV_TypeA를 생성한다. 수리 직후와 레벨 진입 시 조건을 확인하고 한 방문당 한 번 생성한다. 이미 생성된 ATV를 전원 상태 변경으로 제거하거나 탑승 잠금을 거는 동작은 없다.
+- 확인: 현재 저장된 RaidVillage를 별도 UE 5.7 읽기 전용 프로세스로 열어 두 액터의 ID 매핑과 차량 클래스를 확인. 코드/맵/진행 상태 변경 없음.
