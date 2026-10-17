@@ -96,7 +96,8 @@ public:
 	void UpdateLaserSightBeam(
 		const FVector& AimDirection,
 		const FVector& AimWorldPoint,
-		bool bHasAimWorldPoint);
+		bool bHasAimWorldPoint,
+        AActor* AimTarget = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void SetWeaponMeshOverride(

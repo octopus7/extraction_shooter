@@ -1,5 +1,6 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 #include "LoopRailTrain.h"
+#include "AI/Hopper/HopperEnemyCharacter.h"
 
 void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
 {
@@ -29,6 +30,9 @@ void ATunaSweeperTopDownCharacter::SetAimWorldHit(const FVector& WorldPoint, con
 		return;
 	}
 
+    if (const auto* Hopper=Cast<ATunaSweeperHopperEnemyCharacter>(HitActor);
+        Hopper && !Hopper->IsDead() && Hopper->GetMechHealth()>0 && HitComponent->ComponentHasTag(TEXT("HopperMechHitBox")))
+        SetAimWorldPoint(AimHit.ImpactPoint);
 	AimIntentActor = HitActor;
 	AimIntentComponent = HitComponent;
 	AimIntentWorldPoint = AimHit.ImpactPoint;

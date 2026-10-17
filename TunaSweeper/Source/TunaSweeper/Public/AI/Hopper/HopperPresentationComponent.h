@@ -3,6 +3,7 @@
 #include "Components/ActorComponent.h"
 #include "AI/Hopper/HopperGait.h"
 #include "HopperPresentationComponent.generated.h"
+class UBoxComponent;
 class UHopperVisualData;
 class USceneComponent;
 class UStaticMeshComponent;
@@ -29,6 +30,8 @@ public:
  FVector GetPilotMuzzleLocation() const;
  void SetGunVisible(bool bVisible);
  void SetMechActive(bool bActive);
+ UBoxComponent* CreateMechHitBox(UStaticMeshComponent* Part);
+ void DisableMechHitBoxes();
  void KeepOpenCockpitWreck();
  float GetHatchOpenAlpha() const { return HatchOpen; }
  float GetMaxStableWalkSpeed() const;

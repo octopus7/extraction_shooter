@@ -1,4 +1,5 @@
 #include "Weapon/TunaSweeperWeapon.h"
+#include "AI/Hopper/HopperEnemyCharacter.h"
 #include "Combat/TunaSweeperProjectileDamage.h"
 #include "Combat/TunaSweeperCombatValue.h"
 #include "Weapon/TunaSweeperWeaponConfiguration.h"
@@ -189,8 +190,15 @@ namespace
 		const FVector& AimWorldPoint,
 		bool bHasAimWorldPoint,
 		const FVector& AimDirection,
-		const FVector& FallbackForward)
+		const FVector& FallbackForward,
+        const AActor* AimTarget = nullptr)
 	{
+        if (const auto* Hopper=Cast<ATunaSweeperHopperEnemyCharacter>(AimTarget);
+            Hopper && !Hopper->IsDead() && Hopper->GetMechHealth()>0 && bHasAimWorldPoint)
+        {
+            const FVector ToMech=(AimWorldPoint-MuzzleWorldLocation).GetSafeNormal();
+            if (!ToMech.IsNearlyZero()) return ToMech;
+        }
 		FVector ResolvedDirection = FVector::ZeroVector;
 		if (bHasAimWorldPoint)
 		{
@@ -448,7 +456,7 @@ FTransform ATunaSweeperWeapon::GetLaserSightWorldTransform() const
 void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	const FVector& AimDirection,
 	const FVector& AimWorldPoint,
-	bool bHasAimWorldPoint)
+	bool bHasAimWorldPoint, AActor* AimTarget)
 {
 	if (!LaserSightComponent)
 	{
@@ -463,7 +471,7 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 		AimWorldPoint,
 		bHasAimWorldPoint,
 		AimDirection,
-		GetActorForwardVector());
+		GetActorForwardVector(), AimTarget);
 	const FVector TraceEndWorld =
 		BeamStartWorld + LaserDirection * FMath::Max(1.0f, LaserSightFallbackRange);
 	FVector BeamEndWorld = TraceEndWorld;
@@ -690,12 +698,15 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	}
 
 	const FVector SpawnLocation = GetMuzzleWorldLocation();
+    const auto* Mech=Cast<ATunaSweeperHopperEnemyCharacter>(AimIntentActor);
+    const bool bMechAim=Mech && !Mech->IsDead() && Mech->GetMechHealth()>0 && bHasAimIntentWorldPoint &&
+        AimIntentComponent && AimIntentComponent->GetOwner()==Mech && AimIntentComponent->ComponentHasTag(TEXT("HopperMechHitBox"));
 	const FVector ShotDirection = ResolveMuzzleLevelAimDirection(
 		SpawnLocation,
-		AimWorldPoint,
-		bHasAimWorldPoint,
+		bMechAim ? AimIntentWorldPoint : AimWorldPoint,
+		bMechAim || bHasAimWorldPoint,
 		AimDirection,
-		GetActorForwardVector());
+		GetActorForwardVector(), bMechAim ? AimIntentActor : nullptr);
 
 	const TSubclassOf<ATunaSweeperProjectile> LoadedProjectileClass = ResolveProjectileClass();
 

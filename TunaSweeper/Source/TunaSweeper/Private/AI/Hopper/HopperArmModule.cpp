@@ -1,6 +1,8 @@
 #include "AI/Hopper/HopperArmModule.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/Hopper/HopperVisualData.h"
+#include "AI/Hopper/HopperPresentationComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
@@ -28,6 +30,8 @@ AHopperArmModule::AHopperArmModule()
 
 void AHopperArmModule::ConfigureVisual(UHopperVisualData* Data, bool bLeft)
 {
+    for (UBoxComponent* Box : HitBoxes) if (IsValid(Box)) Box->DestroyComponent();
+    HitBoxes.Reset();
     for (UStaticMeshComponent* Part : VisualParts) if (Part) Part->DestroyComponent();
     VisualParts.Reset();
     VisualData = Data;
@@ -49,7 +53,23 @@ void AHopperArmModule::ConfigureVisual(UHopperVisualData* Data, bool bLeft)
         Component->SetRelativeLocation(-Mount);
         Component->RegisterComponent();
         VisualParts.Add(Component);
+        if (auto* Hopper=Cast<ATunaSweeperHopperEnemyCharacter>(GetOwner()))
+            HitBoxes.Add(Hopper->GetPresentation()->CreateMechHitBox(Component));
     }
+}
+
+void AHopperArmModule::Destroyed()
+{
+    for (UBoxComponent* Box : HitBoxes) if (IsValid(Box)) Box->DestroyComponent();
+    HitBoxes.Reset();
+    Super::Destroyed();
+}
+
+void AHopperArmModule::EndPlay(const EEndPlayReason::Type Reason)
+{
+    for (UBoxComponent* Box : HitBoxes) if (IsValid(Box)) Box->DestroyComponent();
+    HitBoxes.Reset();
+    Super::EndPlay(Reason);
 }
 
 bool AHopperArmModule::IsReady() const

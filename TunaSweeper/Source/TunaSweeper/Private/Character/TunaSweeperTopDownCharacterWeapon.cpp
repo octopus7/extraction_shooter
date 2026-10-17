@@ -98,7 +98,7 @@ void ATunaSweeperTopDownCharacter::UpdateEquippedWeaponLaserSightBeam()
 
 	if (bShouldEnableLaserSight)
 	{
-		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimWorldPoint, bHasAimWorldPoint);
+		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimWorldPoint, bHasAimWorldPoint, AimIntentActor.Get());
 	}
 }
 

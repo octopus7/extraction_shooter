@@ -1,5 +1,6 @@
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "Combat/TunaSweeperCombatValue.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "AI/Hopper/HopperArmModule.h"
 #include "AI/Hopper/HopperPresentationComponent.h"
 #include "AI/Hopper/HopperVisualData.h"
@@ -23,6 +24,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogHopperCombat, Log, All);
 ATunaSweeperHopperEnemyCharacter::ATunaSweeperHopperEnemyCharacter()
 {
     GetCapsuleComponent()->InitCapsuleSize(65.f,105.f);
+    GetCapsuleComponent()->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile,ECR_Ignore);
     // The Hopper must never carve navigation around its own movement capsule.
     GetCapsuleComponent()->SetCanEverAffectNavigation(false);
     Presentation = CreateDefaultSubobject<UHopperPresentationComponent>(TEXT("HopperPresentation"));
@@ -55,6 +57,7 @@ void ATunaSweeperHopperEnemyCharacter::OnConstruction(const FTransform& Transfor
 {
     Super::OnConstruction(Transform);
     GetCapsuleComponent()->SetCanEverAffectNavigation(false);
+    if (!HasActorBegunPlay()) GetCapsuleComponent()->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile,ECR_Ignore);
     if (!HasActorBegunPlay()) InitializePresentation();
 }
 
@@ -326,6 +329,7 @@ bool ATunaSweeperHopperEnemyCharacter::SetArmModule(bool bLeft, TSubclassOf<AHop
 void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction()
 {
     Phase = EHopperCombatPhase::Disembarking;
+    Presentation->DisableMechHitBoxes();
     ApplyPhaseMovementSpeed();
     PhaseSeconds = 0;
     ExitRetrySeconds = 0;
@@ -465,6 +469,7 @@ void ATunaSweeperHopperEnemyCharacter::UpdateDisembark(float DeltaSeconds)
 void ATunaSweeperHopperEnemyCharacter::EnterPilotCombat()
 {
     GetCapsuleComponent()->SetCapsuleSize(PilotRadius, PilotHalfHeight);
+    GetCapsuleComponent()->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile,ECR_Block);
     GetCharacterMovement()->UpdateNavAgent(*GetCapsuleComponent());
     SetActorLocation(ExitGroundDestination + FVector(0,0,PilotHalfHeight + 2.f), false, nullptr, ETeleportType::TeleportPhysics);
     Presentation->FinishDisembark();

@@ -2,6 +2,9 @@
 #include "AI/Hopper/HopperVisualData.h"
 #include "Animation/AnimSequence.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
+#include "Engine/StaticMesh.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -56,6 +59,7 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
   C->SetCanEverAffectNavigation(false); C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   C->CreationMethod=Creation; C->ComponentTags.Add(TEXT("HopperGenerated")); C->SetupAttachment(BodyRoot); C->SetStaticMesh(Mesh);
   C->SetMobility(EComponentMobility::Movable); C->RegisterComponent(); C->SetHiddenInGame(HasBegunPlay() && Part.PartName.ToString().StartsWith(TEXT("Arm_"))); Parts.Add(Part.PartName,C);
+  if (!Part.PartName.ToString().StartsWith(TEXT("Arm_"))) CreateMechHitBox(C);
  }
  Pilot=NewObject<USkeletalMeshComponent>(Owner,MakeUniqueObjectName(Owner,USkeletalMeshComponent::StaticClass(),TEXT("HopperPilot")),RF_Transient);
  Pilot->SetCanEverAffectNavigation(false); Pilot->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -138,6 +142,31 @@ void UHopperPresentationComponent::KeepOpenCockpitWreck()
  bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
  SetGunVisible(false);
  SetHatchOpen(1.f);
+}
+UBoxComponent* UHopperPresentationComponent::CreateMechHitBox(UStaticMeshComponent* Part)
+{
+ if (!Part || !Part->GetStaticMesh()) return nullptr;
+ // All damage volumes belong to the enemy, even when attached to a replaceable arm actor.
+ UBoxComponent* Box=NewObject<UBoxComponent>(GetOwner(),NAME_None,RF_Transient);
+ Box->CreationMethod=EComponentCreationMethod::Instance;
+ Box->ComponentTags.Add(TEXT("HopperGenerated")); Box->ComponentTags.Add(TEXT("HopperMechHitBox"));
+ Box->SetCanEverAffectNavigation(false); Box->SetGenerateOverlapEvents(false);
+ Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+ Box->SetCollisionObjectType(ECC_WorldDynamic); Box->SetCollisionResponseToAllChannels(ECR_Ignore);
+ Box->SetCollisionResponseToChannel(ECC_Visibility,ECR_Block);
+ Box->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile,ECR_Block);
+ Box->SetupAttachment(Part);
+ const FBox Bounds=Part->GetStaticMesh()->GetBoundingBox();
+ Box->SetRelativeLocation(Bounds.GetCenter());
+ Box->SetBoxExtent(Bounds.GetExtent().ComponentMax(FVector(1.f)));
+ Box->RegisterComponent();
+ return Box;
+}
+void UHopperPresentationComponent::DisableMechHitBoxes()
+{
+ TArray<UBoxComponent*> Boxes; GetOwner()->GetComponents(Boxes);
+ for (UBoxComponent* Box:Boxes)
+  if (Box->ComponentHasTag(TEXT("HopperMechHitBox"))) Box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 void UHopperPresentationComponent::SetMechActive(bool bActive) { bMechActive=bActive && !bWreck; }
 void UHopperPresentationComponent::SetGunVisible(bool bVisible) { if (Gun) Gun->SetVisibility(bVisible); }

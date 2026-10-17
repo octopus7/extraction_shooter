@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "HopperArmModule.generated.h"
 
+class UBoxComponent;
 class ATunaSweeperProjectile;
 class UHopperVisualData;
 class USceneComponent;
@@ -33,6 +34,8 @@ public:
     bool bUseHopperArmVisuals = true;
 
 protected:
+    virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+    virtual void Destroyed() override;
     /** Return true only when the module actually delivered its attack. */
     UFUNCTION(BlueprintNativeEvent, Category="Hopper|Weapon")
     bool FireWeapon(AActor* TargetActor, const FVector& AimPoint);
@@ -41,6 +44,7 @@ protected:
     TObjectPtr<USceneComponent> Muzzle;
 private:
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> VisualParts;
+    UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> HitBoxes;
     UPROPERTY(Transient) TObjectPtr<UHopperVisualData> VisualData;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> CannonNozzle;
     double NextFireTime = 0;
