@@ -1,0 +1,3 @@
+Built-in image generation; native transparent alpha.
+Reference: Docs/Images/icons/T_UIIcon_CannedTuna.png
+Prompt: Preserve the original squat sealed tuna can, elevated three-quarter view and moderately detailed cartoon game icon style. Polished gold metal rims, lid and pull tab; vivid scarlet red side label with blue-silver tuna fish and cream TUNA lettering. One centered uncropped can on native transparent background, no frame or backdrop.

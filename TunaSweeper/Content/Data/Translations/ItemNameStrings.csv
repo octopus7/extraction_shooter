@@ -185,3 +185,5 @@ item.empty_launcher_tube,空发射管,空發射管,Пустая пусковая
 item.empty_launcher_tube.desc,从兔子摩托车回收的空发射管。用于制作火箭发射器。,從兔子摩托車回收的空發射管。用於製作火箭發射器。,Пустая пусковая труба с кроличьего мотоцикла. Используется для изготовления ракетной пусковой установки.,Um tubo lançador vazio recuperado de uma moto de coelho. Usado para fabricar um lançador de foguetes.
 item.high_output_motor,高功率电机,高功率馬達,Мощный электродвигатель,Motor de alta potência
 item.high_output_motor.desc,为提升重型货物而增强驱动力的电机。用于货运电梯等大型搬运设备。,為提升重型貨物而增強驅動力的馬達。用於貨運電梯等大型搬運設備。,Усиленный электродвигатель для подъёма тяжёлых грузов. Используется в грузовых лифтах и другом крупном транспортном оборудовании.,"Um motor reforçado para levantar cargas pesadas. Usado em grandes equipamentos de transporte, como elevadores de carga."
+item.gourmet_tuna,高级金枪鱼罐头,高級鮪魚罐頭,Изысканные консервы из тунца,Atum gourmet enlatado
+item.gourmet_tuna.desc,猫咪们垂涎的高级金枪鱼罐头。可以交给委托的猫咪。,貓咪們垂涎的高級鮪魚罐頭。可以交給委託的貓咪。,"Отборные консервы из тунца, которые обожают коты. Можно передать коту, давшему задание.",Atum enlatado de qualidade cobiçado pelos gatos. Pode ser entregue ao gato que fez o pedido.

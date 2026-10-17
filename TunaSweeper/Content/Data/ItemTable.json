@@ -1126,5 +1126,16 @@
     "icon_file_name": "T_UIIcon_RabbitToken.uasset",
     "category_tag": "item.category.currency",
     "weight_kg": 0.01
+  },
+  {
+    "id": 6035,
+    "name_string_key": "item.gourmet_tuna",
+    "description_string_key": "item.gourmet_tuna.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "uncommon",
+    "icon_file_name": "T_UIIcon_GourmetTuna.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 0.3
   }
 ]
