@@ -11810,3 +11810,7 @@
 - 요청: 미식 참치 획득처가 없으면 마을 양쪽 역 근처에 루팅 상자 앵커 하나씩 배치.
 - 구현: 서역 village_01, 동역 village_03 인근에 기존 BP_RaidPlacementAnchor를 LootContainer 종류로 배치, 새 ID1002·1003 사용. BP_GourmetTunaCrate 생성 및 내용물8025에 미식 참치6035 1개 확정 등록.
 - 검증: 새 프로세스에서 맵·BP 재로드, 앵커 ID 고유성·역과의 거리·데이터 매칭·메시 확인. 런타임 내용물 생성100회 모두 미식 참치1개 확인. 일회성 스크립트 제거.
+
+## 2026-10-18 04:37:37 (소요시간: 00:05:22)
+
+- 남쪽 단일 도착 영역용 BP_PlainsSignalArrival을 기존 위치 도착 감지 BP로 구성하고 RaidPlains에 임시 배치했다. 저장된 BP 연결 및 단일 배치 검증과 TunaSweeper.Quest.Arrival 자동 검사 3개가 통과했다.
