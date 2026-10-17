@@ -304,5 +304,16 @@
         "drop_chance": 10000
       }
     ]
+  },
+  {
+    "id": 8024,
+    "memo_ko": "정비 공구 세트 1개 확정 보급",
+    "items": [
+      {
+        "item_id": 6013,
+        "quantity": 1,
+        "drop_chance": 10000
+      }
+    ]
   }
 ]
