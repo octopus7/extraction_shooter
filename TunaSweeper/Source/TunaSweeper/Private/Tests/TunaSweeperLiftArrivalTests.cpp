@@ -5,6 +5,7 @@
 #include "Subsystem/TunaSweeperRaidArrivalSubsystem.h"
 #include "Engine/World.h"
 #include "Misc/ScopeExit.h"
+#include "Interaction/TunaSweeperRegionLinkActor.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperLiftArrivalTest, "TunaSweeper.Region.LiftArrival",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -30,6 +31,16 @@ bool FTunaSweeperLiftArrivalTest::RunTest(const FString& Parameters)
     auto* EastB = World->SpawnActor<ATunaSweeperRaidPlayerStart>(Spawn);
     auto* West = World->SpawnActor<ATunaSweeperRaidPlayerStart>(Spawn);
     auto* Ordinary = World->SpawnActor<APlayerStart>(Spawn);
+    auto* Passage = World->SpawnActor<ATunaSweeperRegionLinkActor>(Spawn);
+    TestTrue(TEXT("Ordinary passages preserve default arrival"), Passage->GetArrivalGroup() == ETunaSweeperRaidArrivalGroup::None);
+    Passage->ArrivalGroup = ETunaSweeperRaidArrivalGroup::Plains;
+    Pending.Prepare(TEXT("RaidPlains"), Passage->GetArrivalGroup());
+    auto* South = World->SpawnActor<ATunaSweeperRaidPlayerStart>(Spawn);
+    South->ArrivalGroup = ETunaSweeperRaidArrivalGroup::Plains;
+    FRandomStream SouthRandom(60);
+    const TArray<APlayerStart*> SouthStarts = {South, Ordinary};
+    TestEqual(TEXT("Region link requests the sole southern lift start, not the ordinary start"),
+        UTunaSweeperRaidArrivalSubsystem::SelectRandomStart(SouthStarts, Pending.Consume(TEXT("RaidPlains")), SouthRandom), static_cast<APlayerStart*>(South));
     EastA->ArrivalGroup = EastB->ArrivalGroup = ETunaSweeperRaidArrivalGroup::VillageEast;
     West->ArrivalGroup = ETunaSweeperRaidArrivalGroup::VillageWest;
     const TArray<APlayerStart*> Starts = {EastA, EastB, West, Ordinary};

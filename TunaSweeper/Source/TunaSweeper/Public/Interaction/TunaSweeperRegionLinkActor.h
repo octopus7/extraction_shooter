@@ -19,6 +19,10 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     virtual bool TravelToTargetLevel(APawn* Pawn) override;
+    virtual ETunaSweeperRaidArrivalGroup GetArrivalGroup() const override { return ArrivalGroup; }
+    // Select the destination's dedicated start group; None preserves ordinary passage travel.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Level Travel")
+    ETunaSweeperRaidArrivalGroup ArrivalGroup = ETunaSweeperRaidArrivalGroup::None;
     UFUNCTION(BlueprintPure) bool IsPassageUnlocked() const;
     UFUNCTION(BlueprintCallable) bool RepairPassage(bool bSaveImmediately = true);
     UFUNCTION(BlueprintCallable) void RefreshPassage();
