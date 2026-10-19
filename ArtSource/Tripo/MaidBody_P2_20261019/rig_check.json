@@ -1,0 +1,12 @@
+{
+  "source_task_id": "4b944d5f-fcb1-4aae-b234-aea178b62857",
+  "check_task_id": "e03b074b-82d7-4a69-aa6e-52c5ef34b96c",
+  "status": "success",
+  "riggable": true,
+  "rig_type": "biped",
+  "credits_consumed": 0,
+  "balance_before": 4935,
+  "balance_after": 4935,
+  "frozen_after": 0,
+  "actual_rigging_executed": false
+}
