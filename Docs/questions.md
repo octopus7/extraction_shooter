@@ -8187,3 +8187,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Smart Mesh P2.0 상세 텍스처 옵션의 비용은 얼마인가?
 - 답변: 공식 API 기준 P2 기본 생성 100 + detailed 텍스처 20 = 건당 120크레딧이다. 이전 조회 잔액 5,175 기준 추가 작업·할인 없이 43회 생성 후 15크레딧이 남는다. Studio 요금과 구분하여 API 기준으로 안내했다.
 - 근거: https://developers.tripo3d.ai/en/docs/changelog (P2 series model)
+
+
+## 2026-10-19 23:01:34 (소요시간: 00:00:17)
+
+- 질문: Smart Mesh P2.0은 게임용인가?
+- 답변: 게임 엔진 활용을 목표로 낮은 폴리곤 수와 쿼드 중심 토폴로지를 생성하는 모델이 맞다. 실제 게임 캐릭터 적용에는 리깅·스킨 웨이트·관절 변형과 엔진 내 성능 검증 등이 별도로 필요하다.
+- 근거: https://www.tripo3d.ai/blog/mesh-game-character-p-2
