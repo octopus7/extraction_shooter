@@ -3,7 +3,7 @@ LunaMk3 / UE 5.7 secondary rig handoff
 현재 상태
 - 기존 몸체 리그 61본에 흔들림용 48본을 추가한 총 109본.
 - 양갈래 각각 4본, 늘어진 리본 각각 2본, 치마 둘레 12방향에 각 3본.
-- 원본 몸체 본 이름/계층/기준 자세와 몸체 웨이트 유지.
+- 원본 몸체 본 이름/계층/기준 자세 유지. 보행 작성 과정에서 뒤꿈치가 내려앉는 문제를 고치기 위해 신발·발목 주변 650정점의 웨이트를 보정했으며 나머지 몸체 웨이트는 유지.
 - 얼굴, 두피, 머리띠, 리본 매듭은 head에 고정. 앞머리 전체를 흔드는 리그는 포함하지 않음.
 - 키는 장식과 신발 포함 약 150.9cm. Blender 단위 m, FBX 실제 크기 확인 완료.
 - 모델 FBX에는 애니메이션 없음. QA_LunaMk3_SecondarySway.fbx는 별도 3초 반복 변형 확인용 클립이며 보행이나 물리 시뮬레이션이 아님.
@@ -16,6 +16,7 @@ SKM_LunaMk3.fbx: 텍스처 내장 Skeletal Mesh. 현재 LunaMk2 Skeleton과의 �
 QA_LunaMk3_SecondarySway.fbx: 생성한 LunaMk3 Skeleton을 선택하고 애니메이션으로 가져올 테스트 클립.
 secondary_physics_guide.json: 본 체인, 기준 위치(m), 초기 물리 설정 참고값.
 secondary_rig_validation.json: 실제 본/웨이트/변형/FBX 재가져오기 검사 결과.
+Animations/: 1.2초 여성스러운 걷기 InPlace/RootMotion FBX, 편집용 Blend, 영상 및 검증 결과. 적용 방법은 Animations/UE5_Walk_Guide.txt 참조. 이 보행에는 치마·머리카락의 작은 움직임이 이미 구워져 있다.
 
 UE 적용 순서
 1. FBX를 Skeletal Mesh로 가져오고 새 Skeleton 생성. Import Animations는 끄고 스케일 1을 유지. 크기 약 151cm와 109본을 확인.

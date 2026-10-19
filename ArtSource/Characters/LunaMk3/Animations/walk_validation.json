@@ -1,0 +1,1566 @@
+{
+  "fps": 30,
+  "frames": [
+    1,
+    37
+  ],
+  "duration_seconds": 1.2,
+  "speed_m_per_second": 0.72,
+  "cycle_distance_m": 0.864,
+  "stance_fraction": 0.58,
+  "feet_track_width_m": 0.128,
+  "pelvis_lateral_amplitude_m": 0.01,
+  "pelvis_roll_degrees": 1.8,
+  "pelvis_yaw_degrees": 3.0,
+  "mesh_geometry_and_reference_skeleton_changed": false,
+  "foot_weight_repair": {
+    "vertices": 650,
+    "full_foot_binding_below_m": 0.08,
+    "blend_to_original_weights_until_m": 0.14,
+    "reason": "Original shoe heels had substantial calf/twist weights and sank up to 16 mm during foot roll. Shoes now follow foot/ball bones, fading to original ankle weights."
+  },
+  "external_api_calls": 0,
+  "frames_metrics": [
+    {
+      "phase": 0.0,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.0,
+          "stance": true,
+          "min_sole_z_m": 0.001000006916001439,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.33000234328132e-08,
+          "ankle": [
+            0.1882658451795578,
+            0.06629999727010727,
+            0.10774748772382736
+          ],
+          "pitch_degrees": -10.0
+        },
+        "r": {
+          "phase": 0.5,
+          "stance": true,
+          "min_sole_z_m": 0.0009999941103160381,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 3.817286627724617e-08,
+          "ankle": [
+            -0.20643433928489685,
+            -0.06169998273253441,
+            0.12082935869693756
+          ],
+          "pitch_degrees": 9.839650145772598
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.134519575203437,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.027777777777777776,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.027777777777777776,
+          "stance": true,
+          "min_sole_z_m": 0.000999998883344233,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.059035112255788e-08,
+          "ankle": [
+            0.16677731275558472,
+            0.06630000472068787,
+            0.10695021599531174
+          ],
+          "pitch_degrees": -8.640562287252958
+        },
+        "r": {
+          "phase": 0.5277777777777778,
+          "stance": true,
+          "min_sole_z_m": 0.000999998301267624,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 4.712160915387242e-08,
+          "ankle": [
+            -0.21385693550109863,
+            -0.0617000013589859,
+            0.13624028861522675
+          ],
+          "pitch_degrees": 17.159524009486223
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.130284606884442,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.05555555555555555,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.05555555555555555,
+          "stance": true,
+          "min_sole_z_m": 0.000999984098598361,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.634573255449234e-08,
+          "ankle": [
+            0.1484166830778122,
+            0.06629998981952667,
+            0.10491979867219925
+          ],
+          "pitch_degrees": -5.55453945028705
+        },
+        "r": {
+          "phase": 0.5555555555555556,
+          "stance": true,
+          "min_sole_z_m": 0.0010000132024288177,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.4241045484546706e-08,
+          "ankle": [
+            -0.22345390915870667,
+            -0.061699993908405304,
+            0.14715564250946045
+          ],
+          "pitch_degrees": 22.97967982019381
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.12537314280489817,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.08333333333333333,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.08333333333333333,
+          "stance": true,
+          "min_sole_z_m": 0.0010000108741223812,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.971687092477304e-08,
+          "ankle": [
+            0.13037976622581482,
+            0.06630000472068787,
+            0.10239570587873459
+          ],
+          "pitch_degrees": -2.2303669410150895
+        },
+        "r": {
+          "phase": 0.5833333333333334,
+          "stance": false,
+          "min_sole_z_m": 0.0010341780725866556,
+          "target_sole_z_m": 0.0010341846664796365,
+          "ik_error_m": 5.487695285177318e-08,
+          "ankle": [
+            -0.24208888411521912,
+            -0.061699990183115005,
+            0.15062087774276733
+          ],
+          "pitch_degrees": 24.993421236807478
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.11715172275079003,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.1111111111111111,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.1111111111111111,
+          "stance": true,
+          "min_sole_z_m": 0.0009999964386224747,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.705522537231445e-08,
+          "ankle": [
+            0.11003279685974121,
+            0.06629999727010727,
+            0.10117728263139725
+          ],
+          "pitch_degrees": -0.15648021134989532
+        },
+        "r": {
+          "phase": 0.6111111111111112,
+          "stance": false,
+          "min_sole_z_m": 0.003925096709281206,
+          "target_sole_z_m": 0.003925102391106179,
+          "ik_error_m": 4.470348358154297e-08,
+          "ankle": [
+            -0.25439703464508057,
+            -0.0617000013589859,
+            0.15260782837867737
+          ],
+          "pitch_degrees": 24.452319260275363
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.10515662078562298,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.1388888888888889,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.1388888888888889,
+          "stance": true,
+          "min_sole_z_m": 0.000999991549178958,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.487740830422111e-08,
+          "ankle": [
+            0.08633303642272949,
+            0.06630000472068787,
+            0.10109253972768784
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.6388888888888888,
+          "stance": false,
+          "min_sole_z_m": 0.010999027639627457,
+          "target_sole_z_m": 0.010999032519289999,
+          "ik_error_m": 4.360340502381185e-08,
+          "ankle": [
+            -0.24967381358146667,
+            -0.061699990183115005,
+            0.15741483867168427
+          ],
+          "pitch_degrees": 23.12872550330908
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.09269433137582002,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.16666666666666666,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.16666666666666666,
+          "stance": true,
+          "min_sole_z_m": 0.001000016345642507,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.006850114687196e-08,
+          "ankle": [
+            0.062333036214113235,
+            0.06629998981952667,
+            0.10109254717826843
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.6666666666666666,
+          "stance": false,
+          "min_sole_z_m": 0.021051909774541855,
+          "target_sole_z_m": 0.02105188712606736,
+          "ik_error_m": 8.760374796617662e-08,
+          "ankle": [
+            -0.23029305040836334,
+            -0.061699990183115005,
+            0.16392278671264648
+          ],
+          "pitch_degrees": 21.144144900758658
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.07932720325242268,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.19444444444444445,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.19444444444444445,
+          "stance": true,
+          "min_sole_z_m": 0.0009999937610700727,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.459888009168501e-08,
+          "ankle": [
+            0.03833303973078728,
+            0.06629999727010727,
+            0.10109252482652664
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.6944444444444444,
+          "stance": false,
+          "min_sole_z_m": 0.032372478395700455,
+          "target_sole_z_m": 0.032372521116124015,
+          "ik_error_m": 4.7706993203109864e-08,
+          "ankle": [
+            -0.19861750304698944,
+            -0.061699993908405304,
+            0.1704876869916916
+          ],
+          "pitch_degrees": 18.620082387474117
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.06191067262694101,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.2222222222222222,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.2222222222222222,
+          "stance": true,
+          "min_sole_z_m": 0.0009999955072999,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.452908539676128e-08,
+          "ankle": [
+            0.014333034865558147,
+            0.06629999727010727,
+            0.10109253972768784
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.7222222222222222,
+          "stance": false,
+          "min_sole_z_m": 0.04303397610783577,
+          "target_sole_z_m": 0.04303399452209253,
+          "ik_error_m": 4.360340502381185e-08,
+          "ankle": [
+            -0.15708842873573303,
+            -0.061699990183115005,
+            0.17526842653751373
+          ],
+          "pitch_degrees": 15.678042898305486
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.07984045176356581,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.25,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.25,
+          "stance": true,
+          "min_sole_z_m": 0.0010000007459893823,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.334686652507774e-08,
+          "ankle": [
+            -0.009666960686445236,
+            0.06630001217126846,
+            0.10109254717826843
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.75,
+          "stance": false,
+          "min_sole_z_m": 0.051221538335084915,
+          "target_sole_z_m": 0.05122156629368987,
+          "ik_error_m": 5.686408848491962e-08,
+          "ankle": [
+            -0.10828114300966263,
+            -0.06169998273253441,
+            0.17658022046089172
+          ],
+          "pitch_degrees": 12.439531368102795
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.1036451407088368,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.2777777777777778,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.2777777777777778,
+          "stance": true,
+          "min_sole_z_m": 0.0009999878238886595,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.487740830422111e-08,
+          "ankle": [
+            -0.03366696462035179,
+            0.06630000472068787,
+            0.10109251737594604
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.7777777777777778,
+          "stance": false,
+          "min_sole_z_m": 0.05554156005382538,
+          "target_sole_z_m": 0.05554159016550034,
+          "ik_error_m": 3.687849244703228e-08,
+          "ankle": [
+            -0.054921139031648636,
+            -0.061699990183115005,
+            0.17372016608715057
+          ],
+          "pitch_degrees": 9.026052731716062
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.11851721441558334,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.3055555555555556,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.3055555555555556,
+          "stance": true,
+          "min_sole_z_m": 0.0010000234469771385,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.979417974646353e-08,
+          "ankle": [
+            -0.05766696110367775,
+            0.06630000472068787,
+            0.10109255462884903
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.8055555555555556,
+          "stance": false,
+          "min_sole_z_m": 0.055258750915527344,
+          "target_sole_z_m": 0.05525873394094516,
+          "ik_error_m": 4.926201382152156e-08,
+          "ankle": [
+            0.00013508435222320259,
+            -0.06169998273253441,
+            0.1661403775215149
+          ],
+          "pitch_degrees": 5.559111923995324
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.128289625768311,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.3333333333333333,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.3333333333333333,
+          "stance": true,
+          "min_sole_z_m": 0.0009999697795137763,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.450580596923828e-08,
+          "ankle": [
+            -0.081666961312294,
+            0.06629999727010727,
+            0.10109250992536545
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.8333333333333333,
+          "stance": false,
+          "min_sole_z_m": 0.050421152263879776,
+          "target_sole_z_m": 0.05042114394863039,
+          "ik_error_m": 6.006850114687196e-08,
+          "ankle": [
+            0.05394609645009041,
+            -0.061699993908405304,
+            0.15444685518741608
+          ],
+          "pitch_degrees": 2.160213879790607
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13555653554894176,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.3611111111111111,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.3611111111111111,
+          "stance": true,
+          "min_sole_z_m": 0.000999974086880684,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.787801965433582e-08,
+          "ankle": [
+            -0.10566695779561996,
+            0.06630000472068787,
+            0.10109248757362366
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.8611111111111112,
+          "stance": false,
+          "min_sole_z_m": 0.04185223579406738,
+          "target_sole_z_m": 0.041852249822454175,
+          "ik_error_m": 6.064333243705223e-08,
+          "ankle": [
+            0.10354527831077576,
+            -0.061699990183115005,
+            0.1424987018108368
+          ],
+          "pitch_degrees": -1.0491364660480897
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.1391612849196947,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.3888888888888889,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.3888888888888889,
+          "stance": true,
+          "min_sole_z_m": 0.0010000122711062431,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.195638656616211e-08,
+          "ankle": [
+            -0.12966696918010712,
+            0.06629999727010727,
+            0.10109250992536545
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.8888888888888888,
+          "stance": false,
+          "min_sole_z_m": 0.031010599806904793,
+          "target_sole_z_m": 0.031010604553562846,
+          "ik_error_m": 6.244724472701628e-08,
+          "ankle": [
+            0.1459980458021164,
+            -0.06169998273253441,
+            0.13375337421894073
+          ],
+          "pitch_degrees": -3.947434178670701
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13995210282666282,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.4166666666666667,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.4166666666666667,
+          "stance": true,
+          "min_sole_z_m": 0.0009999803733080626,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.363255977870393e-08,
+          "ankle": [
+            -0.15366697311401367,
+            0.06630000472068787,
+            0.10109249502420425
+          ],
+          "pitch_degrees": 0.0
+        },
+        "r": {
+          "phase": 0.9166666666666667,
+          "stance": false,
+          "min_sole_z_m": 0.019741598516702652,
+          "target_sole_z_m": 0.019741617118078647,
+          "ik_error_m": 5.735011517383401e-08,
+          "ankle": [
+            0.1784428358078003,
+            -0.06169998273253441,
+            0.12425703555345535
+          ],
+          "pitch_degrees": -6.4131743232272385
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.1399899073950278,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.4444444444444444,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.4444444444444444,
+          "stance": true,
+          "min_sole_z_m": 0.0009999868925660849,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 9.06402249678704e-08,
+          "ankle": [
+            -0.17745259404182434,
+            0.06629999727010727,
+            0.10122957825660706
+          ],
+          "pitch_degrees": 0.07398609061496354
+        },
+        "r": {
+          "phase": 0.9444444444444444,
+          "stance": false,
+          "min_sole_z_m": 0.009963452816009521,
+          "target_sole_z_m": 0.009963436473053845,
+          "ik_error_m": 4.9421560620597e-08,
+          "ankle": [
+            0.1981040984392166,
+            -0.06169998645782471,
+            0.11572015285491943
+          ],
+          "pitch_degrees": -8.32485196486764
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13965744898184124,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.4722222222222222,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.4722222222222222,
+          "stance": true,
+          "min_sole_z_m": 0.0009999913163483143,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.143906154658885e-08,
+          "ankle": [
+            -0.1954728662967682,
+            0.06630001217126846,
+            0.1074252724647522
+          ],
+          "pitch_degrees": 3.3633676868748665
+        },
+        "r": {
+          "phase": 0.9722222222222222,
+          "stance": false,
+          "min_sole_z_m": 0.003340433118864894,
+          "target_sole_z_m": 0.003340454127796547,
+          "ik_error_m": 4.16500117164066e-08,
+          "ankle": [
+            0.20227403938770294,
+            -0.061700012534856796,
+            0.10983717441558838
+          ],
+          "pitch_degrees": -9.560962168741902
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13797205095042056,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.5,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.5,
+          "stance": true,
+          "min_sole_z_m": 0.0009999736212193966,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.05288029062447e-08,
+          "ankle": [
+            -0.20643438398838043,
+            0.06629998981952667,
+            0.12082923948764801
+          ],
+          "pitch_degrees": 9.839650145772598
+        },
+        "r": {
+          "phase": 0.0,
+          "stance": true,
+          "min_sole_z_m": 0.0009999979520216584,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.674193133312396e-08,
+          "ankle": [
+            0.188265860080719,
+            -0.06169997900724411,
+            0.1077476516366005
+          ],
+          "pitch_degrees": -10.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13443985397579586,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.5277777777777778,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.5277777777777778,
+          "stance": true,
+          "min_sole_z_m": 0.0009999978356063366,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.429369702178807e-08,
+          "ankle": [
+            -0.21385696530342102,
+            0.06629999727010727,
+            0.136240154504776
+          ],
+          "pitch_degrees": 17.159524009486223
+        },
+        "r": {
+          "phase": 0.02777777777777768,
+          "stance": true,
+          "min_sole_z_m": 0.0009999849135056138,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.3338039902137046e-08,
+          "ankle": [
+            0.1667773574590683,
+            -0.061699990183115005,
+            0.10695036500692368
+          ],
+          "pitch_degrees": -8.640562287252969
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13014889675525812,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.5555555555555556,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.5555555555555556,
+          "stance": true,
+          "min_sole_z_m": 0.000999971991404891,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.819089469244073e-08,
+          "ankle": [
+            -0.22345399856567383,
+            0.06630001962184906,
+            0.14715543389320374
+          ],
+          "pitch_degrees": 22.97967982019381
+        },
+        "r": {
+          "phase": 0.05555555555555558,
+          "stance": true,
+          "min_sole_z_m": 0.0010000113397836685,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.674193133312396e-08,
+          "ankle": [
+            0.14841671288013458,
+            -0.06169997900724411,
+            0.10491996258497238
+          ],
+          "pitch_degrees": -5.554539450287046
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.1251819603712879,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.5833333333333334,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.5833333333333334,
+          "stance": false,
+          "min_sole_z_m": 0.0010342260356992483,
+          "target_sole_z_m": 0.0010341846664796365,
+          "ik_error_m": 7.487740830422111e-08,
+          "ankle": [
+            -0.24208895862102509,
+            0.06630000472068787,
+            0.150620698928833
+          ],
+          "pitch_degrees": 24.993421236807478
+        },
+        "r": {
+          "phase": 0.08333333333333348,
+          "stance": true,
+          "min_sole_z_m": 0.0009999776957556605,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 4.16500117164066e-08,
+          "ankle": [
+            0.1303798109292984,
+            -0.061699990183115005,
+            0.10239578783512115
+          ],
+          "pitch_degrees": -2.230366941015073
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.11695451192094075,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.6111111111111112,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.6111111111111112,
+          "stance": false,
+          "min_sole_z_m": 0.003925062716007233,
+          "target_sole_z_m": 0.003925102391106179,
+          "ik_error_m": 6.143906154658885e-08,
+          "ankle": [
+            -0.25439709424972534,
+            0.06630002707242966,
+            0.15260760486125946
+          ],
+          "pitch_degrees": 24.452319260275363
+        },
+        "r": {
+          "phase": 0.11111111111111116,
+          "stance": true,
+          "min_sole_z_m": 0.001000015065073967,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.322027276634104e-08,
+          "ankle": [
+            0.11003284156322479,
+            -0.06169998645782471,
+            0.10117737203836441
+          ],
+          "pitch_degrees": -0.15648021134989418
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.10506604860847762,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.6388888888888888,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.6388888888888888,
+          "stance": false,
+          "min_sole_z_m": 0.010999062098562717,
+          "target_sole_z_m": 0.010999032519289999,
+          "ik_error_m": 8.024520884654677e-08,
+          "ankle": [
+            -0.24967388808727264,
+            0.06629999727010727,
+            0.15741470456123352
+          ],
+          "pitch_degrees": 23.12872550330908
+        },
+        "r": {
+          "phase": 0.13888888888888884,
+          "stance": true,
+          "min_sole_z_m": 0.0009999984176829457,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.018390663491007e-08,
+          "ankle": [
+            0.08633305877447128,
+            -0.0617000050842762,
+            0.10109264403581619
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.09284793472277665,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.6666666666666666,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.6666666666666666,
+          "stance": false,
+          "min_sole_z_m": 0.02105185203254223,
+          "target_sole_z_m": 0.02105188712606736,
+          "ik_error_m": 4.470348358154297e-08,
+          "ankle": [
+            -0.2302931845188141,
+            0.06629999727010727,
+            0.163922518491745
+          ],
+          "pitch_degrees": 21.144144900758658
+        },
+        "r": {
+          "phase": 0.16666666666666652,
+          "stance": true,
+          "min_sole_z_m": 0.001000009709969163,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.3207788084021586e-08,
+          "ankle": [
+            0.06233307346701622,
+            -0.061699993908405304,
+            0.10109264403581619
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.07971929877779169,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.6944444444444444,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.6944444444444444,
+          "stance": false,
+          "min_sole_z_m": 0.03237251937389374,
+          "target_sole_z_m": 0.032372521116124015,
+          "ik_error_m": 9.453726962543667e-08,
+          "ankle": [
+            -0.19861754775047302,
+            0.06630000472068787,
+            0.17048753798007965
+          ],
+          "pitch_degrees": 18.620082387474117
+        },
+        "r": {
+          "phase": 0.19444444444444442,
+          "stance": true,
+          "min_sole_z_m": 0.0010000030742958188,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 4.607929615994163e-08,
+          "ankle": [
+            0.038333065807819366,
+            -0.061699990183115005,
+            0.10109264403581619
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.061927646634980175,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.7222222222222222,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.7222222222222222,
+          "stance": false,
+          "min_sole_z_m": 0.04303397238254547,
+          "target_sole_z_m": 0.04303399452209253,
+          "ik_error_m": 5.5755039852469285e-08,
+          "ankle": [
+            -0.1570884883403778,
+            0.06630001217126846,
+            0.1752682626247406
+          ],
+          "pitch_degrees": 15.678042898305486
+        },
+        "r": {
+          "phase": 0.22222222222222232,
+          "stance": true,
+          "min_sole_z_m": 0.0009999885223805904,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 5.557585041163747e-08,
+          "ankle": [
+            0.014333071187138557,
+            -0.06169998273253441,
+            0.101092629134655
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.07952854875879822,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.75,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.75,
+          "stance": false,
+          "min_sole_z_m": 0.051221564412117004,
+          "target_sole_z_m": 0.05122156629368987,
+          "ik_error_m": 6.05288029062447e-08,
+          "ankle": [
+            -0.1082812249660492,
+            0.06630000472068787,
+            0.17658008635044098
+          ],
+          "pitch_degrees": 12.439531368102795
+        },
+        "r": {
+          "phase": 0.25,
+          "stance": true,
+          "min_sole_z_m": 0.001000010990537703,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.067193103917811e-08,
+          "ankle": [
+            -0.009666935540735722,
+            -0.061699990183115005,
+            0.10109265148639679
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.10339247848186878,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.7777777777777778,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.7777777777777778,
+          "stance": false,
+          "min_sole_z_m": 0.05554158240556717,
+          "target_sole_z_m": 0.05554159016550034,
+          "ik_error_m": 7.497002108953188e-08,
+          "ankle": [
+            -0.05492120608687401,
+            0.06630000472068787,
+            0.1737201064825058
+          ],
+          "pitch_degrees": 9.026052731716062
+        },
+        "r": {
+          "phase": 0.2777777777777777,
+          "stance": true,
+          "min_sole_z_m": 0.0010000328766182065,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.83872392426648e-08,
+          "ankle": [
+            -0.03366692736744881,
+            -0.061699990183115005,
+            0.10109267383813858
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.11837658817491757,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.8055555555555556,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.8055555555555556,
+          "stance": false,
+          "min_sole_z_m": 0.05525874346494675,
+          "target_sole_z_m": 0.05525873394094516,
+          "ik_error_m": 7.509659630107767e-08,
+          "ankle": [
+            0.00013503822265192866,
+            0.06630000472068787,
+            0.16614024341106415
+          ],
+          "pitch_degrees": 5.559111923995324
+        },
+        "r": {
+          "phase": 0.3055555555555556,
+          "stance": true,
+          "min_sole_z_m": 0.000999997602775693,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.075764607749913e-08,
+          "ankle": [
+            -0.05766693130135536,
+            -0.061699990183115005,
+            0.1010926142334938
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.12823275051078892,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.8333333333333334,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.8333333333333334,
+          "stance": false,
+          "min_sole_z_m": 0.05042112618684769,
+          "target_sole_z_m": 0.05042114394863036,
+          "ik_error_m": 6.155189738369847e-08,
+          "ankle": [
+            0.05394606664776802,
+            0.06630001217126846,
+            0.15444669127464294
+          ],
+          "pitch_degrees": 2.1602138797905965
+        },
+        "r": {
+          "phase": 0.3333333333333335,
+          "stance": true,
+          "min_sole_z_m": 0.000999978743493557,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 4.9421560620597e-08,
+          "ankle": [
+            -0.08166691660881042,
+            -0.06169998645782471,
+            0.10109259188175201
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13554867645192675,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.8611111111111112,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.8611111111111112,
+          "stance": false,
+          "min_sole_z_m": 0.04185225069522858,
+          "target_sole_z_m": 0.041852249822454175,
+          "ik_error_m": 7.487740830422111e-08,
+          "ankle": [
+            0.10354525595903397,
+            0.06630000472068787,
+            0.1424986869096756
+          ],
+          "pitch_degrees": -1.0491364660480897
+        },
+        "r": {
+          "phase": 0.36111111111111116,
+          "stance": true,
+          "min_sole_z_m": 0.0009999868925660849,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 4.842877388000488e-08,
+          "ankle": [
+            -0.10566692054271698,
+            -0.061699990183115005,
+            0.10109257698059082
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.1391788990172459,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.8888888888888888,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.8888888888888888,
+          "stance": false,
+          "min_sole_z_m": 0.031010590493679047,
+          "target_sole_z_m": 0.031010604553562846,
+          "ik_error_m": 5.960464477539063e-08,
+          "ankle": [
+            0.1459980309009552,
+            0.06629999727010727,
+            0.13375324010849
+          ],
+          "pitch_degrees": -3.947434178670701
+        },
+        "r": {
+          "phase": 0.38888888888888884,
+          "stance": true,
+          "min_sole_z_m": 0.001000011689029634,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.679882693323606e-08,
+          "ankle": [
+            -0.12966693937778473,
+            -0.06169998273253441,
+            0.10109259933233261
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13997999090142627,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.9166666666666666,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.9166666666666666,
+          "stance": false,
+          "min_sole_z_m": 0.01974162831902504,
+          "target_sole_z_m": 0.0197416171180787,
+          "ik_error_m": 7.375698489406456e-08,
+          "ankle": [
+            0.17844277620315552,
+            0.06630000472068787,
+            0.12425688654184341
+          ],
+          "pitch_degrees": -6.413174323227228
+        },
+        "r": {
+          "phase": 0.4166666666666665,
+          "stance": true,
+          "min_sole_z_m": 0.000999990152195096,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.244724472701628e-08,
+          "ankle": [
+            -0.15366694331169128,
+            -0.061699990183115005,
+            0.10109258443117142
+          ],
+          "pitch_degrees": 0.0
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.1400202886275095,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.9444444444444444,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.9444444444444444,
+          "stance": false,
+          "min_sole_z_m": 0.009963419288396835,
+          "target_sole_z_m": 0.009963436473053845,
+          "ik_error_m": 6.869095904598301e-08,
+          "ankle": [
+            0.1981040984392166,
+            0.06629999727010727,
+            0.11571997404098511
+          ],
+          "pitch_degrees": -8.32485196486764
+        },
+        "r": {
+          "phase": 0.4444444444444444,
+          "stance": true,
+          "min_sole_z_m": 0.0010000192560255527,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 7.11715712194994e-08,
+          "ankle": [
+            -0.17745259404182434,
+            -0.06169998273253441,
+            0.10122969001531601
+          ],
+          "pitch_degrees": 0.07398609061496354
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13969057578628757,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.9722222222222222,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.9722222222222222,
+          "stance": false,
+          "min_sole_z_m": 0.0033404468558728695,
+          "target_sole_z_m": 0.003340454127796547,
+          "ik_error_m": 8.462232866585662e-08,
+          "ankle": [
+            0.20227403938770294,
+            0.06630001217126846,
+            0.10983701795339584
+          ],
+          "pitch_degrees": -9.560962168741902
+        },
+        "r": {
+          "phase": 0.4722222222222223,
+          "stance": true,
+          "min_sole_z_m": 0.0010000026086345315,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 6.018390663491007e-08,
+          "ankle": [
+            -0.1954728066921234,
+            -0.06169997528195381,
+            0.10742539167404175
+          ],
+          "pitch_degrees": 3.363367686874888
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.13801838926334575,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    },
+    {
+      "phase": 0.0,
+      "travel": 0,
+      "feet": {
+        "l": {
+          "phase": 0.0,
+          "stance": true,
+          "min_sole_z_m": 0.001000006916001439,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 8.33000234328132e-08,
+          "ankle": [
+            0.1882658451795578,
+            0.06629999727010727,
+            0.10774748772382736
+          ],
+          "pitch_degrees": -10.0
+        },
+        "r": {
+          "phase": 0.5,
+          "stance": true,
+          "min_sole_z_m": 0.0009999941103160381,
+          "target_sole_z_m": 0.001,
+          "ik_error_m": 3.817286627724617e-08,
+          "ankle": [
+            -0.20643433928489685,
+            -0.06169998273253441,
+            0.12082935869693756
+          ],
+          "pitch_degrees": 9.839650145772598
+        }
+      },
+      "skirt": {
+        "max_radial_allowance_m": 0.134519575203437,
+        "body_intersection_pairs": 0,
+        "max_unsatisfied_vertex_clearance_m": 0.0
+      }
+    }
+  ],
+  "reference_mesh_geometry_uv_unchanged": true,
+  "weights_unchanged_outside_foot_repair": true,
+  "reference_bone_bind_matrices_and_hierarchy_unchanged": true,
+  "authoring_note": "Only the animation source copy disables Blender Connected flags to allow baked corrective pose translations; the production model and all bind matrices, bone names and parent relationships remain unchanged.",
+  "cloth_note": "Bone translation keys provide cyclic, temporally smoothed gait clearance. These baked secondary keys should not be applied additively on top of a second simulation of the same bones.",
+  "ue_runtime_imported_or_verified": false,
+  "validation": {
+    "sample_count": 73,
+    "sample_spacing_frames": 0.5,
+    "loop_max_bone_matrix_error": 0.0,
+    "flat_stance_world_contact_max_drift_m": 0.00017886326278336714,
+    "min_body_vertex_height_m": 0.0007279249839484692,
+    "full_body_skirt_intersection_pairs_by_half_frame": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "max_full_body_skirt_intersection_pairs": 0,
+    "foot_ik_max_error_m": 9.453726962543667e-08,
+    "sole_height_max_target_error_m": 4.272042355979444e-08
+  },
+  "root_motion_translation_m": [
+    0.8640000224113464,
+    0.0,
+    0.0
+  ],
+  "fbx_roundtrip": {
+    "animations": {
+      "InPlace": {
+        "bones": 109,
+        "frames": [
+          2.0,
+          38.0
+        ],
+        "fps": 30,
+        "duration_seconds": 1.2,
+        "root_displacement_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_skinning_matrix_error": 3.2298266887664795e-06,
+        "samples_compared": 5,
+        "blender_inferred_connected_flags_cleared": 41
+      },
+      "RootMotion": {
+        "bones": 109,
+        "frames": [
+          2.0,
+          38.0
+        ],
+        "fps": 30,
+        "duration_seconds": 1.2,
+        "root_displacement_m": [
+          0.8640000224113464,
+          -1.4062970876693726e-07,
+          0.0
+        ],
+        "max_skinning_matrix_error": 3.2298266887664795e-06,
+        "samples_compared": 5,
+        "blender_inferred_connected_flags_cleared": 41
+      }
+    },
+    "production_model": {
+      "meshes": 3,
+      "bones": 109,
+      "images": 13,
+      "shoe_weight_max_error": 2.9792917466409108e-08,
+      "external_texture_search": false
+    }
+  },
+  "fbx_export_note": "Skeleton-only FBXs use neutral node defaults with a temporary frame-0 rest pose excluded from the exported frames 1-37. Blender import automatically infers Connected constraints absent from FBX; these are cleared for validation to preserve translation channels. Existing hierarchy and bind matrices remain unchanged.",
+  "final_reopen": {
+    "model": {
+      "reopened_after_temporary_files_removed": true,
+      "bones": 109,
+      "packed_images": 13,
+      "meshes": 3,
+      "active_action": null
+    },
+    "animation": {
+      "reopened_after_temporary_files_removed": true,
+      "bones": 109,
+      "packed_images": 13,
+      "meshes": 4,
+      "active_action": "A_LunaMk3_Walk_Feminine_InPlace"
+    }
+  },
+  "previews": {
+    "views": [
+      "threequarter",
+      "side"
+    ],
+    "resolution": [
+      640,
+      800
+    ],
+    "fps": 30,
+    "duration_seconds": 3.6,
+    "frames": 108,
+    "cycles": 3
+  }
+}

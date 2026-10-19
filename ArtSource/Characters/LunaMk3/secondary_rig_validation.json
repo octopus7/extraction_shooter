@@ -16,7 +16,6 @@
   "bone_count": 109,
   "original_bones": 61,
   "added_bones": 48,
-  "body_weights_preserved": true,
   "original_bone_rest_transforms_preserved": true,
   "meshes": [
     {
@@ -394,5 +393,13 @@
     "skirt_tip_test_displacement_m": 0.013297693826254467,
     "verified_without_external_texture_search": true
   },
-  "qa_fbx_skirt_motion_matrix_delta": 0.06894376873970032
+  "qa_fbx_skirt_motion_matrix_delta": 0.06894376873970032,
+  "body_weights_preserved_before_walk_foot_fix": true,
+  "foot_weight_repair": {
+    "vertices": 650,
+    "full_foot_binding_below_m": 0.08,
+    "blend_to_original_weights_until_m": 0.14,
+    "reason": "Original shoe heels had substantial calf/twist weights and sank up to 16 mm during foot roll. Shoes now follow foot/ball bones, fading to original ankle weights."
+  },
+  "walk_validation": "Animations/walk_validation.json"
 }
