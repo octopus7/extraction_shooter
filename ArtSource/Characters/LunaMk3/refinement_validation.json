@@ -1,0 +1,292 @@
+{
+  "face": {
+    "vertices_applied": 467,
+    "iris_polygons": 59,
+    "iris_material": "M_LunaMk3_IrisAnime",
+    "texture": "D:\\github\\extraction_shooter\\ArtSource\\Characters\\LunaMk3\\Textures\\T_LunaMk3_IrisAnimeReference.png",
+    "head_vertex_count_after": 5428,
+    "head_polygon_count_after": 5383,
+    "extra_vertices_retained": 0
+  },
+  "neck": {
+    "added_vertices": 206,
+    "added_faces": 248,
+    "preserved_original_vertices": 5428,
+    "preserved_original_faces": 5383,
+    "preserved_original_weights": true,
+    "preserved_original_uv": true
+  },
+  "skirt": {
+    "vertices": 2842,
+    "faces": 3027,
+    "original_weights_preserved": 2525,
+    "bone_changes_applied": 12
+  },
+  "original_skin_weights_preserved": true,
+  "original_body_hair_bones_preserved": true,
+  "current_meshes": [
+    {
+      "name": "LunaMk3_Body",
+      "vertices": 5378,
+      "faces": 5811,
+      "materials": [
+        "tripo_mat_4b944d5f"
+      ]
+    },
+    {
+      "name": "LunaMk3_Head",
+      "vertices": 5634,
+      "faces": 5631,
+      "materials": [
+        "tripo_mat_a0431b3f",
+        "M_LunaMk3_IrisAnime"
+      ]
+    },
+    {
+      "name": "LunaMk3_Skirt",
+      "vertices": 2912,
+      "faces": 3075,
+      "materials": [
+        "tripo_mat_8c56926b",
+        "M_LunaMk3_CleanWhiteCloth"
+      ]
+    }
+  ],
+  "images": [
+    {
+      "name": "LunaMk3_Body_Color.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Body_Metallic.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Body_Normal.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Body_Roughness.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_0.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_1.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_2.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_3.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_0.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_1.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_2.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_3.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "T_LunaMk3_IrisAnimeReference.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "packed": true
+    }
+  ],
+  "tripo_api_calls": 0,
+  "builtin_imagegen_calls": 3,
+  "face_quality": {
+    "vertices_applied": 467,
+    "iris_polygons": 59,
+    "iris_material": "M_LunaMk3_IrisAnime",
+    "texture": "D:\\github\\extraction_shooter\\ArtSource\\Characters\\LunaMk3\\Textures\\T_LunaMk3_IrisAnimeReference.png",
+    "head_vertex_count_after": 5428,
+    "head_polygon_count_after": 5383,
+    "extra_vertices_retained": 0,
+    "patch_replay_exact": true,
+    "noniris_uv_unchanged": true,
+    "weights_preserved": true,
+    "bones": 109,
+    "protected_hair_vertices_unchanged": true,
+    "no_rejected_bake_data": true,
+    "iris_rim_samples_inside_dark_outline": true,
+    "changed_vertices": 467,
+    "changed_uv_loops": 190,
+    "material": {
+      "name": "M_LunaMk3_IrisAnime",
+      "texture_path": "D:\\github\\extraction_shooter\\ArtSource\\Characters\\LunaMk3\\Textures\\T_LunaMk3_IrisAnimeReference.png",
+      "slot_index_in_working_copy": 1,
+      "color_space": "sRGB",
+      "metallic": 0,
+      "roughness": 0.4,
+      "specular_ior_level": 0.2,
+      "coat_weight": 0.05,
+      "coat_roughness": 0.3,
+      "base_color_texture": true,
+      "alpha_mode": "OPAQUE",
+      "normal_texture": null
+    },
+    "limitations": [
+      "The generated outer eyelashes retain their original topology and baked paint; the right corner is raised and tapered toward the left reference but is not an exact mirrored topology."
+    ]
+  },
+  "face_geometry_quality": {
+    "changed_vertices": 467,
+    "normal_reversals": [],
+    "area_collapse_under_10pct": [],
+    "area_ratio_min": 0.26828757342074616,
+    "area_ratio_max": 2.521045000846665
+  },
+  "neck_quality": {
+    "vertex_count": 5634,
+    "polygon_count": 5631,
+    "added_vertices": 206,
+    "added_faces": 248,
+    "closed_target_boundary_edges": 44,
+    "target_boundary_edges": 44,
+    "remaining_boundary_edges": 2077,
+    "new_nonmanifold_edges": [],
+    "new_inconsistent_winding_edges": [],
+    "min_new_face_area_m2": 1.1837292731797788e-05,
+    "min_new_uv_area": 7.216200081927582e-09,
+    "new_weight_sum_range": [
+      0.9999999701976776,
+      1.0000000037252903
+    ],
+    "max_new_vertex_influences": 2,
+    "rig_bone_count": 109,
+    "all_original_vertex_positions_faces_uv_weights_preserved": {
+      "added_vertices": 206,
+      "added_faces": 248,
+      "preserved_original_vertices": 5428,
+      "preserved_original_faces": 5383,
+      "preserved_original_weights": true,
+      "preserved_original_uv": true
+    },
+    "head_mesh_has_custom_normals": true,
+    "visual_validation": {
+      "neutral_front": "RefinementPreviews/face_front.png",
+      "neutral_low_threequarter": "RefinementPreviews/neck_low_threequarter.png",
+      "neutral_side": "Validated in local repair working copy; not retained separately.",
+      "head_world_yaw_15_degrees": "RefinementPreviews/head_turn_neck_check.png",
+      "chin_hole_closed": true,
+      "rear_head_to_neck_gap_closed": true,
+      "new_skin_overlap_hidden_within_collar": true,
+      "limits": "Original unrelated hair-card boundaries and generated source texture artifacts are preserved. Final integrated FBX roundtrip passed; UE runtime has not been validated."
+    }
+  },
+  "skirt_quality": {
+    "apply": {
+      "vertices": 2842,
+      "faces": 3027,
+      "original_weights_preserved": 2525,
+      "bone_changes_applied": 12
+    },
+    "original_weight_max_error": 0.0,
+    "max_influences": 4,
+    "weight_sum_max_error": 4.470348358154297e-08,
+    "rest": {
+      "band_faces": 214,
+      "band_min_radial_clearance_mm": 2.336587739560081,
+      "band_max_radial_clearance_mm": 9.6633969709128,
+      "band_surface_intersection_pairs": 0,
+      "degenerate_faces": 0
+    },
+    "boundary_edges": 503,
+    "nonmanifold_nonboundary_edges": 2,
+    "mild_sway": {
+      "band_faces": 214,
+      "band_min_radial_clearance_mm": 2.336587739560081,
+      "band_max_radial_clearance_mm": 9.660544525136732,
+      "band_surface_intersection_pairs": 0,
+      "degenerate_faces": 0
+    }
+  },
+  "skirt_attachment_seam": {
+    "applied": {
+      "vertices": 2912,
+      "faces": 3075,
+      "added_vertices": 70,
+      "added_faces": 48
+    },
+    "validation": {
+      "vertices": 2912,
+      "faces": 3075,
+      "added_vertices": 70,
+      "added_faces": 48,
+      "original_vertices_max_delta": 0.0,
+      "original_weight_max_error": 0.0,
+      "new_max_influences": 3,
+      "new_weight_sum_error": 2.9802322387695312e-08,
+      "band_body_intersections": 0,
+      "seam_body_intersections": 0,
+      "new_degenerate_faces": 0
+    },
+    "existing_vertices_weights_and_bones_preserved": true
+  }
+}

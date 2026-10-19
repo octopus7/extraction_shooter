@@ -259,5 +259,6 @@
         "path": "embedded:LunaMk3_Skirt_tripo_image_8c56926b_3.png"
       }
     ]
-  }
+  },
+  "validation_scope": "Historical first assembly before secondary rig and facial repair; see secondary_rig_validation.json for current asset."
 }

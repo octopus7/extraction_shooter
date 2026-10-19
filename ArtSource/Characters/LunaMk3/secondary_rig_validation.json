@@ -1,0 +1,446 @@
+{
+  "name": "LunaMk3",
+  "tripo_api_calls": 0,
+  "builtin_imagegen_calls": 3,
+  "post_cleanup_reopen_verified": true,
+  "preview_video": {"path": "SecondaryRigPreviews/LunaMk3_SwayPreview.mp4", "duration_seconds": 3.0, "frames": 36, "size": [640, 800], "codec": "h264"},
+  "bone_count": 109,
+  "original_bones": 61,
+  "added_bones": 48,
+  "body_weights_preserved": true,
+  "original_bone_rest_transforms_preserved": true,
+  "meshes": [
+    {
+      "name": "LunaMk3_Body",
+      "vertices": 5378,
+      "max_influences": 4,
+      "weight_min_sum": 0.9999998899875209,
+      "weight_max_sum": 1.0000000426080078,
+      "geometry_uv_sha256": "50b5452f63184721ed7fbb2032690b105544851575a3072e83e7804ea6e013bd"
+    },
+    {
+      "name": "LunaMk3_Head",
+      "vertices": 5634,
+      "max_influences": 2,
+      "weight_min_sum": 0.9999999701976776,
+      "weight_max_sum": 1.0000000298023224,
+      "geometry_uv_sha256": "ca8bb241328c3388c0ebbd453d02f2abea20ad6974b95b50089ce24bb2bbcf2c"
+    },
+    {
+      "name": "LunaMk3_Skirt",
+      "vertices": 2912,
+      "max_influences": 4,
+      "weight_min_sum": 0.9999999552965164,
+      "weight_max_sum": 1.0000000409781933,
+      "geometry_uv_sha256": "3f6507dcfeb9188b99f233ac2b6df3f59bf9a975ff9209e30985f2fd2672ef89"
+    }
+  ],
+  "height_m": 1.509163283393832,
+  "geometry_and_uv_preserved_before_refinement": true,
+  "refinements_applied": true,
+  "neutral_saved_pose": true,
+  "chain_validation": [
+    {
+      "bone": "hair_tail_r_01",
+      "weighted_vertices": 139
+    },
+    {
+      "bone": "hair_tail_r_02",
+      "weighted_vertices": 214
+    },
+    {
+      "bone": "hair_tail_r_03",
+      "weighted_vertices": 505
+    },
+    {
+      "bone": "hair_tail_r_04",
+      "weighted_vertices": 527
+    },
+    {
+      "bone": "hair_tail_l_01",
+      "weighted_vertices": 142
+    },
+    {
+      "bone": "hair_tail_l_02",
+      "weighted_vertices": 211
+    },
+    {
+      "bone": "hair_tail_l_03",
+      "weighted_vertices": 508
+    },
+    {
+      "bone": "hair_tail_l_04",
+      "weighted_vertices": 525
+    },
+    {
+      "bone": "hair_ribbon_r_01",
+      "weighted_vertices": 44
+    },
+    {
+      "bone": "hair_ribbon_r_02",
+      "weighted_vertices": 40
+    },
+    {
+      "bone": "hair_ribbon_l_01",
+      "weighted_vertices": 44
+    },
+    {
+      "bone": "hair_ribbon_l_02",
+      "weighted_vertices": 43
+    },
+    {
+      "bone": "skirt_00_01",
+      "weighted_vertices": 89
+    },
+    {
+      "bone": "skirt_00_02",
+      "weighted_vertices": 190
+    },
+    {
+      "bone": "skirt_00_03",
+      "weighted_vertices": 369
+    },
+    {
+      "bone": "skirt_01_01",
+      "weighted_vertices": 218
+    },
+    {
+      "bone": "skirt_01_02",
+      "weighted_vertices": 246
+    },
+    {
+      "bone": "skirt_01_03",
+      "weighted_vertices": 322
+    },
+    {
+      "bone": "skirt_02_01",
+      "weighted_vertices": 213
+    },
+    {
+      "bone": "skirt_02_02",
+      "weighted_vertices": 215
+    },
+    {
+      "bone": "skirt_02_03",
+      "weighted_vertices": 228
+    },
+    {
+      "bone": "skirt_03_01",
+      "weighted_vertices": 113
+    },
+    {
+      "bone": "skirt_03_02",
+      "weighted_vertices": 162
+    },
+    {
+      "bone": "skirt_03_03",
+      "weighted_vertices": 180
+    },
+    {
+      "bone": "skirt_04_01",
+      "weighted_vertices": 156
+    },
+    {
+      "bone": "skirt_04_02",
+      "weighted_vertices": 265
+    },
+    {
+      "bone": "skirt_04_03",
+      "weighted_vertices": 283
+    },
+    {
+      "bone": "skirt_05_01",
+      "weighted_vertices": 113
+    },
+    {
+      "bone": "skirt_05_02",
+      "weighted_vertices": 287
+    },
+    {
+      "bone": "skirt_05_03",
+      "weighted_vertices": 348
+    },
+    {
+      "bone": "skirt_06_01",
+      "weighted_vertices": 82
+    },
+    {
+      "bone": "skirt_06_02",
+      "weighted_vertices": 271
+    },
+    {
+      "bone": "skirt_06_03",
+      "weighted_vertices": 350
+    },
+    {
+      "bone": "skirt_07_01",
+      "weighted_vertices": 122
+    },
+    {
+      "bone": "skirt_07_02",
+      "weighted_vertices": 307
+    },
+    {
+      "bone": "skirt_07_03",
+      "weighted_vertices": 368
+    },
+    {
+      "bone": "skirt_08_01",
+      "weighted_vertices": 157
+    },
+    {
+      "bone": "skirt_08_02",
+      "weighted_vertices": 266
+    },
+    {
+      "bone": "skirt_08_03",
+      "weighted_vertices": 283
+    },
+    {
+      "bone": "skirt_09_01",
+      "weighted_vertices": 113
+    },
+    {
+      "bone": "skirt_09_02",
+      "weighted_vertices": 162
+    },
+    {
+      "bone": "skirt_09_03",
+      "weighted_vertices": 180
+    },
+    {
+      "bone": "skirt_10_01",
+      "weighted_vertices": 211
+    },
+    {
+      "bone": "skirt_10_02",
+      "weighted_vertices": 215
+    },
+    {
+      "bone": "skirt_10_03",
+      "weighted_vertices": 233
+    },
+    {
+      "bone": "skirt_11_01",
+      "weighted_vertices": 225
+    },
+    {
+      "bone": "skirt_11_02",
+      "weighted_vertices": 260
+    },
+    {
+      "bone": "skirt_11_03",
+      "weighted_vertices": 348
+    }
+  ],
+  "pose_checks": [
+    {
+      "frame": 1,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "hair_max_displacement_m": 0.0450836874301502,
+      "skirt_max_displacement_m": 0.008011346998315287,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.8892322582655967,
+          "max_edge_length_ratio": 1.085916016519725
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.95701143316866,
+          "max_edge_length_ratio": 1.0225423050188516
+        }
+      }
+    },
+    {
+      "frame": 13,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 5.7034133638421775e-06,
+      "hair_max_displacement_m": 0.0542179195686748,
+      "skirt_max_displacement_m": 0.03732078749223093,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.9147045147523808,
+          "max_edge_length_ratio": 1.1021950155776334
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.9256614056744041,
+          "max_edge_length_ratio": 1.1997324543202634
+        }
+      }
+    },
+    {
+      "frame": 25,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 2.5112221691382735e-06,
+      "hair_max_displacement_m": 0.0805592548201918,
+      "skirt_max_displacement_m": 0.04082636330615836,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.8987788110084721,
+          "max_edge_length_ratio": 1.0936262498285805
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.8032364724855575,
+          "max_edge_length_ratio": 1.131158864151169
+        }
+      }
+    },
+    {
+      "frame": 37,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "hair_max_displacement_m": 0.04476954632991538,
+      "skirt_max_displacement_m": 0.007587259993902167,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.9134378719507705,
+          "max_edge_length_ratio": 1.1114801710686277
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.9617871721881218,
+          "max_edge_length_ratio": 1.0264309026822924
+        }
+      }
+    },
+    {
+      "frame": 49,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 2.5174143618334505e-06,
+      "hair_max_displacement_m": 0.053850026505924777,
+      "skirt_max_displacement_m": 0.03648858594926712,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.8990404851090822,
+          "max_edge_length_ratio": 1.087843689924372
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.9103525408815334,
+          "max_edge_length_ratio": 1.1752026236452433
+        }
+      }
+    },
+    {
+      "frame": 61,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 5.7172332539080315e-06,
+      "hair_max_displacement_m": 0.07904808236619264,
+      "skirt_max_displacement_m": 0.041905448443277885,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.9047364041212781,
+          "max_edge_length_ratio": 1.1048444692225015
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.774415765760459,
+          "max_edge_length_ratio": 1.1089273817161094
+        }
+      }
+    },
+    {
+      "frame": 73,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "hair_max_displacement_m": 0.0450836874301502,
+      "skirt_max_displacement_m": 0.008011346998315287,
+      "edge_stretch": {
+        "LunaMk3_Head": {
+          "min_edge_length_ratio": 0.8892322582655967,
+          "max_edge_length_ratio": 1.085916016519725
+        },
+        "LunaMk3_Skirt": {
+          "min_edge_length_ratio": 0.95701143316866,
+          "max_edge_length_ratio": 1.0225423050188516
+        }
+      }
+    }
+  ],
+  "qa_clip_note": "Keyframed sway test only. Not physics simulation or walking animation.",
+  "ue_runtime_validated": false,
+  "limitations": [
+    "UE PhysicsAsset, AnimBP and runtime collision tuning still required; not created in this rigging task.",
+    "Face, scalp, headband and upper bows remain rigid on head; two ponytails and hanging ribbons have secondary bones.",
+    "Source generated mesh imperfections remain. Large leg strides or crouches require runtime collision/pose correction."
+  ],
+  "fbx_roundtrip": {
+    "bone_count": 109,
+    "mesh_count": 3,
+    "embedded_image_count": 13,
+    "embedded_image_sizes": [
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        1254,
+        1254
+      ]
+    ],
+    "height_m": 1.5091632183311674,
+    "max_influences": {
+      "LunaMk3_Skirt": 4,
+      "LunaMk3_Body": 4,
+      "LunaMk3_Head": 2
+    },
+    "attachment_pose_delta_m": {
+      "hair_tail_l_01": 0.042431638172481426,
+      "skirt_00_01": 0.042712127871911136
+    },
+    "verified_without_external_texture_search": true
+  },
+  "qa_fbx_animation_verified": true,
+  "qa_fbx_frame_range": [
+    2.0,
+    74.0
+  ]
+}
