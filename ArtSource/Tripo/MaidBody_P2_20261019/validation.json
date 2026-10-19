@@ -1,0 +1,58 @@
+{
+  "mesh_objects": 1,
+  "vertices": 5378,
+  "faces_by_sides": {
+    "3": 996,
+    "4": 4815
+  },
+  "materials": 1,
+  "images": [
+    {
+      "name": "tripo_image_4b944d5f_0",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    },
+    {
+      "name": "tripo_image_4b944d5f_1",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    },
+    {
+      "name": "tripo_image_4b944d5f_2",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    },
+    {
+      "name": "tripo_image_4b944d5f_3",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    }
+  ],
+  "uv_layers": {
+    "tripo_node_4b944d5f": 1
+  },
+  "bounds": {
+    "tripo_node_4b944d5f": [
+      0.18017578125,
+      0.64990234375,
+      0.99951171875
+    ]
+  },
+  "blend_reopen_verified": true
+}

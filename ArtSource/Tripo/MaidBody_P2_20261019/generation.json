@@ -1,0 +1,21 @@
+{
+  "task_id": "4b944d5f-fcb1-4aae-b234-aea178b62857",
+  "status": "success",
+  "source_reference": "ArtSource/Tripo/MaidBody_Reference_20261019/MaidBody_WhiteTights_Reference_v2.png",
+  "model": "P2-20260801",
+  "quad": true,
+  "texture_quality": "detailed",
+  "texture": true,
+  "pbr": true,
+  "input_views": [
+    "front",
+    "back",
+    "right"
+  ],
+  "credits_consumed": 120,
+  "balance_before": 5055,
+  "balance_after": 4935,
+  "frozen_after": 0,
+  "postprocessing_tasks": [],
+  "scope": "Neck-down body only; no skirt, shorts, rigging, Smart UV or head assembly."
+}
