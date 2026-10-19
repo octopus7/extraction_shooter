@@ -488,7 +488,7 @@ void ATunaSweeperHopperEnemyCharacter::OnDeathPresentationStarted()
     Presentation->SetMechActive(false);
     Presentation->SetGunVisible(false);
     Presentation->SetPilotLocomotion(false);
-    if (ShouldKeepDefeatedBody()) Presentation->KeepOpenCockpitWreck();
+    if (ShouldKeepDefeatedBody()) Presentation->StartSeatEjection();
 }
 
 void ATunaSweeperHopperEnemyCharacter::EndPlay(EEndPlayReason::Type Reason)

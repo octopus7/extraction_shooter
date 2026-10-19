@@ -18,6 +18,8 @@ UHopperPresentationComponent::UHopperPresentationComponent()
 {
  PrimaryComponentTick.bCanEverTick=true;
  PrimaryComponentTick.TickGroup=TG_PostPhysics;
+ EjectionSmokeMaterial=FSoftObjectPath(TEXT("/Game/Characters/Hopper/Materials/M_HopperEscapeSmoke.M_HopperEscapeSmoke"));
+ EjectionFlameMaterial=FSoftObjectPath(TEXT("/Game/Characters/CombatPatterns/Materials/M_CP_Glow.M_CP_Glow"));
 }
 float UHopperPresentationComponent::CapsuleHalfHeight() const
 {
@@ -27,6 +29,7 @@ float UHopperPresentationComponent::CapsuleHalfHeight() const
 void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
 {
  if (!Data || (VisualData==Data && IsValid(BodyRoot))) return;
+ ClearEjectionExhaust(); EjectionTime=-1.f; bSeatLaunched=false;
  // This component owns every generated component. Reconstruct only when its data changes.
  TArray<USceneComponent*> Old;
  TArray<USceneComponent*> Owned;
@@ -135,14 +138,6 @@ float UHopperPresentationComponent::GetMaxStableWalkSpeed() const
  // One full alternating cycle plus support time must fit the planted leg reach.
  return FMath::Max(0.f,Horizontal-8.f)/FMath::Max(.1f,2.f*StepDuration+.08f-.22f);
 }
-void UHopperPresentationComponent::KeepOpenCockpitWreck()
-{
- // Keep the pilot seated, including defeats during the boarding animation.
- SeatPilot();
- bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
- SetGunVisible(false);
- SetHatchOpen(1.f);
-}
 UBoxComponent* UHopperPresentationComponent::CreateMechHitBox(UStaticMeshComponent* Part)
 {
  if (!Part || !Part->GetStaticMesh()) return nullptr;
@@ -226,6 +221,7 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  Super::TickComponent(Dt,TickType,TickFunction);
  if (!VisualData || !BodyRoot || !FMath::IsFinite(Dt) || Dt<=0) return;
  ActionRemaining=FMath::Max(0.f,ActionRemaining-Dt);
+ if (EjectionTime>=0.f) { TickSeatEjection(Dt); return; }
  if (bTransferring) TickTransfer(Dt);
  if (bMechActive) TickMech(Dt);
  if (bSeated && !bWreck && !bTransferring && HatchOpen>0) SetHatchOpen(FMath::Max(0.f,HatchOpen-Dt*1.8f));
@@ -310,6 +306,7 @@ void UHopperPresentationComponent::BeginPlay()
 }
 void UHopperPresentationComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+ ClearEjectionExhaust();
  // Detached components remain owned by the enemy, so actor destruction cleans the wreck too.
  Super::EndPlay(Reason);
 }

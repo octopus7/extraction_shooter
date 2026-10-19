@@ -16,6 +16,7 @@
 #include "Settings/LevelEditorPlaySettings.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Engine/DamageEvents.h"
 #include "EngineUtils.h"
 #include "FileHelpers.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -213,6 +214,91 @@ bool FHopperPlayablePresentationTest::RunTest(const FString& Parameters)
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,3));
  ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(.3f));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperPlayStep(this,4));
+ ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
+ return true;
+}
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FHopperEjectionStage,FAutomationTestBase*,Test,int32,Stage);
+bool FHopperEjectionStage::Update()
+{
+ UWorld* World=GEditor->PlayWorld;
+ auto* Hopper=HopperPlayTest::Find(World);
+ if (!Test->TestNotNull(TEXT("Ejection fixture mech"),Hopper)) return true;
+ auto* P=Hopper->GetPresentation();
+ if (Stage==0)
+ {
+  Hopper->bEndCombatOnMechDestruction=true;
+  Hopper->TakeDamage(10000.f,FDamageEvent(),nullptr,nullptr);
+  // Freeze only the presentation timeline to capture exact phases after rendering settles.
+  P->SetComponentTickEnabled(false);
+ }
+ else
+ {
+  const float Steps[]={0.f,.7f,.35f,.55f,.6f,10.f};
+  P->TickComponent(Steps[Stage],LEVELTICK_All,nullptr);
+ }
+ APlayerController* PC=World->GetFirstPlayerController();
+ if (PC)
+ {
+  ACameraActor* Camera=Cast<ACameraActor>(PC->GetViewTarget());
+  if (!Camera) Camera=World->SpawnActor<ACameraActor>();
+  const FVector Look=Hopper->GetActorLocation()+FVector(0,0,Stage>=4?400:Stage==3?140:35);
+  const float Distance=Stage>=4?1250:Stage==3?700:420;
+  const FVector Location=Look+Hopper->GetActorForwardVector()*Distance-Hopper->GetActorRightVector()*Distance*.8f+FVector(0,0,Distance*.45f);
+  Camera->SetActorLocation(Location); Camera->SetActorRotation((Look-Location).Rotation()); PC->SetViewTarget(Camera);
+ }
+ Test->TestTrue(TEXT("Death remains authoritative throughout escape"),Hopper->IsDead());
+ return true;
+}
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FHopperEjectionCapture,FAutomationTestBase*,Test,int32,Stage);
+bool FHopperEjectionCapture::Update()
+{
+ HopperPlayTest::Capture(Test,FString::Printf(TEXT("Ejection_%02d.png"),Stage));
+ return true;
+}
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FHopperEjectionRealtime,FAutomationTestBase*,Test,bool,bStart);
+bool FHopperEjectionRealtime::Update()
+{
+ UWorld* World=GEditor->PlayWorld;
+ if (bStart)
+ {
+  auto* Fixture=HopperPlayTest::Find(World);
+  FActorSpawnParameters Spawn; Spawn.SpawnCollisionHandlingOverride=ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+  auto* H=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Fixture->GetClass(),FVector(0,0,105),FRotator::ZeroRotator,Spawn);
+  H->Tags.Add(TEXT("EjectionRealtimeTest"));
+  H->TakeDamage(10000.f,FDamageEvent(),nullptr,nullptr);
+ }
+ else
+ {
+  for (TActorIterator<ATunaSweeperHopperEnemyCharacter> It(World);It;++It)
+   if (It->ActorHasTag(TEXT("EjectionRealtimeTest")))
+   {
+    Test->TestTrue(TEXT("Dead mech presentation keeps ticking in real gameplay"),It->GetPresentation()->GetPilotMesh()->GetComponentLocation().Z>400.f);
+    Test->TestNull(TEXT("Real-time ejection detaches the complete seat"),It->GetPresentation()->GetPilotMesh()->GetAttachParent()->GetAttachParent());
+    return true;
+   }
+  Test->AddError(TEXT("Real-time ejection fixture missing"));
+ }
+ return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHopperEjectionPresentationTest,"TunaSweeper.Hopper.Play.SeatEjection",
+ EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FHopperEjectionPresentationTest::RunTest(const FString& Parameters)
+{
+ if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir()/TEXT("Maps/HopperCombatTestMap.umap"),false,true)) return false;
+ FRequestPlaySessionParams Play;
+ Play.EditorPlaySettings=NewObject<ULevelEditorPlaySettings>(GetTransientPackage());
+ Play.EditorPlaySettings->NewWindowWidth=1280; Play.EditorPlaySettings->NewWindowHeight=800;
+ GEditor->RequestPlaySession(Play);
+ ADD_LATENT_AUTOMATION_COMMAND(FHopperWaitForReady(this));
+ for (int32 Stage=0;Stage<6;++Stage)
+ {
+  ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionStage(this,Stage));
+  ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(.5f));
+  ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionCapture(this,Stage));
+ }
+ ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionRealtime(this,true));
+ ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(2.2f));
+ ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionRealtime(this,false));
  ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
  return true;
 }

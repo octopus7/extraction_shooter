@@ -9,6 +9,9 @@ class USceneComponent;
 class UStaticMeshComponent;
 class USkeletalMeshComponent;
 class UAnimSequence;
+class UMaterialInterface;
+class UMaterialInstanceDynamic;
+class UProceduralMeshComponent;
 
 /** Presentation only: authoritative health/phase/attacks remain on the enemy. */
 UCLASS(ClassGroup=(Hopper), meta=(BlueprintSpawnableComponent))
@@ -32,7 +35,7 @@ public:
  void SetMechActive(bool bActive);
  UBoxComponent* CreateMechHitBox(UStaticMeshComponent* Part);
  void DisableMechHitBoxes();
- void KeepOpenCockpitWreck();
+ void StartSeatEjection();
  float GetHatchOpenAlpha() const { return HatchOpen; }
  float GetMaxStableWalkSpeed() const;
  virtual void TickComponent(float DeltaTime,ELevelTick TickType,FActorComponentTickFunction* ThisTickFunction) override;
@@ -43,6 +46,15 @@ public:
  UPROPERTY(EditAnywhere,Category="Hopper|Gait",meta=(ClampMin="1")) float StrideTrigger = 25.f;
  UPROPERTY(EditAnywhere,Category="Hopper|Gait") TObjectPtr<class USoundBase> FootfallSound;
  UPROPERTY(EditAnywhere,Category="Hopper|Gait") float FootfallVolume = .7f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection",meta=(ClampMin="0.05",Units="s")) float EjectionHatchSeconds = .65f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection",meta=(ClampMin="0.05",Units="s")) float EjectionSlideSeconds = .55f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection",meta=(ClampMin="0",Units="cm")) float EjectionSlideDistance = 90.f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection",meta=(ClampMin="0.1",Units="s")) float EjectionFlightSeconds = 3.f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection") float EjectionForwardSpeed = 160.f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection") float EjectionUpSpeed = 420.f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection") float EjectionUpAcceleration = 900.f;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection") TSoftObjectPtr<UMaterialInterface> EjectionSmokeMaterial;
+ UPROPERTY(EditAnywhere,Category="Hopper|Ejection") TSoftObjectPtr<UMaterialInterface> EjectionFlameMaterial;
 protected:
  virtual void BeginPlay() override;
  virtual void EndPlay(const EEndPlayReason::Type Reason) override;
@@ -52,6 +64,10 @@ private:
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
+ void TickSeatEjection(float Dt);
+ void CreateEjectionExhaust();
+ void ClearEjectionExhaust();
+ FVector EjectionPosition(float FlightTime) const;
  float CapsuleHalfHeight() const;
  UPROPERTY(Transient) TObjectPtr<UHopperVisualData> VisualData;
  UPROPERTY(Transient) TObjectPtr<USceneComponent> BodyRoot;
@@ -62,6 +78,16 @@ private:
  UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Gun;
  UPROPERTY(Transient) TMap<FName,TObjectPtr<UStaticMeshComponent>> Parts;
  UPROPERTY(Transient) TObjectPtr<UAnimSequence> CurrentClip;
+ UPROPERTY(Transient) TObjectPtr<UProceduralMeshComponent> EjectionFlame;
+ UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> EjectionSmoke;
+ UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> EjectionSmokeMIDs;
+ TArray<float> SmokeBirthTimes;
+ TArray<FVector> SmokeOrigins;
+ FTransform EjectionLaunchTransform;
+ FVector EjectionSeatStart = FVector::ZeroVector;
+ float EjectionTime = -1.f, EjectionInitialHatch = 0.f, NextSmokeTime = 0.f;
+ int32 NextSmokeIndex = 0;
+ bool bSeatLaunched = false;
  TunaSweeperHopper::FBipedGait Gait;
  FVector TransferStart = FVector::ZeroVector;
  FVector TransferEnd = FVector::ZeroVector;

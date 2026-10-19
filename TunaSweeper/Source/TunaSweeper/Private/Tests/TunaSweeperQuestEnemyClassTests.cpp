@@ -154,7 +154,8 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     Hopper->TakeDamage(1.f, FDamageEvent(), Killer, nullptr);
     TestTrue(TEXT("Mech zero health ends combat immediately"), Hopper->IsDead());
     TestFalse(TEXT("Open cockpit wreck remains in level"), Hopper->IsActorBeingDestroyed());
-    TestEqual(TEXT("Destroyed mech leaves cockpit open"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);
+    Hopper->GetPresentation()->TickComponent(.7f, LEVELTICK_All, nullptr);
+    TestEqual(TEXT("Destroyed mech opens cockpit before ejection"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);
     Hopper->GetPresentation()->TickComponent(5.f, LEVELTICK_All, nullptr);
     TestEqual(TEXT("Cockpit does not close again after defeat"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);
     TestEqual(TEXT("Mech destruction immediately credits one kill"), Quests->GetObjectiveProgressCount(HopperId, TEXT("kill")), 1);
