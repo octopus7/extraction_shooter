@@ -8173,3 +8173,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: ../triapi/.env에 있는 키를 읽을 수 있는가?
 - 답변: D:\github\triapi\.env 파일의 존재와 읽기 접근 및 비어 있지 않음을 확인했다. 키 값은 출력하지 않았다. 프로그램의 자동 로딩 여부나 키 유효성은 확인하지 않았다.
+
+
+## 2026-10-19 22:57:37 (소요시간: 00:00:22)
+
+- 질문: Tripo3D 레퍼런스 이미지는 시점별로 잘라야 하는가, 한 장에 모아도 자동 인식하는가?
+- 답변: 공식 멀티뷰 입력은 시점별 별도 이미지로 전달하는 방식이므로 시트를 시점별로 분리하는 것을 권장한다. 합본 자동 분리 인식은 보장되지 않는다. 정면·측면·후면의 포즈와 비율을 맞추고 대상 전체가 보이게 준비한다.
+- 근거: https://www.tripo3d.ai/help/features/how-to-use-multi-view-input-effectively 및 https://developers.tripo3d.ai/en/docs/generation-multiview-to-model/standard
