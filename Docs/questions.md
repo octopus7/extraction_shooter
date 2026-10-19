@@ -8242,3 +8242,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Tripo가 머리카락도 어느 정도 자동 리깅하는가, 아니면 사용하기 어려운 수준인가?
 - 답변: 공식 API 문서는 트윈테일 전용 본 체인·웨이트·UE 물리까지 자동 완성한다고 보장하지 않는다. 머리 본을 따라가는 고정 머리와 흔들리는 머리카락은 별개이며 후자는 별도 체인과 웨이트 및 엔진 설정이 필요하다. 현재 결과를 못 쓰는 것으로 단정할 수 없고, 트윈테일 연결 구조와 변형 품질을 검수해야 한다. 추가 유료 호출은 하지 않았다.
 - 근거: https://developers.tripo3d.ai/en/docs/animations-rig 및 https://www.tripo3d.ai/blog/how-to-add-hair-in-vrchat-with-cats
+
+
+## 2026-10-19 23:37:01 (소요시간: 00:00:20)
+
+- 질문: 머리 없는 몸 메시도 UE5용 리깅이 가능한가?
+- 답변: 가능하다. 몸 메시와 머리 메시를 분리해 동일한 스켈레톤에 맞추는 모듈형 구성을 사용할 수 있다. 몸의 스켈레톤에 목·머리 본을 유지하고 별도 머리를 연결하면 된다. 다만 UE에서 사용 가능한 것과 Tripo가 머리 없는 메시를 자동 인식해 리깅하는 것은 별개이며 현재 몸체의 자동 리깅 성공 여부는 rig-check로 확인해야 한다. 이번 답변에서 리깅 작업은 실행하지 않았다.
+- 근거: https://dev.epicgames.com/documentation/en-us/unreal-engine/working-with-modular-characters-in-unreal-engine 및 https://developers.tripo3d.ai/en/docs/animations-rig-check
