@@ -1,0 +1,18 @@
+{
+  "task_id": "8c56926b-5a73-4a1a-b587-4499d9c19771",
+  "status": "success",
+  "source_reference": "ArtSource/Tripo/MaidSkirt_Reference_20261019/MaidSkirt_Reference_v1.png",
+  "model": "P2-20260801",
+  "quad": true,
+  "face_limit": 2500,
+  "texture": true,
+  "pbr": true,
+  "texture_quality": "detailed",
+  "credits_consumed": 120.0,
+  "server_seconds": 158.74,
+  "balance_queried": false,
+  "last_known_balance_before": 4910,
+  "calculated_balance_if_no_other_usage": 4790,
+  "review": "Interior includes a crosswise bridge dividing two leg-like openings; remove unwanted inner geometry and clean apron/frill defects before rigging or cloth simulation.",
+  "postprocessing_tasks": []
+}
