@@ -8194,3 +8194,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Smart Mesh P2.0은 게임용인가?
 - 답변: 게임 엔진 활용을 목표로 낮은 폴리곤 수와 쿼드 중심 토폴로지를 생성하는 모델이 맞다. 실제 게임 캐릭터 적용에는 리깅·스킨 웨이트·관절 변형과 엔진 내 성능 검증 등이 별도로 필요하다.
 - 근거: https://www.tripo3d.ai/blog/mesh-game-character-p-2
+
+
+## 2026-10-19 23:02:15 (소요시간: 00:00:21)
+
+- 질문: P2.0 게임용 모델에 Smart UV를 넣어야 하는가?
+- 답변: 필수는 아니다. 텍스처 포함 생성 결과를 먼저 확인하고 UV 늘어짐·이음새 문제나 후속 텍스처 편집 필요가 있으면 Smart UV를 적용하는 것을 권장한다. 별도 API Smart UV 작업은 20크레딧이며 P2 detailed 생성 120과 합하면 140크레딧이다.
+- 근거: https://www.tripo3d.ai/blog/mesh-game-character-p-2 및 https://developers.tripo3d.ai/en/docs/changelog
