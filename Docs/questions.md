@@ -8235,3 +8235,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 리깅은 UE5용인가?
 - 답변: 현재 생성 파일에는 리깅 작업을 적용하지 않았다. Tripo 자동 리깅 v3.0은 spec=unreal 및 FBX 출력을 지원하지만 문서상 Unreal Mannequin 본 이름 규칙 지원이며 프로젝트 스켈레톤·애니메이션과 즉시 호환을 보장하지 않는다. 머리 단독 모델은 기존 몸체의 머리 본에 연결하는 방식을 우선 검토하고 얼굴 표정·머리카락 리그는 별도로 구성해야 한다.
 - 근거: https://developers.tripo3d.ai/en/docs/animations-rig
+
+
+## 2026-10-19 23:17:57 (소요시간: 00:00:18)
+
+- 질문: Tripo가 머리카락도 어느 정도 자동 리깅하는가, 아니면 사용하기 어려운 수준인가?
+- 답변: 공식 API 문서는 트윈테일 전용 본 체인·웨이트·UE 물리까지 자동 완성한다고 보장하지 않는다. 머리 본을 따라가는 고정 머리와 흔들리는 머리카락은 별개이며 후자는 별도 체인과 웨이트 및 엔진 설정이 필요하다. 현재 결과를 못 쓰는 것으로 단정할 수 없고, 트윈테일 연결 구조와 변형 품질을 검수해야 한다. 추가 유료 호출은 하지 않았다.
+- 근거: https://developers.tripo3d.ai/en/docs/animations-rig 및 https://www.tripo3d.ai/blog/how-to-add-hair-in-vrchat-with-cats
