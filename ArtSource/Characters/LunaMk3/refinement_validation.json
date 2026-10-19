@@ -265,7 +265,8 @@
       "band_max_radial_clearance_mm": 9.660544525136732,
       "band_surface_intersection_pairs": 0,
       "degenerate_faces": 0
-    }
+    },
+    "validation_scope": "Historical fit measurements before gradual taper; current shape and clearance checks are in skirt_taper_validation.json."
   },
   "skirt_attachment_seam": {
     "applied": {
@@ -288,5 +289,6 @@
       "new_degenerate_faces": 0
     },
     "existing_vertices_weights_and_bones_preserved": true
-  }
+  },
+  "subsequent_skirt_taper": "skirt_taper_validation.json"
 }

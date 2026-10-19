@@ -1,0 +1,383 @@
+{
+  "name": "LunaMk3 gradual skirt taper",
+  "post_cleanup_reopen_verified": true,
+  "scope": "Local deformation of skirt only; same UV, topology, materials and all skin weights. Skirt secondary rest bones follow the new silhouette.",
+  "scale_knots_z_x_y": [
+    [
+      0.56,
+      0.85,
+      0.85
+    ],
+    [
+      0.64,
+      0.85,
+      0.85
+    ],
+    [
+      0.72,
+      0.81,
+      0.8
+    ],
+    [
+      0.81,
+      0.8,
+      0.78
+    ],
+    [
+      0.86,
+      0.85,
+      0.81
+    ],
+    [
+      0.9,
+      0.95,
+      0.93
+    ],
+    [
+      0.915,
+      1.0,
+      1.0
+    ],
+    [
+      0.96,
+      1.0,
+      1.0
+    ]
+  ],
+  "vertices": 2912,
+  "faces": 3075,
+  "max_vertex_displacement_m": 0.04561409012731941,
+  "body_clearance_floor_m": 0.006,
+  "body_clearance_adjusted_vertices": 995,
+  "body_intersections_before": 44,
+  "body_intersections_after": 0,
+  "body_intersection_pairs_after": [],
+  "normal_reversals": [],
+  "min_face_area_ratio": 0.3885526997645941,
+  "waist_unchanged_above_m": 0.915,
+  "uv_topology_weights_preserved": true,
+  "non_skirt_bones_unchanged": true,
+  "skirt_bones_repositioned": [
+    "skirt_00_01",
+    "skirt_00_02",
+    "skirt_00_03",
+    "skirt_01_01",
+    "skirt_01_02",
+    "skirt_01_03",
+    "skirt_02_01",
+    "skirt_02_02",
+    "skirt_02_03",
+    "skirt_03_01",
+    "skirt_03_02",
+    "skirt_03_03",
+    "skirt_04_01",
+    "skirt_04_02",
+    "skirt_04_03",
+    "skirt_05_01",
+    "skirt_05_02",
+    "skirt_05_03",
+    "skirt_06_01",
+    "skirt_06_02",
+    "skirt_06_03",
+    "skirt_07_01",
+    "skirt_07_02",
+    "skirt_07_03",
+    "skirt_08_01",
+    "skirt_08_02",
+    "skirt_08_03",
+    "skirt_09_01",
+    "skirt_09_02",
+    "skirt_09_03",
+    "skirt_10_01",
+    "skirt_10_02",
+    "skirt_10_03",
+    "skirt_11_01",
+    "skirt_11_02",
+    "skirt_11_03"
+  ],
+  "profiles": [
+    {
+      "height_m": 0.9,
+      "before_width_m": 0.18764875084161758,
+      "after_width_m": 0.1718905121088028,
+      "before_depth_m": 0.14894738793373108,
+      "after_depth_m": 0.1407897174358368
+    },
+    {
+      "height_m": 0.86,
+      "before_width_m": 0.301063597202301,
+      "after_width_m": 0.24250538647174835,
+      "before_depth_m": 0.19652877002954483,
+      "after_depth_m": 0.16558095812797546
+    },
+    {
+      "height_m": 0.81,
+      "before_width_m": 0.36704227328300476,
+      "after_width_m": 0.2862931191921234,
+      "before_depth_m": 0.24019429832696915,
+      "after_depth_m": 0.1957397237420082
+    },
+    {
+      "height_m": 0.76,
+      "before_width_m": 0.41594862937927246,
+      "after_width_m": 0.32885003089904785,
+      "before_depth_m": 0.2688452750444412,
+      "after_depth_m": 0.2239360734820366
+    },
+    {
+      "height_m": 0.7,
+      "before_width_m": 0.4320877492427826,
+      "after_width_m": 0.3462944030761719,
+      "before_depth_m": 0.3233467638492584,
+      "after_depth_m": 0.2723272368311882
+    },
+    {
+      "height_m": 0.65,
+      "before_width_m": 0.5005566477775574,
+      "after_width_m": 0.4246231019496918,
+      "before_depth_m": 0.3438117355108261,
+      "after_depth_m": 0.2937930077314377
+    },
+    {
+      "height_m": 0.6,
+      "before_width_m": 0.4105689227581024,
+      "after_width_m": 0.3489835858345032,
+      "before_depth_m": 0.34165753424167633,
+      "after_depth_m": 0.29041077196598053
+    }
+  ],
+  "external_api_calls": 0,
+  "rear_hip_smooth_offset_max_m": 0.007,
+  "body_clearance_adjusted_vertices_note": "Count includes smooth rear hip offset, not only radial floor contacts.",
+  "head_body_geometry_unchanged": true,
+  "all_skin_weights_preserved": true,
+  "pose_checks": [
+    {
+      "frame": 1,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.0037409974422832905,
+      "min_edge_length_ratio": 0.9743497053182669,
+      "max_edge_length_ratio": 1.0166173592328742,
+      "body_intersection_triangle_pairs": 0
+    },
+    {
+      "frame": 13,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.00525925764063299,
+      "min_edge_length_ratio": 0.9798015352802806,
+      "max_edge_length_ratio": 1.0355328836210127,
+      "body_intersection_triangle_pairs": 0
+    },
+    {
+      "frame": 25,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.007212052919807951,
+      "min_edge_length_ratio": 0.9616997158609691,
+      "max_edge_length_ratio": 1.034495200223861,
+      "body_intersection_triangle_pairs": 0
+    },
+    {
+      "frame": 37,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.0035924272566992843,
+      "min_edge_length_ratio": 0.9806548357167804,
+      "max_edge_length_ratio": 1.0190379097278859,
+      "body_intersection_triangle_pairs": 0
+    },
+    {
+      "frame": 49,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.0050455600483759735,
+      "min_edge_length_ratio": 0.9767022299526443,
+      "max_edge_length_ratio": 1.0272417837334622,
+      "body_intersection_triangle_pairs": 0
+    },
+    {
+      "frame": 61,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.007509652406470522,
+      "min_edge_length_ratio": 0.9490747732127837,
+      "max_edge_length_ratio": 1.0301803281961968,
+      "body_intersection_triangle_pairs": 0
+    },
+    {
+      "frame": 73,
+      "body_max_displacement_m": 0.0,
+      "fixed_head_max_displacement_m": 0.0,
+      "waist_max_displacement_m": 0.0,
+      "skirt_max_displacement_m": 0.0037409974422832905,
+      "min_edge_length_ratio": 0.9743497053182669,
+      "max_edge_length_ratio": 1.0166173592328742,
+      "body_intersection_triangle_pairs": 0
+    }
+  ],
+  "qa_sway_amplitude_factors_root_mid_tip": [
+    0.0,
+    0.1,
+    0.8
+  ],
+  "qa_sway_note": "Upper hip chain fixed, middle motion reduced and hem motion retained; no body intersections across all 73 baked QA frames. Not UE physics.",
+  "all_73_qa_frames_body_intersections": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "images_packed": 13,
+  "neutral_pose_saved": true,
+  "ue_runtime_validated": false,
+  "fbx_roundtrip": {
+    "bone_count": 109,
+    "mesh_count": 3,
+    "embedded_image_count": 13,
+    "embedded_image_sizes": [
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        4096,
+        4096
+      ],
+      [
+        1254,
+        1254
+      ]
+    ],
+    "height_m": 1.5091633784241623,
+    "max_influences": {
+      "LunaMk3_Body": 4,
+      "LunaMk3_Head": 2,
+      "LunaMk3_Skirt": 4
+    },
+    "skirt_tip_test_displacement_m": 0.013297693826254467,
+    "verified_without_external_texture_search": true
+  },
+  "qa_fbx_animation_verified": true,
+  "qa_fbx_frame_range": [
+    2.0,
+    74.0
+  ],
+  "qa_fbx_skirt_motion_matrix_delta": 0.06894376873970032
+}

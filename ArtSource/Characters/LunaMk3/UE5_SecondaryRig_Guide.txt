@@ -7,6 +7,8 @@ LunaMk3 / UE 5.7 secondary rig handoff
 - 얼굴, 두피, 머리띠, 리본 매듭은 head에 고정. 앞머리 전체를 흔드는 리그는 포함하지 않음.
 - 키는 장식과 신발 포함 약 150.9cm. Blender 단위 m, FBX 실제 크기 확인 완료.
 - 모델 FBX에는 애니메이션 없음. QA_LunaMk3_SecondarySway.fbx는 별도 3초 반복 변형 확인용 클립이며 보행이나 물리 시뮬레이션이 아님.
+- 치마는 허리 아래를 차등 수축한 형태로 수정. 중간 폭 약 20~22%, 밑단 약 15% 축소. 상단 허리·UV·면 구성·스킨 웨이트 유지, 치마 본의 기준 위치만 형태에 맞춰 이동.
+- 좁아진 치마의 QA 클립은 1단 체인을 고정하고 중간 진폭은 이전의 10%, 끝단은 80%로 조정. 저장된 73프레임 전체에서 몸과 치마의 교차 0을 확인했으며 UE 실시간 충돌 검증과는 별개다.
 
 파일
 SKM_LunaMk3.blend: 중립 자세 원본. QA_LunaMk3_SecondarySway 액션을 보존하지만 기본 연결은 해제.
@@ -17,7 +19,7 @@ secondary_rig_validation.json: 실제 본/웨이트/변형/FBX 재가져오기 �
 
 UE 적용 순서
 1. FBX를 Skeletal Mesh로 가져오고 새 Skeleton 생성. Import Animations는 끄고 스케일 1을 유지. 크기 약 151cm와 109본을 확인.
-2. 별도 secondary PhysicsAsset 구성. pelvis/head를 Kinematic 앵커로 두고 머리·상체·허벅지에 맞는 충돌 캡슐을 조정. 추가된 hair_tail_*, hair_ribbon_*, skirt_* 본만 Simulated로 지정.
+2. 별도 secondary PhysicsAsset 구성. pelvis/head를 Kinematic 앵커로 두고 머리·상체·허벅지에 맞는 충돌 캡슐을 조정. hair_tail_*, hair_ribbon_* 본을 Simulated로 지정. 수축한 치마는 각 체인의 skirt_*_01을 Kinematic으로 유지하고 skirt_*_02, skirt_*_03부터 작은 범위로 움직이도록 시작한다.
 3. 체인 간 연결의 선형 이동을 고정하고 회전 범위/스프링/감쇠를 조정. 본 사이 길이가 짧으므로 자동 생성한 큰 캡슐을 그대로 쓰지 말고 실제 머리끈/치마 표면에 맞게 축소. 치마 부피를 눌러 납작하게 만드는 과한 충돌은 피할 것.
 4. 각 체인의 첫 본은 head 또는 pelvis에 제약으로 연결하고 다음 본은 직전 본에 연결. 같은 체인의 인접 캡슐과 이웃 치마 체인끼리의 충돌은 초기 설정에서 제외. 머리/몸/다리와의 충돌을 먼저 맞춘 뒤 필요한 충돌만 추가.
 5. AnimBP에서 보행/몸 포즈 -> Local To Component -> RigidBody(전용 secondary PhysicsAsset) -> Component To Local -> Output으로 연결. 이미 같은 본을 움직이는 물리 노드가 있으면 중복 적용하지 않을 것.
