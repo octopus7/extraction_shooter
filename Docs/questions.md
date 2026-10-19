@@ -8228,3 +8228,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Tripo 결과 파일 포맷과 쿼드 페이스 여부는 무엇인가?
 - 답변: 생성 API 응답 예시는 GLB이며 P2의 quad 옵션은 기본 false라 명시적으로 true를 지정해야 한다. P2는 쿼드 중심으로 일부 삼각형이 포함될 수 있다. GLB는 쿼드 보존용이 아니므로 편집용 쿼드는 FBX 출력과 실제 토폴로지를 확인해야 한다. 별도 변환 API에서 quad=true는 FBX 출력을 강제한다. 120크레딧 견적에는 별도 변환 작업이 포함되지 않는다.
 - 근거: https://developers.tripo3d.ai/en/docs/generation-multiview-to-model/p ; https://developers.tripo3d.ai/en/docs/models-convert ; https://www.tripo3d.ai/blog/workflow-game-scene
+
+
+## 2026-10-19 23:14:09 (소요시간: 00:00:15)
+
+- 질문: 리깅은 UE5용인가?
+- 답변: 현재 생성 파일에는 리깅 작업을 적용하지 않았다. Tripo 자동 리깅 v3.0은 spec=unreal 및 FBX 출력을 지원하지만 문서상 Unreal Mannequin 본 이름 규칙 지원이며 프로젝트 스켈레톤·애니메이션과 즉시 호환을 보장하지 않는다. 머리 단독 모델은 기존 몸체의 머리 본에 연결하는 방식을 우선 검토하고 얼굴 표정·머리카락 리그는 별도로 구성해야 한다.
+- 근거: https://developers.tripo3d.ai/en/docs/animations-rig
