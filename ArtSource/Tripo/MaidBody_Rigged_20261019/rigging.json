@@ -1,0 +1,15 @@
+{
+  "source_task_id": "4b944d5f-fcb1-4aae-b234-aea178b62857",
+  "rig_task_id": "dc13c386-e203-464e-82eb-b339aaf5d0da",
+  "status": "success",
+  "model": "v3.0-20260909",
+  "rig_type": "biped",
+  "spec": "unreal",
+  "out_format": "fbx",
+  "bone_count": 61,
+  "credits_consumed": 25,
+  "balance_before": 4935,
+  "balance_after": 4910,
+  "frozen_after": 0,
+  "ue_animation_validation": false
+}

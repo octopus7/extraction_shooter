@@ -1,0 +1,369 @@
+{
+  "armatures": [
+    {
+      "name": "Armature",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "deform": true
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "deform": true
+        },
+        {
+          "name": "spine_01",
+          "parent": "pelvis",
+          "deform": true
+        },
+        {
+          "name": "spine_02",
+          "parent": "spine_01",
+          "deform": true
+        },
+        {
+          "name": "spine_03",
+          "parent": "spine_02",
+          "deform": true
+        },
+        {
+          "name": "clavicle_l",
+          "parent": "spine_03",
+          "deform": true
+        },
+        {
+          "name": "upperarm_l",
+          "parent": "clavicle_l",
+          "deform": true
+        },
+        {
+          "name": "lowerarm_l",
+          "parent": "upperarm_l",
+          "deform": true
+        },
+        {
+          "name": "hand_l",
+          "parent": "lowerarm_l",
+          "deform": true
+        },
+        {
+          "name": "index_01_l",
+          "parent": "hand_l",
+          "deform": true
+        },
+        {
+          "name": "index_02_l",
+          "parent": "index_01_l",
+          "deform": true
+        },
+        {
+          "name": "index_03_l",
+          "parent": "index_02_l",
+          "deform": true
+        },
+        {
+          "name": "middle_01_l",
+          "parent": "hand_l",
+          "deform": true
+        },
+        {
+          "name": "middle_02_l",
+          "parent": "middle_01_l",
+          "deform": true
+        },
+        {
+          "name": "middle_03_l",
+          "parent": "middle_02_l",
+          "deform": true
+        },
+        {
+          "name": "pinky_01_l",
+          "parent": "hand_l",
+          "deform": true
+        },
+        {
+          "name": "pinky_02_l",
+          "parent": "pinky_01_l",
+          "deform": true
+        },
+        {
+          "name": "pinky_03_l",
+          "parent": "pinky_02_l",
+          "deform": true
+        },
+        {
+          "name": "ring_01_l",
+          "parent": "hand_l",
+          "deform": true
+        },
+        {
+          "name": "ring_02_l",
+          "parent": "ring_01_l",
+          "deform": true
+        },
+        {
+          "name": "ring_03_l",
+          "parent": "ring_02_l",
+          "deform": true
+        },
+        {
+          "name": "thumb_01_l",
+          "parent": "hand_l",
+          "deform": true
+        },
+        {
+          "name": "thumb_02_l",
+          "parent": "thumb_01_l",
+          "deform": true
+        },
+        {
+          "name": "thumb_03_l",
+          "parent": "thumb_02_l",
+          "deform": true
+        },
+        {
+          "name": "lowerarm_twist_01_l",
+          "parent": "lowerarm_l",
+          "deform": true
+        },
+        {
+          "name": "upperarm_twist_01_l",
+          "parent": "upperarm_l",
+          "deform": true
+        },
+        {
+          "name": "clavicle_r",
+          "parent": "spine_03",
+          "deform": true
+        },
+        {
+          "name": "upperarm_r",
+          "parent": "clavicle_r",
+          "deform": true
+        },
+        {
+          "name": "lowerarm_r",
+          "parent": "upperarm_r",
+          "deform": true
+        },
+        {
+          "name": "hand_r",
+          "parent": "lowerarm_r",
+          "deform": true
+        },
+        {
+          "name": "index_01_r",
+          "parent": "hand_r",
+          "deform": true
+        },
+        {
+          "name": "index_02_r",
+          "parent": "index_01_r",
+          "deform": true
+        },
+        {
+          "name": "index_03_r",
+          "parent": "index_02_r",
+          "deform": true
+        },
+        {
+          "name": "middle_01_r",
+          "parent": "hand_r",
+          "deform": true
+        },
+        {
+          "name": "middle_02_r",
+          "parent": "middle_01_r",
+          "deform": true
+        },
+        {
+          "name": "middle_03_r",
+          "parent": "middle_02_r",
+          "deform": true
+        },
+        {
+          "name": "pinky_01_r",
+          "parent": "hand_r",
+          "deform": true
+        },
+        {
+          "name": "pinky_02_r",
+          "parent": "pinky_01_r",
+          "deform": true
+        },
+        {
+          "name": "pinky_03_r",
+          "parent": "pinky_02_r",
+          "deform": true
+        },
+        {
+          "name": "ring_01_r",
+          "parent": "hand_r",
+          "deform": true
+        },
+        {
+          "name": "ring_02_r",
+          "parent": "ring_01_r",
+          "deform": true
+        },
+        {
+          "name": "ring_03_r",
+          "parent": "ring_02_r",
+          "deform": true
+        },
+        {
+          "name": "thumb_01_r",
+          "parent": "hand_r",
+          "deform": true
+        },
+        {
+          "name": "thumb_02_r",
+          "parent": "thumb_01_r",
+          "deform": true
+        },
+        {
+          "name": "thumb_03_r",
+          "parent": "thumb_02_r",
+          "deform": true
+        },
+        {
+          "name": "lowerarm_twist_01_r",
+          "parent": "lowerarm_r",
+          "deform": true
+        },
+        {
+          "name": "upperarm_twist_01_r",
+          "parent": "upperarm_r",
+          "deform": true
+        },
+        {
+          "name": "neck_01",
+          "parent": "spine_03",
+          "deform": true
+        },
+        {
+          "name": "head",
+          "parent": "neck_01",
+          "deform": true
+        },
+        {
+          "name": "thigh_l",
+          "parent": "pelvis",
+          "deform": true
+        },
+        {
+          "name": "calf_l",
+          "parent": "thigh_l",
+          "deform": true
+        },
+        {
+          "name": "calf_twist_01_l",
+          "parent": "calf_l",
+          "deform": true
+        },
+        {
+          "name": "foot_l",
+          "parent": "calf_l",
+          "deform": true
+        },
+        {
+          "name": "ball_l",
+          "parent": "foot_l",
+          "deform": true
+        },
+        {
+          "name": "thigh_twist_01_l",
+          "parent": "thigh_l",
+          "deform": true
+        },
+        {
+          "name": "thigh_r",
+          "parent": "pelvis",
+          "deform": true
+        },
+        {
+          "name": "calf_r",
+          "parent": "thigh_r",
+          "deform": true
+        },
+        {
+          "name": "calf_twist_01_r",
+          "parent": "calf_r",
+          "deform": true
+        },
+        {
+          "name": "foot_r",
+          "parent": "calf_r",
+          "deform": true
+        },
+        {
+          "name": "ball_r",
+          "parent": "foot_r",
+          "deform": true
+        },
+        {
+          "name": "thigh_twist_01_r",
+          "parent": "thigh_r",
+          "deform": true
+        }
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "tripo_node_4b944d5f",
+      "vertices": 5378,
+      "faces_by_sides": {
+        "3": 996,
+        "4": 4815
+      },
+      "vertex_groups": 60,
+      "unweighted_vertices": 0,
+      "weight_sum_min": 0.9999999580904841,
+      "weight_sum_max": 1.0000000426080078,
+      "uv_layers": 1,
+      "materials": 1
+    }
+  ],
+  "images": [
+    {
+      "name": "Color.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    },
+    {
+      "name": "Metallic.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    },
+    {
+      "name": "Normal.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    },
+    {
+      "name": "Roughness.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "has_data": true,
+      "packed": true
+    }
+  ],
+  "blend_reopen_verified": true
+}
