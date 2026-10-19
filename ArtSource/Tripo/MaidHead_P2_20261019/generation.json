@@ -1,0 +1,21 @@
+{
+  "task_id": "a0431b3f-35f4-46c3-abca-a8cf6fee5e44",
+  "status": "success",
+  "model": "P2-20260801",
+  "quad": true,
+  "texture_quality": "detailed",
+  "texture": true,
+  "pbr": true,
+  "input_views": [
+    "front",
+    "back",
+    "right"
+  ],
+  "side_note": "Lower-left source panel depicts anatomical right side despite LEFT label.",
+  "credits_consumed": 120,
+  "balance_before": 5175,
+  "balance_after": 5055,
+  "frozen_after": 0,
+  "postprocessing_tasks": [],
+  "review_note": "Preview shows an irregular patch below the chin; inspect before production use."
+}
