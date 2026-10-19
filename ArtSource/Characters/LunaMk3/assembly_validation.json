@@ -1,0 +1,263 @@
+{
+  "api_calls": 0,
+  "source_forward": "+X",
+  "source_up": "+Z",
+  "bone_count": 61,
+  "removed_skirt_inner_faces": 150,
+  "removed_head_stub_faces": 16,
+  "meshes": [
+    {
+      "name": "LunaMk3_Body",
+      "vertices": 5378,
+      "faces_by_sides": {
+        "3": 996,
+        "4": 4815
+      },
+      "unweighted_vertices": 0,
+      "uv_layers": 1
+    },
+    {
+      "name": "LunaMk3_Head",
+      "vertices": 5428,
+      "faces_by_sides": {
+        "3": 1951,
+        "4": 3432
+      },
+      "unweighted_vertices": 0,
+      "uv_layers": 1
+    },
+    {
+      "name": "LunaMk3_Skirt",
+      "vertices": 2525,
+      "faces_by_sides": {
+        "3": 863,
+        "4": 1876
+      },
+      "unweighted_vertices": 0,
+      "uv_layers": 1
+    }
+  ],
+  "limitations": [
+    "Skirt has rigid pelvis weights; secondary motion and cloth simulation not configured.",
+    "Hair follows head rigidly; no facial animation rig.",
+    "Generated apron/frill topology and texture artifacts remain.",
+    "UE import, retargeting and gameplay validation not performed."
+  ],
+  "name": "LunaMk3",
+  "height_reference": "Blender/SKM_LunaMk2Merge.blend",
+  "target_height_m": 1.509162906324491,
+  "height_m": 1.5091624640713093,
+  "central_skirt_ray_hits": [
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "images": [
+    {
+      "name": "LunaMk3_Body_Color.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Body_Metallic.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Body_Normal.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Body_Roughness.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_0.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_1.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_2.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Head_tripo_image_a0431b3f_3.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_0.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_1.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_2.jpg",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    },
+    {
+      "name": "LunaMk3_Skirt_tripo_image_8c56926b_3.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "packed": true
+    }
+  ],
+  "LunaMk3_Head_pose_delta_m": 0.06022538502455676,
+  "LunaMk3_Skirt_pose_delta_m": 0.05319576376234576,
+  "fbx_exported": true,
+  "fbx_roundtrip": {
+    "meshes": 3,
+    "bones": [
+      61
+    ],
+    "height_m": 1.5091631429087078,
+    "images": [
+      {
+        "name": "LunaMk3_Body_Color.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Body_Color.jpg"
+      },
+      {
+        "name": "LunaMk3_Body_Metallic.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Body_Metallic.jpg"
+      },
+      {
+        "name": "LunaMk3_Body_Normal.png",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Body_Normal.png"
+      },
+      {
+        "name": "LunaMk3_Body_Roughness.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Body_Roughness.jpg"
+      },
+      {
+        "name": "LunaMk3_Head_tripo_image_a0431b3f_0.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Head_tripo_image_a0431b3f_0.jpg"
+      },
+      {
+        "name": "LunaMk3_Head_tripo_image_a0431b3f_1.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Head_tripo_image_a0431b3f_1.jpg"
+      },
+      {
+        "name": "LunaMk3_Head_tripo_image_a0431b3f_2.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Head_tripo_image_a0431b3f_2.jpg"
+      },
+      {
+        "name": "LunaMk3_Head_tripo_image_a0431b3f_3.png",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Head_tripo_image_a0431b3f_3.png"
+      },
+      {
+        "name": "LunaMk3_Skirt_tripo_image_8c56926b_0.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Skirt_tripo_image_8c56926b_0.jpg"
+      },
+      {
+        "name": "LunaMk3_Skirt_tripo_image_8c56926b_1.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Skirt_tripo_image_8c56926b_1.jpg"
+      },
+      {
+        "name": "LunaMk3_Skirt_tripo_image_8c56926b_2.jpg",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Skirt_tripo_image_8c56926b_2.jpg"
+      },
+      {
+        "name": "LunaMk3_Skirt_tripo_image_8c56926b_3.png",
+        "size": [
+          4096,
+          4096
+        ],
+        "path": "embedded:LunaMk3_Skirt_tripo_image_8c56926b_3.png"
+      }
+    ]
+  }
+}
