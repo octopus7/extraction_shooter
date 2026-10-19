@@ -8221,3 +8221,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 좌우 측면 중 한쪽만 넣어도 되는가?
 - 답변: P Series 멀티뷰 API는 정면 필수·최소 2장이며 나머지 시점은 생략 가능하므로 정면+후면+한쪽 측면 3장 입력이 가능하다. 반대편 고유 디테일은 추정되므로 정확한 재현은 보장되지 않는다.
 - 근거: https://developers.tripo3d.ai/en/docs/generation-multiview-to-model/p
+
+
+## 2026-10-19 23:07:08 (소요시간: 00:00:25)
+
+- 질문: Tripo 결과 파일 포맷과 쿼드 페이스 여부는 무엇인가?
+- 답변: 생성 API 응답 예시는 GLB이며 P2의 quad 옵션은 기본 false라 명시적으로 true를 지정해야 한다. P2는 쿼드 중심으로 일부 삼각형이 포함될 수 있다. GLB는 쿼드 보존용이 아니므로 편집용 쿼드는 FBX 출력과 실제 토폴로지를 확인해야 한다. 별도 변환 API에서 quad=true는 FBX 출력을 강제한다. 120크레딧 견적에는 별도 변환 작업이 포함되지 않는다.
+- 근거: https://developers.tripo3d.ai/en/docs/generation-multiview-to-model/p ; https://developers.tripo3d.ai/en/docs/models-convert ; https://www.tripo3d.ai/blog/workflow-game-scene
