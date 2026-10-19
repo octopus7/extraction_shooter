@@ -8180,3 +8180,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Tripo3D 레퍼런스 이미지는 시점별로 잘라야 하는가, 한 장에 모아도 자동 인식하는가?
 - 답변: 공식 멀티뷰 입력은 시점별 별도 이미지로 전달하는 방식이므로 시트를 시점별로 분리하는 것을 권장한다. 합본 자동 분리 인식은 보장되지 않는다. 정면·측면·후면의 포즈와 비율을 맞추고 대상 전체가 보이게 준비한다.
 - 근거: https://www.tripo3d.ai/help/features/how-to-use-multi-view-input-effectively 및 https://developers.tripo3d.ai/en/docs/generation-multiview-to-model/standard
+
+
+## 2026-10-19 23:00:20 (소요시간: 00:00:21)
+
+- 질문: Smart Mesh P2.0 상세 텍스처 옵션의 비용은 얼마인가?
+- 답변: 공식 API 기준 P2 기본 생성 100 + detailed 텍스처 20 = 건당 120크레딧이다. 이전 조회 잔액 5,175 기준 추가 작업·할인 없이 43회 생성 후 15크레딧이 남는다. Studio 요금과 구분하여 API 기준으로 안내했다.
+- 근거: https://developers.tripo3d.ai/en/docs/changelog (P2 series model)
