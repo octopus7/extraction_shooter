@@ -225,11 +225,16 @@
   },
   {
     "id": 8019,
-    "memo_ko": "고구마 1개 확정 보급",
+    "memo_ko": "고구마 2개씩 2묶음 확정 보급 (총 4개)",
     "items": [
       {
         "item_id": 3007,
-        "quantity": 1,
+        "quantity": 2,
+        "drop_chance": 10000
+      },
+      {
+        "item_id": 3007,
+        "quantity": 2,
         "drop_chance": 10000
       }
     ]
