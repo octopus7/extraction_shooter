@@ -8289,3 +8289,11 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 답변: UE 5.7용 C++ 에디터 플러그인을 추천한다. PNG 원본 RGB 판독, DataAsset 색상별 규칙, Landscape 높이/재질 레이어 적용, 식생 배치를 분리하고 UI는 에디터 패널로 제공한다. 기존 SplineWorldBuilder처럼 C++ 코어와 선택적 PCG 구조가 맞으며 PCG는 복잡한 산포 규칙이 필요할 때 연결한다. 일반 풀/덤불은 인스턴싱하고 기존 AnimeFoliageTree처럼 개별 연출이 있는 나무는 BP 액터 배치를 지원한다.
 - 설계 기준: RGB는 구역 식별자로 사용하고 높이는 별도 16비트 회색조 PNG 또는 명시적인 색상별 높이 규칙으로 정의한다. 원본 RGB 정수의 정확한 비교, 미등록 색 검출, 픽셀당 월드 크기, 이미지 상단과 북쪽 +X 매핑, 고정 Seed, 생성물만 재생성 및 Undo를 고려한다. 이번 응답은 기술 선택 자문이며 구현/에디터 실행은 하지 않았다.
 - 근거: TunaSweeper/Plugins/SplineWorldBuilder/README.md ; TunaSweeper/Source/TunaSweeper/Private/Environment/TunaSweeperAnimeTreeActor.cpp ; Docs/game_conventions.md ; https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-and-exporting-landscape-heightmaps-in-unreal-engine?application_version=5.7 ; https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation-overview?application_version=5.7
+
+
+## 2026-10-22 23:50:32 (소요시간: 00:02:05)
+
+- 질문: PNG의 원본 RGB만 알고 싶은데 sRGB로 인해 색상 값이 틀어질 수 있는가?
+- 답변: 8비트 RGB/RGBA PNG를 직접 디코딩하고 RGB 정수로 비교하면 파일에 저장된 값을 그대로 읽을 수 있다. UE 5.7의 FImageUtils::LoadImage로 FImage를 읽고 BGRA8 형식을 확인한 뒤 AsBGRA8의 FColor.R/G/B를 비교하는 경로를 권장한다. sRGB 메타데이터 자체는 바이트를 변경하지 않지만 FLinearColor(FColor)는 sRGB→Linear 변환을 수행하므로 판정 경로에서 사용하지 않는다. 규칙 입력도 R/G/B 정수로 저장한다.
+- 확인: 로컬 UE 5.7 PngImageWrapper.cpp 디코딩에 png_set_gamma 또는 ICC 프로필 변환 호출이 없으며 8비트 RGB 입력은 채널 순서 정리와 알파 확장 후 정수 값을 유지한다. 원본 16비트 입력은 8비트로 자동 축소하지 않고 별도로 처리해야 한다. 이미지 편집기가 저장 전에 프로필 변환/안티앨리어싱으로 바꾼 값은 이미 파일에 반영된 값이므로 파일 판독이 이전 값을 복원하지는 않는다. 도구 구현이나 에디터 실행은 하지 않았다.
+- 근거: UE 5.7 Engine/Source/Runtime/ImageWrapper/Public/IImageWrapperModule.h:17-42 ; Engine/Source/Runtime/ImageWrapper/Private/Formats/PngImageWrapper.cpp:370-524 ; Engine/Source/Runtime/Core/Public/Math/Color.h:781-785.
