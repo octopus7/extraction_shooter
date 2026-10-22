@@ -114,3 +114,12 @@ UE 5.7 `SingleLayerWaterComposite.usf`의 `saturate(DeltaDepth * 0.02)`에 의�
 - 6개 걷기/달리기 조합과 60초 분량 180회 질주 알림 시뮬레이션 통과. 최대 동시 Niagara 컴포넌트 4개, 종료 후 0개.
 - C++ 변경/빌드는 없으며 열린 사용자 에디터를 재시작하지 않았다. Computer Use 최종 색감·강도 조정과 실제 게임 화면 수용 확인은 사용자 지시로 보류한다. GPU 성능 수치는 측정하지 않았다.
 `946a7e82`에 생성기와 에셋을 함께 기록한 뒤 생성기 2개를 제거했다. 제거 후 새 UE 프로세스에서 계약·에셋·이벤트 검사를 다시 통과했으며 오류/경고는 0건이다. 검증 스크립트는 저장 에셋을 생성하거나 수정하지 않는다.
+
+## 숲 TestWater 웅덩이 (2026-10-22)
+
+- `TestWater` 프로젝트의 `MI_Water`, `MM_Water`, 의존 텍스처 3개를 `/Game/Environment/TestWater`로 이관했다. 기존 `/Game/Shader_Water`는 유지한다.
+- `/Game/MainRaid/RaidForest`에 `Forest_ShallowPuddle_TestWater` 하나를 배치했다. 위치는 `(-7780.16, -2084.13, 3.0)cm`, yaw 18도, Half Extent `(220, 150)cm`이며 시작 지점에서 북쪽 약 9.5m, -Y 방향 1m다. 지면 9점 검사에서 수심은 3cm다.
+- 적용 재질은 `MI_Water_Puddle` / `MM_Water_Puddle`이다. 원본 워터 표현에 기존 BP와 동일한 불규칙 윤곽을 추가하고, 얕은 수심에서 물 전체를 덮던 거품과 발광을 낮췄다. 투명도·작은 잔물결·Surface ForwardShading·수면 거칠기 설정을 웅덩이용으로 조절했다. 이관 원본 MI 파라미터는 보존한다.
+- 기존 `BP_ShallowPuddle`의 젖은 테두리, 물 발소리와 Niagara 이벤트를 사용한다. 이동 충돌·내비게이션·저장 데이터·UI 변경은 없다.
+- 새 UE 5.7 프로세스에서 에셋 참조 완결성, 수면 수평/무충돌, 물 영역/발걸음 이벤트, 기존 695개 액터 위치 유지와 액터 한 개 추가를 검증했다. D3D12 렌더를 확인했고 신규 워터 셰이더 컴파일 오류는 없었다. C++ 빌드는 필요하지 않았다.
+- 검증 보고서와 근접/주변 렌더는 `TunaSweeper/Saved/ForestPuddleWork`에 있다. 임시 이관 프로젝트와 생성 스크립트 제거 후 재로드 검증을 통과했다.
