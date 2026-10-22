@@ -28,7 +28,18 @@ float aa = clamp(fwidth(expanded) * 0.65, 0.001, 0.035);
 float front = smoothstep(0.5 - aa, 0.5 + aa, expanded);
 float directionPhase = lerp(neg, pos, positiveSpeed);
 float trail = lerp(front, directionPhase * front, TrailFade);
-float foam = saturate(center + trail - 1.0) * coverage * saturate(FoamStrength);
+// Reuse the dissolve texture with independent rotation/scale to erode the tail.
+// Protect the bright leading portion and the scalloped contour; no new foam is added.
+float2 tailUV = float2(0.8 * noiseUV.x - 0.6 * noiseUV.y,
+                      0.6 * noiseUV.x + 0.8 * noiseUV.y)
+              * TailBreakupScale + float2(0.371, 0.619);
+float tailNoise = Texture2DSample(Dissolve, DissolveSampler, tailUV).r;
+float holes = smoothstep(0.075, 0.18, tailNoise);
+float tailOnly = (1.0 - smoothstep(0.45, 0.80, directionPhase))
+               * smoothstep(0.52, 0.68, expanded);
+float foamMask = saturate(center + trail - 1.0);
+foamMask = max(0.0, foamMask - 0.45 * saturate(TailBreakupStrength) * tailOnly * holes);
+float foam = foamMask * coverage * saturate(FoamStrength);
 
 // Color and opacity are intentionally independent, matching the reference layers.
 float deepFade = smoothstep(OpaqueDepthStartCm, max(OpaqueDepthEndCm, OpaqueDepthStartCm + 1.0), depthCm);

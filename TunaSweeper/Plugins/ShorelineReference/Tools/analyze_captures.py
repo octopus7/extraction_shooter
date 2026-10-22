@@ -34,6 +34,18 @@ try:
     assert report['disabled_max'] <= 3, 'Foam disable still renders visible pixels'
     assert report['time_changed_pixels'] > 500, 'Foam does not animate'
     assert report['freeze_repeat_mean_error'] < .5, 'Frozen phase is unstable'
+    baseline = pixels('Mask_1_breakup_off.png').mean(axis=2)
+    with Image.open(root / 'Plugins/ShorelineReference/Resources/Validation/BeforeTailBreakup/Mask_1.png') as image:
+        previous_mask = np.asarray(image.convert('RGB'), dtype=np.float32).mean(axis=2)
+    report['breakup_off_matches_previous_mean_error'] = float(np.abs(baseline - previous_mask).mean())
+    report['breakup_changed_pixels'] = int((baseline - m1 > 5).sum())
+    report['tail_removed_pixels'] = int(((baseline > 8) & (m1 <= 8)).sum())
+    bright_front = baseline > 240
+    assert bright_front.any(), 'No bright front to compare'
+    report['bright_front_mean_error'] = float(np.abs(baseline - m1)[bright_front].mean())
+    assert report['breakup_off_matches_previous_mean_error'] < .05, 'Strength zero does not restore the original shader'
+    assert report['breakup_changed_pixels'] > 500 and report['tail_removed_pixels'] > 100, 'Tail breakup not visible'
+    assert report['bright_front_mean_error'] < .5, 'Bright front was eroded'
 
     # Orthographic camera yaw=0, pitch=-90: screen right is UE +Y, screen up +X.
     v, u = np.mgrid[0:1024, 0:1024]

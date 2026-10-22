@@ -28,6 +28,7 @@ try:
     es = u.get_editor_subsystem(u.EditorActorSubsystem)
     actors = {a.get_actor_label(): a for a in es.get_all_level_actors()}
     water = actors['SR_Water'].static_mesh_component
+    tail_strength = u.MaterialEditingLibrary.get_material_default_scalar_parameter_value(u.load_asset(BASE + '/Materials/M_ShorelineReference'), 'TailBreakupStrength')
     dynamic = water.create_dynamic_material_instance(0)
     assert dynamic
     dynamic.set_scalar_parameter_value('FreezeTime', 1)
@@ -57,7 +58,8 @@ try:
     stages = [('Wide.png', 0.0, 'wide'), ('Close_0.png', 0.0, 'close'),
               ('Close_1.png', 1.0, 'close'), ('Close_2.png', 2.0, 'close'),
               ('Mask_0.png', 0.0, 'mask'), ('Mask_1.png', 1.0, 'mask'),
-              ('Mask_1_repeat.png', 1.0, 'mask'), ('Mask_disabled.png', 1.0, 'disabled')]
+              ('Mask_1_repeat.png', 1.0, 'mask'), ('Mask_disabled.png', 1.0, 'disabled'),
+              ('Mask_1_breakup_off.png', 1.0, 'baseline'), ('Close_1_breakup_off.png', 1.0, 'close_baseline')]
     started = time.monotonic()
     started_utc = time.time()
     ticks = 0
@@ -68,9 +70,10 @@ try:
 
     def configure(kind, shader_time):
         dynamic.set_scalar_parameter_value('PreviewTime', shader_time)
-        dynamic.set_scalar_parameter_value('DebugMask', 1 if kind in ['mask', 'disabled'] else 0)
+        dynamic.set_scalar_parameter_value('DebugMask', 1 if kind in ['mask', 'disabled', 'baseline'] else 0)
+        dynamic.set_scalar_parameter_value('TailBreakupStrength', 0 if kind in ['baseline', 'close_baseline'] else tail_strength)
         dynamic.set_scalar_parameter_value('FoamStrength', 0 if kind == 'disabled' else 1)
-        is_mask = kind in ['mask', 'disabled']
+        is_mask = kind in ['mask', 'disabled', 'baseline']
         camera.clear_hidden_components()
         if is_mask:
             camera.hide_actor_components(actors['SR_Island'])
@@ -119,7 +122,7 @@ try:
                 camera.capture_scene()
                 if stage_ticks >= 24:
                     name, shader_time, kind = stages[stage]
-                    u.RenderingLibrary.export_render_target(world, mask_target if kind in ['mask', 'disabled'] else target, str(OUT), name)
+                    u.RenderingLibrary.export_render_target(world, mask_target if kind in ['mask', 'disabled', 'baseline'] else target, str(OUT), name)
                     report['captures'].append({'name': name, 'shader_time': shader_time, 'view': kind})
                     stage += 1
                     stage_ticks = 0

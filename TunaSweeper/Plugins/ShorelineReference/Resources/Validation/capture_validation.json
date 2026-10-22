@@ -43,9 +43,19 @@
       "name": "Mask_disabled.png",
       "shader_time": 1.0,
       "view": "disabled"
+    },
+    {
+      "name": "Mask_1_breakup_off.png",
+      "shader_time": 1.0,
+      "view": "baseline"
+    },
+    {
+      "name": "Close_1_breakup_off.png",
+      "shader_time": 1.0,
+      "view": "close_baseline"
     }
   ],
   "required_captures_exist": true,
   "saved_assets_unchanged": true,
-  "wall_seconds": 36.031
+  "wall_seconds": 37.25
 }

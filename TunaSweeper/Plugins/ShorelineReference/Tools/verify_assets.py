@@ -53,8 +53,17 @@ try:
     report['material_code_hash'] = hashlib.sha256(code.encode()).hexdigest()
     report['custom_inputs'] = [str(n.get_name()) if n else None for n in lib.get_inputs_for_material_expression(material, custom)]
     assert all(n is not None for n in lib.get_inputs_for_material_expression(material, custom))
+    report['tail_parameters'] = {name: lib.get_material_default_scalar_parameter_value(material, name)
+                                 for name in ['TailBreakupStrength', 'TailBreakupScale']}
+    assert 0 < report['tail_parameters']['TailBreakupStrength'] <= 1
+    assert report['tail_parameters']['TailBreakupScale'] > 0
     noise = u.load_asset(BASE + '/Textures/T_ShoreDissolve')
     data = u.load_asset(BASE + '/Textures/T_IslandShoreData')
+    # D3D12 may expose placeholder dimensions while texture compilation is pending.
+    # This UE 5.7 command blocks on the actual assets without saving any changes.
+    editor_world = u.get_editor_subsystem(u.UnrealEditorSubsystem).get_editor_world()
+    u.SystemLibrary.execute_console_command(editor_world, 'Editor.AsyncAssetCompilationFinishAll')
+    report['data_texture_size'] = [data.blueprint_get_size_x(), data.blueprint_get_size_y()]
     assert not noise.get_editor_property('srgb') and not data.get_editor_property('srgb')
     assert data.blueprint_get_size_x() == 1024 and data.blueprint_get_size_y() == 1024
     assert data.get_editor_property('address_x') == u.TextureAddress.TA_CLAMP

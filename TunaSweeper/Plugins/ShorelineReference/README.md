@@ -22,6 +22,8 @@ UE 5.7에서 잔잔한 흰 해안 띠를 검토하는 독립 무인도 테스트
 
 흰 띠는 `exp(-DepthCm/ShoreDepthCm)`을 해안 좌표로 사용한다. 시간 위상, 큰 반복 노이즈, 방향성 꼬리를 합성하고, 해안 바깥과 깊은 물에서는 제거한다. 색을 하얗게 보간하는 양과 물의 불투명도를 높이는 양을 별도로 계산한다. 화면 깊이 대신 저장된 수심을 사용하므로 카메라 이동이나 전경 물체에 해안 전체가 끌려가지 않는다.
 
+꼬리는 일정한 그라데이션으로만 사라지지 않도록 기존 `T_ShoreDissolve`를 회전·오프셋·크기 변경하여 한 번 더 샘플링한다. 밝은 앞부분과 물결 윤곽은 보호하고 옅은 뒤쪽 마스크만 부분적으로 깎아, 부드러운 빈틈과 거품 덩어리가 남는다. 새 텍스처는 추가하지 않으며 이 보정은 원본 해안 수식에 더한 미술 조정이다.
+
 ## 조정
 
 | 파라미터 | 초기값 | 역할 |
@@ -34,6 +36,8 @@ UE 5.7에서 잔잔한 흰 해안 띠를 검토하는 독립 무인도 테스트
 | DissolveStrength | 2.74 | 띠가 끊기는 정도 |
 | GradientDissolve | -1 | 원본의 수심별 노이즈 확대 보간 |
 | TrailFade | 1.27 | 뒤쪽 꼬리 소멸 보간 |
+| TailBreakupStrength | 0.85 | 꼬리의 불규칙한 빈틈 강도; 0이면 보정 전 모습 |
+| TailBreakupScale | 2.6 | 꼬리 노이즈 UV 배율; 커질수록 무늬가 작아짐 |
 | FoamOpacity | 0.68235296 | 흰색/알파 합성 강도 |
 | OpaqueDepthStartCm / OpaqueDepthEndCm | 180 / 200 | 유한한 해저 메시의 끝이 비치지 않도록 깊은 물 색과 완전 불투명으로 전환 |
 | AnimationSpeed | 1 | 시간 재생 배율; 0은 시간0에 정지 |
@@ -54,7 +58,7 @@ UE 5.7에서 잔잔한 흰 해안 띠를 검토하는 독립 무인도 테스트
 
 `Resources/Island/Island_SourcePreview.png`는 Blender의 지형 원본 확인용이며 UE 최종 결과가 아니다. UE 캡처는 `Resources/Validation`에 별도로 보관한다.
 
-최종 검증: UE5.7 D3D12/SM6 셰이더 오류 0, 거품의 얕은 해안 범위 밖 픽셀 0, 같은 시각 반복 차이 0, 서로 다른 시각의 변화 픽셀 18,593개, 240프레임/20초 캡처의 239개 연속 쌍 변화 확인. 일회성 생성기 삭제 후 새 UE 프로세스에서 자산 검증도 통과했다. [근접 결과](Resources/Validation/Close_1.png), [전체 섬](Resources/Validation/Wide.png), [20초 영상](Resources/Validation/Shoreline_20s.mp4), [자산 검증](Resources/Validation/asset_validation.json), [픽셀 검증](Resources/Validation/pixel_validation.json)을 보관한다.
+최종 검증: UE5.7 D3D12/SM6 셰이더 오류 0, 거품의 얕은 해안 범위 밖 픽셀 0, 같은 시각 반복 차이 0, 서로 다른 시각의 변화 픽셀 17,461개, 240프레임/20초 캡처의 239개 연속 쌍 변화 확인. 꼬리 보정 강도 0의 마스크는 수정 전과 정확히 일치하며, 현재 강도에서 4,778픽셀이 달라지고 꼬리 1,192픽셀이 제거되었다. 밝은 앞부분의 평균 차이는 255단계 중 0.34 미만이다. 일회성 갱신기 삭제 후 새 UE 프로세스에서 자산 검증도 통과했다. [수정 전](Resources/Validation/BeforeTailBreakup/Close_1.png), [근접 결과](Resources/Validation/Close_1.png), [전체 섬](Resources/Validation/Wide.png), [20초 영상](Resources/Validation/Shoreline_20s.mp4), [자산 검증](Resources/Validation/asset_validation.json), [픽셀 검증](Resources/Validation/pixel_validation.json)을 보관한다.
 
 ## 출처
 

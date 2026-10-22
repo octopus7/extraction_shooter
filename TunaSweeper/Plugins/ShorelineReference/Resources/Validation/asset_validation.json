@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "material_code_hash": "c6a3498e6de3a12fd5f57b6d67c1af7a158f89c70447185bec117e10205330f0",
+  "material_code_hash": "57c622c0d3fef1b438143ec1a284d5bfa85d0db316b1bb91df770a9023c650c1",
   "custom_inputs": [
     "MaterialExpressionWorldPosition_2",
     "MaterialExpressionTime_4",
@@ -30,7 +30,17 @@
     "MaterialExpressionScalarParameter_61",
     "MaterialExpressionVectorParameter_1",
     "MaterialExpressionVectorParameter_3",
-    "MaterialExpressionVectorParameter_5"
+    "MaterialExpressionVectorParameter_5",
+    "MaterialExpressionScalarParameter_2",
+    "MaterialExpressionScalarParameter_5"
+  ],
+  "tail_parameters": {
+    "TailBreakupStrength": 0.8500000238418579,
+    "TailBreakupScale": 2.5999999046325684
+  },
+  "data_texture_size": [
+    1024,
+    1024
   ],
   "ue_mesh_vs_mask_max_vertex_error_cm": 4.738915788493614e-05,
   "source_to_ue_axes": "UE=(source X, -source Y, source Z); data UV=(UE XY+4096)/8192",
