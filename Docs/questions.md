@@ -8297,3 +8297,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 답변: 8비트 RGB/RGBA PNG를 직접 디코딩하고 RGB 정수로 비교하면 파일에 저장된 값을 그대로 읽을 수 있다. UE 5.7의 FImageUtils::LoadImage로 FImage를 읽고 BGRA8 형식을 확인한 뒤 AsBGRA8의 FColor.R/G/B를 비교하는 경로를 권장한다. sRGB 메타데이터 자체는 바이트를 변경하지 않지만 FLinearColor(FColor)는 sRGB→Linear 변환을 수행하므로 판정 경로에서 사용하지 않는다. 규칙 입력도 R/G/B 정수로 저장한다.
 - 확인: 로컬 UE 5.7 PngImageWrapper.cpp 디코딩에 png_set_gamma 또는 ICC 프로필 변환 호출이 없으며 8비트 RGB 입력은 채널 순서 정리와 알파 확장 후 정수 값을 유지한다. 원본 16비트 입력은 8비트로 자동 축소하지 않고 별도로 처리해야 한다. 이미지 편집기가 저장 전에 프로필 변환/안티앨리어싱으로 바꾼 값은 이미 파일에 반영된 값이므로 파일 판독이 이전 값을 복원하지는 않는다. 도구 구현이나 에디터 실행은 하지 않았다.
 - 근거: UE 5.7 Engine/Source/Runtime/ImageWrapper/Public/IImageWrapperModule.h:17-42 ; Engine/Source/Runtime/ImageWrapper/Private/Formats/PngImageWrapper.cpp:370-524 ; Engine/Source/Runtime/Core/Public/Math/Color.h:781-785.
+
+
+## 2026-10-23 00:25:18 (소요시간: 00:00:57)
+
+- 질문: 구현된 흰 띠가 쇼어라인인가?
+- 답변: 정확한 명칭은 shoreline foam(해안 거품)이다. Shoreline은 물과 땅이 만나는 해안선 자체이며, 이번 흰 띠는 그 해안선을 따라 움직이는 거품 효과다.
