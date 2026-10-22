@@ -1,5 +1,6 @@
 #include "Vehicle/TunaSweeperATVActor.h"
 #include "Combat/TunaSweeperCombatValue.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -102,6 +103,10 @@ void ATunaSweeperATVActor::DestroyVehicle()
 {
 	if (bVehicleDestroyed) return;
 	bVehicleDestroyed = true;
+	FuelSeconds = 0.f;
+	StoreSessionFuel();
+	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>(); Game && FuelSession == Game->GetVehicleFuelSession())
+		Game->SaveGameState();
 	ClearDriveInput();
 	MountComponent->ReleaseRiderForVehicleDestruction();
 	// Remove the Chaos vehicle from its manager. The chassis remains a normal rigid

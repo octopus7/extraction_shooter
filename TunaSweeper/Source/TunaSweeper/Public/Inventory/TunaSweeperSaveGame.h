@@ -157,6 +157,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|World Progress")
 	TArray<FTunaSweeperWorldProgressSaveData> WorldProgressStates;
 
+	// Stable level-package/placement key -> remaining driving seconds.
+	UPROPERTY()
+	TMap<FString, float> VehicleFuelByPlacement;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank")
 	TArray<FTunaSweeperPiggyBankSaveData> PiggyBankStates;
 

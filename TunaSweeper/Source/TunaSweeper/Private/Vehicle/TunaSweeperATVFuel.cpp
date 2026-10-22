@@ -5,11 +5,12 @@
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/Level.h"
+#include "Engine/World.h"
 
 void ATunaSweeperATVActor::InitializeSessionFuel()
 {
     FuelSeconds = 0.f;
-    FuelSessionKey = GetLevel()->GetOutermost()->GetName() + TEXT(":") +
+    FuelSessionKey = UWorld::RemovePIEPrefix(GetLevel()->GetOutermost()->GetName()) + TEXT(":") +
         (FuelSessionId.IsNone() ? GetName() : FuelSessionId.ToString());
     if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
     {

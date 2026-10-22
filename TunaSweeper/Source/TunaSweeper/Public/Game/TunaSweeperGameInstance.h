@@ -561,15 +561,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
 	void BeginRaidExperienceSession();
-	// Raid-session memory only; never serialized into a gameplay slot.
+	// Slot-owned fuel; generation rejects writes from actors of a previous level/slot.
 	uint64 GetVehicleFuelSession() const { return VehicleFuelSession; }
 	float GetVehicleFuel(const FString& Key) const { return VehicleFuelByPlacement.FindRef(Key); }
 	void StoreVehicleFuel(const FString& Key, float Seconds, uint64 Session)
 	{
-		if (Session == VehicleFuelSession && !Key.IsEmpty())
+		if (Session == VehicleFuelSession && !Key.IsEmpty() && FMath::IsFinite(Seconds))
 			VehicleFuelByPlacement.Add(Key, FMath::Clamp(Seconds, 0.f, 60.f));
 	}
 	void ResetVehicleFuelSession() { VehicleFuelByPlacement.Reset(); ++VehicleFuelSession; }
+	void RestoreVehicleFuel(const TMap<FString, float>& SavedFuel)
+	{
+		ResetVehicleFuelSession();
+		for (const auto& Entry : SavedFuel) StoreVehicleFuel(Entry.Key, Entry.Value, VehicleFuelSession);
+	}
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
 	int32 AddRaidExperience(int32 ExperienceAmount);

@@ -568,6 +568,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		return false;
 	}
 
+	RestoreVehicleFuel(SaveGame->VehicleFuelByPlacement);
 	SelectedOutfitId = TunaSweeperOutfits::SanitizePersistedOutfitId(SaveGame->SelectedOutfitId);
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
@@ -906,6 +907,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	{
 		return Left.MarkerId < Right.MarkerId;
 	});
+	SaveGame->VehicleFuelByPlacement = VehicleFuelByPlacement;
 	WorldProgressStatesById.GenerateValueArray(SaveGame->WorldProgressStates);
 	SaveGame->WorldProgressStates.Sort([](
 		const FTunaSweeperWorldProgressSaveData& Left,
@@ -1067,6 +1069,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	ResetVehicleFuelSession();
 	SelectedOutfitId = TEXT("Maid");
 	TGuardValue<bool> InitializationGuard(bInventoryStateInitializing, true);
 	DespawnPetCompanion();
@@ -1143,6 +1146,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
+	ResetVehicleFuelSession();
 	SelectedOutfitId = TEXT("Maid");
 	ItemInstancesByUid.Reset();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
@@ -1205,7 +1209,6 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 
 void UTunaSweeperGameInstance::ResetPlayerSlotArrays()
 {
-	ResetVehicleFuelSession();
 	EquipmentSlots.Reset();
 	AuxiliaryBagSlots.Reset();
 	UsableQuickSlots.Reset();

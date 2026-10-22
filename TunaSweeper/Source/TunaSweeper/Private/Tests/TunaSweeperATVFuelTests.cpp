@@ -3,6 +3,9 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Engine/DamageEvents.h"
+#include "Inventory/TunaSweeperSaveGame.h"
+#include "Kismet/GameplayStatics.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
@@ -193,7 +196,7 @@ bool FTunaSweeperATVFuelTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Destroyed ATV offers no refill interaction"), Mount->GetInteractionType(), ETunaSweeperInteractionType::None);
     TestEqual(TEXT("Destroyed ATV leaves ethanol untouched"), Game->CountInventoryItemById(6009), 1);
 
-    // Recreated actors must recover fuel by stable placement, while a completed raid rejects stale writers.
+    // Stable placement fuel survives travel; departed worlds must not overwrite it.
     auto SpawnSessionVehicle = [&](FName PlacementId)
     {
         auto* Vehicle = World->SpawnActor<ATunaSweeperATVActor>(FVector::ZeroVector, FRotator::ZeroRotator, Spawn);
@@ -232,12 +235,51 @@ bool FTunaSweeperATVFuelTest::RunTest(const FString& Parameters)
     Game->HandleLevelTravelPersistence(TEXT("RaidVillage"), TEXT("BunkerMap"));
     auto* NextRaidVehicle = SpawnSessionVehicle(SessionPlacement);
     if (!NextRaidVehicle) return false;
-    TestFalse(TEXT("Returning to base clears fuel for the next raid"), NextRaidVehicle->HasFuel());
+    TestEqual(TEXT("Returning to base preserves fuel for the next raid"), NextRaidVehicle->FuelSeconds, 47.f);
     SessionVehicle->ConsumeFuel(1.f, true, true);
     TestEqual(TEXT("Old actor really attempts a final consumption update"), SessionVehicle->FuelSeconds, 46.f);
     auto* AfterStaleWrite = SpawnSessionVehicle(SessionPlacement);
     if (!AfterStaleWrite) return false;
-    TestFalse(TEXT("An old raid actor cannot repopulate cleared session fuel"), AfterStaleWrite->HasFuel());
+    TestEqual(TEXT("An old raid actor cannot overwrite fuel after travel"), AfterStaleWrite->FuelSeconds, 47.f);
+    // A real SaveGame archive round trip, without touching any player slot files.
+    auto* Save = NewObject<UTunaSweeperSaveGame>();
+    Save->VehicleFuelByPlacement = Game->VehicleFuelByPlacement;
+    TArray<uint8> Bytes;
+    if (!TestTrue(TEXT("Fuel map serializes"), UGameplayStatics::SaveGameToMemory(Save, Bytes))) return false;
+    auto* Reloaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
+    if (!TestNotNull(TEXT("Fuel map deserializes"), Reloaded)) return false;
+    Game->RestoreVehicleFuel(Reloaded->VehicleFuelByPlacement);
+    auto* Reconnected = SpawnSessionVehicle(SessionPlacement);
+    if (!Reconnected) return false;
+    TestEqual(TEXT("Reconnection restores the exact remaining fuel"), Reconnected->FuelSeconds, 47.f);
+    Game->ResetPlayerSlotArrays();
+    TestEqual(TEXT("Death or raid abandonment inventory reset preserves fuel"), SpawnSessionVehicle(SessionPlacement)->FuelSeconds, 47.f);
+    Reconnected->DetachedPartMeshes.Reset();
+    Reconnected->DestructionExplosionSound.Reset();
+    Reconnected->TakeDamage(1000.f, FDamageEvent(), nullptr, nullptr);
+    TestTrue(TEXT("Lethal damage destroys the vehicle"), Reconnected->IsVehicleDestroyed());
+    TestEqual(TEXT("Destroyed vehicle tank empties immediately"), Reconnected->FuelSeconds, 0.f);
+    TestEqual(TEXT("Replacement at the same placement starts empty"), SpawnSessionVehicle(SessionPlacement)->FuelSeconds, 0.f);
+    Game->StoreVehicleFuel(TEXT("other.level:vehicle"), 31.25f, Game->GetVehicleFuelSession());
+    Save->VehicleFuelByPlacement = Game->VehicleFuelByPlacement;
+    UGameplayStatics::SaveGameToMemory(Save, Bytes);
+    Reloaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
+    if (!TestNotNull(TEXT("Destroyed fuel state deserializes"), Reloaded)) return false;
+    Game->RestoreVehicleFuel(Reloaded->VehicleFuelByPlacement);
+    TestEqual(TEXT("Destruction remains empty after save/load"), SpawnSessionVehicle(SessionPlacement)->FuelSeconds, 0.f);
+    TestEqual(TEXT("Destroying one vehicle preserves another vehicle"), Game->GetVehicleFuel(TEXT("other.level:vehicle")), 31.25f);
+    const uint64 OldSession = Game->GetVehicleFuelSession();
+    Game->RestoreVehicleFuel({});
+    Game->StoreVehicleFuel(TEXT("other.level:vehicle"), 60.f, OldSession);
+    TestEqual(TEXT("Old save without fuel and stale slot writer stay empty"), Game->GetVehicleFuel(TEXT("other.level:vehicle")), 0.f);
+    Game->RestoreVehicleFuel({{TEXT("negative"), -5.f}, {TEXT("overfull"), 100.f},
+        {TEXT("nan"), std::numeric_limits<float>::quiet_NaN()}, {TEXT(""), 60.f}});
+    TestEqual(TEXT("Negative saved fuel clamps empty"), Game->GetVehicleFuel(TEXT("negative")), 0.f);
+    TestEqual(TEXT("Overfull saved fuel clamps to capacity"), Game->GetVehicleFuel(TEXT("overfull")), 60.f);
+    TestFalse(TEXT("NaN saved fuel is rejected"), Game->VehicleFuelByPlacement.Contains(TEXT("nan")));
+    TestFalse(TEXT("Empty saved placement is rejected"), Game->VehicleFuelByPlacement.Contains(TEXT("")));
+    Game->ResetRuntimeStateForSaveSlotSelection();
+    TestTrue(TEXT("Changing slots clears vehicle fuel"), Game->VehicleFuelByPlacement.IsEmpty());
     return true;
 }
 #endif
