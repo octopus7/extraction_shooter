@@ -1,8 +1,26 @@
 #include "UI/TunaSweeperVehicleFuelWidget.h"
 
 #include "Brushes/SlateRoundedBoxBrush.h"
-#include "Layout/Clipping.h"
 #include "Rendering/DrawElements.h"
+
+namespace
+{
+	FLinearColor FuelColor(float Ratio)
+	{
+		// The lower half passes red -> orange -> yellow -> green. The upper
+		// half stays exactly the same green so a healthy tank is easy to read.
+		const FLinearColor Stops[] = {
+			FLinearColor(1.0f, 0.025f, 0.015f),
+			FLinearColor(1.0f, 0.28f, 0.015f),
+			FLinearColor(1.0f, 0.85f, 0.015f),
+			FLinearColor(0.08f, 0.8f, 0.12f)
+		};
+		if (Ratio >= 0.5f) return Stops[3];
+		const float Position = FMath::Clamp(Ratio * 6.0f, 0.0f, 3.0f);
+		const int32 Index = FMath::Min(FMath::FloorToInt(Position), 2);
+		return FMath::Lerp(Stops[Index], Stops[Index + 1], Position - Index);
+	}
+}
 
 void UTunaSweeperVehicleFuelWidget::SetFuelRatio(float InFuelRatio)
 {
@@ -21,32 +39,52 @@ int32 UTunaSweeperVehicleFuelWidget::NativePaint(const FPaintArgs& Args, const F
 	const int32 BaseLayer = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements,
 		LayerId, InWidgetStyle, bParentEnabled);
 	const FVector2D Size = AllottedGeometry.GetLocalSize();
-	if (Size.X <= 10.0f || Size.Y <= 10.0f) return BaseLayer;
+	if (Size.X <= 16.0f || Size.Y <= 16.0f) return BaseLayer;
 
 	const FLinearColor Tint = InWidgetStyle.GetColorAndOpacityTint();
 	const ESlateDrawEffect Effects = bParentEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
-	auto DrawCapsule = [&](float Inset, const FLinearColor& Color, int32 Layer)
+	constexpr float OuterWidth = 14.0f;
+	const float Radius = FMath::Min(Size.X, Size.Y) * 0.5f - OuterWidth * 0.5f - 1.0f;
+	const FVector2D Center = Size * 0.5f;
+	auto MakeSpiral = [&](float End)
 	{
-		const FVector2D CapsuleSize = Size - FVector2D(Inset * 2.0f);
-		const FSlateRoundedBoxBrush Brush(Color, static_cast<float>(CapsuleSize.Y * 0.5f));
-		FSlateDrawElement::MakeBox(OutDrawElements, Layer,
-			AllottedGeometry.ToPaintGeometry(CapsuleSize, FSlateLayoutTransform(FVector2D(Inset))),
-			&Brush, Effects, Color * Tint);
+		TArray<FVector2D> Points;
+		const int32 Segments = FMath::Max(1, FMath::CeilToInt(96.0f * End));
+		Points.Reserve(Segments + 1);
+		for (int32 I = 0; I <= Segments; ++I)
+		{
+			const float Progress = End * static_cast<float>(I) / Segments;
+			// Clockwise from lower-left, leaving a 90-degree opening below.
+			// Radius grows from 50% to 100%; the center never collapses to a dot.
+			const float Angle = FMath::DegreesToRadians(135.0f + 270.0f * Progress);
+			const float Distance = Radius * FMath::Lerp(0.5f, 1.0f, Progress);
+			Points.Add(Center + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Distance);
+		}
+		return Points;
 	};
 
-	// The black outer rim and white inner rim remain readable against both snow and shadows.
-	DrawCapsule(0.0f, FLinearColor::Black, BaseLayer + 1);
-	DrawCapsule(2.0f, FLinearColor::White, BaseLayer + 2);
-	DrawCapsule(4.0f, FLinearColor::Black, BaseLayer + 3);
+	auto DrawStroke = [&](const TArray<FVector2D>& Points, float Width, const FLinearColor& Color, int32 Layer)
+	{
+		FSlateDrawElement::MakeLines(OutDrawElements, Layer, AllottedGeometry.ToPaintGeometry(),
+			Points, Effects, Color * Tint, true, Width);
+		// Round the two ends with the same tinted material as the stroke.
+		const FSlateRoundedBoxBrush Cap(Color, Width * 0.5f);
+		for (const FVector2D& End : {Points[0], Points.Last()})
+		{
+			FSlateDrawElement::MakeBox(OutDrawElements, Layer,
+				AllottedGeometry.ToPaintGeometry(FVector2D(Width),
+					FSlateLayoutTransform(End - FVector2D(Width * 0.5f))), &Cap, Effects, Color * Tint);
+		}
+	};
+
+	const TArray<FVector2D> Track = MakeSpiral(1.0f);
+	// A fixed black/white track shows the available capacity at every fuel level.
+	DrawStroke(Track, OuterWidth, FLinearColor::Black, BaseLayer + 1);
+	DrawStroke(Track, 11.0f, FLinearColor::White, BaseLayer + 2);
+	DrawStroke(Track, 8.0f, FLinearColor::Black, BaseLayer + 3);
 	if (FuelRatio > 0.0f)
 	{
-		constexpr float FillInset = 5.0f;
-		const FVector2D FillSize = Size - FVector2D(FillInset * 2.0f);
-		// Clip the full capsule instead of shrinking it: the advancing edge stays proportional to fuel.
-		OutDrawElements.PushClip(FSlateClippingZone(AllottedGeometry.ToPaintGeometry(
-			FVector2D(FillSize.X * FuelRatio, FillSize.Y), FSlateLayoutTransform(FVector2D(FillInset)))));
-		DrawCapsule(FillInset, FLinearColor(1.0f, 0.28f, 0.015f), BaseLayer + 4);
-		OutDrawElements.PopClip();
+		DrawStroke(MakeSpiral(FuelRatio), 6.0f, FuelColor(FuelRatio), BaseLayer + 4);
 	}
 	return BaseLayer + 4;
 }

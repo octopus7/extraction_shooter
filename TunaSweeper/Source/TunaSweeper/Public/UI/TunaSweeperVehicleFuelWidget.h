@@ -4,7 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "TunaSweeperVehicleFuelWidget.generated.h"
 
-/** A texture-free fuel capsule; its owning vehicle HUD supplies position and visibility. */
+/** A 270-degree spiral fuel gauge; the owning vehicle HUD supplies position and visibility. */
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperVehicleFuelWidget : public UUserWidget
 {

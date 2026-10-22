@@ -109,8 +109,8 @@ void UTunaSweeperVehicleDismountWidget::RefreshFuelGauge()
 	}
 
 	const FVector2D ScreenSize = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(Controller).GetLocalSize();
-	constexpr float GaugeWidth = 112.0f;
-	constexpr float GaugeHeight = 28.0f;
+	constexpr float GaugeWidth = 88.0f;
+	constexpr float GaugeHeight = 88.0f;
 	constexpr float Gap = 12.0f;
 	constexpr float ScreenMargin = 8.0f;
 	if (ScreenSize.X < GaugeWidth + ScreenMargin * 2.0f || ScreenSize.Y < GaugeHeight + ScreenMargin * 2.0f ||

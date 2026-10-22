@@ -11,6 +11,7 @@
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Blueprint/GameViewportSubsystem.h"
 #include "UI/TunaSweeperVehicleDismountWidget.h"
+#include "UI/TunaSweeperVehicleFuelWidget.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "Slate/WidgetRenderer.h"
@@ -122,6 +123,27 @@ bool FTunaSweeperVehicleHUDLayoutTest::RunTest(const FString& Parameters)
 			FImageUtils::PNGCompressImageArray(1280, 720, Pixels, PNG);
 			FFileHelper::SaveArrayToFile(PNG, *(FPaths::ProjectSavedDir() / (bHint ? TEXT("ATVRigWork/HUD_Stopped.png") : TEXT("ATVRigWork/HUD_Moving.png"))));
 		}
+		// Include the adjacent fuel widget in the existing optional HUD render
+		// evidence, at several levels for shape/color review after UI changes.
+		auto FuelCanvas = SNew(SConstraintCanvas);
+		const float Levels[] = {0.0f, 0.1f, 0.25f, 0.4f, 0.5f, 1.0f};
+		for (int32 I = 0; I < UE_ARRAY_COUNT(Levels); ++I)
+		{
+			auto* FuelWidget = NewObject<UTunaSweeperVehicleFuelWidget>(World);
+			FuelWidget->Initialize();
+			FuelWidget->SetFuelRatio(Levels[I]);
+			FuelCanvas->AddSlot().Alignment(FVector2D::ZeroVector).Offset(FMargin(12 + I * 112, 12, 88, 88))
+				[FuelWidget->TakeWidget()];
+		}
+		auto* FuelTarget = Renderer.DrawWidget(FuelCanvas, FVector2D(672, 112));
+		FlushRenderingCommands();
+		TArray<FColor> FuelPixels;
+		FReadSurfaceDataFlags FuelReadFlags;
+		FuelReadFlags.SetLinearToGamma(false);
+		FuelTarget->GameThread_GetRenderTargetResource()->ReadPixels(FuelPixels, FuelReadFlags);
+		TArray64<uint8> FuelPNG;
+		FImageUtils::PNGCompressImageArray(672, 112, FuelPixels, FuelPNG);
+		FFileHelper::SaveArrayToFile(FuelPNG, *(FPaths::ProjectSavedDir() / TEXT("ATVRigWork/Fuel_Levels.png")));
 	}
 	UGameViewportSubsystem::Get()->RemoveWidget(Widget);
 	Instance->UGameInstance::Shutdown();
