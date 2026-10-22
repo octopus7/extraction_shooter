@@ -1,0 +1,10 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "Pixel World Builder",
+  "Category": "Editor",
+  "CanContainContent": true,
+  "EnabledByDefault": true,
+  "Modules": [{ "Name": "PixelWorldBuilderEditor", "Type": "Editor", "LoadingPhase": "PostEngineInit" }]
+}

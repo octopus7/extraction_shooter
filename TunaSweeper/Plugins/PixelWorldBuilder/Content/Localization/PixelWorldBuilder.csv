@@ -1,0 +1,95 @@
+Key,SourceString
+Tool.Title,PNG 월드 빌더
+Tool.Description,PNG에 저장된 RGB 정수로 지형과 식생을 만듭니다. 이미지 위쪽은 북쪽(+X)이며 오른쪽은 +Y입니다. 새 생성물은 현재 레벨에 추가됩니다.
+Tool.Menu,PNG 월드 빌더 열기
+Tool.Section,월드 제작
+Tool.Profile,설정 프로필
+Tool.NewProfile,프로필 저장
+Tool.Analyze,분석 / 미리보기
+Tool.Generate,새로 생성
+Tool.Replace,선택한 생성 그룹 재생성
+Tool.Hint,프로필에서 PNG와 색상 규칙을 설정하세요. 재생성하려면 이전 생성 그룹의 루트 액터를 선택하세요. 변경 사항은 레벨 저장으로 보관합니다.
+Tool.Initial,원본 RGB 판독 대기 중
+Tool.Transaction,PNG 월드 생성 / 재생성
+Tool.RootLabel,PNG 생성 그룹 {Id}
+Tool.LandscapeLabel,PNG 지형 {Id}
+Tool.VegetationLabel,PNG 식생 {Id}
+Tool.Success,생성이 완료되었습니다. 생성 그룹을 선택했습니다. 레벨을 저장해 결과를 보관하세요.
+Tool.Summary,"지형 {X} × {Y} 정점 / 크기 {North}m × {East}m / 식생 {Plants}개 / 간격·경사 제한으로 제외 {Rejected}개"
+Tool.RuleSummary,"RGB ({R}, {G}, {B}): {Count}픽셀"
+Error.Read,PNG 파일을 읽을 수 없습니다. 경로와 파일을 확인하세요.
+Error.Png,올바른 PNG 파일이 아닙니다.
+Error.ColorFormat,배치도는 채널당 8비트 RGB 또는 RGBA PNG여야 합니다. 회색조와 16비트 색상 이미지는 지원하지 않습니다.
+Error.HeightFormat,높이맵은 배치도와 크기가 같은 16비트 회색조 PNG여야 합니다.
+Error.ImageSize,PNG 크기가 제한을 초과했습니다. 한 축은 최대 2048픽셀이며 지형 컴포넌트는 총 256개 이하이어야 합니다.
+Error.Numeric,거리·높이·밀도·크기·경사 설정에 유효하지 않은 값이 있습니다. 양수 범위와 최솟값/최댓값을 확인하세요.
+Error.Rules,색상 규칙은 1개 이상 64개 이하이어야 합니다.
+Error.Duplicate,"중복 RGB 규칙입니다: ({R}, {G}, {B})."
+Error.Unknown,"미등록 RGB ({R}, {G}, {B})가 좌표 ({X}, {Y})에 있습니다. 미등록 픽셀은 총 {Count}개입니다."
+Error.Alpha,"좌표 ({X}, {Y})의 알파가 255가 아닙니다. 배치도는 불투명 PNG로 저장하세요."
+Error.Vegetation,식생 항목마다 메시 또는 액터 클래스를 정확히 하나 지정하세요. 추상·에디터 전용·지형 액터 클래스는 사용할 수 없습니다.
+Error.Layers,바닥 레이어를 사용하려면 모든 색상 규칙에 서로 다른 유효 레이어를 지정하고 해당 레이어가 포함된 랜드스케이프 재질을 설정하세요.
+Error.Budget,식생 생성량이 제한을 초과했습니다. 밀도를 낮추거나 영역을 줄이세요. 메시 인스턴스는 최대 50000개이고 액터는 최대 2000개입니다.
+Error.World,편집 가능한 일반 레벨에서 실행하세요. PIE와 World Partition 및 잠긴 레벨은 지원하지 않습니다.
+Error.Selection,현재 레벨에서 이 도구로 만든 생성 그룹 루트 하나를 선택하세요.
+Error.DuplicateBatch,복제된 생성 그룹이 같은 식별자를 공유하고 있습니다. 이 상태에서는 재생성하지 않습니다. 중복 루트를 제거하거나 새로 생성 버튼으로 독립 그룹을 만드세요.
+Error.Spawn,생성에 실패했습니다. 기존 생성 그룹은 유지했습니다.
+Error.Cancelled,생성을 취소했습니다. 기존 생성 그룹은 유지했습니다.
+Error.Profile,설정 프로필을 선택하세요.
+Field.ColorPng,RGB 배치도 PNG
+Tip.ColorPng,파일에 저장된 RGB 정수를 그대로 읽습니다. 원본은 불투명 8비트 RGB/RGBA PNG로 저장하세요.
+Field.HeightPng,높이맵 PNG (선택)
+Tip.HeightPng,같은 크기의 16비트 회색조 PNG입니다. 비워 두면 색상별 기준 높이를 사용합니다.
+Field.HeightmapMinimumMeters,높이맵 최저 높이 (m)
+Tip.HeightmapMinimumMeters,높이맵 0의 높이이며 원점 Z에 더해집니다.
+Field.HeightmapMaximumMeters,높이맵 최고 높이 (m)
+Tip.HeightmapMaximumMeters,높이맵 65535의 높이이며 원점 Z에 더해집니다.
+Field.MetersPerPixel,픽셀 한 변의 길이 (m)
+Tip.MetersPerPixel,이미지 픽셀은 면적을 나타냅니다. 한 픽셀에 식생을 여러 개 배치할 수 있습니다.
+Field.Origin,맵 중심 / 기준 높이 (cm)
+Tip.Origin,맵의 수평 중심과 기준 높이입니다. 생성된 지형의 남서 모서리는 여기서 계산됩니다.
+Field.Seed,랜덤 시드
+Tip.Seed,동일 이미지·규칙·시드는 동일한 식생 배치를 만듭니다.
+Field.HeightSmoothingPasses,높이 경계 완화 횟수
+Tip.HeightSmoothingPasses,높이에만 평균 필터를 적용합니다. RGB 분류와 바닥 레이어는 변경하지 않습니다.
+Field.LandscapeMaterial,랜드스케이프 재질
+Tip.LandscapeMaterial,선택 사항입니다. 바닥 레이어를 사용하려면 각 Layer Info 이름을 사용하는 재질을 지정하세요.
+Field.Rules,색상 규칙
+Tip.Rules,이미지에 쓰인 RGB 색마다 규칙 하나를 추가하세요. 미등록 색이 있으면 생성하지 않습니다.
+Field.Red,R (0~255)
+Tip.Red,PNG에 저장된 빨강 채널 정수입니다.
+Field.Green,G (0~255)
+Tip.Green,PNG에 저장된 초록 채널 정수입니다.
+Field.Blue,B (0~255)
+Tip.Blue,PNG에 저장된 파랑 채널 정수입니다.
+Field.HeightMeters,기준 높이 (m)
+Tip.HeightMeters,높이맵을 사용하지 않을 때의 높이입니다. 맵 원점 Z에 더해집니다.
+Field.LandscapeLayer,바닥 Layer Info
+Tip.LandscapeLayer,선택 사항입니다. 사용 시 모든 규칙에 서로 다른 레이어를 지정하세요.
+Field.Vegetation,식생 항목
+Tip.Vegetation,같은 색 영역에 여러 종류를 배치할 수 있습니다. 간격은 항목별로 적용됩니다.
+Field.Mesh,인스턴스 메시
+Tip.Mesh,일반 풀과 덤불용 HISM 메시입니다. 액터 클래스와 동시에 지정할 수 없습니다.
+Field.ActorClass,식생 액터 / BP 클래스
+Tip.ActorClass,개별 동작이 있는 나무 BP 등에 사용합니다. 메시와 동시에 지정할 수 없습니다.
+Field.DensityPer100SquareMeters,100㎡당 목표 개수
+Tip.DensityPer100SquareMeters,영역 면적으로 목표 개수를 계산합니다. 경사와 간격 조건에 따라 실제 수량은 줄어들 수 있습니다.
+Field.MinimumSpacingMeters,최소 간격 (m)
+Tip.MinimumSpacingMeters,같은 색상의 같은 식생 항목끼리 적용하는 중심 간격입니다.
+Field.MinimumScale,최소 크기 배율
+Tip.MinimumScale,균일 랜덤 스케일의 최솟값입니다.
+Field.MaximumScale,최대 크기 배율
+Tip.MaximumScale,균일 랜덤 스케일의 최댓값입니다.
+Field.MaximumSlopeDegrees,최대 경사 (도)
+Tip.MaximumSlopeDegrees,이 값보다 가파른 지형에는 해당 식생을 배치하지 않습니다.
+Field.HeightOffsetCm,높이 오프셋 (cm)
+Tip.HeightOffsetCm,지형 표면에 맞춘 뒤 수직 방향으로 더할 값입니다.
+Field.bAlignToSurface,지표면 방향에 정렬
+Tip.bAlignToSurface,켜면 식생의 위쪽 축을 표면 법선에 맞춥니다.
+Field.bCollision,메시 인스턴스 충돌 사용
+Tip.bCollision,메시 출력에만 적용합니다. 액터 출력은 해당 클래스의 충돌 설정을 유지합니다.
+Category.Input,입력 이미지
+Category.World,월드 설정
+Category.Rules,색상별 규칙
+Category.Rule,색상 규칙
+Category.Vegetation,식생
