@@ -8274,3 +8274,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 카메라를 바라보는 빌보드 나무를 구현한 적이 있는지 작업 요청 기록으로 확인.
 - 답변: Docs/requests.md의 2026-10-09 00:55:33 기록에 /Game/Environment/AnimeTree/BP_AnimeFoliageTree 구현이 있다. 나무 전체 한 장이 아니라 잎 카드가 카메라를 향하는 GPU WPO 빌보드 방식이며 바람, 카드 크기, 밀도를 조절한다. 해당 기록에는 UE 5.7 빌드 및 자동화 검사 3개와 GPU 렌더 검증 통과가 명시되어 있다. 이번 답변은 작업 기록 기준이다.
+
+
+## 2026-10-22 23:06:41 (소요시간: 00:16:22)
+
+- 질문: three-stylized-water 데모와 첨부 화면에서 물가의 잔잔한 흰 부분은 어떻게 구현되는가?
+- 답변: 공개 소스와 기본 tropical 프리셋 기준으로 수직 수심의 지수 마스크에서 반복 띠를 만들고, Noise 5 기반 dissolve와 진행 방향 꼬리를 적용하는 shoreline 레이어다. 흰 레이어 알파는 약 0.682이며 전체 수면 거품과 Gerstner 변형은 꺼져 있다. 접촉 레이어는 별도로 켜져 있고 기본 색은 연한 노란색이다. 데모 실시간 렌더 A/B는 수행하지 않았으며 소스·프리셋·첨부 화면을 근거로 설명했다.
+- 근거: https://github.com/norio/three-stylized-water/blob/main/src/water/nodes/shoreline.ts ; https://github.com/norio/three-stylized-water/blob/main/src/water/presets.json
