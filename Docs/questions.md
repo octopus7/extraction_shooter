@@ -8281,3 +8281,11 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: three-stylized-water 데모와 첨부 화면에서 물가의 잔잔한 흰 부분은 어떻게 구현되는가?
 - 답변: 공개 소스와 기본 tropical 프리셋 기준으로 수직 수심의 지수 마스크에서 반복 띠를 만들고, Noise 5 기반 dissolve와 진행 방향 꼬리를 적용하는 shoreline 레이어다. 흰 레이어 알파는 약 0.682이며 전체 수면 거품과 Gerstner 변형은 꺼져 있다. 접촉 레이어는 별도로 켜져 있고 기본 색은 연한 노란색이다. 데모 실시간 렌더 A/B는 수행하지 않았으며 소스·프리셋·첨부 화면을 근거로 설명했다.
 - 근거: https://github.com/norio/three-stylized-water/blob/main/src/water/nodes/shoreline.ts ; https://github.com/norio/three-stylized-water/blob/main/src/water/presets.json
+
+
+## 2026-10-22 23:44:03 (소요시간: 00:03:08)
+
+- 질문: PNG 이미지의 약속한 RGB 색상에 따라 UE 랜드스케이프와 식생을 배치하는 도구는 무엇으로 구현하는 것이 좋은가?
+- 답변: UE 5.7용 C++ 에디터 플러그인을 추천한다. PNG 원본 RGB 판독, DataAsset 색상별 규칙, Landscape 높이/재질 레이어 적용, 식생 배치를 분리하고 UI는 에디터 패널로 제공한다. 기존 SplineWorldBuilder처럼 C++ 코어와 선택적 PCG 구조가 맞으며 PCG는 복잡한 산포 규칙이 필요할 때 연결한다. 일반 풀/덤불은 인스턴싱하고 기존 AnimeFoliageTree처럼 개별 연출이 있는 나무는 BP 액터 배치를 지원한다.
+- 설계 기준: RGB는 구역 식별자로 사용하고 높이는 별도 16비트 회색조 PNG 또는 명시적인 색상별 높이 규칙으로 정의한다. 원본 RGB 정수의 정확한 비교, 미등록 색 검출, 픽셀당 월드 크기, 이미지 상단과 북쪽 +X 매핑, 고정 Seed, 생성물만 재생성 및 Undo를 고려한다. 이번 응답은 기술 선택 자문이며 구현/에디터 실행은 하지 않았다.
+- 근거: TunaSweeper/Plugins/SplineWorldBuilder/README.md ; TunaSweeper/Source/TunaSweeper/Private/Environment/TunaSweeperAnimeTreeActor.cpp ; Docs/game_conventions.md ; https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-and-exporting-landscape-heightmaps-in-unreal-engine?application_version=5.7 ; https://dev.epicgames.com/documentation/en-us/unreal-engine/procedural-content-generation-overview?application_version=5.7
