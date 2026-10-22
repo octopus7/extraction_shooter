@@ -138,3 +138,17 @@ Saved/AnimeTreeQA/tree_15..18.png: off/on pairs; 19..23: overlapping trees/debug
 masks; 24..25: foreground blocker; 26..27: wind-deformed mask over time.
 No asset generator, startup regeneration, game UI, persistence or Demo/channel
 branching is introduced. The user's RaidMap is not modified by this task.
+
+Player visibility dissolve (2026-10-22):
+BP_AnimeFoliageTree uses MI_AnimeTree_LeavesReveal, which enables the
+OcclusionRevealEnabled static switch on the shared leaf material. The default
+switch remains off so BP_Bush_A/B/C keep their existing appearance. The existing
+leaf alpha/density mask is multiplied by the screen-space character/cursor
+mask copied from M_OcclusionRevealMasked, reading the same MPC_OcclusionReveal.
+Radius follows DA_OcclusionRevealSettings; no new actor tick or map setup is
+needed. Existing placed tree instances inherit the BP material on reload.
+Leaf color, gradient, WPO wind/billboard and custom-depth rim remain connected.
+StableShadowProxy bypasses the visibility mask to preserve the fixed-basis
+foliage shadows. The trunk uses the same visibility mask with ShadowPassSwitch,
+keeping its original base color, roughness, specular and physical shadow.
+No geometry, collision, UI strings or save data changes are involved.
