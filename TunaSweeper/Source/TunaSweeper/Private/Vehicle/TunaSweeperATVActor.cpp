@@ -105,6 +105,8 @@ void ATunaSweeperATVActor::BeginPlay()
 	bHasCollisionLocation = true;
 	MountComponent->OnMounted.AddDynamic(this, &ATunaSweeperATVActor::HandleRiderChanged);
 	MountComponent->OnDismounted.AddDynamic(this, &ATunaSweeperATVActor::HandleRiderChanged);
+	InitializeSessionFuel();
+	RefreshFuelInteraction();
 	ClearDriveInput();
 }
 
@@ -126,7 +128,7 @@ UPawnMovementComponent* ATunaSweeperATVActor::GetMovementComponent() const { ret
 
 bool ATunaSweeperATVActor::CanAcceptDriveInput() const
 {
-	if (bVehicleDestroyed) return false;
+	if (bVehicleDestroyed || !HasFuel()) return false;
 	const auto* Rider = MountComponent->GetRider();
 	if (!IsValid(Rider) || Rider->IsDead()) return false;
 	const auto* PC = Cast<ATunaSweeperPlayerController>(Rider->GetController());
@@ -150,7 +152,11 @@ void ATunaSweeperATVActor::ClearDriveInput()
 	VehicleMovement->SetHandbrakeInput(true);
 }
 
-void ATunaSweeperATVActor::HandleRiderChanged(ATunaSweeperTopDownCharacter* Rider) { ClearDriveInput(); }
+void ATunaSweeperATVActor::HandleRiderChanged(ATunaSweeperTopDownCharacter* Rider)
+{
+	ClearDriveInput();
+	RefreshFuelInteraction();
+}
 
 void ATunaSweeperATVActor::Tick(float DeltaSeconds)
 {
@@ -158,6 +164,9 @@ void ATunaSweeperATVActor::Tick(float DeltaSeconds)
 	UpdateDamageSmoke(DeltaSeconds);
 	UpdateCollisionDamage(DeltaSeconds);
 	if (bVehicleDestroyed) return;
+	// A seated driver keeps the engine idling. On foot it is switched off.
+	ConsumeFuel(DeltaSeconds, IsValid(MountComponent->GetRider()),
+		FMath::Abs(VehicleMovement->GetForwardSpeed()) > 5.f || FMath::Abs(DriveInput.Y) > 0.05f);
 	if (!CanAcceptDriveInput())
 	{
 		ClearDriveInput();

@@ -52,6 +52,10 @@ ATunaSweeperATVActor* ATunaSweeperSpecialVehicleSpawner::SpawnVehicle()
 	Params.Owner = this;
 	Params.OverrideLevel = GetLevel();
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	Params.CustomPreSpawnInitalization = [this](AActor* Actor)
+	{
+		CastChecked<ATunaSweeperATVActor>(Actor)->FuelSessionId = GetFName();
+	};
 	// Set before SpawnActor so BeginPlay callbacks cannot create a duplicate.
 	bSpawnedThisVisit = true;
 	const FTransform SpawnTransform(SpawnPoint->GetComponentRotation(), SpawnPoint->GetComponentLocation());

@@ -58,6 +58,8 @@ struct FScene
 		World->GetWorldSettings()->NotifyBeginPlay();
 		World->GetWorldSettings()->NotifyMatchStarted();
 		World->BeginPlay();
+		ATV->FuelSeconds = 60.0f;
+		ATV->RefreshFuelInteraction();
 	}
 	~FScene()
 	{

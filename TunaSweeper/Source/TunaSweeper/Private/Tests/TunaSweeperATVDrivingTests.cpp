@@ -47,6 +47,8 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	World->GetWorldSettings()->NotifyBeginPlay();
 	World->GetWorldSettings()->NotifyMatchStarted();
 	World->BeginPlay();
+	ATV->FuelSeconds = 60.0f;
+	ATV->RefreshFuelInteraction();
 	ATV->SetDriveInput(FVector2D(1,1));
 	TestTrue(TEXT("Unoccupied input is rejected"), ATV->GetDriveInput().IsNearlyZero());
 	TestTrue(TEXT("Direct mount for driving test"), Mount->TryMount(Player));

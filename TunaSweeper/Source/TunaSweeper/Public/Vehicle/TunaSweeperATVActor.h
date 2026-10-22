@@ -23,6 +23,17 @@ class TUNASWEEPER_API ATunaSweeperATVActor : public APawn
 	GENERATED_BODY()
 public:
 	ATunaSweeperATVActor();
+	UFUNCTION(BlueprintPure, Category="ATV|Fuel") float GetFuelRatio() const { return FMath::Clamp(FuelSeconds / 60.f, 0.f, 1.f); }
+	UFUNCTION(BlueprintPure, Category="ATV|Fuel") bool HasFuel() const { return FuelSeconds > 0.f; }
+	bool Refuel(APawn* InstigatorPawn);
+	void ConsumeFuel(float DeltaSeconds, bool bEngineOn, bool bMoving);
+	void RefreshFuelInteraction();
+	void InitializeSessionFuel();
+	// Spawners supply a stable placement ID before BeginPlay; placed vehicles use their actor name.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Fuel") FName FuelSessionId;
+	// Runtime only: seconds of driving remaining. A full tank drives for one minute.
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="ATV|Fuel") float FuelSeconds = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Fuel") FName RefuelObjectiveEventId;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
@@ -104,6 +115,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Collision", meta=(ClampMin="0.05", Units="s"))
 	float CollisionDamageCooldown = 0.75f;
 private:
+	void StoreSessionFuel();
+	FString FuelSessionKey;
+	uint64 FuelSession = 0;
+	bool bRefueling = false;
 	void UpdateCollisionDamage(float DeltaSeconds);
 	FVector PreviousCollisionLocation = FVector::ZeroVector;
 	bool bHasCollisionLocation = false;

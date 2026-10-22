@@ -275,6 +275,8 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperPowerFacilityMaterialsTest;
 	friend class FTunaSweeperRockfallTest;
 	friend class FTunaSweeperEthanolFacilityTest;
+	friend class FTunaSweeperRepairableATVTest;
+	friend class FTunaSweeperATVFuelTest;
 	friend class FTunaSweeperNpcBarterTest;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
@@ -559,6 +561,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
 	void BeginRaidExperienceSession();
+	// Raid-session memory only; never serialized into a gameplay slot.
+	uint64 GetVehicleFuelSession() const { return VehicleFuelSession; }
+	float GetVehicleFuel(const FString& Key) const { return VehicleFuelByPlacement.FindRef(Key); }
+	void StoreVehicleFuel(const FString& Key, float Seconds, uint64 Session)
+	{
+		if (Session == VehicleFuelSession && !Key.IsEmpty())
+			VehicleFuelByPlacement.Add(Key, FMath::Clamp(Seconds, 0.f, 60.f));
+	}
+	void ResetVehicleFuelSession() { VehicleFuelByPlacement.Reset(); ++VehicleFuelSession; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
 	int32 AddRaidExperience(int32 ExperienceAmount);
@@ -1303,4 +1314,6 @@ private:
 
 	UPROPERTY(Transient)
 	double ActiveSlotStartTimeSeconds = 0.0;
+	TMap<FString, float> VehicleFuelByPlacement;
+	uint64 VehicleFuelSession = 0;
 };

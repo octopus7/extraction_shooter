@@ -319,6 +319,8 @@ void UTunaSweeperGameInstance::RemoveVolatileItemsOnBaseArrival(FName ArrivedLev
 
 void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName)
 {
+	if (!TunaSweeperBuildFlavor::IsRaidGameplayLevelName(SourceLevelName) ||
+		!TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TargetLevelName)) ResetVehicleFuelSession();
 	bPendingRaidTutorial = false;
     PendingRegionVitalsDestination = NAME_None;
     if (TunaSweeperBuildFlavor::IsRaidGameplayLevelName(SourceLevelName) && TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TargetLevelName))

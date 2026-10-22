@@ -24,7 +24,7 @@ UTunaSweeperVehicleMountComponent::UTunaSweeperVehicleMountComponent()
 
 bool UTunaSweeperVehicleMountComponent::CanMount(const ATunaSweeperTopDownCharacter* Character) const
 {
-	if (const auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner()); ATV && ATV->IsVehicleDestroyed()) return false;
+	if (const auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner()); ATV && (ATV->IsVehicleDestroyed() || !ATV->HasFuel())) return false;
 	if (!IsValid(Character) || !IsValid(GetOwner()) || GetOwner()->IsActorBeingDestroyed() || Rider.IsValid() ||
 		Character->IsDead() || Character->IsMountedInVehicle() || Character->GetAttachParentActor() ||
 		!IsWithinInteractionDistance(Character) || FMath::Abs(Character->GetActorLocation().Z - GetComponentLocation().Z) > InteractionDistance)

@@ -92,6 +92,8 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	World->GetWorldSettings()->NotifyBeginPlay();
 	World->GetWorldSettings()->NotifyMatchStarted();
 	World->BeginPlay();
+	ATV->FuelSeconds = 60.0f;
+	ATV->RefreshFuelInteraction();
 	TFunction<void(const TCHAR*)> Capture = [](const TCHAR*) {};
 #if WITH_EDITOR
 	if (FParse::Param(FCommandLine::Get(), TEXT("ATVDamagePreview")))
@@ -226,6 +228,8 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	auto* TrappedMount = TrappedATV->MountComponent.Get();
 	TrappedMount->EngineStartSound = TrappedMount->EngineIdleSound = TrappedMount->EngineStopSound = nullptr;
 	TrappedMount->EngineDriveSound = TrappedMount->EngineBoostSound = nullptr;
+	TrappedATV->FuelSeconds = 60.0f;
+	TrappedATV->RefreshFuelInteraction();
 	Player->SetActorLocation(FVector(0,840,90));
 	TestTrue(TEXT("Board before blocked-exit scenario"), TrappedMount->TryMount(Player));
 	TrappedATV->SetActorLocation(FVector(700,700,30), false, nullptr, ETeleportType::TeleportPhysics);

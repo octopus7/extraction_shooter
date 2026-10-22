@@ -144,6 +144,8 @@ private:
 	friend class FTunaSweeperQuestCraftTest;
 	friend class FTunaSweeperQuestEnemyClassTest;
 	friend class FTunaSweeperEthanolFacilityTest;
+	friend class FTunaSweeperRepairableATVTest;
+	friend class FTunaSweeperATVFuelTest;
 	friend class FTunaSweeperNpcBarterTest;
 	friend struct FTunaSweeperRoadkillTestScene;
 	friend class FTunaSweeperQuestWorldProgressTest;

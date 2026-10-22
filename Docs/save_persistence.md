@@ -1,5 +1,13 @@
 # Save/Load Persistence Contract
 
+## ATV repair and raid fuel
+
+Repairable ATV scenery consumes one working vehicle spark plug through the existing atomic facility-repair transaction. Repair progress uses the configured stable world-progress object ID and existing gameplay save fields. A repaired actor remains noninteractive scenery during that map visit, including after reward notifications. Only a later BeginPlay with both saved repair completion and the configured quest reward claimed spawns its configured drivable ATV Blueprint. The scenery and replacement classes remain separate.
+
+Fuel is session memory only: one carried ethanol fills 60 driving seconds; a seated, idle engine consumes 10% of the driving rate, and an unoccupied vehicle consumes none. The GameInstance cache is keyed by level package and a stable vehicle placement ID. Placed vehicles default to their actor name; spawners and repair replacements assign their stable source ID before BeginPlay. Returning to a vehicle during the same raid restores its remaining fuel. Travel involving a non-raid map, gameplay-slot loading, or new inventory/session initialization clears the cache. A generation token rejects late writes from actors belonging to the preceding session. Fuel is not serialized and does not change the save version.
+
+Successful refueling reports the configured interaction objective event after inventory consumption and fuel assignment. Quest objective progress is saved normally; fuel itself is not. An empty tank stops driving input and engine audio but keeps the rider seated so the normal dismount action remains available.
+
 ## Workbench crafting objective progress
 
 `workbench_recipe_crafted` counts successful crafting operations for one exact `recipe_id`, after ingredients are consumed and all output items fit. Acquisition, possession, a different recipe, failed crafting, and crafting before quest acceptance do not advance it. A multi-item output counts as one operation. The count uses the existing numeric quest objective progress and is included in the normal crafting save; no new save fields or version migration are needed. The new objective enum value is appended so existing ordinals remain unchanged.

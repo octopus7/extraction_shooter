@@ -544,6 +544,7 @@ void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
 
 bool UTunaSweeperGameInstance::LoadGameState()
 {
+	ResetVehicleFuelSession();
 	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
 	if (ExistingSlotName.IsEmpty())
 	{
@@ -1204,6 +1205,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 
 void UTunaSweeperGameInstance::ResetPlayerSlotArrays()
 {
+	ResetVehicleFuelSession();
 	EquipmentSlots.Reset();
 	AuxiliaryBagSlots.Reset();
 	UsableQuickSlots.Reset();

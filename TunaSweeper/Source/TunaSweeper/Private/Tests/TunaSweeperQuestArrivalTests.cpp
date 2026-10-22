@@ -190,6 +190,8 @@ bool FTunaSweeperQuestArrivalTest::RunTest(const FString& Parameters)
 	ATV->MountComponent->EngineIdleSound = nullptr;
 	ATV->MountComponent->EngineStopSound = nullptr;
 	ATV->MountComponent->VehicleHudClass.Reset();
+	ATV->FuelSeconds = 60.0f;
+	ATV->RefreshFuelInteraction();
 	TestTrue(TEXT("Actual player attaches to real vehicle"), ATV->MountComponent->TryMount(Player));
 	North->CheckArrivals();
 	TestEqual(TEXT("Missing prerequisites prevent vehicle credit"), Quests->GetObjectiveProgressCount(Drive.QuestId, TEXT("drive")), 0);

@@ -645,3 +645,5 @@ ui.rail.need_oil,需要润滑油。,需要潤滑油。,Нужно смазочн
 ui.interaction.fermented_fuel_supply,供应发酵燃料,供應發酵燃料,Поставка ферментированного топлива,Fornecer combustível fermentado
 ui.barter.ethanol_shortage,需要2份乙醇！,需要2份乙醇！,Нужно 2 ед. этанола!,Preciso de 2 unidades de etanol!
 ui.barter.failed,现在无法交换。,現在無法交換。,Сейчас обмен невозможен.,Não é possível trocar agora.
+ui.vehicle.refuel,加油（乙醇×1）,加油（乙醇×1）,Заправить (этанол ×1),Abastecer (1 Etanol)
+ui.vehicle.fuel_missing,乙醇不足！,乙醇不足！,Недостаточно этанола!,Etanol insuficiente!

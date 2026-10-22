@@ -153,6 +153,8 @@ bool FTunaSweeperRoadkillATVTest::RunTest(const FString& Parameters)
     ATV->MountComponent->EngineDriveSound = ATV->MountComponent->EngineBoostSound = nullptr;
     auto* Victim = Scene.Enemy(FVector(80, 0, 88));
     Scene.BeginPlay();
+    ATV->FuelSeconds = 60.0f;
+    ATV->RefreshFuelInteraction();
     const float InitialHealth = Victim->GetHealth();
     ATV->VehicleMesh->SetPhysicsLinearVelocity(FVector(1000, 0, 0));
     ATV->Tick(0.1f);

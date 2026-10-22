@@ -38,6 +38,7 @@
 #include "Interaction/TunaSweeperNpcBarterComponent.h"
 #include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
+#include "Vehicle/TunaSweeperATVActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperShopActor.h"
@@ -411,19 +412,7 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		if (auto* Mount = Cast<UTunaSweeperVehicleMountComponent>(Interactable))
 		{
 			auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn);
-			if (!Mount->CanMount(Character)) return false;
-			if (auto* GameInstance = Cast<UTunaSweeperGameInstance>(GetWorld()->GetGameInstance()))
-			{
-				if (auto* Speech = GameInstance->GetSubsystem<UTunaSweeperSpeechBubbleSubsystem>())
-				{
-					Speech->ShowForActor(
-						GameInstance->ResolveLocalizedText(TEXT("ui.vehicle.no_fuel"), FText::GetEmpty()),
-						Character, FVector(0.0, 0.0, 20.0),
-						ETunaSweeperSpeechBubbleTailDirection::None, 2.5f, -28.0f);
-				}
-			}
-			// Feedback consumes the input, but does not complete a vehicle-mount objective.
-			return true;
+			bHandled = Mount->TryMount(Character);
 		}
 		break;
 	default:
@@ -908,6 +897,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 		return ProgressActor->RepairUsingAvailableRequiredItems(true);
 	}
 	if (auto* Warehouse = Cast<ATunaSweeperFoodWarehouseActor>(ProgressOwner)) return Warehouse->TakeFood();
+	if (auto* ATV = Cast<ATunaSweeperATVActor>(ProgressOwner)) return ATV->Refuel(InstigatorPawn);
 	if (auto* Parcel = Cast<ATunaSweeperParcelContainerActor>(ProgressOwner)) return Parcel->PickUp(InstigatorPawn);
 	if (auto* Delivery = Cast<ATunaSweeperDeliveryDestinationActor>(ProgressOwner)) return Delivery->Deliver(InstigatorPawn);
 	if (auto* Passage = Cast<ATunaSweeperRegionLinkActor>(ProgressOwner)) return Passage->RepairPassage(true);

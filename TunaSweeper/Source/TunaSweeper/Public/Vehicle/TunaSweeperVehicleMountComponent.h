@@ -37,6 +37,7 @@ public:
 	void SetBoostInput(bool bHeld);
 	void ClearDriveInput();
 	void UpdateDrivingAudio(float DeltaTime, float Speed, float RPMRatio, bool bBoosting);
+	void StopEngineForFuel() { StopEngineAudio(); }
 	UPROPERTY(BlueprintAssignable, Category="TunaSweeper|Vehicle")
 	FTunaSweeperRiderChanged OnMounted;
 	UPROPERTY(BlueprintAssignable, Category="TunaSweeper|Vehicle")
