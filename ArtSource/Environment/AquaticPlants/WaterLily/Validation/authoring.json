@@ -27,7 +27,22 @@
       "materials": [
         "M_WaterLily_Atlas"
       ],
-      "thickness_m": 0.006
+      "thickness_m": 0.006,
+      "geometry_sha256": "b754550c2d283964e8b8c989f83f3a4a6b41ce151264b879cbf94d620d03aa2a",
+      "geometry_unchanged": true,
+      "uv_projection": "Continuous center-based XY plane for leaf top and bottom; circumference strip for thickness; local face-plane projection only for perpendicular vein end caps.",
+      "uv_center": [
+        0.25,
+        0.75
+      ],
+      "uv_allowed_bounds": [
+        0.02,
+        0.48,
+        0.52,
+        0.98
+      ],
+      "end_cap_projection_faces": 38,
+      "smooth_leaf_surface": true
     },
     {
       "name": "SM_WaterLily_B",
@@ -46,7 +61,22 @@
       "materials": [
         "M_WaterLily_Atlas"
       ],
-      "thickness_m": 0.007
+      "thickness_m": 0.007,
+      "geometry_sha256": "d366feee5459d3d7b201a049201e3504ae1d79f344f984b451a7b80cdbc797c4",
+      "geometry_unchanged": true,
+      "uv_projection": "Continuous center-based XY plane for leaf top and bottom; circumference strip for thickness; local face-plane projection only for perpendicular vein end caps.",
+      "uv_center": [
+        0.25,
+        0.75
+      ],
+      "uv_allowed_bounds": [
+        0.02,
+        0.48,
+        0.52,
+        0.98
+      ],
+      "end_cap_projection_faces": 38,
+      "smooth_leaf_surface": true
     },
     {
       "name": "SM_WaterLily_C",
@@ -65,7 +95,30 @@
       "materials": [
         "M_WaterLily_Atlas"
       ],
-      "thickness_m": 0.0045
+      "thickness_m": 0.0045,
+      "geometry_sha256": "b94690bbb187cc18fdf9500ae82bee27d0e30838aa186cb9dd9b54980b72b867",
+      "geometry_unchanged": true,
+      "uv_projection": "Continuous center-based XY plane for leaf top and bottom; circumference strip for thickness; local face-plane projection only for perpendicular vein end caps.",
+      "uv_center": [
+        0.25,
+        0.75
+      ],
+      "uv_allowed_bounds": [
+        0.02,
+        0.48,
+        0.52,
+        0.98
+      ],
+      "end_cap_projection_faces": 38,
+      "smooth_leaf_surface": true
     }
-  ]
+  ],
+  "texture": {
+    "file": "../../Textures/T_AquaticPlants_BaseColor.png",
+    "shared_texture": true,
+    "opaque": true,
+    "sha256": "5ca1fae28e4608b3d4c75592e0ca28d8efc2f5292e242737eb2283d3ee353f71",
+    "uv_quadrant": "upper-left"
+  },
+  "revision": "Continuous UVs and image-generated aquatic plant atlas; source geometry, dimensions, origin and triangle counts preserved."
 }

@@ -1,7 +1,6 @@
 {
   "blender_version": "4.5.12 LTS",
   "source_units": "meters",
-  "palette": "../Textures/T_Duckweed_Palette.png",
   "export": {
     "axis_forward": "-Y",
     "axis_up": "Z",
@@ -1051,5 +1050,21 @@
         }
       ]
     }
-  ]
+  ],
+  "surface_texture": "../Textures/T_AquaticPlants_BaseColor.png",
+  "material": "M_Duckweed_Surface",
+  "uv_layout": {
+    "type": "continuous planar per frond",
+    "atlas_quadrant": "lower-left",
+    "u_range": [
+      0.03,
+      0.47
+    ],
+    "v_range": [
+      0.03,
+      0.47
+    ],
+    "long_axis": "V",
+    "islands_overlap": "intentional reuse by every frond"
+  }
 }

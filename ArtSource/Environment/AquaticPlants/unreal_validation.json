@@ -92,5 +92,11 @@
   "instances_triangles": 50666,
   "existing_actor_transforms_preserved": 696,
   "puddle_depth_cm": 3.0,
+  "texture": "/Game/Environment/AquaticPlants/Textures/T_AquaticPlants_BaseColor",
+  "texture_dimensions": [
+    1254,
+    1254
+  ],
+  "forest_map_unchanged": true,
   "saved_assets_unchanged": true
 }

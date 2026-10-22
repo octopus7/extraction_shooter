@@ -1,11 +1,11 @@
 {
-  "method": "Independent Blender factory-startup process; import each final FBX into a freshly emptied metric scene. No source .blend or generator used.",
+  "method": "Independent Blender factory-startup process; import each final FBX into a freshly emptied metric scene, then reopen final source blend.",
   "blender_version": "4.5.12 LTS",
   "meshes": [
     {
       "name": "SM_WaterLily_A",
       "fbx": "Models/SM_WaterLily_A.fbx",
-      "sha256": "33bee0c1fd9eaf2ac273918f568a3678c66cdacf33aa690ef99bc67f08046338",
+      "sha256": "79523391d8ffdb6cf9325f80b9676669e54507aba30c8ddb2914b42dc7e36834",
       "dimensions_m": [
         0.34,
         0.324,
@@ -27,6 +27,7 @@
       ],
       "vertices": 464,
       "triangles": 848,
+      "triangles_preserved": true,
       "material_slots": 1,
       "material_names": [
         "M_WaterLily_Atlas"
@@ -34,23 +35,35 @@
       "uv_layers": [
         "UVMap"
       ],
+      "uv_bounds": [
+        0.02500000037252903,
+        0.4749999940395355,
+        0.5220000147819519,
+        0.9614787697792053
+      ],
+      "uv_in_upper_left_leaf_quadrant": true,
       "zero_area_uv_triangles": 0,
-      "minimum_uv_triangle_area": 0.007200000572204601,
+      "minimum_uv_triangle_area": 1.030175145189105e-07,
       "zero_area_geometry_faces": 0,
       "nonmanifold_edges": 0,
       "inconsistent_winding_edges": 0,
       "invalid_face_normals": 0,
       "signed_volume_m3": 0.0004759387854119286,
-      "top_facing_area_m2": 0.07934210567327682,
-      "bottom_facing_area_m2": 0.08033574130354282,
-      "top_ray_hit": true,
       "top_ray_normal_z": 0.9997157454490662,
-      "v_notch_open": true
+      "v_notch_open": true,
+      "texture_references": [
+        {
+          "image": "T_AquaticPlants_BaseColor",
+          "path": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\WaterLily\\Models\\..\\..\\Textures\\T_AquaticPlants_BaseColor.png",
+          "resolved_file": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\Textures\\T_AquaticPlants_BaseColor.png",
+          "exists": true
+        }
+      ]
     },
     {
       "name": "SM_WaterLily_B",
       "fbx": "Models/SM_WaterLily_B.fbx",
-      "sha256": "963b23c84c2c59275c47bc9f30632f0f57eeb115affde5e7ed0551ece1be3d26",
+      "sha256": "71bc9c69a4508984a711d4f4e4331e01a9e372ce11f8bb5aac216d0423bdfdd5",
       "dimensions_m": [
         0.38,
         0.352,
@@ -72,6 +85,7 @@
       ],
       "vertices": 488,
       "triangles": 896,
+      "triangles_preserved": true,
       "material_slots": 1,
       "material_names": [
         "M_WaterLily_Atlas"
@@ -79,23 +93,35 @@
       "uv_layers": [
         "UVMap"
       ],
+      "uv_bounds": [
+        0.02500000037252903,
+        0.4749999940395355,
+        0.5220000147819519,
+        0.9654821157455444
+      ],
+      "uv_in_upper_left_leaf_quadrant": true,
       "zero_area_uv_triangles": 0,
-      "minimum_uv_triangle_area": 0.007200000572204601,
+      "minimum_uv_triangle_area": 8.940414808478181e-08,
       "zero_area_geometry_faces": 0,
       "nonmanifold_edges": 0,
       "inconsistent_winding_edges": 0,
       "invalid_face_normals": 0,
       "signed_volume_m3": 0.0006723013177707614,
-      "top_facing_area_m2": 0.09627103490765876,
-      "bottom_facing_area_m2": 0.09731865817479957,
-      "top_ray_hit": true,
       "top_ray_normal_z": 0.9997515678405762,
-      "v_notch_open": true
+      "v_notch_open": true,
+      "texture_references": [
+        {
+          "image": "T_AquaticPlants_BaseColor.001",
+          "path": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\WaterLily\\Models\\..\\..\\Textures\\T_AquaticPlants_BaseColor.png",
+          "resolved_file": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\Textures\\T_AquaticPlants_BaseColor.png",
+          "exists": true
+        }
+      ]
     },
     {
       "name": "SM_WaterLily_C",
       "fbx": "Models/SM_WaterLily_C.fbx",
-      "sha256": "cbdbe8aaed060107b6187580031b630f39c6b523f2918c968cad9d266f642c3f",
+      "sha256": "0943f7bdc49e37b5581272b95a0be35dd8be9ac36de037e07649a1dfb42be033",
       "dimensions_m": [
         0.27000001,
         0.25800002,
@@ -117,6 +143,7 @@
       ],
       "vertices": 440,
       "triangles": 800,
+      "triangles_preserved": true,
       "material_slots": 1,
       "material_names": [
         "M_WaterLily_Atlas"
@@ -124,29 +151,83 @@
       "uv_layers": [
         "UVMap"
       ],
+      "uv_bounds": [
+        0.02500000037252903,
+        0.4749999940395355,
+        0.5220000147819519,
+        0.9700000286102295
+      ],
+      "uv_in_upper_left_leaf_quadrant": true,
       "zero_area_uv_triangles": 0,
-      "minimum_uv_triangle_area": 0.007200000572204601,
+      "minimum_uv_triangle_area": 1.669541234150529e-07,
       "zero_area_geometry_faces": 0,
       "nonmanifold_edges": 0,
       "inconsistent_winding_edges": 0,
       "invalid_face_normals": 0,
       "signed_volume_m3": 0.00022514714615391956,
-      "top_facing_area_m2": 0.050260749165317975,
-      "bottom_facing_area_m2": 0.05107629395479307,
-      "top_ray_hit": true,
       "top_ray_normal_z": 0.9991598725318909,
-      "v_notch_open": true
+      "v_notch_open": true,
+      "texture_references": [
+        {
+          "image": "T_AquaticPlants_BaseColor.002",
+          "path": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\WaterLily\\Models\\..\\..\\Textures\\T_AquaticPlants_BaseColor.png",
+          "resolved_file": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\Textures\\T_AquaticPlants_BaseColor.png",
+          "exists": true
+        }
+      ]
     }
   ],
   "errors": [],
-  "palette": {
-    "file": "Textures/T_WaterLily_Palette.png",
-    "width": 256,
-    "height": 256,
+  "texture": {
+    "file": "../../Textures/T_AquaticPlants_BaseColor.png",
+    "width": 1254,
+    "height": 1254,
     "bit_depth": 8,
     "png_color_type": 2,
     "all_pixels_opaque": true,
-    "sha256": "945c1206afc7dcd1d2d47e0fa9359d705e6c232312f6e3b87f26c38284c24f1d"
+    "sha256": "5ca1fae28e4608b3d4c75592e0ca28d8efc2f5292e242737eb2283d3ee353f71"
+  },
+  "editable_source": {
+    "file": "Models/WaterLily.blend",
+    "opens": true,
+    "models": [
+      {
+        "name": "SM_WaterLily_A",
+        "geometry_unchanged": true,
+        "top_uv_max_seam_error": 0.0,
+        "top_uv_center": [
+          0.25,
+          0.75
+        ],
+        "smooth_leaf_surface": true,
+        "shared_texture_packed": true,
+        "shared_texture_relative_path": "//..\\..\\Textures\\T_AquaticPlants_BaseColor.png"
+      },
+      {
+        "name": "SM_WaterLily_B",
+        "geometry_unchanged": true,
+        "top_uv_max_seam_error": 0.0,
+        "top_uv_center": [
+          0.25,
+          0.75
+        ],
+        "smooth_leaf_surface": true,
+        "shared_texture_packed": true,
+        "shared_texture_relative_path": "//..\\..\\Textures\\T_AquaticPlants_BaseColor.png"
+      },
+      {
+        "name": "SM_WaterLily_C",
+        "geometry_unchanged": true,
+        "top_uv_max_seam_error": 0.0,
+        "top_uv_center": [
+          0.25,
+          0.75
+        ],
+        "smooth_leaf_surface": true,
+        "shared_texture_packed": true,
+        "shared_texture_relative_path": "//..\\..\\Textures\\T_AquaticPlants_BaseColor.png"
+      }
+    ]
   },
   "passed": true
 }

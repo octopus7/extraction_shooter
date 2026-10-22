@@ -126,4 +126,4 @@ UE 5.7 `SingleLayerWaterComposite.usf`의 `saturate(DeltaDepth * 0.02)`에 의�
 
 ### 수생식물 장식 추가
 
-같은 웅덩이에 수련잎 6장, 개구리밥 11군집, 흰 어리연꽃 3군집을 배치했다. 메시 8종과 종별 팔레트 재질은 `/Game/Environment/AquaticPlants`에 있고, 장식에는 충돌·오버랩·내비게이션을 적용하지 않는다. 기존 웅덩이와 발걸음 처리는 그대로 사용한다. 원본·단위·배치·검증 설명은 [수생식물 안내](../ArtSource/Environment/AquaticPlants/README.md)를 따른다.
+같은 웅덩이에 수련잎 6장, 개구리밥 11군집, 흰 어리연꽃 3군집을 배치했다. 메시 8종과 종별 재질은 `/Game/Environment/AquaticPlants`에 있고, 장식에는 충돌·오버랩·내비게이션을 적용하지 않는다. 잎과 꽃잎은 표면에 맞춘 UV와 이미지 생성 베이스 컬러 아틀라스를 사용해 잎맥·꽃잎 결을 표현한다. 기존 웅덩이와 발걸음 처리는 그대로 사용한다. 원본·단위·배치·검증 설명은 [수생식물 안내](../ArtSource/Environment/AquaticPlants/README.md)를 따른다.

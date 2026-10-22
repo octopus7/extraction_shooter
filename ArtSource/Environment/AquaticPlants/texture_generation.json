@@ -1,0 +1,47 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-10-22",
+  "prompt": "Use case: stylized-concept. Asset type: opaque base-color UV texture atlas for existing 3D aquatic plants in a stylized forest game. Generate ONE square 2048x2048 image divided into exactly four equal square tiles, edge-to-edge with hard tile boundaries at 50% width and height; no border, no gaps, no text, no labels. Each tile must be COMPLETELY FILLED with plant surface material, not an isolated leaf silhouette, not objects on a background. Top-left tile: rich muted jade and olive green water lily leaf surface seen perfectly flat top-down; organic fine branching veins radiate from exactly tile center to all edges, a few graceful larger veins, soft restrained botanical mottling. Top-right tile: slightly warmer medium sage green floating-heart/Nymphoides leaf surface, radial palmate veins from exact tile center to edges, fine delicate vein network. Bottom-left tile: fresh green duckweed leaf surface, a fine vertical midrib precisely centered running bottom to top with subtle upward curving side veins, gentle green color gradients covering full tile. Bottom-right tile: ivory-white flower petal surface filling whole tile with delicate soft vertical petal fibers, warm cream near bottom. Reserve bottom 18% of this bottom-right tile for a smooth golden-yellow pollen-center color area with gentle fine texture; transition narrowly above that yellow strip to pure ivory-white for remaining upper 78% of this tile. All 4 are clean softly hand-painted diffuse/albedo material maps for actual UV mapping. Crisp medium-scale veins but restrained microdetail, naturally organic rather than geometric spokes, calm stylized art direction. Even flat illumination, zero cast shadows, zero baked directional lighting, no glossy highlights, no water droplets, no rim silhouette, no black/transparent background, no outlines, no objects, no perspective, no lettering, no watermark. All pixels opaque.",
+  "texture": "Textures/T_AquaticPlants_BaseColor.png",
+  "uv_tiles": {
+    "WaterLily": [
+      0,
+      0.5,
+      0.5,
+      1
+    ],
+    "NymphoidesLeaf": [
+      0.5,
+      0.5,
+      1,
+      1
+    ],
+    "Duckweed": [
+      0,
+      0,
+      0.5,
+      0.5
+    ],
+    "NymphoidesPetal": [
+      0.5,
+      0,
+      1,
+      0.5
+    ]
+  },
+  "notes": "Opaque atlas. UV tiles use bottom-left UV origin. Repeated leaf islands deliberately share their species tile. Flower center uses bottom golden strip; petals use ivory upper portion. Generated source copied verbatim, without raster filtering.",
+  "source_dimensions": [
+    1254,
+    1254
+  ],
+  "source_sha256": "5ca1fae28e4608b3d4c75592e0ca28d8efc2f5292e242737eb2283d3ee353f71",
+  "unreal_build": {
+    "power_of_two_mode": "StretchToPowerOfTwo",
+    "target_dimensions": [
+      2048,
+      2048
+    ],
+    "mip_generation": "FromTextureGroup",
+    "srgb": true
+  }
+}
