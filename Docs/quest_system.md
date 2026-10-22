@@ -230,6 +230,8 @@ v1 목표 타입:
 
 재사용 BP는 `/Game/Interaction/BP_QuestArrivalTrigger`다. 마을의 세 승강장에는 역별 도착 영역을 배치하며, 연결되는 퀘스트 목표와 문자열은 해당 데이터셋에서 관리한다. 복구/연료 시스템은 이 트리거가 직접 구현하지 않는다. 편집기에서 네이티브 `TunaSweeperQuestArrivalTrigger` 액터를 직접 배치해 설정할 수도 있다.
 
+마을의 `Region2/QuestLocations/Village_ATVNorthArrival`는 북쪽 역 남쪽 접근 구역의 차량 도착 영역이다. 공용 BP의 인스턴스로 `LocationId=village.vehicle.north`, `VehicleCondition=ATV`를 사용한다. 초기 박스 전체 크기는 20×40×10m이며 위치와 크기는 레벨에서 조정할 수 있다. 특정 차량 태그나 과거 주유 월드 기록을 요구하지 않고, 선행 조건은 연결된 퀘스트 정의에서 관리한다. 역 방문은 기존 세 영역에서 별도로 판정한다. `Tools/QuestArrival/verify_unreal.py`로 저장된 역·차량 영역의 설정을 읽기 전용 검증한다.
+
 BP의 `ArrivalFlagIcon` Billboard는 레벨 뷰포트에서 흰색 깃발로 위치를 표시한다. 에디터 전용·게임 중 숨김·충돌 없음으로 설정한다. 텍스처 `/Game/Editor/Icons/Flag`는 UE 5.7의 `PerformanceCaptureWorkflow/Content/Common/Icons/Flag.uasset`을 복사한 기존 엔진 리소스이며 플러그인 활성화 없이 사용한다.
 
 ### 퀘스트 조건 시설 액터
