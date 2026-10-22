@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "mask_peak": 243.0,
+  "foam_pixels_t0": 9402,
+  "foam_pixels_t1": 11617,
+  "disabled_max": 1.0,
+  "time_changed_pixels": 18593,
+  "freeze_repeat_mean_error": 0.0,
+  "foam_outside_shallow_water_pixels": 0,
+  "Wide.png_mean_rgb": 144.3900909423828,
+  "Close_0.png_mean_rgb": 152.04058837890625,
+  "Close_1.png_mean_rgb": 152.1125030517578,
+  "Close_2.png_mean_rgb": 152.1011199951172,
+  "motion_frames": 240,
+  "changed_frame_pairs": 239,
+  "shader_compile_errors": 0
+}

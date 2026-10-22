@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "asset": "SM_ShorelineIsland",
+  "units": "centimeters",
+  "origin_cm": [
+    0,
+    0,
+    0
+  ],
+  "water_level_cm": 0,
+  "axis": {
+    "up": "+Z",
+    "north": "+X",
+    "east": "+Y"
+  },
+  "domain_bounds_cm": {
+    "min": [
+      -4096,
+      -4096,
+      -320.0
+    ],
+    "max": [
+      4096,
+      4096,
+      208.16613614564753
+    ]
+  },
+  "terrain": {
+    "grid_cells": [
+      256,
+      256
+    ],
+    "grid_spacing_cm": 32,
+    "vertices": 66049,
+    "triangles": 131072,
+    "material_slots": [
+      "M_IslandSurface"
+    ],
+    "vertex_color": "Color; RGB linear sand/grass albedo, A grass weight",
+    "blender_uv0": "((X+4096)/8192,(Y+4096)/8192)",
+    "fbx_import": "Import Uniform Scale=1, Convert Scene=true, Convert Scene Unit=true; centimeter metadata; do not force front X axis."
+  },
+  "formulas": {
+    "r": "sqrt(X*X+Y*Y)",
+    "theta": "atan2(Y,X)",
+    "R_cm": "1830 + 140*sin(3*(theta+0.12)) + 95*cos(2*(theta-0.4)) + 45*cos(5*(theta+0.3))",
+    "d_cm": "r-R_cm; signed radial horizontal shore distance, positive water side",
+    "h0_cm": "clamp(-0.10*d_cm,-320,210)",
+    "interior": "smoothstep(450,1450,-d_cm)",
+    "plateau_cm": "190+17*sin(X/850)+8*cos(Y/600)",
+    "Z_cm": "lerp(h0_cm,plateau_cm,interior)",
+    "smoothstep": "t=clamp((value-edge0)/(edge1-edge0),0,1); t*t*(3-2*t)"
+  },
+  "bathymetry": {
+    "file": "T_IslandBathymetry.exr",
+    "resolution": [
+      1024,
+      1024
+    ],
+    "channels": "RGBA16F",
+    "color_space": "Linear numeric / Non-Color",
+    "compression": "ZIP lossless",
+    "texture_uv": "((X+4096)/8192,(4096-Y)/8192)",
+    "pixel_sampling": "Texel centers; first file pixel (-4092,+4092) cm; 8 cm/texel; clamp address mode",
+    "R": "0.5+0.5*clamp(d_cm/1000,-1,1)",
+    "G": "clamp(max(0,-Z_cm)/700,0,1)",
+    "B": "clamp((Z_cm+320)/550,0,1)",
+    "A": "1",
+    "approximation": "R is radial distance to analytic polar coastline, not exact Euclidean shortest distance. Both mesh and mask evaluate exactly the same height function; mesh linearly interpolates 32 cm triangles, EXR samples 8 cm pixels and quantizes to float16."
+  },
+  "validation": {
+    "status": "passed",
+    "tool": "Blender 5.0.0 independent fresh process FBX import and EXR load",
+    "imported_mesh_count": 1,
+    "imported_vertices": 66049,
+    "imported_triangles": 131072,
+    "imported_bounds_cm": {
+      "min": [
+        -4096.00048828125,
+        -4096.00048828125,
+        -320.0
+      ],
+      "max": [
+        4096.00048828125,
+        4096.00048828125,
+        208.1661376953125
+      ]
+    },
+    "fbx_max_position_error_cm": 0.00048828125,
+    "fbx_max_uv_error": 5.960464477539063e-08,
+    "fbx_max_vertex_color_error": 0.0,
+    "min_face_normal_z": 0.9587425589561462,
+    "exr_half_channel_types": {
+      "A": 1,
+      "B": 1,
+      "G": 1,
+      "R": 1
+    },
+    "exr_max_quantization_error_rgba": [
+      0.000244140625,
+      0.0001220703125,
+      0.000244140625,
+      0.0
+    ],
+    "analytic_vs_fbx_interpolation_max_height_error_cm": 1.0568618774414062,
+    "exr_depth_vs_fbx_interpolation_max_error_cm": 1.0680007934570312,
+    "exr_height_vs_fbx_interpolation_max_error_cm": 1.0568618774414062,
+    "fbx_shoreline_radial_max_error_cm": 0.2489342508970367,
+    "samples_tested": 1048576,
+    "near_shore_interpolation_max_height_error_cm": 0.025747179985046387,
+    "notes": "FBX reimport uses centimeter scene. Maximum depth error is at the far offshore -320 cm floor clamp; near-shore height error is under 0.026 cm. Actual UE imported asset bounds and UV orientation must still be confirmed by Unreal import owner. Top-left EXR file UV has V toward world -Y."
+  },
+  "source_preview": {
+    "file": "Island_SourcePreview.png",
+    "scope": "Blender source geometry preview with temporary ocean and lighting; these preview elements are absent from the editable blend and FBX. This is not a screenshot of Unreal materials or the final test map."
+  }
+}

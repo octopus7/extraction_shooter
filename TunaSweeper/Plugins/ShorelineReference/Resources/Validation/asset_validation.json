@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "material_code_hash": "c6a3498e6de3a12fd5f57b6d67c1af7a158f89c70447185bec117e10205330f0",
+  "custom_inputs": [
+    "MaterialExpressionWorldPosition_2",
+    "MaterialExpressionTime_4",
+    "MaterialExpressionTextureObjectParameter_0",
+    "MaterialExpressionTextureObjectParameter_4",
+    "MaterialExpressionScalarParameter_1",
+    "MaterialExpressionScalarParameter_3",
+    "MaterialExpressionScalarParameter_6",
+    "MaterialExpressionScalarParameter_10",
+    "MaterialExpressionScalarParameter_12",
+    "MaterialExpressionScalarParameter_13",
+    "MaterialExpressionScalarParameter_17",
+    "MaterialExpressionScalarParameter_19",
+    "MaterialExpressionScalarParameter_24",
+    "MaterialExpressionScalarParameter_25",
+    "MaterialExpressionScalarParameter_26",
+    "MaterialExpressionScalarParameter_33",
+    "MaterialExpressionScalarParameter_34",
+    "MaterialExpressionScalarParameter_40",
+    "MaterialExpressionScalarParameter_44",
+    "MaterialExpressionScalarParameter_47",
+    "MaterialExpressionScalarParameter_48",
+    "MaterialExpressionScalarParameter_50",
+    "MaterialExpressionScalarParameter_54",
+    "MaterialExpressionScalarParameter_56",
+    "MaterialExpressionScalarParameter_60",
+    "MaterialExpressionScalarParameter_61",
+    "MaterialExpressionVectorParameter_1",
+    "MaterialExpressionVectorParameter_3",
+    "MaterialExpressionVectorParameter_5"
+  ],
+  "ue_mesh_vs_mask_max_vertex_error_cm": 4.738915788493614e-05,
+  "source_to_ue_axes": "UE=(source X, -source Y, source Z); data UV=(UE XY+4096)/8192",
+  "dependencies": {
+    "/ShorelineReference/Maps/L_ShorelineReferenceIsland": [
+      "/Script/NavigationSystem",
+      "/Engine/EngineMaterials/WorldGridMaterial",
+      "/Engine/EditorResources/LightIcons/S_LightError",
+      "/ShorelineReference/Meshes/SM_ReferenceIsland",
+      "/ShorelineReference/Meshes/SM_ReferenceWaterPlane"
+    ],
+    "/ShorelineReference/Materials/MI_ShorelineReference": [
+      "/ShorelineReference/Materials/M_ShorelineReference"
+    ],
+    "/ShorelineReference/Materials/M_IslandSurface": [],
+    "/ShorelineReference/Materials/M_ShorelineReference": [
+      "/ShorelineReference/Textures/T_IslandShoreData",
+      "/ShorelineReference/Textures/T_ShoreDissolve"
+    ],
+    "/ShorelineReference/Meshes/SM_ReferenceIsland": [
+      "/Script/NavigationSystem",
+      "/ShorelineReference/Materials/M_IslandSurface"
+    ],
+    "/ShorelineReference/Meshes/SM_ReferenceWaterPlane": [
+      "/Script/NavigationSystem",
+      "/ShorelineReference/Materials/MI_ShorelineReference"
+    ],
+    "/ShorelineReference/Textures/T_IslandShoreData": [
+      "/Script/InterchangeEngine"
+    ],
+    "/ShorelineReference/Textures/T_ShoreDissolve": [
+      "/Script/InterchangeEngine"
+    ]
+  },
+  "actors": 7,
+  "water_z": 0,
+  "saved_files_unchanged": true
+}

@@ -1,0 +1,13 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0-island-study",
+  "FriendlyName": "Shoreline Reference",
+  "Description": "Isolated calm shoreline reference study and deserted island review map.",
+  "Category": "Rendering",
+  "CreatedBy": "TunaSweeper",
+  "CanContainContent": true,
+  "EnabledByDefault": true,
+  "IsExperimentalVersion": true,
+  "Installed": false
+}
