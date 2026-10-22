@@ -41,6 +41,8 @@ UE 5.7용 순환 지상열차 플러그인. 게임 모듈을 참조하지 않는
 
 `bShowCarriageRoofs`는 기본 false로, 탑다운에서 캐릭터와 좌석이 보이도록 했다. true이면 별도 지붕 메시가 추가된다. 기관차는 운전실 내부나 운전 조작을 제공하지 않는다.
 
+TunaSweeper 본편의 `/Game/MainRaid/RaidVillage`에 배치된 `TS_Village_Train`은 이 옵션을 켜고 `/Game/MainRaid/Rail/SM_CarriageRoofReveal`을 사용한다. 지붕의 원본 BaseColor·Roughness·Metallic 텍스처를 유지하면서 `/Game/Effects/M_OcclusionRevealMasked`의 마스크 그래프와 `MPC_OcclusionReveal`을 사용해 플레이어·커서 주변을 비운다. 반경은 기존 `DA_OcclusionRevealSettings`를 따른다. 지붕은 객차 바닥에 부착되어 이동·재구성 후에도 적용되며 충돌은 추가하지 않는다. 이 게임 전용 연결은 `/Game` 에셋에만 저장되어 플러그인 자체에 게임 에셋 의존성을 추가하지 않는다.
+
 ## 게임 연결
 
 - `SetRunning`으로 운행을 켜고 끈다. false는 즉시 정지하며 정차 타이머도 보존한다.
