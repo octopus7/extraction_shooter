@@ -10,6 +10,7 @@ Editor-only PNG terrain and vegetation tool. Source RGB bytes are classification
 4. Set meters per pixel, map center, seed and rule heights. Optionally provide a same-sized, 16-bit grayscale PNG and its elevation range. The optional heightmap replaces color-rule elevations. Height smoothing never changes category RGBs.
 5. Optionally set a Landscape material and one distinct Layer Info per color. All referenced layer names must exist in the material. Without layers, the material is simply assigned to the generated Landscape.
 6. Add vegetation entries to each rule. Select either a static mesh (HISM instances) or an actor/BP class. Density is a target per 100 square meters; slope and spacing can reduce the realized count. Minimum spacing applies within each rule/entry, not between different species.
+   For mesh instances, the material must have **Used with Instanced Static Meshes** enabled and saved. UE may enable it in memory while editing; save the material too when UE reports the missing usage flag.
 7. **분석 / 미리보기** validates the input and shows pixel counts, terrain dimensions and planned vegetation count without modifying the level.
 8. **새로 생성** creates a new batch in the current level. Select its root actor and use **선택한 생성 그룹 재생성** to replace only that batch. Ordinary Undo/Redo is supported. Save the level to preserve the result.
 
@@ -33,3 +34,5 @@ Run `Tools/PixelWorldBuilder/run_tests.ps1` from the repository, following `Docs
 The six tests use hand-defined PNG fixtures with non-primary RGB samples and sRGB/gAMA metadata, validate mapping and limits, and create temporary maps for generation, replacement, duplicate-group protection, Undo/Redo and save/reload checks. The round-trip map is removed afterward. Layer weights are read from the imported edit layer; the NullRHI suite does not validate GPU material rendering. Do not run the map-changing integration tests inside an editor with unsaved user work.
 
 UE 5.7 Development Editor build and all six tests passed on 2026-10-23, with no test warnings or errors. Final report: `TunaSweeper/Saved/Automation/PixelWorldBuilder-final/index.json` (local, not tracked).
+
+An editable 128×128 m sample map and profile are available under `/Game/Prototype/PixelWorldDemo`. Original PNG inputs, palette, verification report and rendered captures are documented in `TunaSweeper/SourceArt/PixelWorldDemo/README.md`.

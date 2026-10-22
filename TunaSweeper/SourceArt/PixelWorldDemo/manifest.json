@@ -1,0 +1,124 @@
+{
+  "size": [
+    64,
+    64
+  ],
+  "meters_per_pixel": 2,
+  "world_size_m": [
+    128,
+    128
+  ],
+  "height_range_m": [
+    0,
+    12
+  ],
+  "stored_height_range_m": [
+    0.9461203936827649,
+    6.922041657129777
+  ],
+  "seed": 20261023,
+  "orientation": {
+    "top": "+X north",
+    "right": "+Y east"
+  },
+  "palette": [
+    {
+      "name": "Forest",
+      "rgb": [
+        34,
+        139,
+        34
+      ],
+      "pixel_count": 2028
+    },
+    {
+      "name": "Meadow",
+      "rgb": [
+        128,
+        196,
+        72
+      ],
+      "pixel_count": 1163
+    },
+    {
+      "name": "Path",
+      "rgb": [
+        194,
+        144,
+        88
+      ],
+      "pixel_count": 422
+    },
+    {
+      "name": "Rock",
+      "rgb": [
+        128,
+        128,
+        144
+      ],
+      "pixel_count": 483
+    }
+  ],
+  "png_sha256": {
+    "PW_Demo_Height.png": "ffd9e6ad8b9aba75bf8474c86e4c9cb0e6fcfe96a5965e93980ca2b08c907121",
+    "PW_Demo_RGB.png": "66d9799e8eacab07d594eb78a803ea929dd1b0df7054258ae395e62262e0660a"
+  },
+  "vegetation": [
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/SM_SimpleTree.SM_SimpleTree",
+      "rgb": [
+        34,
+        139,
+        34
+      ]
+    },
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/SM_SimplePineTree.SM_SimplePineTree",
+      "rgb": [
+        34,
+        139,
+        34
+      ]
+    },
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/SM_BushSpreading.SM_BushSpreading",
+      "rgb": [
+        34,
+        139,
+        34
+      ]
+    },
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/SM_GrassSparse.SM_GrassSparse",
+      "rgb": [
+        34,
+        139,
+        34
+      ]
+    },
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/SM_GrassDenseShort.SM_GrassDenseShort",
+      "rgb": [
+        128,
+        196,
+        72
+      ]
+    },
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/SM_BushSparse.SM_BushSparse",
+      "rgb": [
+        128,
+        196,
+        72
+      ]
+    },
+    {
+      "mesh": "/Game/Prototype/PixelWorldDemo/Meshes/RockM_1.RockM_1",
+      "rgb": [
+        128,
+        128,
+        144
+      ]
+    }
+  ]
+}
