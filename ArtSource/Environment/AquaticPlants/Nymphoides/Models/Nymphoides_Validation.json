@@ -1,0 +1,177 @@
+{
+  "blender_version": "4.5.12 LTS",
+  "validation_method": "New factory scene for each FBX reimport, mesh/UV/normal/texture inspection",
+  "palette": {
+    "file": "Textures/T_Nymphoides_Palette.png",
+    "size": [
+      128,
+      128
+    ],
+    "opaque": true,
+    "min_alpha": 1.0
+  },
+  "assets": {
+    "SM_Nymphoides_A": {
+      "file": "SM_Nymphoides_A.fbx",
+      "fresh_import": true,
+      "objects": 1,
+      "vertices": 1604,
+      "triangles": 2456,
+      "dimensions_m": [
+        0.26577363908290863,
+        0.2525639757514,
+        0.041977196000516415
+      ],
+      "dimensions_ue_cm": [
+        26.577363908290863,
+        25.25639757514,
+        4.1977196000516415
+      ],
+      "bounds_min_m": [
+        -0.13998615741729736,
+        -0.11923038214445114,
+        -0.0070840148255229
+      ],
+      "bounds_max_m": [
+        0.12578748166561127,
+        0.13333359360694885,
+        0.034893181174993515
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "object_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_rad": [
+        0.0,
+        -0.0,
+        8.742277657347586e-08
+      ],
+      "material_slots": 1,
+      "materials": [
+        "M_Nymphoides_Palette"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "uv_degenerate_triangles": 0,
+      "minimum_uv_triangle_area": 0.009799997997284038,
+      "geometry_degenerate_triangles": 0,
+      "minimum_geometry_triangle_area_m2": 2.2829049526448964e-08,
+      "normals_finite": true,
+      "unit_face_normals": true,
+      "nonmanifold_edges": 0,
+      "signed_volume_m3": 3.036563073156143e-05,
+      "texture_references": [
+        {
+          "name": "T_Nymphoides_Palette",
+          "path": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\Nymphoides\\Models\\..\\Textures\\T_Nymphoides_Palette.png",
+          "loaded": true,
+          "size": [
+            128,
+            128
+          ]
+        }
+      ],
+      "source_water_surface_m": 0.0,
+      "passed": true
+    },
+    "SM_Nymphoides_B": {
+      "file": "SM_Nymphoides_B.fbx",
+      "fresh_import": true,
+      "objects": 1,
+      "vertices": 2325,
+      "triangles": 3546,
+      "dimensions_m": [
+        0.3018916845321655,
+        0.2627525180578232,
+        0.04920679610222578
+      ],
+      "dimensions_ue_cm": [
+        30.189168453216553,
+        26.275251805782318,
+        4.920679610222578
+      ],
+      "bounds_min_m": [
+        -0.16267111897468567,
+        -0.13072700798511505,
+        -0.007080025039613247
+      ],
+      "bounds_max_m": [
+        0.13922056555747986,
+        0.13202551007270813,
+        0.042126771062612534
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "object_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_rad": [
+        0.0,
+        -0.0,
+        8.742277657347586e-08
+      ],
+      "material_slots": 1,
+      "materials": [
+        "M_Nymphoides_Palette"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "uv_degenerate_triangles": 0,
+      "minimum_uv_triangle_area": 0.009799997997284038,
+      "geometry_degenerate_triangles": 0,
+      "minimum_geometry_triangle_area_m2": 2.200378604284225e-08,
+      "normals_finite": true,
+      "unit_face_normals": true,
+      "nonmanifold_edges": 0,
+      "signed_volume_m3": 3.91967548340446e-05,
+      "texture_references": [
+        {
+          "name": "T_Nymphoides_Palette",
+          "path": "D:\\github\\extraction_shooter\\ArtSource\\Environment\\AquaticPlants\\Nymphoides\\Models\\..\\Textures\\T_Nymphoides_Palette.png",
+          "loaded": true,
+          "size": [
+            128,
+            128
+          ]
+        }
+      ],
+      "source_water_surface_m": 0.0,
+      "passed": true
+    }
+  },
+  "all_passed": true,
+  "editable_blend": {
+    "file": "Models/Nymphoides_Clusters.blend",
+    "asset_objects": [
+      "SM_Nymphoides_A",
+      "SM_Nymphoides_B"
+    ],
+    "palette_packed": true,
+    "palette_loaded": true,
+    "vertex_group_counts": {
+      "SM_Nymphoides_A": 34,
+      "SM_Nymphoides_B": 49
+    },
+    "source_triangles": {
+      "SM_Nymphoides_A": 2456,
+      "SM_Nymphoides_B": 3546
+    },
+    "palette_decoded_pixel_count": 16384,
+    "palette_all_opaque": true,
+    "packed_bytes": 936,
+    "passed": true
+  }
+}

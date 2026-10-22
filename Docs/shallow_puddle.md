@@ -123,3 +123,7 @@ UE 5.7 `SingleLayerWaterComposite.usf`의 `saturate(DeltaDepth * 0.02)`에 의�
 - 기존 `BP_ShallowPuddle`의 젖은 테두리, 물 발소리와 Niagara 이벤트를 사용한다. 이동 충돌·내비게이션·저장 데이터·UI 변경은 없다.
 - 새 UE 5.7 프로세스에서 에셋 참조 완결성, 수면 수평/무충돌, 물 영역/발걸음 이벤트, 기존 695개 액터 위치 유지와 액터 한 개 추가를 검증했다. D3D12 렌더를 확인했고 신규 워터 셰이더 컴파일 오류는 없었다. C++ 빌드는 필요하지 않았다.
 - 검증 보고서와 근접/주변 렌더는 `TunaSweeper/Saved/ForestPuddleWork`에 있다. 임시 이관 프로젝트와 생성 스크립트 제거 후 재로드 검증을 통과했다.
+
+### 수생식물 장식 추가
+
+같은 웅덩이에 수련잎 6장, 개구리밥 11군집, 흰 어리연꽃 3군집을 배치했다. 메시 8종과 종별 팔레트 재질은 `/Game/Environment/AquaticPlants`에 있고, 장식에는 충돌·오버랩·내비게이션을 적용하지 않는다. 기존 웅덩이와 발걸음 처리는 그대로 사용한다. 원본·단위·배치·검증 설명은 [수생식물 안내](../ArtSource/Environment/AquaticPlants/README.md)를 따른다.

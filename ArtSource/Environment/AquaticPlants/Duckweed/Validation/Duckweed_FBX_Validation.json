@@ -1,0 +1,204 @@
+{
+  "blender_version": "4.5.12 LTS",
+  "method": "Independent background factory-startup Blender process, fresh scene for each FBX import; editable source reopened afterward.",
+  "export_convention": {
+    "axis_forward": "-Y",
+    "axis_up": "Z",
+    "global_scale": 1,
+    "apply_unit_scale": true,
+    "apply_scale_options": "FBX_SCALE_UNITS",
+    "UE_import_uniform_scale": 1.0,
+    "UE_convert_scene_unit": true
+  },
+  "assets": [
+    {
+      "name": "SM_Duckweed_A",
+      "file": "Models/SM_Duckweed_A.fbx",
+      "fresh_process_import": true,
+      "dimensions_m": [
+        0.2103684,
+        0.1754058,
+        0.002
+      ],
+      "dimensions_ue_cm": [
+        21.03684,
+        17.54058,
+        0.2
+      ],
+      "vertices": 1364,
+      "triangles": 2552,
+      "frond_components": 44,
+      "material_slots": [
+        "M_Duckweed_Palette"
+      ],
+      "textures": [
+        {
+          "name": "T_Duckweed_Palette",
+          "path": "Textures/T_Duckweed_Palette.png",
+          "exists": true,
+          "depth_bits": 24
+        }
+      ],
+      "uv_layer": "UVMap",
+      "min_uv_triangle_area": 0.0006147199470518672,
+      "degenerate_uv_triangles": 0,
+      "degenerate_geometry_triangles": 0,
+      "invalid_corner_normals": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "minimum_signed_frond_volume_m3": 4.545268824281592e-08,
+      "tests": {
+        "one_mesh": true,
+        "dimensions_match_source": true,
+        "width_20_to_35_cm": true,
+        "waterline_min_z_zero": true,
+        "thickness_2_mm": true,
+        "origin_zero": true,
+        "single_material": true,
+        "single_available_palette": true,
+        "opaque_material_no_alpha_connection": true,
+        "rgb_palette_no_alpha_channel": true,
+        "has_uv": true,
+        "all_uv_triangles_nondegenerate": true,
+        "all_geometry_triangles_nondegenerate": true,
+        "all_normals_unit_and_finite": true,
+        "watertight_all_fronds": true,
+        "expected_frond_components": true,
+        "all_fronds_outward": true,
+        "triangles_match_source": true
+      },
+      "pass": true
+    },
+    {
+      "name": "SM_Duckweed_B",
+      "file": "Models/SM_Duckweed_B.fbx",
+      "fresh_process_import": true,
+      "dimensions_m": [
+        0.2452848,
+        0.1815426,
+        0.002
+      ],
+      "dimensions_ue_cm": [
+        24.52848,
+        18.15426,
+        0.2
+      ],
+      "vertices": 1829,
+      "triangles": 3422,
+      "frond_components": 59,
+      "material_slots": [
+        "M_Duckweed_Palette"
+      ],
+      "textures": [
+        {
+          "name": "T_Duckweed_Palette",
+          "path": "Textures/T_Duckweed_Palette.png",
+          "exists": true,
+          "depth_bits": 24
+        }
+      ],
+      "uv_layer": "UVMap",
+      "min_uv_triangle_area": 0.0006147199470518672,
+      "degenerate_uv_triangles": 0,
+      "degenerate_geometry_triangles": 0,
+      "invalid_corner_normals": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "minimum_signed_frond_volume_m3": 4.7893458708185094e-08,
+      "tests": {
+        "one_mesh": true,
+        "dimensions_match_source": true,
+        "width_20_to_35_cm": true,
+        "waterline_min_z_zero": true,
+        "thickness_2_mm": true,
+        "origin_zero": true,
+        "single_material": true,
+        "single_available_palette": true,
+        "opaque_material_no_alpha_connection": true,
+        "rgb_palette_no_alpha_channel": true,
+        "has_uv": true,
+        "all_uv_triangles_nondegenerate": true,
+        "all_geometry_triangles_nondegenerate": true,
+        "all_normals_unit_and_finite": true,
+        "watertight_all_fronds": true,
+        "expected_frond_components": true,
+        "all_fronds_outward": true,
+        "triangles_match_source": true
+      },
+      "pass": true
+    },
+    {
+      "name": "SM_Duckweed_C",
+      "file": "Models/SM_Duckweed_C.fbx",
+      "fresh_process_import": true,
+      "dimensions_m": [
+        0.2990206,
+        0.2824031,
+        0.002
+      ],
+      "dimensions_ue_cm": [
+        29.90206,
+        28.24031,
+        0.2
+      ],
+      "vertices": 2356,
+      "triangles": 4408,
+      "frond_components": 76,
+      "material_slots": [
+        "M_Duckweed_Palette"
+      ],
+      "textures": [
+        {
+          "name": "T_Duckweed_Palette",
+          "path": "Textures/T_Duckweed_Palette.png",
+          "exists": true,
+          "depth_bits": 24
+        }
+      ],
+      "uv_layer": "UVMap",
+      "min_uv_triangle_area": 0.0006147199470518672,
+      "degenerate_uv_triangles": 0,
+      "degenerate_geometry_triangles": 0,
+      "invalid_corner_normals": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "minimum_signed_frond_volume_m3": 5.313923594670495e-08,
+      "tests": {
+        "one_mesh": true,
+        "dimensions_match_source": true,
+        "width_20_to_35_cm": true,
+        "waterline_min_z_zero": true,
+        "thickness_2_mm": true,
+        "origin_zero": true,
+        "single_material": true,
+        "single_available_palette": true,
+        "opaque_material_no_alpha_connection": true,
+        "rgb_palette_no_alpha_channel": true,
+        "has_uv": true,
+        "all_uv_triangles_nondegenerate": true,
+        "all_geometry_triangles_nondegenerate": true,
+        "all_normals_unit_and_finite": true,
+        "watertight_all_fronds": true,
+        "expected_frond_components": true,
+        "all_fronds_outward": true,
+        "triangles_match_source": true
+      },
+      "pass": true
+    }
+  ],
+  "editable_source": {
+    "opens": true,
+    "asset_scenes_present": true,
+    "asset_objects_present": true,
+    "palette_packed": true,
+    "all_asset_object_scales_applied": true
+  },
+  "all_passed": true,
+  "post_cleanup_revalidation": {
+    "all_three_fbxs_reimported": true,
+    "dimensions_and_triangle_counts_match": true,
+    "packed_blend_reopens": true,
+    "temporary_generator_directory_empty": true,
+    "backup_removed": true
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "method": "Independent Blender factory-startup process; import each final FBX into a freshly emptied metric scene. No source .blend or generator used.",
+  "blender_version": "4.5.12 LTS",
+  "meshes": [
+    {
+      "name": "SM_WaterLily_A",
+      "fbx": "Models/SM_WaterLily_A.fbx",
+      "sha256": "33bee0c1fd9eaf2ac273918f568a3678c66cdacf33aa690ef99bc67f08046338",
+      "dimensions_m": [
+        0.34,
+        0.324,
+        0.01171055
+      ],
+      "expected_UE_dimensions_cm": [
+        34.0,
+        32.4,
+        1.17106
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "world_z_bounds_m": [
+        -0.0032,
+        0.00851055
+      ],
+      "vertices": 464,
+      "triangles": 848,
+      "material_slots": 1,
+      "material_names": [
+        "M_WaterLily_Atlas"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "zero_area_uv_triangles": 0,
+      "minimum_uv_triangle_area": 0.007200000572204601,
+      "zero_area_geometry_faces": 0,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "invalid_face_normals": 0,
+      "signed_volume_m3": 0.0004759387854119286,
+      "top_facing_area_m2": 0.07934210567327682,
+      "bottom_facing_area_m2": 0.08033574130354282,
+      "top_ray_hit": true,
+      "top_ray_normal_z": 0.9997157454490662,
+      "v_notch_open": true
+    },
+    {
+      "name": "SM_WaterLily_B",
+      "fbx": "Models/SM_WaterLily_B.fbx",
+      "sha256": "963b23c84c2c59275c47bc9f30632f0f57eeb115affde5e7ed0551ece1be3d26",
+      "dimensions_m": [
+        0.38,
+        0.352,
+        0.01246948
+      ],
+      "expected_UE_dimensions_cm": [
+        38.0,
+        35.2,
+        1.24695
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "world_z_bounds_m": [
+        -0.0042,
+        0.00826948
+      ],
+      "vertices": 488,
+      "triangles": 896,
+      "material_slots": 1,
+      "material_names": [
+        "M_WaterLily_Atlas"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "zero_area_uv_triangles": 0,
+      "minimum_uv_triangle_area": 0.007200000572204601,
+      "zero_area_geometry_faces": 0,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "invalid_face_normals": 0,
+      "signed_volume_m3": 0.0006723013177707614,
+      "top_facing_area_m2": 0.09627103490765876,
+      "bottom_facing_area_m2": 0.09731865817479957,
+      "top_ray_hit": true,
+      "top_ray_normal_z": 0.9997515678405762,
+      "v_notch_open": true
+    },
+    {
+      "name": "SM_WaterLily_C",
+      "fbx": "Models/SM_WaterLily_C.fbx",
+      "sha256": "cbdbe8aaed060107b6187580031b630f39c6b523f2918c968cad9d266f642c3f",
+      "dimensions_m": [
+        0.27000001,
+        0.25800002,
+        0.01593203
+      ],
+      "expected_UE_dimensions_cm": [
+        27.0,
+        25.8,
+        1.5932
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "world_z_bounds_m": [
+        -0.0017,
+        0.01423203
+      ],
+      "vertices": 440,
+      "triangles": 800,
+      "material_slots": 1,
+      "material_names": [
+        "M_WaterLily_Atlas"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "zero_area_uv_triangles": 0,
+      "minimum_uv_triangle_area": 0.007200000572204601,
+      "zero_area_geometry_faces": 0,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "invalid_face_normals": 0,
+      "signed_volume_m3": 0.00022514714615391956,
+      "top_facing_area_m2": 0.050260749165317975,
+      "bottom_facing_area_m2": 0.05107629395479307,
+      "top_ray_hit": true,
+      "top_ray_normal_z": 0.9991598725318909,
+      "v_notch_open": true
+    }
+  ],
+  "errors": [],
+  "palette": {
+    "file": "Textures/T_WaterLily_Palette.png",
+    "width": 256,
+    "height": 256,
+    "bit_depth": 8,
+    "png_color_type": 2,
+    "all_pixels_opaque": true,
+    "sha256": "945c1206afc7dcd1d2d47e0fa9359d705e6c232312f6e3b87f26c38284c24f1d"
+  },
+  "passed": true
+}

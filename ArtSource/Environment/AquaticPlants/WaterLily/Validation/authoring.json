@@ -1,0 +1,71 @@
+{
+  "authoring": "Blender 4.5, metric, 1 unit = 1 meter",
+  "export": {
+    "axis_forward": "-Y",
+    "axis_up": "Z",
+    "global_scale": 1.0,
+    "apply_unit_scale": true,
+    "apply_scale_options": "FBX_SCALE_UNITS",
+    "bake_space_transform": false,
+    "UE_import_uniform_scale": 1.0
+  },
+  "meshes": [
+    {
+      "name": "SM_WaterLily_A",
+      "dimensions_m": [
+        0.3400000035762787,
+        0.3240000009536743,
+        0.01171055343002081
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "vertices": 464,
+      "triangles": 848,
+      "materials": [
+        "M_WaterLily_Atlas"
+      ],
+      "thickness_m": 0.006
+    },
+    {
+      "name": "SM_WaterLily_B",
+      "dimensions_m": [
+        0.3799999952316284,
+        0.35199999809265137,
+        0.012469477951526642
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "vertices": 488,
+      "triangles": 896,
+      "materials": [
+        "M_WaterLily_Atlas"
+      ],
+      "thickness_m": 0.007
+    },
+    {
+      "name": "SM_WaterLily_C",
+      "dimensions_m": [
+        0.27000001072883606,
+        0.2580000162124634,
+        0.015932027250528336
+      ],
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "vertices": 440,
+      "triangles": 800,
+      "materials": [
+        "M_WaterLily_Atlas"
+      ],
+      "thickness_m": 0.0045
+    }
+  ]
+}

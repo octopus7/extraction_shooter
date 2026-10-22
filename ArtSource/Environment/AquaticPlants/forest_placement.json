@@ -1,0 +1,409 @@
+{
+  "status": "passed",
+  "assets": [
+    {
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_A.SM_WaterLily_A",
+      "dimensions_cm": [
+        34.0,
+        32.39999961853027,
+        1.1710553169250488
+      ],
+      "triangles": 848,
+      "bounds_min_z": -0.3199999928474426
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_B.SM_WaterLily_B",
+      "dimensions_cm": [
+        37.99999809265137,
+        35.19999885559082,
+        1.246947854757309
+      ],
+      "triangles": 896,
+      "bounds_min_z": -0.41999998688697815
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_C.SM_WaterLily_C",
+      "dimensions_cm": [
+        27.000000953674316,
+        25.800002098083496,
+        1.5932026356458664
+      ],
+      "triangles": 800,
+      "bounds_min_z": -0.17000000178813934
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_A.SM_Duckweed_A",
+      "dimensions_cm": [
+        21.036839485168457,
+        17.540575981140137,
+        0.20000000298023224
+      ],
+      "triangles": 2552,
+      "bounds_min_z": 0.0
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_B.SM_Duckweed_B",
+      "dimensions_cm": [
+        24.528477668762207,
+        18.15425968170166,
+        0.20000000298023224
+      ],
+      "triangles": 3422,
+      "bounds_min_z": 0.0
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_C.SM_Duckweed_C",
+      "dimensions_cm": [
+        29.902061462402344,
+        28.240307807922363,
+        0.20000000298023224
+      ],
+      "triangles": 4408,
+      "bounds_min_z": 0.0
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/Nymphoides/SM_Nymphoides_A.SM_Nymphoides_A",
+      "dimensions_cm": [
+        26.57736110687256,
+        25.256394386291504,
+        4.197719633579254
+      ],
+      "triangles": 2456,
+      "bounds_min_z": -0.7084015011787415
+    },
+    {
+      "mesh": "/Game/Environment/AquaticPlants/Nymphoides/SM_Nymphoides_B.SM_Nymphoides_B",
+      "dimensions_cm": [
+        30.189165115356445,
+        26.275248527526855,
+        4.92067950963974
+      ],
+      "triangles": 3546,
+      "bounds_min_z": -0.708002507686615
+    }
+  ],
+  "actors": [
+    {
+      "label": "Forest_PuddlePlant_WaterLily_01",
+      "species": "WaterLily",
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_A.SM_WaterLily_A",
+      "position": [
+        -7881.068012859967,
+        -2129.5345475767863,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -110,
+        -12
+      ],
+      "yaw": 33.00000000000001,
+      "scale": 1.0
+    },
+    {
+      "label": "Forest_PuddlePlant_WaterLily_02",
+      "species": "WaterLily",
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_B.SM_WaterLily_B",
+      "position": [
+        -7879.162844890538,
+        -2086.857032009356,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -95,
+        28
+      ],
+      "yaw": 133.0,
+      "scale": 0.95
+    },
+    {
+      "label": "Forest_PuddlePlant_WaterLily_03",
+      "species": "WaterLily",
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_C.SM_WaterLily_C",
+      "position": [
+        -7851.984190108195,
+        -2047.5337472505485,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -57,
+        57
+      ],
+      "yaw": 228.0,
+      "scale": 1.04
+    },
+    {
+      "label": "Forest_PuddlePlant_WaterLily_04",
+      "species": "WaterLily",
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_A.SM_WaterLily_A",
+      "position": [
+        -7827.85380407694,
+        -2076.4944873996296,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -43,
+        22
+      ],
+      "yaw": -26.999999999999993,
+      "scale": 0.92
+    },
+    {
+      "label": "Forest_PuddlePlant_WaterLily_05",
+      "species": "WaterLily",
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_C.SM_WaterLily_C",
+      "position": [
+        -7865.164112947823,
+        -2159.0653106482764,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -104,
+        -45
+      ],
+      "yaw": 83.0,
+      "scale": 0.92
+    },
+    {
+      "label": "Forest_PuddlePlant_WaterLily_06",
+      "species": "WaterLily",
+      "mesh": "/Game/Environment/AquaticPlants/WaterLily/SM_WaterLily_B.SM_WaterLily_B",
+      "position": [
+        -7759.35067443368,
+        -2009.023595682692,
+        3.120002384185791
+      ],
+      "local_cm": [
+        43,
+        65
+      ],
+      "yaw": 173.0,
+      "scale": 0.85
+    },
+    {
+      "label": "Forest_PuddlePlant_Nymphoides_07",
+      "species": "Nymphoides",
+      "mesh": "/Game/Environment/AquaticPlants/Nymphoides/SM_Nymphoides_A.SM_Nymphoides_A",
+      "position": [
+        -7820.464456681951,
+        -2144.541511912654,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -57,
+        -45
+      ],
+      "yaw": 38.00000000000001,
+      "scale": 0.95
+    },
+    {
+      "label": "Forest_PuddlePlant_Nymphoides_08",
+      "species": "Nymphoides",
+      "mesh": "/Game/Environment/AquaticPlants/Nymphoides/SM_Nymphoides_B.SM_Nymphoides_B",
+      "position": [
+        -7802.766251655711,
+        -2021.0272473969749,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -2,
+        67
+      ],
+      "yaw": 213.0,
+      "scale": 0.9
+    },
+    {
+      "label": "Forest_PuddlePlant_Nymphoides_09",
+      "species": "Nymphoides",
+      "mesh": "/Game/Environment/AquaticPlants/Nymphoides/SM_Nymphoides_A.SM_Nymphoides_A",
+      "position": [
+        -7712.679943472545,
+        -2026.4546849072192,
+        3.120002384185791
+      ],
+      "local_cm": [
+        82,
+        34
+      ],
+      "yaw": -11.999999999999993,
+      "scale": 0.85
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_10",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_A.SM_Duckweed_A",
+      "position": [
+        -7681.724123095032,
+        -2031.117000292853,
+        3.120002384185791
+      ],
+      "local_cm": [
+        110,
+        20
+      ],
+      "yaw": 33.00000000000001,
+      "scale": 0.95
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_11",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_B.SM_Duckweed_B",
+      "position": [
+        -7663.2520650952065,
+        -2055.607469321663,
+        3.120002384185791
+      ],
+      "local_cm": [
+        120,
+        -9
+      ],
+      "yaw": 93.0,
+      "scale": 0.9
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_12",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_C.SM_Duckweed_C",
+      "position": [
+        -7680.350131792188,
+        -2100.067070255832,
+        3.120002384185791
+      ],
+      "local_cm": [
+        90,
+        -46
+      ],
+      "yaw": 158.0,
+      "scale": 1.0
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_13",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_A.SM_Duckweed_A",
+      "position": [
+        -7713.211120139132,
+        -2138.0822704376283,
+        3.120002384185791
+      ],
+      "local_cm": [
+        47,
+        -72
+      ],
+      "yaw": -16.999999999999993,
+      "scale": 1.05
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_14",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_C.SM_Duckweed_C",
+      "position": [
+        -7748.448222308393,
+        -2155.8402723160225,
+        3.120002384185791
+      ],
+      "local_cm": [
+        8,
+        -78
+      ],
+      "yaw": 78.0,
+      "scale": 0.85
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_15",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_B.SM_Duckweed_B",
+      "position": [
+        -7779.809081812963,
+        -2162.875646587135,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -24,
+        -75
+      ],
+      "yaw": 138.0,
+      "scale": 0.8
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_16",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_B.SM_Duckweed_B",
+      "position": [
+        -7902.918307201586,
+        -2133.4797519041495,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -132,
+        -9
+      ],
+      "yaw": 213.0,
+      "scale": 0.82
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_17",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_A.SM_Duckweed_A",
+      "position": [
+        -7913.946896866402,
+        -2086.5929711444824,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -128,
+        39
+      ],
+      "yaw": 258.0,
+      "scale": 0.8
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_18",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_C.SM_Duckweed_C",
+      "position": [
+        -7879.801829475618,
+        -2046.0576239413454,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -83,
+        67
+      ],
+      "yaw": 298.0,
+      "scale": 0.8
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_19",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_B.SM_Duckweed_B",
+      "position": [
+        -7728.274826390315,
+        -1997.874978352024,
+        3.120002384185791
+      ],
+      "local_cm": [
+        76,
+        66
+      ],
+      "yaw": 338.0,
+      "scale": 0.78
+    },
+    {
+      "label": "Forest_PuddlePlant_Duckweed_20",
+      "species": "Duckweed",
+      "mesh": "/Game/Environment/AquaticPlants/Duckweed/SM_Duckweed_A.SM_Duckweed_A",
+      "position": [
+        -7886.657379228725,
+        -2157.6371984054144,
+        3.120002384185791
+      ],
+      "local_cm": [
+        -124,
+        -37
+      ],
+      "yaw": 53.00000000000001,
+      "scale": 0.7
+    }
+  ],
+  "existing_actors": 696,
+  "plant_count": 20
+}
