@@ -95,7 +95,8 @@ namespace
 
 }
 
-ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
+ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	BurnComponent = CreateDefaultSubobject<UTunaSweeperBurnComponent>(TEXT("BurnComponent"));

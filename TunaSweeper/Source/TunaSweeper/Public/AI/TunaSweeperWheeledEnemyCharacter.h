@@ -12,8 +12,9 @@ class TUNASWEEPER_API ATunaSweeperWheeledEnemyCharacter : public ATunaSweeperEne
 {
     GENERATED_BODY()
 public:
-    ATunaSweeperWheeledEnemyCharacter();
+    ATunaSweeperWheeledEnemyCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
     virtual ETunaSweeperEnemyFireResult TryFireProjectileAt(AActor* TargetActor) override;
+    bool IsDriving() const;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Robot|Visual")
     bool bTricycle = false;
@@ -47,4 +48,5 @@ private:
     double LeftRollRadians = 0;
     double RightRollRadians = 0;
     double FrontRollRadians = 0;
+    float FrontSteeringDegrees = 0;
 };

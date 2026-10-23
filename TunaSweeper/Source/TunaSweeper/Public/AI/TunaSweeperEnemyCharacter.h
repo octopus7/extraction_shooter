@@ -77,7 +77,7 @@ class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	ATunaSweeperEnemyCharacter();
+	ATunaSweeperEnemyCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat|Armor")
 	int32 BodyArmorItemId = INDEX_NONE;

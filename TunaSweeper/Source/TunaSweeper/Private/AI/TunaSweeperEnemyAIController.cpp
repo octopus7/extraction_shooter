@@ -1,4 +1,5 @@
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "AI/TunaSweeperWheeledEnemyCharacter.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Component/TunaSweeperCombatPatternComponent.h"
@@ -2218,6 +2219,13 @@ bool ATunaSweeperEnemyAIController::RotateTowardLocation(
 {
 	APawn* ControlledPawn = GetPawn();
 	if (!ControlledPawn || DeltaSeconds <= 0.0f)
+	{
+		return false;
+	}
+	if (const auto* Robot = Cast<ATunaSweeperWheeledEnemyCharacter>(ControlledPawn);
+		Robot && Robot->bTricycle && (bMoveRequestActive || Robot->IsDriving() ||
+			(AwarenessState == ETunaSweeperEnemyAwarenessState::Unaware &&
+				NonCombatState == ETunaSweeperNonCombatState::Wander)))
 	{
 		return false;
 	}

@@ -1,5 +1,7 @@
 #include "AI/TunaSweeperWheeledEnemyCharacter.h"
 
+#include "AI/TunaSweeperWheeledMovementComponent.h"
+#include "AIController.h"
 #include "Component/TunaSweeperFactionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -9,7 +11,8 @@
 #include "NiagaraSystem.h"
 #include "Weapon/TunaSweeperWeapon.h"
 
-ATunaSweeperWheeledEnemyCharacter::ATunaSweeperWheeledEnemyCharacter()
+ATunaSweeperWheeledEnemyCharacter::ATunaSweeperWheeledEnemyCharacter(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer.SetDefaultSubobjectClass<UTunaSweeperWheeledMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
     GetCapsuleComponent()->InitCapsuleSize(58, 60);
     auto MakePart = [this](const TCHAR* Name)
@@ -126,9 +129,27 @@ void ATunaSweeperWheeledEnemyCharacter::AlignBuiltInMuzzle()
 ETunaSweeperEnemyFireResult ATunaSweeperWheeledEnemyCharacter::TryFireProjectileAt(AActor* TargetActor)
 {
     if (IsDead() || UsesMeleeAttack()) return ETunaSweeperEnemyFireResult::Blocked;
+    if (bTricycle)
+    {
+        if (!TargetActor || IsDriving()) return ETunaSweeperEnemyFireResult::Blocked;
+        const FVector Direction = (TargetActor->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+        if (Direction.IsNearlyZero() || FMath::Abs(FMath::FindDeltaAngleDegrees(
+            GetActorRotation().Yaw, Direction.Rotation().Yaw)) > GetCombatProfile().AttackFacingToleranceDegrees)
+            return ETunaSweeperEnemyFireResult::Blocked;
+    }
     GetEnemyWeaponRuntimeStatus();
     AlignBuiltInMuzzle();
     return Super::TryFireProjectileAt(TargetActor);
+}
+
+bool ATunaSweeperWheeledEnemyCharacter::IsDriving() const
+{
+    if (!bTricycle) return false;
+    if (GetVelocity().SizeSquared2D() > FMath::Square(5.0f)) return true;
+    const auto* Movement = Cast<UTunaSweeperWheeledMovementComponent>(GetCharacterMovement());
+    if (Movement && Movement->HasSteeringInput()) return true;
+    const auto* AI = Cast<AAIController>(GetController());
+    return AI && AI->GetMoveStatus() == EPathFollowingStatus::Moving;
 }
 
 void ATunaSweeperWheeledEnemyCharacter::Tick(float DeltaSeconds)
@@ -144,10 +165,24 @@ void ATunaSweeperWheeledEnemyCharacter::Tick(float DeltaSeconds)
     const double HalfTrack = bTricycle ? 46.0 : 48.0;
     LeftRollRadians = FMath::UnwindRadians(LeftRollRadians + (Distance + YawRadians * HalfTrack) / Radius);
     RightRollRadians = FMath::UnwindRadians(RightRollRadians + (Distance - YawRadians * HalfTrack) / Radius);
-    FrontRollRadians = FMath::UnwindRadians(FrontRollRadians + Distance / Radius);
+    if (bTricycle)
+    {
+        // Rear axle X=-65, front axle X=77: steer with the actual turn radius.
+        // A stopped robot can pivot on its driven rear wheels with the front caster sideways.
+        const float SteeringLimit = FMath::Abs(Distance) > 0.5 ? 45.0f : 90.0f;
+        const float DesiredSteering = FMath::IsNearlyZero(YawRadians) ? 0.0f :
+            FMath::Clamp(static_cast<float>(FMath::RadiansToDegrees(FMath::Atan2(142.0 * YawRadians,
+                FMath::Max(FMath::Abs(Distance), 0.01)))), -SteeringLimit, SteeringLimit);
+        FrontSteeringDegrees = FMath::FInterpConstantTo(FrontSteeringDegrees, DesiredSteering, DeltaSeconds, 240.0f);
+    }
+    const double SteeringRadians = FMath::DegreesToRadians(FrontSteeringDegrees);
+    const double FrontDistance = Distance * FMath::Cos(SteeringRadians) +
+        YawRadians * 77.0 * FMath::Sin(SteeringRadians);
+    FrontRollRadians = FMath::UnwindRadians(FrontRollRadians + FrontDistance / Radius);
     LeftWheel->SetRelativeRotation(FQuat(FVector::RightVector, LeftRollRadians));
     RightWheel->SetRelativeRotation(FQuat(FVector::RightVector, RightRollRadians));
-    FrontWheel->SetRelativeRotation(FQuat(FVector::RightVector, FrontRollRadians));
+    FrontWheel->SetRelativeRotation(FQuat(FVector::UpVector, SteeringRadians) *
+        FQuat(FVector::RightVector, FrontRollRadians));
     PreviousRobotLocation = Location;
     PreviousRobotRotation = Rotation;
 }

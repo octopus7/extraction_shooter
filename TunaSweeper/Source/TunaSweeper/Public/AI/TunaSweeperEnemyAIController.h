@@ -173,6 +173,7 @@ protected:
 private:
 	bool bWasStandardCombatSuppressed = false;
 #if WITH_DEV_AUTOMATION_TESTS
+	friend class FTunaSweeperTrikeDrivingTest;
 	friend class FTunaSweeperEnemyRepositionFallbackTest;
 	friend class FTunaSweeperCombatPatternRangedBoundaryTest;
 #endif
