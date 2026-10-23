@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "mask_peak": 243.0,
+  "foam_pixels_t0": 8530,
+  "foam_pixels_t1": 10455,
+  "disabled_max": 1.0,
+  "time_changed_pixels": 17451,
+  "freeze_repeat_mean_error": 0.0,
+  "breakup_off_matches_previous_mean_error": 0.005491574294865131,
+  "breakup_changed_pixels": 4770,
+  "tail_removed_pixels": 1186,
+  "bright_front_mean_error": 0.41666603088378906,
+  "foam_outside_shallow_water_pixels": 0,
+  "Wide.png_mean_rgb": 128.50267028808594,
+  "Close_0.png_mean_rgb": 144.943115234375,
+  "Close_1.png_mean_rgb": 145.01870727539062,
+  "Close_2.png_mean_rgb": 145.00445556640625,
+  "motion_frames": 240,
+  "changed_frame_pairs": 239,
+  "shader_compile_errors": 0
+}

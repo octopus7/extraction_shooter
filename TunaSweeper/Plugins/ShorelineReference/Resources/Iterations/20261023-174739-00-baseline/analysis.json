@@ -1,0 +1,9 @@
+{
+  "status": "failed",
+  "freeze_repeat_mean_error": 0.0,
+  "surface_detail_mean_difference": 0.0,
+  "surface_detail_changed_pixels": 0,
+  "caustics_mean_difference": 0.0,
+  "time_changed_pixels": 58293,
+  "error": "Surface detail is absent"
+}

@@ -1,0 +1,2 @@
+# Keep the archived renderer evidence needed for offline capture analysis.
+!*.log

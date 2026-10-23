@@ -1,0 +1,4 @@
+# Captured evidence hashes refer to the exact archived bytes.
+* -text whitespace=cr-at-eol
+# Renderer output is immutable capture evidence, including its whitespace.
+*.log -diff -merge -whitespace

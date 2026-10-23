@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "freeze_repeat_mean_error": 0.0,
+  "surface_detail_mean_difference": 6.084372520446777,
+  "surface_detail_changed_pixels": 982865,
+  "caustics_mean_difference": 0.20993782579898834,
+  "time_changed_pixels": 86783,
+  "wide_near_white_fraction": 0.0,
+  "close_near_white_fraction": 0.0,
+  "low_near_white_fraction": 0.0,
+  "surface_near_white_fraction": 0.0
+}

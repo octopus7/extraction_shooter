@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "render_log_sha256": "184d63c259042b9aec2d7d3f78387511675e038778df809041b95395864c1edb",
+  "shader_compile_errors": 0,
+  "freeze_repeat_mean_error": 0.0,
+  "surface_detail_mean_difference": 10.338265419006348,
+  "surface_detail_changed_pixels": 1015242,
+  "caustics_mean_difference": 0.14312304556369781,
+  "sun_glint_mean_difference": 1.3134182691574097,
+  "time_changed_pixels": 91817,
+  "wide_near_white_fraction": 0.0,
+  "close_near_white_fraction": 0.0,
+  "low_near_white_fraction": 0.0,
+  "surface_near_white_fraction": 0.0
+}

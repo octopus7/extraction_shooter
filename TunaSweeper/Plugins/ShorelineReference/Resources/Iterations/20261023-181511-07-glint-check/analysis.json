@@ -1,0 +1,11 @@
+{
+  "status": "failed",
+  "shader_compile_errors": 0,
+  "freeze_repeat_mean_error": 0.0,
+  "surface_detail_mean_difference": 2.292942762374878,
+  "surface_detail_changed_pixels": 496308,
+  "caustics_mean_difference": 0.15307356417179108,
+  "sun_glint_mean_difference": 9.309895540354773e-05,
+  "time_changed_pixels": 89437,
+  "error": "Sun glint is absent in the review view"
+}

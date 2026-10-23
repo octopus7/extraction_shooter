@@ -1,0 +1,18 @@
+{
+  "status": "saved",
+  "previous_water_scale": [
+    500.0,
+    500.0,
+    1.0
+  ],
+  "defaults": {
+    "SurfaceDetailStrength": 1.0,
+    "SurfaceScale": 0.7,
+    "SurfaceSpeed": 0.45,
+    "RippleStrength": 0.11,
+    "ReflectionStrength": 0.45,
+    "GlintStrength": 0.09,
+    "CausticsStrength": 0.085
+  },
+  "shader_hash": "74095e36e29fe2ea31dea1fec5da761f814373bbd3259e84537fdd86f08534ed"
+}

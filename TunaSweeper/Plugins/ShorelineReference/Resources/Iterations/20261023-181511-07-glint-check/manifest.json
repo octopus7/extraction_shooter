@@ -1,0 +1,298 @@
+{
+  "status": "captured",
+  "label": "07-glint-check",
+  "started": "2026-10-23T18:15:11.051949",
+  "renderer": "UE5.7 D3D12 SM6 SceneCapture2D",
+  "captures": [
+    {
+      "view": "wide",
+      "shader_time": 1.0,
+      "overrides": {},
+      "camera_location": [
+        0.0,
+        -5800.0,
+        4400.0
+      ],
+      "camera_rotation": [
+        -37.18470645323311,
+        89.99999999999999,
+        4.2136194190577993e-07
+      ],
+      "file": "wide\\20261023-1815.png",
+      "sha256": "78dd8f1d1ad2492adaf73bfa7c88ef88faec8e2b4c731214df10ab10f07af9fa",
+      "original_export_sha256": "0ad1f5ef757e0cdd9b5f77279611cf5d89cf94b7b788b667377ce328996de515",
+      "export_padding_removed_bytes": 100875,
+      "decoded_rgba_sha256": "8ab841046a83644d2c136f167a3221e585c49279fab7934a400fe6db31629d05"
+    },
+    {
+      "view": "close",
+      "shader_time": 1.0,
+      "overrides": {},
+      "camera_location": [
+        -850.0,
+        -2400.0,
+        1000.0
+      ],
+      "camera_rotation": [
+        -44.999999999999964,
+        53.13010235415597,
+        2.9102057577995666e-07
+      ],
+      "file": "close\\20261023-1815.png",
+      "sha256": "9124ad04049eee5d9ac73ecbb7e6e9e919111ec68b1f6b40a0237196b0bd8892",
+      "original_export_sha256": "fba31ddf40089500d2c35610d78b1ddd29290e09aaa39d9e1e0f4ec6921879cf",
+      "export_padding_removed_bytes": 158729,
+      "decoded_rgba_sha256": "cdfc8d08326f34d6e7d0e3272b9169918e765978cbd8d3d55a9ea81a86e9cc63"
+    },
+    {
+      "view": "close-repeat",
+      "shader_time": 1.0,
+      "overrides": {},
+      "camera_location": [
+        -850.0,
+        -2400.0,
+        1000.0
+      ],
+      "camera_rotation": [
+        -44.999999999999964,
+        53.13010235415597,
+        2.9102057577995666e-07
+      ],
+      "file": "close-repeat\\20261023-1815.png",
+      "sha256": "9124ad04049eee5d9ac73ecbb7e6e9e919111ec68b1f6b40a0237196b0bd8892",
+      "original_export_sha256": "fba31ddf40089500d2c35610d78b1ddd29290e09aaa39d9e1e0f4ec6921879cf",
+      "export_padding_removed_bytes": 158729,
+      "decoded_rgba_sha256": "cdfc8d08326f34d6e7d0e3272b9169918e765978cbd8d3d55a9ea81a86e9cc63"
+    },
+    {
+      "view": "close-t3",
+      "shader_time": 3.0,
+      "overrides": {},
+      "camera_location": [
+        -850.0,
+        -2400.0,
+        1000.0
+      ],
+      "camera_rotation": [
+        -44.999999999999964,
+        53.13010235415597,
+        2.9102057577995666e-07
+      ],
+      "file": "close-t3\\20261023-1815.png",
+      "sha256": "47775ba10d2e7bafcb929977ecbf69ce2c648b683e1d823bad6c66eff3260af7",
+      "original_export_sha256": "7d98f210bd11f10e36d929857685df77cae2f376d03097c8752d2c9e77bcc47b",
+      "export_padding_removed_bytes": 159289,
+      "decoded_rgba_sha256": "f8622f815475530dc862e00cbad33177734aaf0a08a20e57edbfa239bd707e91"
+    },
+    {
+      "view": "close-detail-off",
+      "shader_time": 1.0,
+      "overrides": {
+        "SurfaceDetailStrength": 0
+      },
+      "camera_location": [
+        -850.0,
+        -2400.0,
+        1000.0
+      ],
+      "camera_rotation": [
+        -44.999999999999964,
+        53.13010235415597,
+        2.9102057577995666e-07
+      ],
+      "file": "close-detail-off\\20261023-1815.png",
+      "sha256": "b7d323647b33b8d11fdcfb288b379f1f96dde61fb827579c2cdf6d947de75ac4",
+      "original_export_sha256": "ee75bbf909d56c6b6f3468b880f6d5704a17f4b787d95c150a11347ab5259557",
+      "export_padding_removed_bytes": 172099,
+      "decoded_rgba_sha256": "6b789272bf07bfbfbac7cc5844f785c3c5554ca09b337de856ffb44efb5fdd5c"
+    },
+    {
+      "view": "close-caustics-off",
+      "shader_time": 1.0,
+      "overrides": {
+        "CausticsStrength": 0
+      },
+      "camera_location": [
+        -850.0,
+        -2400.0,
+        1000.0
+      ],
+      "camera_rotation": [
+        -44.999999999999964,
+        53.13010235415597,
+        2.9102057577995666e-07
+      ],
+      "file": "close-caustics-off\\20261023-1815.png",
+      "sha256": "6deeeae92a7dfa19c89727a45d0ab48bd071d0ba5e554cd3b8ace43a506fadb7",
+      "original_export_sha256": "5b722a26224b09f89e9f8cf1fbb90cb2a1bc46f18d4e89320c00cafbd93632ac",
+      "export_padding_removed_bytes": 172120,
+      "decoded_rgba_sha256": "860df071a7fbe1aeb203d4d3b892538a41ed77e85f65d3f8b7d01eb7574ef08f"
+    },
+    {
+      "view": "close-glint-off",
+      "shader_time": 1.0,
+      "overrides": {
+        "GlintStrength": 0
+      },
+      "camera_location": [
+        -850.0,
+        -2400.0,
+        1000.0
+      ],
+      "camera_rotation": [
+        -44.999999999999964,
+        53.13010235415597,
+        2.9102057577995666e-07
+      ],
+      "file": "close-glint-off\\20261023-1815.png",
+      "sha256": "594b6b93bae4f2f5de416c72b1dc88f4035878cfd4067075e42638c035927ab7",
+      "original_export_sha256": "14d8fc679144eac78cbc059b1290fc24f50fc9bd930ad906d1b65126158e7e5d",
+      "export_padding_removed_bytes": 158995,
+      "decoded_rgba_sha256": "f26ad54803e02b9df7dbae27c0df86d9732b7d91a0b3feff05761fe5d032cf63"
+    },
+    {
+      "view": "low",
+      "shader_time": 1.0,
+      "overrides": {},
+      "camera_location": [
+        -700.0,
+        -3300.0,
+        550.0
+      ],
+      "camera_rotation": [
+        -14.550656077757822,
+        70.7099537808112,
+        1.376132416247174e-07
+      ],
+      "file": "low\\20261023-1815.png",
+      "sha256": "c087373973830683099dcca73d2b1c2cbf20f810a43b7e0f234158903741c46f",
+      "original_export_sha256": "e85dec6ffc4ecf22bbe8ee144db703c086a1c900af86a58bdea91a3f60fce9a3",
+      "export_padding_removed_bytes": 181417,
+      "decoded_rgba_sha256": "3238b384debd68fe94831e2d422fcdadb21554c85344548c7acd8300459e3e0a"
+    },
+    {
+      "view": "surface",
+      "shader_time": 1.0,
+      "overrides": {},
+      "camera_location": [
+        -650.0,
+        -3500.0,
+        1100.0
+      ],
+      "camera_rotation": [
+        -59.796220835561265,
+        38.65980825409007,
+        2.5881708730731896e-07
+      ],
+      "file": "surface\\20261023-1815.png",
+      "sha256": "a628ae2fd9038fd44a4261c4e37ff391f222fc7e503f22e7273e286f1fe1c614",
+      "original_export_sha256": "e8a90d4778b3c3cf40d0f294929234bc4a4306e1ac822de28d7828c02364ed1f",
+      "export_padding_removed_bytes": 232318,
+      "decoded_rgba_sha256": "f071c15a4b6ee059a41e4e2554ffef4797a69598df29ff9c341f80d8dcd37fed"
+    },
+    {
+      "view": "surface-off",
+      "shader_time": 1.0,
+      "overrides": {
+        "SurfaceDetailStrength": 0
+      },
+      "camera_location": [
+        -650.0,
+        -3500.0,
+        1100.0
+      ],
+      "camera_rotation": [
+        -59.796220835561265,
+        38.65980825409007,
+        2.5881708730731896e-07
+      ],
+      "file": "surface-off\\20261023-1815.png",
+      "sha256": "ca36bbe5bb40b76775eaf21ad29cbb426bf4b786cf7bf0151b7b270c9627b0fa",
+      "original_export_sha256": "ad60fcd2f629046b8b891671e2ae1e6678eb2e4c725f53255b84059291bab911",
+      "export_padding_removed_bytes": 243515,
+      "decoded_rgba_sha256": "9b1d4ae10254898dc547fa0cf151e17b8dc9af9b74804e3bb85670028aaaac40"
+    },
+    {
+      "view": "mask",
+      "shader_time": 1.0,
+      "overrides": {},
+      "camera_location": [
+        0.0,
+        0.0,
+        6000.0
+      ],
+      "camera_rotation": [
+        -90.0,
+        0.0,
+        0.0
+      ],
+      "file": "mask\\20261023-1815.png",
+      "sha256": "e2ae7fa723aedce3daa097644c0904497f8b2fe99d0e09c5f8648d05070228a6",
+      "original_export_sha256": "931bcf0c159fa9aae9a82b8ad9858a2383a737c74064405eb28d2ad85569df4a",
+      "export_padding_removed_bytes": 33908,
+      "decoded_rgba_sha256": "55282add3ee0573a71b4c3f4c71c9d3e480a9e32b88eea1d12fc326f0fcfe4b8"
+    }
+  ],
+  "shader_hash": "3dabf8b98ec43f6c4de78f7e872f2a10a2be813e315e74d6932a1644697f9511",
+  "log_file": "D:/github/extraction_shooter/TunaSweeper/Saved/ShorelineVisualIteration/07-glint-check.log",
+  "water_actor_scale": [
+    16000.0,
+    16000.0,
+    1.0
+  ],
+  "parameters": {
+    "AnimationSpeed": 1.0,
+    "PreviewTime": 0.0,
+    "FreezeTime": 0.0,
+    "MaskWorldSize": 8192.0,
+    "MaskDepthRange": 700.0,
+    "ShoreDepthCm": 45.0,
+    "PhaseSpeed": 0.07900000363588333,
+    "BandAmount": 4.059999942779541,
+    "BandThickness": 0.8679999709129333,
+    "DissolveScale": 1.75,
+    "DissolveStrength": 2.740000009536743,
+    "GradientDissolve": -1.0,
+    "TrailFade": 1.2699999809265137,
+    "FoamStrength": 1.0,
+    "FoamOpacity": 0.6823529601097107,
+    "ColorDepthCm": 125.0,
+    "ShallowOpacity": 0.44999998807907104,
+    "DeepOpacity": 0.9599999785423279,
+    "OpaqueDepthStartCm": 90.0,
+    "OpaqueDepthEndCm": 290.0,
+    "ShoreFadeWidth": 0.4880000054836273,
+    "DebugMask": 0.0,
+    "TailBreakupStrength": 0.8500000238418579,
+    "TailBreakupScale": 2.5999999046325684,
+    "SurfaceDetailStrength": 1.0,
+    "SurfaceScale": 0.699999988079071,
+    "SurfaceSpeed": 0.44999998807907104,
+    "RippleStrength": 0.10999999940395355,
+    "ReflectionStrength": 0.44999998807907104,
+    "GlintStrength": 0.09000000357627869,
+    "CausticsStrength": 0.08500000089406967
+  },
+  "colors": {
+    "ShallowColor": [
+      0.054999999701976776,
+      0.38999998569488525,
+      0.3700000047683716,
+      1.0
+    ],
+    "DeepColor": [
+      0.007000000216066837,
+      0.11999999731779099,
+      0.18000000715255737,
+      1.0
+    ],
+    "FoamColor": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "saved_assets_unchanged": true,
+  "wall_seconds": 5.109
+}

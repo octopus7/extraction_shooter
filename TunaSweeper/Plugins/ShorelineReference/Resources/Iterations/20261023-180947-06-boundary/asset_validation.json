@@ -1,0 +1,99 @@
+{
+  "status": "passed",
+  "material_code_hash": "3dabf8b98ec43f6c4de78f7e872f2a10a2be813e315e74d6932a1644697f9511",
+  "custom_inputs": [
+    "MaterialExpressionWorldPosition_2",
+    "MaterialExpressionTime_4",
+    "MaterialExpressionTextureObjectParameter_0",
+    "MaterialExpressionTextureObjectParameter_4",
+    "MaterialExpressionScalarParameter_1",
+    "MaterialExpressionScalarParameter_3",
+    "MaterialExpressionScalarParameter_6",
+    "MaterialExpressionScalarParameter_10",
+    "MaterialExpressionScalarParameter_12",
+    "MaterialExpressionScalarParameter_13",
+    "MaterialExpressionScalarParameter_17",
+    "MaterialExpressionScalarParameter_19",
+    "MaterialExpressionScalarParameter_24",
+    "MaterialExpressionScalarParameter_25",
+    "MaterialExpressionScalarParameter_26",
+    "MaterialExpressionScalarParameter_33",
+    "MaterialExpressionScalarParameter_34",
+    "MaterialExpressionScalarParameter_40",
+    "MaterialExpressionScalarParameter_44",
+    "MaterialExpressionScalarParameter_47",
+    "MaterialExpressionScalarParameter_48",
+    "MaterialExpressionScalarParameter_50",
+    "MaterialExpressionScalarParameter_54",
+    "MaterialExpressionScalarParameter_56",
+    "MaterialExpressionScalarParameter_60",
+    "MaterialExpressionScalarParameter_61",
+    "MaterialExpressionVectorParameter_1",
+    "MaterialExpressionVectorParameter_3",
+    "MaterialExpressionVectorParameter_5",
+    "MaterialExpressionScalarParameter_2",
+    "MaterialExpressionScalarParameter_5",
+    "MaterialExpressionScalarParameter_8",
+    "MaterialExpressionScalarParameter_14",
+    "MaterialExpressionScalarParameter_16",
+    "MaterialExpressionScalarParameter_20",
+    "MaterialExpressionScalarParameter_21",
+    "MaterialExpressionScalarParameter_27",
+    "MaterialExpressionScalarParameter_30",
+    "MaterialExpressionCameraVectorWS_0"
+  ],
+  "parameter_metadata_mismatches": [],
+  "tail_parameters": {
+    "TailBreakupStrength": 0.8500000238418579,
+    "TailBreakupScale": 2.5999999046325684
+  },
+  "surface_parameters": {
+    "SurfaceDetailStrength": 1.0,
+    "SurfaceScale": 0.699999988079071,
+    "SurfaceSpeed": 0.44999998807907104,
+    "RippleStrength": 0.10999999940395355,
+    "ReflectionStrength": 0.44999998807907104,
+    "GlintStrength": 0.09000000357627869,
+    "CausticsStrength": 0.08500000089406967
+  },
+  "data_texture_size": [
+    1024,
+    1024
+  ],
+  "ue_mesh_vs_mask_max_vertex_error_cm": 4.738915788493614e-05,
+  "source_to_ue_axes": "UE=(source X, -source Y, source Z); data UV=(UE XY+4096)/8192",
+  "dependencies": {
+    "/ShorelineReference/Maps/L_ShorelineReferenceIsland": [
+      "/Script/NavigationSystem",
+      "/Engine/EngineMaterials/WorldGridMaterial",
+      "/Engine/EditorResources/LightIcons/S_LightError",
+      "/ShorelineReference/Meshes/SM_ReferenceIsland",
+      "/ShorelineReference/Meshes/SM_ReferenceWaterPlane"
+    ],
+    "/ShorelineReference/Materials/MI_ShorelineReference": [
+      "/ShorelineReference/Materials/M_ShorelineReference"
+    ],
+    "/ShorelineReference/Materials/M_IslandSurface": [],
+    "/ShorelineReference/Materials/M_ShorelineReference": [
+      "/ShorelineReference/Textures/T_IslandShoreData",
+      "/ShorelineReference/Textures/T_ShoreDissolve"
+    ],
+    "/ShorelineReference/Meshes/SM_ReferenceIsland": [
+      "/Script/NavigationSystem",
+      "/ShorelineReference/Materials/M_IslandSurface"
+    ],
+    "/ShorelineReference/Meshes/SM_ReferenceWaterPlane": [
+      "/Script/NavigationSystem",
+      "/ShorelineReference/Materials/MI_ShorelineReference"
+    ],
+    "/ShorelineReference/Textures/T_IslandShoreData": [
+      "/Script/InterchangeEngine"
+    ],
+    "/ShorelineReference/Textures/T_ShoreDissolve": [
+      "/Script/InterchangeEngine"
+    ]
+  },
+  "actors": 7,
+  "water_z": 0,
+  "saved_files_unchanged": true
+}

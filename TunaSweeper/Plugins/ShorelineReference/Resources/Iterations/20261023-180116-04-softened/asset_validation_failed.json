@@ -1,0 +1,73 @@
+{
+  "status": "failed",
+  "material_code_hash": "74095e36e29fe2ea31dea1fec5da761f814373bbd3259e84537fdd86f08534ed",
+  "custom_inputs": [
+    "MaterialExpressionWorldPosition_2",
+    "MaterialExpressionTime_4",
+    "MaterialExpressionTextureObjectParameter_0",
+    "MaterialExpressionTextureObjectParameter_4",
+    "MaterialExpressionScalarParameter_1",
+    "MaterialExpressionScalarParameter_3",
+    "MaterialExpressionScalarParameter_6",
+    "MaterialExpressionScalarParameter_10",
+    "MaterialExpressionScalarParameter_12",
+    "MaterialExpressionScalarParameter_13",
+    "MaterialExpressionScalarParameter_17",
+    "MaterialExpressionScalarParameter_19",
+    "MaterialExpressionScalarParameter_24",
+    "MaterialExpressionScalarParameter_25",
+    "MaterialExpressionScalarParameter_26",
+    "MaterialExpressionScalarParameter_33",
+    "MaterialExpressionScalarParameter_34",
+    "MaterialExpressionScalarParameter_40",
+    "MaterialExpressionScalarParameter_44",
+    "MaterialExpressionScalarParameter_47",
+    "MaterialExpressionScalarParameter_48",
+    "MaterialExpressionScalarParameter_50",
+    "MaterialExpressionScalarParameter_54",
+    "MaterialExpressionScalarParameter_56",
+    "MaterialExpressionScalarParameter_60",
+    "MaterialExpressionScalarParameter_61",
+    "MaterialExpressionVectorParameter_1",
+    "MaterialExpressionVectorParameter_3",
+    "MaterialExpressionVectorParameter_5",
+    "MaterialExpressionScalarParameter_2",
+    "MaterialExpressionScalarParameter_5",
+    "MaterialExpressionScalarParameter_8",
+    "MaterialExpressionScalarParameter_14",
+    "MaterialExpressionScalarParameter_16",
+    "MaterialExpressionScalarParameter_20",
+    "MaterialExpressionScalarParameter_21",
+    "MaterialExpressionScalarParameter_27",
+    "MaterialExpressionScalarParameter_30",
+    "MaterialExpressionCameraVectorWS_0"
+  ],
+  "parameter_metadata_mismatches": [
+    {
+      "name": "ColorDepthCm",
+      "graph": 125.0,
+      "public": 95.0
+    },
+    {
+      "name": "ShallowOpacity",
+      "graph": 0.44999998807907104,
+      "public": 0.30000001192092896
+    },
+    {
+      "name": "OpaqueDepthStartCm",
+      "graph": 90.0,
+      "public": 180.0
+    },
+    {
+      "name": "ShallowColor",
+      "graph": "<Struct 'LinearColor' (0x0000024F50F75078) {r: 0.055000, g: 0.390000, b: 0.370000, a: 1.000000}>",
+      "public": "<Struct 'LinearColor' (0x0000024EB062FAA0) {r: 0.120000, g: 0.580000, b: 0.650000, a: 1.000000}>"
+    },
+    {
+      "name": "DeepColor",
+      "graph": "<Struct 'LinearColor' (0x0000024F50F751F8) {r: 0.007000, g: 0.120000, b: 0.180000, a: 1.000000}>",
+      "public": "<Struct 'LinearColor' (0x0000024EB062F320) {r: 0.018000, g: 0.240000, b: 0.380000, a: 1.000000}>"
+    }
+  ],
+  "error": "Traceback (most recent call last):\n  File \"D:/github/extraction_shooter/TunaSweeper/Plugins/ShorelineReference/Tools/verify_assets.py\", line 72, in <module>\n    assert not report['parameter_metadata_mismatches'], 'Saved parameter defaults are stale'\nAssertionError: Saved parameter defaults are stale\n"
+}

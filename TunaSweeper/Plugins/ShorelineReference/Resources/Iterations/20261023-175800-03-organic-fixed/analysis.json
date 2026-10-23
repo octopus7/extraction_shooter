@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "shader_compile_errors": 0,
+  "freeze_repeat_mean_error": 0.0,
+  "surface_detail_mean_difference": 3.849372625350952,
+  "surface_detail_changed_pixels": 833334,
+  "caustics_mean_difference": 0.8366904258728027,
+  "time_changed_pixels": 134516,
+  "wide_near_white_fraction": 0.0,
+  "close_near_white_fraction": 0.0,
+  "low_near_white_fraction": 0.0,
+  "surface_near_white_fraction": 0.0
+}

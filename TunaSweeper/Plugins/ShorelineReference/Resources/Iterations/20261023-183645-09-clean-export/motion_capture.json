@@ -1,0 +1,61 @@
+{
+  "status": "captured_pending_pixel_validation",
+  "renderer": "UE5.7 D3D12 SM6 SceneCapture2D",
+  "sequence_seconds": 20,
+  "sequence_fps": 12,
+  "captures": [
+    {
+      "name": "Wide.png",
+      "shader_time": 0.0,
+      "view": "wide"
+    },
+    {
+      "name": "Close_0.png",
+      "shader_time": 0.0,
+      "view": "close"
+    },
+    {
+      "name": "Close_1.png",
+      "shader_time": 1.0,
+      "view": "close"
+    },
+    {
+      "name": "Close_2.png",
+      "shader_time": 2.0,
+      "view": "close"
+    },
+    {
+      "name": "Mask_0.png",
+      "shader_time": 0.0,
+      "view": "mask"
+    },
+    {
+      "name": "Mask_1.png",
+      "shader_time": 1.0,
+      "view": "mask"
+    },
+    {
+      "name": "Mask_1_repeat.png",
+      "shader_time": 1.0,
+      "view": "mask"
+    },
+    {
+      "name": "Mask_disabled.png",
+      "shader_time": 1.0,
+      "view": "disabled"
+    },
+    {
+      "name": "Mask_1_breakup_off.png",
+      "shader_time": 1.0,
+      "view": "baseline"
+    },
+    {
+      "name": "Close_1_breakup_off.png",
+      "shader_time": 1.0,
+      "view": "close_baseline"
+    }
+  ],
+  "required_captures_exist": true,
+  "saved_assets_unchanged": true,
+  "wall_seconds": 41.406
+}

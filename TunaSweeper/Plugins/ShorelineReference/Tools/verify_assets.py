@@ -53,10 +53,34 @@ try:
     report['material_code_hash'] = hashlib.sha256(code.encode()).hexdigest()
     report['custom_inputs'] = [str(n.get_name()) if n else None for n in lib.get_inputs_for_material_expression(material, custom)]
     assert all(n is not None for n in lib.get_inputs_for_material_expression(material, custom))
+    # Saved parameter metadata must agree with the graph so editor controls,
+    # material instances, and review A/Bs all inherit the same values.
+    report['parameter_metadata_mismatches'] = []
+    for node in lib.get_inputs_for_material_expression(material, custom):
+        if isinstance(node, u.MaterialExpressionScalarParameter):
+            name = str(node.get_editor_property('parameter_name'))
+            graph_value = node.get_editor_property('default_value')
+            public_value = lib.get_material_default_scalar_parameter_value(material, name)
+            if abs(graph_value - public_value) > 0.00001:
+                report['parameter_metadata_mismatches'].append({'name': name, 'graph': graph_value, 'public': public_value})
+        elif isinstance(node, u.MaterialExpressionVectorParameter):
+            name = str(node.get_editor_property('parameter_name'))
+            graph = node.get_editor_property('default_value')
+            public = lib.get_material_default_vector_parameter_value(material, name)
+            if any(abs(getattr(graph,c) - getattr(public,c)) > 0.00001 for c in ['r','g','b','a']):
+                report['parameter_metadata_mismatches'].append({'name': name, 'graph': str(graph), 'public': str(public)})
+    assert not report['parameter_metadata_mismatches'], 'Saved parameter defaults are stale'
     report['tail_parameters'] = {name: lib.get_material_default_scalar_parameter_value(material, name)
                                  for name in ['TailBreakupStrength', 'TailBreakupScale']}
     assert 0 < report['tail_parameters']['TailBreakupStrength'] <= 1
     assert report['tail_parameters']['TailBreakupScale'] > 0
+    report['surface_parameters'] = {name: lib.get_material_default_scalar_parameter_value(material, name)
+        for name in ['SurfaceDetailStrength', 'SurfaceScale', 'SurfaceSpeed', 'RippleStrength',
+                     'ReflectionStrength', 'GlintStrength', 'CausticsStrength']}
+    assert all(math.isfinite(v) and v > 0 for v in report['surface_parameters'].values())
+    assert report['surface_parameters']['SurfaceDetailStrength'] <= 1
+    names = [str(i.get_editor_property('input_name')) for i in custom.get_editor_property('inputs')]
+    assert 'ViewDirection' in names, 'View-dependent shading is disconnected'
     noise = u.load_asset(BASE + '/Textures/T_ShoreDissolve')
     data = u.load_asset(BASE + '/Textures/T_IslandShoreData')
     # D3D12 may expose placeholder dimensions while texture compilation is pending.

@@ -8,12 +8,17 @@ import sys
 
 import numpy as np
 from PIL import Image
+from png_integrity import validate_png
 
 root = Path(__file__).resolve().parents[3]
 out = Path(sys.argv[1]) if len(sys.argv) > 1 else root / 'Saved/ShorelineReferenceWork/Review'
 report = {'status': 'running'}
+checked_pngs = set()
 
 def pixels(name):
+    if name not in checked_pngs:
+        validate_png(out / name)
+        checked_pngs.add(name)
     with Image.open(out / name) as image:
         return np.asarray(image.convert('RGB'), dtype=np.float32)
 
@@ -21,6 +26,9 @@ try:
     capture = json.loads((out / 'capture_validation.json').read_text(encoding='utf-8'))
     assert capture['status'] == 'captured_pending_pixel_validation', capture
     assert capture['saved_assets_unchanged'] and capture['required_captures_exist']
+    for entry in capture['captures']:
+        validate_png(out / entry['name'])
+        checked_pngs.add(entry['name'])
     masks = [pixels(n) for n in ['Mask_0.png', 'Mask_1.png', 'Mask_1_repeat.png', 'Mask_disabled.png']]
     m0, m1, repeat, disabled = [m.mean(axis=2) for m in masks]
     assert m0.shape == (1024, 1024)
@@ -85,5 +93,6 @@ except Exception as error:
     report.update(status='failed', error=str(error))
     raise
 finally:
+    report['png_integrity_checked_files'] = len(checked_pngs)
     (out / 'pixel_validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     print(json.dumps(report, indent=2))

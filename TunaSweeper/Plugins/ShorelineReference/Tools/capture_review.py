@@ -7,9 +7,13 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import sys
 import time
 import traceback
+import uuid
 import unreal as u
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from png_integrity import finalize_exported_png
 
 if 'ExecutePythonScript=' not in u.SystemLibrary.get_command_line():
     raise RuntimeError('Run this tool in a dedicated -ExecutePythonScript process; it exits that process.')
@@ -18,6 +22,16 @@ ROOT = Path(u.Paths.project_dir()).resolve() / 'Plugins/ShorelineReference'
 OUT = Path(u.Paths.project_saved_dir()).resolve() / 'ShorelineReferenceWork/Review'
 OUT.mkdir(parents=True, exist_ok=True)
 BASE = '/ShorelineReference'
+
+def export_frame(world, render_target, name):
+    # UE5.7 can export allocation padding after IEND, even to a fresh file.
+    # Preserve all encoded pixel chunks, finalize the container, then replace.
+    temporary = OUT / ('Capture_' + uuid.uuid4().hex + '.png')
+    u.RenderingLibrary.export_render_target(world, render_target, str(OUT), temporary.name)
+    assert temporary.is_file() and temporary.stat().st_size > 100, 'Frame export failed: ' + name
+    finalize_exported_png(temporary)
+    temporary.replace(OUT / name)
+
 before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
           for p in (ROOT / 'Content').rglob('*') if p.is_file()}
 report = {'status': 'running', 'renderer': 'UE5.7 D3D12 SM6 SceneCapture2D',
@@ -122,7 +136,7 @@ try:
                 camera.capture_scene()
                 if stage_ticks >= 24:
                     name, shader_time, kind = stages[stage]
-                    u.RenderingLibrary.export_render_target(world, mask_target if kind in ['mask', 'disabled', 'baseline'] else target, str(OUT), name)
+                    export_frame(world, mask_target if kind in ['mask', 'disabled', 'baseline'] else target, name)
                     report['captures'].append({'name': name, 'shader_time': shader_time, 'view': kind})
                     stage += 1
                     stage_ticks = 0
@@ -143,7 +157,7 @@ try:
                 view((-850 + 700 * orbit, -2400 - 250 * orbit, 1000 + 250 * orbit), (-250 + 300 * orbit, -1600, 0))
             camera.capture_scene()
             if sequence_frame % 2 == 1:
-                u.RenderingLibrary.export_render_target(world, target, str(OUT), 'Motion_%04d.png' % index)
+                export_frame(world, target, 'Motion_%04d.png' % index)
         except Exception:
             finish(traceback.format_exc())
         finally:
