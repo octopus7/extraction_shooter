@@ -8366,3 +8366,11 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 최근 작업한 물 표현 작업이 무엇인지 확인.
 - 답변: 가장 최근 완료된 물 표현 커밋은 2026-10-23 00:49의 aa6aaa8b로, ShorelineReference 해안 거품 꼬리에 불규칙한 빈틈을 추가한 작업이다. 앞선 551a608b에서는 독립 무인도 맵과 잔잔한 해안 거품을 만들었다. 맵은 /ShorelineReference/Maps/L_ShorelineReferenceIsland이며, 기존 숲 TestWater 웅덩이 및 StylizedWater와 분리되어 있다.
 - 근거: 최근 Git 이력, Docs/requests.md, ShorelineReference/README.md 및 CalmShoreline.hlsl을 대조했다.
+
+## 2026-10-23 23:17:15 (소요시간: 00:02:30)
+
+- 질문: 환경(날씨) 시스템의 보편적인 구현 아이디어와 다른 프로젝트에서도 재사용 가능한 플러그인 구조를 제안해 달라.
+- 답변: UE 5.7에서 C++ 코어, DataAsset 날씨 프리셋, 교체 가능한 하늘·강수·바람·오디오 표현부를 분리하는 구성을 추천했다. 단일 Blueprint 액터와 기상 시뮬레이션 방식의 비용·재사용성 차이를 설명하고, 월드별 상태 관리, 날씨 전환 규칙, 선택적 시간대 입력, 지역 보정과 실내 차폐, 게임플레이 연동 경계를 제안했다. 맑음·흐림·비·안개, 부드러운 전환, 공용 바람, 실내 강수 차폐, 미리보기부터 시작하고 눈·축적·번개 등은 확장하는 범위를 제시했다.
+- 재사용 원칙: 플러그인은 TunaSweeper 클래스와 자산 경로에 의존하지 않고 프로젝트 어댑터를 통해 기존 표현을 연결한다. Runtime과 Editor를 분리하고 상태 내보내기/복원은 제공하되 실제 저장 슬롯 정책은 프로젝트가 맡는다. 멀티플레이 확장 시 서버가 날씨를 결정하고 별도 복제 액터로 상태를 전달한다. 프리셋 전환과 표면 젖음의 축적·건조는 구분한다.
+- 확인: 공개 Source/Plugins 검색에서 통합 날씨·낮밤 관리자는 발견하지 못했다. RegionalGroundFog는 자체 안개만 관리하며 나무 WindStrength와 탈출 연기 바람은 별도 경로다. 바이너리 Blueprint 내부와 에디터 실행 상태는 조사하지 않았다. 구현 변경 없이 아이디어를 제안했으며, 날씨의 게임플레이 영향 범위를 후속 논의 사항으로 남겼다.
+- 근거: TunaSweeper/Plugins/RegionalGroundFog/Source/RegionalGroundFog/Public/RegionalGroundFogActor.h ; TunaSweeper/Source/TunaSweeper/Private/Environment/TunaSweeperAnimeTreeActor.cpp ; Docs/game_conventions.md ; https://dev.epicgames.com/documentation/en-us/unreal-engine/plugins-in-unreal-engine?application_version=5.7 ; https://dev.epicgames.com/documentation/en-us/unreal-engine/programming-subsystems-in-unreal-engine?application_version=5.7 ; https://dev.epicgames.com/documentation/en-us/unreal-engine/sky-atmosphere-component-in-unreal-engine?application_version=5.7
