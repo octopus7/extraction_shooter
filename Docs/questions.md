@@ -8374,3 +8374,14 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 재사용 원칙: 플러그인은 TunaSweeper 클래스와 자산 경로에 의존하지 않고 프로젝트 어댑터를 통해 기존 표현을 연결한다. Runtime과 Editor를 분리하고 상태 내보내기/복원은 제공하되 실제 저장 슬롯 정책은 프로젝트가 맡는다. 멀티플레이 확장 시 서버가 날씨를 결정하고 별도 복제 액터로 상태를 전달한다. 프리셋 전환과 표면 젖음의 축적·건조는 구분한다.
 - 확인: 공개 Source/Plugins 검색에서 통합 날씨·낮밤 관리자는 발견하지 못했다. RegionalGroundFog는 자체 안개만 관리하며 나무 WindStrength와 탈출 연기 바람은 별도 경로다. 바이너리 Blueprint 내부와 에디터 실행 상태는 조사하지 않았다. 구현 변경 없이 아이디어를 제안했으며, 날씨의 게임플레이 영향 범위를 후속 논의 사항으로 남겼다.
 - 근거: TunaSweeper/Plugins/RegionalGroundFog/Source/RegionalGroundFog/Public/RegionalGroundFogActor.h ; TunaSweeper/Source/TunaSweeper/Private/Environment/TunaSweeperAnimeTreeActor.cpp ; Docs/game_conventions.md ; https://dev.epicgames.com/documentation/en-us/unreal-engine/plugins-in-unreal-engine?application_version=5.7 ; https://dev.epicgames.com/documentation/en-us/unreal-engine/programming-subsystems-in-unreal-engine?application_version=5.7 ; https://dev.epicgames.com/documentation/en-us/unreal-engine/sky-atmosphere-component-in-unreal-engine?application_version=5.7
+
+## 2026-11-01 13:38:03 (소요시간: 00:00:48)
+
+- 질문: 추가 언어 지원을 위해 분리된 파일이 무엇인지 확인해 달라.
+- 답변: TunaSweeper/Content/Data의 기본 CSV 6개는 string_key,ko,en,ja 열을 사용하며, 같은 이름의 Translations/UITextStrings.csv, ItemNameStrings.csv, QuestTextStrings.csv, ScenarioTextStrings.csv, MemoTextStrings.csv, DifficultyTextStrings.csv는 string_key,zh-Hans,zh-Hant,ru,pt-BR 열로 중국어 간체·번체, 러시아어, 브라질 포르투갈어를 보관한다. TunaSweeperAdditionalTranslations.cpp가 원본 CSV 옆 Translations 폴더에서 동명 파일을 읽고 string_key로 적용한다.
+- 확인: Docs/localization.md와 로더 코드를 대조하고 기본·추가 언어 CSV 12개 헤더를 확인했다. 게임 코드와 데이터는 변경하지 않았다.
+
+## 2026-11-01 13:41:03 (소요시간: 00:00:07)
+
+- 질문: 한국어·일본어·영어·중국어 간체·중국어 번체·러시아어를 정식 지원 6개 언어로 하고, 기본·추가 언어 파일 구분을 없애며 브라질 포르투갈어를 삭제한다는 요구를 이해했는가?
+- 답변: 6개 언어를 동등한 정식 지원 언어로 통합 관리하고 추가 언어 파일 구분을 없애며 브라질 포르투갈어를 제거하는 것으로 이해했다. 이번 응답은 요구사항 이해 확인이며 구현 변경은 아직 수행하지 않았다.
