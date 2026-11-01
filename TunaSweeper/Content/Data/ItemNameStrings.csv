@@ -125,8 +125,8 @@ item.body_armor_tier4,4등급 방탄복,Tier 4 Body Armor,等級4の防弾ベス
 item.body_armor_tier4.desc,방어 4등급 · 기본 방어력 8. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 8. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力8。弾薬の貫通等級に応じて実効防御力が変わる。,护甲等级4 · 基础防御8。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦8。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 8. Эффективная защита зависит от уровня пробития боеприпасов.
 item.ballistic_helmet_tier4,4등급 방탄 헬멧,Tier 4 Ballistic Helmet,等級4の防弾ヘルメット,4级防弹头盔,4級防彈頭盔,Баллистический шлем 4-го уровня
 item.ballistic_helmet_tier4.desc,방어 4등급 · 기본 방어력 4. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 4. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力4。弾薬の貫通等級に応じて実効防御力が変わる。,护甲等级4 · 基础防御4。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦4。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 4. Эффективная защита зависит от уровня пробития боеприпасов.
-item.toot_toot,뿡뿡,Pfft,ぷぅ,,,
-item.toot_toot.desc,정체는 방귀다. 지금은 아무 쓸모 없이 인벤토리 한 칸만 차지한다.,A fart. Currently useless and only takes up an inventory slot.,正体はおなら。今のところ何の役にも立たず、インベントリを1枠占有するだけ。,,,
+item.toot_toot,뿡뿡,Pfft,ぷぅ,噗噗,噗噗,Пуф
+item.toot_toot.desc,정체는 방귀다. 지금은 아무 쓸모 없이 인벤토리 한 칸만 차지한다.,A fart. Currently useless and only takes up an inventory slot.,正体はおなら。今のところ何の役にも立たず、インベントリを1枠占有するだけ。,其实就是个屁。目前毫无用处，只会占用一个背包栏位。,其實就是個屁。目前毫無用處，只會佔用一個揹包欄位。,Это пук. Пока что совершенно бесполезен и лишь занимает одну ячейку инвентаря.
 item.sweet_potato,고구마,Sweet Potato,サツマイモ,红薯,地瓜,Батат
 item.sweet_potato.desc,먹을 수 있는 고구마. 식량이나 납품 물자로 사용할 수 있다.,An edible sweet potato that can serve as food or supplies.,食料や納品物資として使えるサツマイモ。,可食用的红薯，可作为食物或交付物资。,可食用的地瓜，可作為食物或交付物資。,Съедобный батат. Подходит для еды или поставок.
 item.dog_food,개 사료,Dog Food,ドッグフード,狗粮,狗糧,Корм для собак

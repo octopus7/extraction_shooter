@@ -1,68 +1,68 @@
 string_key,ko,en,ja,zh-Hans,zh-Hant,ru
-achievement.01.name,첫 외출,First Outing,初めてのお出かけ,,,
-achievement.02.name,붉은 신고식,First Blood,紅の洗礼,,,
-achievement.03.name,새로운 가족,New Family,新しい家族,,,
-achievement.04.name,발사,Blast Off!,発射！,,,
-achievement.05.name,아늑한 집,Home Sweet Home,居心地のいい我が家,,,
-achievement.06.name,골목대장,King of the Block,路地裏の番長,,,
-achievement.07.name,마을,The Town,街,,,
-achievement.08.name,또 다른 가족?,Another Family Member?,また家族が増えた？,,,
-achievement.09.name,문명의 맛,Now That’s Civilization!,これが文明か！,,,
-achievement.10.name,토끼사냥,Rabbit Hunt,ウサギ狩り,,,
-achievement.11.name,구사일생,Close Call,九死に一生,,,
-achievement.12.name,퇴근합니다,Clocking Out,定時で帰ります！,,,
-achievement.13.name,미지와 조우,Encounter with the Unknown,未知との遭遇,,,
-achievement.15.name,요술봉,Magic Wand,魔法のステッキ,,,
-achievement.16.name,안전운전,Drive Safely,安全運転,,,
-achievement.17.name,부자,Rich,お金持ち,,,
-achievement.18.name,동네최강,Top Dog,町内最強,,,
-achievement.19.name,황무지,Wasteland,荒野,,,
-achievement.20.name,결말,The End,結末,,,
-ui.achievement.unlocked,도전 과제 달성: {0},Achievement unlocked: {0},実績解除：{0},,,
+achievement.01.name,첫 외출,First Outing,初めてのお出かけ,初次外出,初次外出,Первая вылазка
+achievement.02.name,붉은 신고식,First Blood,紅の洗礼,血色洗礼,血色洗禮,Кровавое посвящение
+achievement.03.name,새로운 가족,New Family,新しい家族,新家人,新家人,Новая семья
+achievement.04.name,발사,Blast Off!,発射！,发射！,發射！,Пуск!
+achievement.05.name,아늑한 집,Home Sweet Home,居心地のいい我が家,温馨的家,溫馨的家,"Дом, милый дом"
+achievement.06.name,골목대장,King of the Block,路地裏の番長,街头霸王,街頭霸王,Гроза квартала
+achievement.07.name,마을,The Town,街,村庄,村莊,Деревня
+achievement.08.name,또 다른 가족?,Another Family Member?,また家族が増えた？,又一位家人？,又一位家人？,Ещё один член семьи?
+achievement.09.name,문명의 맛,Now That’s Civilization!,これが文明か！,文明的滋味,文明的滋味,Вкус цивилизации
+achievement.10.name,토끼사냥,Rabbit Hunt,ウサギ狩り,猎兔行动,獵兔行動,Охота на кроликов
+achievement.11.name,구사일생,Close Call,九死に一生,九死一生,九死一生,На волосок от смерти
+achievement.12.name,퇴근합니다,Clocking Out,定時で帰ります！,下班了,下班了,Рабочий день окончен
+achievement.13.name,미지와 조우,Encounter with the Unknown,未知との遭遇,邂逅未知,邂逅未知,Встреча с неизвестным
+achievement.15.name,요술봉,Magic Wand,魔法のステッキ,魔法棒,魔法棒,Волшебная палочка
+achievement.16.name,안전운전,Drive Safely,安全運転,安全驾驶,安全駕駛,Безопасное вождение
+achievement.17.name,부자,Rich,お金持ち,有钱人,有錢人,Богатство
+achievement.18.name,동네최강,Top Dog,町内最強,全村最强,全村最強,Сильнейший в округе
+achievement.19.name,황무지,Wasteland,荒野,荒原,荒原,Пустошь
+achievement.20.name,결말,The End,結末,结局,結局,Конец
+ui.achievement.unlocked,도전 과제 달성: {0},Achievement unlocked: {0},実績解除：{0},解锁成就：{0},解鎖成就：{0},Получено достижение: {0}
 ui.interaction.travel_basement,지하실로 이동,Go to basement,地下室へ移動,前往地下室,前往地下室,Перейти в подвал
 ui.interaction.travel_control_room,관제실로 이동,Enter control room,管制室へ移動,进入控制室,進入控制室,Войти в диспетчерскую
 ui.interaction.return_bunker,벙커로 돌아가기,Return to bunker,バンカーに戻る,返回地堡,返回地堡,Вернуться в бункер
 ui.item_info.defense_specs,방어구 스펙,Armor Specs,防具性能,护甲属性,護甲屬性,Характеристики брони
 ui.item_info.defense,기본 방어력,Base Defense,基本防御力,基础防御,基礎防禦,Базовая защита
-tool.save.code,오류 코드,Error code,エラーコード,,,
-tool.save.hash,현재 파일 hash,Current file hash,現在のファイルhash,,,
-tool.save.sourceHash,편집 전 파일 hash,Source file hash,編集前のファイルhash,,,
-tool.save.validationCode,검증 결과,Validation result,検証結果,,,
-tool.save.backupPath,원본 백업,Original backup,元のバックアップ,,,
-tool.save.runDirectory,실행 로그 폴더,Run log directory,実行ログフォルダー,,,
-tool.save.slots,슬롯 / 대상 / 버전 / 읽기 가능 / 경로,Slot / Flavor / Version / Readable / Path,スロット / 対象 / バージョン / 読取可 / パス,,,
-tool.save.empty,비어 있음,Empty,空,,,
-tool.save.saveSlotIndex,저장 슬롯,Save slot,セーブスロット,,,
-tool.save.buildFlavor,대상,Build flavor,対象,,,
-tool.save.saveVersion,저장 버전,Save version,セーブバージョン,,,
-tool.save.difficultyStage,난이도 단계,Difficulty stage,難易度段階,,,
-tool.save.totalPlaySeconds,플레이 시간(초),Play time (seconds),プレイ時間(秒),,,
-tool.save.questCoinBalance,코인,Coins,コイン,,,
-tool.save.totalExperiencePoints,누적 경험치,Total experience,累積経験値,,,
-tool.save.selectedOutfitId,선택 의상 ID,Selected outfit ID,選択衣装ID,,,
-tool.save.inventoryCapacity,소지품 용량,Inventory capacity,所持品容量,,,
-tool.save.equipmentSlots,장착 장비,Equipment,装備,,,
-tool.save.inventorySlots,소지품,Inventory,所持品,,,
-tool.save.auxiliaryBagSlots,보조 가방,Auxiliary bag,補助バッグ,,,
-tool.save.usableQuickSlots,퀵 슬롯,Quick slots,クイックスロット,,,
-tool.save.storageSlots,창고,Storage,倉庫,,,
-tool.save.item_header,슬롯 / 아이템 ID / 이름 × 수량 / 장전 탄약,Slot / Item ID / Name × Quantity / Loaded ammo,スロット / アイテムID / 名前 × 数量 / 装填弾薬,,,
-tool.save.questProgressStates,퀘스트 기록 수,Quest records,クエスト記録数,,,
-tool.save.activeResearchStates,진행 연구 수,Active research records,進行研究数,,,
-tool.save.appliedResearchNodeIds,적용 연구 수,Applied research nodes,適用研究数,,,
-tool.save.completedScenarioFlags,완료 시나리오 플래그 수,Completed scenario flags,完了シナリオフラグ数,,,
-tool.save.acquiredMemoIds,획득 메모 수,Acquired memos,獲得メモ数,,,
-tool.save.worldProgressStates,월드 진행 기록 수,World progress records,ワールド進行記録数,,,
-tool.save.json_hint,전체 진행 데이터와 UID는 --json으로 확인하세요.,Use --json for full progression data and UIDs.,完全な進行データとUIDは --json で確認できます。,,,
-tool.save.presetCount,프리셋 장착 항목 수,Preset equipment entries,プリセット装備項目数,,,
-tool.save.preset_hint,--output으로 파일을 저장하거나 --json으로 프리셋 내용을 확인하세요.,Use --output to save a file or --json to inspect the preset.,--output で保存するか --json でプリセット内容を確認してください。,,,
-tool.save.exportPath,프리셋 저장 경로,Preset output path,プリセット保存先,,,
-tool.save.help,TunaSweeper 세이브 도구 | 명령: catalog / list / inspect / validate / add / preset-export / preset-apply | 공통: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 세이브 지정: --save <sav> --flavor Demo|Main --slot <번호> | 추가: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 또는 --items <JSON 파일> | 프리셋: --preset <JSON 파일> / 내보내기: --output <새 파일> | 목록: --directory <폴더> | 변경은 기본 미리보기. 저장: --commit [--expected-hash <조회 hash>] | 게임과 PIE 종료 후 편집. 자세한 사용법: Tools/SaveTool/README.md,TunaSweeper Save Tool | Commands: catalog / list / inspect / validate / add / preset-export / preset-apply | Common: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <seconds> | Save: --save <sav> --flavor Demo|Main --slot <number> | Add: --item <ID> --quantity <count> [--ammo <ID> --rounds <loaded count>] or --items <JSON file> | Preset: --preset <JSON file> / export: --output <new file> | List: --directory <folder> | Edits preview by default. Write: --commit [--expected-hash <inspection hash>] | Close game and PIE before editing. Guide: Tools/SaveTool/README.md,TunaSweeper セーブツール | コマンド: catalog / list / inspect / validate / add / preset-export / preset-apply | 共通: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | セーブ: --save <sav> --flavor Demo|Main --slot <番号> | 追加: --item <ID> --quantity <数量> [--ammo <ID> --rounds <装填数>] または --items <JSONファイル> | プリセット: --preset <JSONファイル> / 書き出し: --output <新規ファイル> | 一覧: --directory <フォルダー> | 既定はプレビュー。保存: --commit [--expected-hash <確認時のhash>] | ゲームとPIEを終了してから編集。詳細: Tools/SaveTool/README.md,,,
-tool.save.running,Unreal 커맨드렛 실행 중…,Running Unreal commandlet…,Unrealコマンドレット実行中…,,,
-tool.save.success,완료,Complete,完了,,,
-tool.save.failure,실패: 아래 오류 코드와 상세 정보를 확인하세요.,Failed: check the error code and details below.,失敗: 以下のエラーコードと詳細を確認してください。,,,
-tool.save.preview,미리보기입니다. 원본 세이브는 변경하지 않았습니다.,Preview only. The original save was not changed.,プレビューです。元のセーブは変更されていません。,,,
-tool.save.catalog_header,ID / 이름 / 분류 / 최대 중첩,ID / Name / Category / Max stack,ID / 名前 / 分類 / 最大スタック,,,
+tool.save.code,오류 코드,Error code,エラーコード,错误代码,錯誤代碼,Код ошибки
+tool.save.hash,현재 파일 hash,Current file hash,現在のファイルhash,当前文件哈希值,目前檔案雜湊值,Хеш текущего файла
+tool.save.sourceHash,편집 전 파일 hash,Source file hash,編集前のファイルhash,编辑前文件哈希值,編輯前檔案雜湊值,Хеш файла до изменений
+tool.save.validationCode,검증 결과,Validation result,検証結果,验证结果,驗證結果,Результат проверки
+tool.save.backupPath,원본 백업,Original backup,元のバックアップ,原始文件备份,原始檔案備份,Резервная копия исходного файла
+tool.save.runDirectory,실행 로그 폴더,Run log directory,実行ログフォルダー,运行日志文件夹,執行記錄資料夾,Папка журналов запуска
+tool.save.slots,슬롯 / 대상 / 버전 / 읽기 가능 / 경로,Slot / Flavor / Version / Readable / Path,スロット / 対象 / バージョン / 読取可 / パス,栏位 / 目标 / 版本 / 可读取 / 路径,欄位 / 目標 / 版本 / 可讀取 / 路徑,Слот / Версия игры / Версия сохранения / Доступность чтения / Путь
+tool.save.empty,비어 있음,Empty,空,空,空,Пусто
+tool.save.saveSlotIndex,저장 슬롯,Save slot,セーブスロット,存档栏位,存檔欄位,Слот сохранения
+tool.save.buildFlavor,대상,Build flavor,対象,目标,目標,Версия игры
+tool.save.saveVersion,저장 버전,Save version,セーブバージョン,存档版本,存檔版本,Версия сохранения
+tool.save.difficultyStage,난이도 단계,Difficulty stage,難易度段階,难度阶段,難度階段,Ступень сложности
+tool.save.totalPlaySeconds,플레이 시간(초),Play time (seconds),プレイ時間(秒),游玩时间（秒）,遊玩時間（秒）,Время игры (секунды)
+tool.save.questCoinBalance,코인,Coins,コイン,硬币,硬幣,Монеты
+tool.save.totalExperiencePoints,누적 경험치,Total experience,累積経験値,累计经验值,累積經驗值,Всего опыта
+tool.save.selectedOutfitId,선택 의상 ID,Selected outfit ID,選択衣装ID,所选服装ID,所選服裝ID,ID выбранного костюма
+tool.save.inventoryCapacity,소지품 용량,Inventory capacity,所持品容量,随身物品容量,隨身物品容量,Вместимость инвентаря
+tool.save.equipmentSlots,장착 장비,Equipment,装備,已装备物品,已裝備物品,Снаряжение
+tool.save.inventorySlots,소지품,Inventory,所持品,随身物品,隨身物品,Инвентарь
+tool.save.auxiliaryBagSlots,보조 가방,Auxiliary bag,補助バッグ,辅助背包,輔助揹包,Дополнительная сумка
+tool.save.usableQuickSlots,퀵 슬롯,Quick slots,クイックスロット,快捷栏,快捷欄,Ячейки быстрого доступа
+tool.save.storageSlots,창고,Storage,倉庫,仓库,倉庫,Хранилище
+tool.save.item_header,슬롯 / 아이템 ID / 이름 × 수량 / 장전 탄약,Slot / Item ID / Name × Quantity / Loaded ammo,スロット / アイテムID / 名前 × 数量 / 装填弾薬,栏位 / 物品ID / 名称 × 数量 / 已装填弹药,欄位 / 物品ID / 名稱 × 數量 / 已裝填彈藥,Ячейка / ID предмета / Название × Количество / Заряженные патроны
+tool.save.questProgressStates,퀘스트 기록 수,Quest records,クエスト記録数,任务记录数,任務記錄數,Количество записей о заданиях
+tool.save.activeResearchStates,진행 연구 수,Active research records,進行研究数,进行中的研究数,進行中的研究數,Количество текущих исследований
+tool.save.appliedResearchNodeIds,적용 연구 수,Applied research nodes,適用研究数,已应用研究数,已套用研究數,Количество применённых исследований
+tool.save.completedScenarioFlags,완료 시나리오 플래그 수,Completed scenario flags,完了シナリオフラグ数,已完成剧情标记数,已完成劇情旗標數,Количество флагов завершённых сценариев
+tool.save.acquiredMemoIds,획득 메모 수,Acquired memos,獲得メモ数,已获得备忘录数,已獲得備忘錄數,Количество найденных записок
+tool.save.worldProgressStates,월드 진행 기록 수,World progress records,ワールド進行記録数,世界进度记录数,世界進度記錄數,Количество записей о прогрессе мира
+tool.save.json_hint,전체 진행 데이터와 UID는 --json으로 확인하세요.,Use --json for full progression data and UIDs.,完全な進行データとUIDは --json で確認できます。,使用 --json 查看完整进度数据和UID。,使用 --json 查看完整進度資料和UID。,Используйте --json для просмотра полных данных о прогрессе и UID.
+tool.save.presetCount,프리셋 장착 항목 수,Preset equipment entries,プリセット装備項目数,预设装备项目数,預設裝備項目數,Количество элементов снаряжения в пресете
+tool.save.preset_hint,--output으로 파일을 저장하거나 --json으로 프리셋 내용을 확인하세요.,Use --output to save a file or --json to inspect the preset.,--output で保存するか --json でプリセット内容を確認してください。,使用 --output 保存文件，或使用 --json 查看预设内容。,使用 --output 儲存檔案，或使用 --json 查看預設內容。,Используйте --output для сохранения файла или --json для просмотра содержимого пресета.
+tool.save.exportPath,프리셋 저장 경로,Preset output path,プリセット保存先,预设保存路径,預設儲存路徑,Путь сохранения пресета
+tool.save.help,TunaSweeper 세이브 도구 | 명령: catalog / list / inspect / validate / add / preset-export / preset-apply | 공통: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 세이브 지정: --save <sav> --flavor Demo|Main --slot <번호> | 추가: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 또는 --items <JSON 파일> | 프리셋: --preset <JSON 파일> / 내보내기: --output <새 파일> | 목록: --directory <폴더> | 변경은 기본 미리보기. 저장: --commit [--expected-hash <조회 hash>] | 게임과 PIE 종료 후 편집. 자세한 사용법: Tools/SaveTool/README.md,TunaSweeper Save Tool | Commands: catalog / list / inspect / validate / add / preset-export / preset-apply | Common: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <seconds> | Save: --save <sav> --flavor Demo|Main --slot <number> | Add: --item <ID> --quantity <count> [--ammo <ID> --rounds <loaded count>] or --items <JSON file> | Preset: --preset <JSON file> / export: --output <new file> | List: --directory <folder> | Edits preview by default. Write: --commit [--expected-hash <inspection hash>] | Close game and PIE before editing. Guide: Tools/SaveTool/README.md,TunaSweeper セーブツール | コマンド: catalog / list / inspect / validate / add / preset-export / preset-apply | 共通: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | セーブ: --save <sav> --flavor Demo|Main --slot <番号> | 追加: --item <ID> --quantity <数量> [--ammo <ID> --rounds <装填数>] または --items <JSONファイル> | プリセット: --preset <JSONファイル> / 書き出し: --output <新規ファイル> | 一覧: --directory <フォルダー> | 既定はプレビュー。保存: --commit [--expected-hash <確認時のhash>] | ゲームとPIEを終了してから編集。詳細: Tools/SaveTool/README.md,TunaSweeper 存档工具 | 命令：catalog / list / inspect / validate / add / preset-export / preset-apply | 通用：--project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 指定存档：--save <sav> --flavor Demo|Main --slot <번호> | 添加：--item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 或 --items <JSON 파일> | 预设：--preset <JSON 파일> / 导出：--output <새 파일> | 列表：--directory <폴더> | 默认预览修改。写入：--commit [--expected-hash <조회 hash>] | 编辑前请关闭游戏和PIE。详细用法：Tools/SaveTool/README.md,TunaSweeper 存檔工具 | 命令：catalog / list / inspect / validate / add / preset-export / preset-apply | 通用：--project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 指定存檔：--save <sav> --flavor Demo|Main --slot <번호> | 新增：--item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 或 --items <JSON 파일> | 預設：--preset <JSON 파일> / 匯出：--output <새 파일> | 列表：--directory <폴더> | 預設預覽修改。寫入：--commit [--expected-hash <조회 hash>] | 編輯前請關閉遊戲和PIE。詳細用法：Tools/SaveTool/README.md,Инструмент сохранений TunaSweeper | Команды: catalog / list / inspect / validate / add / preset-export / preset-apply | Общие параметры: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | Выбор сохранения: --save <sav> --flavor Demo|Main --slot <번호> | Добавление: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] или --items <JSON 파일> | Пресет: --preset <JSON 파일> / экспорт: --output <새 파일> | Список: --directory <폴더> | По умолчанию изменения показываются в режиме предварительного просмотра. Запись: --commit [--expected-hash <조회 hash>] | Перед редактированием закройте игру и завершите PIE. Руководство: Tools/SaveTool/README.md
+tool.save.running,Unreal 커맨드렛 실행 중…,Running Unreal commandlet…,Unrealコマンドレット実行中…,正在运行Unreal命令程序…,正在執行Unreal命令程式…,Запуск командлета Unreal…
+tool.save.success,완료,Complete,完了,完成,完成,Готово
+tool.save.failure,실패: 아래 오류 코드와 상세 정보를 확인하세요.,Failed: check the error code and details below.,失敗: 以下のエラーコードと詳細を確認してください。,失败：请查看下方的错误代码和详细信息。,失敗：請查看下方的錯誤代碼和詳細資訊。,Ошибка: проверьте код и подробности ниже.
+tool.save.preview,미리보기입니다. 원본 세이브는 변경하지 않았습니다.,Preview only. The original save was not changed.,プレビューです。元のセーブは変更されていません。,当前为预览，原始存档未被修改。,目前為預覽，原始存檔未被修改。,Предварительный просмотр. Исходное сохранение не изменено.
+tool.save.catalog_header,ID / 이름 / 분류 / 최대 중첩,ID / Name / Category / Max stack,ID / 名前 / 分類 / 最大スタック,ID / 名称 / 类别 / 最大堆叠数,ID / 名稱 / 類別 / 最大堆疊數,ID / Название / Категория / Максимум в стопке
 ui.item_info.ammo_specs,탄약 스펙,Ammunition Specs,弾薬性能,弹药属性,彈藥屬性,Характеристики боеприпасов
 ui.item_info.projectile_damage,투사체 피해,Projectile Damage,投射物ダメージ,弹丸伤害,彈丸傷害,Урон снаряда
 ui.item_info.ammo_damage_context,기준 무기: {0} · 방어 적용 전 · 산탄은 펠릿당,Reference weapon: {0} · Before defense · Per pellet for shotguns,基準武器: {0} · 防御適用前 · 散弾はペレットごと,参考武器：{0} · 防御减伤前 · 霰弹按单颗计算,參考武器：{0} · 防禦減傷前 · 霰彈按單顆計算,Оружие: {0} · До защиты · Для дробовика — за дробину
@@ -363,7 +363,7 @@ ui.settings.frame_rate,프레임 제한,Frame Rate Limit,フレームレート�
 ui.settings.individual_quality,개별 품질,Individual Quality,個別品質,详细画质设置,詳細畫質設置,Отдельные настройки качества
 ui.settings.performance_effects,성능 및 효과,Performance and Effects,性能と効果,性能与特效,性能與特效,Производительность и эффекты
 ui.settings.preset.auto_details,"{0} ({1}, VRAM {2} MB)","{0} ({1}, VRAM {2} MB)","{0} ({1}, VRAM {2} MB)",{0}（{1}，显存 {2} MB）,{0}（{1}，顯存 {2} MB）,"{0} ({1}, видеопамять {2} МБ)"
-ui.settings.pending_suffix, · 적용 대기, · Apply pending, · 適用待ち, · 等待应用, · 等待應用, · Ожидает применения
+ui.settings.pending_suffix," · 적용 대기"," · Apply pending"," · 適用待ち"," · 等待应用"," · 等待應用"," · Ожидает применения"
 ui.settings.fps_value,{0} FPS,{0} FPS,{0} FPS,{0} FPS,{0} FPS,{0} FPS
 ui.settings.unavailable_suffix,{0} (사용 불가),{0} (Unavailable),{0} (使用不可),{0}（不可用）,{0}（不可用）,{0} (недоступно)
 ui.language.english,English,English,English,English,English,English
@@ -647,7 +647,7 @@ ui.quest_cheat.reset,대상 초기화 + 선행 완료,Reset target and complete 
 ui.quest_cheat.reset_help,선택한 퀘스트의 진행과 추적을 지우고 선행 체인을 완료합니다. 후속 퀘스트와 지급된 보상은 유지합니다.,Clear the selected quest progress and tracking and complete its prerequisites. Later quests and granted rewards remain unchanged.,選択したクエストの進行と追跡を消去し前提を完了します。後続クエストと受取済み報酬は維持します。,清除所选任务的进度和追踪并完成前置任务。保留后续任务和已发放奖励。,清除所選任務的進度和追蹤並完成前置任務。保留後續任務和已發放獎勵。,Удаляет прогресс и отслеживание задания и завершает предыдущие. Последующие задания и выданные награды сохраняются.
 ui.quest_cheat.reset_success,대상 퀘스트를 초기화하고 선행 퀘스트를 완료했습니다.,Target reset and prerequisites completed.,対象を初期化し前提クエストを完了しました。,已重置目标并完成前置任务。,已重設目標並完成前置任務。,Задание сброшено. Предыдущие задания завершены.
 ui.quest_cheat.refresh,목록 새로고침,Refresh list,一覧を更新,刷新列表,重新整理清單,Обновить список
-ui.quest_cheat.active_only,진행 중·수락 가능만 표시,Show active and available quests only,進行中・受注可能のみ表示,,,
+ui.quest_cheat.active_only,진행 중·수락 가능만 표시,Show active and available quests only,進行中・受注可能のみ表示,仅显示进行中和可接受的任务,僅顯示進行中和可接受的任務,Только текущие и доступные задания
 ui.quest_cheat.list_header,퀘스트 ID / 제목 / 현재 상태 — 선택하면 치트 대상에 적용됩니다.,Quest ID / Title / Current state — select a row to target it.,クエストID / タイトル / 現在の状態 — 選択すると操作対象になります。,任务ID / 标题 / 当前状态 — 选择一行设为目标。,任務ID / 標題 / 目前狀態 — 選取一列設為目標。,ID / Название / Состояние — выберите строку для изменения.
 ui.quest_cheat.row,{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2}
 ui.quest_cheat.untitled,제목 없음,Untitled,タイトルなし,无标题,無標題,Без названия
@@ -705,30 +705,30 @@ ui.interaction.required_quantity,×{0},×{0},×{0},×{0},×{0},×{0}
 ui.rail.lubricate,윤활오일 사용,Apply lubricating oil,潤滑オイルを使う,使用润滑油,使用潤滑油,Применить смазочное масло
 ui.rail.travel_next,다음 역으로 이동,Travel to next station,次の駅へ移動,前往下一站,前往下一站,Отправиться на следующую станцию
 ui.rail.need_oil,윤활오일이 필요해.,I need lubricating oil.,潤滑オイルが必要だ。,需要润滑油。,需要潤滑油。,Нужно смазочное масло.
-ui.world_cheat.title,월드 진행 치트,World Progress Cheats,ワールド進行チート,,,
-ui.world_cheat.description,선택한 슬롯의 월드 진행을 항목별로 변경합니다. 다음 플레이에서 저장을 불러오면 반영됩니다.,Edit each world object in the selected slot. Changes apply when the save is loaded in the next play session.,選択スロットのワールド進行を個別に変更します。次回プレイでセーブを読み込むと反映されます。,,,
-ui.world_cheat.notes,퀘스트·아이템·보상은 직접 변경하지 않습니다. 완료한 퀘스트 목표를 되돌리려면 퀘스트 치트도 사용하세요. 철도는 한 역이라도 완료이면 전체 역에 다시 반영되므로 미윤활로 되돌릴 때 세 역을 모두 초기화하세요. 낙석의 진행 수량 1은 장전 상태입니다.,"Quests, items and rewards are not edited. Use Quest Cheats separately to reset credited objectives. Railway completion spreads from any completed station: reset all three stations to remove lubrication. Rockfall progress quantity 1 means armed.",クエスト・アイテム・報酬は直接変更しません。達成済み目標のリセットにはクエストチートも使用してください。鉄道は1駅でも完了すると全駅に反映されるため、未潤滑に戻す際は3駅とも初期化してください。落石の進行数1は装填済みです。,,,
-ui.world_cheat.saved_object,기존 월드 기록,Saved world object,保存済みワールド記録,,,
-ui.world_cheat.state.unrecorded,기록 없음,Not recorded,記録なし,,,
-ui.world_cheat.state.in_progress,미완료,Incomplete,未完了,,,
-ui.world_cheat.state.completed,완료,Completed,完了,,,
-ui.world_cheat.row,{0} · {1} · 수량 {2},{0} · {1} · Quantity {2},{0} · {1} · 数量 {2},,,
-ui.world_cheat.reset,초기화,Reset,初期化,,,
-ui.world_cheat.quantity,진행 수량,Progress quantity,進行数,,,
-ui.world_cheat.in_progress,미완료로 적용,Apply incomplete,未完了として適用,,,
-ui.world_cheat.complete,완료로 적용,Apply completed,完了として適用,,,
-ui.world_cheat.success,선택 항목을 저장했습니다. 변경 전 원본은 자동 백업되었습니다.,Saved the selected object. The original save was backed up automatically.,選択項目を保存しました。変更前のセーブは自動バックアップ済みです。,,,
-ui.world_cheat.object.base_pipe,기지 배관 수리,Base pipe repair,拠点の配管修理,,,
-ui.world_cheat.object.raid_lift,레이드 리프트 복구,Raid lift repair,レイドリフト修理,,,
-ui.world_cheat.object.rockfall,숲–마을 터널 낙석,Forest–village tunnel rockfall,森–村トンネルの落石,,,
-ui.world_cheat.object.plains_lift,숲–평원 승강기,Forest–plains lift,森–平原の昇降機,,,
-ui.world_cheat.object.forest_power,숲 전력 시설,Forest power facility,森の電力設備,,,
-ui.world_cheat.object.atv_power,마을 ATV 창고 전력,Village ATV warehouse power,村のATV倉庫の電力,,,
-ui.world_cheat.object.ethanol,마을 에탄올 생산 시설,Village ethanol facility,村のエタノール生産設備,,,
-ui.world_cheat.object.rail_west,서역 윤활,West station lubrication,西駅の潤滑,,,
-ui.world_cheat.object.rail_north,북역 윤활,North station lubrication,北駅の潤滑,,,
-ui.world_cheat.object.rail_east,동역 윤활,East station lubrication,東駅の潤滑,,,
-ui.interaction.pickup_parcel,택배상자 줍기,Pick up parcel,配達箱を拾う,,,
+ui.world_cheat.title,월드 진행 치트,World Progress Cheats,ワールド進行チート,世界进度作弊,世界進度作弊,Читы прогресса мира
+ui.world_cheat.description,선택한 슬롯의 월드 진행을 항목별로 변경합니다. 다음 플레이에서 저장을 불러오면 반영됩니다.,Edit each world object in the selected slot. Changes apply when the save is loaded in the next play session.,選択スロットのワールド進行を個別に変更します。次回プレイでセーブを読み込むと反映されます。,逐项修改所选栏位的世界进度。下次游玩时加载存档即可生效。,逐項修改所選欄位的世界進度。下次遊玩時載入存檔即可生效。,Изменение прогресса мира по отдельным объектам в выбранном слоте. Изменения вступят в силу при загрузке сохранения в следующем игровом сеансе.
+ui.world_cheat.notes,퀘스트·아이템·보상은 직접 변경하지 않습니다. 완료한 퀘스트 목표를 되돌리려면 퀘스트 치트도 사용하세요. 철도는 한 역이라도 완료이면 전체 역에 다시 반영되므로 미윤활로 되돌릴 때 세 역을 모두 초기화하세요. 낙석의 진행 수량 1은 장전 상태입니다.,"Quests, items and rewards are not edited. Use Quest Cheats separately to reset credited objectives. Railway completion spreads from any completed station: reset all three stations to remove lubrication. Rockfall progress quantity 1 means armed.",クエスト・アイテム・報酬は直接変更しません。達成済み目標のリセットにはクエストチートも使用してください。鉄道は1駅でも完了すると全駅に反映されるため、未潤滑に戻す際は3駅とも初期化してください。落石の進行数1は装填済みです。,不会直接修改任务、物品或奖励。如需重置已完成的任务目标，请同时使用任务作弊功能。铁路只要有一个车站已完成，就会将完成状态重新应用到所有车站；要恢复为未润滑状态，请重置全部三个车站。落石的进度数量为1时，表示已装填。,不會直接修改任務、物品或獎勵。如需重設已完成的任務目標，請同時使用任務作弊功能。鐵路只要有一個車站已完成，就會將完成狀態重新套用到所有車站；要恢復為未潤滑狀態，請重設全部三個車站。落石的進度數量為1時，表示已裝填。,"Задания, предметы и награды напрямую не изменяются. Для сброса выполненных целей также используйте читы заданий. Если хотя бы одна станция завершена, это состояние снова применяется ко всем станциям: чтобы убрать смазку, сбросьте все три станции. Количество прогресса 1 у обвала означает, что заряд установлен."
+ui.world_cheat.saved_object,기존 월드 기록,Saved world object,保存済みワールド記録,现有世界记录,現有世界記錄,Существующая запись о мире
+ui.world_cheat.state.unrecorded,기록 없음,Not recorded,記録なし,无记录,無記錄,Нет записи
+ui.world_cheat.state.in_progress,미완료,Incomplete,未完了,未完成,未完成,Не завершено
+ui.world_cheat.state.completed,완료,Completed,完了,已完成,已完成,Завершено
+ui.world_cheat.row,{0} · {1} · 수량 {2},{0} · {1} · Quantity {2},{0} · {1} · 数量 {2},{0} · {1} · 数量 {2},{0} · {1} · 數量 {2},{0} · {1} · Количество: {2}
+ui.world_cheat.reset,초기화,Reset,初期化,重置,重設,Сбросить
+ui.world_cheat.quantity,진행 수량,Progress quantity,進行数,进度数量,進度數量,Количество прогресса
+ui.world_cheat.in_progress,미완료로 적용,Apply incomplete,未完了として適用,设为未完成,設為未完成,Отметить как незавершённое
+ui.world_cheat.complete,완료로 적용,Apply completed,完了として適用,设为已完成,設為已完成,Отметить как завершённое
+ui.world_cheat.success,선택 항목을 저장했습니다. 변경 전 원본은 자동 백업되었습니다.,Saved the selected object. The original save was backed up automatically.,選択項目を保存しました。変更前のセーブは自動バックアップ済みです。,已保存所选项目，修改前的原始存档已自动备份。,已儲存所選項目，修改前的原始存檔已自動備份。,Выбранный объект сохранён. Резервная копия исходного сохранения создана автоматически.
+ui.world_cheat.object.base_pipe,기지 배관 수리,Base pipe repair,拠点の配管修理,基地管道修理,基地管線維修,Ремонт труб на базе
+ui.world_cheat.object.raid_lift,레이드 리프트 복구,Raid lift repair,レイドリフト修理,突袭升降机修复,突襲昇降機修復,Ремонт рейдового подъёмника
+ui.world_cheat.object.rockfall,숲–마을 터널 낙석,Forest–village tunnel rockfall,森–村トンネルの落石,森林–村庄隧道落石,森林–村莊隧道落石,Обвал в туннеле между лесом и деревней
+ui.world_cheat.object.plains_lift,숲–평원 승강기,Forest–plains lift,森–平原の昇降機,森林–平原升降机,森林–平原昇降機,Подъёмник между лесом и равнинами
+ui.world_cheat.object.forest_power,숲 전력 시설,Forest power facility,森の電力設備,森林电力设施,森林電力設施,Электростанция в лесу
+ui.world_cheat.object.atv_power,마을 ATV 창고 전력,Village ATV warehouse power,村のATV倉庫の電力,村庄ATV仓库供电,村莊ATV倉庫供電,Электроснабжение склада квадроцикла в деревне
+ui.world_cheat.object.ethanol,마을 에탄올 생산 시설,Village ethanol facility,村のエタノール生産設備,村庄乙醇生产设施,村莊乙醇生產設施,Установка по производству этанола в деревне
+ui.world_cheat.object.rail_west,서역 윤활,West station lubrication,西駅の潤滑,西站润滑,西站潤滑,Смазка западной станции
+ui.world_cheat.object.rail_north,북역 윤활,North station lubrication,北駅の潤滑,北站润滑,北站潤滑,Смазка северной станции
+ui.world_cheat.object.rail_east,동역 윤활,East station lubrication,東駅の潤滑,东站润滑,東站潤滑,Смазка восточной станции
+ui.interaction.pickup_parcel,택배상자 줍기,Pick up parcel,配達箱を拾う,拾取快递箱,拾取包裹箱,Подобрать посылку
 ui.interaction.fermented_fuel_supply,발효연료 공급,Supply fermented fuel,発酵燃料を供給,供应发酵燃料,供應發酵燃料,Поставка ферментированного топлива
 ui.barter.ethanol_shortage,에탄올 2개가 필요하다!,I need 2 ethanol!,エタノールが2個必要だ！,需要2份乙醇！,需要2份乙醇！,Нужно 2 ед. этанола!
 ui.barter.failed,지금은 교환할 수 없다.,I can't exchange this right now.,今は交換できない。,现在无法交换。,現在無法交換。,Сейчас обмен невозможен.
