@@ -5,7 +5,7 @@ achievement.03.name,새로운 가족,New Family,新しい家族,新家人,新家
 achievement.04.name,발사,Blast Off!,発射！,发射！,發射！,Пуск!
 achievement.05.name,아늑한 집,Home Sweet Home,居心地のいい我が家,温馨的家,溫馨的家,"Дом, милый дом"
 achievement.06.name,골목대장,King of the Block,路地裏の番長,街头霸王,街頭霸王,Гроза квартала
-achievement.07.name,마을,The Town,街,村庄,村莊,Деревня
+achievement.07.name,마을,The Village,村,村庄,村莊,Деревня
 achievement.08.name,또 다른 가족?,Another Family Member?,また家族が増えた？,又一位家人？,又一位家人？,Ещё один член семьи?
 achievement.09.name,문명의 맛,Now That’s Civilization!,これが文明か！,文明的滋味,文明的滋味,Вкус цивилизации
 achievement.10.name,토끼사냥,Rabbit Hunt,ウサギ狩り,猎兔行动,獵兔行動,Охота на кроликов
@@ -21,12 +21,12 @@ achievement.20.name,결말,The End,結末,结局,結局,Конец
 ui.achievement.unlocked,도전 과제 달성: {0},Achievement unlocked: {0},実績解除：{0},解锁成就：{0},解鎖成就：{0},Получено достижение: {0}
 ui.interaction.travel_basement,지하실로 이동,Go to basement,地下室へ移動,前往地下室,前往地下室,Перейти в подвал
 ui.interaction.travel_control_room,관제실로 이동,Enter control room,管制室へ移動,进入控制室,進入控制室,Войти в диспетчерскую
-ui.interaction.return_bunker,벙커로 돌아가기,Return to bunker,バンカーに戻る,返回地堡,返回地堡,Вернуться в бункер
+ui.interaction.return_bunker,기지로 돌아가기,Return to base,基地に戻る,返回基地,返回基地,Вернуться на базу
 ui.item_info.defense_specs,방어구 스펙,Armor Specs,防具性能,护甲属性,護甲屬性,Характеристики брони
 ui.item_info.defense,기본 방어력,Base Defense,基本防御力,基础防御,基礎防禦,Базовая защита
 tool.save.code,오류 코드,Error code,エラーコード,错误代码,錯誤代碼,Код ошибки
-tool.save.hash,현재 파일 hash,Current file hash,現在のファイルhash,当前文件哈希值,目前檔案雜湊值,Хеш текущего файла
-tool.save.sourceHash,편집 전 파일 hash,Source file hash,編集前のファイルhash,编辑前文件哈希值,編輯前檔案雜湊值,Хеш файла до изменений
+tool.save.hash,현재 파일 hash,Current file hash,現在のファイルのハッシュ値,当前文件哈希值,目前檔案雜湊值,Хеш текущего файла
+tool.save.sourceHash,편집 전 파일 hash,Source file hash,編集前のファイルのハッシュ値,编辑前文件哈希值,編輯前檔案雜湊值,Хеш файла до изменений
 tool.save.validationCode,검증 결과,Validation result,検証結果,验证结果,驗證結果,Результат проверки
 tool.save.backupPath,원본 백업,Original backup,元のバックアップ,原始文件备份,原始檔案備份,Резервная копия исходного файла
 tool.save.runDirectory,실행 로그 폴더,Run log directory,実行ログフォルダー,运行日志文件夹,執行記錄資料夾,Папка журналов запуска
@@ -43,7 +43,7 @@ tool.save.selectedOutfitId,선택 의상 ID,Selected outfit ID,選択衣装ID,�
 tool.save.inventoryCapacity,소지품 용량,Inventory capacity,所持品容量,随身物品容量,隨身物品容量,Вместимость инвентаря
 tool.save.equipmentSlots,장착 장비,Equipment,装備,已装备物品,已裝備物品,Снаряжение
 tool.save.inventorySlots,소지품,Inventory,所持品,随身物品,隨身物品,Инвентарь
-tool.save.auxiliaryBagSlots,보조 가방,Auxiliary bag,補助バッグ,辅助背包,輔助揹包,Дополнительная сумка
+tool.save.auxiliaryBagSlots,보조 가방,Auxiliary bag,補助バッグ,辅助背包,輔助背包,Дополнительная сумка
 tool.save.usableQuickSlots,퀵 슬롯,Quick slots,クイックスロット,快捷栏,快捷欄,Ячейки быстрого доступа
 tool.save.storageSlots,창고,Storage,倉庫,仓库,倉庫,Хранилище
 tool.save.item_header,슬롯 / 아이템 ID / 이름 × 수량 / 장전 탄약,Slot / Item ID / Name × Quantity / Loaded ammo,スロット / アイテムID / 名前 × 数量 / 装填弾薬,栏位 / 物品ID / 名称 × 数量 / 已装填弹药,欄位 / 物品ID / 名稱 × 數量 / 已裝填彈藥,Ячейка / ID предмета / Название × Количество / Заряженные патроны
@@ -57,7 +57,7 @@ tool.save.json_hint,전체 진행 데이터와 UID는 --json으로 확인하세�
 tool.save.presetCount,프리셋 장착 항목 수,Preset equipment entries,プリセット装備項目数,预设装备项目数,預設裝備項目數,Количество элементов снаряжения в пресете
 tool.save.preset_hint,--output으로 파일을 저장하거나 --json으로 프리셋 내용을 확인하세요.,Use --output to save a file or --json to inspect the preset.,--output で保存するか --json でプリセット内容を確認してください。,使用 --output 保存文件，或使用 --json 查看预设内容。,使用 --output 儲存檔案，或使用 --json 查看預設內容。,Используйте --output для сохранения файла или --json для просмотра содержимого пресета.
 tool.save.exportPath,프리셋 저장 경로,Preset output path,プリセット保存先,预设保存路径,預設儲存路徑,Путь сохранения пресета
-tool.save.help,TunaSweeper 세이브 도구 | 명령: catalog / list / inspect / validate / add / preset-export / preset-apply | 공통: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 세이브 지정: --save <sav> --flavor Demo|Main --slot <번호> | 추가: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 또는 --items <JSON 파일> | 프리셋: --preset <JSON 파일> / 내보내기: --output <새 파일> | 목록: --directory <폴더> | 변경은 기본 미리보기. 저장: --commit [--expected-hash <조회 hash>] | 게임과 PIE 종료 후 편집. 자세한 사용법: Tools/SaveTool/README.md,TunaSweeper Save Tool | Commands: catalog / list / inspect / validate / add / preset-export / preset-apply | Common: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <seconds> | Save: --save <sav> --flavor Demo|Main --slot <number> | Add: --item <ID> --quantity <count> [--ammo <ID> --rounds <loaded count>] or --items <JSON file> | Preset: --preset <JSON file> / export: --output <new file> | List: --directory <folder> | Edits preview by default. Write: --commit [--expected-hash <inspection hash>] | Close game and PIE before editing. Guide: Tools/SaveTool/README.md,TunaSweeper セーブツール | コマンド: catalog / list / inspect / validate / add / preset-export / preset-apply | 共通: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | セーブ: --save <sav> --flavor Demo|Main --slot <番号> | 追加: --item <ID> --quantity <数量> [--ammo <ID> --rounds <装填数>] または --items <JSONファイル> | プリセット: --preset <JSONファイル> / 書き出し: --output <新規ファイル> | 一覧: --directory <フォルダー> | 既定はプレビュー。保存: --commit [--expected-hash <確認時のhash>] | ゲームとPIEを終了してから編集。詳細: Tools/SaveTool/README.md,TunaSweeper 存档工具 | 命令：catalog / list / inspect / validate / add / preset-export / preset-apply | 通用：--project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 指定存档：--save <sav> --flavor Demo|Main --slot <번호> | 添加：--item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 或 --items <JSON 파일> | 预设：--preset <JSON 파일> / 导出：--output <새 파일> | 列表：--directory <폴더> | 默认预览修改。写入：--commit [--expected-hash <조회 hash>] | 编辑前请关闭游戏和PIE。详细用法：Tools/SaveTool/README.md,TunaSweeper 存檔工具 | 命令：catalog / list / inspect / validate / add / preset-export / preset-apply | 通用：--project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 指定存檔：--save <sav> --flavor Demo|Main --slot <번호> | 新增：--item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 或 --items <JSON 파일> | 預設：--preset <JSON 파일> / 匯出：--output <새 파일> | 列表：--directory <폴더> | 預設預覽修改。寫入：--commit [--expected-hash <조회 hash>] | 編輯前請關閉遊戲和PIE。詳細用法：Tools/SaveTool/README.md,Инструмент сохранений TunaSweeper | Команды: catalog / list / inspect / validate / add / preset-export / preset-apply | Общие параметры: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | Выбор сохранения: --save <sav> --flavor Demo|Main --slot <번호> | Добавление: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] или --items <JSON 파일> | Пресет: --preset <JSON 파일> / экспорт: --output <새 파일> | Список: --directory <폴더> | По умолчанию изменения показываются в режиме предварительного просмотра. Запись: --commit [--expected-hash <조회 hash>] | Перед редактированием закройте игру и завершите PIE. Руководство: Tools/SaveTool/README.md
+tool.save.help,TunaSweeper 세이브 도구 | 명령: catalog / list / inspect / validate / add / preset-export / preset-apply | 공통: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <초> | 세이브 지정: --save <sav> --flavor Demo|Main --slot <번호> | 추가: --item <ID> --quantity <수량> [--ammo <ID> --rounds <장전 수>] 또는 --items <JSON 파일> | 프리셋: --preset <JSON 파일> / 내보내기: --output <새 파일> | 목록: --directory <폴더> | 변경은 기본 미리보기. 저장: --commit [--expected-hash <조회 hash>] | 게임과 PIE 종료 후 편집. 자세한 사용법: Tools/SaveTool/README.md,TunaSweeper Save Tool | Commands: catalog / list / inspect / validate / add / preset-export / preset-apply | Common: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <seconds> | Save: --save <sav> --flavor Demo|Main --slot <number> | Add: --item <ID> --quantity <count> [--ammo <ID> --rounds <loaded count>] or --items <JSON file> | Preset: --preset <JSON file> / export: --output <new file> | List: --directory <folder> | Edits preview by default. Write: --commit [--expected-hash <inspection hash>] | Close game and PIE before editing. Guide: Tools/SaveTool/README.md,TunaSweeper セーブツール | コマンド: catalog / list / inspect / validate / add / preset-export / preset-apply | 共通: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | セーブ: --save <sav> --flavor Demo|Main --slot <番号> | 追加: --item <ID> --quantity <数量> [--ammo <ID> --rounds <装填数>] または --items <JSONファイル> | プリセット: --preset <JSONファイル> / 書き出し: --output <新規ファイル> | 一覧: --directory <フォルダー> | 既定はプレビュー。保存: --commit [--expected-hash <確認時のhash>] | ゲームとPIEを終了してから編集。詳細: Tools/SaveTool/README.md,TunaSweeper 存档工具 | 命令：catalog / list / inspect / validate / add / preset-export / preset-apply | 通用：--project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | 指定存档：--save <sav> --flavor Demo|Main --slot <编号> | 添加：--item <ID> --quantity <数量> [--ammo <ID> --rounds <装填数>] 或 --items <JSON文件> | 预设：--preset <JSON文件> / 导出：--output <新文件> | 列表：--directory <文件夹> | 默认预览修改。写入：--commit [--expected-hash <查询时的哈希值>] | 编辑前请关闭游戏和PIE。详细用法：Tools/SaveTool/README.md,TunaSweeper 存檔工具 | 命令：catalog / list / inspect / validate / add / preset-export / preset-apply | 通用：--project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <秒> | 指定存檔：--save <sav> --flavor Demo|Main --slot <編號> | 新增：--item <ID> --quantity <數量> [--ammo <ID> --rounds <裝填數>] 或 --items <JSON檔案> | 預設：--preset <JSON檔案> / 匯出：--output <新檔案> | 列表：--directory <資料夾> | 預設預覽修改。寫入：--commit [--expected-hash <查詢時的雜湊值>] | 編輯前請關閉遊戲和PIE。詳細用法：Tools/SaveTool/README.md,Инструмент сохранений TunaSweeper | Команды: catalog / list / inspect / validate / add / preset-export / preset-apply | Общие параметры: --project <uproject> --editor <exe> --lang ko|en|ja --json --timeout <секунды> | Выбор сохранения: --save <sav> --flavor Demo|Main --slot <номер> | Добавление: --item <ID> --quantity <количество> [--ammo <ID> --rounds <заряженных патронов>] или --items <JSON-файл> | Пресет: --preset <JSON-файл> / экспорт: --output <новый файл> | Список: --directory <папка> | По умолчанию изменения показываются в режиме предварительного просмотра. Запись: --commit [--expected-hash <хеш из проверки>] | Перед редактированием закройте игру и завершите PIE. Руководство: Tools/SaveTool/README.md
 tool.save.running,Unreal 커맨드렛 실행 중…,Running Unreal commandlet…,Unrealコマンドレット実行中…,正在运行Unreal命令程序…,正在執行Unreal命令程式…,Запуск командлета Unreal…
 tool.save.success,완료,Complete,完了,完成,完成,Готово
 tool.save.failure,실패: 아래 오류 코드와 상세 정보를 확인하세요.,Failed: check the error code and details below.,失敗: 以下のエラーコードと詳細を確認してください。,失败：请查看下方的错误代码和详细信息。,失敗：請查看下方的錯誤代碼和詳細資訊。,Ошибка: проверьте код и подробности ниже.
@@ -65,7 +65,7 @@ tool.save.preview,미리보기입니다. 원본 세이브는 변경하지 않았
 tool.save.catalog_header,ID / 이름 / 분류 / 최대 중첩,ID / Name / Category / Max stack,ID / 名前 / 分類 / 最大スタック,ID / 名称 / 类别 / 最大堆叠数,ID / 名稱 / 類別 / 最大堆疊數,ID / Название / Категория / Максимум в стопке
 ui.item_info.ammo_specs,탄약 스펙,Ammunition Specs,弾薬性能,弹药属性,彈藥屬性,Характеристики боеприпасов
 ui.item_info.projectile_damage,투사체 피해,Projectile Damage,投射物ダメージ,弹丸伤害,彈丸傷害,Урон снаряда
-ui.item_info.ammo_damage_context,기준 무기: {0} · 방어 적용 전 · 산탄은 펠릿당,Reference weapon: {0} · Before defense · Per pellet for shotguns,基準武器: {0} · 防御適用前 · 散弾はペレットごと,参考武器：{0} · 防御减伤前 · 霰弹按单颗计算,參考武器：{0} · 防禦減傷前 · 霰彈按單顆計算,Оружие: {0} · До защиты · Для дробовика — за дробину
+ui.item_info.ammo_damage_context,기준 무기: {0} · 방어 적용 전 · 산탄은 펠릿당,Reference weapon: {0} · Before defense · Per pellet for shotguns,基準武器: {0} · 防御適用前 · 散弾はペレットごと,参考武器：{0} · 防御减伤前 · 霰弹按单颗计算,參考武器：{0} · 防禦減傷前 · 霰彈按單顆計算,Оружие для расчёта: {0} · До учёта брони · Для дробовика — за дробину
 editor.anim.title_head_look.title,타이틀 머리 추적,Title Head Look,タイトルの頭追従,标题画面头部追踪,標題畫面頭部追蹤,Поворот головы на главном экране
 editor.anim.title_head_look.tooltip,타이틀의 머리 목표 방향을 물리 계산 전 포즈에 적용합니다.,Applies the title head target direction to the pose before physics.,タイトルの頭の目標方向を物理計算前のポーズに適用します。,在物理计算前，将标题画面头部的目标方向应用于姿势。,在物理計算前，將標題畫面頭部的目標方向應用於姿勢。,Применяет целевое направление головы на главном экране к позе перед расчётом физики.
 ui.vehicle.mount,탑승하기,Mount,乗る,乘坐,乘坐,Сесть
@@ -77,8 +77,8 @@ ui.pause.resume,계속하기,Resume,ゲームに戻る,继续游戏,繼續遊戲
 ui.pause.return_to_title,타이틀로 돌아가기,Return to Title,タイトルに戻る,返回标题画面,返回標題畫面,На главный экран
 ui.pause.confirm_title,타이틀로 돌아가시겠습니까?,Return to the title screen?,タイトルに戻りますか？,返回标题画面吗？,返回標題畫面嗎？,Вернуться на главный экран?
 ui.pause.confirm_quit,게임을 종료하시겠습니까?,Quit the game?,ゲームを終了しますか？,退出游戏吗？,退出遊戲嗎？,Выйти из игры?
-ui.pause.raid_warning,레이드를 떠나면 소지품·장비·퀵슬롯 아이템과 이번 레이드의 미정산 경험치를 잃습니다. 보관함과 퀘스트·월드 진행 상황은 저장됩니다.,Leaving the raid forfeits carried items and equipment including quick slots and unbanked raid experience. Storage and quest/world progress are saved.,レイドを離れると所持品・装備・クイックスロットのアイテムと未精算のレイド経験値を失います。保管庫とクエスト・ワールドの進行状況は保存されます。,离开突袭会失去随身物品、装备、快捷栏物品，以及本次突袭未结算的经验值。仓库物品和任务、世界进度会保存。,離開突襲會失去隨身物品、裝備、快捷欄物品，以及本次突襲未結算的經驗值。倉庫物品和任務、世界進度會保存。,"При выходе из рейда вы потеряете переносимые предметы, снаряжение, вещи в быстрых ячейках и неполученный опыт рейда. Содержимое хранилища, задания и прогресс мира сохранятся."
-ui.pause.bunker_warning,벙커의 현재 진행 상황을 저장하고 나갑니다. 아이템은 잃지 않습니다.,Your current bunker progress will be saved before leaving. No items will be lost.,バンカーの現在の進行状況を保存して退出します。アイテムは失われません。,退出前会保存当前地堡进度，物品不会丢失。,退出前會保存當前地堡進度，物品不會丟失。,Перед выходом прогресс в бункере будет сохранён. Предметы не пропадут.
+ui.pause.raid_warning,레이드를 떠나면 소지품·장비·퀵슬롯 아이템과 이번 레이드의 미정산 경험치를 잃습니다. 보관함과 퀘스트·월드 진행 상황은 저장됩니다.,Leaving the raid forfeits carried items and equipment including quick slots and unbanked raid experience. Storage and quest/world progress are saved.,レイドを離れると所持品・装備・クイックスロットのアイテムと未精算のレイド経験値を失います。保管庫とクエスト・ワールドの進行状況は保存されます。,离开突袭会失去随身物品、装备、快捷栏物品，以及本次突袭未结算的经验值。仓库物品和任务、世界进度会保存。,離開突襲會失去隨身物品、裝備、快捷欄物品，以及本次突襲未結算的經驗值。倉庫物品和任務、世界進度會保存。,"При выходе из рейда вы потеряете переносимые предметы, снаряжение, вещи в ячейках быстрого доступа и неполученный опыт рейда. Содержимое хранилища, задания и прогресс мира сохранятся."
+ui.pause.bunker_warning,기지의 현재 진행 상황을 저장하고 나갑니다. 아이템은 잃지 않습니다.,Your current base progress will be saved before leaving. No items will be lost.,基地の現在の進行状況を保存して退出します。アイテムは失われません。,退出前会保存当前基地进度，物品不会丢失。,退出前會保存當前基地進度，物品不會丟失。,Перед выходом прогресс на базе будет сохранён. Предметы не пропадут.
 ui.pause.save_failed,저장하지 못했습니다. 게임을 떠나지 않았습니다. 다시 시도하거나 취소해 주세요.,Saving failed. You have not left the game. Please retry or cancel.,保存できませんでした。ゲームは終了していません。再試行するかキャンセルしてください。,保存失败。游戏尚未退出，请重试或取消。,保存失敗。遊戲尚未退出，請重試或取消。,Не удалось сохранить игру. Вы всё ещё в игре. Повторите попытку или отмените выход.
 ui.debuff.overweight,중량 과다,Overweight,重量過多,超重,超重,Перегрузка
 ui.debuff.movement_blocked,이동불가,Movement Blocked,移動不可,无法移动,無法移動,Движение заблокировано
@@ -138,7 +138,7 @@ ui.settings.development.save_data_exists,현재 슬롯 {0}: 저장 데이터 있
 ui.settings.development.no_save_data,현재 슬롯 {0}: 저장 데이터 없음,Current Slot {0}: No save data,現在のスロット {0}: セーブデータなし,当前栏位 {0}：没有存档,當前欄位 {0}：沒有存檔,Текущая ячейка {0}: сохранения нет
 ui.settings.development.delete_current_save,현재 슬롯 세이브 데이터 즉시 삭제,Delete Current Slot Save Data Now,現在のスロットのセーブデータを即時削除,立即删除当前栏位存档,立即刪除當前欄位存檔,Удалить сохранение в текущей ячейке
 ui.toast.save_delete_failed,저장 데이터를 삭제하지 못했습니다.,Failed to delete save data.,セーブデータを削除できませんでした。,删除存档失败。,刪除存檔失敗。,Не удалось удалить сохранение.
-ui.hud.mode.inventory,인벤토리,Inventory,インベントリ,背包,揹包,Инвентарь
+ui.hud.mode.inventory,인벤토리,Inventory,インベントリ,背包,背包,Инвентарь
 ui.hud.mode.quest,퀘스트,Quests,クエスト,任务,任務,Задания
 ui.hud.mode.map,지도,Map,地図,地图,地圖,Карта
 ui.hud.mode.memo,메모,Memos,メモ,备忘录,備忘錄,Записки
@@ -148,36 +148,36 @@ ui.research.remaining_time,{0}:{1},{0}:{1},{0}:{1},{0}:{1},{0}:{1},{0}:{1}
 ui.research.action.locked,잠김,Locked,ロック中,未解锁,未解鎖,Заблокировано
 ui.research.action.start,연구 시작,Start Research,研究開始,开始研究,開始研究,Начать исследование
 ui.research.action.researching,연구 중,Researching,研究中,研究中,研究中,Исследование идёт
-ui.research.action.complete,완료,Complete,完了,完成,完成,Завершено
+ui.research.action.complete,완료,Complete,完了,完成,完成,Завершить
 ui.research.action.applied,적용됨,Applied,適用済み,已应用,已應用,Применено
 ui.research.status,적용 {0} / {1},Applied {0} / {1},適用 {0} / {1},已应用 {0} / {1},已應用 {0} / {1},Применено {0} / {1}
 ui.hud.quick_slot_guide,아이템을 슬롯으로 드래그하여 퀵슬롯을 설정하세요,Drag items into slots to set quick slots,アイテムをスロットへドラッグしてクイックスロットを設定,将物品拖入栏位即可设置快捷栏,將物品拖入欄位即可設置快捷欄,Перетащите предметы в ячейки быстрого доступа.
 ui.hud.reload_prompt,재장전,Reload,リロード,装填,裝填,Перезарядить
-ui.hud.ammo_unset,탄약 미지정,Ammo Not Set,弾薬未設定,未装备弹药,未裝備彈藥,Патроны не выбраны
+ui.hud.ammo_unset,탄약 미지정,Ammo Not Set,弾薬未設定,未指定弹药,未指定彈藥,Патроны не выбраны
 ui.hud.health_pattern,HP {0} / {1},HP {0} / {1},HP {0} / {1},生命值 {0} / {1},生命值 {0} / {1},Здоровье {0} / {1}
 ui.hud.food_pattern,배부름 {0},Fullness {0},満腹度 {0},饱腹度 {0},飽腹度 {0},Сытость {0}
-ui.hud.hydration_pattern,수분 {0},Hydration {0},水分 {0},饮水值 {0},飲水值 {0},Жажда {0}
-ui.inventory.weight_label,소지 중량,Carry Weight,所持重量,负重,負重,Вес снаряжения
+ui.hud.hydration_pattern,수분 {0},Hydration {0},水分 {0},水分 {0},水分 {0},Запас воды {0}
+ui.inventory.weight_label,소지 중량,Carry Weight,所持重量,负重,負重,Вес переносимых предметов
 ui.inventory.weight_pattern,{0}/{1}kg,{0}/{1}kg,{0}/{1}kg,{0}/{1} 千克,{0}/{1} 千克,{0}/{1} кг
-ui.inventory.title,인벤토리,Inventory,インベントリ,背包,揹包,Инвентарь
+ui.inventory.title,인벤토리,Inventory,インベントリ,背包,背包,Инвентарь
 ui.inventory.overweight,과중량,Overweight,重量超過,超重,超重,Перегрузка
 ui.inventory.sort,정리,Sort,整理,整理,整理,Сортировать
-ui.inventory.slot.gun1,총기 1,Weapon 1,武器 1,武器 1,武器 1,Оружие 1
-ui.inventory.slot.gun2,총기 2,Weapon 2,武器 2,武器 2,武器 2,Оружие 2
+ui.inventory.slot.gun1,총기 1,Firearm 1,銃器 1,枪械 1,槍械 1,Оружие 1
+ui.inventory.slot.gun2,총기 2,Firearm 2,銃器 2,枪械 2,槍械 2,Оружие 2
 ui.inventory.slot.melee,근접,Melee,近接,近战武器,近戰武器,Ближний бой
 ui.inventory.slot.head,머리,Head,頭,头部,頭部,Голова
 ui.inventory.slot.body,신체,Body,身体,身体,身體,Тело
 ui.inventory.slot.face,얼굴,Face,顔,面部,面部,Лицо
 ui.inventory.slot.ear,이어폰,Earphones,イヤホン,耳机,耳機,Наушники
-ui.inventory.slot.bag,가방,Bag,バッグ,背包,揹包,Рюкзак
+ui.inventory.slot.bag,가방,Bag,バッグ,背包,背包,Рюкзак
 ui.inventory.slot.generic,슬롯 {0},Slot {0},スロット {0},栏位 {0},欄位 {0},Ячейка {0}
 ui.item_info.attachment_magazine,탄창,Magazine,マガジン,弹匣,彈匣,Магазин
 ui.item_info.attachment_optic,광학,Optic,光学,瞄具,瞄具,Прицел
 ui.item_info.attachment_tactical,전술 장비,Tactical,戦術装備,战术配件,戰術配件,Тактический модуль
-ui.item_info.mod,Mod,Mod,MOD,模块,模塊,Модуль
+ui.item_info.mod,Mod,Mod,MOD,改装,改裝,Модуль
 ui.item_info.attachments,부착물,Attachments,アタッチメント,配件,配件,Модули
-ui.item_info.rifle_modding,소총 모딩: 대용량 탄창 / 광학 장비 / 전술 장비,Rifle Mods: Extended Magazine / Optic / Tactical,ライフル改造: 拡張マガジン / 光学装備 / 戦術装備,步枪配件：扩容弹匣／瞄具／战术配件,步槍配件：擴容彈匣／瞄具／戰術配件,Модули винтовки: увеличенный магазин / прицел / тактический модуль
-ui.item_info.weapon_modding,총기 모딩,Weapon Mods,銃器改造,武器模块,武器模塊,Модули оружия
+ui.item_info.rifle_modding,소총 모딩: 대용량 탄창 / 광학 장비 / 전술 장비,Rifle Mods: Extended Magazine / Optic / Tactical,ライフル改造: 拡張マガジン / 光学装備 / 戦術装備,步枪改装：扩容弹匣／瞄具／战术配件,步槍改裝：擴容彈匣／瞄具／戰術配件,Модули винтовки: увеличенный магазин / прицел / тактический модуль
+ui.item_info.weapon_modding,총기 모딩,Weapon Mods,銃器改造,枪械改装,槍械改裝,Модули оружия
 ui.item_hover.take,줍기/배치,Take/Place,拾う/配置,拾取／放置,拾取／放置,Взять / положить
 ui.item_hover.use,사용,Use,使用,使用,使用,Использовать
 ui.item_hover.drop,버리기,Drop,捨てる,丢弃,丟棄,Выбросить
@@ -189,8 +189,8 @@ ui.item_hover.weight_kg_pattern,{0} kg,{0} kg,{0} kg,{0} 千克,{0} 千克,{0} �
 ui.item_hover.price_pattern,{0},{0},{0},{0},{0},{0}
 ui.item_hover.buy,F로 구매,Buy with F,Fで購入,按 F 购买,按 F 購買,Купить: F
 ui.item_hover.craft,제조,Craft,製造,制作,製作,Создать
-ui.item_hover.sort_lock,정렬 잠금,Lock Sort,整理ロック,锁定排序,鎖定排序,Заблокировать сортировку
-ui.item_hover.sort_unlock,정렬 잠금 해제,Unlock Sort,整理ロック解除,解除排序锁定,解除排序鎖定,Разрешить сортировку
+ui.item_hover.sort_lock,정렬 잠금,Lock Item Position,整理ロック,锁定排序,鎖定排序,Заблокировать сортировку
+ui.item_hover.sort_unlock,정렬 잠금 해제,Unlock Item Position,整理ロック解除,解除排序锁定,解除排序鎖定,Разрешить сортировку
 ui.shop.title,상점,Shop,ショップ,商店,商店,Магазин
 ui.shop.debug_refresh_stock,갱신,Refresh,更新,刷新,刷新,Обновить
 ui.shop.sell_button,F키 판매,Sell with F,Fキーで売却,按 F 出售,按 F 出售,Продать: F
@@ -208,24 +208,24 @@ ui.storage.filter.blueprint,설계도,Blueprint,設計図,蓝图,藍圖,Черт
 ui.storage.filter.other,기타,Other,その他,其他,其他,Прочее
 ui.workbench.craft,제조,Craft,製造,制作,製作,Создать
 ui.workbench.dismantle,분해,Dismantle,分解,拆解,拆解,Разобрать
-ui.workbench.blueprint_register,설계도 등록,Blueprint Register,設計図登録,登记蓝图,登記藍圖,Зарегистрировать чертёж
-ui.workbench.no_ingredients,필요 재료 없음,No materials,必要素材なし,没有材料,沒有材料,Нет материалов
-ui.workbench.no_dismantle_results,분해 결과 없음,No dismantle results,分解結果なし,没有可拆解的物品,沒有可拆解的物品,Нет предметов для разборки
+ui.workbench.blueprint_register,설계도 등록,Register Blueprint,設計図登録,登记蓝图,登記藍圖,Зарегистрировать чертёж
+ui.workbench.no_ingredients,필요 재료 없음,No materials required,必要素材なし,无需材料,無需材料,Материалы не нужны
+ui.workbench.no_dismantle_results,분해 결과 없음,No dismantle results,分解結果なし,无拆解产物,無拆解產物,Разборка ничего не даст
 ui.workbench.blueprint_already_known,이미 등록됨,Already registered,登録済み,已登记,已登記,Уже зарегистрировано
 ui.workbench.dismantle_target,분해할 아이템,Dismantle Item,分解するアイテム,拆解物品,拆解物品,Разобрать предмет
 ui.workbench.blueprint_target,등록할 설계도,Blueprint to Register,登録する設計図,待登记蓝图,待登記藍圖,Чертёж для регистрации
-ui.shop.sell_price_pattern,판매가 {0},Sell {0},売却 {0},出售 {0},出售 {0},Продать за {0}
+ui.shop.sell_price_pattern,판매가 {0},Sell Price {0},売却価格 {0},售价 {0},售價 {0},Продать за {0}
 ui.split.title,수량 나누기,Split Quantity,数量分割,拆分数量,拆分數量,Разделить количество
 ui.split.guide,나눌 수량을 입력하세요 (1-{0}),Enter split quantity (1-{0}),分割する数量を入力 (1-{0}),输入拆分数量（1～{0}）,輸入拆分數量（1～{0}）,Введите количество для разделения (1–{0})
 ui.memo.title,메모,Memo,メモ,备忘录,備忘錄,Записка
 ui.memo.list_title,메모 목록,Memo List,メモ一覧,备忘录列表,備忘錄列表,Список записок
-ui.memo.none,획득한 메모가 없습니다.,No acquired memos.,取得したメモがありません。,还没有获得备忘录。,還沒有獲得備忘錄。,Записок пока нет.
+ui.memo.none,획득한 메모가 없습니다.,No memos collected.,取得したメモがありません。,还没有获得备忘录。,還沒有獲得備忘錄。,Записок пока нет.
 ui.dialogue.continue,계속,Continue,続行,继续,繼續,Продолжить
 ui.scenario.title,재기동 기록,Reboot Log,再起動記録,重启日志,重啓日誌,Журнал перезагрузки
-ui.scenario.status,B-07 벙커 / 비상 기상,B-07 Bunker / Emergency Wake,B-07 バンカー / 緊急起床,B-07 地堡／紧急唤醒,B-07 地堡／緊急喚醒,Бункер B-07 / аварийное пробуждение
+ui.scenario.status,B-07 기지 / 비상 기상,B-07 Base / Emergency Awakening,B-07 基地 / 緊急覚醒,B-07 基地／紧急唤醒,B-07 基地／緊急喚醒,База B-07 / аварийное пробуждение
 ui.scenario.prompt,클릭해서 계속,Click to Continue,クリックして続行,点击继续,點擊繼續,"Нажмите, чтобы продолжить"
 ui.scenario.monologue1,기억 데이터 손상.,Memory data damaged.,記憶データ損傷。,记忆数据损坏。,記憶數據損壞。,Данные памяти повреждены.
-ui.scenario.monologue2,위치 확인... B-07 벙커.,Location confirmed... B-07 bunker.,位置確認... B-07 バンカー。,位置已确认……B-07 地堡。,位置已確認……B-07 地堡。,Местоположение подтверждено... бункер B-07.
+ui.scenario.monologue2,위치 확인... B-07 기지.,Location confirmed... B-07 base.,位置確認... B-07 基地。,位置已确认……B-07 基地。,位置已確認……B-07 基地。,Местоположение подтверждено... база B-07.
 ui.scenario.monologue3,생존 기능 재시동.,Survival functions rebooted.,生存機能再起動。,生存系统已重启。,生存系統已重啓。,Системы жизнеобеспечения перезапущены.
 ui.scenario.monologue4,전력 부족. 내부 시스템 불안정.,Power shortage. Internal systems unstable.,電力不足。内部システム不安定。,电力不足。内部系统不稳定。,電力不足。內部系統不穩定。,Нехватка энергии. Внутренние системы нестабильны.
 ui.scenario.monologue5,그래도 움직일 수 있다.,Still able to move.,それでも動ける。,还能移动。,還能移動。,Двигаться всё ещё могу.
@@ -254,38 +254,38 @@ ui.interaction.workbench_open,작업대,Workbench,作業台,工作台,工作臺,
 ui.interaction.workbench_craft,제조,Craft,製造,制作,製作,Создать
 ui.interaction.workbench_dismantle,분해,Dismantle,分解,拆解,拆解,Разобрать
 ui.interaction.workbench_blueprint_register,설계도 등록,Register Blueprint,設計図登録,登记蓝图,登記藍圖,Зарегистрировать чертёж
-ui.transition.returning_to_bunker,벙커로 복귀 중,Returning to Bunker,バンカーへ帰還中,正在返回地堡,正在返回地堡,Возвращение в бункер
+ui.transition.returning_to_bunker,기지로 복귀 중,Returning to Base,基地へ帰還中,正在返回基地,正在返回基地,Возвращение на базу
 ui.raid_experience.header,레이드 경험치,Raid Experience,レイド経験値,突袭经验,突襲經驗,Опыт рейда
 ui.raid_experience.level_pattern,레벨 {0},Level {0},レベル {0},等级 {0},等級 {0},Уровень {0}
 ui.raid_experience.max_level,최대 레벨,Max Level,最大レベル,最高等级,最高等級,Максимальный уровень
 ui.raid_experience.exp_pattern,{0} / {1} EXP,{0} / {1} EXP,{0} / {1} EXP,{0} / {1} 经验值,{0} / {1} 經驗值,{0} / {1} опыта
 ui.raid_experience.gain_pattern,+{0} EXP,+{0} EXP,+{0} EXP,+{0} 经验值,+{0} 經驗值,+{0} опыта
 ui.raid_experience.calculating,레이드 보상 계산 중...,Calculating raid rewards...,レイド報酬を計算中...,正在结算突袭奖励……,正在結算突襲獎勵……,Подсчёт наград за рейд...
-ui.raid_experience.return_ready,아무 키나 누르거나 클릭해 벙커로 복귀,Press any key or click to return to bunker,任意のキーまたはクリックでバンカーへ帰還,按任意键或点击鼠标返回地堡,按任意鍵或點擊鼠標返回地堡,"Нажмите любую клавишу или кнопку мыши, чтобы вернуться в бункер."
-ui.raid_experience.loading_bunker,벙커 로딩 중...,Loading bunker...,バンカーをロード中...,正在加载地堡……,正在加載地堡……,Загрузка бункера...
-ui.housing.title,벙커 하우징,Bunker Housing,バンカーハウジング,地堡设施,地堡設施,Обустройство бункера
+ui.raid_experience.return_ready,아무 키나 누르거나 클릭해 기지로 복귀,Press any key or click to return to base,任意のキーまたはクリックで基地へ帰還,按任意键或点击鼠标返回基地,按任意鍵或點擊鼠標返回基地,"Нажмите любую клавишу или кнопку мыши, чтобы вернуться на базу."
+ui.raid_experience.loading_bunker,기지 로딩 중...,Loading base...,基地をロード中...,正在加载基地……,正在加載基地……,Загрузка базы...
+ui.housing.title,기지 하우징,Base Housing,基地ハウジング,基地设施,基地設施,Обустройство базы
 ui.housing.guide.place,Q/E 회전. 바닥을 클릭해 배치,Q/E rotate. Click floor to place.,Q/Eで回転。床をクリックして配置,用 Q/E 旋转。点击地面放置。,用 Q/E 旋轉。點擊地面放置。,"Поворачивайте клавишами Q/E. Щёлкните по полу, чтобы разместить."
-ui.housing.guide.select,보관 중이거나 건설 가능한 시설을 클릭하세요. 배치된 항목은 길게 눌러 보관합니다.,Click stored or ready facilities. Hold placed entries to store.,保管中または建設可能な施設をクリック。配置済み項目は長押しで保管,点击已存放或可建造的设施。长按已放置设施可将其收起。,點擊已存放或可建造的設施。長按已放置設施可將其收起。,"Выберите объект на хранении или готовый к постройке. Удерживайте размещённый объект, чтобы убрать его."
+ui.housing.guide.select,보관 중이거나 건설 가능한 시설을 클릭하세요. 배치된 항목은 길게 눌러 보관합니다.,Click a stored facility or one ready to build. Hold a placed facility to store it.,保管中または建設可能な施設をクリック。配置済み項目は長押しで保管,点击已存放或可建造的设施。长按已放置设施可将其收起。,點擊已存放或可建造的設施。長按已放置設施可將其收起。,"Выберите объект на хранении или готовый к постройке. Удерживайте размещённый объект, чтобы убрать его."
 ui.housing.no_materials,필요 재료 없음,No materials required,必要素材なし,无需材料,無需材料,Материалы не нужны
 ui.housing.ready_to_build,건설 가능,Ready to build,建設可能,可以建造,可以建造,Готово к постройке
 ui.housing.stored,보관 중,Stored,保管中,已存放,已存放,На хранении
 ui.housing.placed_hold_to_store,배치됨 - 길게 눌러 보관,Placed - hold to store,配置済み - 長押しで保管,已放置，长按收起,已放置，長按收起,"Размещено — удерживайте, чтобы убрать"
-ui.housing.need_materials,재료 부족,Need materials,素材不足,需要材料,需要材料,Нужны материалы
+ui.housing.need_materials,재료 부족,Need materials,素材不足,材料不足,材料不足,Нужны материалы
 ui.housing.facility.workbench,작업대,Workbench,作業台,工作台,工作臺,Верстак
 ui.housing.facility.workbench.desc,제작과 수리에 사용할 수 있는 작업대,A functional work surface for crafting and repairs,制作と修理に使える作業台,用于制作物品和修理的工作台。,用於製作物品和修理的工作臺。,Рабочая поверхность для создания предметов и ремонта.
 ui.housing.facility.piggy_bank,돼지저금통,Piggy Bank,豚の貯金箱,储蓄罐,儲蓄罐,Копилка
-ui.housing.facility.piggy_bank.desc,옛 문명의 동전과 지폐를 저금하는 돼지저금통,A piggy bank for storing ancient coins and banknotes,古代文明の硬貨と紙幣を預ける豚の貯金箱,可存放古代硬币和纸币的储蓄罐。,可存放古代硬幣和紙幣的儲蓄罐。,Копилка для хранения древних монет и банкнот.
-ui.housing.facility.signal_control,통신 관제 시설,Signal Control Facility,通信管制施設,信号控制设施,信號控制設施,Центр связи
-ui.housing.facility.signal_control.desc,맵과 워프포인트 관리를 위한 벙커 통신 콘솔,A bunker console for maps and warp point management,マップとワープポイント管理用のバンカー通信コンソール,用于地图和传送点管理的地堡控制台。,用於地圖和傳送點管理的地堡控制檯。,Консоль бункера для работы с картой и точками телепортации.
+ui.housing.facility.piggy_bank.desc,옛 문명의 동전과 지폐를 저금하는 돼지저금통,A piggy bank for storing ancient coins and banknotes,古代文明の硬貨と紙幣を預ける豚の貯金箱,可存放古文明硬币和纸币的猪形储蓄罐。,可存放古文明硬幣和紙幣的豬形儲蓄罐。,Копилка для хранения древних монет и банкнот.
+ui.housing.facility.signal_control,통신 관제 시설,Signal Control Facility,通信管制施設,通信控制设施,通信控制設施,Центр связи
+ui.housing.facility.signal_control.desc,맵과 워프포인트 관리를 위한 기지 통신 콘솔,A base console for maps and warp point management,マップとワープポイント管理用の基地通信コンソール,用于地图和传送点管理的基地通信控制台。,用於地圖和傳送點管理的基地通信控制台。,Консоль базы для работы с картой и точками телепортации.
 ui.housing.facility.supply,보급 시설,Supply Facility,補給施設,补给设施,補給設施,Пункт снабжения
-ui.housing.facility.supply.desc,식량과 소모품 보급을 관리하는 벙커 보급소,A bunker station for food and consumable supplies,食料と消耗品補給を管理するバンカー補給所,储存食品和消耗品的地堡设施。,儲存食品和消耗品的地堡設施。,Пункт бункера с пищевыми продуктами и расходниками.
+ui.housing.facility.supply.desc,식량과 소모품 보급을 관리하는 기지 보급소,A base station for food and consumable supplies,食料と消耗品補給を管理する基地補給所,管理食物和消耗品补给的基地补给站。,管理食物和消耗品補給的基地補給站。,"Пункт снабжения базы, управляющий запасами еды и расходников."
 ui.interaction.boom,Boom!,Boom!,Boom!,轰！,轟！,Бум!
-ui.notification.rescue_cart,구급 카트 후송 중,Rescue cart returning,救急カート搬送中,救护车正在返回,救護車正在返回,Спасательная тележка возвращается
+ui.notification.rescue_cart,구급 카트 후송 중,Evacuating by rescue cart,救急カート搬送中,急救推车转运中,急救推車轉運中,Эвакуация на спасательной тележке
 ui.interaction.mole_dialogue,대화,Dialogue,会話,对话,對話,Диалог
 ui.quest.interaction_name,퀘스트,Quest,クエスト,任务,任務,Задание
 ui.map_overlay.start_location,시작 위치,Start Position,開始位置,起点,起點,Стартовая позиция
-ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点,撤离点,撤離點,Точка эвакуации
-ui.map_marker.help,우클릭: 마커 추가 / 기존 마커 우클릭: 삭제,Right-click: Add marker / Right-click existing marker: Delete,右クリック: マーカーを追加 / 既存マーカーを右クリック: 削除,右键点击：添加标记／右键点击已有标记：删除,右鍵點擊：添加標記／右鍵點擊已有標記：刪除,Правая кнопка мыши: добавить метку / нажать на существующую метку: удалить
+ui.map_overlay.extraction_point,추출 포인트,Extraction Point,脱出地点,撤离点,撤離點,Точка эвакуации
+ui.map_marker.help,우클릭: 마커 추가 / 기존 마커 우클릭: 삭제,Right-click: Add marker / Right-click existing marker: Delete,右クリック: マーカーを追加 / 既存マーカーを右クリック: 削除,右键点击：添加标记／右键点击已有标记：删除,右鍵點擊：添加標記／右鍵點擊已有標記：刪除,Правая кнопка мыши: добавить метку / правая кнопка мыши по существующей метке: удалить
 ui.enemy.status.reload,재장전,Reloading,リロード,装填中,裝填中,Перезарядка
 ui.common.confirm,확인,Confirm,確認,确认,確認,Подтвердить
 ui.title.demo_label,데모,Demo,デモ,试玩版,試玩版,Демоверсия
@@ -295,7 +295,7 @@ ui.toast.load_failed,저장 데이터를 불러오지 못했습니다.,Failed to
 ui.toast.save_failed,저장 데이터를 만들지 못했습니다.,Failed to create save data.,セーブデータを作成できませんでした。,创建存档失败。,創建存檔失敗。,Не удалось создать сохранение.
 ui.interaction.clear_debris,이물질 제거,Clear Debris,異物を除去,清除杂物,清除雜物,Убрать мусор
 ui.interaction.take_crowbar,쇠지렛대 획득,Take Crowbar,バールを取る,拾取撬棍,拾取撬棍,Взять лом
-ui.interaction.take_tuna_can,참치캔 획득,Take Tuna Can,ツナ缶を入手,拾取金枪鱼罐头,拾取金槍魚罐頭,Взять банку тунца
+ui.interaction.take_tuna_can,참치캔 획득,Take Tuna Can,ツナ缶を入手,拾取金枪鱼罐头,拾取鮪魚罐頭,Взять банку тунца
 ui.demo_ending.farewell_title,본편에서 만나요,See you in the full game,本編でまた会いましょう,完整版再见,完整版再見,До встречи в полной игре
 ui.demo_ending.return_to_title,아무 키나 누르면 타이틀로 돌아갑니다,Press any key to return to the title,任意のキーを押すとタイトルに戻ります,按任意键返回标题画面,按任意鍵返回標題畫面,"Нажмите любую клавишу, чтобы вернуться на главный экран."
 ui.common.apply,적용,Apply,適用,应用,應用,Применить
@@ -305,7 +305,7 @@ ui.settings.preset.auto,자동,Auto,自動,自动,自動,Авто
 ui.settings.preset.low,낮음,Low,低,低,低,Низкое
 ui.settings.preset.medium,중간,Medium,中,中,中,Среднее
 ui.settings.preset.high,높음,High,高,高,高,Высокое
-ui.settings.preset.epic,최고,Epic,最高,极高,極高,Эпическое
+ui.settings.preset.epic,최고,Epic,最高,极高,極高,Максимальное
 ui.settings.preset.custom,사용자 지정,Custom,カスタム,自定义,自定義,Пользовательское
 ui.settings.texture,텍스처,Texture,テクスチャ,纹理,紋理,Текстуры
 ui.settings.shadow,그림자,Shadow,シャドウ,阴影,陰影,Тени
@@ -324,22 +324,22 @@ ui.settings.dynamic_resolution,동적 해상도,Dynamic Resolution,動的解像�
 ui.settings.hardware_ray_tracing,하드웨어 레이 트레이싱,Hardware Ray Tracing,ハードウェアレイトレーシング,硬件光线追踪,硬件光線追蹤,Аппаратная трассировка лучей
 ui.settings.fps_unlimited,제한 없음,Unlimited,無制限,无限制,無限制,Без ограничений
 ui.settings.resolution_confirm_countdown,이 화면 설정을 유지할까요? {0}초 후 복구됩니다.,Keep these display settings? Reverting in {0} seconds.,この画面設定を維持しますか？ {0}秒後に元に戻します。,保留这些显示设置吗？{0} 秒后将恢复原设置。,保留這些顯示設置嗎？{0} 秒後將恢復原設置。,Сохранить настройки экрана? Возврат к прежним через {0} сек.
-research.node.vitality_1.name,기초 체력 연구,Basic Vitality,基礎体力研究,基础生命力,基礎生命力,Основы выживания
+research.node.vitality_1.name,기초 체력 연구,Basic Vitality,基礎体力研究,基础生命力,基礎生命力,Базовая физическая подготовка
 research.node.vitality_1.description,최대 체력이 5 증가합니다.,Maximum health +5.,最大体力が5増加します。,生命值上限 +5。,生命值上限 +5。,Максимум здоровья +5.
-research.node.nutrition_1.name,영양 저장 I,Nutrition Storage I,栄養貯蔵 I,食物储备 I,食物儲備 I,Запас пищи I
-research.node.nutrition_1.description,최대 포만감이 5 증가합니다.,Maximum food +5.,最大満腹度が5増加します。,饱腹度上限 +5。,飽腹度上限 +5。,Максимум сытости +5.
-research.node.hydration_1.name,수분 저장 I,Hydration Storage I,水分貯蔵 I,饮水储备 I,飲水儲備 I,Запас воды I
-research.node.hydration_1.description,최대 수분이 5 증가합니다.,Maximum hydration +5.,最大水分が5増加します。,饮水值上限 +5。,飲水值上限 +5。,Максимум запаса воды +5.
+research.node.nutrition_1.name,영양 저장 I,Nutrition Storage I,栄養貯蔵 I,营养储备 I,營養儲備 I,Запас пищи I
+research.node.nutrition_1.description,최대 포만감이 5 증가합니다.,Maximum fullness +5.,最大満腹度が5増加します。,饱腹度上限 +5。,飽腹度上限 +5。,Максимум сытости +5.
+research.node.hydration_1.name,수분 저장 I,Hydration Storage I,水分貯蔵 I,水分储备 I,水分儲備 I,Запас воды I
+research.node.hydration_1.description,최대 수분이 5 증가합니다.,Maximum hydration +5.,最大水分が5増加します。,水分上限 +5。,水分上限 +5。,Максимум запаса воды +5.
 research.node.vitality_2.name,체력 강화 I,Vitality Boost I,体力強化 I,生命力强化 I,生命力強化 I,Укрепление здоровья I
 research.node.vitality_2.description,최대 체력이 10 증가합니다.,Maximum health +10.,最大体力が10増加します。,生命值上限 +10。,生命值上限 +10。,Максимум здоровья +10.
 research.node.stamina_1.name,지구력 I,Endurance I,持久力 I,耐力 I,耐力 I,Выносливость I
 research.node.stamina_1.description,최대 스태미나가 5 증가합니다.,Maximum stamina +5.,最大スタミナが5増加します。,耐力上限 +5。,耐力上限 +5。,Максимум выносливости +5.
 research.node.carry_1.name,운반 기술 I,Carrying Technique I,運搬技術 I,负重技巧 I,負重技巧 I,Переноска грузов I
 research.node.carry_1.description,운반 힘이 1 증가합니다.,Carry strength +1.,運搬力が1増加します。,负重能力 +1。,負重能力 +1。,Грузоподъёмность +1.
-research.node.nutrition_2.name,영양 저장 II,Nutrition Storage II,栄養貯蔵 II,食物储备 II,食物儲備 II,Запас пищи II
-research.node.nutrition_2.description,최대 포만감이 10 증가합니다.,Maximum food +10.,最大満腹度が10増加します。,饱腹度上限 +10。,飽腹度上限 +10。,Максимум сытости +10.
-research.node.hydration_2.name,수분 저장 II,Hydration Storage II,水分貯蔵 II,饮水储备 II,飲水儲備 II,Запас воды II
-research.node.hydration_2.description,최대 수분이 10 증가합니다.,Maximum hydration +10.,最大水分が10増加します。,饮水值上限 +10。,飲水值上限 +10。,Максимум запаса воды +10.
+research.node.nutrition_2.name,영양 저장 II,Nutrition Storage II,栄養貯蔵 II,营养储备 II,營養儲備 II,Запас пищи II
+research.node.nutrition_2.description,최대 포만감이 10 증가합니다.,Maximum fullness +10.,最大満腹度が10増加します。,饱腹度上限 +10。,飽腹度上限 +10。,Максимум сытости +10.
+research.node.hydration_2.name,수분 저장 II,Hydration Storage II,水分貯蔵 II,水分储备 II,水分儲備 II,Запас воды II
+research.node.hydration_2.description,최대 수분이 10 증가합니다.,Maximum hydration +10.,最大水分が10増加します。,水分上限 +10。,水分上限 +10。,Максимум запаса воды +10.
 research.node.vitality_3.name,체력 강화 II,Vitality Boost II,体力強化 II,生命力强化 II,生命力強化 II,Укрепление здоровья II
 research.node.vitality_3.description,최대 체력이 15 증가합니다.,Maximum health +15.,最大体力が15増加します。,生命值上限 +15。,生命值上限 +15。,Максимум здоровья +15.
 research.node.stamina_2.name,지구력 II,Endurance II,持久力 II,耐力 II,耐力 II,Выносливость II
@@ -347,23 +347,23 @@ research.node.stamina_2.description,최대 스태미나가 10 증가합니다.,M
 research.node.carry_2.name,운반 기술 II,Carrying Technique II,運搬技術 II,负重技巧 II,負重技巧 II,Переноска грузов II
 research.node.carry_2.description,운반 힘이 2 증가합니다.,Carry strength +2.,運搬力が2増加します。,负重能力 +2。,負重能力 +2。,Грузоподъёмность +2.
 research.node.survival_mastery.name,생존 숙련,Survival Mastery,サバイバル熟練,生存精通,生存精通,Мастерство выживания
-research.node.survival_mastery.description,모든 생존 최대치가 10 증가합니다.,All survival maximums +10.,すべての生存最大値が10増加します。,所有生存属性上限 +10。,所有生存屬性上限 +10。,Все максимальные показатели выживания +10.
+research.node.survival_mastery.description,모든 생존 최대치가 10 증가합니다.,Maximum values of all survival stats +10.,すべての生存系ステータスの最大値が10増加します。,所有生存属性上限 +10。,所有生存屬性上限 +10。,Все максимальные показатели выживания +10.
 research.node.ultimate_conditioning.name,궁극의 신체 단련,Ultimate Conditioning,究極の身体鍛錬,极限训练,極限訓練,Предел возможностей
 research.node.ultimate_conditioning.description,"최대 체력과 스태미나가 20, 운반 힘이 2 증가합니다.","Maximum health and stamina +20, carry strength +2.",最大体力とスタミナが20、運搬力が2増加します。,生命值和耐力上限 +20，负重能力 +2。,生命值和耐力上限 +20，負重能力 +2。,"Максимум здоровья и выносливости +20, грузоподъёмность +2."
-research.node.weapon_burn_1.name,소총 발화 연구 I,Rifle Ignition I,ライフル発火研究 I,步枪燃烧强化 I,步槍燃燒強化 I,Усиление поджога винтовки I
-research.node.weapon_burn_1.description,소총의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last 1 second longer and gain 25% of base tick damage.,ライフルによる燃焼が1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪引燃效果延长 1 秒，每次灼烧伤害增加基础伤害的 25%。,步槍引燃效果延長 1 秒，每次灼燒傷害增加基礎傷害的 25%。,Поджог винтовки длится на 1 секунду дольше. Урон каждого тика увеличивается на 25% от базового.
-research.node.ammo_burn_1.name,소이탄 연소 연구 I,Incendiary Ammunition I,焼夷弾燃焼研究 I,燃烧弹药 I,燃燒彈藥 I,Зажигательные патроны I
-research.node.ammo_burn_1.description,소총 탄약의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last 1 second longer and gain 25% of base tick damage.,ライフル弾薬による燃焼が1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪弹药的引燃效果延长 1 秒，每次灼烧伤害增加基础伤害的 25%。,步槍彈藥的引燃效果延長 1 秒，每次灼燒傷害增加基礎傷害的 25%。,Поджог винтовочных патронов длится на 1 секунду дольше. Урон каждого тика увеличивается на 25% от базового.
-research.node.weapon_burn_2.name,소총 발화 연구 II,Rifle Ignition II,ライフル発火研究 II,步枪燃烧强化 II,步槍燃燒強化 II,Усиление поджога винтовки II
-research.node.weapon_burn_2.description,소총의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last another 1 second and gain another 25% of base tick damage.,ライフルによる燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪引燃效果再延长 1 秒，每次灼烧伤害再增加基础伤害的 25%。,步槍引燃效果再延長 1 秒，每次灼燒傷害再增加基礎傷害的 25%。,Поджог винтовки длится ещё на 1 секунду дольше. Урон каждого тика дополнительно увеличивается на 25% от базового.
-research.node.ammo_burn_2.name,소이탄 연소 연구 II,Incendiary Ammunition II,焼夷弾燃焼研究 II,燃烧弹药 II,燃燒彈藥 II,Зажигательные патроны II
-research.node.ammo_burn_2.description,소총 탄약의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last another 1 second and gain another 25% of base tick damage.,ライフル弾薬による燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪弹药的引燃效果再延长 1 秒，每次灼烧伤害再增加基础伤害的 25%。,步槍彈藥的引燃效果再延長 1 秒，每次灼燒傷害再增加基礎傷害的 25%。,Поджог винтовочных патронов длится ещё на 1 секунду дольше. Урон каждого тика дополнительно увеличивается на 25% от базового.
+research.node.weapon_burn_1.name,소총 발화 연구 I,Rifle Ignition I,ライフル発火研究 I,步枪燃烧强化 I,步槍燃燒強化 I,Исследование поджига винтовкой I
+research.node.weapon_burn_1.description,소총의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last 1 second longer and gain 25% of base tick damage.,ライフルによる燃焼が1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪引燃效果延长 1 秒，每次灼烧伤害增加基础伤害的 25%。,步槍引燃效果延長 1 秒，每次灼燒傷害增加基礎傷害的 25%。,Горение от попаданий из винтовки длится на 1 секунду дольше. Урон каждого тика увеличивается на 25% от базового.
+research.node.ammo_burn_1.name,소이탄 연소 연구 I,Incendiary Ammunition I,焼夷弾燃焼研究 I,燃烧弹药 I,燃燒彈藥 I,Исследование зажигательных патронов I
+research.node.ammo_burn_1.description,소총 탄약의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last 1 second longer and gain 25% of base tick damage.,ライフル弾薬による燃焼が1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪弹药的引燃效果延长 1 秒，每次灼烧伤害增加基础伤害的 25%。,步槍彈藥的引燃效果延長 1 秒，每次灼燒傷害增加基礎傷害的 25%。,Вызванное винтовочными патронами горение длится на 1 секунду дольше. Урон каждого тика увеличивается на 25% от базового.
+research.node.weapon_burn_2.name,소총 발화 연구 II,Rifle Ignition II,ライフル発火研究 II,步枪燃烧强化 II,步槍燃燒強化 II,Исследование поджига винтовкой II
+research.node.weapon_burn_2.description,소총의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last another 1 second and gain another 25% of base tick damage.,ライフルによる燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪引燃效果再延长 1 秒，每次灼烧伤害再增加基础伤害的 25%。,步槍引燃效果再延長 1 秒，每次灼燒傷害再增加基礎傷害的 25%。,Горение от попаданий из винтовки длится ещё на 1 секунду дольше. Урон каждого тика дополнительно увеличивается на 25% от базового.
+research.node.ammo_burn_2.name,소이탄 연소 연구 II,Incendiary Ammunition II,焼夷弾燃焼研究 II,燃烧弹药 II,燃燒彈藥 II,Исследование зажигательных патронов II
+research.node.ammo_burn_2.description,소총 탄약의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last another 1 second and gain another 25% of base tick damage.,ライフル弾薬による燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。,步枪弹药的引燃效果再延长 1 秒，每次灼烧伤害再增加基础伤害的 25%。,步槍彈藥的引燃效果再延長 1 秒，每次灼燒傷害再增加基礎傷害的 25%。,Вызванное винтовочными патронами горение длится ещё на 1 секунду дольше. Урон каждого тика дополнительно увеличивается на 25% от базового.
 ui.settings.preset,전체 품질 프리셋,Overall Quality Preset,全体品質プリセット,整体画质预设,整體畫質預設,Общий уровень качества
 ui.settings.frame_rate,프레임 제한,Frame Rate Limit,フレームレート上限,帧率上限,幀率上限,Ограничение частоты кадров
 ui.settings.individual_quality,개별 품질,Individual Quality,個別品質,详细画质设置,詳細畫質設置,Отдельные настройки качества
 ui.settings.performance_effects,성능 및 효과,Performance and Effects,性能と効果,性能与特效,性能與特效,Производительность и эффекты
 ui.settings.preset.auto_details,"{0} ({1}, VRAM {2} MB)","{0} ({1}, VRAM {2} MB)","{0} ({1}, VRAM {2} MB)",{0}（{1}，显存 {2} MB）,{0}（{1}，顯存 {2} MB）,"{0} ({1}, видеопамять {2} МБ)"
-ui.settings.pending_suffix," · 적용 대기"," · Apply pending"," · 適用待ち"," · 等待应用"," · 等待應用"," · Ожидает применения"
+ui.settings.pending_suffix," · 적용 대기"," · Pending application"," · 適用待ち"," · 等待应用"," · 等待應用"," · Ожидает применения"
 ui.settings.fps_value,{0} FPS,{0} FPS,{0} FPS,{0} FPS,{0} FPS,{0} FPS
 ui.settings.unavailable_suffix,{0} (사용 불가),{0} (Unavailable),{0} (使用不可),{0}（不可用）,{0}（不可用）,{0} (недоступно)
 ui.language.english,English,English,English,English,English,English
@@ -376,14 +376,14 @@ ui.settings.development,개발,Development,開発,开发选项,開發選項,На
 ui.settings.development.enemy_combat_debug,적 전투 디버그,Enemy Combat Debug,敵戦闘デバッグ,敌人战斗调试,敵人戰鬥調試,Отладка поведения врагов
 ui.settings.development.debug_display_language,디버그 표시 언어,Debug Display Language,デバッグ表示言語,调试显示语言,調試顯示語言,Язык отладочного интерфейса
 ui.settings.development.piggy_bank,돼지저금통,Piggy Bank,貯金箱,储蓄罐,儲蓄罐,Копилка
-ui.settings.development.always_slow_presentation,상시 슬로우 연출,Always Slow Presentation,常時スロー演出,始终使用慢速演出,始終使用慢速演出,Всегда показывать замедленную анимацию
+ui.settings.development.always_slow_presentation,상시 슬로우 연출,Always-On Slow Motion,常時スロー演出,持续慢动作效果,持續慢動作效果,Постоянный эффект замедления
 ui.difficulty.select_title,난이도 선택,Choose Difficulty,難易度選択,选择难度,選擇難度,Выберите сложность
 ui.difficulty.adjust_title,난이도 변경,Change Difficulty,難易度変更,更改难度,更改難度,Изменить сложность
 ui.difficulty.start,시작하기,Start,開始,开始,開始,Начать
 ui.settings.resolution_value,{0} × {1},{0} × {1},{0} × {1},{0} × {1},{0} × {1},{0} × {1}
-ui.combat_lab.status,전투 실험실 · 라운드 {0} · {1} · 남은 적 {2},Combat lab · Round {0} · {1} · {2} hostiles,戦闘ラボ · ラウンド {0} · {1} · 敵 {2},战斗实验室 · 第 {0} 轮 · {1} · 敌人 {2},戰鬥實驗室 · 第 {0} 輪 · {1} · 敵人 {2},Боевая лаборатория · Раунд {0} · {1} · врагов: {2}
-ui.combat_lab.metrics,{0}초 · 발사 탄환 {1} / 적 {2} · 받은 피해 {3},{0}s · Projectiles {1} / enemy {2} · Damage taken {3},{0}秒 · 発射弾 {1} / 敵 {2} · 被ダメージ {3},{0} 秒 · 弹丸 {1}／敌人 {2} · 受到伤害 {3},{0} 秒 · 彈丸 {1}／敵人 {2} · 受到傷害 {3},{0} с · Снарядов {1} / врагов {2} · Получено урона {3}
-ui.combat_lab.controls,F6 자동/수동 · Home 재시작 · F8 적 상태 · WASD 이동 · 마우스 사격,F6 Auto/manual · Home Restart · F8 Enemy state · WASD Move · Mouse Fire,F6 自動/手動 · Home 再開 · F8 敵状態 · WASD 移動 · マウス 射撃,F6 自动／手动 · Home 重启 · F8 敌人状态 · WASD 移动 · 鼠标开火,F6 自動／手動 · Home 重啓 · F8 敵人狀態 · WASD 移動 · 鼠標開火,F6 Авто/ручной · Home Перезапуск · F8 Состояние врага · WASD Движение · Мышь Огонь
+ui.combat_lab.status,전투 실험실 · 라운드 {0} · {1} · 남은 적 {2},Combat lab · Round {0} · {1} · {2} hostiles,戦闘ラボ · ラウンド {0} · {1} · 敵 {2},战斗实验室 · 第 {0} 轮 · {1} · 剩余敌人 {2},戰鬥實驗室 · 第 {0} 輪 · {1} · 剩餘敵人 {2},Боевая лаборатория · Раунд {0} · {1} · врагов: {2}
+ui.combat_lab.metrics,{0}초 · 발사 탄환 {1} / 적 {2} · 받은 피해 {3},{0}s · Shots fired — Player {1} / Enemy {2} · Damage taken {3},{0}秒 · 発射弾数 — プレイヤー {1} / 敵 {2} · 被ダメージ {3},{0} 秒 · 发射弹数：我方 {1}／敌方 {2} · 受到伤害 {3},{0} 秒 · 發射彈數：我方 {1}／敵方 {2} · 受到傷害 {3},{0} с · Выпущено снарядов: игрок {1} / враги {2} · Получено урона: {3}
+ui.combat_lab.controls,F6 자동/수동 · Home 재시작 · F8 적 상태 · WASD 이동 · 마우스 사격,F6 Auto/manual · Home Restart · F8 Enemy state · WASD Move · Mouse Fire,F6 自動/手動 · Home リスタート · F8 敵状態 · WASD 移動 · マウス 射撃,F6 自动／手动 · Home 重启 · F8 敌人状态 · WASD 移动 · 鼠标开火,F6 自動／手動 · Home 重啓 · F8 敵人狀態 · WASD 移動 · 鼠標開火,F6 Авто/ручной · Home Перезапуск · F8 Состояние врага · WASD Движение · Мышь Огонь
 ui.combat_lab.manual,수동 조작,Manual control,手動操作,手动控制,手動控制,Ручное управление
 ui.combat_lab.seek,탐색 중,Searching,探索中,搜索中,搜索中,Поиск
 ui.combat_lab.engage,교전 중,Engaging,交戦中,交战中,交戰中,В бою
@@ -391,7 +391,7 @@ ui.combat_lab.reload,재장전,Reloading,リロード中,装填中,裝填中,П�
 ui.combat_lab.dodge,회피,Dodging,回避中,闪避中,閃避中,Уклонение
 ui.combat_lab.ready,전투 준비,Preparing,戦闘準備,准备中,準備中,Подготовка
 ui.combat_lab.win,승리 · 다음 전투 준비,Victory · Preparing next round,勝利 · 次の戦闘準備,胜利 · 准备下一轮,勝利 · 準備下一輪,Победа · Подготовка к следующему раунду
-ui.combat_lab.loss,사망 · 다음 전투 준비,Defeat · Preparing next round,死亡 · 次の戦闘準備,失败 · 准备下一轮,失敗 · 準備下一輪,Поражение · Подготовка к следующему раунду
+ui.combat_lab.loss,사망 · 다음 전투 준비,Defeat · Preparing next round,死亡 · 次の戦闘準備,死亡 · 准备下一轮,死亡 · 準備下一輪,Поражение · Подготовка к следующему раунду
 ui.combat_lab.timeout,시간 초과 · 재시도,Time limit · Retrying,時間切れ · 再試行,时间耗尽 · 重新尝试,時間耗盡 · 重新嘗試,Время вышло · Повторная попытка
 ui.combat_lab.reset,전투 초기화,Resetting,戦闘リセット,重置中,重置中,Сброс
 ui.combat_lab.stopped,전투 종료,Stopped,戦闘終了,已停止,已停止,Остановлено
@@ -401,7 +401,7 @@ ui.tutorial.page.2,조작 안내  2 / 3,CONTROLS  2 / 3,操作ガイド  2 / 3,�
 ui.tutorial.page.3,조작 안내  3 / 3,CONTROLS  3 / 3,操作ガイド  3 / 3,操作说明 3 / 3,操作說明 3 / 3,УПРАВЛЕНИЕ 3 / 3
 ui.tutorial.basics.title,탐험의 첫걸음,Your first steps,探索の第一歩,迈出第一步,邁出第一步,Первые шаги
 ui.tutorial.combat.title,전투에서 살아남기,Survive the fight,戦いを生き抜く,在战斗中生存,在戰鬥中生存,Выжить в бою
-ui.tutorial.items.title,챙기고 준비하고 회복하기,Loot and recover,集めて備えて回復しよう,搜集与恢复,蒐集與恢復,Добыча и восстановление
+ui.tutorial.items.title,챙기고 준비하고 회복하기,"Loot, prepare, and recover",集めて備えて回復しよう,收集、准备与恢复,收集、準備與恢復,Добыча и восстановление
 ui.tutorial.move.title,이동,Move,移動,移动,移動,Движение
 ui.tutorial.move.body,<key>WASD</> 키로 주변을 탐색하세요.,Use <key>WASD</> to explore your surroundings.,<key>WASD</>キーで周囲を探索しましょう。,使用 <key>WASD</> 探索周围。,使用 <key>WASD</> 探索周圍。,"Используйте <key>WASD</>, чтобы осмотреться."
 ui.tutorial.interact.title,상호작용,Interact,インタラクト,互动,互動,Взаимодействовать
@@ -416,11 +416,11 @@ ui.tutorial.sprint.title,달리기,Sprint,ダッシュ,奔跑,奔跑,Бег
 ui.tutorial.sprint.body,<key>왼쪽 Shift</> 키를 누른 채 이동하면 달립니다.,Hold <key>Left Shift</> while moving to sprint.,<key>左Shift</>キーを押しながら移動すると走ります。,移动时按住 <key>左 Shift</> 奔跑。,移動時按住 <key>左 Shift</> 奔跑。,"Удерживайте <key>левый Shift</> при движении, чтобы бежать."
 ui.tutorial.loot.title,전리품 획득,Collect loot,物資を集める,收集物资,收集物資,Собрать добычу
 ui.tutorial.loot.body,<key>F</> 키로 상자를 열고 필요한 물품을 챙기세요.,Press <key>F</> to open containers and collect useful supplies.,<key>F</>キーで箱を開けて必要な物資を集めましょう。,按 <key>F</> 打开容器并收集物资。,按 <key>F</> 打開容器並收集物資。,"Нажмите <key>F</>, чтобы открыть контейнер и забрать припасы."
-ui.tutorial.inventory.title,인벤토리,Inventory,インベントリ,背包,揹包,Инвентарь
-ui.tutorial.inventory.body,<key>Tab</> 키로 가방을 열어 가진 물품을 확인하세요.,Press <key>Tab</> to open your inventory and check your supplies.,<key>Tab</>キーでバッグを開いて持ち物を確認しましょう。,按 <key>Tab</> 打开背包，查看物资。,按 <key>Tab</> 打開揹包，查看物資。,"Нажмите <key>Tab</>, чтобы открыть инвентарь и проверить припасы."
+ui.tutorial.inventory.title,인벤토리,Inventory,インベントリ,背包,背包,Инвентарь
+ui.tutorial.inventory.body,<key>Tab</> 키로 가방을 열어 가진 물품을 확인하세요.,Press <key>Tab</> to open your inventory and check your supplies.,<key>Tab</>キーでバッグを開いて持ち物を確認しましょう。,按 <key>Tab</> 打开背包，查看物资。,按 <key>Tab</> 打開背包，查看物資。,"Нажмите <key>Tab</>, чтобы открыть инвентарь и проверить припасы."
 ui.interaction.tutorial_review,조작법,Controls,操作方法,操作说明,操作說明,Управление
 ui.tutorial.heal.title,회복,Heal,回復,治疗,治療,Лечение
-ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 <key>U</> 키로 사용하세요.,Hover over a healing item in your inventory and press <key>U</> to use it.,バッグの回復アイテムにカーソルを合わせて<key>U</>キーで使いましょう。,将光标移到背包中的治疗物品上，按 <key>U</> 使用。,將光標移到揹包中的治療物品上，按 <key>U</> 使用。,"Наведите курсор на лечебный предмет в инвентаре и нажмите <key>U</>, чтобы использовать его."
+ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 <key>U</> 키로 사용하세요.,Hover over a healing item in your inventory and press <key>U</> to use it.,バッグの回復アイテムにカーソルを合わせて<key>U</>キーで使いましょう。,将光标移到背包中的治疗物品上，按 <key>U</> 使用。,將光標移到背包中的治療物品上，按 <key>U</> 使用。,"Наведите курсор на лечебный предмет в инвентаре и нажмите <key>U</>, чтобы использовать его."
 ui.coop.title,온라인 협동,Online Co-op,オンライン協力,在线合作,在線合作,Совместная игра
 ui.coop.description,2인 연결 테스트 로비입니다. 협동 진행 상황은 저장되지 않습니다.,Two-player connection test lobby. Co-op progress is not saved.,2人用接続テストロビーです。協力プレイの進行状況は保存されません。,双人连接测试大厅。合作游戏进度不会保存。,雙人連接測試大廳。合作遊戲進度不會保存。,Тестовое лобби для двух игроков. Прогресс совместной игры не сохраняется.
 ui.coop.host,방 만들기,Create Room,ルームを作成,创建房间,創建房間,Создать комнату
@@ -460,14 +460,14 @@ ui.coop.connect,온라인 연결,Connect Online,オンラインに接続,连接�
 ui.lab.title,연구실,Laboratory,研究室,实验室,實驗室,Лаборатория
 ui.lab.description,나만의 보스를 만들고 직접 도전하세요.,Build your own boss and take on the challenge.,自分だけのボスを作って挑戦しましょう。,创造自己的首领，迎接挑战。,創造自己的首領，迎接挑戰。,Создайте собственного босса и примите вызов.
 ui.lab.development,보스개발,Boss Development,ボス開発,首领开发,首領開發,Создание босса
-ui.lab.single,보스플레이(싱글),Boss Play (Single Player),ボスプレイ（シングル）,首领战（单人）,首領戰（單人）,Бой с боссом (один игрок)
-ui.lab.multiplayer,보스플레이(멀티),Boss Play (Multiplayer),ボスプレイ（マルチ）,首领战（多人）,首領戰（多人）,Бой с боссом (несколько игроков)
+ui.lab.single,보스플레이(싱글),Boss Battle (Single Player),ボスバトル（シングル）,首领战（单人）,首領戰（單人）,Бой с боссом (один игрок)
+ui.lab.multiplayer,보스플레이(멀티),Boss Battle (Multiplayer),ボスバトル（マルチ）,首领战（多人）,首領戰（多人）,Бой с боссом (несколько игроков)
 ui.lab.in_development,개발 중,In development,開発中,开发中,開發中,В разработке
 ui.boss_lab.module.core,코어,Core,コア,核心,核心,Ядро
 ui.boss_lab.module.frame,프레임,Frame,フレーム,框架,框架,Каркас
 ui.boss_lab.module.armor,장갑,Armor,装甲,装甲,裝甲,Броня
 ui.boss_lab.module.drive,구동부,Drive,駆動部,驱动装置,驅動裝置,Привод
-ui.boss_lab.module.cannon,기관포,Cannon,機関砲,加农炮,加農炮,Пушка
+ui.boss_lab.module.cannon,기관포,Cannon,機関砲,机关炮,機砲,Автопушка
 ui.boss_lab.module.missile,미사일,Missile,ミサイル,导弹,導彈,Ракета
 ui.boss_lab.module.laser,레이저,Laser,レーザー,激光,激光,Лазер
 ui.boss_lab.error.invalid_definition,잘못된 보스 설계도입니다.,Invalid boss design.,ボスの設計図が無効です。,首领设计无效。,首領設計無效。,Недопустимая конструкция босса.
@@ -482,7 +482,7 @@ ui.boss_lab.error.read,보스 파일을 읽을 수 없습니다.,Cannot read the
 ui.boss_lab.error.write,보스 파일을 저장할 수 없습니다.,Cannot save the boss file.,ボスファイルを保存できません。,无法保存首领文件。,無法保存首領文件。,Не удалось сохранить файл босса.
 ui.boss_lab.error.delete,보스 파일을 삭제할 수 없습니다.,Cannot delete the boss file.,ボスファイルを削除できません。,无法删除首领文件。,無法刪除首領文件。,Не удалось удалить файл босса.
 ui.boss_lab.development_title,보스개발,Boss Development,ボス開発,首领开发,首領開發,Создание босса
-ui.boss_lab.single_title,보스플레이(싱글),Boss Play (Single Player),ボスプレイ（シングル）,首领战（单人）,首領戰（單人）,Бой с боссом (один игрок)
+ui.boss_lab.single_title,보스플레이(싱글),Boss Battle (Single Player),ボスバトル（シングル）,首领战（单人）,首領戰（單人）,Бой с боссом (один игрок)
 ui.boss_lab.library,보스 보관함,Boss Library,ボスライブラリ,首领设计库,首領設計庫,Библиотека боссов
 ui.boss_lab.slot_format,{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1}
 ui.boss_lab.empty_slot,빈 슬롯,Empty slot,空きスロット,空栏位,空欄位,Пустая ячейка
@@ -503,7 +503,7 @@ ui.boss_lab.part_format,{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1},{
 ui.boss_lab.parent,연결할 부품,Parent part,接続先の部品,上级部件,上級部件,Родительская деталь
 ui.boss_lab.module,추가할 부품,New part,追加する部品,新部件,新部件,Новая деталь
 ui.boss_lab.socket,연결 방향,Connection direction,接続方向,连接方向,連接方向,Направление соединения
-ui.boss_lab.yaw,회전 (도),Rotation (degrees),回転（度）,旋转角度,旋轉角度,Угол поворота
+ui.boss_lab.yaw,회전 (도),Rotation (degrees),回転（度）,旋转（度）,旋轉（度）,Угол поворота (°)
 ui.boss_lab.add_part,부품 연결,Attach part,部品を接続,连接部件,連接部件,Прикрепить деталь
 ui.boss_lab.remove_branch,선택 부품과 하위 부품 제거,Remove part and its branch,選択部品と子部品を削除,移除部件及其分支,移除部件及其分支,Удалить деталь и её ответвление
 ui.boss_lab.tactics,전술,Tactics,戦術,战术,戰術,Тактика
@@ -531,7 +531,7 @@ ui.boss_lab.confirm_delete,이 슬롯의 보스 설계도를 삭제할까요?,De
 ui.boss_lab.confirm_remove_branch,선택한 부품과 연결된 하위 부품을 모두 제거할까요?,Remove this part and all attached child parts?,選択した部品とすべての子部品を削除しますか？,移除此部件及其所有子部件吗？,移除此部件及其所有子部件嗎？,Удалить эту деталь и все прикреплённые к ней дочерние детали?
 ui.boss_lab.confirm,확인,Confirm,確認,确认,確認,Подтвердить
 ui.boss_lab.cancel,취소,Cancel,キャンセル,取消,取消,Отмена
-ui.boss_lab.select_saved_slot,플레이할 보스가 저장된 슬롯을 선택하세요.,Select a saved boss to play.,プレイする保存済みのボスを選んでください。,选择已保存的首领，开始战斗。,選擇已保存的首領，開始戰鬥。,Выберите сохранённого босса для боя.
+ui.boss_lab.select_saved_slot,플레이할 보스가 저장된 슬롯을 선택하세요.,Select a slot containing the boss you want to fight.,戦うボスを保存したスロットを選んでください。,选择已保存的首领，开始战斗。,選擇已保存的首領，開始戰鬥。,Выберите сохранённого босса для боя.
 ui.boss_lab.no_free_slot,빈 보스 슬롯이 없습니다.,No empty boss slots.,空きボススロットがありません。,没有空的首领栏位。,沒有空的首領欄位。,Нет свободных ячеек для боссов.
 ui.boss_lab.core_cannot_remove,코어는 제거할 수 없습니다.,The core cannot be removed.,コアは削除できません。,无法移除核心。,無法移除核心。,Ядро нельзя удалить.
 ui.boss_lab.core_cannot_add,코어는 하나만 사용할 수 있습니다.,Only one core is allowed.,コアは1つだけ使用できます。,只能安装一个核心。,只能安裝一個核心。,Допускается только одно ядро.
@@ -543,12 +543,12 @@ ui.boss_lab.rotate_left,왼쪽 회전,Rotate left,左へ回転,向左旋转,向�
 ui.boss_lab.rotate_right,오른쪽 회전,Rotate right,右へ回転,向右旋转,向右旋轉,Повернуть вправо
 ui.boss_lab.battle.ready,보스를 조립하거나 저장된 보스를 선택하세요.,Assemble a boss or select a saved boss.,ボスを組み立てるか保存済みのボスを選んでください。,组装首领或选择已保存的首领。,組裝首領或選擇已保存的首領。,Соберите босса или выберите сохранённого.
 ui.boss_lab.battle.active,코어 {0} / {1} · 가동 부품 {2},Core {0} / {1} · Active parts {2},コア {0} / {1} · 稼働部品 {2},核心 {0} / {1} · 工作中的部件 {2},核心 {0} / {1} · 工作中的部件 {2},Ядро {0} / {1} · Активных деталей: {2}
-ui.boss_lab.battle.controls,WASD 이동 · 마우스 사격/조준 · Space 회피 · R 재장전 · Home / Esc 시험 종료,WASD move · Mouse fire/aim · Space dodge · R reload · Home / Esc end test,WASD 移動 · マウス 射撃/照準 · Space 回避 · R リロード · Home / Esc テスト終了,WASD 移动 · 鼠标开火／瞄准 · 空格闪避 · R 装填 · Home／Esc 结束测试,WASD 移動 · 鼠標開火／瞄準 · 空格閃避 · R 裝填 · Home／Esc 結束測試,WASD — движение · Мышь — стрельба/прицел · Пробел — уклонение · R — перезарядка · Home/Esc — завершить тест
-ui.boss_lab.battle.victory,코어 파괴 · 시험 성공,Core destroyed · Test complete,コア破壊 · テスト成功,核心已摧毁 · 测试完成,核心已摧毀 · 測試完成,Ядро уничтожено · Испытание завершено
+ui.boss_lab.battle.controls,WASD 이동 · 마우스 사격/조준 · Space 회피 · R 재장전 · Home / Esc 시험 종료,WASD move · Mouse fire/aim · Space dodge · R reload · Home / Esc end test,WASD 移動 · マウス 射撃/照準 · Space 回避 · R リロード · Home / Esc テスト終了,WASD 移动 · 鼠标开火／瞄准 · 空格闪避 · R 装填 · Home／Esc 结束测试,WASD 移動 · 鼠標開火／瞄準 · 空格閃避 · R 裝填 · Home／Esc 結束測試,WASD — движение · Мышь — стрельба/прицеливание · Пробел — уклонение · R — перезарядка · Home/Esc — завершить тест
+ui.boss_lab.battle.victory,코어 파괴 · 시험 성공,Core destroyed · Test successful,コア破壊 · テスト成功,核心已摧毁 · 测试成功,核心已摧毀 · 測試成功,Ядро уничтожено · Испытание пройдено
 ui.boss_lab.battle.defeat,시험 종료 · 다시 도전할 수 있습니다.,Test ended · You can try again.,テスト終了 · 再挑戦できます。,测试结束 · 可以再试一次。,測試結束 · 可以再試一次。,Испытание завершено · Можно попробовать снова.
 ui.boss_lab.battle.stopped,시험을 종료했습니다.,Test ended.,テストを終了しました。,测试已结束。,測試已結束。,Испытание завершено.
 ui.boss_lab.battle.spawn_failed,시험 전투를 준비할 수 없습니다.,Cannot prepare the test battle.,テスト戦闘を準備できません。,无法准备测试战斗。,無法準備測試戰鬥。,Не удалось подготовить испытательный бой.
-ui.boss_lab.battle.warning,공격 예고,Incoming attack,攻撃予告,攻击将至,攻擊將至,Входящая атака
+ui.boss_lab.battle.warning,공격 예고,Incoming attack,攻撃予告,攻击将至,攻擊將至,Предупреждение об атаке
 ui.boss_lab.unnamed,이름 없는 보스,Unnamed boss,名前のないボス,未命名首领,未命名首領,Безымянный босс
 ui.boss_lab.confirm_leave,저장하지 않고 타이틀로 돌아갈까요? 초안은 이번 실행 동안 유지됩니다.,Return to the title without saving? The draft stays available until you close the game.,保存せずにタイトルへ戻りますか？下書きはゲームを終了するまで保持されます。,不保存就返回标题画面吗？关闭游戏前仍可使用这份草稿。,不保存就返回標題畫面嗎？關閉遊戲前仍可使用這份草稿。,Вернуться на главный экран без сохранения? Черновик останется доступен до закрытия игры.
 ui.interaction.wardrobe_open,옷장 열기,Open Wardrobe,クローゼットを開く,打开衣柜,打開衣櫃,Открыть гардероб
@@ -561,7 +561,7 @@ ui.wardrobe.outfit.sportswear,운동복,Sportswear,スポーツウェア,运动�
 ui.wardrobe.outfit.bunny_pajamas,토끼 잠옷,Bunny Pajamas,うさぎのパジャマ,兔子睡衣,兔子睡衣,Пижама-кролик
 ui.wardrobe.outfit.adventurer,모험가 의상,Adventurer Outfit,冒険者の衣装,冒险者服,冒險者服,Костюм искателя приключений
 ui.wardrobe.outfit.raincoat,우의,Raincoat,レインコート,雨衣,雨衣,Дождевик
-ui.wardrobe.outfit.scifi_suit,SF 슈트,Sci-Fi Suit,SFスーツ,科幻服,科幻服,Фантастический костюм
+ui.wardrobe.outfit.scifi_suit,SF 슈트,Sci-Fi Suit,SFスーツ,科幻服,科幻服,Футуристический костюм
 ui.wardrobe.equip,착용,Wear,着用,穿上,穿上,Надеть
 ui.wardrobe.equipped,착용 중,Wearing,着用中,穿着中,穿着中,Надето
 ui.wardrobe.close,닫기,Close,閉じる,关闭,關閉,Закрыть
@@ -577,7 +577,7 @@ ui.interaction.debug_armory_open,무기고,Armory,武器庫,军械库,軍械庫,
 ui.debug_armory.title,무기고,Armory,武器庫,军械库,軍械庫,Арсенал
 ui.debug_armory.subtitle,필요한 장비와 수량을 선택해 무료로 지급받으세요.,Choose equipment and quantity to receive supplies for free.,装備と数量を選んで無料で受け取れます。,选择装备和数量即可免费领取。,選擇裝備和數量即可免費領取。,Выберите снаряжение и количество для бесплатного получения.
 ui.debug_armory.category,분류,Category,分類,分类,分類,Категория
-ui.debug_armory.weapons,무기 · 부착물,Weapons and attachments,武器・アタッチメント,武器与配件,武器與配件,Оружие и модификации
+ui.debug_armory.weapons,무기 · 부착물,Weapons and attachments,武器・アタッチメント,武器与配件,武器與配件,Оружие и модули
 ui.debug_armory.ammo,탄약,Ammunition,弾薬,弹药,彈藥,Боеприпасы
 ui.debug_armory.protection,보호 장비,Protective equipment,防具,防护装备,防護裝備,Защитное снаряжение
 ui.debug_armory.quantity,수량,Quantity,数量,数量,數量,Количество
@@ -605,18 +605,18 @@ ui.passage.part,{0} × {1},{0} × {1},{0} × {1},{0} × {1},{0} × {1},{0} × {1
 ui.passage.repair,수리: {0},Repair: {0},修理: {0},修理：{0},修理：{0},Ремонт: {0}
 ui.passage.separator," + "," + "," + "," + "," + "," + "
 ui.interaction.deliver_parcel,배달하기,Deliver,配達する,交付包裹,交付包裹,Доставить посылку
-ui.item_info.volatile_warning,기지로 가져갈 수 없습니다.,Cannot be brought back to base.,拠点には持ち帰れません。,无法带回基地。,無法帶回基地。,Нельзя принести на базу.
+ui.item_info.volatile_warning,기지로 가져갈 수 없습니다.,Cannot be brought back to base.,基地には持ち帰れません。,无法带回基地。,無法帶回基地。,Нельзя принести на базу.
 ui.interaction.use_facility,시설 이용,Use facility,施設を使う,使用设施,使用設施,Использовать объект
 ui.quest_cheat.title,퀘스트 치트,Quest Cheats,クエストチート,任务作弊,任務作弊,Читы заданий
-ui.quest_cheat.description,현재 선택된 세이브 슬롯의 퀘스트 진행을 편집합니다. 보상 아이템·돈은 지급하지 않습니다.,Edit quest progress in the selected save slot. No items or coins are granted.,選択中のセーブスロットの進行を編集します。アイテムや通貨は付与しません。,编辑当前存档槽的任务进度。不发放物品或货币。,編輯目前存檔欄位的任務進度。不發放物品或貨幣。,Изменение заданий выбранного сохранения без выдачи предметов и монет.
+ui.quest_cheat.description,현재 선택된 세이브 슬롯의 퀘스트 진행을 편집합니다. 보상 아이템·돈은 지급하지 않습니다.,Edit quest progress in the selected save slot. No items or coins are granted.,選択中のセーブスロットの進行を編集します。アイテムや通貨は付与しません。,编辑当前存档栏位的任务进度。不发放物品或货币。,編輯目前存檔欄位的任務進度。不發放物品或貨幣。,Изменение прогресса заданий выбранного сохранения без выдачи наградных предметов и монет.
 ui.quest_cheat.slot,현재 슬롯: {0} / {1},Current slot: {0} / {1},現在のスロット: {0} / {1},当前存档：{0} / {1},目前存檔：{0} / {1},Текущее сохранение: {0} / {1}
 ui.quest_cheat.id,퀘스트 ID,Quest ID,クエストID,任务 ID,任務 ID,ID задания
 ui.quest_cheat.locked,게임 실행 중에는 사용할 수 없습니다. 플레이를 종료하세요.,Unavailable while the game is running. End the play session.,ゲーム実行中は使用できません。プレイを終了してください。,游戏运行时无法使用。请先结束游戏。,遊戲執行時無法使用。請先結束遊戲。,Недоступно во время игры. Завершите игровой сеанс.
 ui.quest_cheat.complete,해당 퀘스트까지 완료,Complete through this quest,このクエストまで完了,完成至此任务,完成至此任務,Завершить вплоть до этого задания
 ui.quest_cheat.prerequisites,선행 퀘스트만 완료,Complete prerequisites only,前提クエストのみ完了,仅完成前置任务,僅完成前置任務,Завершить только предыдущие задания
-ui.quest_cheat.selection_invalid,현재 선택된 세이브 슬롯을 읽을 수 없습니다.,Unable to read the selected save slot.,選択中のセーブスロットを読み込めません。,无法读取所选存档槽。,無法讀取所選存檔欄位。,Не удалось прочитать выбранное сохранение.
-ui.quest_cheat.selection_changed,선택된 슬롯이 바뀌었습니다. 표시된 슬롯을 확인하고 다시 실행하세요.,The selected slot changed. Check the displayed slot and try again.,スロットが変更されました。表示を確認して再実行してください。,所选存档已更改。请确认显示的存档后重试。,所選存檔已變更。請確認顯示的存檔後重試。,Сохранение изменилось. Проверьте выбранный слот и повторите попытку.
-ui.quest_cheat.success,{0}개 퀘스트 완료 상태를 저장했습니다. 원본 세이브 백업도 보관했습니다.,Saved completion for {0} quests. A backup of the original save was kept.,{0}件の完了状態を保存しました。元のセーブもバックアップしました。,已保存 {0} 个任务的完成状态，并保留原存档备份。,已儲存 {0} 個任務的完成狀態，並保留原存檔備份。,Сохранено завершение заданий: {0}. Создана резервная копия.
+ui.quest_cheat.selection_invalid,현재 선택된 세이브 슬롯을 읽을 수 없습니다.,Unable to read the selected save slot.,選択中のセーブスロットを読み込めません。,无法读取所选存档栏位。,無法讀取所選存檔欄位。,Не удалось прочитать выбранное сохранение.
+ui.quest_cheat.selection_changed,선택된 슬롯이 바뀌었습니다. 표시된 슬롯을 확인하고 다시 실행하세요.,The selected slot changed. Check the displayed slot and try again.,スロットが変更されました。表示を確認して再実行してください。,所选存档已更改。请确认显示的存档后重试。,所選存檔已變更。請確認顯示的存檔後重試。,Выбран другой слот сохранения. Проверьте выбранный слот и повторите попытку.
+ui.quest_cheat.success,{0}개 퀘스트 완료 상태를 저장했습니다. 원본 세이브 백업도 보관했습니다.,Saved completion for {0} quests. A backup of the original save was kept.,{0}件の完了状態を保存しました。元のセーブもバックアップしました。,已保存 {0} 个任务的完成状态，并保留原存档备份。,已儲存 {0} 個任務的完成狀態，並保留原存檔備份。,Сохранён статус завершения заданий: {0}. Создана резервная копия исходного сохранения.
 ui.quest_cheat.error,변경하지 못했습니다. 오류 코드: {0},Changes could not be saved. Error code: {0},変更を保存できませんでした。エラーコード: {0},无法保存更改。错误代码：{0},無法儲存變更。錯誤代碼：{0},Не удалось сохранить изменения. Код ошибки: {0}
 ui.editor.open_level.raid_test,레이드 (Test),Raid (Test),レイド (Test),突袭 (Test),突襲 (Test),Рейд (Test)
 ui.editor.open_level.raid_forest,레이드 - 숲,Raid Forest,レイド - 森,突袭 - 森林,突襲 - 森林,Рейд — лес
@@ -635,7 +635,7 @@ ui.quest_reward_locker.quantity,수량: {0},Quantity: {0},数量：{0},数量：
 ui.quest_reward_locker.close,닫기,Close,閉じる,关闭,關閉,Закрыть
 ui.quest_reward_locker.no_space,가방 공간이 부족합니다. 물품은 수령함에 남아 있습니다.,Not enough bag space. The item remains in the terminal.,バッグの空きが足りません。物品は受取端末に残っています。,背包空间不足。物品仍在终端中。,背包空間不足。物品仍在終端中。,В сумке недостаточно места. Предмет остался в терминале.
 ui.quest_reward_locker.unnamed_item,아이템,Item,アイテム,物品,物品,Предмет
-ui.quest.submit,가져다 주기,Bring items,持っていく,带去,帶去,Принести
+ui.quest.submit,가져다 주기,Bring items,持っていく,交付,交付,Принести
 ui.lift.title,목적지 선택,Choose destination,行き先を選択,选择目的地,選擇目的地,Выберите пункт назначения
 ui.lift.choose,리프트 이용,Use lift,リフトを使う,使用升降机,使用升降機,Использовать подъёмник
 ui.lift.forest,숲,Forest,森,森林,森林,Лес
@@ -647,14 +647,14 @@ ui.quest_cheat.reset,대상 초기화 + 선행 완료,Reset target and complete 
 ui.quest_cheat.reset_help,선택한 퀘스트의 진행과 추적을 지우고 선행 체인을 완료합니다. 후속 퀘스트와 지급된 보상은 유지합니다.,Clear the selected quest progress and tracking and complete its prerequisites. Later quests and granted rewards remain unchanged.,選択したクエストの進行と追跡を消去し前提を完了します。後続クエストと受取済み報酬は維持します。,清除所选任务的进度和追踪并完成前置任务。保留后续任务和已发放奖励。,清除所選任務的進度和追蹤並完成前置任務。保留後續任務和已發放獎勵。,Удаляет прогресс и отслеживание задания и завершает предыдущие. Последующие задания и выданные награды сохраняются.
 ui.quest_cheat.reset_success,대상 퀘스트를 초기화하고 선행 퀘스트를 완료했습니다.,Target reset and prerequisites completed.,対象を初期化し前提クエストを完了しました。,已重置目标并完成前置任务。,已重設目標並完成前置任務。,Задание сброшено. Предыдущие задания завершены.
 ui.quest_cheat.refresh,목록 새로고침,Refresh list,一覧を更新,刷新列表,重新整理清單,Обновить список
-ui.quest_cheat.active_only,진행 중·수락 가능만 표시,Show active and available quests only,進行中・受注可能のみ表示,仅显示进行中和可接受的任务,僅顯示進行中和可接受的任務,Только текущие и доступные задания
+ui.quest_cheat.active_only,진행 중·수락 가능만 표시,Show active and available quests only,進行中・受注可能のみ表示,仅显示进行中和可接取的任务,僅顯示進行中和可接取的任務,Только текущие и доступные задания
 ui.quest_cheat.list_header,퀘스트 ID / 제목 / 현재 상태 — 선택하면 치트 대상에 적용됩니다.,Quest ID / Title / Current state — select a row to target it.,クエストID / タイトル / 現在の状態 — 選択すると操作対象になります。,任务ID / 标题 / 当前状态 — 选择一行设为目标。,任務ID / 標題 / 目前狀態 — 選取一列設為目標。,ID / Название / Состояние — выберите строку для изменения.
 ui.quest_cheat.row,{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2},{0} | {1} | {2}
 ui.quest_cheat.untitled,제목 없음,Untitled,タイトルなし,无标题,無標題,Без названия
-ui.quest_cheat.state.locked,수락 불가,Unavailable,受注不可,不可接受,無法接受,Недоступно
-ui.quest_cheat.state.available,수락 가능,Available,受注可能,可接受,可接受,Доступно
+ui.quest_cheat.state.locked,수락 불가,Unavailable,受注不可,无法接取,無法接取,Недоступно
+ui.quest_cheat.state.available,수락 가능,Available,受注可能,可接取,可接取,Доступно
 ui.quest_cheat.state.accepted,진행 중,In progress,進行中,进行中,進行中,В процессе
-ui.quest_cheat.state.reward,보상 대기,Reward pending,報酬待ち,待领取奖励,待領取獎勵,Ожидает награды
+ui.quest_cheat.state.reward,보상 대기,Reward Ready,報酬受取待ち,待领取奖励,待領取獎勵,Ожидает награды
 ui.quest_cheat.state.completed,보상 완료,Reward claimed,報酬受取済み,已领取奖励,已領取獎勵,Награда получена
 ui.quest_cheat.check,검사,Check,検査,检查,檢查,Проверить
 ui.quest_cheat.fix,수정,Fix,修正,修复,修復,Исправить
@@ -662,17 +662,17 @@ ui.quest_cheat.audit.clean,검사 완료: 선행 퀘스트 진행에 문제가 �
 ui.quest_cheat.audit.incomplete,{0} [{1}]: 선행 {2} [{3}]가 보상 완료되지 않았습니다. 현재 상태: {4}.,{0} [{1}]: prerequisite {2} [{3}] has not had its reward claimed. Current state: {4}.,{0} [{1}]：前提 {2} [{3}] の報酬が未受取です。現在：{4}。,{0} [{1}]：前置任务 {2} [{3}] 尚未领取奖励。当前状态：{4}。,{0} [{1}]：前置任務 {2} [{3}] 尚未領取獎勵。目前狀態：{4}。,{0} [{1}]: награда за предыдущее задание {2} [{3}] не получена. Состояние: {4}.
 ui.quest_cheat.audit.cycle,{0} [{1}] → {2} [{3}]: 선행 연결이 순환합니다. 정의를 수정해야 합니다.,{0} [{1}] → {2} [{3}]: prerequisite cycle. Correct the quest definitions.,{0} [{1}] → {2} [{3}]：前提が循環しています。定義を修正してください。,{0} [{1}] → {2} [{3}]：前置关系循环。请修改任务定义。,{0} [{1}] → {2} [{3}]：前置關係循環。請修改任務定義。,{0} [{1}] → {2} [{3}]: цикл зависимостей. Исправьте определения заданий.
 ui.quest_cheat.audit.missing,{0} [{1}]: 선행 ID {2}의 정의가 없습니다. 정의를 수정해야 합니다.,{0} [{1}]: prerequisite ID {2} has no definition. Correct the quest definitions.,{0} [{1}]：前提ID {2} の定義がありません。定義を修正してください。,{0} [{1}]：前置ID {2} 没有定义。请修改任务定义。,{0} [{1}]：前置ID {2} 沒有定義。請修改任務定義。,{0} [{1}]: определение предыдущего задания {2} отсутствует. Исправьте определения.
-ui.quest_cheat.audit.unknown,진행 기록이 있는 퀘스트 {0}의 정의가 없습니다. 자동 수정할 수 없습니다.,Quest {0} has saved progress but no definition. Automatic repair is unavailable.,進行記録のあるクエスト {0} の定義がありません。自動修正できません。,任务 {0} 有进度记录但没有定义。无法自动修复。,任務 {0} 有進度記錄但沒有定義。無法自動修復。,У задания {0} есть прогресс но нет определения. Автоисправление недоступно.
-ui.quest_cheat.audit.unaccepted,미수락,Not accepted,未受注,未接受,未接受,Не принято
-ui.quest_cheat.audit.blocked,자동 수정할 수 없는 문제가 있어 Fix를 사용할 수 없습니다.,Fix is unavailable because an issue cannot be repaired automatically.,自動修正できない問題があるため修正は使用できません。,存在无法自动修复的问题，无法使用修复。,存在無法自動修復的問題，無法使用修復。,Есть проблема которую нельзя исправить автоматически. Исправление недоступно.
-ui.quest_cheat.audit.stale,슬롯 또는 저장 내용이 변경됐습니다. 다시 검사하세요.,The slot or save has changed. Run Check again.,スロットまたは保存内容が変更されました。再検査してください。,存档槽或内容已改变。请重新检查。,存檔欄位或內容已變更。請重新檢查。,Слот или сохранение изменились. Выполните проверку заново.
+ui.quest_cheat.audit.unknown,진행 기록이 있는 퀘스트 {0}의 정의가 없습니다. 자동 수정할 수 없습니다.,Quest {0} has saved progress but no definition. Automatic repair is unavailable.,進行記録のあるクエスト {0} の定義がありません。自動修正できません。,任务 {0} 有进度记录但没有定义。无法自动修复。,任務 {0} 有進度記錄但沒有定義。無法自動修復。,"У задания {0} есть прогресс, но нет определения. Автоисправление недоступно."
+ui.quest_cheat.audit.unaccepted,미수락,Not accepted,未受注,未接取,未接取,Не принято
+ui.quest_cheat.audit.blocked,자동 수정할 수 없는 문제가 있어 Fix를 사용할 수 없습니다.,Fix is unavailable because an issue cannot be repaired automatically.,自動修正できない問題があるため修正は使用できません。,存在无法自动修复的问题，无法使用修复。,存在無法自動修復的問題，無法使用修復。,"Есть проблема, которую нельзя исправить автоматически. Исправление недоступно."
+ui.quest_cheat.audit.stale,슬롯 또는 저장 내용이 변경됐습니다. 다시 검사하세요.,The slot or save has changed. Run Check again.,スロットまたは保存内容が変更されました。再検査してください。,存档栏位或内容已改变。请重新检查。,存檔欄位或內容已變更。請重新檢查。,Слот или сохранение изменились. Выполните проверку заново.
 ui.quest_cheat.audit.fixed,선행 퀘스트 {0}개를 완료 처리했습니다. 보상은 지급하지 않았습니다.,Completed {0} prerequisite quests without granting rewards.,前提クエスト {0} 件を完了しました。報酬は付与していません。,已完成 {0} 个前置任务，未发放奖励。,已完成 {0} 個前置任務，未發放獎勵。,Завершено предыдущих заданий: {0}. Награды не выданы.
 ui.quest_cheat.flavor.main,메인,Main,メイン,主版本,主版本,Основная
-ui.quest_cheat.flavor.demo,데모,Demo,デモ,演示版,試玩版,Демо
-ui.interaction.control_room_return,원래 위치로 돌아가기,Return to the entrance,入口へ戻る,返回入口,返回入口,Вернуться ко входу
+ui.quest_cheat.flavor.demo,데모,Demo,デモ,试玩版,試玩版,Демо
+ui.interaction.control_room_return,원래 위치로 돌아가기,Return to the previous location,元の場所へ戻る,返回原位,返回原位,Вернуться на прежнее место
 ui.save_snapshot.title,세이브 스냅샷,Save Snapshots,セーブスナップショット,存档快照,存檔快照,Снимки сохранений
-ui.save_snapshot.help,현재 슬롯에 마지막으로 저장된 상태를 보관합니다. 계정 공용 도전과제·설정은 포함하지 않습니다.,Preserve the last saved state of the current slot. Account-wide achievements and settings are excluded.,現在のスロットの最終保存状態を保管します。アカウント共通の実績や設定は含みません。,保存当前槽位最后保存的状态。不包含账号共用的成就和设置。,保存目前欄位最後儲存的狀態。不包含帳號共用的成就和設定。,Сохранить последнее записанное состояние текущего слота. Общие достижения и настройки аккаунта не включаются.
-ui.save_snapshot.locked,플레이를 종료한 뒤 스냅샷을 생성·복구·삭제할 수 있습니다.,Stop play before creating or restoring or deleting snapshots.,プレイ終了後にスナップショットを作成・復元・削除できます。,请结束游玩后创建、恢复或删除快照。,請結束遊玩後建立、還原或刪除快照。,Остановите игру перед созданием или восстановлением или удалением снимка.
+ui.save_snapshot.help,현재 슬롯에 마지막으로 저장된 상태를 보관합니다. 계정 공용 도전과제·설정은 포함하지 않습니다.,Preserve the last saved state of the current slot. Account-wide achievements and settings are excluded.,現在のスロットの最終保存状態を保管します。アカウント共通の実績や設定は含みません。,保存当前栏位最后保存的状态。不包含账号共用的成就和设置。,保存目前欄位最後儲存的狀態。不包含帳號共用的成就和設定。,Сохранить последнее записанное состояние текущего слота. Общие достижения и настройки аккаунта не включаются.
+ui.save_snapshot.locked,플레이를 종료한 뒤 스냅샷을 생성·복구·삭제할 수 있습니다.,"End the play session before creating, restoring, or deleting snapshots.",プレイ終了後にスナップショットを作成・復元・削除できます。,请结束游玩后创建、恢复或删除快照。,請結束遊玩後建立、還原或刪除快照。,"Завершите игровой сеанс перед созданием, восстановлением или удалением снимка."
 ui.save_snapshot.note_hint,메모 입력 (필수 · 최대 2048자),Memo (required · up to 2048 characters),メモ（必須・最大2048文字）,备注（必填 · 最多2048字）,備註（必填 · 最多2048字）,Заметка (обязательно · до 2048 символов)
 ui.save_snapshot.note_empty,메모 없음,No memo,メモなし,无备注,無備註,Без заметки
 ui.save_snapshot.note_row,메모: {0},Memo: {0},メモ：{0},备注：{0},備註：{0},Заметка: {0}
@@ -680,17 +680,17 @@ ui.save_snapshot.note_too_long,메모는 2048자 이내로 입력하세요.,Keep
 ui.save_snapshot.delete,선택한 스냅샷 삭제,Delete Selected Snapshot,選択したスナップショットを削除,删除选中快照,刪除選取的快照,Удалить выбранный снимок
 ui.save_snapshot.delete_confirm,{0}\n{1}\n이 스냅샷과 메모를 삭제할까요? 삭제는 되돌릴 수 없습니다. 현재 세이브는 유지됩니다.,{0}\n{1}\nDelete this snapshot and its memo? This cannot be undone. The current save is preserved.,{0}\n{1}\nこのスナップショットとメモを削除しますか？元には戻せません。現在のセーブは維持されます。,{0}\n{1}\n删除此快照及备注？此操作无法撤销。当前存档不会改变。,{0}\n{1}\n刪除此快照及備註？此操作無法復原。目前存檔不會變更。,{0}\n{1}\nУдалить снимок и заметку? Это действие необратимо. Текущее сохранение не изменится.
 ui.save_snapshot.deleted,선택한 스냅샷과 메모를 삭제했습니다.,Selected snapshot and memo deleted.,選択したスナップショットとメモを削除しました。,已删除选中快照及备注。,已刪除選取的快照及備註。,Выбранный снимок и заметка удалены.
-ui.save_snapshot.create,현재 슬롯 스냅샷 생성,Snapshot Current Slot,現在のスロットを保存,创建当前槽位快照,建立目前欄位快照,Создать снимок текущего слота
+ui.save_snapshot.create,현재 슬롯 스냅샷 생성,Snapshot Current Slot,現在のスロットのスナップショットを作成,创建当前栏位快照,建立目前欄位快照,Создать снимок текущего слота
 ui.save_snapshot.restore,선택한 스냅샷 복구,Restore Selected Snapshot,選択したスナップショットを復元,恢复选中快照,還原選取的快照,Восстановить выбранный снимок
 ui.save_snapshot.row,{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1}
 ui.save_snapshot.automatic,복구 전 자동 백업,Automatic pre-restore backup,復元前の自動バックアップ,恢复前自动备份,還原前自動備份,Автокопия перед восстановлением
 ui.save_snapshot.manual,수동 스냅샷,Manual snapshot,手動スナップショット,手动快照,手動快照,Ручной снимок
-ui.save_snapshot.empty,이 슬롯에 보관된 스냅샷이 없습니다.,No snapshots for this slot.,このスロットのスナップショットはありません。,此槽位没有快照。,此欄位沒有快照。,Для этого слота нет снимков.
+ui.save_snapshot.empty,이 슬롯에 보관된 스냅샷이 없습니다.,No snapshots for this slot.,このスロットのスナップショットはありません。,此栏位没有快照。,此欄位沒有快照。,Для этого слота нет снимков.
 ui.save_snapshot.created,현재 슬롯의 마지막 저장 상태를 스냅샷으로 보관했습니다.,Snapshot of the last saved state created.,最終保存状態のスナップショットを作成しました。,已创建最后保存状态的快照。,已建立最後儲存狀態的快照。,Создан снимок последнего сохранённого состояния.
-ui.save_snapshot.restored,복구했습니다. 다음 플레이에서 해당 슬롯을 불러오세요. 복구 전 상태도 자동 백업으로 보관했습니다.,Restored. Load this slot in the next play session. The previous state was also backed up.,復元しました。次のプレイでこのスロットを読み込んでください。復元前の状態も自動保存しました。,已恢复。下次游玩时加载此槽位。恢复前的状态也已自动备份。,已還原。下次遊玩時載入此欄位。還原前的狀態也已自動備份。,Восстановлено. Загрузите слот при следующем запуске. Предыдущее состояние сохранено в автокопии.
-ui.save_snapshot.confirm,{0}\n{1} 스냅샷으로 복구할까요? 현재 상태는 자동 백업됩니다.,{0}\nRestore the snapshot from {1}? The current state will be backed up.,{0}\n{1} のスナップショットに復元しますか？現在の状態は自動保存されます。,{0}\n恢复 {1} 的快照？当前状态将自动备份。,{0}\n還原 {1} 的快照？目前狀態將自動備份。,{0}\nВосстановить снимок от {1}? Текущее состояние будет скопировано.
-ui.save_snapshot.selection_changed,선택 슬롯이 변경되었습니다. 목록을 확인하고 다시 시도하세요.,The selected slot changed. Check the list and try again.,スロットが変更されました。一覧を確認して再試行してください。,所选槽位已变更。请检查列表后重试。,所選欄位已變更。請檢查清單後重試。,Выбранный слот изменился. Проверьте список и повторите.
-ui.save_snapshot.error,처리하지 못했습니다: {0}\n저장 파일과 선택 슬롯을 확인하세요.,Operation failed: {0}\nCheck the save file and selected slot.,処理できませんでした: {0}\nセーブファイルとスロットを確認してください。,操作失败：{0}\n请检查存档和所选槽位。,操作失敗：{0}\n請檢查存檔和所選欄位。,Операция не выполнена: {0}\nПроверьте файл сохранения и выбранный слот.
+ui.save_snapshot.restored,복구했습니다. 다음 플레이에서 해당 슬롯을 불러오세요. 복구 전 상태도 자동 백업으로 보관했습니다.,Restored. Load this slot in the next play session. The previous state was also backed up.,復元しました。次のプレイでこのスロットを読み込んでください。復元前の状態も自動バックアップとして保管しました。,已恢复。下次游玩时加载此栏位。恢复前的状态也已自动备份。,已還原。下次遊玩時載入此欄位。還原前的狀態也已自動備份。,Восстановлено. Загрузите слот при следующем запуске. Предыдущее состояние сохранено в автокопии.
+ui.save_snapshot.confirm,{0}\n{1} 스냅샷으로 복구할까요? 현재 상태는 자동 백업됩니다.,{0}\nRestore the snapshot from {1}? The current state will be backed up.,{0}\n{1} のスナップショットに復元しますか？現在の状態は自動バックアップされます。,{0}\n恢复 {1} 的快照？当前状态将自动备份。,{0}\n還原 {1} 的快照？目前狀態將自動備份。,{0}\nВосстановить снимок от {1}? Текущее состояние будет скопировано.
+ui.save_snapshot.selection_changed,선택 슬롯이 변경되었습니다. 목록을 확인하고 다시 시도하세요.,The selected slot changed. Check the list and try again.,スロットが変更されました。一覧を確認して再試行してください。,所选栏位已变更。请检查列表后重试。,所選欄位已變更。請檢查清單後重試。,Выбранный слот изменился. Проверьте список и повторите.
+ui.save_snapshot.error,처리하지 못했습니다: {0}\n저장 파일과 선택 슬롯을 확인하세요.,Operation failed: {0}\nCheck the save file and selected slot.,処理できませんでした: {0}\nセーブファイルとスロットを確認してください。,操作失败：{0}\n请检查存档和所选栏位。,操作失敗：{0}\n請檢查存檔和所選欄位。,Операция не выполнена: {0}\nПроверьте файл сохранения и выбранный слот.
 ui.interaction.go_outside,밖으로 이동,Go outside,外へ移動,前往外面,前往外面,Выйти наружу
 ui.interaction.feed,먹이 주기,Feed,エサをあげる,喂食,餵食,Покормить
 ui.toast.item_reward,보상: {0} ×{1},Reward: {0} ×{1},報酬：{0} ×{1},奖励：{0} ×{1},獎勵：{0} ×{1},Награда: {0} ×{1}
@@ -706,31 +706,31 @@ ui.rail.lubricate,윤활오일 사용,Apply lubricating oil,潤滑オイルを�
 ui.rail.travel_next,다음 역으로 이동,Travel to next station,次の駅へ移動,前往下一站,前往下一站,Отправиться на следующую станцию
 ui.rail.need_oil,윤활오일이 필요해.,I need lubricating oil.,潤滑オイルが必要だ。,需要润滑油。,需要潤滑油。,Нужно смазочное масло.
 ui.world_cheat.title,월드 진행 치트,World Progress Cheats,ワールド進行チート,世界进度作弊,世界進度作弊,Читы прогресса мира
-ui.world_cheat.description,선택한 슬롯의 월드 진행을 항목별로 변경합니다. 다음 플레이에서 저장을 불러오면 반영됩니다.,Edit each world object in the selected slot. Changes apply when the save is loaded in the next play session.,選択スロットのワールド進行を個別に変更します。次回プレイでセーブを読み込むと反映されます。,逐项修改所选栏位的世界进度。下次游玩时加载存档即可生效。,逐項修改所選欄位的世界進度。下次遊玩時載入存檔即可生效。,Изменение прогресса мира по отдельным объектам в выбранном слоте. Изменения вступят в силу при загрузке сохранения в следующем игровом сеансе.
-ui.world_cheat.notes,퀘스트·아이템·보상은 직접 변경하지 않습니다. 완료한 퀘스트 목표를 되돌리려면 퀘스트 치트도 사용하세요. 철도는 한 역이라도 완료이면 전체 역에 다시 반영되므로 미윤활로 되돌릴 때 세 역을 모두 초기화하세요. 낙석의 진행 수량 1은 장전 상태입니다.,"Quests, items and rewards are not edited. Use Quest Cheats separately to reset credited objectives. Railway completion spreads from any completed station: reset all three stations to remove lubrication. Rockfall progress quantity 1 means armed.",クエスト・アイテム・報酬は直接変更しません。達成済み目標のリセットにはクエストチートも使用してください。鉄道は1駅でも完了すると全駅に反映されるため、未潤滑に戻す際は3駅とも初期化してください。落石の進行数1は装填済みです。,不会直接修改任务、物品或奖励。如需重置已完成的任务目标，请同时使用任务作弊功能。铁路只要有一个车站已完成，就会将完成状态重新应用到所有车站；要恢复为未润滑状态，请重置全部三个车站。落石的进度数量为1时，表示已装填。,不會直接修改任務、物品或獎勵。如需重設已完成的任務目標，請同時使用任務作弊功能。鐵路只要有一個車站已完成，就會將完成狀態重新套用到所有車站；要恢復為未潤滑狀態，請重設全部三個車站。落石的進度數量為1時，表示已裝填。,"Задания, предметы и награды напрямую не изменяются. Для сброса выполненных целей также используйте читы заданий. Если хотя бы одна станция завершена, это состояние снова применяется ко всем станциям: чтобы убрать смазку, сбросьте все три станции. Количество прогресса 1 у обвала означает, что заряд установлен."
+ui.world_cheat.description,선택한 슬롯의 월드 진행을 항목별로 변경합니다. 다음 플레이에서 저장을 불러오면 반영됩니다.,Edit progress for each world object in the selected slot. Changes apply when the save is loaded in the next play session.,選択スロットのワールド進行を個別に変更します。次回プレイでセーブを読み込むと反映されます。,逐项修改所选栏位的世界进度。下次游玩时加载存档即可生效。,逐項修改所選欄位的世界進度。下次遊玩時載入存檔即可生效。,Изменение прогресса мира по отдельным объектам в выбранном слоте. Изменения вступят в силу при загрузке сохранения в следующем игровом сеансе.
+ui.world_cheat.notes,퀘스트·아이템·보상은 직접 변경하지 않습니다. 완료한 퀘스트 목표를 되돌리려면 퀘스트 치트도 사용하세요. 철도는 한 역이라도 완료이면 전체 역에 다시 반영되므로 미윤활로 되돌릴 때 세 역을 모두 초기화하세요. 낙석의 진행 수량 1은 장전 상태입니다.,"Quests, items and rewards are not edited. Use Quest Cheats separately to reset credited objectives. Railway completion spreads from any completed station: reset all three stations to remove lubrication. Rockfall progress quantity 1 means armed.",クエスト・アイテム・報酬は直接変更しません。達成済み目標のリセットにはクエストチートも使用してください。鉄道は1駅でも完了すると全駅に反映されるため、未潤滑に戻す際は3駅とも初期化してください。落石の進行数1は装填済みです。,不会直接修改任务、物品或奖励。如需重置已完成的任务目标，请同时使用任务作弊功能。铁路只要有一个车站已完成，就会将完成状态重新应用到所有车站；要恢复为未润滑状态，请重置全部三个车站。落石的进度数量为1时，表示已装填。,不會直接修改任務、物品或獎勵。如需重設已完成的任務目標，請同時使用任務作弊功能。鐵路只要有一個車站已完成，就會將完成狀態重新套用到所有車站；要恢復為未潤滑狀態，請重設全部三個車站。落石的進度數量為1時，表示已裝填。,"Задания, предметы и награды напрямую не изменяются. Для сброса выполненных целей также используйте читы заданий. Если хотя бы одна станция отмечена как завершённая, это состояние снова применяется ко всем станциям: чтобы убрать смазку, сбросьте все три станции. Значение прогресса 1 у обвала означает, что заряд установлен."
 ui.world_cheat.saved_object,기존 월드 기록,Saved world object,保存済みワールド記録,现有世界记录,現有世界記錄,Существующая запись о мире
 ui.world_cheat.state.unrecorded,기록 없음,Not recorded,記録なし,无记录,無記錄,Нет записи
 ui.world_cheat.state.in_progress,미완료,Incomplete,未完了,未完成,未完成,Не завершено
 ui.world_cheat.state.completed,완료,Completed,完了,已完成,已完成,Завершено
 ui.world_cheat.row,{0} · {1} · 수량 {2},{0} · {1} · Quantity {2},{0} · {1} · 数量 {2},{0} · {1} · 数量 {2},{0} · {1} · 數量 {2},{0} · {1} · Количество: {2}
 ui.world_cheat.reset,초기화,Reset,初期化,重置,重設,Сбросить
-ui.world_cheat.quantity,진행 수량,Progress quantity,進行数,进度数量,進度數量,Количество прогресса
-ui.world_cheat.in_progress,미완료로 적용,Apply incomplete,未完了として適用,设为未完成,設為未完成,Отметить как незавершённое
-ui.world_cheat.complete,완료로 적용,Apply completed,完了として適用,设为已完成,設為已完成,Отметить как завершённое
+ui.world_cheat.quantity,진행 수량,Progress quantity,進行数,进度数量,進度數量,Значение прогресса
+ui.world_cheat.in_progress,미완료로 적용,Mark Incomplete,未完了として適用,设为未完成,設為未完成,Отметить как незавершённое
+ui.world_cheat.complete,완료로 적용,Mark Completed,完了として適用,设为已完成,設為已完成,Отметить как завершённое
 ui.world_cheat.success,선택 항목을 저장했습니다. 변경 전 원본은 자동 백업되었습니다.,Saved the selected object. The original save was backed up automatically.,選択項目を保存しました。変更前のセーブは自動バックアップ済みです。,已保存所选项目，修改前的原始存档已自动备份。,已儲存所選項目，修改前的原始存檔已自動備份。,Выбранный объект сохранён. Резервная копия исходного сохранения создана автоматически.
-ui.world_cheat.object.base_pipe,기지 배관 수리,Base pipe repair,拠点の配管修理,基地管道修理,基地管線維修,Ремонт труб на базе
-ui.world_cheat.object.raid_lift,레이드 리프트 복구,Raid lift repair,レイドリフト修理,突袭升降机修复,突襲昇降機修復,Ремонт рейдового подъёмника
+ui.world_cheat.object.base_pipe,기지 배관 수리,Base pipe repair,基地の配管修理,基地管道修理,基地管線維修,Ремонт труб на базе
+ui.world_cheat.object.raid_lift,레이드 리프트 복구,Raid lift repair,レイドリフト修理,突袭升降机修复,突襲升降機修復,Ремонт рейдового подъёмника
 ui.world_cheat.object.rockfall,숲–마을 터널 낙석,Forest–village tunnel rockfall,森–村トンネルの落石,森林–村庄隧道落石,森林–村莊隧道落石,Обвал в туннеле между лесом и деревней
-ui.world_cheat.object.plains_lift,숲–평원 승강기,Forest–plains lift,森–平原の昇降機,森林–平原升降机,森林–平原昇降機,Подъёмник между лесом и равнинами
+ui.world_cheat.object.plains_lift,숲–평원 승강기,Forest–plains lift,森–平原の昇降機,森林–平原升降机,森林–平原升降機,Подъёмник между лесом и равнинами
 ui.world_cheat.object.forest_power,숲 전력 시설,Forest power facility,森の電力設備,森林电力设施,森林電力設施,Электростанция в лесу
-ui.world_cheat.object.atv_power,마을 ATV 창고 전력,Village ATV warehouse power,村のATV倉庫の電力,村庄ATV仓库供电,村莊ATV倉庫供電,Электроснабжение склада квадроцикла в деревне
+ui.world_cheat.object.atv_power,마을 ATV 창고 전력,Village ATV warehouse power,村のATV倉庫の電力,村庄ATV仓库供电,村莊ATV倉庫供電,Электроснабжение склада квадроциклов в деревне
 ui.world_cheat.object.ethanol,마을 에탄올 생산 시설,Village ethanol facility,村のエタノール生産設備,村庄乙醇生产设施,村莊乙醇生產設施,Установка по производству этанола в деревне
 ui.world_cheat.object.rail_west,서역 윤활,West station lubrication,西駅の潤滑,西站润滑,西站潤滑,Смазка западной станции
 ui.world_cheat.object.rail_north,북역 윤활,North station lubrication,北駅の潤滑,北站润滑,北站潤滑,Смазка северной станции
 ui.world_cheat.object.rail_east,동역 윤활,East station lubrication,東駅の潤滑,东站润滑,東站潤滑,Смазка восточной станции
 ui.interaction.pickup_parcel,택배상자 줍기,Pick up parcel,配達箱を拾う,拾取快递箱,拾取包裹箱,Подобрать посылку
-ui.interaction.fermented_fuel_supply,발효연료 공급,Supply fermented fuel,発酵燃料を供給,供应发酵燃料,供應發酵燃料,Поставка ферментированного топлива
-ui.barter.ethanol_shortage,에탄올 2개가 필요하다!,I need 2 ethanol!,エタノールが2個必要だ！,需要2份乙醇！,需要2份乙醇！,Нужно 2 ед. этанола!
+ui.interaction.fermented_fuel_supply,발효연료 공급,Supply fermented fuel,発酵燃料を供給,供应发酵燃料,供應發酵燃料,Подать ферментированное топливо
+ui.barter.ethanol_shortage,에탄올 2개가 필요하다!,I need 2 units of ethanol!,エタノールが2個必要だ！,需要2份乙醇！,需要2份乙醇！,Нужно 2 ед. этанола!
 ui.barter.failed,지금은 교환할 수 없다.,I can't exchange this right now.,今は交換できない。,现在无法交换。,現在無法交換。,Сейчас обмен невозможен.
 ui.vehicle.refuel,주유 (에탄올 1개),Refuel (1 Ethanol),給油（エタノール1個）,加油（乙醇×1）,加油（乙醇×1）,Заправить (этанол ×1)
 ui.vehicle.fuel_missing,에탄올이 부족하다!,Not enough ethanol!,エタノールが足りない！,乙醇不足！,乙醇不足！,Недостаточно этанола!

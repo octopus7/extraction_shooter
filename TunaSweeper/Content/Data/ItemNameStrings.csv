@@ -1,5 +1,5 @@
 string_key,ko,en,ja,zh-Hans,zh-Hant,ru
-shop.vending_machine,자판기 상점,Vending Machine,自動販売機ショップ,自动售货机,自動售貨機,Торговый автомат
+shop.vending_machine,자판기 상점,Vending Machine,自動販売機ショップ,自动售货机,自動販賣機,Торговый автомат
 item.pistol,권총,Pistol,ピストル,手枪,手槍,Пистолет
 item.rifle,소총,Rifle,ライフル,步枪,步槍,Винтовка
 item.shotgun,산탄총,Shotgun,ショットガン,霰弹枪,霰彈槍,Дробовик
@@ -11,21 +11,21 @@ item.spiked_club,도깨비 방망이,Spiked Club,鬼の金棒,狼牙棒,狼牙�
 item.pistol_ammo,권총 탄약,Pistol Ammo,ピストル弾薬,手枪弹药,手槍彈藥,Патроны для пистолета
 item.rifle_ammo,소총 탄약,Rifle Ammo,ライフル弾薬,步枪弹药,步槍彈藥,Патроны для винтовки
 item.shotgun_ammo,산탄총 탄약,Shotgun Ammo,ショットガン弾薬,霰弹枪弹药,霰彈槍彈藥,Патроны для дробовика
-item.rusty_pistol_ammo,녹슨 권총탄,Rusty Pistol Ammo,錆びたピストル弾,劣质手枪弹,劣質手槍彈,Ржавые патроны для пистолета
+item.rusty_pistol_ammo,녹슨 권총탄,Rusty Pistol Ammo,錆びたピストル弾,锈蚀手枪弹,鏽蝕手槍彈,Ржавые патроны для пистолета
 item.pistol_ap_ammo,권총 철갑탄,Pistol AP Ammo,ピストル徹甲弾,手枪穿甲弹,手槍穿甲彈,Бронебойные патроны для пистолета
-item.rusty_rifle_ammo,녹슨 소총탄,Rusty Rifle Ammo,錆びたライフル弾,劣质步枪弹,劣質步槍彈,Ржавые патроны для винтовки
+item.rusty_rifle_ammo,녹슨 소총탄,Rusty Rifle Ammo,錆びたライフル弾,锈蚀步枪弹,鏽蝕步槍彈,Ржавые патроны для винтовки
 item.rifle_ap_ammo,소총 철갑탄,Rifle AP Ammo,ライフル徹甲弾,步枪穿甲弹,步槍穿甲彈,Бронебойные патроны для винтовки
-item.rusty_shotgun_ammo,녹슨 산탄,Rusty Shotgun Ammo,錆びた散弾,劣质霰弹,劣質霰彈,Ржавые патроны для дробовика
+item.rusty_shotgun_ammo,녹슨 산탄,Rusty Shotgun Ammo,錆びた散弾,锈蚀霰弹,鏽蝕霰彈,Ржавые патроны для дробовика
 item.shotgun_ap_ammo,산탄총 철갑탄,Shotgun AP Ammo,ショットガン徹甲弾,霰弹枪穿甲弹,霰彈槍穿甲彈,Бронебойные патроны для дробовика
 item.rifle_extended_magazine,소총 대용량 탄창,Rifle Extended Magazine,ライフル拡張マガジン,步枪扩容弹匣,步槍擴容彈匣,Увеличенный магазин для винтовки
 item.red_dot_optic,레드닷 광학장비,Red Dot Optic,レッドドットサイト,红点瞄具,紅點瞄具,Коллиматорный прицел
 item.laser_sight,레이저 사이트,Laser Sight,レーザーサイト,激光瞄具,激光瞄具,Лазерный прицел
 item.canned_food,통조림,Canned Food,缶詰,罐头食品,罐頭食品,Консервы
 item.water_bottle,생수,Bottled Water,飲料水,瓶装水,瓶裝水,Бутылка воды
-item.large_water_bottle,큰생수,Large Bottled Water,大きな飲料水,大瓶装水,大瓶裝水,Большая бутылка воды
-item.king_water_bottle,왕생수,Royal Bottled Water,王の飲料水,王之瓶装水,王之瓶裝水,Королевская вода
+item.large_water_bottle,큰생수,Large Bottled Water,大容量の飲料水,大瓶装水,大瓶裝水,Большая бутылка воды
+item.king_water_bottle,왕생수,Jumbo Bottled Water,特大の飲料水,超大瓶装水,超大瓶裝水,Огромная бутылка воды
 item.energy_bar,에너지바,Energy Bar,エナジーバー,能量棒,能量棒,Энергетический батончик
-item.canned_tuna,참치 통조림,Canned Tuna,ツナ缶,金枪鱼罐头,金槍魚罐頭,Консервированный тунец
+item.canned_tuna,참치 통조림,Canned Tuna,ツナ缶,金枪鱼罐头,鮪魚罐頭,Консервированный тунец
 item.bandage,붕대,Bandage,包帯,绷带,繃帶,Бинт
 item.first_aid_kit,응급키트,First Aid Kit,救急キット,急救包,急救包,Аптечка
 item.painkillers,진통제,Painkillers,鎮痛剤,止痛药,止痛藥,Обезболивающие
@@ -36,7 +36,7 @@ item.tactical_sunglasses,전술 선글라스,Tactical Sunglasses,タクティカ
 item.tactical_earphones_tier1,이어폰 I,Tactical Earphones I,イヤホン I,战术耳机 I,戰術耳機 I,Тактические наушники I
 item.tactical_earphones_tier2,이어폰 II,Tactical Earphones II,イヤホン II,战术耳机 II,戰術耳機 II,Тактические наушники II
 item.tactical_jacket,전술 재킷,Tactical Jacket,タクティカルジャケット,战术夹克,戰術夾克,Тактическая куртка
-item.backpack,배낭,Backpack,バックパック,背包,揹包,Рюкзак
+item.backpack,배낭,Backpack,バックパック,背包,背包,Рюкзак
 item.valuables_crate,귀중품 상자,Valuables Crate,貴重品箱,贵重物品箱,貴重物品箱,Ящик с ценностями
 container.wooden_crate,나무 상자,Wooden Crate,木箱,木箱,木箱,Деревянный ящик
 container.metal_case,금속 상자,Metal Case,金属ケース,金属箱,金屬箱,Металлический ящик
@@ -56,9 +56,9 @@ item.pistol_ammo.desc,권총에 사용하는 소형 탄약 묶음이다,A small 
 item.rifle_ammo.desc,소총에 사용하는 표준 탄약 묶음이다,A standard bundle of rifle rounds,ライフル用の標準弾薬の束,一包标准步枪弹药。,一包標準步槍彈藥。,Пачка стандартных патронов для винтовки.
 item.shotgun_ammo.desc,산탄총에 사용하는 산탄 탄약이다,Shells used by shotguns,ショットガンで使う散弾,霰弹枪使用的弹药。,霰彈槍使用的彈藥。,Патроны для дробовика.
 item.rusty_pistol_ammo.desc,상태가 나빠 위력이 낮은 권총탄이다,Low-grade pistol rounds with reduced impact,状態が悪く威力の低いピストル弾,状态不佳、威力较低的手枪弹药。,狀態不佳、威力較低的手槍彈藥。,Пистолетные патроны плохого качества с пониженным уроном.
-item.pistol_ap_ammo.desc,장갑 관통력을 높인 권총탄이다,Armor-piercing pistol rounds with higher impact,装甲貫通力を高めたピストル弾,提高了穿甲能力的手枪弹药。,提高了穿甲能力的手槍彈藥。,Пистолетные патроны с повышенным бронепробитием.
+item.pistol_ap_ammo.desc,장갑 관통력을 높인 권총탄이다,Pistol rounds with improved armor penetration,装甲貫通力を高めたピストル弾,提高了穿甲能力的手枪弹药。,提高了穿甲能力的手槍彈藥。,Пистолетные патроны с повышенным бронепробитием.
 item.rusty_rifle_ammo.desc,상태가 나빠 위력이 낮은 소총탄이다,Low-grade rifle rounds with reduced impact,状態が悪く威力の低いライフル弾,状态不佳、威力较低的步枪弹药。,狀態不佳、威力較低的步槍彈藥。,Винтовочные патроны плохого качества с пониженным уроном.
-item.rifle_ap_ammo.desc,장갑 관통력을 높인 소총탄이다,Armor-piercing rifle rounds with higher impact,装甲貫通力を高めたライフル弾,提高了穿甲能力的步枪弹药。,提高了穿甲能力的步槍彈藥。,Винтовочные патроны с повышенным бронепробитием.
+item.rifle_ap_ammo.desc,장갑 관통력을 높인 소총탄이다,Rifle rounds with improved armor penetration,装甲貫通力を高めたライフル弾,提高了穿甲能力的步枪弹药。,提高了穿甲能力的步槍彈藥。,Винтовочные патроны с повышенным бронепробитием.
 item.rusty_shotgun_ammo.desc,상태가 나빠 위력이 낮은 산탄이다,Low-grade shotgun shells with reduced impact,状態が悪く威力の低い散弾,状态不佳、威力较低的霰弹。,狀態不佳、威力較低的霰彈。,Патроны для дробовика плохого качества с пониженным уроном.
 item.shotgun_ap_ammo.desc,단단한 표적에 강한 산탄총 철갑탄이다,Armor-piercing shotgun shells for harder targets,硬い標的に強いショットガン徹甲弾,适合对付坚硬目标的霰弹枪穿甲弹。,適合對付堅硬目標的霰彈槍穿甲彈。,Бронебойные патроны для дробовика против бронированных целей.
 item.rifle_extended_magazine.desc,소총의 탄창 슬롯에 장착하는 대용량 탄창이다,An extended magazine that fits the rifle magazine slot,ライフルのマガジンスロットに装着する拡張マガジン,可装入步枪弹匣槽位的扩容弹匣。,可裝入步槍彈匣槽位的擴容彈匣。,Увеличенный магазин для слота магазина винтовки.
@@ -67,9 +67,9 @@ item.laser_sight.desc,소총의 전술 장비 슬롯에 장착하는 레이저 �
 item.canned_food.desc,오래 보관할 수 있는 평범한 식량 통조림이다,A plain canned meal with a long shelf life,長期保存できる普通の缶詰食品,可以长期保存的普通罐头食品。,可以長期保存的普通罐頭食品。,Обычные консервы с длительным сроком хранения.
 item.water_bottle.desc,갈증을 줄이는 깨끗한 생수다,Clean bottled water that eases thirst,渇きを抑えるきれいな飲料水,能解渴的干净瓶装水。,能解渴的乾淨瓶裝水。,"Чистая питьевая вода, утоляющая жажду."
 item.large_water_bottle.desc,생수 두 병을 합친 큰 생수다,Two bottles worth of clean water,2本分のきれいな飲料水,相当于两瓶水的大瓶装水。,相當於兩瓶水的大瓶裝水。,Большая бутылка чистой воды объёмом в две обычные.
-item.king_water_bottle.desc,생수와 큰생수를 조합한 왕생수다,Clean water crafted from bottled water and large bottled water,飲料水と大きな飲料水を組み合わせた王の飲料水,由普通瓶装水和大瓶装水组合而成的王之瓶装水。,由普通瓶裝水和大瓶裝水組合而成的王之瓶裝水。,"Королевская вода, созданная из обычной и большой бутылок воды."
+item.king_water_bottle.desc,생수와 큰생수를 조합한 왕생수다,Clean water crafted from bottled water and large bottled water,飲料水と大容量の飲料水を組み合わせた特大の飲料水,由普通瓶装水和大瓶装水组合而成的超大瓶装水。,由普通瓶裝水和大瓶裝水組合而成的超大瓶裝水。,"Огромная бутылка воды, полученная из обычной и большой бутылок воды."
 item.energy_bar.desc,빠르게 허기를 채우는 작은 에너지바다,A small energy bar that quickly eases hunger,素早く空腹を満たす小さなエナジーバー,能迅速缓解饥饿的小型能量棒。,能迅速緩解飢餓的小型能量棒。,"Небольшой батончик, который быстро утоляет голод."
-item.canned_tuna.desc,노란 라벨의 참치 통조림이다,A yellow labeled can of tuna,黄色いラベルのツナ缶,贴着黄色标签的金枪鱼罐头。,貼着黃色標籤的金槍魚罐頭。,Банка тунца с жёлтой этикеткой.
+item.canned_tuna.desc,노란 라벨의 참치 통조림이다,A yellow labeled can of tuna,黄色いラベルのツナ缶,贴着黄色标签的金枪鱼罐头。,貼着黃色標籤的鮪魚罐頭。,Банка тунца с жёлтой этикеткой.
 item.bandage.desc,가벼운 상처를 응급 처치하는 붕대다,A bandage for simple first aid,軽い傷を応急処置する包帯,用于处理轻伤的绷带。,用於處理輕傷的繃帶。,Бинт для оказания первой помощи при лёгких ранениях.
 item.first_aid_kit.desc,기본 치료 도구가 들어 있는 응급키트다,A first aid kit with basic treatment tools,基本的な治療道具が入った救急キット,装有基础医疗用品的急救包。,裝有基礎醫療用品的急救包。,Аптечка с основными средствами первой помощи.
 item.painkillers.desc,통증을 잠시 줄이는 약품이다,Medicine that briefly reduces pain,痛みを一時的に抑える薬,暂时缓解疼痛的药品。,暫時緩解疼痛的藥品。,"Лекарство, временно уменьшающее боль."
@@ -80,41 +80,41 @@ item.tactical_sunglasses.desc,얼굴 장착 슬롯에 쓰는 장식용 선글라
 item.tactical_earphones_tier1.desc,주변 소리를 더 잘 듣기 위한 기본 이어폰이다,Basic earphones for hearing nearby sounds more clearly,周囲の音を聞き取りやすくする基本イヤホン,帮助更清晰听到周围声音的基础耳机。,幫助更清晰聽到周圍聲音的基礎耳機。,Базовые наушники для более чёткого восприятия окружающих звуков.
 item.tactical_earphones_tier2.desc,차음과 통신 성능이 개선된 고급 이어폰이다,Improved earphones with better isolation and comms,遮音性と通信性能が向上した上位イヤホン,隔音与通信性能更好的高级耳机。,隔音與通信性能更好的高級耳機。,Улучшенные наушники с более качественной шумоизоляцией и связью.
 item.tactical_jacket.desc,신체 슬롯에 장착할 수 있는 방호 의류다,Protective clothing that fits the body equipment slot,身体スロットに装備できる防護服,可装备在身体槽位的防护服。,可裝備在身體槽位的防護服。,Защитная одежда для слота снаряжения тела.
-item.backpack.desc,추가 보관 공간을 제공하는 배낭이다,A backpack that provides extra storage,追加の収納空間を提供するバックパック,提供额外储物空间的背包。,提供額外儲物空間的揹包。,Рюкзак с дополнительным местом для предметов.
+item.backpack.desc,추가 보관 공간을 제공하는 배낭이다,A backpack that provides extra storage,追加の収納空間を提供するバックパック,提供额外储物空间的背包。,提供額外儲物空間的背包。,Рюкзак с дополнительным местом для предметов.
 item.valuables_crate.desc,팔 만한 물건이 들어 있을 수 있는 작은 상자다,A small crate that may hold sellable goods,売れる品が入っているかもしれない小箱,可能装有可出售物品的小箱子。,可能裝有可出售物品的小箱子。,"Небольшой ящик, в котором могут быть ценные вещи на продажу."
-item.backpack_tier1,계란 가방,Egg Backpack,たまごバッグ,鸡蛋背包,雞蛋揹包,Рюкзак-яйцо
-item.backpack_tier2,닭 가방,Chicken Backpack,ニワトリバッグ,小鸡背包,小雞揹包,Рюкзак-курица
-item.backpack_tier3,공룡 가방,Dinosaur Backpack,恐竜バッグ,恐龙背包,恐龍揹包,Рюкзак-динозавр
-item.backpack_tier4,군용배낭,Military Backpack,軍用バックパック,军用背包,軍用揹包,Армейский рюкзак
-item.backpack_tier5,카본프레임 가방,Carbon Frame Backpack,カーボンフレームバッグ,碳纤维框架背包,碳纖維框架揹包,Рюкзак с карбоновой рамой
-item.backpack_tier1.desc,커다란 계란 모양의 가방. 인벤토리를 50칸으로 확장한다,A large egg-shaped backpack. Expands inventory to 50 slots,大きなたまご型のバッグ。インベントリを50スロットに拡張する,大鸡蛋形背包。将背包容量扩展至 50 格。,大雞蛋形揹包。將揹包容量擴展至 50 格。,Большой рюкзак в форме яйца. Увеличивает инвентарь до 50 ячеек.
-item.backpack_tier2.desc,동그란 닭 모양의 가방. 인벤토리를 60칸으로 확장한다,A round chicken-shaped backpack. Expands inventory to 60 slots,丸いニワトリ型のバッグ。インベントリを60スロットに拡張する,圆滚滚的小鸡背包。将背包容量扩展至 60 格。,圓滾滾的小雞揹包。將揹包容量擴展至 60 格。,Круглый рюкзак в форме курицы. Увеличивает инвентарь до 60 ячеек.
-item.backpack_tier3.desc,하늘을 보며 이를 다문 공룡을 업는 가방. 인벤토리를 80칸으로 확장한다,A piggyback dinosaur looking skyward with a toothy clenched grin. Expands inventory to 80 slots,空を見上げて歯を食いしばる恐竜を背負うバッグ。インベントリを80スロットに拡張する,背着仰望天空、紧咬牙关的恐龙。将背包容量扩展至 80 格。,揹着仰望天空、緊咬牙關的恐龍。將揹包容量擴展至 80 格。,"Рюкзак с динозавром, который смотрит в небо и сжимает зубы. Увеличивает инвентарь до 80 ячеек."
-item.backpack_tier4.desc,단순하고 튼튼한 군용배낭. 인벤토리를 100칸으로 확장한다,A simple sturdy military backpack. Expands inventory to 100 slots,シンプルで丈夫な軍用バックパック。インベントリを100スロットに拡張する,简单坚固的军用背包。将背包容量扩展至 100 格。,簡單堅固的軍用揹包。將揹包容量擴展至 100 格。,Простой и прочный армейский рюкзак. Увеличивает инвентарь до 100 ячеек.
-item.backpack_tier5.desc,가벼운 카본프레임이 받쳐 주는 대형 가방. 인벤토리를 120칸으로 확장한다,A large backpack supported by a lightweight carbon frame. Expands inventory to 120 slots,軽量カーボンフレームで支える大型バッグ。インベントリを120スロットに拡張する,由轻质碳纤维框架支撑的大背包。将背包容量扩展至 120 格。,由輕質碳纖維框架支撐的大揹包。將揹包容量擴展至 120 格。,Большой рюкзак с лёгкой карбоновой рамой. Увеличивает инвентарь до 120 ячеек.
+item.backpack_tier1,계란 가방,Egg Backpack,たまごバッグ,鸡蛋背包,雞蛋背包,Рюкзак-яйцо
+item.backpack_tier2,닭 가방,Chicken Backpack,ニワトリバッグ,鸡背包,雞背包,Рюкзак-курица
+item.backpack_tier3,공룡 가방,Dinosaur Backpack,恐竜バッグ,恐龙背包,恐龍背包,Рюкзак-динозавр
+item.backpack_tier4,군용배낭,Military Backpack,軍用バックパック,军用背包,軍用背包,Армейский рюкзак
+item.backpack_tier5,카본프레임 가방,Carbon Frame Backpack,カーボンフレームバッグ,碳纤维框架背包,碳纖維框架背包,Рюкзак с карбоновой рамой
+item.backpack_tier1.desc,커다란 계란 모양의 가방. 인벤토리를 50칸으로 확장한다,A large egg-shaped backpack. Expands inventory to 50 slots,大きなたまご型のバッグ。インベントリを50スロットに拡張する,大鸡蛋形背包。将背包容量扩展至 50 格。,大雞蛋形背包。將背包容量擴展至 50 格。,Большой рюкзак в форме яйца. Увеличивает инвентарь до 50 ячеек.
+item.backpack_tier2.desc,동그란 닭 모양의 가방. 인벤토리를 60칸으로 확장한다,A round chicken-shaped backpack. Expands inventory to 60 slots,丸いニワトリ型のバッグ。インベントリを60スロットに拡張する,圆滚滚的鸡形背包。将背包容量扩展至 60 格。,圓滾滾的雞形背包。將背包容量擴展至 60 格。,Круглый рюкзак в форме курицы. Увеличивает инвентарь до 60 ячеек.
+item.backpack_tier3.desc,하늘을 보며 이를 다문 공룡을 업는 가방. 인벤토리를 80칸으로 확장한다,A backpack shaped like a dinosaur looking skyward with its teeth clenched. Expands inventory to 80 slots,空を見上げて歯を食いしばる恐竜を背負うバッグ。インベントリを80スロットに拡張する,背着仰望天空、紧咬牙关的恐龙。将背包容量扩展至 80 格。,揹着仰望天空、緊咬牙關的恐龍。將背包容量擴展至 80 格。,"Рюкзак с динозавром, который смотрит в небо и сжимает зубы. Увеличивает инвентарь до 80 ячеек."
+item.backpack_tier4.desc,단순하고 튼튼한 군용배낭. 인벤토리를 100칸으로 확장한다,A simple sturdy military backpack. Expands inventory to 100 slots,シンプルで丈夫な軍用バックパック。インベントリを100スロットに拡張する,简单坚固的军用背包。将背包容量扩展至 100 格。,簡單堅固的軍用背包。將背包容量擴展至 100 格。,Простой и прочный армейский рюкзак. Увеличивает инвентарь до 100 ячеек.
+item.backpack_tier5.desc,가벼운 카본프레임이 받쳐 주는 대형 가방. 인벤토리를 120칸으로 확장한다,A large backpack supported by a lightweight carbon frame. Expands inventory to 120 slots,軽量カーボンフレームで支える大型バッグ。インベントリを120スロットに拡張する,由轻质碳纤维框架支撑的大背包。将背包容量扩展至 120 格。,由輕質碳纖維框架支撐的大背包。將背包容量擴展至 120 格。,Большой рюкзак с лёгкой карбоновой рамой. Увеличивает инвентарь до 120 ячеек.
 item.wood,목재,Wood,木材,木材,木材,Древесина
-item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材,从伐木机上取得的粗糙木材。,從伐木機上取得的粗糙木材。,"Необработанная древесина, добытая из лесоруба."
-item.blueprint_king_water_bottle,설계도 왕생수,Blueprint: Royal Bottled Water,設計図 王の飲料水,蓝图：王之瓶装水,藍圖：王之瓶裝水,Чертёж: королевская вода
-item.blueprint_king_water_bottle.desc,왕생수 제조법을 등록할 수 있는 설계도다,A blueprint that unlocks the royal bottled water recipe,王の飲料水の製造法を登録できる設計図,可解锁王之瓶装水制作配方的蓝图。,可解鎖王之瓶裝水製作配方的藍圖。,"Чертёж, открывающий рецепт королевской воды."
+item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材,从伐木机上取得的粗糙木材。,從伐木機上取得的粗糙木材。,"Необработанная древесина, полученная от робота-лесоруба."
+item.blueprint_king_water_bottle,설계도 왕생수,Blueprint: Jumbo Bottled Water,設計図 特大の飲料水,蓝图：超大瓶装水,藍圖：超大瓶裝水,Чертёж: огромная бутылка воды
+item.blueprint_king_water_bottle.desc,왕생수 제조법을 등록할 수 있는 설계도다,A blueprint that unlocks the jumbo bottled water recipe,特大の飲料水の製造法を登録できる設計図,可解锁超大瓶装水制作配方的蓝图。,可解鎖超大瓶裝水製作配方的藍圖。,"Чертёж, открывающий рецепт огромной бутылки воды."
 item.ancient_coin,옛 문명의 동전,Ancient Civilization Coin,古代文明の硬貨,古文明硬币,古文明硬幣,Монета древней цивилизации
 item.ancient_coin.desc,로켓 모양 탑이 양각된 오래된 동전이다. 함께 발견되는 왕국은행권 때문에 종교단체의 물건으로 오해받곤 한다.,An old coin embossed with a rocket-shaped tower. It is often found with Kingdom Banknotes and is sometimes mistaken for a religious group relic.,ロケット型の塔が浮き彫りになった古い硬貨。王国銀行券と一緒に見つかるため宗教団体の遺物と誤解されることがある。,印有火箭形塔楼浮雕的古老硬币。因为常与王国纸币一同出土，偶尔被误认为宗教团体的遗物。,印有火箭形塔樓浮雕的古老硬幣。因爲常與王國紙幣一同出土，偶爾被誤認爲宗教團體的遺物。,Старинная монета с рельефом башни в форме ракеты. Из-за найденных рядом банкнот Королевства её иногда принимают за религиозную реликвию.
 item.ancient_banknote,옛 문명의 지폐,Ancient Civilization Banknote,古代文明の紙幣,古文明纸币,古文明紙幣,Банкнота древней цивилизации
-item.ancient_banknote.desc,왕국은행권이라 불리는 오래된 지폐다. 둥근 머리와 몸통의 사람 실루엣 때문에 종교단체의 상징물로 오해받곤 한다.,An old note known as a Kingdom Banknote. Its simple round-headed human silhouette is sometimes mistaken for a religious group symbol.,王国銀行券と呼ばれる古い紙幣。丸い頭と胴体だけの人型シルエットのため宗教団体の象徴と誤解されることがある。,被称为王国纸币的古老钞票。由于印有圆头人形的简单剪影，偶尔被误认为宗教团体的标志。,被稱爲王國紙幣的古老鈔票。由於印有圓頭人形的簡單剪影，偶爾被誤認爲宗教團體的標誌。,"Старинная купюра, известная как банкнота Королевства. Простой силуэт человека с круглой головой иногда принимают за символ религиозной группы."
+item.ancient_banknote.desc,왕국은행권이라 불리는 오래된 지폐다. 둥근 머리와 몸통의 사람 실루엣 때문에 종교단체의 상징물로 오해받곤 한다.,An old note known as a Kingdom Banknote. Its simple round-headed human silhouette is sometimes mistaken for a religious group symbol.,王国銀行券と呼ばれる古い紙幣。丸い頭と胴体だけの人型シルエットのため宗教団体の象徴と誤解されることがある。,被称为王国纸币的古老钞票。由于印有圆头人形的简单剪影，偶尔被误认为宗教团体的标志。,被稱爲王國紙幣的古老鈔票。由於印有圓頭人形的簡單剪影，偶爾被誤認爲宗教團體的標誌。,"Старинная купюра, известная как банкнота Королевства. Из-за силуэта человека с круглой головой и округлым туловищем её иногда принимают за символ религиозной группы."
 item.crowbar,쇠지렛대,Crowbar,バール,撬棍,撬棍,Лом
 item.crowbar.desc,근접무기로도 쓰는 튼튼한 쇠지렛대다. 취수 스크린에 걸린 수초와 이물질을 걷어낼 수 있다.,A sturdy crowbar that doubles as a melee weapon and clears weeds and debris from the water-intake screen,近接武器にもなる頑丈なバール。取水スクリーンに絡まった水草や異物を取り除ける。,结实的撬棍，也可用作近战武器。能清除取水滤网上的水草和杂物。,結實的撬棍，也可用作近戰武器。能清除取水濾網上的水草和雜物。,Прочный лом можно использовать как оружие ближнего боя и для очистки водозаборной сетки от водорослей и мусора.
 item.replacement_valve_handle,교체용 밸브 손잡이,Replacement Valve Handle,交換用バルブハンドル,备用阀门手柄,備用閥門手柄,Запасная рукоятка клапана
 item.replacement_valve_handle.desc,취수 시설의 부러진 밸브에 맞는 교체용 손잡이다,A replacement handle that fits the broken valve at the water intake,取水施設の壊れたバルブに合う交換用ハンドルだ,适用于取水设施损坏阀门的备用手柄。,適用於取水設施損壞閥門的備用手柄。,Запасная рукоятка для сломанного клапана водозабора.
 item.waterproof_tape,방수 테이프,Waterproof Tape,防水テープ,防水胶带,防水膠帶,Водостойкая лента
-item.waterproof_tape.desc,벙커의 새는 배관을 임시로 막을 수 있는 두꺼운 방수 테이프다,Heavy waterproof tape that can temporarily seal a leaking bunker pipe,バンカーの水漏れする配管を一時的に塞げる厚手の防水テープだ,可暂时封住地堡漏水管道的厚实防水胶带。,可暫時封住地堡漏水管道的厚實防水膠帶。,Плотная водостойкая лента для временной герметизации протекающей трубы в бункере.
+item.waterproof_tape.desc,기지의 새는 배관을 임시로 막을 수 있는 두꺼운 방수 테이프다,Heavy waterproof tape that can temporarily seal a leaking base pipe,基地の水漏れする配管を一時的に塞げる厚手の防水テープだ,可暂时封住基地漏水管道的厚实防水胶带。,可暫時封住基地漏水管道的厚實防水膠帶。,Плотная водостойкая лента для временной герметизации протекающей трубы на базе.
 container.lumber_crate,목재 상자,Lumber Crate,木材箱,木材箱,木材箱,Ящик с древесиной
 container.developer_crate,개발상자,Developer Crate,開発箱,开发者箱,開發者箱,Ящик разработчика
 container.north_crate,북쪽 상자,North Crate,北側の箱,北侧箱子,北側箱子,Северный ящик
 item.pistol_advanced_ap_ammo,권총용 고급 철갑탄,Advanced AP Pistol Ammo,拳銃用高性能徹甲弾,高级穿甲手枪弹,高級穿甲手槍彈,Улучшенные бронебойные пистолетные патроны
-item.pistol_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня."
+item.pistol_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Боеприпасы с пробитием 4-го уровня. Базовый урон такой же, как у бронебойных патронов, но лучше пробивают броню высокого уровня."
 item.rifle_advanced_ap_ammo,소총용 고급 철갑탄,Advanced AP Rifle Ammo,ライフル用高性能徹甲弾,高级穿甲步枪弹,高級穿甲步槍彈,Улучшенные бронебойные винтовочные патроны
-item.rifle_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня."
+item.rifle_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Боеприпасы с пробитием 4-го уровня. Базовый урон такой же, как у бронебойных патронов, но лучше пробивают броню высокого уровня."
 item.shotgun_advanced_ap_ammo,산탄총용 고급 철갑탄,Advanced AP Shotgun Ammo,ショットガン用高性能徹甲弾,高级穿甲霰弹,高級穿甲霰彈,Улучшенные бронебойные патроны для дробовика
-item.shotgun_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Пробитие 4-го уровня. Базовый урон как у бронебойных патронов, но лучшее пробитие брони высокого уровня."
+item.shotgun_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Боеприпасы с пробитием 4-го уровня. Базовый урон такой же, как у бронебойных патронов, но лучше пробивают броню высокого уровня."
 item.ballistic_helmet_tier1,1등급 방탄 헬멧,Tier 1 Ballistic Helmet,等級1の防弾ヘルメット,1级防弹头盔,1級防彈頭盔,Баллистический шлем 1-го уровня
 item.ballistic_helmet_tier1.desc,방어 1등급 · 기본 방어력 1. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 1 · Base defense 1. Effective defense depends on ammunition penetration tier.,防御等級1・基本防御力1。弾薬の貫通等級に応じて実効防御力が変わる。,护甲等级1 · 基础防御1。实际防御取决于弹药穿透等级。,護甲等級1 · 基礎防禦1。實際防禦取決於彈藥穿透等級。,Броня 1-го уровня · Базовая защита 1. Эффективная защита зависит от уровня пробития боеприпасов.
 item.body_armor_tier3,3등급 방탄복,Tier 3 Body Armor,等級3の防弾ベスト,3级防弹衣,3級防彈衣,Бронежилет 3-го уровня
@@ -125,8 +125,8 @@ item.body_armor_tier4,4등급 방탄복,Tier 4 Body Armor,等級4の防弾ベス
 item.body_armor_tier4.desc,방어 4등급 · 기본 방어력 8. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 8. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力8。弾薬の貫通等級に応じて実効防御力が変わる。,护甲等级4 · 基础防御8。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦8。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 8. Эффективная защита зависит от уровня пробития боеприпасов.
 item.ballistic_helmet_tier4,4등급 방탄 헬멧,Tier 4 Ballistic Helmet,等級4の防弾ヘルメット,4级防弹头盔,4級防彈頭盔,Баллистический шлем 4-го уровня
 item.ballistic_helmet_tier4.desc,방어 4등급 · 기본 방어력 4. 탄약 관통 등급에 따라 실제 방어력이 달라진다.,Armor tier 4 · Base defense 4. Effective defense depends on ammunition penetration tier.,防御等級4・基本防御力4。弾薬の貫通等級に応じて実効防御力が変わる。,护甲等级4 · 基础防御4。实际防御取决于弹药穿透等级。,護甲等級4 · 基礎防禦4。實際防禦取決於彈藥穿透等級。,Броня 4-го уровня · Базовая защита 4. Эффективная защита зависит от уровня пробития боеприпасов.
-item.toot_toot,뿡뿡,Pfft,ぷぅ,噗噗,噗噗,Пуф
-item.toot_toot.desc,정체는 방귀다. 지금은 아무 쓸모 없이 인벤토리 한 칸만 차지한다.,A fart. Currently useless and only takes up an inventory slot.,正体はおなら。今のところ何の役にも立たず、インベントリを1枠占有するだけ。,其实就是个屁。目前毫无用处，只会占用一个背包栏位。,其實就是個屁。目前毫無用處，只會佔用一個揹包欄位。,Это пук. Пока что совершенно бесполезен и лишь занимает одну ячейку инвентаря.
+item.toot_toot,뿡뿡,Pfft,ぷぅ,噗噗,噗噗,Пук
+item.toot_toot.desc,정체는 방귀다. 지금은 아무 쓸모 없이 인벤토리 한 칸만 차지한다.,A fart. Currently useless and only takes up an inventory slot.,正体はおなら。今のところ何の役にも立たず、インベントリを1枠占有するだけ。,其实就是个屁。目前毫无用处，只会占用一个背包栏位。,其實就是個屁。目前毫無用處，只會佔用一個背包欄位。,Это пук. Пока что совершенно бесполезен и лишь занимает одну ячейку инвентаря.
 item.sweet_potato,고구마,Sweet Potato,サツマイモ,红薯,地瓜,Батат
 item.sweet_potato.desc,먹을 수 있는 고구마. 식량이나 납품 물자로 사용할 수 있다.,An edible sweet potato that can serve as food or supplies.,食料や納品物資として使えるサツマイモ。,可食用的红薯，可作为食物或交付物资。,可食用的地瓜，可作為食物或交付物資。,Съедобный батат. Подходит для еды или поставок.
 item.dog_food,개 사료,Dog Food,ドッグフード,狗粮,狗糧,Корм для собак
@@ -146,7 +146,7 @@ item.maintenance_tool_set.desc,기계 정비에 필요한 공구를 모아 둔 �
 item.industrial_lubricant,윤활오일,Lubricating Oil,潤滑オイル,润滑油,潤滑油,Смазочное масло
 item.industrial_lubricant.desc,기계 부품 사이의 마찰을 줄이는 윤활유.,Lubricant that reduces friction between machine parts.,機械部品の摩擦を減らす潤滑油。,减少机械零件之间摩擦的润滑油。,減少機械零件之間摩擦的潤滑油。,Смазка для уменьшения трения между деталями механизмов.
 item.broken_spark_plug,망가진 점화 플러그,Broken Spark Plug,壊れたスパークプラグ,损坏的火花塞,損壞的火星塞,Сломанная свеча зажигания
-item.broken_spark_plug.desc,손상되어 정상 부품으로 사용할 수 없는 점화 플러그.,A damaged spark plug that cannot be used as a working replacement.,破損しており交換部品としては使えないスパークプラグ。,已损坏的火花塞，不能作为正常替换零件使用。,已損壞的火星塞，不能作為正常替換零件使用。,"Повреждённая свеча зажигания, непригодная для замены рабочей детали."
+item.broken_spark_plug.desc,손상되어 정상 부품으로 사용할 수 없는 점화 플러그.,A damaged spark plug that cannot be used as a working replacement.,破損しており交換部品としては使えないスパークプラグ。,已损坏的火花塞，不能作为正常替换零件使用。,已損壞的火星塞，不能作為正常替換零件使用。,"Повреждённая свеча зажигания, непригодная к использованию."
 item.vehicle_spark_plug,차량용 점화 플러그,Vehicle Spark Plug,車両用スパークプラグ,车辆火花塞,車用火星塞,Автомобильная свеча зажигания
 item.vehicle_spark_plug.desc,차량 엔진에 사용하는 정상 상태의 점화 플러그.,A working spark plug for a vehicle engine.,車両のエンジンに使う正常なスパークプラグ。,适用于车辆发动机的完好火花塞。,適用於車輛引擎的完好火星塞。,Исправная свеча зажигания для двигателя транспортного средства.
 item.model_boat,모형배,Model Boat,模型の船,模型船,模型船,Модель корабля
@@ -161,7 +161,7 @@ item.water_valve,수도 밸브,Water Valve,水道バルブ,水阀,水閥,Вод�
 item.water_valve.desc,배관의 물 흐름을 조절하는 밸브.,A valve for controlling water flow through a pipe.,配管の水の流れを調節するバルブ。,控制管道水流的阀门。,控制管道水流的閥門。,Вентиль для регулировки потока воды в трубе.
 item.feather,깃털,Feather,羽根,羽毛,羽毛,Перо
 item.feather.desc,가볍고 부드러운 깃털.,A light and soft feather.,軽くて柔らかい羽根。,轻盈柔软的羽毛。,輕盈柔軟的羽毛。,Лёгкое и мягкое перо.
-item.heating_coil,전열코일,Heating Coil,電熱コイル,电热丝,電熱線圈,Нагревательная спираль
+item.heating_coil,전열코일,Heating Coil,電熱コイル,电热线圈,電熱線圈,Нагревательная спираль
 item.heating_coil.desc,전기를 열로 바꾸는 가열 부품.,A heating element that converts electricity into heat.,電気を熱に変える加熱部品。,将电能转化为热量的加热元件。,將電能轉化為熱量的加熱元件。,"Нагревательный элемент, преобразующий электричество в тепло."
 item.motor,모터,Motor,モーター,电机,馬達,Электродвигатель
 item.motor.desc,전기로 장치를 움직이는 소형 모터.,A compact electric motor for driving machinery.,電気で装置を動かす小型モーター。,用电驱动设备的小型电机。,用電驅動設備的小型馬達。,Компактный электродвигатель для привода механизмов.
@@ -169,22 +169,22 @@ item.high_capacity_capacitor,고용량 콘덴서,High-Capacity Capacitor,大容�
 item.high_capacity_capacitor.desc,전력 장치를 복구하거나 리프트를 수리하는 데 사용하는 고용량 콘덴서.,A high-capacity capacitor used to restore power systems or repair lifts.,電力設備の復旧やリフトの修理に使う大容量コンデンサー。,用于恢复供电系统或修复升降机的大容量电容器。,用於恢復供電系統或修復升降機的大容量電容器。,Конденсатор большой ёмкости для восстановления электроснабжения или ремонта подъёмников.
 item.super_electromagnet,초강력 전자석,Super Electromagnet,超強力電磁石,超强电磁铁,超強電磁鐵,Сверхмощный электромагнит
 item.super_electromagnet.desc,리프트를 수리하는 데 사용하는 초강력 전자석.,A super electromagnet used to repair a lift.,リフトの修理に使う超強力電磁石。,用于修复升降机的超强电磁铁。,用於修復升降機的超強電磁鐵。,Сверхмощный электромагнит для ремонта подъёмника.
-item.toot_toot_yellow,노란 뿡뿡,Yellow Pfft,黄色いぷぅ,黄色噗噗,黃色噗噗,Жёлтый пуф
-item.toot_toot_pink,분홍 뿡뿡,Pink Pfft,ピンクのぷぅ,粉色噗噗,粉紅噗噗,Розовый пуф
-item.toot_toot_yellow.desc,노란빛을 띠는 뿡뿡.,A yellow-tinted puff.,黄色がかったぷぅ。,带着黄色的噗噗。,帶著黃色的噗噗。,Пуф с жёлтым оттенком.
-item.toot_toot_pink.desc,분홍빛을 띠는 뿡뿡.,A pink-tinted puff.,ピンクがかったぷぅ。,带着粉色的噗噗。,帶著粉紅色的噗噗。,Пуф с розовым оттенком.
-item.high_output_power_converter,고출력 전력 변환 모듈,High-Output Power Converter Module,高出力電力変換モジュール,高功率电力转换模块,高功率電力轉換模組,Модуль преобразования питания высокой мощности
-item.high_output_power_converter.desc,손상된 전력 변환 장치를 복구해 설비에 공급할 수 있는 전력을 늘리는 모듈.,A module that restores a damaged power converter so it can supply more power to equipment.,損傷した電力変換装置を修復し、設備へ供給できる電力を増やすモジュール。,修复受损电力转换装置以提高设备供电能力的模块。,修復受損電力轉換裝置以提高設備供電能力的模組。,Модуль для ремонта преобразователя и восстановления мощности питания оборудования.
+item.toot_toot_yellow,노란 뿡뿡,Yellow Pfft,黄色いぷぅ,黄色噗噗,黃色噗噗,Жёлтый пук
+item.toot_toot_pink,분홍 뿡뿡,Pink Pfft,ピンクのぷぅ,粉色噗噗,粉紅噗噗,Розовый пук
+item.toot_toot_yellow.desc,노란빛을 띠는 뿡뿡.,A yellow-tinted Pfft.,黄色がかったぷぅ。,呈黄色的噗噗。,呈黃色的噗噗。,Пук с жёлтым оттенком.
+item.toot_toot_pink.desc,분홍빛을 띠는 뿡뿡.,A pink-tinted Pfft.,ピンクがかったぷぅ。,呈粉色的噗噗。,呈粉紅色的噗噗。,Пук с розовым оттенком.
+item.high_output_power_converter,고출력 전력 변환 모듈,High-Output Power Converter Module,高出力電力変換モジュール,高功率电力转换模块,高功率電力轉換模組,Мощный модуль преобразования энергии
+item.high_output_power_converter.desc,손상된 전력 변환 장치를 복구해 설비에 공급할 수 있는 전력을 늘리는 모듈.,A module that restores a damaged power converter so it can supply more power to equipment.,損傷した電力変換装置を修復し、設備へ供給できる電力を増やすモジュール。,修复受损电力转换装置以提高设备供电能力的模块。,修復受損電力轉換裝置以提高設備供電能力的模組。,"Модуль для ремонта повреждённого преобразователя и увеличения мощности, подаваемой на оборудование."
 item.power_control_server,전력 제어 서버,Power Control Server,電力制御サーバー,电力控制服务器,電力控制伺服器,Сервер управления питанием
 item.power_control_server.desc,감자 그림이 그려진 검은 금속 상자. 관제실의 전력 배분과 설비 제어를 담당하는 서버다.,A black metal box bearing a potato illustration. This server manages power distribution and equipment control in the control room.,ジャガイモの絵が描かれた黒い金属箱。管制室の電力配分と設備制御を担うサーバー。,印有土豆图案的黑色金属箱。用于控制室配电和设备控制的服务器。,印有馬鈴薯圖案的黑色金屬箱。用於控制室配電和設備控制的伺服器。,Чёрный металлический ящик с рисунком картофелины. Сервер управляет распределением питания и оборудованием диспетчерской.
 item.concentrated_explosive,고농축 폭발물,Concentrated Explosive,高濃縮爆薬,高浓缩炸药,高濃縮炸藥,Концентрированная взрывчатка
-item.concentrated_explosive.desc,시한장치가 붙은 유리병. 낙석에 설치하면 5초 후 폭발해 길을 연다.,A glass bottle with a timer. Install it on fallen rocks to clear the way after a five-second countdown.,時限装置付きのガラス瓶。落石に設置すると5秒後に爆発して道を開く。,装有计时器的玻璃瓶。放置在落石上后会在5秒后爆炸并清除道路。,裝有計時器的玻璃瓶。放置在落石上後會在5秒後爆炸並清除道路。,Стеклянная бутылка с таймером. Установите её на завале — через пять секунд взрыв расчистит путь.
+item.concentrated_explosive.desc,시한장치가 붙은 유리병. 낙석에 설치하면 5초 후 폭발해 길을 연다.,A glass bottle with a timer. Install it on fallen rocks to clear the way after a five-second countdown.,時限装置付きのガラス瓶。落石に設置すると5秒後に爆発して道を開く。,装有计时器的玻璃瓶。安装在落石上，5秒后会爆炸，炸开通路。,裝有計時器的玻璃瓶。安裝在落石上，5秒後會爆炸，炸開通路。,Стеклянная бутылка с таймером. Установите её на завале — через пять секунд взрыв расчистит путь.
 item.desk_clock,탁상시계,Desk Clock,置き時計,台钟,座鐘,Настольные часы
 item.desk_clock.desc,작업대에서 제작 재료로 사용할 수 있는 작은 탁상시계.,A small desk clock that can be used as a crafting material at a workbench.,作業台で製作素材として使える小さな置き時計。,可在工作台上用作制作材料的小台钟。,可在工作臺上用作製作材料的小座鐘。,Небольшие настольные часы. Можно использовать как материал для изготовления предметов на верстаке.
 item.rabbit_token,토끼코인,Rabbit Token,ウサギコイン,兔子代币,兔子代幣,Кроличий жетон
-item.rabbit_token.desc,토끼 바이크가 지니고 있던 자판기용 코인.,A vending-machine token carried by a rabbit trike.,ウサギ三輪ロボットが持っていた自販機用コイン。,兔子三轮机器人携带的自动售货机代币。,兔子三輪機器人攜帶的自動販賣機代幣。,Жетон для торгового автомата из кроличьего трицикла.
+item.rabbit_token.desc,토끼 바이크가 지니고 있던 자판기용 코인.,A vending-machine token carried by a rabbit bike.,ウサギバイクが持っていた自販機用コイン。,兔子三轮机器人携带的自动售货机代币。,兔子三輪機器人攜帶的自動販賣機代幣。,Жетон для торгового автомата из кроличьего трицикла.
 item.empty_launcher_tube,빈 발사관,Empty Launcher Tube,空の発射管,空发射管,空發射管,Пустая пусковая труба
-item.empty_launcher_tube.desc,토끼 바이크에서 회수한 빈 발사관. 로켓무기를 만드는 데 사용한다.,An empty launcher tube recovered from a rabbit bike. Used to craft a rocket launcher.,ウサギバイクから回収した空の発射管。ロケットランチャーの製作に使用する。,从兔子摩托车回收的空发射管。用于制作火箭发射器。,從兔子摩托車回收的空發射管。用於製作火箭發射器。,Пустая пусковая труба с кроличьего мотоцикла. Используется для изготовления ракетной пусковой установки.
+item.empty_launcher_tube.desc,토끼 바이크에서 회수한 빈 발사관. 로켓무기를 만드는 데 사용한다.,An empty launcher tube recovered from a rabbit bike. Used to craft a rocket launcher.,ウサギバイクから回収した空の発射管。ロケットランチャーの製作に使用する。,从兔子三轮机器人回收的空发射管。用于制作火箭发射器。,從兔子三輪機器人回收的空發射管。用於製作火箭發射器。,Пустая пусковая труба с кроличьего трицикла. Используется для изготовления ракетной пусковой установки.
 item.high_output_motor,고출력 모터,High-Output Motor,高出力モーター,高功率电机,高功率馬達,Мощный электродвигатель
 item.high_output_motor.desc,무거운 화물을 끌어올리기 위해 구동력을 강화한 모터. 화물용 엘리베이터 같은 대형 운반 설비에 사용한다.,A reinforced motor built to lift heavy cargo. Used in large transport machinery such as freight elevators.,重い貨物を引き上げるために駆動力を強化したモーター。貨物用エレベーターなどの大型運搬設備に使われる。,为提升重型货物而增强驱动力的电机。用于货运电梯等大型搬运设备。,為提升重型貨物而增強驅動力的馬達。用於貨運電梯等大型搬運設備。,Усиленный электродвигатель для подъёма тяжёлых грузов. Используется в грузовых лифтах и другом крупном транспортном оборудовании.
 item.gourmet_tuna,미식 참치 통조림,Gourmet Canned Tuna,高級ツナ缶,高级金枪鱼罐头,高級鮪魚罐頭,Изысканные консервы из тунца
