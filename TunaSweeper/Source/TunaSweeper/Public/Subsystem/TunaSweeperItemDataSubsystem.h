@@ -13,8 +13,7 @@ enum class ETunaSweeperItemTextLanguage : uint8
 	Japanese UMETA(DisplayName = "Japanese"),
 	SimplifiedChinese UMETA(DisplayName = "Simplified Chinese"),
 	TraditionalChinese UMETA(DisplayName = "Traditional Chinese"),
-	Russian UMETA(DisplayName = "Russian"),
-	BrazilianPortuguese UMETA(DisplayName = "Brazilian Portuguese")
+	Russian UMETA(DisplayName = "Russian")
 };
 
 UENUM(BlueprintType)
@@ -227,9 +226,6 @@ struct TUNASWEEPER_API FTunaSweeperItemNameString
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FText Russian;
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
-	FText BrazilianPortuguese;
 };
 
 USTRUCT(BlueprintType)

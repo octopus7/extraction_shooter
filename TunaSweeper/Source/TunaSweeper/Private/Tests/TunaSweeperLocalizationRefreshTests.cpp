@@ -18,7 +18,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Rendering/SlateRenderer.h"
 #include "UI/TunaSweeperUIFont.h"
-#include "Subsystem/TunaSweeperAdditionalTranslations.h"
+#include "Serialization/Csv/CsvParser.h"
 #include "HAL/FileManager.h"
 #include "Internationalization/Internationalization.h"
 #include "Internationalization/Culture.h"
@@ -137,8 +137,8 @@ bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 	UTunaSweeperOptionRowWidget* LanguageRow = Cast<UTunaSweeperOptionRowWidget>(
 		FindNestedWidget(Intro.Get(), TEXT("InterfaceLanguageOptionRow")));
 	if (!TestNotNull(TEXT("Language selector exists"), LanguageRow)) return false;
-	const TCHAR* LanguageNames[] = {TEXT("English"), TEXT("한국어"), TEXT("日本語"),
-		TEXT("简体中文"), TEXT("繁體中文"), TEXT("Русский"), TEXT("Português (Brasil)")};
+	const TCHAR* LanguageNames[] = {TEXT("English"), TEXT("日本語"), TEXT("한국어"),
+		TEXT("简体中文"), TEXT("繁體中文"), TEXT("Русский")};
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(LanguageNames); ++Index)
 	{
 		LanguageRow->OnStepRequested.Broadcast(Index == 0 ? 0 : 1);
@@ -177,21 +177,21 @@ bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FTunaSweeperAdditionalLanguagesTest,
-	"TunaSweeper.UI.Localization.AdditionalLanguages",
+	FTunaSweeperSupportedLanguagesTest,
+	"TunaSweeper.UI.Localization.SupportedLanguages",
 	TunaSweeperLocalizationRefreshTests::TestFlags)
 
-bool FTunaSweeperAdditionalLanguagesTest::RunTest(const FString& Parameters)
+bool FTunaSweeperSupportedLanguagesTest::RunTest(const FString& Parameters)
 {
 	const UTunaSweeperTextSubsystem* Strings = GetDefault<UTunaSweeperTextSubsystem>();
 	if (!TestTrue(TEXT("Text data loads"), Strings->LoadTextData(true))) return false;
-	// Existing enum values 0-2 must remain stable for serialized references.
-	const TCHAR* Expected[] = { TEXT("下车"), TEXT("下車"), TEXT("Выйти"), TEXT("Descer") };
+	// Exercise the six languages in settings display order.
+	const TCHAR* Expected[] = { TEXT("Dismount"), TEXT("降りる"), TEXT("내리기"), TEXT("下车"), TEXT("下車"), TEXT("Выйти") };
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(Expected); ++Index)
 	{
 		FText Text;
-		TestTrue(TEXT("Additional language resolves"), Strings->TryGetTextByKey(
-			TEXT("ui.vehicle.dismount"), static_cast<ETunaSweeperItemTextLanguage>(Index + 3), Text));
+		TestTrue(TEXT("Supported language resolves"), Strings->TryGetTextByKey(
+			TEXT("ui.vehicle.dismount"), TunaSweeperLanguage::SupportedLanguages[Index], Text));
 		TestEqual(TEXT("Selected translation is returned"), Text.ToString(), FString(Expected[Index]));
 	}
 	return true;
@@ -217,9 +217,6 @@ bool FTunaSweeperLanguageCodesTest::RunTest(const FString& Parameters)
 		{TEXT("zh-Hant-CN"), ETunaSweeperItemTextLanguage::TraditionalChinese},
 		{TEXT("zh-Hans-HK"), ETunaSweeperItemTextLanguage::SimplifiedChinese},
 		{TEXT(" RU-ru "), ETunaSweeperItemTextLanguage::Russian},
-		{TEXT("pt-BR"), ETunaSweeperItemTextLanguage::BrazilianPortuguese},
-		{TEXT(" PT_br "), ETunaSweeperItemTextLanguage::BrazilianPortuguese},
-		{TEXT("pt"), ETunaSweeperItemTextLanguage::BrazilianPortuguese},
 		{TEXT("ja-JP"), ETunaSweeperItemTextLanguage::Japanese},
 		{TEXT("ko-KR"), ETunaSweeperItemTextLanguage::Korean},
 		{TEXT("en-US"), ETunaSweeperItemTextLanguage::English}};
@@ -229,7 +226,7 @@ bool FTunaSweeperLanguageCodesTest::RunTest(const FString& Parameters)
 		TestTrue(Pair.Key, TryParseLanguageCode(Pair.Key, Parsed));
 		TestTrue(TEXT("Locale resolves to expected language"), Parsed == Pair.Value);
 	}
-	for (const TCHAR* Invalid : {TEXT(""), TEXT("fr-FR"), TEXT("rubbish"), TEXT("english"), TEXT("pt-PT")})
+	for (const TCHAR* Invalid : {TEXT(""), TEXT("fr-FR"), TEXT("rubbish"), TEXT("english"), TEXT("pt-PT"), TEXT("pt-BR"), TEXT("pt"), TEXT(" PT_br ")})
 	{
 		auto Parsed = ETunaSweeperItemTextLanguage::Korean;
 		TestFalse(TEXT("Unsupported code is rejected"), TryParseLanguageCode(Invalid, Parsed));
@@ -284,11 +281,11 @@ bool FTunaSweeperLanguageDatasetsTest::RunTest(const FString& Parameters)
 		!TestTrue(TEXT("Quests load"), Quests->LoadQuestData()) ||
 		!TestTrue(TEXT("Scenarios load"), Scenarios->LoadScenarioData()) ||
 		!TestTrue(TEXT("UI, memo and difficulty load"), Strings->LoadTextData())) return false;
-	const TCHAR* ItemExpected[] = {TEXT("手枪"), TEXT("手槍"), TEXT("Пистолет"), TEXT("Pistola")};
-	const TCHAR* QuestExpected[] = {TEXT("任务"), TEXT("任務"), TEXT("Задания"), TEXT("Missões")};
-	const TCHAR* MemoExpected[] = {TEXT("另一片森林"), TEXT("另一片森林"), TEXT("Другой лес"), TEXT("Outra floresta")};
-	const TCHAR* DifficultyExpected[] = {TEXT("搜集"), TEXT("蒐集"), TEXT("Сбор ресурсов"), TEXT("Coleta")};
-	const TCHAR* SpeakerExpected[] = {TEXT("露娜"), TEXT("露娜"), TEXT("Луна"), TEXT("Luna")};
+	const TCHAR* ItemExpected[] = {TEXT("手枪"), TEXT("手槍"), TEXT("Пистолет")};
+	const TCHAR* QuestExpected[] = {TEXT("任务"), TEXT("任務"), TEXT("Задания")};
+	const TCHAR* MemoExpected[] = {TEXT("灰色的家伙最弱。"), TEXT("灰色的傢伙最弱。"), TEXT("Серые — самые слабые.")};
+	const TCHAR* DifficultyExpected[] = {TEXT("搜集"), TEXT("蒐集"), TEXT("Сбор ресурсов")};
+	const TCHAR* SpeakerExpected[] = {TEXT("露娜"), TEXT("露娜"), TEXT("Луна")};
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(ItemExpected); ++Index)
 	{
 		const auto Language = static_cast<ETunaSweeperItemTextLanguage>(Index + 3);
@@ -298,7 +295,7 @@ bool FTunaSweeperLanguageDatasetsTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("Item translation"), Text.ToString(), FString(ItemExpected[Index]));
 		TestTrue(TEXT("Quest key resolves"), Quests->TryGetQuestTextByKey(TEXT("quest.ui.title"), Language, Text));
 		TestEqual(TEXT("Quest translation"), Text.ToString(), FString(QuestExpected[Index]));
-		TestTrue(TEXT("Memo key resolves"), Strings->TryGetTextByKey(TEXT("memo.1.title"), Language, Text));
+		TestTrue(TEXT("Memo key resolves"), Strings->TryGetTextByKey(TEXT("memo.1.body"), Language, Text));
 		TestEqual(TEXT("Memo translation"), Text.ToString(), FString(MemoExpected[Index]));
 		TestTrue(TEXT("Difficulty key resolves"), Strings->TryGetTextByKey(TEXT("difficulty.stage.1.title"), Language, Text));
 		TestEqual(TEXT("Difficulty translation"), Text.ToString(), FString(DifficultyExpected[Index]));
@@ -311,46 +308,27 @@ bool FTunaSweeperLanguageDatasetsTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FTunaSweeperTranslationCompatibilityTest,
-	"TunaSweeper.UI.Localization.TranslationCompatibility",
-	TunaSweeperLocalizationRefreshTests::TestFlags)
-
-bool FTunaSweeperTranslationCompatibilityTest::RunTest(const FString& Parameters)
+    FTunaSweeperUnifiedLanguageCsvTest,
+    "TunaSweeper.UI.Localization.UnifiedLanguageCsv",
+    TunaSweeperLocalizationRefreshTests::TestFlags)
+bool FTunaSweeperUnifiedLanguageCsvTest::RunTest(const FString& Parameters)
 {
-	const FString Directory = FPaths::ProjectSavedDir() / (TEXT("TranslationTest-") + FGuid::NewGuid().ToString());
-	const FString TranslationDirectory = Directory / TEXT("Translations");
-	const FString SourcePath = Directory / TEXT("Strings.csv");
-	const FString TranslationPath = TranslationDirectory / TEXT("Strings.csv");
-	IFileManager::Get().MakeDirectory(*TranslationDirectory, true);
-	ON_SCOPE_EXIT
-	{
-		IFileManager::Get().Delete(*TranslationPath);
-		IFileManager::Get().DeleteDirectory(*TranslationDirectory);
-		IFileManager::Get().DeleteDirectory(*Directory);
-	};
-	FTunaSweeperAdditionalTranslations Translations;
-	TestTrue(TEXT("Missing translation pack is optional"), Translations.Load(SourcePath));
-	const TCHAR* CsvCases[] = {
-		TEXT("string_key,zh-Hans,zh-Hant,ru\nkey,简,繁,Привет\n"),
-		TEXT("string_key,zh-Hans,zh-Hant,ru,pt-BR\nkey,简,繁,Привет,\n"),
-		TEXT("string_key,zh-Hans,zh-Hant,ru,pt-BR\nkey,简,繁,Привет,Olá\n")};
-	for (int32 Index = 0; Index < UE_ARRAY_COUNT(CsvCases); ++Index)
-	{
-		if (!TestTrue(TEXT("Fixture CSV written"), FFileHelper::SaveStringToFile(CsvCases[Index], *TranslationPath))) return false;
-		TestTrue(TEXT("Legacy and extended translation packs load"), Translations.Load(SourcePath));
-		FTunaSweeperLocalizedTextString Text;
-		Text.English = FText::FromString(TEXT("Hello"));
-		Translations.Apply(TEXT("key"), Text);
-		TestEqual(TEXT("Portuguese missing-cell fallback"),
-			TunaSweeperLanguage::Resolve(Text, ETunaSweeperItemTextLanguage::BrazilianPortuguese).ToString(),
-			FString(Index == 2 ? TEXT("Olá") : TEXT("Hello")));
-		TestEqual(TEXT("Existing translations remain available"), Text.Russian.ToString(), FString(TEXT("Привет")));
-	}
-	const FString Conflict = TEXT("string_key,zh-Hans,zh-Hant,ru,pt-BR\nkey,a,b,c,Olá\nkey,a,b,c,Outro\n");
-	FFileHelper::SaveStringToFile(Conflict, *TranslationPath);
-	AddExpectedError(TEXT("Conflicting translation key"), EAutomationExpectedErrorFlags::Contains, 1);
-	TestFalse(TEXT("Conflicting Portuguese duplicates are rejected"), Translations.Load(SourcePath));
-	return true;
+    const TCHAR* Expected[] = {TEXT("string_key"), TEXT("ko"), TEXT("en"), TEXT("ja"), TEXT("zh-Hans"), TEXT("zh-Hant"), TEXT("ru")};
+    for (const TCHAR* Name : {TEXT("UITextStrings.csv"), TEXT("ItemNameStrings.csv"), TEXT("QuestTextStrings.csv"), TEXT("ScenarioTextStrings.csv"), TEXT("MemoTextStrings.csv"), TEXT("DifficultyTextStrings.csv")})
+    {
+        FString Content;
+        if (!TestTrue(TEXT("Unified CSV exists"), FFileHelper::LoadFileToString(Content, *(FPaths::ProjectContentDir() / TEXT("Data") / Name)))) return false;
+        FCsvParser Parser(Content);
+        const auto& Rows = Parser.GetRows();
+        if (!TestTrue(TEXT("CSV has header and data"), Rows.Num() > 1)) return false;
+        for (int32 Row = 0; Row < Rows.Num(); ++Row)
+            if (!TestEqual(TEXT("Every row has key plus six languages"), Rows[Row].Num(), 7)) return false;
+        for (int32 Col = 0; Col < UE_ARRAY_COUNT(Expected); ++Col)
+            TestEqual(TEXT("Unified language columns"), FString(Rows[0][Col]), FString(Expected[Col]));
+        TestFalse(TEXT("No separate translation file"), FPaths::FileExists(FPaths::ProjectContentDir() / TEXT("Data/Translations") / Name));
+    }
+    TestEqual(TEXT("Exactly six supported languages"), static_cast<int32>(UE_ARRAY_COUNT(TunaSweeperLanguage::SupportedLanguages)), 6);
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(

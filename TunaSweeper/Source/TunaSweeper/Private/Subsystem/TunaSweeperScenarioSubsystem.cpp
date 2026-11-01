@@ -1,7 +1,6 @@
 #include "Subsystem/TunaSweeperScenarioSubsystem.h"
 #include "Quest/TunaSweeperQuestId.h"
 #include "Settings/TunaSweeperLanguage.h"
-#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -345,12 +344,6 @@ bool UTunaSweeperScenarioSubsystem::LoadScenarioTextStringsCsv()
 		return false;
 	}
 
-	FTunaSweeperAdditionalTranslations AdditionalTranslations;
-	if (!AdditionalTranslations.Load(CsvPath))
-	{
-		return false;
-	}
-
 	FCsvParser Parser(CsvContent);
 	const FCsvParser::FRows& Rows = Parser.GetRows();
 	if (Rows.Num() < 2)
@@ -358,12 +351,15 @@ bool UTunaSweeperScenarioSubsystem::LoadScenarioTextStringsCsv()
 		return false;
 	}
 	const TArray<const TCHAR*>& Header = Rows[0];
-	if (!TunaSweeperScenarioData::GetCsvCell(Header, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) ||
+	if (Header.Num() != 7 || !TunaSweeperScenarioData::GetCsvCell(Header, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) ||
 		!TunaSweeperScenarioData::GetCsvCell(Header, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) ||
 		!TunaSweeperScenarioData::GetCsvCell(Header, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) ||
-		!TunaSweeperScenarioData::GetCsvCell(Header, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase))
+		!TunaSweeperScenarioData::GetCsvCell(Header, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase) ||
+		!TunaSweeperScenarioData::GetCsvCell(Header, 4).Equals(TEXT("zh-Hans"), ESearchCase::IgnoreCase) ||
+		!TunaSweeperScenarioData::GetCsvCell(Header, 5).Equals(TEXT("zh-Hant"), ESearchCase::IgnoreCase) ||
+		!TunaSweeperScenarioData::GetCsvCell(Header, 6).Equals(TEXT("ru"), ESearchCase::IgnoreCase))
 	{
-		UE_LOG(LogTunaSweeperScenarioData, Error, TEXT("Scenario CSV header must be string_key,ko,en,ja: %s"), *CsvPath);
+		UE_LOG(LogTunaSweeperScenarioData, Error, TEXT("Scenario CSV header must be string_key,ko,en,ja,zh-Hans,zh-Hant,ru: %s"), *CsvPath);
 		return false;
 	}
 
@@ -390,7 +386,9 @@ bool UTunaSweeperScenarioSubsystem::LoadScenarioTextStringsCsv()
 		Text.Korean = FText::FromString(Korean);
 		Text.English = FText::FromString(English);
 		Text.Japanese = FText::FromString(Japanese);
-		AdditionalTranslations.Apply(StringKey, Text);
+		Text.SimplifiedChinese = FText::FromString(TunaSweeperScenarioData::GetCsvCell(Row, 4));
+		Text.TraditionalChinese = FText::FromString(TunaSweeperScenarioData::GetCsvCell(Row, 5));
+		Text.Russian = FText::FromString(TunaSweeperScenarioData::GetCsvCell(Row, 6));
 		ScenarioTextStringsByKey.Add(StringKey, MoveTemp(Text));
 	}
 	return !ScenarioTextStringsByKey.IsEmpty();

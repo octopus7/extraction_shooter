@@ -22,7 +22,7 @@ try {
             continue
         }
         $header = Get-Content -LiteralPath $path -Encoding UTF8 -TotalCount 1
-        if ($null -eq $header -or $header.Trim() -ne 'string_key,ko,en,ja') {
+        if ($null -eq $header -or $header.Trim() -ne 'string_key,ko,en,ja,zh-Hans,zh-Hant,ru') {
             Write-Host ($messages.Header -f $path)
             $errors++
             continue
@@ -39,7 +39,7 @@ try {
                 Write-Host ($messages.Duplicate -f $path, $key)
                 $errors++
             } else { $keys[$key] = $true }
-            $missing = @('ko', 'en', 'ja' | Where-Object { [string]::IsNullOrWhiteSpace([string]$row.$_) })
+            $missing = @('ko', 'en', 'ja', 'zh-Hans', 'zh-Hant', 'ru' | Where-Object { [string]::IsNullOrWhiteSpace([string]$row.$_) })
             if ($missing.Count -gt 0) {
                 Write-Host ($messages.Missing -f $path, $key, ($missing -join ','))
                 $errors++

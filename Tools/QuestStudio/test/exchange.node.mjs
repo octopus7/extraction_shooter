@@ -177,3 +177,9 @@ test('both BAT launchers work from another directory with a synthetic authentica
   assert.equal(JSON.parse(fs.readFileSync(path.join(payload, 'Data/QuestStudioMetadata.json')))['1'].x, 123);
   assert(![upload.stdout,upload.stderr,download.stdout,download.stderr].join('').includes('synthetic-password'));
 }));
+
+test('game CSV exports exactly six official languages even with Korean-only input', () => {
+  const csv = exchange.writeStrings([...strings, { key: 'q.title', locale: 'pt-BR', value: 'Removed' }]);
+  assert.equal(csv.split('\r\n')[0], 'string_key,ko,en,ja,zh-Hans,zh-Hant,ru');
+  assert.deepEqual(exchange.parseStrings(csv), strings);
+});

@@ -20,13 +20,13 @@ test('retired demo catalog is empty and scenarios have no dangling quest referen
 });
 
 test('quest-specific translations retire together while shared UI strings remain', () => {
-  for (const name of ['QuestTextStrings.csv', 'Translations/QuestTextStrings.csv']) {
+  for (const name of ['QuestTextStrings.csv']) {
     const rows = parse(read(name), { columns: true, skip_empty_lines: true, bom: true });
     assert.ok(rows.length > 0, `${name} must keep shared strings`);
     assert.ok(rows.every((row) => !row.string_key.startsWith('quest.demo_q')));
     assert.ok(rows.some((row) => row.string_key === 'quest.ui.title'));
   }
-  for (const name of ['ScenarioTextStrings.csv', 'Translations/ScenarioTextStrings.csv']) {
+  for (const name of ['ScenarioTextStrings.csv']) {
     const rows = parse(read(name), { columns: true, skip_empty_lines: true, bom: true });
     assert.ok(rows.every((row) => !row.string_key.startsWith('scenario.demo.ending.dinner.')));
     assert.ok(rows.some((row) => row.string_key === 'scenario.demo.bunker_toilet.line1'));

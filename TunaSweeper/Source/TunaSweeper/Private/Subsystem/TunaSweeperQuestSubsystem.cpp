@@ -1,7 +1,6 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Quest/TunaSweeperQuestId.h"
 #include "Settings/TunaSweeperLanguage.h"
-#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
 #include "Dom/JsonObject.h"
 #include "Engine/Engine.h"
@@ -502,7 +501,7 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestTextByKey(
 	const bool bKoreanOnly = !QuestTextString->Korean.IsEmpty() &&
 		QuestTextString->English.IsEmpty() && QuestTextString->Japanese.IsEmpty() &&
 		QuestTextString->SimplifiedChinese.IsEmpty() && QuestTextString->TraditionalChinese.IsEmpty() &&
-		QuestTextString->Russian.IsEmpty() && QuestTextString->BrazilianPortuguese.IsEmpty();
+		QuestTextString->Russian.IsEmpty();
 	if (bKoreanOnly)
 	{
 		const FTunaSweeperQuestTextString* PreviewFormat = QuestTextStringsByKey.Find(TEXT("ui.quest.editor_korean_only_format"));
@@ -1400,13 +1399,6 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 			continue;
 		}
 
-		FTunaSweeperAdditionalTranslations AdditionalTranslations;
-		if (!AdditionalTranslations.Load(CsvPath))
-		{
-			bAllFilesValid = false;
-			continue;
-		}
-
 		FCsvParser CsvParser(CsvContent);
 		const FCsvParser::FRows& Rows = CsvParser.GetRows();
 		if (Rows.Num() < 1)
@@ -1417,14 +1409,17 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 		}
 
 		const TArray<const TCHAR*>& HeaderRow = Rows[0];
-		const bool bHeaderIsValid =
+		const bool bHeaderIsValid = HeaderRow.Num() == 7 &&
 			TunaSweeperQuestData::GetCsvCell(HeaderRow, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
 			TunaSweeperQuestData::GetCsvCell(HeaderRow, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
 			TunaSweeperQuestData::GetCsvCell(HeaderRow, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
-			TunaSweeperQuestData::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase) &&
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 4).Equals(TEXT("zh-Hans"), ESearchCase::IgnoreCase) &&
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 5).Equals(TEXT("zh-Hant"), ESearchCase::IgnoreCase) &&
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 6).Equals(TEXT("ru"), ESearchCase::IgnoreCase);
 		if (!bHeaderIsValid)
 		{
-			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV header must be string_key,ko,en,ja: %s"), *CsvPath);
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV header must be string_key,ko,en,ja,zh-Hans,zh-Hant,ru: %s"), *CsvPath);
 			bAllFilesValid = false;
 			continue;
 		}
@@ -1432,9 +1427,9 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 		for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
 		{
 			const TArray<const TCHAR*>& Row = Rows[RowIndex];
-			if (Row.Num() < 4)
+			if (Row.Num() != 7)
 			{
-				UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d in %s: expected 4 columns."), RowIndex, *CsvPath);
+				UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d in %s: expected 7 columns."), RowIndex, *CsvPath);
 				bAllFilesValid = false;
 				continue;
 			}
@@ -1459,7 +1454,9 @@ bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 			QuestTextString.Korean = FText::FromString(Korean);
 			QuestTextString.English = FText::FromString(English);
 			QuestTextString.Japanese = FText::FromString(Japanese);
-			AdditionalTranslations.Apply(QuestTextString.StringKey, QuestTextString);
+			QuestTextString.SimplifiedChinese = FText::FromString(TunaSweeperQuestData::GetCsvCell(Row, 4));
+			QuestTextString.TraditionalChinese = FText::FromString(TunaSweeperQuestData::GetCsvCell(Row, 5));
+			QuestTextString.Russian = FText::FromString(TunaSweeperQuestData::GetCsvCell(Row, 6));
 			if (QuestTextStringsByKey.Contains(QuestTextString.StringKey))
 			{
 				UE_LOG(LogTunaSweeperQuest, Error, TEXT("Duplicate quest text string key %s across build-flavor data. Keys may not override each other."), *StringKey);

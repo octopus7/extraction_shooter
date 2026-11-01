@@ -13,20 +13,23 @@ function Assert-Validation([string]$Flavor, [bool]$Success, [string[]]$Expected 
     foreach ($text in $Expected) { if (-not $output.Contains($text)) { throw "Missing diagnostic '$text': $output" } }
 }
 try {
-    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja`npublic.title,KO,EN,JA`n"
-    Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja`nmain.title,KO,,`nmain.description,KO,EN,`n"
+    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,EN,JA,SC,TC,RU`n"
+    Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nmain.title,KO,,,SC,TC,RU`nmain.description,KO,EN,,SC,TC,RU`n"
     Write-Fixture 'Authoring/QuestStudio/QuestStudioNotes.ko.csv' "string_key,ko`nnotes,KO`n"
     Assert-Validation Demo $true
     Assert-Validation Full $false @('main.title', 'main.description', 'en', 'ja', 'QuestTextStrings.csv')
-    Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja`nmain.title,KO,EN,JA`n"
+    Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nmain.title,KO,EN,JA,SC,TC,RU`n"
     Assert-Validation Full $true
-    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja`nquoted.title,`"KO, text`nsecond line`",EN,JA`n"
+    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nquoted.title,`"KO, text`nsecond line`",EN,JA,SC,TC,RU`n"
     Assert-Validation Demo $true
-    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja`npublic.title,KO,`"  `",JA`n"
+    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,`"  `",JA,SC,TC,RU`n"
     Assert-Validation Demo $false @('public.title', 'en')
     Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en`npublic.title,KO,EN`n"
     Assert-Validation Demo $false @('QuestTextStrings.csv')
-    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja`npublic.title,KO,,JA`n"
+    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,,JA,SC,TC,RU`n"
+    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nmissing.title,KO,EN,JA,,,`n"
+    Assert-Validation Demo $false @('missing.title', 'zh-Hans', 'zh-Hant', 'ru')
+    Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,,JA,SC,TC,RU`n"
     Write-Fixture 'TunaSweeper.uproject' '{}'
     Write-Fixture 'FakeUE/Engine/Build/BatchFiles/RunUAT.bat' "@echo UAT_REACHED`n@exit /b 77`n"
     Write-Fixture 'BuildScripts/BuildFlavorData.ps1' "throw 'PREPARE_REACHED'"
@@ -42,7 +45,7 @@ try {
                 throw "Packaging guard failed for $($bat.Name): $output"
             }
         }
-        Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja`npublic.title,KO,EN,JA`n"
+        Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,EN,JA,SC,TC,RU`n"
         Write-Fixture 'BuildScripts/BuildFlavorData.ps1' "Write-Output 'PREPARE_REACHED'"
         foreach ($bat in Get-ChildItem (Join-Path $fixture 'BatchScripts/Package*.bat')) {
             $output = & cmd.exe /d /c $bat.FullName 2>&1 | Out-String

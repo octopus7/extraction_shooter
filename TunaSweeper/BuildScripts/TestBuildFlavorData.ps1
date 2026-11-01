@@ -9,9 +9,9 @@ function Write-Fixture([string]$RelativePath, [string]$Content) {
 try {
     Write-Fixture 'External/MainPayload/main-payload.json' '{"schema_version":1,"build_flavor":"main","initial_level":"/Game/Test","quest_definitions":"Data/QuestDefinitions.json","quest_text_strings":"Data/QuestTextStrings.csv","scenario_definitions":"Data/ScenarioDefinitions.json","scenario_text_strings":"Data/ScenarioTextStrings.csv"}'
     Write-Fixture 'External/MainPayload/Data/QuestDefinitions.json' '[]'
-    Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja`n"
+    Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`n"
     Write-Fixture 'External/MainPayload/Data/ScenarioDefinitions.json' '{"schema_version":1,"build_flavor":"main","scenarios":[{"id":"fixture"}]}'
-    Write-Fixture 'External/MainPayload/Data/ScenarioTextStrings.csv' "string_key,ko,en,ja`n"
+    Write-Fixture 'External/MainPayload/Data/ScenarioTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`n"
     Write-Fixture 'BuildScripts/BuildFlavorData.ps1' (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'BuildFlavorData.ps1') -Raw)
     $script = Join-Path $fixture 'BuildScripts/BuildFlavorData.ps1'
     $staged = Join-Path $fixture 'Content/Data/MainPayloadStaged/Data'
@@ -41,7 +41,7 @@ try {
     }
     & $script -Mode PrepareMain
     Write-Fixture 'Content/Data/ScenarioDefinitions.json' '{"schema_version":1,"build_flavor":"demo","scenarios":[{"id":"fixture"}]}'
-    Write-Fixture 'Content/Data/ScenarioTextStrings.csv' "string_key,ko,en,ja`n"
+    Write-Fixture 'Content/Data/ScenarioTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`n"
     & $script -Mode PrepareDemo
     if (Test-Path -LiteralPath (Join-Path $fixture 'Content/Data/MainPayloadStaged')) { throw 'Demo retained Main runtime data.' }
     Write-Output 'PASS: optional runtime JSON staging, malformed JSON rejection, and Demo cleanup.'

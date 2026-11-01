@@ -9,12 +9,11 @@ namespace TunaSweeperLanguage
 	inline constexpr const TCHAR* LanguageKey = TEXT("Language");
 	inline constexpr ETunaSweeperItemTextLanguage SupportedLanguages[] = {
 		ETunaSweeperItemTextLanguage::English,
-		ETunaSweeperItemTextLanguage::Korean,
 		ETunaSweeperItemTextLanguage::Japanese,
+		ETunaSweeperItemTextLanguage::Korean,
 		ETunaSweeperItemTextLanguage::SimplifiedChinese,
 		ETunaSweeperItemTextLanguage::TraditionalChinese,
-		ETunaSweeperItemTextLanguage::Russian,
-		ETunaSweeperItemTextLanguage::BrazilianPortuguese};
+		ETunaSweeperItemTextLanguage::Russian};
 
 	TUNASWEEPER_API const TCHAR* ToLanguageCode(ETunaSweeperItemTextLanguage Language);
 	TUNASWEEPER_API bool TryParseLanguageCode(const FString& Code, ETunaSweeperItemTextLanguage& OutLanguage);
@@ -30,7 +29,6 @@ namespace TunaSweeperLanguage
 		case ETunaSweeperItemTextLanguage::SimplifiedChinese: Translation = &Text.SimplifiedChinese; break;
 		case ETunaSweeperItemTextLanguage::TraditionalChinese: Translation = &Text.TraditionalChinese; break;
 		case ETunaSweeperItemTextLanguage::Russian: Translation = &Text.Russian; break;
-		case ETunaSweeperItemTextLanguage::BrazilianPortuguese: Translation = &Text.BrazilianPortuguese; break;
 		default: break;
 		}
 		return Translation->IsEmpty() ? Text.English : *Translation;

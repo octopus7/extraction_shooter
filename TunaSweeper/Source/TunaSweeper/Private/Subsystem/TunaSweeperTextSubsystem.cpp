@@ -1,6 +1,5 @@
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "Settings/TunaSweeperLanguage.h"
-#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -95,12 +94,6 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, co
 		return false;
 	}
 
-	FTunaSweeperAdditionalTranslations AdditionalTranslations;
-	if (!AdditionalTranslations.Load(TextStringsCsvPath))
-	{
-		return false;
-	}
-
 	FCsvParser CsvParser(CsvContent);
 	const FCsvParser::FRows& Rows = CsvParser.GetRows();
 	if (Rows.Num() < 2)
@@ -110,14 +103,17 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, co
 	}
 
 	const TArray<const TCHAR*>& HeaderRow = Rows[0];
-	const bool bHeaderIsValid =
+	const bool bHeaderIsValid = HeaderRow.Num() == 7 &&
 		TunaSweeperText::GetCsvCell(HeaderRow, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
 		TunaSweeperText::GetCsvCell(HeaderRow, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
 		TunaSweeperText::GetCsvCell(HeaderRow, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
-		TunaSweeperText::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
+		TunaSweeperText::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase) &&
+		TunaSweeperText::GetCsvCell(HeaderRow, 4).Equals(TEXT("zh-Hans"), ESearchCase::IgnoreCase) &&
+		TunaSweeperText::GetCsvCell(HeaderRow, 5).Equals(TEXT("zh-Hant"), ESearchCase::IgnoreCase) &&
+		TunaSweeperText::GetCsvCell(HeaderRow, 6).Equals(TEXT("ru"), ESearchCase::IgnoreCase);
 	if (!bHeaderIsValid)
 	{
-		UE_LOG(LogTunaSweeperText, Error, TEXT("%s text strings CSV header must be string_key,ko,en,ja: %s"), DatasetLabel, *TextStringsCsvPath);
+		UE_LOG(LogTunaSweeperText, Error, TEXT("%s text strings CSV header must be string_key,ko,en,ja,zh-Hans,zh-Hant,ru: %s"), DatasetLabel, *TextStringsCsvPath);
 		return false;
 	}
 
@@ -125,9 +121,9 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, co
 	for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
 	{
 		const TArray<const TCHAR*>& Row = Rows[RowIndex];
-		if (Row.Num() < 4)
+		if (Row.Num() != 7)
 		{
-			UE_LOG(LogTunaSweeperText, Warning, TEXT("Skipping %s text row %d: expected 4 columns."), DatasetLabel, RowIndex);
+			UE_LOG(LogTunaSweeperText, Warning, TEXT("Skipping %s text row %d: expected 7 columns."), DatasetLabel, RowIndex);
 			continue;
 		}
 
@@ -146,7 +142,9 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, co
 		TextString.Korean = FText::FromString(Korean);
 		TextString.English = FText::FromString(English);
 		TextString.Japanese = FText::FromString(Japanese);
-		AdditionalTranslations.Apply(TextString.StringKey, TextString);
+		TextString.SimplifiedChinese = FText::FromString(TunaSweeperText::GetCsvCell(Row, 4));
+		TextString.TraditionalChinese = FText::FromString(TunaSweeperText::GetCsvCell(Row, 5));
+		TextString.Russian = FText::FromString(TunaSweeperText::GetCsvCell(Row, 6));
 
 		if (TextStringsByKey.Contains(TextString.StringKey))
 		{

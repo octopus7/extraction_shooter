@@ -1,62 +1,62 @@
-string_key,ko,en,ja
-memo.title_format,메모 {Number},Memo {Number},メモ {Number}
-memo.1.body,회색은 최약체다,The gray ones are the weakest.,灰色のやつが一番弱い。
-memo.2.body,메모 2 번,Memo 2,メモ 2 番
-memo.3.body,메모 3 번,Memo 3,メモ 3 番
-memo.4.body,메모 4 번,Memo 4,メモ 4 番
-memo.5.body,메모 5 번,Memo 5,メモ 5 番
-memo.6.body,메모 6 번,Memo 6,メモ 6 番
-memo.7.body,메모 7 번,Memo 7,メモ 7 番
-memo.8.body,메모 8 번,Memo 8,メモ 8 番
-memo.9.body,메모 9 번,Memo 9,メモ 9 番
-memo.10.body,작은 녀석이 뿜는 가스는 매우 강하다,The gas the little one emits is very potent.,小さなやつが放つガスは非常に強力だ。
-memo.11.body,강력한 폭발이 필요하다,A powerful explosion is needed.,強力な爆発が必要だ。
-memo.12.body,메모 12 번,Memo 12,メモ 12 番
-memo.13.body,메모 13 번,Memo 13,メモ 13 番
-memo.14.body,메모 14 번,Memo 14,メモ 14 番
-memo.15.body,메모 15 번,Memo 15,メモ 15 番
-memo.16.body,꿈의 물질 RK-89로 효율높은 철도 이동이 가능해질것이다.,The dream material RK-89 will make efficient rail travel possible.,夢の物質RK-89によって効率的な鉄道移動が可能になるだろう。
-memo.17.body,RK-89는 그냥 돌이다냥. 다른 연구실에서는 뜨지도 않았다냥. 철도보다 소문이 먼저 달리고 있다냥.,"RK-89 is just a rock, meow. Other labs couldn't even make it levitate, meow. The rumors are moving faster than the trains, meow.",RK-89はただの石だにゃ。他の研究室では浮きもしなかったにゃ。鉄道より先に噂が走っているにゃ。
-memo.18.body,메모 18 번,Memo 18,メモ 18 番
-memo.19.body,메모 19 번,Memo 19,メモ 19 番
-memo.20.body,메모 20 번,Memo 20,メモ 20 番
-memo.21.body,메모 21 번,Memo 21,メモ 21 番
-memo.22.body,메모 22 번,Memo 22,メモ 22 番
-memo.23.body,메모 23 번,Memo 23,メモ 23 番
-memo.24.body,메모 24 번,Memo 24,メモ 24 番
-memo.25.body,메모 25 번,Memo 25,メモ 25 番
-memo.26.body,메모 26 번,Memo 26,メモ 26 番
-memo.27.body,메모 27 번,Memo 27,メモ 27 番
-memo.28.body,메모 28 번,Memo 28,メモ 28 番
-memo.29.body,메모 29 번,Memo 29,メモ 29 番
-memo.30.body,메모 30 번,Memo 30,メモ 30 番
-memo.31.body,메모 31 번,Memo 31,メモ 31 番
-memo.32.body,메모 32 번,Memo 32,メモ 32 番
-memo.33.body,메모 33 번,Memo 33,メモ 33 番
-memo.34.body,메모 34 번,Memo 34,メモ 34 番
-memo.35.body,메모 35 번,Memo 35,メモ 35 番
-memo.36.body,메모 36 번,Memo 36,メモ 36 番
-memo.37.body,메모 37 번,Memo 37,メモ 37 番
-memo.38.body,메모 38 번,Memo 38,メモ 38 番
-memo.39.body,메모 39 번,Memo 39,メモ 39 番
-memo.40.body,메모 40 번,Memo 40,メモ 40 番
-memo.41.body,메모 41 번,Memo 41,メモ 41 番
-memo.42.body,메모 42 번,Memo 42,メモ 42 番
-memo.43.body,메모 43 번,Memo 43,メモ 43 番
-memo.44.body,메모 44 번,Memo 44,メモ 44 番
-memo.45.body,메모 45 번,Memo 45,メモ 45 番
-memo.46.body,메모 46 번,Memo 46,メモ 46 番
-memo.47.body,메모 47 번,Memo 47,メモ 47 番
-memo.48.body,메모 48 번,Memo 48,メモ 48 番
-memo.49.body,메모 49 번,Memo 49,メモ 49 番
-memo.50.body,메모 50 번,Memo 50,メモ 50 番
-memo.51.body,메모 51 번,Memo 51,メモ 51 番
-memo.52.body,메모 52 번,Memo 52,メモ 52 番
-memo.53.body,메모 53 번,Memo 53,メモ 53 番
-memo.54.body,메모 54 번,Memo 54,メモ 54 番
-memo.55.body,메모 55 번,Memo 55,メモ 55 番
-memo.56.body,메모 56 번,Memo 56,メモ 56 番
-memo.57.body,메모 57 번,Memo 57,メモ 57 番
-memo.58.body,메모 58 번,Memo 58,メモ 58 番
-memo.59.body,메모 59 번,Memo 59,メモ 59 番
-memo.60.body,메모 60 번,Memo 60,メモ 60 番
+string_key,ko,en,ja,zh-Hans,zh-Hant,ru
+memo.title_format,메모 {Number},Memo {Number},メモ {Number},备忘录 {Number},備忘錄 {Number},Записка {Number}
+memo.1.body,회색은 최약체다,The gray ones are the weakest.,灰色のやつが一番弱い。,灰色的家伙最弱。,灰色的傢伙最弱。,Серые — самые слабые.
+memo.2.body,메모 2 번,Memo 2,メモ 2 番,备忘录 2,備忘錄 2,Записка 2
+memo.3.body,메모 3 번,Memo 3,メモ 3 番,备忘录 3,備忘錄 3,Записка 3
+memo.4.body,메모 4 번,Memo 4,メモ 4 番,备忘录 4,備忘錄 4,Записка 4
+memo.5.body,메모 5 번,Memo 5,メモ 5 番,备忘录 5,備忘錄 5,Записка 5
+memo.6.body,메모 6 번,Memo 6,メモ 6 番,备忘录 6,備忘錄 6,Записка 6
+memo.7.body,메모 7 번,Memo 7,メモ 7 番,备忘录 7,備忘錄 7,Записка 7
+memo.8.body,메모 8 번,Memo 8,メモ 8 番,备忘录 8,備忘錄 8,Записка 8
+memo.9.body,메모 9 번,Memo 9,メモ 9 番,备忘录 9,備忘錄 9,Записка 9
+memo.10.body,작은 녀석이 뿜는 가스는 매우 강하다,The gas the little one emits is very potent.,小さなやつが放つガスは非常に強力だ。,小家伙释放的气体非常强劲。,小傢伙釋放的氣體非常強勁。,Газ этого малыша очень мощный.
+memo.11.body,강력한 폭발이 필요하다,A powerful explosion is needed.,強力な爆発が必要だ。,需要一次强力的爆炸。,需要一次強力的爆炸。,Нужен мощный взрыв.
+memo.12.body,메모 12 번,Memo 12,メモ 12 番,备忘录 12,備忘錄 12,Записка 12
+memo.13.body,메모 13 번,Memo 13,メモ 13 番,备忘录 13,備忘錄 13,Записка 13
+memo.14.body,메모 14 번,Memo 14,メモ 14 番,备忘录 14,備忘錄 14,Записка 14
+memo.15.body,메모 15 번,Memo 15,メモ 15 番,备忘录 15,備忘錄 15,Записка 15
+memo.16.body,꿈의 물질 RK-89로 효율높은 철도 이동이 가능해질것이다.,The dream material RK-89 will make efficient rail travel possible.,夢の物質RK-89によって効率的な鉄道移動が可能になるだろう。,梦幻材料RK-89将使高效的铁路出行成为可能。,夢幻材料RK-89將使高效的鐵路出行成為可能。,Материал мечты RK-89 сделает эффективные поездки по железной дороге возможными.
+memo.17.body,RK-89는 그냥 돌이다냥. 다른 연구실에서는 뜨지도 않았다냥. 철도보다 소문이 먼저 달리고 있다냥.,"RK-89 is just a rock, meow. Other labs couldn't even make it levitate, meow. The rumors are moving faster than the trains, meow.",RK-89はただの石だにゃ。他の研究室では浮きもしなかったにゃ。鉄道より先に噂が走っているにゃ。,RK-89不过是块石头喵。别的实验室连让它浮起来都做不到喵。传言跑得比火车还快喵。,RK-89不過是塊石頭喵。別的實驗室連讓它浮起來都做不到喵。傳言跑得比火車還快喵。,"RK-89 — просто камень, мяу. В других лабораториях он даже не взлетел, мяу. Слухи несутся быстрее поездов, мяу."
+memo.18.body,메모 18 번,Memo 18,メモ 18 番,备忘录 18,備忘錄 18,Записка 18
+memo.19.body,메모 19 번,Memo 19,メモ 19 番,备忘录 19,備忘錄 19,Записка 19
+memo.20.body,메모 20 번,Memo 20,メモ 20 番,备忘录 20,備忘錄 20,Записка 20
+memo.21.body,메모 21 번,Memo 21,メモ 21 番,备忘录 21,備忘錄 21,Записка 21
+memo.22.body,메모 22 번,Memo 22,メモ 22 番,备忘录 22,備忘錄 22,Записка 22
+memo.23.body,메모 23 번,Memo 23,メモ 23 番,备忘录 23,備忘錄 23,Записка 23
+memo.24.body,메모 24 번,Memo 24,メモ 24 番,备忘录 24,備忘錄 24,Записка 24
+memo.25.body,메모 25 번,Memo 25,メモ 25 番,备忘录 25,備忘錄 25,Записка 25
+memo.26.body,메모 26 번,Memo 26,メモ 26 番,备忘录 26,備忘錄 26,Записка 26
+memo.27.body,메모 27 번,Memo 27,メモ 27 番,备忘录 27,備忘錄 27,Записка 27
+memo.28.body,메모 28 번,Memo 28,メモ 28 番,备忘录 28,備忘錄 28,Записка 28
+memo.29.body,메모 29 번,Memo 29,メモ 29 番,备忘录 29,備忘錄 29,Записка 29
+memo.30.body,메모 30 번,Memo 30,メモ 30 番,备忘录 30,備忘錄 30,Записка 30
+memo.31.body,메모 31 번,Memo 31,メモ 31 番,备忘录 31,備忘錄 31,Записка 31
+memo.32.body,메모 32 번,Memo 32,メモ 32 番,备忘录 32,備忘錄 32,Записка 32
+memo.33.body,메모 33 번,Memo 33,メモ 33 番,备忘录 33,備忘錄 33,Записка 33
+memo.34.body,메모 34 번,Memo 34,メモ 34 番,备忘录 34,備忘錄 34,Записка 34
+memo.35.body,메모 35 번,Memo 35,メモ 35 番,备忘录 35,備忘錄 35,Записка 35
+memo.36.body,메모 36 번,Memo 36,メモ 36 番,备忘录 36,備忘錄 36,Записка 36
+memo.37.body,메모 37 번,Memo 37,メモ 37 番,备忘录 37,備忘錄 37,Записка 37
+memo.38.body,메모 38 번,Memo 38,メモ 38 番,备忘录 38,備忘錄 38,Записка 38
+memo.39.body,메모 39 번,Memo 39,メモ 39 番,备忘录 39,備忘錄 39,Записка 39
+memo.40.body,메모 40 번,Memo 40,メモ 40 番,备忘录 40,備忘錄 40,Записка 40
+memo.41.body,메모 41 번,Memo 41,メモ 41 番,备忘录 41,備忘錄 41,Записка 41
+memo.42.body,메모 42 번,Memo 42,メモ 42 番,备忘录 42,備忘錄 42,Записка 42
+memo.43.body,메모 43 번,Memo 43,メモ 43 番,备忘录 43,備忘錄 43,Записка 43
+memo.44.body,메모 44 번,Memo 44,メモ 44 番,备忘录 44,備忘錄 44,Записка 44
+memo.45.body,메모 45 번,Memo 45,メモ 45 番,备忘录 45,備忘錄 45,Записка 45
+memo.46.body,메모 46 번,Memo 46,メモ 46 番,备忘录 46,備忘錄 46,Записка 46
+memo.47.body,메모 47 번,Memo 47,メモ 47 番,备忘录 47,備忘錄 47,Записка 47
+memo.48.body,메모 48 번,Memo 48,メモ 48 番,备忘录 48,備忘錄 48,Записка 48
+memo.49.body,메모 49 번,Memo 49,メモ 49 番,备忘录 49,備忘錄 49,Записка 49
+memo.50.body,메모 50 번,Memo 50,メモ 50 番,备忘录 50,備忘錄 50,Записка 50
+memo.51.body,메모 51 번,Memo 51,メモ 51 番,备忘录 51,備忘錄 51,Записка 51
+memo.52.body,메모 52 번,Memo 52,メモ 52 番,备忘录 52,備忘錄 52,Записка 52
+memo.53.body,메모 53 번,Memo 53,メモ 53 番,备忘录 53,備忘錄 53,Записка 53
+memo.54.body,메모 54 번,Memo 54,メモ 54 番,备忘录 54,備忘錄 54,Записка 54
+memo.55.body,메모 55 번,Memo 55,メモ 55 番,备忘录 55,備忘錄 55,Записка 55
+memo.56.body,메모 56 번,Memo 56,メモ 56 番,备忘录 56,備忘錄 56,Записка 56
+memo.57.body,메모 57 번,Memo 57,メモ 57 番,备忘录 57,備忘錄 57,Записка 57
+memo.58.body,메모 58 번,Memo 58,メモ 58 番,备忘录 58,備忘錄 58,Записка 58
+memo.59.body,메모 59 번,Memo 59,メモ 59 番,备忘录 59,備忘錄 59,Записка 59
+memo.60.body,메모 60 번,Memo 60,メモ 60 番,备忘录 60,備忘錄 60,Записка 60

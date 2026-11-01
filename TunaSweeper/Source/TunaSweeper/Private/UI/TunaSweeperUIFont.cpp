@@ -46,7 +46,7 @@ namespace
 					CompositeFont->FallbackTypeface.Typeface.Fonts.Emplace(
 						BoldTypefaceName, FallbackFontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
 				}
-				// Nanum and the CJK fallback omit several Portuguese accents.
+				// Nanum and the CJK fallback omit some accented Latin glyphs.
 				FCompositeSubFont& LatinFont = CompositeFont->SubTypefaces.AddDefaulted_GetRef();
 				LatinFont.CharacterRanges.Add(FInt32Range::Inclusive(0x00C0, 0x024F));
 				LatinFont.Typeface.Fonts.Emplace(RegularTypefaceName,

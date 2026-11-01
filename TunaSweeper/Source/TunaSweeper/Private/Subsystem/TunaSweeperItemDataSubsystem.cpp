@@ -1,7 +1,6 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Settings/TunaSweeperLanguage.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
-#include "Subsystem/TunaSweeperAdditionalTranslations.h"
 #include "Combat/TunaSweeperBurnTypes.h"
 
 #include "Dom/JsonObject.h"
@@ -1100,12 +1099,6 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 		return false;
 	}
 
-	FTunaSweeperAdditionalTranslations AdditionalTranslations;
-	if (!AdditionalTranslations.Load(ItemNameStringsCsvPath))
-	{
-		return false;
-	}
-
 	FCsvParser CsvParser(CsvContent);
 	const FCsvParser::FRows& Rows = CsvParser.GetRows();
 	if (Rows.Num() < 2)
@@ -1115,14 +1108,17 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 	}
 
 	const TArray<const TCHAR*>& HeaderRow = Rows[0];
-	const bool bHeaderIsValid =
+	const bool bHeaderIsValid = HeaderRow.Num() == 7 &&
 		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
 		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
 		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
-		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
+		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase) &&
+		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 4).Equals(TEXT("zh-Hans"), ESearchCase::IgnoreCase) &&
+		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 5).Equals(TEXT("zh-Hant"), ESearchCase::IgnoreCase) &&
+		TunaSweeperItemDataFiles::GetCsvCell(HeaderRow, 6).Equals(TEXT("ru"), ESearchCase::IgnoreCase);
 	if (!bHeaderIsValid)
 	{
-		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Item name strings CSV header must be string_key,ko,en,ja: %s"), *ItemNameStringsCsvPath);
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Item name strings CSV header must be string_key,ko,en,ja,zh-Hans,zh-Hant,ru: %s"), *ItemNameStringsCsvPath);
 		return false;
 	}
 
@@ -1130,9 +1126,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 	for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
 	{
 		const TArray<const TCHAR*>& Row = Rows[RowIndex];
-		if (Row.Num() < 4)
+		if (Row.Num() != 7)
 		{
-			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping item name row %d: expected 4 columns."), RowIndex);
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping item name row %d: expected 7 columns."), RowIndex);
 			continue;
 		}
 
@@ -1152,7 +1148,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 		NameString.Korean = FText::FromString(Korean);
 		NameString.English = FText::FromString(English);
 		NameString.Japanese = FText::FromString(Japanese);
-		AdditionalTranslations.Apply(NameString.StringKey, NameString);
+		NameString.SimplifiedChinese = FText::FromString(TunaSweeperItemDataFiles::GetCsvCell(Row, 4));
+		NameString.TraditionalChinese = FText::FromString(TunaSweeperItemDataFiles::GetCsvCell(Row, 5));
+		NameString.Russian = FText::FromString(TunaSweeperItemDataFiles::GetCsvCell(Row, 6));
 
 		if (ItemNameStringsByKey.Contains(NameString.StringKey))
 		{

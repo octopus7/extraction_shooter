@@ -106,9 +106,6 @@ struct TUNASWEEPER_API FTunaSweeperQuestTextString
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
 	FText Russian;
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
-	FText BrazilianPortuguese;
 };
 
 USTRUCT(BlueprintType)

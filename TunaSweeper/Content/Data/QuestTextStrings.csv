@@ -1,51 +1,51 @@
-string_key,ko,en,ja
-quest.ui.title,퀘스트,Quests,クエスト
-quest.ui.list_title,퀘스트 목록,Quest List,クエスト一覧
-quest.ui.tab.available,수락가능,Available,受注可能
-quest.ui.tab.in_progress,진행중,In Progress,進行中
-quest.ui.tab.completed,보상완료,Reward Complete,報酬完了
-quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select a quest from the right list.,右の一覧からクエストを選択してください
-quest.ui.empty.available,수락 가능한 퀘스트가 없습니다.,No available quests.,受注可能なクエストはありません
-quest.ui.empty.in_progress,진행 중인 퀘스트가 없습니다.,No active quests.,進行中のクエストはありません
-quest.ui.empty.completed,보상을 완료한 퀘스트가 없습니다.,No completed reward quests.,報酬完了のクエストはありません
-quest.ui.empty.detail,퀘스트가 없습니다,No quests,クエストがありません
-quest.ui.objectives,목표,Objectives,目標
-quest.ui.rewards,보상,Rewards,報酬
-quest.ui.no_reward,없음,None,なし
-quest.ui.coins,코인,Coins,コイン
-quest.ui.item_fallback,아이템,Item,アイテム
-quest.ui.facility_unlock,시설 해금,Facility Unlock,施設解放
-quest.ui.state.available,수락 가능,Available,受注可能
-quest.ui.state.locked,잠김,Locked,ロック中
-quest.ui.state.accepted,진행 중,In Progress,進行中
-quest.ui.state.reward_available,보상 가능,Reward Available,報酬受取可能
-quest.ui.state.reward_completed,보상 완료,Reward Complete,報酬完了
-quest.ui.button.accept,수락,Accept,受注
-quest.ui.button.locked,잠김,Locked,ロック中
-quest.ui.button.in_progress,진행 중,In Progress,進行中
-quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る
-quest.ui.button.completed,완료,Complete,完了
-quest.speaker.mole,두더지,Mole,モグラ
-quest.first_outing.title,첫 외출,First Outing,初めての外出
-quest.first_outing.description,벙커 밖으로 나가 레이드 구역을 확인하고 돌아올 준비를 하세요.,Step outside the bunker and confirm the raid zone.,バンカーの外へ出てレイド区域を確認しましょう
-quest.first_outing.objective.leave_bunker,벙커 밖으로 이동,Move outside the bunker,バンカーの外へ移動
-quest.first_outing.accept.line1,몸은 괜찮아 보여. 장비도 챙겼으니 이제 밖으로 나갈 준비가 됐어.,You look all right and your gear is ready. You're set to head outside.,体は大丈夫そうだね。装備もそろったし、外へ出る準備はできたよ。
-quest.first_outing.accept.line2,왼쪽 사다리가 바깥 구역으로 이어져. 서두르지 말고 준비되면 가자.,The ladder on the left leads outside. Take your time and we'll go when you're ready.,左のはしごが外につながってる。焦らず、準備ができたら行こう。
-quest.lumberjack_first_kill.title,벌목기 제거,Remove the Lumberjack,伐採機の排除
-quest.lumberjack_first_kill.description,레이드 구역에서 벌목기를 처치하고 생환하세요.,Eliminate a lumberjack in the raid zone and return alive.,レイド区域で伐採機を排除して生還しましょう
-quest.lumberjack_first_kill.objective.kill_lumberjack,벌목기 처치,Eliminate a lumberjack,伐採機を排除
-quest.signalbot_map_check.title,신호 관제 확인,Signal Control Check,通信管制確認
-quest.signalbot_map_check.description,신호봇과 함께 새 통신 관제 시설을 확인하세요.,Check the new signal control facility with Signal Bot.,シグナルボットと新しい通信管制施設を確認しましょう
-quest.signalbot_map_check.objective.talk_to_signalbot,신호봇과 대화,Talk to Signal Bot,シグナルボットと話す
-quest.ricepotbot_supply_check.title,보급 시설 확인,Supply Facility Check,補給施設確認
-quest.ricepotbot_supply_check.description,밥통봇과 함께 새 보급 시설을 확인하세요.,Check the new supply facility with Rice Pot Bot.,ライスポットボットと新しい補給施設を確認しましょう
-quest.ricepotbot_supply_check.objective.talk_to_ricepotbot,밥통봇과 대화,Talk to Rice Pot Bot,ライスポットボットと話す
-quest.rescue_cart_return.title,구조 복귀 확인,Rescue Return Check,救助帰還確認
-quest.rescue_cart_return.description,작전 중 이상 상태가 감지되면 구급 카트 전송 절차에 따라 벙커로 돌아옵니다.,If abnormal status is detected during a sortie the rescue cart returns you to the bunker.,作戦中に異常状態を検知すると救急カート転送手順でバンカーへ戻ります
-quest.rescue_cart_return.objective.return_by_rescue_cart,구급 카트에 실려 벙커로 돌아오기,Return to the bunker by rescue cart,救急カートでバンカーへ戻る
-quest.warp_point_used_test.title,워프 포인트 사용 확인,Warp Point Use Check,ワープポイント使用確認
-quest.warp_point_used_test.description,워프 포인트 사용 목표 검증용 데이터입니다. 실제 제공자나 진행 흐름에는 연결되지 않습니다.,Validation data for the warp point objective. It is not connected to a real provider flow.,ワープポイント使用目標の検証用データです。実際の提供者や進行には接続されません
-quest.warp_point_used_test.objective.use_raid_warp_point_a,워프 포인트 사용,Use a warp point,ワープポイントを使用
-ui.quest.editor_korean_only_format,K{0},K{0},K{0}
-quest.ui.accept_all,모두 수락,Accept All,すべて受注
-ui.quest.item_reward,{0} ×{1},{0} ×{1},{0} ×{1}
+string_key,ko,en,ja,zh-Hans,zh-Hant,ru
+quest.ui.title,퀘스트,Quests,クエスト,任务,任務,Задания
+quest.ui.list_title,퀘스트 목록,Quest List,クエスト一覧,任务列表,任務列表,Список заданий
+quest.ui.tab.available,수락가능,Available,受注可能,可接取,可接取,Доступные
+quest.ui.tab.in_progress,진행중,In Progress,進行中,进行中,進行中,Выполняются
+quest.ui.tab.completed,보상완료,Reward Complete,報酬完了,奖励已领取,獎勵已領取,Награды получены
+quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select a quest from the right list.,右の一覧からクエストを選択してください,请从右侧列表选择任务。,請從右側列表選擇任務。,Выберите задание в списке справа.
+quest.ui.empty.available,수락 가능한 퀘스트가 없습니다.,No available quests.,受注可能なクエストはありません,没有可接取的任务。,沒有可接取的任務。,Нет доступных заданий.
+quest.ui.empty.in_progress,진행 중인 퀘스트가 없습니다.,No active quests.,進行中のクエストはありません,没有进行中的任务。,沒有進行中的任務。,Нет активных заданий.
+quest.ui.empty.completed,보상을 완료한 퀘스트가 없습니다.,No completed reward quests.,報酬完了のクエストはありません,没有已领取奖励的任务。,沒有已領取獎勵的任務。,Нет заданий с полученной наградой.
+quest.ui.empty.detail,퀘스트가 없습니다,No quests,クエストがありません,没有任务,沒有任務,Нет заданий
+quest.ui.objectives,목표,Objectives,目標,目标,目標,Цели
+quest.ui.rewards,보상,Rewards,報酬,奖励,獎勵,Награды
+quest.ui.no_reward,없음,None,なし,无,無,Нет
+quest.ui.coins,코인,Coins,コイン,硬币,硬幣,Монеты
+quest.ui.item_fallback,아이템,Item,アイテム,物品,物品,Предмет
+quest.ui.facility_unlock,시설 해금,Facility Unlock,施設解放,设施解锁,設施解鎖,Открытие объекта
+quest.ui.state.available,수락 가능,Available,受注可能,可接取,可接取,Доступно
+quest.ui.state.locked,잠김,Locked,ロック中,未解锁,未解鎖,Заблокировано
+quest.ui.state.accepted,진행 중,In Progress,進行中,进行中,進行中,Выполняется
+quest.ui.state.reward_available,보상 가능,Reward Available,報酬受取可能,可领取奖励,可領取獎勵,Награда доступна
+quest.ui.state.reward_completed,보상 완료,Reward Complete,報酬完了,奖励已领取,獎勵已領取,Награда получена
+quest.ui.button.accept,수락,Accept,受注,接取,接取,Принять
+quest.ui.button.locked,잠김,Locked,ロック中,未解锁,未解鎖,Заблокировано
+quest.ui.button.in_progress,진행 중,In Progress,進行中,进行中,進行中,Выполняется
+quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る,领取奖励,領取獎勵,Получить награду
+quest.ui.button.completed,완료,Complete,完了,已完成,已完成,Завершено
+quest.speaker.mole,두더지,Mole,モグラ,鼹鼠,鼴鼠,Крот
+quest.first_outing.title,첫 외출,First Outing,初めての外出,首次外出,首次外出,Первый выход
+quest.first_outing.description,벙커 밖으로 나가 레이드 구역을 확인하고 돌아올 준비를 하세요.,Step outside the bunker and confirm the raid zone.,バンカーの外へ出てレイド区域を確認しましょう,走出地堡，确认突袭区域并准备返回。,走出地堡，確認突襲區域並準備返回。,"Выйдите из бункера, осмотрите зону рейда и приготовьтесь вернуться."
+quest.first_outing.objective.leave_bunker,벙커 밖으로 이동,Move outside the bunker,バンカーの外へ移動,前往地堡外,前往地堡外,Выйти из бункера
+quest.first_outing.accept.line1,몸은 괜찮아 보여. 장비도 챙겼으니 이제 밖으로 나갈 준비가 됐어.,You look all right and your gear is ready. You're set to head outside.,体は大丈夫そうだね。装備もそろったし、外へ出る準備はできたよ。,你看起来没事，装备也带齐了。现在可以出去了。,你看起來沒事，裝備也帶齊了。現在可以出去了。,"Выглядишь нормально, снаряжение на месте. Теперь можно выходить."
+quest.first_outing.accept.line2,왼쪽 사다리가 바깥 구역으로 이어져. 서두르지 말고 준비되면 가자.,The ladder on the left leads outside. Take your time and we'll go when you're ready.,左のはしごが外につながってる。焦らず、準備ができたら行こう。,左边的梯子通往外面。别急，准备好了再走。,左邊的梯子通往外面。別急，準備好了再走。,"Лестница слева ведёт наружу. Не спеши, пойдём, когда будешь готов."
+quest.lumberjack_first_kill.title,벌목기 제거,Remove the Lumberjack,伐採機の排除,消灭伐木机,消滅伐木機,Уничтожить лесоруба
+quest.lumberjack_first_kill.description,레이드 구역에서 벌목기를 처치하고 생환하세요.,Eliminate a lumberjack in the raid zone and return alive.,レイド区域で伐採機を排除して生還しましょう,在突袭区域消灭一台伐木机并活着返回。,在突襲區域消滅一臺伐木機並活着返回。,Уничтожьте лесоруба в зоне рейда и вернитесь живым.
+quest.lumberjack_first_kill.objective.kill_lumberjack,벌목기 처치,Eliminate a lumberjack,伐採機を排除,消灭伐木机,消滅伐木機,Уничтожить лесоруба
+quest.signalbot_map_check.title,신호 관제 확인,Signal Control Check,通信管制確認,检查信号控制设施,檢查信號控制設施,Проверка центра связи
+quest.signalbot_map_check.description,신호봇과 함께 새 통신 관제 시설을 확인하세요.,Check the new signal control facility with Signal Bot.,シグナルボットと新しい通信管制施設を確認しましょう,与信号机器人一起检查新的信号控制设施。,與信號機器人一起檢查新的信號控制設施。,Проверьте новый центр связи вместе с Сигналботом.
+quest.signalbot_map_check.objective.talk_to_signalbot,신호봇과 대화,Talk to Signal Bot,シグナルボットと話す,与信号机器人交谈,與信號機器人交談,Поговорить с Сигналботом
+quest.ricepotbot_supply_check.title,보급 시설 확인,Supply Facility Check,補給施設確認,检查补给设施,檢查補給設施,Проверка пункта снабжения
+quest.ricepotbot_supply_check.description,밥통봇과 함께 새 보급 시설을 확인하세요.,Check the new supply facility with Rice Pot Bot.,ライスポットボットと新しい補給施設を確認しましょう,与饭锅机器人一起检查新的补给设施。,與飯鍋機器人一起檢查新的補給設施。,Проверьте новый пункт снабжения вместе с Рисоварботом.
+quest.ricepotbot_supply_check.objective.talk_to_ricepotbot,밥통봇과 대화,Talk to Rice Pot Bot,ライスポットボットと話す,与饭锅机器人交谈,與飯鍋機器人交談,Поговорить с Рисоварботом
+quest.rescue_cart_return.title,구조 복귀 확인,Rescue Return Check,救助帰還確認,确认救援返回,確認救援返回,Проверка спасательной эвакуации
+quest.rescue_cart_return.description,작전 중 이상 상태가 감지되면 구급 카트 전송 절차에 따라 벙커로 돌아옵니다.,If abnormal status is detected during a sortie the rescue cart returns you to the bunker.,作戦中に異常状態を検知すると救急カート転送手順でバンカーへ戻ります,行动中检测到异常状态时，救护车会将你送回地堡。,行動中檢測到異常狀態時，救護車會將你送回地堡。,"Если во время вылазки обнаружат критическое состояние, спасательная тележка доставит вас в бункер."
+quest.rescue_cart_return.objective.return_by_rescue_cart,구급 카트에 실려 벙커로 돌아오기,Return to the bunker by rescue cart,救急カートでバンカーへ戻る,乘救护车返回地堡,乘救護車返回地堡,Вернуться в бункер на спасательной тележке
+quest.warp_point_used_test.title,워프 포인트 사용 확인,Warp Point Use Check,ワープポイント使用確認,测试传送点,測試傳送點,Проверка точки телепортации
+quest.warp_point_used_test.description,워프 포인트 사용 목표 검증용 데이터입니다. 실제 제공자나 진행 흐름에는 연결되지 않습니다.,Validation data for the warp point objective. It is not connected to a real provider flow.,ワープポイント使用目標の検証用データです。実際の提供者や進行には接続されません,用于验证传送点目标的数据，未连接实际任务提供者或流程。,用於驗證傳送點目標的數據，未連接實際任務提供者或流程。,Тестовые данные для цели с точкой телепортации. Не связаны с действующим заданием.
+quest.warp_point_used_test.objective.use_raid_warp_point_a,워프 포인트 사용,Use a warp point,ワープポイントを使用,使用传送点,使用傳送點,Использовать точку телепортации
+ui.quest.editor_korean_only_format,K{0},K{0},K{0},K{0},K{0},K{0}
+quest.ui.accept_all,모두 수락,Accept All,すべて受注,全部接受,全部接受,Принять все
+ui.quest.item_reward,{0} ×{1},{0} ×{1},{0} ×{1},{0} ×{1},{0} ×{1},{0} ×{1}

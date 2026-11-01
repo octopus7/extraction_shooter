@@ -34,7 +34,7 @@ function parseStrings(csv) {
   }
   return result;
 }
-function writeStrings(strings, locales = [...new Set(['ko', 'en', 'ja', ...strings.map(s => s.locale)])]) {
+function writeStrings(strings, locales = ['ko', 'en', 'ja', 'zh-Hans', 'zh-Hant', 'ru']) {
   const keys = [...new Set(strings.map(s => s.key))];
   const values = new Map(strings.map(s => [JSON.stringify([s.key, s.locale]), s.value]));
   const quote = value => /[",\r\n]/.test(value) ? '"' + value.replaceAll('"', '""') + '"' : value;

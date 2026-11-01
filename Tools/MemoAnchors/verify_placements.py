@@ -22,7 +22,7 @@ def verify_data():
         key = f"memo.{row['memo_id']}.body"
         assert row['body_string_key'] == key
         keys.add(key)
-    for path in [data/'MemoTextStrings.csv', data/'Translations/MemoTextStrings.csv']:
+    for path in [data/'MemoTextStrings.csv']:
         with path.open(encoding='utf-8-sig', newline='') as f:
             translations = list(csv.DictReader(f))
         assert len(translations) == 61 and {r['string_key'] for r in translations} == keys
