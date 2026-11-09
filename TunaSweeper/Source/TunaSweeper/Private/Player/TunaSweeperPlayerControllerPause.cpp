@@ -25,6 +25,11 @@ bool ATunaSweeperPlayerController::IsPauseMenuKey(const FKey& Key, const UWorld*
 
 void ATunaSweeperPlayerController::TogglePauseMenu()
 {
+	if (IsIconEditorOpen())
+	{
+		CloseIconEditorPanel();
+		return;
+	}
 	if (TutorialPopupWidget) return;
 	if (PauseMenuWidget)
 	{

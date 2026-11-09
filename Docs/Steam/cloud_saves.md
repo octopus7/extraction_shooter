@@ -27,11 +27,13 @@ These settings must be saved and published in **each app's Steam Cloud settings*
 | Subdirectory | `TunaSweeper/Saved/SaveGames/Steam/{64BitSteamID}/Demo` | `TunaSweeper/Saved/SaveGames/Steam/{64BitSteamID}/FullGame` |
 | Pattern, rule 1 | `*.sav` | `*.sav` |
 | Pattern, rule 2 (same root/subdirectory) | `*.sav.previous` | `*.sav.previous` |
+| Pattern, rule 3 (same root/subdirectory) | `GlobalIcon.rgb` | `GlobalIcon.rgb` |
 | OS Restriction | `[Cross-Platform]` | `[Cross-Platform]` |
-| Recursive (both rules) | Enabled | Enabled |
+| Recursive (rules 1 and 2) | Enabled | Enabled |
+| Recursive (rule 3) | Disabled | Disabled |
 | Shared cloud APP ID | `0` | `0` |
 
-Both rules are necessary: active/settings/achievement saves and `Backups/*.sav` match rule 1; recovery generations match rule 2. Candidate files, corrupt archives, and deletion audit logs remain local. Avoid a broad `*` rule or syncing the entire `Saved` directory, which also contains machine-specific settings and logs.
+All three rules are necessary: active/settings/achievement saves and `Backups/*.sav` match rule 1; recovery generations match rule 2; the slot-independent 32×32 RGB icon matches rule 3. `GlobalIcon.rgb` is exactly 3072 raw RGB8 bytes and is saved only when the player confirms the icon editor. Its `GlobalIcon.rgb.<guid>.candidate` files must remain local. The third rule is a required Steamworks configuration addition; adding this documentation does not publish that rule or verify live synchronization. Candidate files, corrupt archives, and deletion audit logs remain local. Avoid a broad `*` rule or syncing the entire `Saved` directory, which also contains machine-specific settings and logs.
 
 Set both byte and file quotas before enabling Auto-Cloud. An initial allocation of 256 MiB and 200 files per user/app allows room for the current 30 retained timestamped backups plus active/settings/achievement and previous-generation files; verify byte usage with representative long-play saves before release. The two app IDs remain separate so a demo never replaces full-game progress.
 
@@ -51,7 +53,7 @@ Auto-Cloud에는 별도의 클라우드 업로드·다운로드 코드가 필요
 
 1. 대상 앱의 Steam Cloud 설정을 열고 위 표의 Demo/Full game을 구분한다.
 2. 사용자당 용량과 파일 수를 지정한다. 위 256 MiB(268435456 bytes)/200 files는 프로젝트의 초기 제안값이며 Steam의 필수값이 아니다. 실제 최대 세이브·백업 크기로 여유를 확인한다.
-3. Auto-Cloud 경로 규칙을 두 개 등록한다. 위 표의 Root, Subdirectory, Pattern, OS Restriction, Recursive를 사용한다. `{64BitSteamID}`는 실제 계정 번호로 치환해서 입력하지 않고 변수 그대로 등록한다.
+3. Auto-Cloud 경로 규칙을 세 개 등록한다. 위 표의 Root, Subdirectory, Pattern, OS Restriction, Recursive를 사용한다. 기존 두 규칙이 등록되어 있다면 `GlobalIcon.rgb` 규칙을 추가한다. `{64BitSteamID}`는 실제 계정 번호로 치환해서 입력하지 않고 변수 그대로 등록한다.
 4. Steam 배포 빌드를 실행해 실제 생성 경로를 위 표와 대조한다. 런타임 로그의 `Steam Auto-Cloud save directory:`도 확인할 수 있다. `LocalOnly`로 저장되면 계정 초기화부터 확인한다.
 5. 이미 출시된 앱은 `Enable cloud support for developers only`로 먼저 시험한다. 이 모드는 해당 게임의 Developer Comp 라이선스를 가진 계정을 대상으로 한다.
 6. Save와 Publish를 완료한다. 설정 반영을 위해 최대 10분 기다리거나 Steam 클라이언트를 재시작한다.

@@ -1,4 +1,5 @@
 #include "Player/TunaSweeperPlayerController.h"
+#include "UI/Astra/IconEditorGPT6Astra.h"
 
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraActor.h"
@@ -515,6 +516,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	CloseIconEditorPanel();
 	if (StartupLogoWidget)
 	{
 		StartupLogoWidget->OnFinished.Unbind();
@@ -701,6 +703,8 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+	UpdateIconEditorInteraction();
+	if (IconEditorPanel) return;
 	UpdateWardrobeInteraction();
 	UpdateQuestRewardLockerInteraction();
 	UpdateDebugArmoryInteraction();
@@ -2439,6 +2443,20 @@ bool ATunaSweeperPlayerController::StartHousingFacilityPlacement(FName FacilityI
 
 void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 {
+	ApplyDefaultGameInputModeInternal(true);
+}
+
+void ATunaSweeperPlayerController::ApplyDefaultGameInputModeInternal(bool bReleaseGameplayInputLocks)
+{
+	if (IconEditorPanel)
+	{
+		FInputModeUIOnly IconInputMode;
+		IconInputMode.SetWidgetToFocus(IconEditorPanel->TakeWidget());
+		IconInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(IconInputMode);
+		bShowMouseCursor = true;
+		return;
+	}
 	if (TutorialPopupWidget)
 	{
 		FInputModeUIOnly TutorialInputMode;
@@ -2465,8 +2483,11 @@ void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 	bShowMouseCursor = true;
-	SetIgnoreMoveInput(false);
-	SetIgnoreLookInput(false);
+	if (bReleaseGameplayInputLocks)
+	{
+		SetIgnoreMoveInput(false);
+		SetIgnoreLookInput(false);
+	}
 }
 
 bool ATunaSweeperPlayerController::IsInventoryUiOpen() const

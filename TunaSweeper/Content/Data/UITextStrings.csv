@@ -786,6 +786,25 @@ ui.wave_defense.result_faulted,오류로 방어전이 중단되었습니다.,Def
 ui.wave_defense.result_pending,결과 저장 대기 중입니다. 이동하거나 종료하면 저장되지 않은 결과가 사라집니다.,Waiting to save the result. Leaving or quitting discards an unsaved result.,結果の保存待ちです。移動または終了すると未保存の結果は失われます。,正在等待保存结果。离开或退出将丢失未保存的结果。,正在等待儲存結果。離開或結束將遺失未儲存的結果。,Ожидание сохранения результата. При уходе или выходе несохранённый результат будет потерян.
 ui.wave_defense.reward_pending,성공 보상을 수령하세요.,Claim your reward.,報酬を受け取ってください。,请领取奖励。,請領取獎勵。,Получите награду.
 ui.wave_defense.selected,선택한 슬롯: {0},Selected slot: {0},選択したスロット: {0},已选槽位：{0},已選欄位：{0},Выбранное место: {0}
+ui.icon_editor.title,아이콘 편집기,Icon editor,アイコンエディター,图标编辑器,圖示編輯器,Редактор значка
+ui.icon_editor.subtitle,32 × 32 픽셀 · RGB,32 × 32 pixels · RGB,32 × 32 ピクセル · RGB,32 × 32 像素 · RGB,32 × 32 像素 · RGB,32 × 32 пикселя · RGB
+ui.icon_editor.description,확정하면 이 계정의 모든 저장 슬롯에 공통으로 적용됩니다.,Confirm to save this icon for all save slots on this account.,確定するとこのアカウントの全セーブスロットに適用されます。,确认后将应用于此账号的所有存档栏位。,確認後將套用至此帳號的所有存檔欄位。,После подтверждения значок будет общим для всех сохранений этого аккаунта.
+ui.icon_editor.preview,미리보기,Preview,プレビュー,预览,預覽,Предпросмотр
+ui.icon_editor.color,선택한 색상,Selected color,選択中の色,当前颜色,目前顏色,Выбранный цвет
+ui.icon_editor.palette,기본 색상,Palette,パレット,调色板,調色盤,Палитра
+ui.icon_editor.red,빨강,Red,赤,红,紅,Красный
+ui.icon_editor.green,초록,Green,緑,绿,綠,Зелёный
+ui.icon_editor.blue,파랑,Blue,青,蓝,藍,Синий
+ui.icon_editor.brush,브러시,Brush,ブラシ,画笔,畫筆,Кисть
+ui.icon_editor.eyedropper,색상 추출,Eyedropper,スポイト,吸管,滴管,Пипетка
+ui.icon_editor.fill,전체 채우기,Fill canvas,全体を塗りつぶす,填充画布,填滿畫布,Залить холст
+ui.icon_editor.help,왼쪽 드래그: 그리기 · 오른쪽 클릭: 색상 추출 · Esc: 취소,Left drag: draw · Right click: sample · Esc: cancel,左ドラッグ：描画 · 右クリック：色取得 · Esc：取消,左键拖动：绘画 · 右键：取色 · Esc：取消,左鍵拖曳：繪畫 · 右鍵：取色 · Esc：取消,ЛКМ: рисовать · ПКМ: взять цвет · Esc: отмена
+ui.icon_editor.ready,확정을 누르기 전에는 저장되지 않습니다.,Changes are saved only when you confirm.,確定するまで変更は保存されません。,确认后才会保存更改。,確認後才會儲存變更。,Изменения сохраняются только после подтверждения.
+ui.icon_editor.cancel,취소,Cancel,キャンセル,取消,取消,Отмена
+ui.icon_editor.confirm,확정 및 저장,Confirm & save,確定して保存,确认并保存,確認並儲存,Сохранить
+ui.icon_editor.invalid,저장된 아이콘 형식이 올바르지 않습니다. 확정하면 원본을 덮어씁니다.,Saved icon is invalid. Confirm will replace the original.,保存アイコンが無効です。確定すると元のファイルを置き換えます。,已存图标格式无效。确认将覆盖原文件。,已存圖示格式無效。確認將覆寫原檔案。,Формат значка неверен. Подтверждение заменит исходный файл.
+ui.icon_editor.read_failed,아이콘을 읽지 못했습니다. 확정하면 원본을 덮어씁니다.,Could not read the icon. Confirm will replace the original.,アイコンを読み込めません。確定すると元のファイルを置き換えます。,无法读取图标。确认将覆盖原文件。,無法讀取圖示。確認將覆寫原檔案。,Не удалось прочитать значок. Подтверждение заменит исходный файл.
+ui.icon_editor.save_failed,저장하지 못했습니다. 편집 내용은 유지됩니다. 다시 시도하세요.,Save failed. Your draft is still here. Please try again.,保存できませんでした。編集内容は保持されています。再試行してください。,保存失败。编辑内容已保留。请重试。,儲存失敗。編輯內容已保留。請重試。,Сохранить не удалось. Изменения сохранены в редакторе. Повторите попытку.
 ui.wave_defense.facility_status,{0} 내구도 {1}/{2} 탄약 {3}/{4},{0} health {1}/{2} ammo {3}/{4},{0} 耐久 {1}/{2} 弾薬 {3}/{4},{0} 耐久 {1}/{2} 弹药 {3}/{4},{0} 耐久 {1}/{2} 彈藥 {3}/{4},{0} прочность {1}/{2} патроны {3}/{4}
 ui.wave_defense.facility_empty,{0}: 빈 슬롯,{0}: empty slot,{0}: 空きスロット,{0}：空槽位,{0}：空欄位,{0}: пустое место
 ui.wave_defense.core_warning,경고: 장치 내구도가 낮습니다!,Warning: core health is low!,警告：装置の耐久が低下しています！,警告：装置耐久过低！,警告：裝置耐久過低！,Внимание: прочность устройства низкая!

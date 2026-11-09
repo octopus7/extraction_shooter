@@ -51,7 +51,8 @@ enum class ETunaSweeperInteractionType : uint8
 	RailStation = 36 UMETA(DisplayName = "Rail Station"),
 	NpcBarter = 37 UMETA(DisplayName = "NPC Barter"),
 	WaveDefense = 38 UMETA(DisplayName = "Wave Defense"),
-	Ending = 39 UMETA(DisplayName = "Ending")
+	Ending = 39 UMETA(DisplayName = "Ending"),
+	IconEditor = 40 UMETA(DisplayName = "Icon Editor")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))

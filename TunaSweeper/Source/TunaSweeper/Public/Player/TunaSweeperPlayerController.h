@@ -29,6 +29,8 @@ struct FInputActionValue;
 class AWaveDefenseDirector;
 class UWaveDefensePanelGPT61Terra;
 class UWaveDefenseHUDGPT61Terra;
+class AIconEditorTerminal;
+class UIconEditorGPT6Astra;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -53,7 +55,7 @@ public:
 	void TogglePauseMenu();
 	void ResumeFromPauseMenu();
 	void ExitFromPauseMenu(bool bQuitGame);
-	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || TutorialPopupWidget != nullptr; }
+	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || TutorialPopupWidget != nullptr || IconEditorPanel != nullptr; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Tutorial")
 	bool TryShowBunkerBasicsTutorial();
@@ -141,6 +143,10 @@ public:
 
 	bool OpenWaveDefensePanel(AWaveDefenseDirector* Director);
 	void CloseWaveDefensePanel();
+	bool OpenIconEditorPanel(AIconEditorTerminal* Terminal);
+	UFUNCTION()
+	void CloseIconEditorPanel();
+	bool IsIconEditorOpen() const { return IconEditorPanel != nullptr; }
 	
 	bool OpenQuestRewardLockerPanel(ATunaSweeperQuestRewardLockerActor* LockerActor);
 	bool TryReceiveQuestReward(int32 Index);
@@ -298,6 +304,11 @@ protected:
 private:
 	UPROPERTY(Transient) TObjectPtr<UWaveDefensePanelGPT61Terra> WaveDefensePanel;
 	UPROPERTY(Transient) TObjectPtr<UWaveDefenseHUDGPT61Terra> WaveDefenseHUD;
+	UPROPERTY(Transient) TObjectPtr<UIconEditorGPT6Astra> IconEditorPanel;
+	TWeakObjectPtr<AIconEditorTerminal> ActiveIconEditorTerminal;
+	bool bIconEditorPausedGame = false;
+	void UpdateIconEditorInteraction();
+	void ApplyDefaultGameInputModeInternal(bool bReleaseGameplayInputLocks);
 
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();

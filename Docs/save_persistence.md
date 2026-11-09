@@ -1,5 +1,13 @@
 # Save/Load Persistence Contract
 
+## Global RGB icon
+
+`UIconStorageSubsystem` stores one `GlobalIcon.rgb` under `TunaSweeperBuildFlavor::GetSaveGameDirectory()`. It is shared by all gameplay save slots in that account/store/build flavor; it is not a `USaveGame` field and no save-version bump is required. Slot initialization, new games, death, retirement and slot deletion do not read, clear or replace it. Existing Steam account, LocalOnly fallback and Demo/FullGame directory isolation are retained.
+
+The file contains exactly 3072 bytes: 32×32 opaque RGB8 pixels, top-left origin, rows from top to bottom and pixels left to right, interleaved R/G/B bytes. There is no header, alpha, compression, CRC envelope or palette. Editor opening loads a draft; a missing file starts black without writing. Wrong length or a read failure leaves the file untouched and reports a localized warning. Painting, sampling and fill only affect the draft. Cancel/Escape, actor invalidation, unpossess and travel discard it without saving.
+
+Only Confirm writes a unique sibling `GlobalIcon.rgb.<guid>.candidate`, flushes/closes it, compares its bytes and renames it over the primary. Windows uses same-directory `MoveFileExW` replacement without a preliminary delete; failed writes/replacement keep the old primary and the current draft. No candidate is a recovery source or a Cloud target. File-level Cloud conflict resolution remains Steam's responsibility; there is no merge or running-game sync watcher. See [Steam Cloud configuration](Steam/cloud_saves.md) for the required exact-name rule, and [authoring guide](icon_editor.md) for the WBP/actor assets. Local runtime verification passed on 2026-11-10: exact raw bytes, draft-only paint/fill, Confirm/Cancel/Escape, locked-file read/replacement failure and retry, candidate cleanup, new-game/slot-deletion independence, and modal input/pause restoration. Tests used only an isolated GUID automation directory. See Saved/Logs/IconEditor-final-tests.log and the authoring guide for coverage and remaining limits. Steamworks registration/publication and live synchronization remain user-owned external work.
+
 ## Repeatable free-play endings
 
 `ending.freeplay.normal_seen` and `ending.freeplay.true_seen` are additive entries in `CompletedScenarioFlags`; no save version change is needed. `SaveFreePlayEnding` atomically writes the chosen flag, current carried inventory/quick slots, shared raid storage, existing progress and settled raid XP. On failure it restores the new flag and total XP while leaving pending XP available for retry. On success pending XP is cleared so repeated endings cannot award it twice. Neither ending consumes tuna, deletes the slot, marks it retired, or writes `demo.ending.farewell_seen`.
