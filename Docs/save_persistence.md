@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Repeatable free-play endings
+
+`ending.freeplay.normal_seen` and `ending.freeplay.true_seen` are additive entries in `CompletedScenarioFlags`; no save version change is needed. `SaveFreePlayEnding` atomically writes the chosen flag, current carried inventory/quick slots, shared raid storage, existing progress and settled raid XP. On failure it restores the new flag and total XP while leaving pending XP available for retry. On success pending XP is cleared so repeated endings cannot award it twice. Neither ending consumes tuna, deletes the slot, marks it retired, or writes `demo.ending.farewell_seen`.
+
+The actor preflights a non-abandoning save before presentation, pauses gameplay during the story and travels to the title only after successful completion save. The existing slot-selection/base-entry flow remains available afterward. Conditions are re-evaluated from the ten unique normal-tuna stacks (item 3004, quantity 10 each); the true-ending completion flag does not permanently bypass that condition. See [free-play ending guide](free_play_endings.md).
+
 ## Persistent raid storage
 
 `RaidStorageSlots` adds a separate ten-slot warehouse to the existing gameplay save (additive tagged property; save version remains 22). Its item UIDs and recursively attached items join the owned item graph, so death/raid abandonment preserves them. Travel preserves the GameInstance state; save-slot selection and new-game initialization clear it before loading the selected slot. Older files start empty. Combat-lab inventory backups also isolate and restore this warehouse.

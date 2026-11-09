@@ -37,6 +37,7 @@
 #include "Interaction/TunaSweeperNpcFeedingComponent.h"
 #include "Interaction/TunaSweeperNpcBarterComponent.h"
 #include "WaveDefense/WaveDefenseTerminal.h"
+#include "Scenario/TunaSweeperEndingActor.h"
 #include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Vehicle/TunaSweeperATVActor.h"
@@ -358,7 +359,11 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return false;
 	case ETunaSweeperInteractionType::WaveDefense:
 		if (auto* Terminal = Cast<AWaveDefenseTerminal>(Interactable->GetOwner())) bHandled = Terminal->OpenFor(InstigatorPawn);
-		break;	case ETunaSweeperInteractionType::QuestRewardLockerOpen:
+		break;
+	case ETunaSweeperInteractionType::Ending:
+		if (auto* Ending = Cast<ATunaSweeperEndingActor>(Interactable->GetOwner())) bHandled = Ending->StartEnding(InstigatorPawn);
+		break;
+	case ETunaSweeperInteractionType::QuestRewardLockerOpen:
 	{
 		ATunaSweeperQuestRewardLockerActor* Locker = Cast<ATunaSweeperQuestRewardLockerActor>(Interactable->GetOwner());
 		ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());

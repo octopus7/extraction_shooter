@@ -281,6 +281,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperRaidStoragePersistenceTest;
+	friend class FTunaSweeperFreePlayEndingPersistenceTest;
 	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperFeedingRewardsTest;
 	friend class FTunaSweeperQuestArrivalTest;
@@ -640,6 +641,8 @@ public:
 	void OpenRaidStorage(UObject* Owner, const FText& DisplayName);
 	void CloseRaidStorage(UObject* Owner);
 	bool IsRaidStorageOpen() const { return bActiveLootContainerIsRaidStorage; }
+	bool IsRaidStorageReadyForTrueEnding();
+	bool SaveFreePlayEnding(bool bTrueEnding);
 	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& GetSelectedWeaponAttachmentSlotTags() const { return SelectedWeaponAttachmentSlotTags; }
