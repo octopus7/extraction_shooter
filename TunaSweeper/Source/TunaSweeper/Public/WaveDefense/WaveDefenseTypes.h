@@ -43,4 +43,18 @@ struct TUNASWEEPER_API FWaveDefenseSnapshot
     UPROPERTY(BlueprintReadOnly) float SecondsRemaining = 0.0f;
     UPROPERTY(BlueprintReadOnly) float LeaveSecondsRemaining = 0.0f;
     UPROPERTY(BlueprintReadOnly) TArray<FName> AnnouncedLanes;
+    UPROPERTY(BlueprintReadOnly) bool bResultSavePending = false;
+    UPROPERTY(BlueprintReadOnly) bool bRewardPending = false;
+    UPROPERTY(BlueprintReadOnly) float DirectionWarningSeconds = 0.0f;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FWaveDefenseFacilitySnapshot
+{
+    GENERATED_BODY()
+    UPROPERTY(BlueprintReadOnly) bool bOccupied = false;
+    UPROPERTY(BlueprintReadOnly) int32 Health = 0;
+    UPROPERTY(BlueprintReadOnly) int32 MaxHealth = 0;
+    UPROPERTY(BlueprintReadOnly) int32 Ammo = 0;
+    UPROPERTY(BlueprintReadOnly) int32 MaxAmmo = 0;
 };

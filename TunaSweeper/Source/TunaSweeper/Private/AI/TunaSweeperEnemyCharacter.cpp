@@ -308,7 +308,8 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 		const bool bByVehicleCollision = Driver && !Driver->IsDead() && Driver->GetController() == EventInstigator &&
 			DamageEvent.DamageTypeClass && DamageEvent.DamageTypeClass->IsChildOf(UTunaSweeperVehicleCollisionDamageType::StaticClass());
 		HandleDeath(EventInstigator, DamageCauser, bByVehicleCollision);
-		if (EventInstigator && EventInstigator->IsLocalPlayerController() && bByVehicleCollision)
+		const UWaveDefenseParticipantComponent* WaveParticipant = FindComponentByClass<UWaveDefenseParticipantComponent>();
+		if ((!WaveParticipant || WaveParticipant->ShouldGrantDefaultKillRewards()) && EventInstigator && EventInstigator->IsLocalPlayerController() && bByVehicleCollision)
 		{
 			if (auto* Achievements = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperAchievementSubsystem>() : nullptr)
 				Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::VehicleCollisionKill, NAME_None);

@@ -479,6 +479,7 @@ public:
 
 	bool TryBeginWaveDefenseRun(FName EncounterId, int32 RewardCoins, int32 DifficultyStage, FGuid& OutRunId);
 	bool TryFinalizeWaveDefenseRun(FName EncounterId, FGuid RunId, EWaveDefenseOutcome Outcome, int32 CompletedWave);
+	void StageWaveDefenseInterrupted(FName EncounterId, FGuid RunId);
 	bool TryClaimWaveDefenseReward(FName EncounterId, FGuid RunId);
 	const FWaveDefenseProgress* FindWaveDefenseProgress(FName EncounterId) const { return WaveDefenseProgress.Find(EncounterId); }
 

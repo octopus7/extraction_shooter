@@ -62,3 +62,14 @@ bool UTunaSweeperGameInstance::TryClaimWaveDefenseReward(FName EncounterId, FGui
     if (!bCommitted) Record->bRewardPending = true;
     return bCommitted;
 }
+
+void UTunaSweeperGameInstance::StageWaveDefenseInterrupted(FName EncounterId, FGuid InRunId)
+{
+    FWaveDefenseProgress* Record = WaveDefenseProgress.Find(EncounterId);
+    if (Record && InRunId.IsValid() && Record->RunId == InRunId && Record->Outcome == EWaveDefenseOutcome::None)
+    {
+        Record->Outcome = EWaveDefenseOutcome::Interrupted;
+        Record->bRewardPending = false;
+        bWaveDefenseInterruptedNeedsSave = true;
+    }
+}

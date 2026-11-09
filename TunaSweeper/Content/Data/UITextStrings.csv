@@ -739,7 +739,7 @@ ui.raid_storage.duplicate,경고: 보관함이 중복 배치되어 있습니다.
 ui.raid_storage.save_failed,보관함 저장에 실패했습니다. 게임을 종료하지 말고 저장을 다시 시도하세요.,Storage could not be saved. Retry saving before quitting.,保管箱を保存できませんでした。終了せずに保存を再試行してください。,储物箱保存失败。请勿退出游戏并重试保存。,儲物箱儲存失敗。請勿結束遊戲並重試儲存。,Не удалось сохранить хранилище. Повторите сохранение перед выходом.
 ui.wave_defense.invalid_definition,방어전 설정이 올바르지 않아 시작할 수 없습니다.,Cannot start because the defense configuration is invalid.,防衛戦の設定が無効なため開始できません。,防守战配置无效，无法开始。,防守戰設定無效，無法開始。,Невозможно начать: настройки обороны недействительны.
 ui.wave_defense.title,기지 방어전,Base Defense,拠点防衛,基地防御,基地防禦,Оборона базы
-ui.wave_defense.intro,6웨이브를 막아 장치를 지키세요. 사망 시 기존 레이드 손실이 적용됩니다. 탄약과 치료제를 준비하세요.,Defend the core for six waves. Normal raid death losses apply. Bring ammunition and healing supplies.,6ウェーブの間装置を守りましょう。死亡時は通常のレイド損失が適用されます。弾薬と回復品を用意してください。,守住装置并抵御六波攻击。死亡时适用常规突袭损失。请准备弹药和治疗物资。,守住裝置並抵禦六波攻擊。死亡時適用一般突襲損失。請準備彈藥和治療物資。,Защитите устройство от шести волн. При смерти действуют обычные потери рейда. Возьмите патроны и лечение.
+ui.wave_defense.intro,6웨이브를 막아 장치를 지키세요. 예상 시간은 10~15분입니다. 사망 시 기존 레이드 손실이 적용됩니다. 탄약과 치료제를 준비하세요.,Defend the core for six waves. Estimated time: 10–15 minutes. Normal raid death losses apply. Bring ammunition and healing supplies.,6ウェーブの間装置を守りましょう。所要時間は約10〜15分です。死亡時は通常のレイド損失が適用されます。弾薬と回復品を用意してください。,守住装置并抵御六波攻击。预计需要10至15分钟。死亡时适用常规突袭损失。请准备弹药和治疗物资。,守住裝置並抵禦六波攻擊。預計需要10至15分鐘。死亡時適用一般突襲損失。請準備彈藥和治療物資。,Защитите устройство от шести волн. Примерное время: 10–15 минут. При смерти действуют обычные потери рейда. Возьмите патроны и лечение.
 ui.wave_defense.status,웨이브 {0}/{1}  장치 {2}/{3}  적 {4}  대기 {5}  자원 {6},Wave {0}/{1}  Core {2}/{3}  Enemies {4}  Queued {5}  Supplies {6},ウェーブ {0}/{1}  装置 {2}/{3}  敵 {4}  待機 {5}  資源 {6},波次 {0}/{1}  装置 {2}/{3}  敌人 {4}  待生成 {5}  资源 {6},波次 {0}/{1}  裝置 {2}/{3}  敵人 {4}  待生成 {5}  資源 {6},Волна {0}/{1}  Устройство {2}/{3}  Враги {4}  Ожидают {5}  Ресурсы {6}
 ui.wave_defense.details,난이도 {0}  성공 보상 {1}코인  준비 {2}초  이탈 {3}초,Difficulty {0}  Reward {1} coins  Prepare {2}s  Leave {3}s,難易度 {0}  報酬 {1}コイン  準備 {2}秒  離脱 {3}秒,难度 {0}  奖励 {1}金币  准备 {2}秒  离开 {3}秒,難度 {0}  獎勵 {1}金幣  準備 {2}秒  離開 {3}秒,Сложность {0}  Награда {1} монет  Подготовка {2}с  Уход {3}с
 ui.wave_defense.start,시작,Start,開始,开始,開始,Начать
@@ -747,11 +747,11 @@ ui.wave_defense.ready,준비 완료,Ready,準備完了,准备完成,準備完成
 ui.wave_defense.abort,포기,Abandon,放棄,放弃,放棄,Покинуть
 ui.wave_defense.claim,보상 수령,Claim reward,報酬を受け取る,领取奖励,領取獎勵,Получить награду
 ui.wave_defense.close,닫기,Close,閉じる,关闭,關閉,Закрыть
-ui.wave_defense.barrier,방벽 설치,Build barrier,防壁を設置,建造路障,建造路障,Построить барьер
-ui.wave_defense.turret,포탑 설치,Build turret,砲塔を設置,建造炮塔,建造砲塔,Построить турель
-ui.wave_defense.repair_core,장치 수리,Repair core,装置を修理,修理装置,修理裝置,Починить устройство
-ui.wave_defense.repair_facility,시설 수리,Repair facility,施設を修理,修理设施,修理設施,Починить сооружение
-ui.wave_defense.reload,포탑 재장전,Reload turret,砲塔を再装填,重装炮塔,重裝砲塔,Перезарядить турель
+ui.wave_defense.barrier,방벽 설치 ({0}),Build barrier ({0}),防壁を設置 ({0}),建造路障 ({0}),建造路障 ({0}),Построить барьер ({0})
+ui.wave_defense.turret,포탑 설치 ({0}),Build turret ({0}),砲塔を設置 ({0}),建造炮塔 ({0}),建造砲塔 ({0}),Построить турель ({0})
+ui.wave_defense.repair_core,장치 수리 ({0}),Repair core ({0}),装置を修理 ({0}),修理装置 ({0}),修理裝置 ({0}),Починить устройство ({0})
+ui.wave_defense.repair_facility,시설 수리 ({0}),Repair facility ({0}),施設を修理 ({0}),修理设施 ({0}),修理設施 ({0}),Починить сооружение ({0})
+ui.wave_defense.reload,포탑 재장전 ({0}),Reload turret ({0}),砲塔を再装填 ({0}),重装炮塔 ({0}),重裝砲塔 ({0}),Перезарядить турель ({0})
 ui.wave_defense.north_barrier,북 방벽,North barrier,北防壁,北路障,北路障,Северный барьер
 ui.wave_defense.west_barrier,서 방벽,West barrier,西防壁,西路障,西路障,Западный барьер
 ui.wave_defense.east_barrier,동 방벽,East barrier,東防壁,东路障,東路障,Восточный барьер
@@ -772,3 +772,21 @@ ui.freeplay_ending.true.1,열 개의 칸에 참치 통조림 백 개가 가지�
 ui.freeplay_ending.true.2,"루나는 창고 문에 적었다. 혼자 버티기 위한 식량이 아니라, 함께 돌아오기 위한 약속.",Luna wrote on the storage door: Not food for surviving alone but a promise that we will come home together.,ルナは倉庫の扉に書いた。一人で耐えるための食料ではなく、みんなで帰ってくるための約束。,露娜在仓库门上写道：这不是独自求生的口粮而是一同归来的约定。,露娜在倉庫門上寫道：這不是獨自求生的口糧而是一同歸來的約定。,Луна написала на двери склада: это не припасы для одиночки. Это обещание вернуться домой вместе.
 ui.freeplay_ending.true.3,그날부터 기지의 불빛은 구조 신호가 되었다. 돌아갈 곳이 없던 이들이 하나둘 문을 두드렸다.,From that day on the light of the base became a beacon. One by one those with nowhere to go came knocking.,その日から、基地の灯りは救いの目印になった。帰る場所のない人々が、一人、また一人と扉を叩いた。,从那天起基地的灯光成了救援的信号。无家可归的人们陆续敲响了门。,從那天起基地的燈光成了救援的信號。無家可歸的人們陸續敲響了門。,"С того дня свет базы стал маяком. В дверь стали стучаться те, кому некуда было вернуться."
 ui.freeplay_ending.true.4,"백 개의 내일. 살아남는 일은, 함께 살아가는 일이 되었다. 타이틀로 돌아간 뒤 같은 슬롯에서 계속 플레이할 수 있습니다.",A hundred tomorrows. Surviving had become living together. You can continue this save slot after returning to the title screen.,百の明日。生き延びることは、共に生きることになった。 タイトルに戻った後も、同じセーブスロットでプレイを続けられます。,一百个明天。活下去变成了一起生活。 返回标题画面后仍可使用同一存档继续游玩。,一百個明天。活下去變成了一起生活。 返回標題畫面後仍可使用同一存檔繼續遊玩。,Сто завтрашних дней. Выживание превратилось в совместную жизнь. После возврата на титульный экран можно продолжить игру в этом слоте.
+ui.wave_defense.direction_north,북쪽,North,北,北,北,Север
+ui.wave_defense.direction_west,서쪽,West,西,西,西,Запад
+ui.wave_defense.direction_east,동쪽,East,東,东,東,Восток
+ui.wave_defense.direction_line,공격 방향: {0} {1}  전환까지 {2}초,Attack directions: {0} {1}  Change in {2}s,攻撃方向: {0} {1}  切替まで {2}秒,进攻方向：{0} {1}  切换倒计时 {2}秒,進攻方向：{0} {1}  切換倒數 {2}秒,Направления атаки: {0} {1}  Смена через {2}с
+ui.wave_defense.lines,{0}  {1},{0}  {1},{0}  {1},{0}  {1},{0}  {1},{0}  {1}
+ui.wave_defense.result_success,방어 성공,Defense successful,防衛成功,防守成功,防守成功,Оборона успешна
+ui.wave_defense.result_core,장치가 파괴되었습니다.,The core was destroyed.,装置が破壊されました。,装置已被摧毁。,裝置已被摧毀。,Устройство уничтожено.
+ui.wave_defense.result_player,플레이어가 사망했습니다.,The player died.,プレイヤーが死亡しました。,玩家已死亡。,玩家已死亡。,Игрок погиб.
+ui.wave_defense.result_abandoned,방어전을 포기했습니다.,Defense abandoned.,防衛戦を放棄しました。,已放弃防守战。,已放棄防守戰。,Оборона прервана.
+ui.wave_defense.result_interrupted,방어전이 중단되었습니다.,Defense interrupted.,防衛戦が中断されました。,防守战已中断。,防守戰已中斷。,Оборона прервана.
+ui.wave_defense.result_faulted,오류로 방어전이 중단되었습니다.,Defense stopped due to an error.,エラーにより防衛戦が中断されました。,防守战因错误中断。,防守戰因錯誤中斷。,Оборона остановлена из-за ошибки.
+ui.wave_defense.result_pending,결과 저장 대기 중입니다. 이동하거나 종료하면 저장되지 않은 결과가 사라집니다.,Waiting to save the result. Leaving or quitting discards an unsaved result.,結果の保存待ちです。移動または終了すると未保存の結果は失われます。,正在等待保存结果。离开或退出将丢失未保存的结果。,正在等待儲存結果。離開或結束將遺失未儲存的結果。,Ожидание сохранения результата. При уходе или выходе несохранённый результат будет потерян.
+ui.wave_defense.reward_pending,성공 보상을 수령하세요.,Claim your reward.,報酬を受け取ってください。,请领取奖励。,請領取獎勵。,Получите награду.
+ui.wave_defense.selected,선택한 슬롯: {0},Selected slot: {0},選択したスロット: {0},已选槽位：{0},已選欄位：{0},Выбранное место: {0}
+ui.wave_defense.facility_status,{0} 내구도 {1}/{2} 탄약 {3}/{4},{0} health {1}/{2} ammo {3}/{4},{0} 耐久 {1}/{2} 弾薬 {3}/{4},{0} 耐久 {1}/{2} 弹药 {3}/{4},{0} 耐久 {1}/{2} 彈藥 {3}/{4},{0} прочность {1}/{2} патроны {3}/{4}
+ui.wave_defense.facility_empty,{0}: 빈 슬롯,{0}: empty slot,{0}: 空きスロット,{0}：空槽位,{0}：空欄位,{0}: пустое место
+ui.wave_defense.core_warning,경고: 장치 내구도가 낮습니다!,Warning: core health is low!,警告：装置の耐久が低下しています！,警告：装置耐久过低！,警告：裝置耐久過低！,Внимание: прочность устройства низкая!
+ui.wave_defense.leave_warning,경고: {0}초 안에 방어 구역으로 돌아오세요!,Warning: return to the defense area in {0}s!,警告：{0}秒以内に防衛区域へ戻ってください！,警告：请在{0}秒内返回防守区域！,警告：請在{0}秒內返回防守區域！,Внимание: вернитесь в зону обороны за {0}с!

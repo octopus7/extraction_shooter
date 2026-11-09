@@ -4,6 +4,7 @@
 #include "WaveDefense/WaveDefenseTypes.h"
 #include "WaveDefenseDefinition.generated.h"
 class ATunaSweeperEnemyCharacter;
+class USoundBase;
 
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FWaveDefenseEnemyEntry
@@ -59,5 +60,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float TurretRange = 1800.0f;
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float TurretInterval = 1.0f;
     UPROPERTY(EditAnywhere, BlueprintReadOnly) float TurretDamage = 10.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly) TSoftObjectPtr<USoundBase> WarningSound;
     bool ValidateDefinition(TArray<FName>& OutErrors) const;
 };

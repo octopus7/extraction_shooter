@@ -59,4 +59,6 @@ private:
     void SetButtonText(UButton* Button, FName Key);
     TWeakObjectPtr<AWaveDefenseDirector> Director;
     FName SelectedSlot = TEXT("north.barrier");
+    FName SelectedSlotTextKey = TEXT("ui.wave_defense.north_barrier");
+    float ActionErrorSeconds = 0.0f;
 };

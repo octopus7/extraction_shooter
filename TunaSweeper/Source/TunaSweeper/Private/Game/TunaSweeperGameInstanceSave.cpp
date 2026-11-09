@@ -1088,6 +1088,8 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	WaveDefenseProgress.Reset();
+	bWaveDefenseInterruptedNeedsSave = false;
 	ResetVehicleFuelSession();
 	SelectedOutfitId = TEXT("Maid");
 	TGuardValue<bool> InitializationGuard(bInventoryStateInitializing, true);
@@ -1169,6 +1171,8 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
+	WaveDefenseProgress.Reset();
+	bWaveDefenseInterruptedNeedsSave = false;
 	ResetVehicleFuelSession();
 	SelectedOutfitId = TEXT("Maid");
 	ItemInstancesByUid.Reset();

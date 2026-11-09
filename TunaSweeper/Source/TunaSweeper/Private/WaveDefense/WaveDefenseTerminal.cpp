@@ -11,3 +11,4 @@ bool AWaveDefenseTerminal::OpenFor(APawn* Player)
     auto* Controller = Player ? Cast<ATunaSweeperPlayerController>(Player->GetController()) : nullptr;
     return Controller && Director && IsWithinInteractionDistance(Player) && Controller->OpenWaveDefensePanel(Director);
 }
+void AWaveDefenseTerminal::SetDirector(AWaveDefenseDirector* InDirector) { Director = InDirector; }

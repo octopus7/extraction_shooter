@@ -11,6 +11,7 @@ public:
     bool NotifyEnemyDied(FGuid EnemyToken);
     void ResolveFrame(bool bPlayerDead, bool bCoreDestroyed);
     void Abort(EWaveDefenseOutcome Reason);
+    void Finish();
     bool TrySpendSupplies(int32 Amount);
     FWaveDefenseSnapshot GetSnapshot() const { return Snapshot; }
 private:

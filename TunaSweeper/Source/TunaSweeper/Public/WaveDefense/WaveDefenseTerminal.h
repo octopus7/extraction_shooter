@@ -10,6 +10,7 @@ class TUNASWEEPER_API AWaveDefenseTerminal : public ATunaSweeperInteractableActo
 public:
     AWaveDefenseTerminal();
     bool OpenFor(APawn* Player);
+    void SetDirector(AWaveDefenseDirector* InDirector);
 protected:
     UPROPERTY(EditInstanceOnly, Category="Wave Defense") TObjectPtr<AWaveDefenseDirector> Director;
 };

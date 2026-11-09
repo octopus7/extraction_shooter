@@ -81,6 +81,7 @@ public:
 	ATunaSweeperEnemyAIController();
 
 	bool GetCombatDebugSnapshot(FTunaSweeperEnemyCombatDebugSnapshot& OutSnapshot) const;
+	bool IsEngagedWith(const AActor* Actor) const { return Actor && CurrentTargetActor.Get() == Actor && (bIsCombatEngaged || AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted); }
 	void NotifySuspicionAtLocation(const FVector& SuspicionLocation);
 	void NotifyDamageTaken(AActor* SuspectedActor);
 

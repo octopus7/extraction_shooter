@@ -1,6 +1,7 @@
 #include "Weapon/TunaSweeperWeapon.h"
 #include "WaveDefense/WaveDefenseParticipantComponent.h"
 #include "WaveDefense/WaveDefenseDirector.h"
+#include "Component/TunaSweeperFactionComponent.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "Combat/TunaSweeperProjectileDamage.h"
 #include "Combat/TunaSweeperCombatValue.h"
@@ -976,10 +977,20 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 			AimIntentComponent,
 			AimIntentWorldPoint,
 			bHasAimIntentWorldPoint);
-		SpawnedProjectile->FinishSpawning(SpawnTransform);
 		if (InstigatorPawn)
 			if (const auto* Participant = InstigatorPawn->FindComponentByClass<UWaveDefenseParticipantComponent>())
-				if (AWaveDefenseDirector* Director = Participant->GetDirector()) Director->RegisterOwnedActor(SpawnedProjectile);
+				if (AWaveDefenseDirector* Director = Participant->GetDirector())
+				{
+					auto* Ownership = NewObject<UWaveDefenseParticipantComponent>(SpawnedProjectile);
+					Ownership->Initialize(Director, Participant->GetRunId(), Participant->GetToken(), Participant->GetRole());
+					Ownership->RegisterComponent();
+					auto* Faction = NewObject<UTunaSweeperFactionComponent>(SpawnedProjectile);
+					Faction->SetFactionId(TunaSweeperFactionIds::Enemy);
+					Faction->SetCanBeCombatTarget(false);
+					Faction->RegisterComponent();
+					Director->RegisterOwnedActor(SpawnedProjectile);
+				}
+		SpawnedProjectile->FinishSpawning(SpawnTransform);
 		IgnoreNearbyPlayerPassthroughCovers(SpawnedProjectile, InstigatorPawn);
 	}
 

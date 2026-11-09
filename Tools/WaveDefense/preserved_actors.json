@@ -1,0 +1,1586 @@
+[
+  {
+    "name": "TS_Plains_Landscape",
+    "class": "/Script/Landscape.Landscape",
+    "pos": [
+      -10000.0,
+      -10000.0,
+      0.0
+    ]
+  },
+  {
+    "name": "TS_Plains_Sun",
+    "class": "/Script/Engine.DirectionalLight",
+    "pos": [
+      0.0,
+      0.0,
+      20000.0
+    ]
+  },
+  {
+    "name": "TS_Plains_SkyLight",
+    "class": "/Script/Engine.SkyLight",
+    "pos": [
+      0.0,
+      0.0,
+      15000.0
+    ]
+  },
+  {
+    "name": "TS_Plains_SkyAtmosphere",
+    "class": "/Script/Engine.SkyAtmosphere",
+    "pos": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "TS_Plains_HeightFog",
+    "class": "/Script/Engine.ExponentialHeightFog",
+    "pos": [
+      0.0,
+      0.0,
+      -1000.0
+    ]
+  },
+  {
+    "name": "TS_Plains_PlayerStart",
+    "class": "/Script/Engine.PlayerStart",
+    "pos": [
+      -240.0,
+      1940.0,
+      279.5175785294632
+    ]
+  },
+  {
+    "name": "TS_Plains_ReviewCamera",
+    "class": "/Script/Engine.CameraActor",
+    "pos": [
+      396.82539682539687,
+      -14285.714285714283,
+      16269.841269841269
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -269.7420634920635,
+      -5017.93464781746,
+      86.45094452492413
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_002",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -4954.142640128968,
+      -6305.808221726191,
+      121.19079495795086
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_003",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7654.239521329364,
+      -1411.7536272321431,
+      74.87162484976943
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_004",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      9370.55431547619,
+      -2115.514942956349,
+      414.9993781942394
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_005",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2189.1500806051586,
+      8988.062686011905,
+      399.9524593113056
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_006",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2190.049138144841,
+      2913.5749937996025,
+      49.9481708702624
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_007",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6781.494140625,
+      -1889.3903459821427,
+      57.0997194128322
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_008",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      8968.563988095237,
+      7321.310763888889,
+      351.9840532386552
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_009",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2101.598152281746,
+      -7470.5326140873,
+      112.54520980490634
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_010",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8554.569692460316,
+      -7102.694072420634,
+      292.61842722440633
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_011",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7535.328311011905,
+      -4300.035652281746,
+      67.74899962691416
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_012",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7215.5567956349205,
+      -1720.0358072916665,
+      71.02357438910622
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_013",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      8119.8412698412685,
+      -6633.50849454365,
+      154.27949234031985
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_014",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8762.736390128968,
+      5593.488033234127,
+      388.53270033059744
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_015",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1252.730499751984,
+      -6797.188895089286,
+      99.51112311364705
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_016",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -1888.3796812996034,
+      4713.927641369048,
+      78.66079775943217
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_017",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7018.319072420634,
+      381.5468439980159,
+      40.459761766236625
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_018",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7687.372891865078,
+      8111.839657738095,
+      154.63254404538384
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_019",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3629.1046626984125,
+      3805.8190724206343,
+      83.30006066514034
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_020",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6919.411117311509,
+      1775.2627418154761,
+      7.3709562962758355
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_021",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6642.332434275793,
+      8771.14025297619,
+      390.11944191799194
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_022",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      8979.654947916666,
+      4444.444444444444,
+      299.83268523601873
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_023",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      8693.374875992064,
+      -3760.5309864831343,
+      326.0779191284528
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_024",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -944.0104166666665,
+      -8097.584945436507,
+      212.0146294383958
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_025",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      854.0238451745565,
+      1867.6855898814351,
+      20.44933704858704
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_026",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -3678.6330450148807,
+      7113.890438988095,
+      121.2464828543234
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_027",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6363.19599454365,
+      -3572.2074962797615,
+      86.49871737833382
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_028",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4184.691220238095,
+      6500.86650545635,
+      79.34534208035257
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_029",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6870.379154265873,
+      -134.60208953373015,
+      47.976793543664826
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_030",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8672.594246031746,
+      455.8244977678571,
+      314.5445135552145
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_031",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -1080.5671812996031,
+      -4486.526925223214,
+      84.8691902627179
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_032",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      9177.94208829365,
+      5164.477926587301,
+      402.90537146358474
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_033",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      842.5775842215869,
+      -1894.8676418668506,
+      58.78954900440658
+    ]
+  },
+  {
+    "name": "TS_Plains_Rocks_034",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -2861.547464037698,
+      -1587.3116629464284,
+      34.134843647258094
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1324.941871279762,
+      -5761.187453497023,
+      104.5872414011028
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_002",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6985.550750248016,
+      3049.709356398809,
+      88.79018072738472
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_003",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8526.091269841269,
+      1509.7687251984125,
+      240.61177395064078
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_004",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -4401.372612847222,
+      -5048.729306175595,
+      103.03030263436449
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_005",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3460.441468253968,
+      8976.4896453373,
+      410.7538279390319
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_006",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3473.3227926587297,
+      3377.1926153273807,
+      75.58122171165815
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_007",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      5198.101128472222,
+      1214.120628720238,
+      52.32791530679606
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_008",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2941.1179315476184,
+      8354.04575892857,
+      254.13268628768128
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_009",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      8158.630952380952,
+      -1237.9557291666665,
+      165.22254636746948
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_010",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -3797.1974206349205,
+      7513.265749007936,
+      120.02182476395683
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_011",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      8182.956659226191,
+      6821.8021453373,
+      181.83857368520694
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_012",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -3664.945281498016,
+      -2472.83451140873,
+      66.28964698697382
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_013",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6054.106212797618,
+      859.7671750992063,
+      45.74362202883276
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_014",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6791.9115823412685,
+      -7550.291418650793,
+      68.15506429284869
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_015",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6453.679935515873,
+      6257.445126488095,
+      109.06874979692657
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_016",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4477.712673611111,
+      2771.565755208333,
+      77.78327762994013
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_017",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      188.44633556547615,
+      5342.723834325397,
+      61.83397018933829
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_018",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2581.898716517857,
+      -5762.9177517361095,
+      103.5618844929486
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_019",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8782.200210813491,
+      -4388.3982824900795,
+      329.11486655549743
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_020",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2699.556671626984,
+      -2148.283265128968,
+      62.2560772725119
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_021",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -2323.100353422619,
+      8664.192708333332,
+      353.1421188221502
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_022",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7666.245039682539,
+      9175.199962797618,
+      386.2888231044053
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_023",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2462.5689794146824,
+      -5383.062453497024,
+      97.87491735422736
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_024",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -363.5125192274729,
+      1969.8899722932795,
+      52.20330511091379
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_025",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1375.039527529762,
+      -8961.39167906746,
+      409.66170538637743
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_026",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -680.7624937996031,
+      9289.327566964284,
+      411.3082021921
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_027",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8451.97250124008,
+      4981.566220238095,
+      316.7935453022001
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_028",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8036.190941220237,
+      -6295.592292906746,
+      150.56238638209106
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_029",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1545.4357328869046,
+      8108.237227182539,
+      192.77331342823527
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_030",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -5099.273778521825,
+      -4098.394872271825,
+      93.44610876540901
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_031",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8303.805493551587,
+      6817.615327380952,
+      271.2707107638744
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_032",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4266.15978422619,
+      7183.995225694445,
+      87.29427972371195
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_033",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -3327.1654885912703,
+      -7452.184089781746,
+      114.43285814041883
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_034",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -3807.0793030753966,
+      -3235.7123480902774,
+      82.86528689026454
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_035",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -959.7191220238096,
+      2729.345703125,
+      70.16898877374115
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_036",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1267.3944382440475,
+      2866.152033730159,
+      61.997687903716724
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_037",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6562.710038442459,
+      -5882.113405257936,
+      88.56101174105788
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_038",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6095.307849702382,
+      -1334.0177021329364,
+      90.07480782112543
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_039",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6338.340153769841,
+      2338.096013144841,
+      101.05321068179182
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_040",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6601.778738839286,
+      2670.104011656746,
+      66.9060947436592
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_041",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7822.572544642857,
+      -8080.278087797618,
+      143.44112012812184
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_042",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7354.018632192459,
+      329.3790302579365,
+      47.357734648561745
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_043",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7436.593191964286,
+      -3635.440693204365,
+      61.39433743351765
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_044",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8596.561104910714,
+      7320.4272073412685,
+      332.5393707283474
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_045",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -2277.1468874007937,
+      -119.91102430555554,
+      32.57210044085514
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_046",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6894.252232142857,
+      7826.895771329364,
+      150.4100528629242
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_047",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      951.7915564247921,
+      -1761.7109494137546,
+      57.74818952809801
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_048",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7309.198288690477,
+      -3607.863653273809,
+      63.90195731255517
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_049",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      850.0124007936506,
+      -4402.362738715277,
+      77.08531525857325
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_050",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3422.157893105159,
+      9057.58773561508,
+      421.3030742505034
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_051",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1998.4655133275057,
+      154.07399869646858,
+      61.95773200270196
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_052",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1569.0964471726193,
+      -8594.058469742064,
+      333.8495440608058
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_053",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2590.776909722222,
+      2485.7406374007937,
+      29.038517659497302
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_054",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -1551.9203316766207,
+      -1268.8350527076345,
+      15.809772513115604
+    ]
+  },
+  {
+    "name": "TS_Plains_StoneScatter_055",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      9359.925285218253,
+      -8527.61734250992,
+      391.35484119188914
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2195.569816468254,
+      7660.939050099205,
+      103.47271173302943
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_002",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7221.994357638889,
+      8143.466331845237,
+      214.66456760259825
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_003",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -9001.41834077381,
+      -3184.745473710317,
+      180.21857153954988
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_004",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -437.80924479166663,
+      6344.831969246032,
+      88.82942016560992
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_005",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7977.890159970237,
+      8813.96019345238,
+      369.0276710136786
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_006",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2378.4295944940477,
+      -5802.781265500991,
+      105.54559619612701
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_007",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      521.0015190972222,
+      -6162.125651041666,
+      91.34981057911136
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_008",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7385.926649305555,
+      8741.446552579364,
+      324.5229479146219
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_009",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3694.6180555555547,
+      7270.334201388889,
+      80.52199130526424
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_010",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1668.167635068625,
+      -1241.024666744279,
+      52.26557196593785
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_011",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      5872.862413194445,
+      1698.6800905257933,
+      95.85347163123151
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_012",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      625.1806179408194,
+      -1964.7876660002012,
+      58.214647473436344
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_013",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4892.65407986111,
+      3439.5717075892853,
+      97.2476932182326
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_014",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      5463.9818948412685,
+      -8467.075117807539,
+      264.5972733920862
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_015",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -4144.623093377976,
+      6921.402219742064,
+      125.70101297923975
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_016",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7702.694072420634,
+      -6707.3001922123,
+      71.00166542044826
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_017",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2265.2715773809523,
+      5971.520027281746,
+      71.45076698929188
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_018",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6865.504092261905,
+      7140.234375,
+      114.02473282205028
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_019",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1215.4397631448412,
+      -9420.383804563491,
+      440.76635657229417
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_020",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -8911.29867311508,
+      -4248.884703621032,
+      342.43129652900825
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_021",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      9288.158792162698,
+      4375.398375496032,
+      365.24992190450575
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_022",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -2588.674200148809,
+      -6385.685221354166,
+      111.32112895489627
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_023",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      5359.920634920634,
+      -3846.1026630704364,
+      95.5700005170911
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_024",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1436.803230406746,
+      -6323.476252480159,
+      103.85381692808369
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_025",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -4926.831442212301,
+      -1218.2919456845239,
+      44.78573662609415
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_026",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2245.4264322916665,
+      8986.51878720238,
+      399.87560803570886
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_027",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7450.886656746032,
+      6912.766617063491,
+      75.1671368669704
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_028",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -4841.114056299602,
+      4577.584015376984,
+      87.63914563636354
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_029",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4606.408110119048,
+      -8391.110181051587,
+      265.0039262783248
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_030",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4664.380270337301,
+      4349.961247519841,
+      95.58816068245142
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_031",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      9310.388764880952,
+      -5277.7882409474205,
+      384.69439621073616
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_032",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7661.283172123016,
+      -7999.095517113095,
+      169.62971860089237
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_033",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6727.949838789682,
+      -1722.376457093254,
+      55.8082168318324
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_034",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1677.1794394841272,
+      6002.362351190477,
+      68.2267831219142
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_035",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2325.200737847222,
+      6950.455729166666,
+      85.16930679112556
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_036",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6493.836805555555,
+      -9468.961588541666,
+      393.2491727626839
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_037",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4233.285280257936,
+      782.2467137896824,
+      64.80171803178382
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_038",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -3773.4123108878966,
+      -7172.986421130952,
+      120.86016459918756
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_039",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -7553.166852678571,
+      5753.667534722223,
+      123.96899319928343
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_040",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -6614.9096292162685,
+      2219.0545944940477,
+      38.70662195817931
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_041",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2956.1314174107138,
+      -3499.7143942212297,
+      81.2130254501426
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_042",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3141.530257936508,
+      2245.14896453373,
+      27.70615168605218
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_043",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6143.908110119048,
+      -6924.036613343254,
+      79.8470272034283
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_044",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      9349.96589781746,
+      7296.834697420634,
+      381.22837707793224
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_045",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -2552.468532986111,
+      8906.727430555555,
+      400.4573174622128
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_046",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -2053.376891121032,
+      7596.901351686509,
+      115.00787387354649
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_047",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      1116.445777529762,
+      2316.068328373016,
+      46.207362969755195
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_048",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7731.153893849205,
+      -6061.040969122023,
+      72.36150045843897
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_049",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      2755.051773313492,
+      9443.670944940475,
+      427.3154359127366
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_050",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4138.893539186508,
+      -4331.520492311508,
+      97.80947856217608
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_051",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      4932.266865079365,
+      -6488.965618799602,
+      100.81816884422733
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_052",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      3290.732731894841,
+      8624.793836805555,
+      333.495301716448
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_053",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      -4446.742466517857,
+      -2666.923208085317,
+      62.72203537853056
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_054",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      276.31171789237976,
+      2037.2601445791688,
+      42.274220322899055
+    ]
+  },
+  {
+    "name": "TS_Plains_SparseGrass_055",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      207.62648809523807,
+      3535.4461185515866,
+      71.19113241251034
+    ]
+  },
+  {
+    "name": "TS_Plains_LandingZone",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      7539.682539682539,
+      3174.603174603175,
+      120.3547300809987
+    ]
+  },
+  {
+    "name": "TS_Plains_ServiceTank",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6587.301587301587,
+      4444.444444444444,
+      102.50785962483133
+    ]
+  },
+  {
+    "name": "TS_Plains_ServiceGenerator",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      6190.476190476191,
+      4206.349206349206,
+      105.03911005087866
+    ]
+  },
+  {
+    "name": "TS_Plains_Boundary_North",
+    "class": "/Script/Engine.BlockingVolume",
+    "pos": [
+      10500.0,
+      0.0,
+      7482.793898809524
+    ]
+  },
+  {
+    "name": "TS_Plains_Boundary_South",
+    "class": "/Script/Engine.BlockingVolume",
+    "pos": [
+      -10500.0,
+      0.0,
+      7482.793898809524
+    ]
+  },
+  {
+    "name": "TS_Plains_Boundary_East",
+    "class": "/Script/Engine.BlockingVolume",
+    "pos": [
+      0.0,
+      10500.0,
+      7482.793898809524
+    ]
+  },
+  {
+    "name": "TS_Plains_Boundary_West",
+    "class": "/Script/Engine.BlockingVolume",
+    "pos": [
+      0.0,
+      -10500.0,
+      7482.793898809524
+    ]
+  },
+  {
+    "name": "TS_Plains_SSTOLander",
+    "class": "/Game/MainRaid/SSTO/BP_SSTOLander.BP_SSTOLander_C",
+    "pos": [
+      0.0,
+      0.0,
+      137.65917922821004
+    ]
+  },
+  {
+    "name": "TS_Plains_SSTO_Entry",
+    "class": "/Script/TunaSweeper.TunaSweeperLadderTransferActor",
+    "pos": [
+      63.25921241212275,
+      -696.2985278856277,
+      34.32042423728308
+    ]
+  },
+  {
+    "name": "TS_Plains_SSTO_Exit",
+    "class": "/Script/TunaSweeper.TunaSweeperLadderTransferActor",
+    "pos": [
+      -217.65788970115892,
+      -287.2679881210913,
+      342.3593161399833
+    ]
+  },
+  {
+    "name": "RaidPlains_Extraction_1",
+    "class": "/Game/Interaction/BP_ExtractionPoint.BP_ExtractionPoint_C",
+    "pos": [
+      992.063492063492,
+      1785.7142857142853,
+      51.63053269994634
+    ]
+  },
+  {
+    "name": "RaidPlains_ExtractionVoxel_1",
+    "class": "/Script/Engine.StaticMeshActor",
+    "pos": [
+      992.100574157977,
+      1785.5907006100106,
+      15.160985420895486
+    ]
+  },
+  {
+    "name": "Memo_051",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -2213.9841789873285,
+      -6756.193025462706,
+      115.38199035681123
+    ]
+  },
+  {
+    "name": "Memo_052",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -8082.27274878716,
+      5529.249909253447,
+      225.03244833959127
+    ]
+  },
+  {
+    "name": "Memo_053",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -840.9038702434132,
+      5443.965489979722,
+      77.18960589390844
+    ]
+  },
+  {
+    "name": "Memo_054",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -2841.8991115570534,
+      341.454934957133,
+      18.31498357761285
+    ]
+  },
+  {
+    "name": "Memo_055",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      4419.532458101976,
+      -5469.441593388001,
+      121.11927811037424
+    ]
+  },
+  {
+    "name": "Memo_056",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -5098.072039132572,
+      -6119.737690218955,
+      114.08517231961025
+    ]
+  },
+  {
+    "name": "Memo_057",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -7390.283316949828,
+      1137.659234878609,
+      20.406284437197655
+    ]
+  },
+  {
+    "name": "Memo_058",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -909.0971231611061,
+      6130.44254520747,
+      92.70164868745923
+    ]
+  },
+  {
+    "name": "Memo_059",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -6399.272127792245,
+      -533.8527837382196,
+      46.42497883204703
+    ]
+  },
+  {
+    "name": "Memo_060",
+    "class": "/Game/Interaction/BP_MemoAnchor.BP_MemoAnchor_C",
+    "pos": [
+      -7375.942557835822,
+      -6021.7018669639165,
+      78.70055442352998
+    ]
+  },
+  {
+    "name": "LiftArrival_PLAINS_South",
+    "class": "/Game/Interaction/RaidLift/BP_RaidPlayerStart.BP_RaidPlayerStart_C",
+    "pos": [
+      -640.0,
+      1940.0,
+      162.6775181321973
+    ]
+  },
+  {
+    "name": "Plains_SignalArrival",
+    "class": "/Game/MainRaid/QuestLocations/BP_PlainsSignalArrival.BP_PlainsSignalArrival_C",
+    "pos": [
+      -1240.0,
+      1940.0,
+      200.0
+    ]
+  },
+  {
+    "name": "BP_SSTOUpperShell0",
+    "class": "/Game/MainRaid/SSTO/BP_SSTOUpperShell.BP_SSTOUpperShell_C",
+    "pos": [
+      0.0,
+      0.0,
+      137.65917922821004
+    ]
+  }
+]

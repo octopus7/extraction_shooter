@@ -71,11 +71,11 @@
 
 **Interfaces:** `UWaveDefenseDefinition::ValidateDefinition(TArray<FName>& OutErrors) const -> bool`; `FWaveDefenseRun::Start(const UWaveDefenseDefinition&, FGuid RunId) -> bool`; `AdvanceTime(float GameSeconds) -> void`; `NotifySpawned(FGuid EnemyToken) -> bool`; `NotifyEnemyDied(FGuid EnemyToken) -> bool`; `ResolveFrame(bool bPlayerDead, bool bCoreDestroyed) -> void`; `GetSnapshot() const -> FWaveDefenseSnapshot`. 검증은 오류 키를 반환하고 호출 측에서 기존 TextSubsystem으로 현지화한다.
 
-- [ ] `TunaSweeper.WaveDefense.Rules`에 실패 테스트를 추가한다. 6행 수량 `6,8,10,12,14,16`, 합계66, 상한 `4,5,6,7,8,8`을 검증한다.
-- [ ] 45초 준비→Active, `queued=0 && alive=0`에서만 30초 Intermission, 마지막 wave에서 Resolving으로 가는 전이를 테스트한다. 빈/잘못된 정의는 시작을 거절한다.
+- [x] `TunaSweeper.WaveDefense.Rules`에 실패 테스트를 추가한다. 6행 수량 `6,8,10,12,14,16`, 합계66, 상한 `4,5,6,7,8,8`을 검증한다.
+- [x] 45초 준비→Active, `queued=0 && alive=0`에서만 30초 Intermission, 마지막 wave에서 Resolving으로 가는 전이를 테스트한다. 빈/잘못된 정의는 시작을 거절한다.
 - [ ] 동일 EnemyToken 사망 중복, 상한 도달 중 spawn, 마지막 사망+core/player 사망, 시작 연타를 테스트한다. 실패를 먼저 확인한 뒤 상태 모델을 구현한다.
 - [ ] 초기200·wave1~5 완료마다100·wave6 추가없음, pause 중 `AdvanceTime` 호출 없음, 음수 delta 거절을 구현한다. 종결 입력을 같은 프레임에서 집계하여 사망을 우선한다.
-- [ ] 정의를 `/Game/MainRaid/WaveDefense/DA_PlainsWaveDefense`로 후속 에셋 작성 단계에서 저장할 수 있게 구성하고 같은 테스트 필터의 PASS를 확인한다.
+- [x] 정의를 `/Game/MainRaid/WaveDefense/DA_PlainsWaveDefense`로 후속 에셋 작성 단계에서 저장할 수 있게 구성하고 같은 테스트 필터의 PASS를 확인한다.
 
 **완료 조건:** UE 월드를 생성하지 않고 규정된 상태 전이와 수량을 테스트할 수 있다.
 
@@ -150,7 +150,7 @@
 
 **Interfaces:** `AWaveDefenseTerminal::OpenFor(APawn* Player) -> bool`; Controller의 `OpenWaveDefensePanel(AWaveDefenseDirector*) -> bool`, `CloseWaveDefensePanel() -> void`. HUD/Panel은 `FWaveDefenseSnapshot` 및 시설 목록을 받아 표시하고 Task 3~5 API에 명령을 전달한다. 새로운 interaction enum 값은 구현 시 현재 마지막 값 뒤에 추가하며 기존 숫자를 재사용하지 않는다.
 
-- [ ] 에디터 조정 문서를 읽고 맵의 기존 액터·동선·해당 영역의 지형을 조사한다. 설계 §4 조건에 맞는 독립 부지를 확정하고 새 거점 transform과 기존 보존 대상 목록을 검증기에 기록한다.
+- [x] 에디터 조정 문서를 읽고 맵의 기존 액터·동선·해당 영역의 지형을 조사한다. 설계 §4 조건에 맞는 독립 부지를 확정하고 새 거점 transform과 기존 보존 대상 목록을 검증기에 기록한다.
 - [ ] UE에서 편집 가능한 거점·슬롯·후보 위치를 저장한다. 방벽/포탑 슬롯은 진입로별 1개, 생성 후보는 진입로별 최소2개, 출입은 남쪽이라는 개념을 실제 지형에 맞춰 구현한다. 기존 액터를 임의 이동하지 않는다.
 - [ ] 기존 일반 적 클래스·무기·프로필을 검증해 DataAsset에 채운다. soft reference의 cook 포함 경로와 맵에서의 참조를 확인한다. 검토되지 않은 Main 전용 데이터에 의존하지 않는다.
 - [ ] 저장된 WBP 트리에서 단말/준비/결과 패널 및 HUD를 작성하고 실제 모델 정보·명명 규칙을 적용한다. 모든 표시 문자열·숫자 포맷·오류를 6개 언어 CSV 키로 연결한다.
@@ -194,3 +194,7 @@ $waveEditor = 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEd
 
 사용자 요청으로 중단 상태를 보존한다. 런타임·테스트·문자열·BP/WBP/DataAsset 초안이며 완성본이 아니다. 마지막 보고 빌드는 WaveDefense-13 성공, 자동화는 WaveDefense09 5개 성공이지만 이후 전체 변경은 미검증이다. 실제 평원 배치·에셋 재로드·6웨이브 통합·실플레이·회귀검증·최종리뷰가 남았다. WaveDefenseGenerateWidgets.cpp는 재개용 임시 생성기로 남겨두며 최종 완료 전에 제거·재검증한다. 재개 시 Saved/WaveDefense와 관련 빌드/자동화 로그를 먼저 확인한다.
 
+
+## 재개 후 두 번째 중간 커밋 — 2026-11-10
+
+사용자 요청으로 다시 일시 중단했다. 평원 배치와 NavMesh 6경로, 실제 66마리/6웨이브 자동 통합, 슬롯·저장실패·AI·화면 회귀를 진행했다. 기존 리뷰9건/UI후속3건은 제한 정적 재검토에서 해결됐다. 러시아어 시설 버튼 줄바꿈 수정의 최종 에셋 반영·언어 재검증, 실제 수동 플레이/밸런스, 임시 생성기 제거와 최종 재빌드·회귀는 남아 있다. `Saved/WaveDefense/implementation_report.md`와 검증 보고서를 읽고 재개한다. 일회성 `WaveDefense*Once.cpp` 및 `WaveDefenseGenerateWidgets.cpp`는 재개용으로 보존한 미완성 작업물이며 최종 제출 전 제거한다. 자동 PIE의 시간 가속·피해 주입은 수동 밸런스 검증을 대신하지 않는다.

@@ -65,6 +65,10 @@ void FWaveDefenseRun::Abort(EWaveDefenseOutcome Reason)
     Snapshot.Outcome = Reason;
     Snapshot.Phase = EWaveDefensePhase::Resolving;
 }
+void FWaveDefenseRun::Finish()
+{
+    if (Snapshot.Phase == EWaveDefensePhase::Resolving) Snapshot.Phase = EWaveDefensePhase::Finished;
+}
 bool FWaveDefenseRun::TrySpendSupplies(int32 Amount)
 {
     if (Amount <= 0 || Snapshot.Supplies < Amount || (Snapshot.Phase != EWaveDefensePhase::Preparing && Snapshot.Phase != EWaveDefensePhase::Intermission)) return false;

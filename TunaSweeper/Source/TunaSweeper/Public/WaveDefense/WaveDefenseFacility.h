@@ -25,6 +25,7 @@ public:
     bool CanReload() const { return Kind == EWaveDefenseFacilityKind::Turret && Health > 0 && Ammo < MaxAmmo; }
     bool IsOperational() const { return Health > 0; }
     EWaveDefenseFacilityKind GetKind() const { return Kind; }
+    FWaveDefenseFacilitySnapshot GetSnapshot() const;
 protected:
     UPROPERTY(EditDefaultsOnly, Category="Wave Defense") TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;
 private:

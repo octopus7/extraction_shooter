@@ -64,15 +64,23 @@ void AWaveDefenseFacility::Tick(float DeltaSeconds)
 float AWaveDefenseFacility::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
     if (!Director || !GetWorld() || Health <= 0) return 0.0f;
-    const AActor* Source = EventInstigator && EventInstigator->GetPawn() ? EventInstigator->GetPawn() : DamageCauser;
-    const auto* Participant = Source ? Source->FindComponentByClass<UWaveDefenseParticipantComponent>() : nullptr;
+    const auto* ProjectileParticipant = DamageCauser && !Cast<APawn>(DamageCauser) ? DamageCauser->FindComponentByClass<UWaveDefenseParticipantComponent>() : nullptr;
+    const AActor* Source = ProjectileParticipant ? DamageCauser : EventInstigator && EventInstigator->GetPawn() ? EventInstigator->GetPawn() : DamageCauser;
+    const auto* Participant = ProjectileParticipant ? ProjectileParticipant : Source ? Source->FindComponentByClass<UWaveDefenseParticipantComponent>() : nullptr;
     if (!Participant && DamageCauser && DamageCauser->GetInstigator()) Participant = DamageCauser->GetInstigator()->FindComponentByClass<UWaveDefenseParticipantComponent>();
     const auto* Factions = GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>();
     const bool bHostile = Factions && Source && Factions->AreActorsHostile(Source, this);
-    const float Applied = Participant ? FWaveDefenseDamageRules::Resolve(DamageAmount, Director->GetDamageMultiplier(), RunId, Participant->GetRunId(), bHostile, Director->IsActiveParticipant(Participant->GetRunId(), Participant->GetToken(), Participant->GetOwner())) : 0.0f;
+    const bool bOwned = Participant && (ProjectileParticipant ? Director->IsOwnedProjectile(Participant->GetRunId(), Participant->GetToken(), DamageCauser) : Director->IsDamageParticipant(Participant->GetRunId(), Participant->GetToken(), Participant->GetOwner(), false));
+    const float Applied = Participant ? FWaveDefenseDamageRules::Resolve(DamageAmount, Director->GetDamageMultiplier(), RunId, Participant->GetRunId(), bHostile, bOwned) : 0.0f;
     const float Clamped = FMath::Min<float>(Health, Applied); Health -= FMath::RoundToInt(Clamped);
     if (Health <= 0) Destroy();
     return Clamped;
 }
 bool AWaveDefenseFacility::Repair() { if (!CanRepair()) return false; Health = FMath::Min(MaxHealth, Health + FMath::RoundToInt(MaxHealth * 0.5f)); return true; }
 bool AWaveDefenseFacility::Reload() { if (!CanReload()) return false; Ammo = MaxAmmo; return true; }
+FWaveDefenseFacilitySnapshot AWaveDefenseFacility::GetSnapshot() const
+{
+    FWaveDefenseFacilitySnapshot Snapshot; Snapshot.bOccupied = IsOperational(); Snapshot.Health = Health; Snapshot.MaxHealth = MaxHealth;
+    if (Kind == EWaveDefenseFacilityKind::Turret) { Snapshot.Ammo = Ammo; Snapshot.MaxAmmo = MaxAmmo; }
+    return Snapshot;
+}

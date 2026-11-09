@@ -1,11 +1,13 @@
 #include "UI/Terra/WaveDefensePanelGPT61Terra.h"
 #include "WaveDefense/WaveDefenseDirector.h"
+#include "WaveDefense/WaveDefenseDefinition.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/WidgetTree.h"
+#include "WaveDefenseTextHelpers.h"
 void UWaveDefensePanelGPT61Terra::SetDirector(AWaveDefenseDirector* InDirector) { Director = InDirector; }
 FText UWaveDefensePanelGPT61Terra::Text(FName Key) const
 {
@@ -16,7 +18,16 @@ FText UWaveDefensePanelGPT61Terra::Text(FName Key) const
 }
 void UWaveDefensePanelGPT61Terra::SetButtonText(UButton* Button, FName Key)
 {
-    if (Button && Button->GetChildrenCount() > 0) if (auto* Label = Cast<UTextBlock>(Button->GetChildAt(0))) Label->SetText(Text(Key));
+    int32 Cost = INDEX_NONE;
+    if (const auto* Definition = Director.IsValid() ? Director->GetDefinition() : nullptr)
+    {
+        if (Key == TEXT("ui.wave_defense.barrier")) Cost = Definition->BarrierCost;
+        else if (Key == TEXT("ui.wave_defense.turret")) Cost = Definition->TurretCost;
+        else if (Key == TEXT("ui.wave_defense.repair_core")) Cost = Definition->CoreRepairCost;
+        else if (Key == TEXT("ui.wave_defense.repair_facility")) Cost = Definition->FacilityRepairCost;
+        else if (Key == TEXT("ui.wave_defense.reload")) Cost = Definition->ReloadCost;
+    }
+    if (Button && Button->GetChildrenCount() > 0) if (auto* Label = Cast<UTextBlock>(Button->GetChildAt(0))) Label->SetText(Cost == INDEX_NONE ? Text(Key) : FText::Format(Text(Key), FText::AsNumber(Cost)));
 }
 void UWaveDefensePanelGPT61Terra::NativeConstruct()
 {
@@ -37,22 +48,35 @@ void UWaveDefensePanelGPT61Terra::NativeTick(const FGeometry& Geometry, float De
     if (!Director.IsValid()) return;
     const auto S = Director->GetSnapshot();
     StatusText->SetText(FText::Format(Text(TEXT("ui.wave_defense.status")), FText::AsNumber(S.Wave), FText::AsNumber(S.TotalWaves), FText::AsNumber(S.CoreHealth), FText::AsNumber(S.CoreMaxHealth), FText::AsNumber(S.Alive), FText::AsNumber(S.Queued), FText::AsNumber(S.Supplies)));
-    DetailText->SetText(FText::Format(Text(TEXT("ui.wave_defense.details")), FText::AsNumber(Director->GetDifficultyStage()), FText::AsNumber(Director->GetRewardCoins()), FText::AsNumber(FMath::CeilToInt(S.SecondsRemaining)), FText::AsNumber(FMath::CeilToInt(S.LeaveSecondsRemaining))));
+    const FText Details = FText::Format(Text(TEXT("ui.wave_defense.details")), FText::AsNumber(Director->GetDifficultyStage()), FText::AsNumber(Director->GetRewardCoins()), FText::AsNumber(FMath::CeilToInt(S.SecondsRemaining)), FText::AsNumber(FMath::CeilToInt(S.LeaveSecondsRemaining)));
+    const auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+    const FText Warning = WaveDefenseText::Warnings(Game, S);
+    const FText DirectionsAndWarning = FText::Format(Text(TEXT("ui.wave_defense.lines")), WaveDefenseText::Direction(Game, S), Warning);
+    DetailText->SetText(FText::Format(Text(TEXT("ui.wave_defense.lines")), Details, DirectionsAndWarning));
+    ActionErrorSeconds = FMath::Max(0.0f, ActionErrorSeconds - DeltaTime);
+    FText Message = WaveDefenseText::Message(Game, S, ActionErrorSeconds > 0, SelectedSlotTextKey);
+    if (ActionErrorSeconds <= 0 && WaveDefenseText::Result(Game, S).IsEmpty())
+    {
+        FWaveDefenseFacilitySnapshot Facility;
+        if (Director->GetFacilitySnapshot(SelectedSlot, Facility))
+            Message = Facility.bOccupied ? FText::Format(Text(TEXT("ui.wave_defense.facility_status")), Text(SelectedSlotTextKey), FText::AsNumber(Facility.Health), FText::AsNumber(Facility.MaxHealth), FText::AsNumber(Facility.Ammo), FText::AsNumber(Facility.MaxAmmo)) : FText::Format(Text(TEXT("ui.wave_defense.facility_empty")), Text(SelectedSlotTextKey));
+    }
+    MessageText->SetText(Message);
 }
-void UWaveDefensePanelGPT61Terra::RunAction(EWaveDefenseAction Action, FName SlotKey) { if (!Director.IsValid() || !Director->TryFacilityAction(SlotKey, Action)) MessageText->SetText(Text(TEXT("ui.wave_defense.action_failed"))); else MessageText->SetText(FText::GetEmpty()); }
-void UWaveDefensePanelGPT61Terra::Start() { if (!Director.IsValid() || !Director->TryStart(GetOwningPlayerPawn())) MessageText->SetText(Text(TEXT("ui.wave_defense.action_failed"))); }
-void UWaveDefensePanelGPT61Terra::Ready() { if (!Director.IsValid() || !Director->SetReady()) MessageText->SetText(Text(TEXT("ui.wave_defense.action_failed"))); }
+void UWaveDefensePanelGPT61Terra::RunAction(EWaveDefenseAction Action, FName SlotKey) { ActionErrorSeconds = !Director.IsValid() || !Director->TryFacilityAction(SlotKey, Action) ? 4.0f : 0.0f; }
+void UWaveDefensePanelGPT61Terra::Start() { ActionErrorSeconds = !Director.IsValid() || !Director->TryStart(GetOwningPlayerPawn()) ? 4.0f : 0.0f; }
+void UWaveDefensePanelGPT61Terra::Ready() { ActionErrorSeconds = !Director.IsValid() || !Director->SetReady() ? 4.0f : 0.0f; }
 void UWaveDefensePanelGPT61Terra::Abort() { if (Director.IsValid()) Director->Abort(EWaveDefenseOutcome::Abandoned); }
-void UWaveDefensePanelGPT61Terra::Claim() { if (!Director.IsValid() || !Director->TryClaimReward()) MessageText->SetText(Text(TEXT("ui.wave_defense.action_failed"))); }
+void UWaveDefensePanelGPT61Terra::Claim() { ActionErrorSeconds = !Director.IsValid() || !Director->TryClaimReward() ? 4.0f : 0.0f; }
 void UWaveDefensePanelGPT61Terra::Close() { if (auto* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer())) Controller->CloseWaveDefensePanel(); }
 void UWaveDefensePanelGPT61Terra::Barrier() { RunAction(EWaveDefenseAction::InstallBarrier, SelectedSlot); }
 void UWaveDefensePanelGPT61Terra::Turret() { RunAction(EWaveDefenseAction::InstallTurret, SelectedSlot); }
 void UWaveDefensePanelGPT61Terra::RepairCore() { RunAction(EWaveDefenseAction::RepairCore, TEXT("core")); }
 void UWaveDefensePanelGPT61Terra::RepairFacility() { RunAction(EWaveDefenseAction::RepairFacility, SelectedSlot); }
 void UWaveDefensePanelGPT61Terra::Reload() { RunAction(EWaveDefenseAction::ReloadTurret, SelectedSlot); }
-void UWaveDefensePanelGPT61Terra::NorthBarrier() { SelectedSlot = TEXT("north.barrier"); }
-void UWaveDefensePanelGPT61Terra::WestBarrier() { SelectedSlot = TEXT("west.barrier"); }
-void UWaveDefensePanelGPT61Terra::EastBarrier() { SelectedSlot = TEXT("east.barrier"); }
-void UWaveDefensePanelGPT61Terra::NorthTurret() { SelectedSlot = TEXT("north.turret"); }
-void UWaveDefensePanelGPT61Terra::WestTurret() { SelectedSlot = TEXT("west.turret"); }
-void UWaveDefensePanelGPT61Terra::EastTurret() { SelectedSlot = TEXT("east.turret"); }
+void UWaveDefensePanelGPT61Terra::NorthBarrier() { SelectedSlot = TEXT("north.barrier"); SelectedSlotTextKey = TEXT("ui.wave_defense.north_barrier"); }
+void UWaveDefensePanelGPT61Terra::WestBarrier() { SelectedSlot = TEXT("west.barrier"); SelectedSlotTextKey = TEXT("ui.wave_defense.west_barrier"); }
+void UWaveDefensePanelGPT61Terra::EastBarrier() { SelectedSlot = TEXT("east.barrier"); SelectedSlotTextKey = TEXT("ui.wave_defense.east_barrier"); }
+void UWaveDefensePanelGPT61Terra::NorthTurret() { SelectedSlot = TEXT("north.turret"); SelectedSlotTextKey = TEXT("ui.wave_defense.north_turret"); }
+void UWaveDefensePanelGPT61Terra::WestTurret() { SelectedSlot = TEXT("west.turret"); SelectedSlotTextKey = TEXT("ui.wave_defense.west_turret"); }
+void UWaveDefensePanelGPT61Terra::EastTurret() { SelectedSlot = TEXT("east.turret"); SelectedSlotTextKey = TEXT("ui.wave_defense.east_turret"); }
