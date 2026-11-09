@@ -148,6 +148,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Storage")
 	TArray<FTunaSweeperInventorySlot> StorageSlots;
 
+	// Secondary warehouse belongs to the active gameplay save, not the raid session.
+	UPROPERTY(SaveGame)
+	TArray<FTunaSweeperInventorySlot> RaidStorageSlots;
+
     UPROPERTY()
     TArray<FTunaSweeperItemStack> PendingQuestRewards;
 

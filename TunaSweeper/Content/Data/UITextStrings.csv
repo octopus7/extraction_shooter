@@ -734,3 +734,6 @@ ui.barter.ethanol_shortage,에탄올 2개가 필요하다!,I need 2 units of eth
 ui.barter.failed,지금은 교환할 수 없다.,I can't exchange this right now.,今は交換できない。,现在无法交换。,現在無法交換。,Сейчас обмен невозможен.
 ui.vehicle.refuel,주유 (에탄올 1개),Refuel (1 Ethanol),給油（エタノール1個）,加油（乙醇×1）,加油（乙醇×1）,Заправить (этанол ×1)
 ui.vehicle.fuel_missing,에탄올이 부족하다!,Not enough ethanol!,エタノールが足りない！,乙醇不足！,乙醇不足！,Недостаточно этанола!
+ui.raid_storage.name,레이드 보관함,Raid Storage,レイド保管箱,突袭储物箱,突襲儲物箱,Хранилище рейда
+ui.raid_storage.duplicate,경고: 보관함이 중복 배치되어 있습니다. 모든 보관함은 같은 내용물을 공유합니다.,Warning: Multiple storage chests are placed. All share the same contents.,警告：保管箱が重複配置されています。内容物はすべて共有されます。,警告：储物箱重复放置。所有储物箱共享物品。,警告：儲物箱重複放置。所有儲物箱共用物品。,Предупреждение: размещено несколько хранилищ. Их содержимое общее.
+ui.raid_storage.save_failed,보관함 저장에 실패했습니다. 게임을 종료하지 말고 저장을 다시 시도하세요.,Storage could not be saved. Retry saving before quitting.,保管箱を保存できませんでした。終了せずに保存を再試行してください。,储物箱保存失败。请勿退出游戏并重试保存。,儲物箱儲存失敗。請勿結束遊戲並重試儲存。,Не удалось сохранить хранилище. Повторите сохранение перед выходом.

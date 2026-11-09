@@ -1360,6 +1360,7 @@ void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(
 	CollectItemUidsFromSlots(EquipmentSlots, OutItemUids);
 	CollectItemUidsFromSlots(AuxiliaryBagSlots, OutItemUids);
 	CollectItemUidsFromSlots(StorageSlots, OutItemUids);
+	CollectItemUidsFromSlots(RaidStorageSlots, OutItemUids);
 	if (bIncludeUsableQuickSlots)
 	{
 		CollectItemUidsFromSlots(UsableQuickSlots, OutItemUids);

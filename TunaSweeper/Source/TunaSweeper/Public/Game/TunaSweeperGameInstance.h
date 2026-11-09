@@ -280,6 +280,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperNpcBarterTest;
 	friend class FTunaSweeperQuestSubmissionTest;
 	friend class FTunaSweeperUndergroundStorageTest;
+	friend class FTunaSweeperRaidStoragePersistenceTest;
 	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperFeedingRewardsTest;
 	friend class FTunaSweeperQuestArrivalTest;
@@ -629,6 +630,11 @@ public:
 	const TArray<FTunaSweeperInventorySlot>& GetAuxiliaryBagSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetUsableQuickSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetStorageSlots();
+	static constexpr int32 RaidStorageCapacity = 10;
+	const TArray<FTunaSweeperInventorySlot>& GetRaidStorageSlots();
+	void OpenRaidStorage(UObject* Owner, const FText& DisplayName);
+	void CloseRaidStorage(UObject* Owner);
+	bool IsRaidStorageOpen() const { return bActiveLootContainerIsRaidStorage; }
 	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& GetSelectedWeaponAttachmentSlotTags() const { return SelectedWeaponAttachmentSlotTags; }
@@ -1159,6 +1165,13 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> StorageSlots;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> RaidStorageSlots;
+	bool bActiveLootContainerIsRaidStorage = false;
+	bool bPendingRaidStorageSave = false;
+	void SynchronizeRaidStorage();
+	bool FlushRaidStorageSave();
 
     UPROPERTY(Transient)
     TArray<FTunaSweeperItemStack> PendingQuestRewards;

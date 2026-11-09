@@ -90,7 +90,7 @@ namespace TunaSweeperSaveTool::Internal
 			if (!Data.TryGetItemDefinition(Item.ItemId, D)) return TEXT("unknown_item");
 			if (Item.Quantity > FMath::Max(1, Data.ResolveItemMaxStackQuantity(D))) return TEXT("invalid_stack");
 		}
-		for (const auto* Slots : { &Save.InventorySlots, &Save.EquipmentSlots, &Save.AuxiliaryBagSlots, &Save.StorageSlots, &Save.UsableQuickSlots })
+		for (const auto* Slots : { &Save.InventorySlots, &Save.EquipmentSlots, &Save.AuxiliaryBagSlots, &Save.StorageSlots, &Save.RaidStorageSlots, &Save.UsableQuickSlots })
 		{
 			for (const auto& Slot : *Slots)
 			{

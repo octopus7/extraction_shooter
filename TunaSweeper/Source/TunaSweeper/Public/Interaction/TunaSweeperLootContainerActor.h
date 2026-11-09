@@ -51,7 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
 	bool BuildContainerInstance(FTunaSweeperLootContainerInstance& OutInstance) const;
 
-	bool OpenRuntimeContainer(UTunaSweeperGameInstance* TunaGameInstance, FTunaSweeperLootContainerInstance& OutInstance);
+	virtual bool OpenRuntimeContainer(UTunaSweeperGameInstance* TunaGameInstance, FTunaSweeperLootContainerInstance& OutInstance);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	UTunaSweeperInteractableComponent* GetInteractableComponent() const { return InteractableComponent; }

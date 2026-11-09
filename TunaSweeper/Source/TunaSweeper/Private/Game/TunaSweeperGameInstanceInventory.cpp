@@ -648,7 +648,7 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
 	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
 	const bool bAcquiredFromLootContainer =
-		SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
+		!bActiveLootContainerIsRaidStorage && SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
 		TargetSlot.Source != ETunaSweeperItemSlotSource::LootContainer;
 	int32 AcquiredItemId = INDEX_NONE;
 	int32 AcquiredQuantity = 0;
@@ -937,7 +937,7 @@ bool UTunaSweeperGameInstance::SplitItemStackBetweenSlots(
 	ClearSelectedItemIfInvalid();
 	BroadcastInventoryStateChanged();
 
-	if (SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
+	if (!bActiveLootContainerIsRaidStorage && SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
 		TargetSlot.Source != ETunaSweeperItemSlotSource::LootContainer)
 	{
 		MarkItemEverAcquired(SplitItemId);
@@ -1292,6 +1292,7 @@ bool UTunaSweeperGameInstance::SetStorageSlotCapacity(int32 NewCapacity, bool bS
 
 void UTunaSweeperGameInstance::BroadcastInventoryStateChanged()
 {
+	SynchronizeRaidStorage();
 	bHasGeneratedPlayerInventoryItems = false;
 	RefreshLegacyPlayerInventoryItems();
 	ClearSelectedItemIfInvalid();

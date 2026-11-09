@@ -751,6 +751,9 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	UsableQuickSlots = SaveGame->UsableQuickSlots;
 	StorageSlotCapacity = NormalizeStorageSlotCapacity(SaveGame->StorageSlotCapacity);
 	StorageSlots = SaveGame->StorageSlots;
+	RaidStorageSlots = SaveGame->RaidStorageSlots;
+	EnsureSlotArraySize(RaidStorageSlots, RaidStorageCapacity);
+	bPendingRaidStorageSave = false;
     PendingQuestRewards = SaveGame->PendingQuestRewards;
     PendingQuestRewards.RemoveAll([](const FTunaSweeperItemStack& Entry) { return Entry.ItemId <= 0 || Entry.Quantity <= 0; });
 	ShopStockStatesByKey.Reset();
@@ -786,6 +789,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	RemoveInvalidSlotReferences(AuxiliaryBagSlots);
 	RemoveInvalidSlotReferences(UsableQuickSlots);
 	RemoveInvalidSlotReferences(StorageSlots);
+	RemoveInvalidSlotReferences(RaidStorageSlots);
 
 	EnsureSlotArraySize(EquipmentSlots, FMath::Max(TunaSweeperInventory::RequiredEquipmentSlots, GameplaySettings.EquipmentSlotCount));
 	EnsureSlotArraySize(AuxiliaryBagSlots, FMath::Max(0, GameplaySettings.AuxiliaryBagSlotCount));
@@ -822,6 +826,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	}
 	EnsureSlotArraySize(PlayerInventorySlots, InventoryCapacity);
 
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
@@ -959,6 +964,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
 	SaveGame->StorageSlotCapacity = NormalizeStorageSlotCapacity(StorageSlotCapacity);
 	SaveGame->StorageSlots = StorageSlots;
+	SaveGame->RaidStorageSlots = RaidStorageSlots;
     SaveGame->PendingQuestRewards = PendingQuestRewards;
 	EnsureSlotArraySize(SaveGame->StorageSlots, SaveGame->StorageSlotCapacity);
 	ShopStockStatesByKey.GenerateValueArray(SaveGame->ShopStockStates);
@@ -1086,6 +1092,9 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	AuxiliaryBagSlots.Reset();
 	UsableQuickSlots.Reset();
 	StorageSlots.Reset();
+	RaidStorageSlots.Reset();
+	RaidStorageSlots.SetNum(RaidStorageCapacity);
+	bPendingRaidStorageSave = false;
     PendingQuestRewards.Reset();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
 	ShopStockStatesByKey.Reset();
@@ -1094,6 +1103,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	ActiveWorkbenchId = INDEX_NONE;
 	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
 	bHasActiveWorkbench = false;
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	SelectedWeaponAttachmentSlotTags.Reset();
@@ -1188,6 +1198,9 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	ResetPlayerSlotArrays();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
 	StorageSlots.Reset();
+	RaidStorageSlots.Reset();
+	RaidStorageSlots.SetNum(RaidStorageCapacity);
+	bPendingRaidStorageSave = false;
     PendingQuestRewards.Reset();
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
 	ShopStockStatesByKey.Reset();
@@ -1196,6 +1209,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	ActiveWorkbenchId = INDEX_NONE;
 	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
 	bHasActiveWorkbench = false;
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();

@@ -62,9 +62,11 @@ void UTunaSweeperGameInstance::SetActiveLootContainerInstance(
 {
 	EnsureInventoryStateInitialized();
 
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerDisplayName = InContainerInstance.DisplayName;
 	ActiveLootContainerCapacity = FMath::Max(0, InContainerInstance.Capacity);
 	ActiveLootContainerOwner = InOwner;
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	EnsureSlotArraySize(ActiveLootContainerSlots, ActiveLootContainerCapacity);
 
@@ -90,6 +92,7 @@ void UTunaSweeperGameInstance::SetActiveLootContainerRuntimeSlots(
 {
 	EnsureInventoryStateInitialized();
 
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerDisplayName = InContainerInstance.DisplayName;
 	ActiveLootContainerCapacity = FMath::Max(0, InContainerInstance.Capacity);
 	ActiveLootContainerOwner = InOwner;
@@ -137,6 +140,7 @@ void UTunaSweeperGameInstance::NotifyActiveLootContainerUiClosed()
 	if (bHasActiveLootContainer)
 	{
 		OnActiveLootContainerUiClosed.Broadcast();
+		if (bActiveLootContainerIsRaidStorage) CloseRaidStorage(ActiveLootContainerOwner.Get());
 	}
 }
 
@@ -179,6 +183,13 @@ bool UTunaSweeperGameInstance::FlushPendingBunkerItemStateSave()
 
 void UTunaSweeperGameInstance::MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker)
 {
+	if (bActiveLootContainerIsRaidStorage || bPendingRaidStorageSave)
+	{
+		SynchronizeRaidStorage();
+		bPendingRaidStorageSave = true;
+		FlushRaidStorageSave();
+		return;
+	}
 	if (IsCurrentWorldBunkerMap())
 	{
 		bPendingBunkerItemStateSave = true;
@@ -207,6 +218,7 @@ bool UTunaSweeperGameInstance::SaveForGameplayExit(bool bAbandonRaid)
 		auto State = std::tie(ItemInstancesByUid, EquipmentSlots, AuxiliaryBagSlots, UsableQuickSlots,
 			PlayerInventorySlots, StorageSlots, ActiveLootContainerSlots, ActiveLootContainerOwner,
 			ActiveLootContainerDisplayName, ActiveLootContainerCapacity, bHasActiveLootContainer,
+			bActiveLootContainerIsRaidStorage, bPendingRaidStorageSave,
 			SelectedItemSlotReference, HoveredItemSlotReference, SelectedWeaponAttachmentSlotTags,
 			SelectedWeaponAttachmentSlots, PendingRaidExperiencePoints, RaidStartExperiencePoints,
 			bRaidExperienceSessionActive, bHasPendingRaidExperienceAnimationState,
@@ -243,6 +255,7 @@ bool UTunaSweeperGameInstance::ClearInventoryAndSaveInternal(bool bNotifyChanges
 
 	TSet<FGuid> StorageItemUids;
 	CollectItemUidsFromSlots(StorageSlots, StorageItemUids);
+	CollectItemUidsFromSlots(RaidStorageSlots, StorageItemUids);
 	TMap<FGuid, FTunaSweeperItemInstance> PreservedStorageItemInstances;
 	for (const FGuid& StorageItemUid : StorageItemUids)
 	{
@@ -258,6 +271,7 @@ bool UTunaSweeperGameInstance::ClearInventoryAndSaveInternal(bool bNotifyChanges
 	EnsureSlotArraySize(UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
 	RemoveInvalidSlotReferences(StorageSlots);
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();

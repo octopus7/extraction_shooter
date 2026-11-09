@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Persistent raid storage
+
+`RaidStorageSlots` adds a separate ten-slot warehouse to the existing gameplay save (additive tagged property; save version remains 22). Its item UIDs and recursively attached items join the owned item graph, so death/raid abandonment preserves them. Travel preserves the GameInstance state; save-slot selection and new-game initialization clear it before loading the selected slot. Older files start empty. Combat-lab inventory backups also isolate and restore this warehouse.
+
+All placed raid-storage actors share this array within the active slot. The existing loot UI temporarily edits its active-container mirror; inventory broadcasts synchronize the mirror before listeners, and mutation completion immediately saves both inventory and warehouse with runtime quick slots in the same fail-closed save transaction. A failed write retains current runtime contents and a pending retry with a localized warning; changes and close retry. Closing or unloading the owner clears the active mirror without deleting stored contents. Withdrawals do not re-award acquisition quest progress or raid loot experience. Ordinary loot containers remain transient. See [raid storage authoring guide](raid_storage.md).
+
 ## ATV repair and raid fuel
 
 Repairable ATV scenery consumes one working vehicle spark plug through the existing atomic facility-repair transaction. Repair progress uses the configured stable world-progress object ID and existing gameplay save fields. A repaired actor remains noninteractive scenery during that map visit, including after reward notifications. Only a later BeginPlay with both saved repair completion and the configured quest reward claimed spawns its configured drivable ATV Blueprint. The scenery and replacement classes remain separate.

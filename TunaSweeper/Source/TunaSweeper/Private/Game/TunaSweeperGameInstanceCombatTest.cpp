@@ -3,12 +3,13 @@
 struct UTunaSweeperGameInstance::FCombatTestInventoryBackup
 {
 	TMap<FGuid, FTunaSweeperItemInstance> Items;
-	TArray<FTunaSweeperInventorySlot> Inventory, Equipment, Auxiliary, Quick, Storage;
+	TArray<FTunaSweeperInventorySlot> Inventory, Equipment, Auxiliary, Quick, Storage, RaidStorage;
 	TSet<int32> AcquiredItems;
 	int32 WeaponSlot = 1;
 	bool bMeleeSelected = false;
 	bool bHasSelection = false;
 	bool bPendingSave = false;
+	bool bPendingRaidStorageSave = false;
 	int64 TotalExperience = 0;
 	int64 RaidStartExperience = 0;
 	int64 PendingExperience = 0;
@@ -28,11 +29,13 @@ void UTunaSweeperGameInstance::BeginCombatTestSession()
 	Backup->Auxiliary = AuxiliaryBagSlots;
 	Backup->Quick = UsableQuickSlots;
 	Backup->Storage = StorageSlots;
+	Backup->RaidStorage = RaidStorageSlots;
 	Backup->AcquiredItems = EverAcquiredItemIds;
 	Backup->WeaponSlot = RuntimeSelectedWeaponSlotNumber;
 	Backup->bMeleeSelected = bRuntimeSelectedMeleeWeapon;
 	Backup->bHasSelection = bHasRuntimeSelectedWeaponSelection;
 	Backup->bPendingSave = bPendingBunkerItemStateSave;
+	Backup->bPendingRaidStorageSave = bPendingRaidStorageSave;
 	Backup->TotalExperience = TotalExperiencePoints;
 	Backup->RaidStartExperience = RaidStartExperiencePoints;
 	Backup->PendingExperience = PendingRaidExperiencePoints;
@@ -51,11 +54,15 @@ void UTunaSweeperGameInstance::ResetCombatTestLoadout()
 	ItemInstancesByUid.Reset();
 	ResetPlayerSlotArrays();
 	StorageSlots.Reset();
+	RaidStorageSlots.Reset();
+	RaidStorageSlots.SetNum(RaidStorageCapacity);
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	bHasActiveLootContainer = false;
 	bPendingBunkerItemStateSave = false;
+	bPendingRaidStorageSave = false;
 	if (!InitializeDemoStartingLoadout())
 	{
 		UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Boss lab could not initialize rifle and ammunition."));
@@ -90,17 +97,20 @@ void UTunaSweeperGameInstance::EndCombatTestSession()
 	AuxiliaryBagSlots = Backup->Auxiliary;
 	UsableQuickSlots = Backup->Quick;
 	StorageSlots = Backup->Storage;
+	RaidStorageSlots = Backup->RaidStorage;
 	EverAcquiredItemIds = Backup->AcquiredItems;
 	RuntimeSelectedWeaponSlotNumber = Backup->WeaponSlot;
 	bRuntimeSelectedMeleeWeapon = Backup->bMeleeSelected;
 	bHasRuntimeSelectedWeaponSelection = Backup->bHasSelection;
 	bPendingBunkerItemStateSave = Backup->bPendingSave;
+	bPendingRaidStorageSave = Backup->bPendingRaidStorageSave;
 	TotalExperiencePoints = Backup->TotalExperience;
 	RaidStartExperiencePoints = Backup->RaidStartExperience;
 	PendingRaidExperiencePoints = Backup->PendingExperience;
 	PendingRaidExperienceAnimationState = Backup->ExperienceAnimation;
 	bRaidExperienceSessionActive = Backup->bRaidSession;
 	bHasPendingRaidExperienceAnimationState = Backup->bPendingAnimation;
+	bActiveLootContainerIsRaidStorage = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	bHasActiveLootContainer = false;
