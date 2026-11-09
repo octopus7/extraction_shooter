@@ -124,6 +124,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void AddCoins(int32 Amount, bool bSaveImmediately = true);
 
+	bool TryCommitCoinGrant(int32 Amount, TFunctionRef<bool()> Persist);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool TrySpendCoins(int32 Amount, bool bSaveImmediately = true);
 
@@ -213,5 +215,6 @@ private:
 	TMap<int32, FTunaSweeperNumericQuestProgressSaveData> QuestProgressById;
 	int32 TrackedQuestId = 0;
 	int32 CoinBalance = 0;
+	bool bCoinGrantInProgress = false;
 	bool bQuestDataLoaded = false;
 };

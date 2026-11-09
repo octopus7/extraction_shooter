@@ -1,4 +1,8 @@
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
+#include "WaveDefense/WaveDefenseCore.h"
+#include "WaveDefense/WaveDefenseFacility.h"
+#include "WaveDefense/WaveDefenseParticipantComponent.h"
+#include "WaveDefense/WaveDefenseDirector.h"
 
 #include "Component/TunaSweeperFactionComponent.h"
 #include "GameFramework/Controller.h"
@@ -71,6 +75,13 @@ bool UTunaSweeperFactionSubsystem::CanTargetActor(const AActor* SourceActor, con
 	if (!IsValid(SourceActor) || !IsValid(TargetActor) || SourceActor == TargetActor)
 	{
 		return false;
+	}
+
+	if (Cast<AWaveDefenseCore>(TargetActor) || Cast<AWaveDefenseFacility>(TargetActor))
+	{
+		const auto* Participant = SourceActor->FindComponentByClass<UWaveDefenseParticipantComponent>();
+		const auto* Director = Participant ? Participant->GetDirector() : nullptr;
+		if (!Director || (!Director->OwnsCore(TargetActor) && !Director->OwnsFacility(TargetActor)) || !Director->IsActiveParticipant(Participant->GetRunId(), Participant->GetToken(), Participant->GetOwner())) return false;
 	}
 
 	const UTunaSweeperFactionComponent* TargetFactionComponent =

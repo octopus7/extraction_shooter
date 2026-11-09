@@ -14,6 +14,9 @@ namespace TunaSweeperBuildFlavor
 	TUNASWEEPER_API bool IsDemo();
 	TUNASWEEPER_API FName GetName();
 	TUNASWEEPER_API FString GetSaveGameDirectory();
+#if WITH_DEV_AUTOMATION_TESTS
+	TUNASWEEPER_API bool SetWaveDefenseTestSaveDirectory(const FString& Directory);
+#endif
 	TUNASWEEPER_API FString GetExternalMainPayloadRoot();
 	TUNASWEEPER_API FString GetStagedMainPayloadRoot();
 	TUNASWEEPER_API FString GetMainPayloadRoot();

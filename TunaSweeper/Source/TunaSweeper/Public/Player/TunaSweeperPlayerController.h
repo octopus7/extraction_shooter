@@ -26,6 +26,10 @@ class ATunaSweeperQuestRewardLockerActor;
 class ATunaSweeperDebugArmoryActor;
 struct FInputActionValue;
 
+class AWaveDefenseDirector;
+class UWaveDefensePanelGPT61Terra;
+class UWaveDefenseHUDGPT61Terra;
+
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
@@ -135,6 +139,9 @@ public:
 	bool IsDebugArmoryInteractionValid() const;
 	bool GetDebugArmoryCatalog(TArray<FTunaSweeperItemDefinition>& OutItems) const;
 
+	bool OpenWaveDefensePanel(AWaveDefenseDirector* Director);
+	void CloseWaveDefensePanel();
+	
 	bool OpenQuestRewardLockerPanel(ATunaSweeperQuestRewardLockerActor* LockerActor);
 	bool TryReceiveQuestReward(int32 Index);
 	void CloseQuestRewardLockerPanel();
@@ -289,6 +296,9 @@ protected:
 	TSoftClassPtr<ATunaSweeperPickupItemActor> PickupItemActorClass;
 
 private:
+	UPROPERTY(Transient) TObjectPtr<UWaveDefensePanelGPT61Terra> WaveDefensePanel;
+	UPROPERTY(Transient) TObjectPtr<UWaveDefenseHUDGPT61Terra> WaveDefenseHUD;
+
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	bool TryStartDeveloperLogo();

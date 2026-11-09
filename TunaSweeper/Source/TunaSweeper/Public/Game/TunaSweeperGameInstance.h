@@ -476,6 +476,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
 	int32 GetActiveSaveSlotDifficultyStage() const { return ActiveSaveSlotDifficultyStage; }
 
+	bool TryBeginWaveDefenseRun(FName EncounterId, int32 RewardCoins, int32 DifficultyStage, FGuid& OutRunId);
+	bool TryFinalizeWaveDefenseRun(FName EncounterId, FGuid RunId, EWaveDefenseOutcome Outcome, int32 CompletedWave);
+	bool TryClaimWaveDefenseReward(FName EncounterId, FGuid RunId);
+	const FWaveDefenseProgress* FindWaveDefenseProgress(FName EncounterId) const { return WaveDefenseProgress.Find(EncounterId); }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
 	bool IsActiveSaveSlotDifficultySelected() const { return bActiveSaveSlotDifficultySelected; }
 
@@ -1320,6 +1325,13 @@ private:
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotDifficultyStage = 1;
+
+	UPROPERTY(Transient) TMap<FName, FWaveDefenseProgress> WaveDefenseProgress;
+	bool bWaveDefenseInterruptedNeedsSave = false;
+#if WITH_DEV_AUTOMATION_TESTS
+	friend class FWaveDefensePersistenceTest;
+	bool bWaveDefenseTestFailSave = false;
+#endif
 
 	UPROPERTY(Transient)
 	bool bActiveSaveSlotDifficultySelected = false;

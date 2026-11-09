@@ -11,6 +11,10 @@
 
 namespace TunaSweeperBuildFlavor
 {
+#if WITH_DEV_AUTOMATION_TESTS
+	static FString WaveDefenseTestSaveDirectory;
+#endif
+
 	namespace
 	{
 		constexpr const TCHAR* MainPayloadManifestName = TEXT("main-payload.json");
@@ -77,6 +81,10 @@ namespace TunaSweeperBuildFlavor
 
 	FString GetSaveGameDirectory()
 	{
+#if WITH_DEV_AUTOMATION_TESTS
+		if (!WaveDefenseTestSaveDirectory.IsEmpty()) return WaveDefenseTestSaveDirectory;
+#endif
+
 		const FString SteamDirectory = TunaSweeperSteamCloud::GetSaveDirectory();
 		if (!SteamDirectory.IsEmpty())
 		{
@@ -90,7 +98,21 @@ namespace TunaSweeperBuildFlavor
 		return TunaSweeperSaveDirectory::ResolveLocalDirectory(FPaths::ProjectSavedDir(), IsDemo());
 	}
 
-	FString GetExternalMainPayloadRoot()
+	#if WITH_DEV_AUTOMATION_TESTS
+    bool SetWaveDefenseTestSaveDirectory(const FString& Directory)
+    {
+        if (Directory.IsEmpty()) { WaveDefenseTestSaveDirectory.Reset(); return true; }
+        FString Candidate = FPaths::ConvertRelativePathToFull(Directory);
+        FPaths::NormalizeDirectoryName(Candidate);
+        FPaths::CollapseRelativeDirectories(Candidate);
+        FString Root = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Automation/WaveDefense"));
+        FPaths::NormalizeDirectoryName(Root);
+        if (!Candidate.StartsWith(Root + TEXT("/"), ESearchCase::IgnoreCase)) return false;
+        WaveDefenseTestSaveDirectory = Candidate;
+        return true;
+    }
+#endif
+FString GetExternalMainPayloadRoot()
 	{
 		return FPaths::ConvertRelativePathToFull(FPaths::Combine(
 			FPaths::ProjectDir(), TEXT("External"), TEXT("MainPayload")));

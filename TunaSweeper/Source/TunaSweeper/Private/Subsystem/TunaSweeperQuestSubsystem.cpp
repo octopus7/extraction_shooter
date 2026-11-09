@@ -1084,6 +1084,18 @@ void UTunaSweeperQuestSubsystem::AddCoins(int32 Amount, bool bSaveImmediately)
 	BroadcastQuestProgressChanged(bSaveImmediately);
 }
 
+bool UTunaSweeperQuestSubsystem::TryCommitCoinGrant(int32 Amount, TFunctionRef<bool()> Persist)
+{
+    if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) return false;
+    EnsureSaveStateLoaded();
+    if (bCoinGrantInProgress || Amount <= 0 || CoinBalance > MAX_int32 - Amount) return false;
+    TGuardValue<bool> Guard(bCoinGrantInProgress, true);
+    const int32 PreviousBalance = CoinBalance;
+    CoinBalance += Amount;
+    if (!Persist()) { CoinBalance = PreviousBalance; return false; }
+    BroadcastQuestProgressChanged(false);
+    return true;
+}
 bool UTunaSweeperQuestSubsystem::TrySpendCoins(int32 Amount, bool bSaveImmediately)
 {
 	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }

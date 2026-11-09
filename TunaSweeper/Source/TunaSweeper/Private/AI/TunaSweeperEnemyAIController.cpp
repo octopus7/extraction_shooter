@@ -1,4 +1,5 @@
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "WaveDefense/WaveDefenseParticipantComponent.h"
 #include "AI/TunaSweeperWheeledEnemyCharacter.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
@@ -384,6 +385,16 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 		return;
 	}
 
+	if (auto* Participant = ControlledPawn->FindComponentByClass<UWaveDefenseParticipantComponent>())
+	{
+		if (AActor* Preferred = Participant->GetPreferredTarget(); Preferred && CurrentTargetActor.Get() != Preferred)
+		{
+			ClearCombatTarget();
+			if (HasDirectSightTo(Preferred)) StartAlerted(Preferred, TEXT("Wave defense target"));
+			else MoveToActor(Preferred, 120.0f);
+			return;
+		}
+	}
 	UTunaSweeperFactionSubsystem* FactionSubsystem = World->GetSubsystem<UTunaSweeperFactionSubsystem>();
 	AActor* TargetActor = CurrentTargetActor.Get();
 	if (TargetActor)
@@ -541,6 +552,8 @@ void ATunaSweeperEnemyAIController::NotifyDamageTaken(AActor* SuspectedActor)
 	{
 		return;
 	}
+
+	if (auto* Participant = ControlledPawn->FindComponentByClass<UWaveDefenseParticipantComponent>()) Participant->NotifyDamageFrom(SuspectedActor);
 
 	if (SuspectedActor)
 	{

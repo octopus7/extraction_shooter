@@ -1,4 +1,6 @@
 #include "Weapon/TunaSweeperWeapon.h"
+#include "WaveDefense/WaveDefenseParticipantComponent.h"
+#include "WaveDefense/WaveDefenseDirector.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "Combat/TunaSweeperProjectileDamage.h"
 #include "Combat/TunaSweeperCombatValue.h"
@@ -975,6 +977,9 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 			AimIntentWorldPoint,
 			bHasAimIntentWorldPoint);
 		SpawnedProjectile->FinishSpawning(SpawnTransform);
+		if (InstigatorPawn)
+			if (const auto* Participant = InstigatorPawn->FindComponentByClass<UWaveDefenseParticipantComponent>())
+				if (AWaveDefenseDirector* Director = Participant->GetDirector()) Director->RegisterOwnedActor(SpawnedProjectile);
 		IgnoreNearbyPlayerPassthroughCovers(SpawnedProjectile, InstigatorPawn);
 	}
 

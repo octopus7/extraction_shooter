@@ -436,6 +436,9 @@ bool UTunaSweeperGameInstance::SetActiveSaveSlotDifficultyStage(int32 Difficulty
 {
 	EnsureInventoryStateInitialized();
 
+	for (const auto& Pair : WaveDefenseProgress)
+		if (Pair.Value.RunId.IsValid() && Pair.Value.Outcome == EWaveDefenseOutcome::None) return false;
+
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(DifficultyStage);
 	bActiveSaveSlotDifficultySelected = true;
 
@@ -568,6 +571,12 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		return false;
 	}
 
+	WaveDefenseProgress = SaveGame->WaveDefenseProgress;
+	for (auto& Pair : WaveDefenseProgress)
+	{
+		if (Pair.Value.RunId.IsValid() && Pair.Value.Outcome == EWaveDefenseOutcome::None)
+		{ Pair.Value.Outcome = EWaveDefenseOutcome::Interrupted; bWaveDefenseInterruptedNeedsSave = true; }
+	}
 	RestoreVehicleFuel(SaveGame->VehicleFuelByPlacement);
 	SelectedOutfitId = TunaSweeperOutfits::SanitizePersistedOutfitId(SaveGame->SelectedOutfitId);
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
@@ -847,6 +856,9 @@ bool UTunaSweeperGameInstance::LoadGameState()
 bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	UTunaSweeperGameInstance::EUsableQuickSlotSaveMode UsableQuickSlotSaveMode) const
 {
+	#if WITH_DEV_AUTOMATION_TESTS
+	if (bWaveDefenseTestFailSave) return false;
+#endif
 	// Lab supplies, damage and rewards belong only to the current test session.
 	if (IsCombatTestSession() || ActiveSaveSlotIndex == RetiredDemoSaveSlotIndex) return false;
 
@@ -891,6 +903,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 		}
 	}
 
+	SaveGame->WaveDefenseProgress = WaveDefenseProgress;
 	SaveGame->SaveVersion = TunaSweeperSave::CurrentSaveVersion;
 	SaveGame->SelectedOutfitId = SelectedOutfitId;
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;

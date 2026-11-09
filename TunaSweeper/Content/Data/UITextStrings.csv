@@ -737,3 +737,25 @@ ui.vehicle.fuel_missing,에탄올이 부족하다!,Not enough ethanol!,エタノ
 ui.raid_storage.name,레이드 보관함,Raid Storage,レイド保管箱,突袭储物箱,突襲儲物箱,Хранилище рейда
 ui.raid_storage.duplicate,경고: 보관함이 중복 배치되어 있습니다. 모든 보관함은 같은 내용물을 공유합니다.,Warning: Multiple storage chests are placed. All share the same contents.,警告：保管箱が重複配置されています。内容物はすべて共有されます。,警告：储物箱重复放置。所有储物箱共享物品。,警告：儲物箱重複放置。所有儲物箱共用物品。,Предупреждение: размещено несколько хранилищ. Их содержимое общее.
 ui.raid_storage.save_failed,보관함 저장에 실패했습니다. 게임을 종료하지 말고 저장을 다시 시도하세요.,Storage could not be saved. Retry saving before quitting.,保管箱を保存できませんでした。終了せずに保存を再試行してください。,储物箱保存失败。请勿退出游戏并重试保存。,儲物箱儲存失敗。請勿結束遊戲並重試儲存。,Не удалось сохранить хранилище. Повторите сохранение перед выходом.
+ui.wave_defense.invalid_definition,방어전 설정이 올바르지 않아 시작할 수 없습니다.,Cannot start because the defense configuration is invalid.,防衛戦の設定が無効なため開始できません。,防守战配置无效，无法开始。,防守戰設定無效，無法開始。,Невозможно начать: настройки обороны недействительны.
+ui.wave_defense.title,기지 방어전,Base Defense,拠点防衛,基地防御,基地防禦,Оборона базы
+ui.wave_defense.intro,6웨이브를 막아 장치를 지키세요. 사망 시 기존 레이드 손실이 적용됩니다. 탄약과 치료제를 준비하세요.,Defend the core for six waves. Normal raid death losses apply. Bring ammunition and healing supplies.,6ウェーブの間装置を守りましょう。死亡時は通常のレイド損失が適用されます。弾薬と回復品を用意してください。,守住装置并抵御六波攻击。死亡时适用常规突袭损失。请准备弹药和治疗物资。,守住裝置並抵禦六波攻擊。死亡時適用一般突襲損失。請準備彈藥和治療物資。,Защитите устройство от шести волн. При смерти действуют обычные потери рейда. Возьмите патроны и лечение.
+ui.wave_defense.status,웨이브 {0}/{1}  장치 {2}/{3}  적 {4}  대기 {5}  자원 {6},Wave {0}/{1}  Core {2}/{3}  Enemies {4}  Queued {5}  Supplies {6},ウェーブ {0}/{1}  装置 {2}/{3}  敵 {4}  待機 {5}  資源 {6},波次 {0}/{1}  装置 {2}/{3}  敌人 {4}  待生成 {5}  资源 {6},波次 {0}/{1}  裝置 {2}/{3}  敵人 {4}  待生成 {5}  資源 {6},Волна {0}/{1}  Устройство {2}/{3}  Враги {4}  Ожидают {5}  Ресурсы {6}
+ui.wave_defense.details,난이도 {0}  성공 보상 {1}코인  준비 {2}초  이탈 {3}초,Difficulty {0}  Reward {1} coins  Prepare {2}s  Leave {3}s,難易度 {0}  報酬 {1}コイン  準備 {2}秒  離脱 {3}秒,难度 {0}  奖励 {1}金币  准备 {2}秒  离开 {3}秒,難度 {0}  獎勵 {1}金幣  準備 {2}秒  離開 {3}秒,Сложность {0}  Награда {1} монет  Подготовка {2}с  Уход {3}с
+ui.wave_defense.start,시작,Start,開始,开始,開始,Начать
+ui.wave_defense.ready,준비 완료,Ready,準備完了,准备完成,準備完成,Готово
+ui.wave_defense.abort,포기,Abandon,放棄,放弃,放棄,Покинуть
+ui.wave_defense.claim,보상 수령,Claim reward,報酬を受け取る,领取奖励,領取獎勵,Получить награду
+ui.wave_defense.close,닫기,Close,閉じる,关闭,關閉,Закрыть
+ui.wave_defense.barrier,방벽 설치,Build barrier,防壁を設置,建造路障,建造路障,Построить барьер
+ui.wave_defense.turret,포탑 설치,Build turret,砲塔を設置,建造炮塔,建造砲塔,Построить турель
+ui.wave_defense.repair_core,장치 수리,Repair core,装置を修理,修理装置,修理裝置,Починить устройство
+ui.wave_defense.repair_facility,시설 수리,Repair facility,施設を修理,修理设施,修理設施,Починить сооружение
+ui.wave_defense.reload,포탑 재장전,Reload turret,砲塔を再装填,重装炮塔,重裝砲塔,Перезарядить турель
+ui.wave_defense.north_barrier,북 방벽,North barrier,北防壁,北路障,北路障,Северный барьер
+ui.wave_defense.west_barrier,서 방벽,West barrier,西防壁,西路障,西路障,Западный барьер
+ui.wave_defense.east_barrier,동 방벽,East barrier,東防壁,东路障,東路障,Восточный барьер
+ui.wave_defense.north_turret,북 포탑,North turret,北砲塔,北炮塔,北砲塔,Северная турель
+ui.wave_defense.west_turret,서 포탑,West turret,西砲塔,西炮塔,西砲塔,Западная турель
+ui.wave_defense.east_turret,동 포탑,East turret,東砲塔,东炮塔,東砲塔,Восточная турель
+ui.wave_defense.action_failed,요청을 처리하지 못했습니다.,The action could not be completed.,操作を完了できませんでした。,无法完成操作。,無法完成操作。,Не удалось выполнить действие.

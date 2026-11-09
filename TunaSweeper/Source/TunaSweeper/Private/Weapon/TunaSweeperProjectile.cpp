@@ -1,4 +1,5 @@
 #include "Weapon/TunaSweeperProjectile.h"
+#include "WaveDefense/WaveDefenseFacility.h"
 #include "Component/TunaSweeperBurnComponent.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
@@ -504,6 +505,11 @@ void ATunaSweeperProjectile::HandleHit(
 		return;
 	}
 
+	if (const AWaveDefenseFacility* Facility = Cast<AWaveDefenseFacility>(GetOwner()); Facility && !Facility->CanDamageTarget(OtherActor))
+	{
+		Destroy();
+		return;
+	}
 	if (UWorld* World = GetWorld())
 	{
 		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =

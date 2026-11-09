@@ -7,6 +7,7 @@
 #include "Quest/TunaSweeperQuestTypes.h"
 #include "Quest/TunaSweeperQuestId.h"
 #include "Research/TunaSweeperResearchTypes.h"
+#include "WaveDefense/WaveDefenseTypes.h"
 #include "TunaSweeperSaveGame.generated.h"
 
 UENUM(BlueprintType)
@@ -90,6 +91,8 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveVersion = 22;
+
+	UPROPERTY() TMap<FName, FWaveDefenseProgress> WaveDefenseProgress;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Outfits")
 	FName SelectedOutfitId = TEXT("Maid");

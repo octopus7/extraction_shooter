@@ -1,4 +1,6 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "WaveDefense/WaveDefenseParticipantComponent.h"
+#include "WaveDefense/WaveDefenseDirector.h"
 #include "Vehicle/TunaSweeperVehicleCollisionDamageType.h"
 #include "Vehicle/TunaSweeperATVActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
@@ -593,6 +595,8 @@ bool ATunaSweeperEnemyCharacter::EnsureEnemyWeaponActor()
 		return false;
 	}
 
+	if (const auto* Participant = FindComponentByClass<UWaveDefenseParticipantComponent>())
+		if (AWaveDefenseDirector* Director = Participant->GetDirector()) Director->RegisterOwnedActor(EnemyWeapon);
 	EnemyWeapon->SetActorEnableCollision(false);
 	EnemyWeapon->SetActorHiddenInGame(true);
 	EnemyWeapon->ConfigureGunVisual();
@@ -1283,6 +1287,8 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 
 	bIsDead = true;
 	CurrentHealth = 0.0f;
+	UWaveDefenseParticipantComponent* WaveParticipant = FindComponentByClass<UWaveDefenseParticipantComponent>();
+	if (WaveParticipant) WaveParticipant->NotifyDeath();
 	if (BurnComponent) BurnComponent->ClearBurn();
 	if (FactionComponent) FactionComponent->SetCanBeCombatTarget(false);
 	if (CombatPatternComponent) CombatPatternComponent->CancelPatterns();
@@ -1300,7 +1306,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 
 	OnDeathPresentationStarted();
 	DetachFromControllerPendingDestroy();
-	if (KillerController && KillerController->IsPlayerController())
+	if ((!WaveParticipant || WaveParticipant->ShouldGrantDefaultKillRewards()) && KillerController && KillerController->IsPlayerController())
 	{
 		if (UGameInstance* GameInstance = GetGameInstance())
 		{
@@ -1408,8 +1414,12 @@ void ATunaSweeperEnemyCharacter::TickDeathDissolve(float DeltaSeconds)
 void ATunaSweeperEnemyCharacter::FinalizeDeath()
 {
 	TickDeathDissolve(DeathRagdollDurationSeconds);
-	SpawnDeathStrawberryBurst();
-	SpawnDeathLootContainer(PendingDeathDamageCauser.Get());
+	const UWaveDefenseParticipantComponent* WaveParticipant = FindComponentByClass<UWaveDefenseParticipantComponent>();
+	if (!WaveParticipant || WaveParticipant->ShouldGrantDefaultKillRewards())
+	{
+		SpawnDeathStrawberryBurst();
+		SpawnDeathLootContainer(PendingDeathDamageCauser.Get());
+	}
 	PendingDeathDamageCauser.Reset();
 	SetActorEnableCollision(false);
 	if (!ShouldKeepDefeatedBody()) Destroy();
