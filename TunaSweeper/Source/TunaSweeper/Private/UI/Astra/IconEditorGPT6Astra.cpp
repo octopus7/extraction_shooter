@@ -1,5 +1,6 @@
 // Authored by gpt-6-astra; reasoning effort: medium.
 #include "UI/Astra/IconEditorGPT6Astra.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/SpinBox.h"
@@ -9,6 +10,31 @@
 #include "InputCoreTypes.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "UI/Astra/IconCanvasGPT6Astra.h"
+
+namespace
+{
+// RGB8 presets, in visible swatch order. Names are authoring comments only.
+const FColor PresetColors[6][12] = {
+    {FColor(0, 0, 0), FColor(255, 255, 255), FColor(120, 132, 145), FColor(244, 67, 54), FColor(255, 153, 45),
+     FColor(255, 221, 72), FColor(78, 197, 104), FColor(41, 208, 200), FColor(65, 140, 245), FColor(135, 93, 230),
+     FColor(237, 105, 181), FColor(141, 93, 64)}, // Original
+    {FColor(255, 245, 230), FColor(255, 214, 220), FColor(255, 191, 163), FColor(255, 229, 163), FColor(232, 239, 176),
+     FColor(197, 237, 204), FColor(188, 235, 230), FColor(184, 221, 246), FColor(199, 204, 245), FColor(222, 200, 243),
+     FColor(242, 200, 228), FColor(216, 206, 196)}, // Pastel
+    {FColor(0, 0, 0), FColor(23, 23, 23), FColor(46, 46, 46), FColor(69, 69, 69), FColor(93, 93, 93),
+     FColor(116, 116, 116), FColor(139, 139, 139), FColor(162, 162, 162), FColor(186, 186, 186), FColor(209, 209, 209),
+     FColor(232, 232, 232), FColor(255, 255, 255)}, // Grayscale
+    {FColor(59, 40, 38), FColor(101, 67, 56), FColor(141, 92, 66), FColor(183, 121, 75), FColor(217, 155, 99),
+     FColor(242, 192, 120), FColor(245, 222, 163), FColor(217, 183, 136), FColor(163, 151, 101), FColor(114, 125, 75),
+     FColor(198, 85, 68), FColor(237, 136, 100)}, // Warm earth and sunset
+    {FColor(21, 50, 61), FColor(29, 83, 99), FColor(40, 122, 141), FColor(67, 165, 181), FColor(131, 207, 209),
+     FColor(188, 230, 223), FColor(25, 63, 53), FColor(40, 96, 73), FColor(67, 135, 97), FColor(120, 173, 130),
+     FColor(179, 201, 157), FColor(220, 231, 196)}, // Cool ocean and forest
+    {FColor(80, 27, 100), FColor(135, 38, 163), FColor(198, 56, 176), FColor(238, 67, 138), FColor(219, 40, 74),
+     FColor(242, 100, 50), FColor(249, 187, 48), FColor(180, 220, 50), FColor(32, 179, 106), FColor(25, 184, 187),
+     FColor(36, 102, 213), FColor(87, 59, 209)}, // Vivid jewels
+};
+} // namespace
 UIconEditorGPT6Astra::UIconEditorGPT6Astra(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer)
 {
     SetIsFocusable(true);
@@ -44,8 +70,6 @@ bool UIconEditorGPT6Astra::InitializeEditor()
         PreviewText->SetText(Text(TEXT("ui.icon_editor.preview")));
     if (ColorText)
         ColorText->SetText(Text(TEXT("ui.icon_editor.color")));
-    if (PaletteText)
-        PaletteText->SetText(Text(TEXT("ui.icon_editor.palette")));
     if (RedText)
         RedText->SetText(Text(TEXT("ui.icon_editor.red")));
     if (GreenText)
@@ -66,6 +90,36 @@ bool UIconEditorGPT6Astra::InitializeEditor()
         CancelText->SetText(Text(TEXT("ui.icon_editor.cancel")));
     if (ConfirmText)
         ConfirmText->SetText(Text(TEXT("ui.icon_editor.confirm")));
+    if (RedDecrease)
+    {
+        RedDecrease->OnClicked.AddUniqueDynamic(this, &ThisClass::RedDecreaseClicked);
+        RedDecrease->SetToolTipText(Text(TEXT("ui.icon_editor.decrease")));
+    }
+    if (RedIncrease)
+    {
+        RedIncrease->OnClicked.AddUniqueDynamic(this, &ThisClass::RedIncreaseClicked);
+        RedIncrease->SetToolTipText(Text(TEXT("ui.icon_editor.increase")));
+    }
+    if (GreenDecrease)
+    {
+        GreenDecrease->OnClicked.AddUniqueDynamic(this, &ThisClass::GreenDecreaseClicked);
+        GreenDecrease->SetToolTipText(Text(TEXT("ui.icon_editor.decrease")));
+    }
+    if (GreenIncrease)
+    {
+        GreenIncrease->OnClicked.AddUniqueDynamic(this, &ThisClass::GreenIncreaseClicked);
+        GreenIncrease->SetToolTipText(Text(TEXT("ui.icon_editor.increase")));
+    }
+    if (BlueDecrease)
+    {
+        BlueDecrease->OnClicked.AddUniqueDynamic(this, &ThisClass::BlueDecreaseClicked);
+        BlueDecrease->SetToolTipText(Text(TEXT("ui.icon_editor.decrease")));
+    }
+    if (BlueIncrease)
+    {
+        BlueIncrease->OnClicked.AddUniqueDynamic(this, &ThisClass::BlueIncreaseClicked);
+        BlueIncrease->SetToolTipText(Text(TEXT("ui.icon_editor.increase")));
+    }
     if (BrushButton)
         BrushButton->OnClicked.AddUniqueDynamic(this, &ThisClass::Brush);
     if (EyedropperButton)
@@ -110,6 +164,13 @@ bool UIconEditorGPT6Astra::InitializeEditor()
     PreviewCanvas->bInteractive = false;
     PreviewCanvas->bShowGrid = false;
     PreviewCanvas->SetVisibility(ESlateVisibility::HitTestInvisible);
+    Preset1->OnClicked.AddUniqueDynamic(this, &ThisClass::Preset1Clicked);
+    Preset2->OnClicked.AddUniqueDynamic(this, &ThisClass::Preset2Clicked);
+    Preset3->OnClicked.AddUniqueDynamic(this, &ThisClass::Preset3Clicked);
+    Preset4->OnClicked.AddUniqueDynamic(this, &ThisClass::Preset4Clicked);
+    Preset5->OnClicked.AddUniqueDynamic(this, &ThisClass::Preset5Clicked);
+    Preset6->OnClicked.AddUniqueDynamic(this, &ThisClass::Preset6Clicked);
+    SelectPreset(0);
     SetColor(Color);
     Brush();
     RefreshPixels();
@@ -229,49 +290,139 @@ void UIconEditorGPT6Astra::Eyedropper()
 }
 void UIconEditorGPT6Astra::Pick00()
 {
-    SetColor(FColor(0, 0, 0));
+    PickSwatch(0);
 }
 void UIconEditorGPT6Astra::Pick01()
 {
-    SetColor(FColor(255, 255, 255));
+    PickSwatch(1);
 }
 void UIconEditorGPT6Astra::Pick02()
 {
-    SetColor(FColor(120, 132, 145));
+    PickSwatch(2);
 }
 void UIconEditorGPT6Astra::Pick03()
 {
-    SetColor(FColor(244, 67, 54));
+    PickSwatch(3);
 }
 void UIconEditorGPT6Astra::Pick04()
 {
-    SetColor(FColor(255, 153, 45));
+    PickSwatch(4);
 }
 void UIconEditorGPT6Astra::Pick05()
 {
-    SetColor(FColor(255, 221, 72));
+    PickSwatch(5);
 }
 void UIconEditorGPT6Astra::Pick06()
 {
-    SetColor(FColor(78, 197, 104));
+    PickSwatch(6);
 }
 void UIconEditorGPT6Astra::Pick07()
 {
-    SetColor(FColor(41, 208, 200));
+    PickSwatch(7);
 }
 void UIconEditorGPT6Astra::Pick08()
 {
-    SetColor(FColor(65, 140, 245));
+    PickSwatch(8);
 }
 void UIconEditorGPT6Astra::Pick09()
 {
-    SetColor(FColor(135, 93, 230));
+    PickSwatch(9);
 }
 void UIconEditorGPT6Astra::Pick10()
 {
-    SetColor(FColor(237, 105, 181));
+    PickSwatch(10);
 }
 void UIconEditorGPT6Astra::Pick11()
 {
-    SetColor(FColor(141, 93, 64));
+    PickSwatch(11);
+}
+
+void UIconEditorGPT6Astra::RedDecreaseClicked()
+{
+    RedChanged(FMath::Clamp(static_cast<int32>(Color.R) - 1, 0, 255));
+}
+void UIconEditorGPT6Astra::RedIncreaseClicked()
+{
+    RedChanged(FMath::Clamp(static_cast<int32>(Color.R) + 1, 0, 255));
+}
+void UIconEditorGPT6Astra::GreenDecreaseClicked()
+{
+    GreenChanged(FMath::Clamp(static_cast<int32>(Color.G) - 1, 0, 255));
+}
+void UIconEditorGPT6Astra::GreenIncreaseClicked()
+{
+    GreenChanged(FMath::Clamp(static_cast<int32>(Color.G) + 1, 0, 255));
+}
+void UIconEditorGPT6Astra::BlueDecreaseClicked()
+{
+    BlueChanged(FMath::Clamp(static_cast<int32>(Color.B) - 1, 0, 255));
+}
+void UIconEditorGPT6Astra::BlueIncreaseClicked()
+{
+    BlueChanged(FMath::Clamp(static_cast<int32>(Color.B) + 1, 0, 255));
+}
+
+void UIconEditorGPT6Astra::PickSwatch(int32 Index)
+{
+    if (Index >= 0 && Index < 12)
+        SetColor(PresetColors[ActivePreset][Index]);
+}
+void UIconEditorGPT6Astra::SelectPreset(int32 Index)
+{
+    if (Index < 0 || Index >= 6)
+        return;
+    ActivePreset = Index;
+    UButton *Tabs[] = {Preset1, Preset2, Preset3, Preset4, Preset5, Preset6};
+    const FLinearColor Bright(0.88f, 0.93f, 0.96f);
+    // The authored disabled brush retains the containing panel color for both tab states.
+    const FLinearColor Dark = Preset1->GetStyle().Disabled.TintColor.GetSpecifiedColor();
+    for (int32 I = 0; I < 6; ++I)
+    {
+        const bool bSelected = I == ActivePreset;
+        FButtonStyle Style = Tabs[I]->GetStyle();
+        Style.SetNormal(FSlateRoundedBoxBrush(bSelected ? Bright : Dark, 6.0f));
+        Style.SetHovered(FSlateRoundedBoxBrush(bSelected ? Bright : FLinearColor(0.18f, 0.23f, 0.28f), 6.0f));
+        Style.SetPressed(FSlateRoundedBoxBrush(bSelected ? Bright : FLinearColor(0.25f, 0.30f, 0.35f), 6.0f));
+        Tabs[I]->SetStyle(Style);
+        if (auto *Label = Cast<UTextBlock>(Tabs[I]->GetContent()))
+        {
+            Label->SetText(Text(FName(*FString::Printf(TEXT("ui.icon_editor.preset%d"), I + 1))));
+            Label->SetColorAndOpacity(bSelected ? Dark : Bright);
+        }
+    }
+    UButton *Swatches[] = {Palette00, Palette01, Palette02, Palette03, Palette04, Palette05,
+                           Palette06, Palette07, Palette08, Palette09, Palette10, Palette11};
+    for (int32 I = 0; I < 12; ++I)
+    {
+        FButtonStyle Style = Swatches[I]->GetStyle();
+        const FLinearColor Tint(PresetColors[ActivePreset][I]);
+        Style.Normal.TintColor = Tint;
+        Style.Hovered.TintColor = Tint;
+        Style.Pressed.TintColor = Tint;
+        Swatches[I]->SetStyle(Style);
+    }
+}
+void UIconEditorGPT6Astra::Preset1Clicked()
+{
+    SelectPreset(0);
+}
+void UIconEditorGPT6Astra::Preset2Clicked()
+{
+    SelectPreset(1);
+}
+void UIconEditorGPT6Astra::Preset3Clicked()
+{
+    SelectPreset(2);
+}
+void UIconEditorGPT6Astra::Preset4Clicked()
+{
+    SelectPreset(3);
+}
+void UIconEditorGPT6Astra::Preset5Clicked()
+{
+    SelectPreset(4);
+}
+void UIconEditorGPT6Astra::Preset6Clicked()
+{
+    SelectPreset(5);
 }

@@ -31,7 +31,6 @@ class TUNASWEEPER_API UIconEditorGPT6Astra : public UUserWidget
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> DescriptionText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PreviewText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> ColorText;
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PaletteText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> RedText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> GreenText;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> BlueText;
@@ -46,6 +45,12 @@ class TUNASWEEPER_API UIconEditorGPT6Astra : public UUserWidget
     UPROPERTY(meta = (BindWidget)) TObjectPtr<USpinBox> RedInput;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<USpinBox> GreenInput;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<USpinBox> BlueInput;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> RedDecrease;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> RedIncrease;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> GreenDecrease;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> GreenIncrease;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> BlueDecrease;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> BlueIncrease;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> BrushButton;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> EyedropperButton;
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> FillButton;
@@ -65,6 +70,21 @@ class TUNASWEEPER_API UIconEditorGPT6Astra : public UUserWidget
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Palette11;
 
   private:
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Preset1;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Preset2;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Preset3;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Preset4;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Preset5;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UButton> Preset6;
+    int32 ActivePreset = 0;
+    void SelectPreset(int32 Index);
+    void PickSwatch(int32 Index);
+    UFUNCTION() void Preset1Clicked();
+    UFUNCTION() void Preset2Clicked();
+    UFUNCTION() void Preset3Clicked();
+    UFUNCTION() void Preset4Clicked();
+    UFUNCTION() void Preset5Clicked();
+    UFUNCTION() void Preset6Clicked();
     TArray<uint8> Draft;
     FColor Color = FColor::White;
     bool bUpdatingColor = false;
@@ -73,6 +93,12 @@ class TUNASWEEPER_API UIconEditorGPT6Astra : public UUserWidget
     void SetColor(FColor Value);
     void SetStatus(FName Key);
     FText Text(FName Key) const;
+    UFUNCTION() void RedDecreaseClicked();
+    UFUNCTION() void RedIncreaseClicked();
+    UFUNCTION() void GreenDecreaseClicked();
+    UFUNCTION() void GreenIncreaseClicked();
+    UFUNCTION() void BlueDecreaseClicked();
+    UFUNCTION() void BlueIncreaseClicked();
     UFUNCTION() void Confirm();
     UFUNCTION() void Cancel();
     UFUNCTION() void Fill();

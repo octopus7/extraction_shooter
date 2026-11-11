@@ -791,10 +791,9 @@ ui.icon_editor.subtitle,32 × 32 픽셀 · RGB,32 × 32 pixels · RGB,32 × 32 �
 ui.icon_editor.description,확정하면 이 계정의 모든 저장 슬롯에 공통으로 적용됩니다.,Confirm to save this icon for all save slots on this account.,確定するとこのアカウントの全セーブスロットに適用されます。,确认后将应用于此账号的所有存档栏位。,確認後將套用至此帳號的所有存檔欄位。,После подтверждения значок будет общим для всех сохранений этого аккаунта.
 ui.icon_editor.preview,미리보기,Preview,プレビュー,预览,預覽,Предпросмотр
 ui.icon_editor.color,선택한 색상,Selected color,選択中の色,当前颜色,目前顏色,Выбранный цвет
-ui.icon_editor.palette,기본 색상,Palette,パレット,调色板,調色盤,Палитра
-ui.icon_editor.red,빨강,Red,赤,红,紅,Красный
-ui.icon_editor.green,초록,Green,緑,绿,綠,Зелёный
-ui.icon_editor.blue,파랑,Blue,青,蓝,藍,Синий
+ui.icon_editor.red,R,R,R,R,R,R
+ui.icon_editor.green,G,G,G,G,G,G
+ui.icon_editor.blue,B,B,B,B,B,B
 ui.icon_editor.brush,브러시,Brush,ブラシ,画笔,畫筆,Кисть
 ui.icon_editor.eyedropper,색상 추출,Eyedropper,スポイト,吸管,滴管,Пипетка
 ui.icon_editor.fill,전체 채우기,Fill canvas,全体を塗りつぶす,填充画布,填滿畫布,Залить холст
@@ -809,3 +808,12 @@ ui.wave_defense.facility_status,{0} 내구도 {1}/{2} 탄약 {3}/{4},{0} health 
 ui.wave_defense.facility_empty,{0}: 빈 슬롯,{0}: empty slot,{0}: 空きスロット,{0}：空槽位,{0}：空欄位,{0}: пустое место
 ui.wave_defense.core_warning,경고: 장치 내구도가 낮습니다!,Warning: core health is low!,警告：装置の耐久が低下しています！,警告：装置耐久过低！,警告：裝置耐久過低！,Внимание: прочность устройства низкая!
 ui.wave_defense.leave_warning,경고: {0}초 안에 방어 구역으로 돌아오세요!,Warning: return to the defense area in {0}s!,警告：{0}秒以内に防衛区域へ戻ってください！,警告：请在{0}秒内返回防守区域！,警告：請在{0}秒內返回防守區域！,Внимание: вернитесь в зону обороны за {0}с!
+
+ui.icon_editor.decrease,1 줄이기,Decrease by 1,1減らす,减少1,減少1,Уменьшить на 1
+ui.icon_editor.increase,1 늘리기,Increase by 1,1増やす,增加1,增加1,Увеличить на 1
+ui.icon_editor.preset1,1,1,1,1,1,1
+ui.icon_editor.preset2,2,2,2,2,2,2
+ui.icon_editor.preset3,3,3,3,3,3,3
+ui.icon_editor.preset4,4,4,4,4,4,4
+ui.icon_editor.preset5,5,5,5,5,5,5
+ui.icon_editor.preset6,6,6,6,6,6,6
