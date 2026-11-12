@@ -63,3 +63,7 @@ Blender/Exports/LunaMk2FaceMorphs.zip
 
 /UnrealTemp/
 /SoundTemp
+
+# Python bytecode caches
+__pycache__/
+*.pyc

@@ -8531,3 +8531,10 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: superpowers에 남은 의상 플러그인 계획은 의도적으로 보존했으며 커밋 대상인가?
 - 답변: Docs/superpowers/specs/2026-11-12-garment-designer-design.md는 이번 목업 작업 이전부터 있던 별도 의상 작업 문서라 삭제하지 않았다. 현재 Git 미추적·미스테이징이며 ignore 대상도 아니므로 일괄 git add 시 포함될 수 있다. 이번 목업 작업의 커밋 범위에는 포함하지 않는다. 문서 이동·삭제·커밋은 수행하지 않았다.
 
+
+
+## 2026-11-12 19:30:46 (소요시간: 00:00:20)
+
+- 질문: Tools/MainRaidLevels/__pycache__/capture_maps.cpython-311.pyc는 무엇이며 커밋 대상인가?
+- 답변: 이번 프리뷰 촬영에서 capture_maps.py를 import하면서 생성된 Python 3.11 바이트코드 캐시로 커밋 대상이 아니다. 누락된 임시 파일 정리로 해당 파일을 삭제하고 .gitignore에 __pycache__/ 및 *.pyc를 추가했다. 무시 규칙 적용과 파일 삭제를 확인했으며 커밋하지 않았다.
+
