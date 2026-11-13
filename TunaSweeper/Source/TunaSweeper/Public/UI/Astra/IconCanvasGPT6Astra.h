@@ -12,10 +12,14 @@ class TUNASWEEPER_API UIconCanvasGPT6Astra : public UUserWidget
     friend struct FIconEditorAutomationAccess;
 #endif
   public:
+    UIconCanvasGPT6Astra(const FObjectInitializer &ObjectInitializer);
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon") bool bInteractive = true;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Icon") bool bShowGrid = true;
     bool bEyedropper = false;
     FIconPixelInput OnPixelInput;
+    FSimpleDelegate OnStrokeStarted;
+    FSimpleDelegate OnStrokeFinished;
+    void FinishStroke(bool bReleaseCapture = true);
     void SetPixels(const TArray<uint8> &InPixels);
 
   protected:

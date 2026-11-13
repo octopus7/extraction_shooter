@@ -1,9 +1,14 @@
 // Authored by gpt-6-astra; reasoning effort: medium.
 #include "UI/Astra/IconCanvasGPT6Astra.h"
+#include "Framework/Application/SlateApplication.h"
 #include "IconEditor/IconStorageSubsystem.h"
 #include "InputCoreTypes.h"
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
+UIconCanvasGPT6Astra::UIconCanvasGPT6Astra(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer)
+{
+    SetIsFocusable(true);
+}
 void UIconCanvasGPT6Astra::SetPixels(const TArray<uint8> &InPixels)
 {
     Pixels = InPixels;
@@ -89,9 +94,13 @@ FReply UIconCanvasGPT6Astra::NativeOnMouseButtonDown(const FGeometry &G, const F
         (E.GetEffectingButton() != EKeys::LeftMouseButton && E.GetEffectingButton() != EKeys::RightMouseButton) ||
         !GetPixel(G, E, P))
         return FReply::Unhandled();
+    FinishStroke();
+    SetKeyboardFocus();
     bDrawing = true;
     bSamplingStroke = bEyedropper || E.GetEffectingButton() == EKeys::RightMouseButton;
     LastPixel = FIntPoint(-1, -1);
+    if (!bSamplingStroke)
+        OnStrokeStarted.ExecuteIfBound();
     StrokeTo(P);
     return FReply::Handled().CaptureMouse(TakeWidget());
 }
@@ -111,14 +120,24 @@ FReply UIconCanvasGPT6Astra::NativeOnMouseButtonUp(const FGeometry &, const FPoi
     if (bDrawing &&
         (E.GetEffectingButton() == EKeys::LeftMouseButton || E.GetEffectingButton() == EKeys::RightMouseButton))
     {
-        bDrawing = false;
+        FinishStroke(false);
         return FReply::Handled().ReleaseMouseCapture();
     }
     return FReply::Unhandled();
 }
 void UIconCanvasGPT6Astra::NativeOnMouseCaptureLost(const FCaptureLostEvent &E)
 {
+    FinishStroke(false);
+    Super::NativeOnMouseCaptureLost(E);
+}
+
+void UIconCanvasGPT6Astra::FinishStroke(bool bReleaseCapture)
+{
+    const bool bCommit = bDrawing && !bSamplingStroke;
     bDrawing = false;
     LastPixel = FIntPoint(-1, -1);
-    Super::NativeOnMouseCaptureLost(E);
+    if (bCommit)
+        OnStrokeFinished.ExecuteIfBound();
+    if (bReleaseCapture && HasMouseCapture() && FSlateApplication::IsInitialized())
+        FSlateApplication::Get().ReleaseAllPointerCapture();
 }

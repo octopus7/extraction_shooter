@@ -60,6 +60,22 @@ bool UIconEditorGPT6Astra::InitializeEditor()
     const EIconLoadResult Result = Storage->LoadRgbIcon(Draft);
     if (Draft.Num() != UIconStorageSubsystem::ByteCount)
         Draft.Init(0, UIconStorageSubsystem::ByteCount);
+    // Exactly one fixed allocation per opening: current state plus twenty undo states.
+    History.SetNumUninitialized(HistoryStates * UIconStorageSubsystem::ByteCount);
+    HistoryStart = 0;
+    HistoryCount = 1;
+    HistoryCursor = 0;
+    bStrokePending = false;
+    FMemory::Memcpy(History.GetData(), Draft.GetData(), UIconStorageSubsystem::ByteCount);
+    UndoButton->OnClicked.AddUniqueDynamic(this, &ThisClass::Undo);
+    RedoButton->OnClicked.AddUniqueDynamic(this, &ThisClass::Redo);
+    if (auto *Label = Cast<UTextBlock>(UndoButton->GetContent()))
+        Label->SetText(Text(TEXT("ui.icon_editor.undo")));
+    if (auto *Label = Cast<UTextBlock>(RedoButton->GetContent()))
+        Label->SetText(Text(TEXT("ui.icon_editor.redo")));
+    UndoButton->SetToolTipText(Text(TEXT("ui.icon_editor.undo_tip")));
+    RedoButton->SetToolTipText(Text(TEXT("ui.icon_editor.redo_tip")));
+    UpdateHistoryButtons();
     if (TitleText)
         TitleText->SetText(Text(TEXT("ui.icon_editor.title")));
     if (SubtitleText)
@@ -161,6 +177,8 @@ bool UIconEditorGPT6Astra::InitializeEditor()
     if (BlueInput)
         BlueInput->OnValueChanged.AddUniqueDynamic(this, &ThisClass::BlueChanged);
     PixelCanvas->OnPixelInput.BindUObject(this, &ThisClass::PixelInput);
+    PixelCanvas->OnStrokeStarted.BindUObject(this, &ThisClass::BeginStroke);
+    PixelCanvas->OnStrokeFinished.BindUObject(this, &ThisClass::CommitHistory);
     PreviewCanvas->bInteractive = false;
     PreviewCanvas->bShowGrid = false;
     PreviewCanvas->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -183,7 +201,15 @@ bool UIconEditorGPT6Astra::InitializeEditor()
 void UIconEditorGPT6Astra::NativeDestruct()
 {
     if (PixelCanvas)
+    {
+        PixelCanvas->OnStrokeStarted.Unbind();
+        PixelCanvas->OnStrokeFinished.Unbind();
         PixelCanvas->OnPixelInput.Unbind();
+        PixelCanvas->FinishStroke();
+    }
+    History.Empty();
+    HistoryCount = 0;
+    bStrokePending = false;
     Draft.Empty();
     Super::NativeDestruct();
 }
@@ -192,6 +218,19 @@ FReply UIconEditorGPT6Astra::NativeOnPreviewKeyDown(const FGeometry &G, const FK
     if (E.GetKey() == EKeys::Escape)
     {
         Cancel();
+        return FReply::Handled();
+    }
+    if (E.IsControlDown() && (E.GetKey() == EKeys::Z || E.GetKey() == EKeys::Y))
+    {
+        // Native numeric text editing retains its own editing undo and selection behavior.
+        for (USpinBox *Input : {RedInput.Get(), GreenInput.Get(), BlueInput.Get()})
+            if (Input && Input->GetCachedWidget().IsValid() &&
+                (Input->GetCachedWidget()->HasKeyboardFocus() || Input->GetCachedWidget()->HasFocusedDescendants()))
+                return Super::NativeOnPreviewKeyDown(G, E);
+        if (E.GetKey() == EKeys::Y || E.IsShiftDown())
+            Redo();
+        else
+            Undo();
         return FReply::Handled();
     }
     return Super::NativeOnPreviewKeyDown(G, E);
@@ -252,6 +291,7 @@ void UIconEditorGPT6Astra::BlueChanged(float V)
 }
 void UIconEditorGPT6Astra::Confirm()
 {
+    FinishPendingStroke();
     auto *S = GetGameInstance() ? GetGameInstance()->GetSubsystem<UIconStorageSubsystem>() : nullptr;
     if (S && S->TrySaveIcon(Draft))
         OnCloseRequested.Broadcast();
@@ -264,6 +304,7 @@ void UIconEditorGPT6Astra::Cancel()
 }
 void UIconEditorGPT6Astra::Fill()
 {
+    FinishPendingStroke();
     for (int32 I = 0; I + 2 < Draft.Num(); I += 3)
     {
         Draft[I] = Color.R;
@@ -271,6 +312,7 @@ void UIconEditorGPT6Astra::Fill()
         Draft[I + 2] = Color.B;
     }
     RefreshPixels();
+    CommitHistory();
 }
 void UIconEditorGPT6Astra::Brush()
 {
@@ -425,4 +467,69 @@ void UIconEditorGPT6Astra::Preset5Clicked()
 void UIconEditorGPT6Astra::Preset6Clicked()
 {
     SelectPreset(5);
+}
+
+void UIconEditorGPT6Astra::BeginStroke()
+{
+    bStrokePending = true;
+}
+void UIconEditorGPT6Astra::FinishPendingStroke()
+{
+    if (PixelCanvas)
+        PixelCanvas->FinishStroke();
+    if (bStrokePending)
+        CommitHistory();
+}
+void UIconEditorGPT6Astra::CommitHistory()
+{
+    bStrokePending = false;
+    if (HistoryCount == 0)
+        return;
+    constexpr int32 Bytes = UIconStorageSubsystem::ByteCount;
+    const int32 Current = (HistoryStart + HistoryCursor) % HistoryStates;
+    // Compare before truncating redo: a no-op must preserve the entire branch.
+    if (FMemory::Memcmp(History.GetData() + Current * Bytes, Draft.GetData(), Bytes) == 0)
+        return;
+    HistoryCount = HistoryCursor + 1;
+    if (HistoryCount == HistoryStates)
+    {
+        HistoryStart = (HistoryStart + 1) % HistoryStates;
+        --HistoryCount;
+    }
+    const int32 Next = (HistoryStart + HistoryCount) % HistoryStates;
+    FMemory::Memcpy(History.GetData() + Next * Bytes, Draft.GetData(), Bytes);
+    ++HistoryCount;
+    HistoryCursor = HistoryCount - 1;
+    UpdateHistoryButtons();
+}
+void UIconEditorGPT6Astra::RestoreHistory()
+{
+    constexpr int32 Bytes = UIconStorageSubsystem::ByteCount;
+    const int32 HistorySlot = (HistoryStart + HistoryCursor) % HistoryStates;
+    FMemory::Memcpy(Draft.GetData(), History.GetData() + HistorySlot * Bytes, Bytes);
+    RefreshPixels();
+    UpdateHistoryButtons();
+}
+void UIconEditorGPT6Astra::UpdateHistoryButtons()
+{
+    UndoButton->SetIsEnabled(HistoryCursor > 0);
+    RedoButton->SetIsEnabled(HistoryCursor + 1 < HistoryCount);
+}
+void UIconEditorGPT6Astra::Undo()
+{
+    FinishPendingStroke();
+    if (HistoryCursor > 0)
+    {
+        --HistoryCursor;
+        RestoreHistory();
+    }
+}
+void UIconEditorGPT6Astra::Redo()
+{
+    FinishPendingStroke();
+    if (HistoryCursor + 1 < HistoryCount)
+    {
+        ++HistoryCursor;
+        RestoreHistory();
+    }
 }

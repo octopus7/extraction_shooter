@@ -56,6 +56,37 @@ struct FIconEditorAutomationAccess
     {
         return Panel->Color;
     }
+    static const uint8 *HistoryData(const UIconEditorGPT6Astra *P)
+    {
+        return P->History.GetData();
+    }
+    static int32 HistoryCapacity(const UIconEditorGPT6Astra *P)
+    {
+        return P->History.Max();
+    }
+    static int32 HistoryCount(const UIconEditorGPT6Astra *P)
+    {
+        return P->HistoryCount;
+    }
+    static int32 HistoryCursor(const UIconEditorGPT6Astra *P)
+    {
+        return P->HistoryCursor;
+    }
+    static bool Drawing(const UIconCanvasGPT6Astra *C)
+    {
+        return C->bDrawing;
+    }
+    static void LoseCapture(UIconCanvasGPT6Astra *C)
+    {
+        C->NativeOnMouseCaptureLost(FCaptureLostEvent());
+    }
+    static FReply Shortcut(UIconEditorGPT6Astra *P, FKey Key, bool Shift = false)
+    {
+        return P->NativeOnPreviewKeyDown(
+            FGeometry(),
+            FKeyEvent(Key, FModifierKeysState(Shift, false, true, false, false, false, false, false, false), 0, false,
+                      0, 0));
+    }
     static int32 Preset(const UIconEditorGPT6Astra *Panel)
     {
         return Panel->ActivePreset;
@@ -149,7 +180,7 @@ bool FIconEditorAssetTest::RunTest(const FString &)
         if (TestNotNull(It->GetName(), Widget))
             TestTrue(It->GetName() + TEXT(" correct authored type"), Widget->IsA(It->PropertyClass));
     }
-    TestEqual(TEXT("Every required binding inspected"), BindingCount, 50);
+    TestEqual(TEXT("Every required binding inspected"), BindingCount, 52);
     for (const TCHAR *Name :
          {TEXT("BrushText"), TEXT("EyedropperText"), TEXT("FillText"), TEXT("CancelText"), TEXT("ConfirmText")})
     {
@@ -266,6 +297,87 @@ bool FIconEditorExercise::Update()
     auto *Canvas = Cast<UIconCanvasGPT6Astra>(UI->GetWidgetFromName(TEXT("PixelCanvas")));
     if (!Test->TestNotNull(TEXT("Bound pixel canvas"), Canvas))
         return true;
+    const uint8 *HistoryAddress = FIconEditorAutomationAccess::HistoryData(UI);
+    const int32 HistoryCapacity = FIconEditorAutomationAccess::HistoryCapacity(UI);
+    Test->TestEqual(TEXT("One baseline and twenty full snapshots"), HistoryCapacity,
+                    21 * UIconStorageSubsystem::ByteCount);
+    Test->TestEqual(TEXT("Initial history baseline"), FIconEditorAutomationAccess::HistoryCount(UI), 1);
+    Test->TestFalse(TEXT("Undo initially disabled"),
+                    Cast<UButton>(UI->GetWidgetFromName(TEXT("UndoButton")))->GetIsEnabled());
+    Click(Test, UI, TEXT("Palette03"));
+    Cast<UIconByteSpinBoxGPT6Astra>(UI->GetWidgetFromName(TEXT("RedInput")))
+        ->SetEditingTextForAutomation(FText::AsNumber(244));
+    Test->TestFalse(TEXT("RGB text editing retains native undo"),
+                    FIconEditorAutomationAccess::Shortcut(UI, EKeys::Z).IsEventHandled());
+    Stroke(Canvas, FIntPoint(0, 0), FIntPoint(31, 31));
+    Test->TestEqual(TEXT("Continuous stroke adds exactly one snapshot"), FIconEditorAutomationAccess::HistoryCount(UI),
+                    2);
+    Test->TestTrue(TEXT("Ctrl Z handles pixel undo after RGB edit then drawing"),
+                   FIconEditorAutomationAccess::Shortcut(UI, EKeys::Z).IsEventHandled());
+    Test->TestTrue(TEXT("Stroke undo restores exact loaded bytes"), FIconEditorAutomationAccess::Draft(UI) == Baseline);
+    FIconEditorAutomationAccess::Shortcut(UI, EKeys::Z, true);
+    Test->TestEqual(TEXT("Ctrl Shift Z redo cursor"), FIconEditorAutomationAccess::HistoryCursor(UI), 1);
+    Click(Test, UI, TEXT("UndoButton"));
+    FIconEditorAutomationAccess::Shortcut(UI, EKeys::Y);
+    Test->TestEqual(TEXT("Ctrl Y redo cursor"), FIconEditorAutomationAccess::HistoryCursor(UI), 1);
+    // Complete an interrupted drag on capture loss, and make the next move inert.
+    const FGeometry HistoryGeo = FGeometry::MakeRoot(FVector2D(576), FSlateLayoutTransform());
+    FIconEditorAutomationAccess::Down(Canvas, HistoryGeo, Pointer(FVector2D(9, 27), EKeys::LeftMouseButton, true));
+    Test->TestEqual(TEXT("Pending stroke has no intermediate snapshot"), FIconEditorAutomationAccess::HistoryCount(UI),
+                    2);
+    FIconEditorAutomationAccess::LoseCapture(Canvas);
+    Test->TestEqual(TEXT("Capture loss commits one stroke"), FIconEditorAutomationAccess::HistoryCount(UI), 3);
+    Test->TestFalse(TEXT("Capture loss ends drawing"), FIconEditorAutomationAccess::Drawing(Canvas));
+    const auto AfterLoss = FIconEditorAutomationAccess::Draft(UI);
+    FIconEditorAutomationAccess::Move(Canvas, HistoryGeo, Pointer(FVector2D(500, 9), EKeys::LeftMouseButton, true));
+    Test->TestTrue(TEXT("No painting after capture loss"), FIconEditorAutomationAccess::Draft(UI) == AfterLoss);
+    // More than twenty edits forces ring wrap without reallocating its storage.
+    for (int32 I = 1; I <= 25; ++I)
+    {
+        Cast<USpinBox>(UI->GetWidgetFromName(TEXT("RedInput")))->SetValue(I);
+        Click(Test, UI, TEXT("FillButton"));
+        Test->TestTrue(TEXT("History address stable while pushing"),
+                       FIconEditorAutomationAccess::HistoryData(UI) == HistoryAddress);
+        Test->TestEqual(TEXT("History capacity stable while pushing"), FIconEditorAutomationAccess::HistoryCapacity(UI),
+                        HistoryCapacity);
+    }
+    for (int32 I = 0; I < 20; ++I)
+        Click(Test, UI, TEXT("UndoButton"));
+    Test->TestEqual(TEXT("Exactly twenty undos retain edit five"), int32(FIconEditorAutomationAccess::Draft(UI)[0]), 5);
+    Click(Test, UI, TEXT("UndoButton"));
+    Test->TestEqual(TEXT("Undo limit does not move"), int32(FIconEditorAutomationAccess::Draft(UI)[0]), 5);
+    Cast<USpinBox>(UI->GetWidgetFromName(TEXT("RedInput")))->SetValue(5);
+    Click(Test, UI, TEXT("FillButton"));
+    Stroke(Canvas, FIntPoint(0, 0), FIntPoint(31, 31));
+    Test->TestEqual(TEXT("No-op fill and stroke preserve redo branch"), FIconEditorAutomationAccess::HistoryCount(UI),
+                    21);
+    Test->TestEqual(TEXT("No-op leaves cursor"), FIconEditorAutomationAccess::HistoryCursor(UI), 0);
+    for (int32 I = 0; I < 10; ++I)
+        Click(Test, UI, TEXT("RedoButton"));
+    Test->TestEqual(TEXT("Redo restores exact ring state"), int32(FIconEditorAutomationAccess::Draft(UI)[0]), 15);
+    Cast<USpinBox>(UI->GetWidgetFromName(TEXT("RedInput")))->SetValue(99);
+    Click(Test, UI, TEXT("FillButton"));
+    Test->TestEqual(TEXT("New edit truncates redo branch"), FIconEditorAutomationAccess::HistoryCount(UI), 12);
+    Test->TestFalse(TEXT("Redo disabled after branching"),
+                    Cast<UButton>(UI->GetWidgetFromName(TEXT("RedoButton")))->GetIsEnabled());
+    Test->TestTrue(TEXT("History pointer stable through undo redo branch"),
+                   FIconEditorAutomationAccess::HistoryData(UI) == HistoryAddress);
+    Test->TestEqual(TEXT("History capacity stable through undo redo branch"),
+                    FIconEditorAutomationAccess::HistoryCapacity(UI), HistoryCapacity);
+    // Undo must finalize a currently held brush stroke before restoring the previous snapshot.
+    Cast<USpinBox>(UI->GetWidgetFromName(TEXT("RedInput")))->SetValue(100);
+    FIconEditorAutomationAccess::Down(Canvas, HistoryGeo, Pointer(FVector2D(9, 9), EKeys::LeftMouseButton, true));
+    Click(Test, UI, TEXT("UndoButton"));
+    Test->TestEqual(TEXT("Undo finalizes pending stroke"), int32(FIconEditorAutomationAccess::Draft(UI)[0]), 99);
+    Test->TestFalse(TEXT("Undo ends captured drawing"), FIconEditorAutomationAccess::Drawing(Canvas));
+    Click(Test, UI, TEXT("CancelButton"));
+    Test->TestTrue(TEXT("Cancel history changes never writes"), Read(Storage) == Baseline);
+    if (!Test->TestTrue(TEXT("Reopen after history exercise"), Terminal->OpenFor(Player)))
+        return true;
+    UI = Panel(World);
+    Canvas = Cast<UIconCanvasGPT6Astra>(UI->GetWidgetFromName(TEXT("PixelCanvas")));
+    Test->TestEqual(TEXT("Reopen resets history to loaded baseline"), FIconEditorAutomationAccess::HistoryCount(UI), 1);
+    Test->TestTrue(TEXT("Reopen loads saved bytes"), FIconEditorAutomationAccess::Draft(UI) == Baseline);
     Test->TestEqual(TEXT("Opening defaults to preset one"), FIconEditorAutomationAccess::Preset(UI), 0);
     Test->TestNull(TEXT("Palette title removed"), UI->GetWidgetFromName(TEXT("PaletteText")));
     const TArray<uint8> BeforePresets = FIconEditorAutomationAccess::Draft(UI);
@@ -550,9 +662,13 @@ bool FIconEditorRender::Update()
                 Image.CopyTo(DisplayImage, ERawImageFormat::BGRA8, EGammaSpace::sRGB);
                 if (Size.Y == 1080)
                 {
-                    const FColor DisplayColor = reinterpret_cast<const FColor*>(DisplayImage.RawData.GetData())[420 * Size.X + 1330];
-                    Test->TestTrue(FString::Printf(TEXT("Display RGB fidelity: %d,%d,%d"), DisplayColor.R, DisplayColor.G, DisplayColor.B),
-                        FMath::Abs(int32(DisplayColor.R)-160)<=2 && FMath::Abs(int32(DisplayColor.G)-105)<=2 && FMath::Abs(int32(DisplayColor.B)-183)<=2);
+                    const FColor DisplayColor =
+                        reinterpret_cast<const FColor *>(DisplayImage.RawData.GetData())[420 * Size.X + 1330];
+                    Test->TestTrue(FString::Printf(TEXT("Display RGB fidelity: %d,%d,%d"), DisplayColor.R,
+                                                   DisplayColor.G, DisplayColor.B),
+                                   FMath::Abs(int32(DisplayColor.R) - 160) <= 2 &&
+                                       FMath::Abs(int32(DisplayColor.G) - 105) <= 2 &&
+                                       FMath::Abs(int32(DisplayColor.B) - 183) <= 2);
                 }
                 Test->TestTrue(
                     TEXT("Save localized screen"),
