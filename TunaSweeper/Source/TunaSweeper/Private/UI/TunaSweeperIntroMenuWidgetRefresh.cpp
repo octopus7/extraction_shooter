@@ -50,7 +50,8 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 		}
 		else if (!Summary.bDifficultySelected && !bIsDemo)
 		{
-			StartButtonText->SetText(FText::FromString(TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
+			StartButtonText->SetText(ResolveUiText(
+				FName(TEXT("ui.difficulty.select_title")), FText::GetEmpty()));
 		}
 		else
 		{
@@ -63,9 +64,9 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 {
-	RefreshSaveSlotButton(1, SaveSlot1Button, SaveSlot1Text);
-	RefreshSaveSlotButton(2, SaveSlot2Button, SaveSlot2Text);
-	RefreshSaveSlotButton(3, SaveSlot3Button, SaveSlot3Text);
+	RefreshSaveSlotButton(1);
+	RefreshSaveSlotButton(2);
+	RefreshSaveSlotButton(3);
 
 	if (SaveSlotActionRow)
 	{
@@ -76,6 +77,9 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 
 	if (SelectedSaveSlotIndex == INDEX_NONE)
 	{
+		if (DeleteSaveSlotButton) DeleteSaveSlotButton->SetIsEnabled(false);
+		if (DeleteSaveSlotButtonBox) DeleteSaveSlotButtonBox->SetVisibility(ESlateVisibility::Hidden);
+		ResetDeleteHoldProgress();
 		return;
 	}
 
@@ -121,7 +125,7 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 		DeleteSaveSlotButtonText->SetJustification(ETextJustify::Center);
 		DeleteSaveSlotButtonText->SetMargin(FMargin(0.0f));
 		DeleteSaveSlotButtonText->SetColorAndOpacity(FSlateColor(Summary.bHasData
-			? FLinearColor::White
+			? FLinearColor(0.78f, 0.43f, 0.36f, 1.f)
 			: FLinearColor(0.55f, 0.60f, 0.62f, 1.0f)));
 	}
 
@@ -578,6 +582,9 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 {
 	RefreshLaboratoryTexts();
 	SetNamedText(
+		FName(TEXT("SlotSelectButtonText")),
+		ResolveUiText(FName(TEXT("ui.title.slot_select")), FText::GetEmpty()));
+	SetNamedText(
 		FName(TEXT("SettingsButtonText")),
 		ResolveUiText(FName(TEXT("ui.title.settings")), FText::GetEmpty()));
 	SetNamedText(
@@ -691,84 +698,27 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 	ApplyUnifiedControlStyles();
 }
 
-void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText)
+void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex)
 {
-	const bool bSelected = SaveSlotIndex == SelectedSaveSlotIndex;
-
-	if (SlotText)
-	{
-		SlotText->SetText(BuildSaveSlotButtonText(SaveSlotIndex));
-		SlotText->SetJustification(ETextJustify::Center);
-		SlotText->SetMargin(FMargin(0.0f));
-		SlotText->SetColorAndOpacity(FSlateColor(bSelected
-			? FLinearColor::White
-			: FLinearColor(0.74f, 0.80f, 0.84f, 1.0f)));
-	}
-
-	if (SlotButton)
-	{
-		SlotButton->SetIsEnabled(true);
-		ApplySaveSlotButtonStyle(SlotButton, bSelected);
-	}
-
-	UImage* RingImage = nullptr;
-	switch (SaveSlotIndex)
-	{
-	case 1:
-		RingImage = GeneratedSaveSlot1SelectionRingImage;
-		break;
-	case 2:
-		RingImage = GeneratedSaveSlot2SelectionRingImage;
-		break;
-	case 3:
-		RingImage = GeneratedSaveSlot3SelectionRingImage;
-		break;
-	default:
-		break;
-	}
-
-	SetSaveSlotSelectionRingSelected(RingImage, bSelected);
+    FTunaSweeperSaveSlotSummary Summary;
+    Summary.SaveSlotIndex = SaveSlotIndex;
+    if (const auto* GI = Cast<UTunaSweeperGameInstance>(GetGameInstance())) Summary = GI->GetSaveSlotSummary(SaveSlotIndex);
+    PresentSaveSlot(SaveSlotIndex, Summary, SaveSlotIndex == SelectedSaveSlotIndex);
 }
 
-void UTunaSweeperIntroMenuWidget::ApplySaveSlotButtonStyle(UButton* SlotButton, bool bSelected)
+void UTunaSweeperIntroMenuWidget::ApplySaveSlotButtonStyle(UButton* SlotButton)
 {
-	if (!SlotButton)
-	{
-		return;
-	}
-
-	const FVector2D ButtonSize(700.0f, 112.0f);
-	const float CornerRadius = 11.0f;
-	const FLinearColor NormalFill(0.025f, 0.045f, 0.050f, 0.56f);
-	const FLinearColor HoveredFill(0.055f, 0.095f, 0.105f, 0.76f);
-	const FLinearColor PressedFill = NormalFill * 0.75f;
-	const FLinearColor NormalOutline = bSelected
-		? FLinearColor(0.98f, 1.0f, 0.92f, 1.0f)
-		: FLinearColor(0.78f, 0.84f, 0.82f, 0.88f);
-	const FLinearColor HoveredOutline = bSelected
-		? FLinearColor(1.0f, 1.0f, 0.96f, 1.0f)
-		: FLinearColor(0.96f, 0.98f, 0.95f, 1.0f);
-	const FLinearColor PressedOutline = bSelected
-		? FLinearColor(0.94f, 0.98f, 0.88f, 1.0f)
-		: FLinearColor(0.60f, 0.68f, 0.68f, 0.90f);
-
-	auto MakeSlotBrush = [ButtonSize, CornerRadius](const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
-	{
-		FSlateBrush Brush;
-		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
-		Brush.TintColor = FSlateColor(FillColor);
-		Brush.SetImageSize(ButtonSize);
-		Brush.OutlineSettings = FSlateBrushOutlineSettings(CornerRadius, FSlateColor(OutlineColor), OutlineWidth);
-		Brush.OutlineSettings.bUseBrushTransparency = false;
-		return Brush;
-	};
-
-	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(MakeSlotBrush(NormalFill, NormalOutline, bSelected ? 2.8f : 1.3f));
-	ButtonStyle.SetHovered(MakeSlotBrush(HoveredFill, HoveredOutline, bSelected ? 3.2f : 1.7f));
-	ButtonStyle.SetPressed(MakeSlotBrush(PressedFill, PressedOutline, bSelected ? 2.2f : 1.0f));
-	ButtonStyle.SetNormalPadding(FMargin(0.0f));
-	ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
-	SlotButton->SetStyle(ButtonStyle);
-	SlotButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+    if (!SlotButton) return;
+    // The authored material owns the outline and inner glow. Button overlays add hover/focus feedback.
+    auto Brush = [](float Alpha) {
+        FSlateBrush B;
+        B.DrawAs = ESlateBrushDrawType::RoundedBox;
+        B.TintColor = FSlateColor(FLinearColor(0.42f, 0.76f, 0.72f, Alpha));
+        B.OutlineSettings = FSlateBrushOutlineSettings(16.f);
+        return B;
+    };
+    FButtonStyle Style;
+    Style.SetNormal(Brush(0.f)); Style.SetHovered(Brush(.09f)); Style.SetPressed(Brush(.16f));
+    Style.SetNormalPadding(FMargin(0)); Style.SetPressedPadding(FMargin(0));
+    SlotButton->SetStyle(Style);
 }

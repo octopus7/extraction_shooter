@@ -113,78 +113,11 @@ void UTunaSweeperIntroMenuWidget::HideLegacyDeleteHoldGaugeWidgets()
 
 void UTunaSweeperIntroMenuWidget::EnsureDeleteSaveSlotHoldProgressWidget()
 {
-	if (!WidgetTree || !DeleteSaveSlotButton || !DeleteSaveSlotButtonText)
-	{
-		return;
-	}
-
-	if (!DeleteSaveSlotHoldProgressFill)
-	{
-		DeleteSaveSlotHoldProgressFill = Cast<UImage>(FindIntroWidget(TEXT("DeleteSaveSlotHoldProgressFill")));
-	}
-
-	if (DeleteSaveSlotHoldProgressFill)
-	{
-		ConfigureDeleteSaveSlotHoldProgressFill();
-		return;
-	}
-
-	UOverlay* ButtonOverlay = WidgetTree->ConstructWidget<UOverlay>(
-		UOverlay::StaticClass(),
-		TEXT("DeleteSaveSlotButtonFullProgressOverlay"));
-	DeleteSaveSlotHoldProgressFill = WidgetTree->ConstructWidget<UImage>(
-		UImage::StaticClass(),
-		TEXT("DeleteSaveSlotHoldProgressFill"));
-	if (!ButtonOverlay || !DeleteSaveSlotHoldProgressFill)
-	{
-		DeleteSaveSlotHoldProgressFill = nullptr;
-		return;
-	}
-
-	ConfigureDeleteSaveSlotHoldProgressFill();
-
-	if (DeleteSaveSlotButtonBox)
-	{
-		DeleteSaveSlotButton->RemoveFromParent();
-		DeleteSaveSlotButtonText->RemoveFromParent();
-		DeleteSaveSlotButtonBox->SetContent(ButtonOverlay);
-
-		if (UOverlaySlot* ButtonSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotButton))
-		{
-			ButtonSlot->SetHorizontalAlignment(HAlign_Fill);
-			ButtonSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		if (UOverlaySlot* ProgressFillSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotHoldProgressFill))
-		{
-			ProgressFillSlot->SetHorizontalAlignment(HAlign_Fill);
-			ProgressFillSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		if (UOverlaySlot* TextSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotButtonText))
-		{
-			TextSlot->SetHorizontalAlignment(HAlign_Fill);
-			TextSlot->SetVerticalAlignment(VAlign_Center);
-		}
-	}
-	else
-	{
-		DeleteSaveSlotButtonText->RemoveFromParent();
-		DeleteSaveSlotButton->SetContent(ButtonOverlay);
-
-		if (UOverlaySlot* ProgressFillSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotHoldProgressFill))
-		{
-			ProgressFillSlot->SetHorizontalAlignment(HAlign_Fill);
-			ProgressFillSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		if (UOverlaySlot* TextSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotButtonText))
-		{
-			TextSlot->SetHorizontalAlignment(HAlign_Fill);
-			TextSlot->SetVerticalAlignment(VAlign_Center);
-		}
-	}
-
-	DeleteSaveSlotButtonText->SetVisibility(ESlateVisibility::HitTestInvisible);
-	DeleteSaveSlotButtonText->SetJustification(ETextJustify::Center);
-	DeleteSaveSlotButtonText->SetMargin(FMargin(0.0f));
+    if (!DeleteSaveSlotHoldProgressFill)
+    {
+        DeleteSaveSlotHoldProgressFill = Cast<UImage>(FindIntroWidget(TEXT("DeleteSaveSlotHoldProgressFill")));
+    }
+    ConfigureDeleteSaveSlotHoldProgressFill();
 }
 
 void UTunaSweeperIntroMenuWidget::ConfigureDeleteSaveSlotHoldProgressFill()

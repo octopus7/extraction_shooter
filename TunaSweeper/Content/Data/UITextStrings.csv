@@ -821,3 +821,4 @@ ui.icon_editor.undo,실행 취소,Undo,元に戻す,撤销,復原,Отменит
 ui.icon_editor.redo,다시 실행,Redo,やり直す,重做,重做,Повторить
 ui.icon_editor.undo_tip,실행 취소 (Ctrl+Z),Undo (Ctrl+Z),元に戻す (Ctrl+Z),撤销 (Ctrl+Z),復原 (Ctrl+Z),Отменить (Ctrl+Z)
 ui.icon_editor.redo_tip,다시 실행 (Ctrl+Y 또는 Ctrl+Shift+Z),Redo (Ctrl+Y or Ctrl+Shift+Z),やり直す (Ctrl+Y / Ctrl+Shift+Z),重做 (Ctrl+Y / Ctrl+Shift+Z),重做 (Ctrl+Y / Ctrl+Shift+Z),Повторить (Ctrl+Y / Ctrl+Shift+Z)
+ui.title.difficulty.unselected,미선택,Not selected,未選択,未选择,未選擇,Не выбрана

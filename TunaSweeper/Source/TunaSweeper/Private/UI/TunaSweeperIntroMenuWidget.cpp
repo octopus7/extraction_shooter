@@ -43,7 +43,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	ApplyDemoNoticeVisualStyle();
 	EnsureTitleWindParticleOverlay();
 	EnsureDeleteSaveSlotHoldProgressWidget();
-	EnsureSaveSlotSelectionRingWidgets();
+
 	EnsureDifficultySelectionPanel();
 	HideLegacyDeleteHoldGaugeWidgets();
 	EnsurePiggyBankToggleButton();
@@ -494,8 +494,6 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 	{
 		SelectSaveSlot(3);
 	}
-
-	UpdateSaveSlotSelectionRingAnimation(InDeltaTime);
 
 	if (!bDeleteHoldActive)
 	{

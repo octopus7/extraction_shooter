@@ -314,6 +314,7 @@ protected:
 private:
 	friend class FTitleScreenAssetTest;
 	friend class FDifficultySelectionVisualTest;
+	friend class FSaveSlotPresentationTest;
 	friend class FTunaSweeperLaboratoryMenuTest;
 	void EnsureLaboratoryMenu();
 	void RefreshLaboratoryTexts();
@@ -523,19 +524,9 @@ private:
 	void RefreshInterfaceSelectionStyles();
 	void RefreshDevelopmentSelectionStyles();
 	void RefreshLocalizedTexts();
-	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
-	void ApplySaveSlotButtonStyle(UButton* SlotButton, bool bSelected);
-	void EnsureSaveSlotSelectionRingWidgets();
-	void EnsureSaveSlotSelectionRingContent(
-		UButton* SlotButton,
-		UTextBlock* SlotText,
-		TObjectPtr<UImage>& RingImage,
-		const TCHAR* ContentWidgetName,
-		const TCHAR* RingWidgetName);
-	void ConfigureSaveSlotSelectionRingImage(UImage* RingImage);
-	UTexture2D* GetOrCreateSaveSlotSelectionRingTexture();
-	void UpdateSaveSlotSelectionRingAnimation(float InDeltaTime);
-	void SetSaveSlotSelectionRingSelected(UImage* RingImage, bool bSelected) const;
+	void RefreshSaveSlotButton(int32 SaveSlotIndex);
+	void ApplySaveSlotButtonStyle(UButton* SlotButton);
+	void PresentSaveSlot(int32 Index, const struct FTunaSweeperSaveSlotSummary& Summary, bool bSelected);
 	void LoadTitleGraphicsSettings();
 	void SaveTitleGraphicsSettings() const;
 	void ApplyDLSSSetting(ETunaSweeperTitleDLSSMode DLSSMode);
@@ -559,7 +550,6 @@ private:
 	FText BuildDifficultyTitleText(int32 DifficultyStage) const;
 	FText BuildDifficultyDescriptionText(int32 DifficultyStage) const;
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
-	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	FString FormatPlayTime(float TotalPlaySeconds) const;
 	FText BuildSaveSlotDifficultyText(int32 DifficultyStage, bool bDifficultySelected = true) const;
@@ -606,7 +596,6 @@ private:
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
 	int32 SelectedDifficultyStage = INDEX_NONE;
 	float DeleteHoldElapsedSeconds = 0.0f;
-	float SaveSlotSelectionRingAngle = 0.0f;
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
 	bool bStartTravelPending = false;
@@ -699,17 +688,6 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> DifficultyBackButtonText;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UImage> GeneratedSaveSlot1SelectionRingImage;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UImage> GeneratedSaveSlot2SelectionRingImage;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UImage> GeneratedSaveSlot3SelectionRingImage;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> SaveSlotSelectionRingTexture;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> SettingsTabFadeTexture;

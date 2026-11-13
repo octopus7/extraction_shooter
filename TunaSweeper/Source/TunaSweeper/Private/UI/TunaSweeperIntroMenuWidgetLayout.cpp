@@ -283,9 +283,7 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	StyleButton(QuitButton, EButtonRole::Secondary);
 
 	// Save-slot cards retain their comparison presentation; only their actions adopt the shared language.
-	StyleButton(PrimarySaveSlotButton, EButtonRole::Primary);
-	StyleButton(DeleteSaveSlotButton, EButtonRole::Danger);
-	StyleButton(BackToMainMenuButton, EButtonRole::Secondary);
+	// Save-slot actions keep their authored primary and quiet text-button styles.
 	StyleButton(ConfirmDeleteButton, EButtonRole::Danger);
 	StyleButton(CancelDeleteButton, EButtonRole::Secondary);
 

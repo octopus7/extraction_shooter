@@ -192,7 +192,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
-	SaveSlotSelectionRingAngle = 0.0f;
+
 	RefreshSaveSlotMenu();
 }
 
@@ -441,6 +441,6 @@ void UTunaSweeperIntroMenuWidget::SelectSaveSlot(int32 SaveSlotIndex)
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 	SelectedSaveSlotIndex = FMath::Clamp(SaveSlotIndex, 1, 3);
-	SaveSlotSelectionRingAngle = 0.0f;
+
 	RefreshSaveSlotMenu();
 }
