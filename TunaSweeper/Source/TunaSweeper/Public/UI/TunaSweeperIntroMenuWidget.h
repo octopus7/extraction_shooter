@@ -313,6 +313,7 @@ protected:
 
 private:
 	friend class FTitleScreenAssetTest;
+	friend class FDifficultySelectionVisualTest;
 	friend class FTunaSweeperLaboratoryMenuTest;
 	void EnsureLaboratoryMenu();
 	void RefreshLaboratoryTexts();
@@ -553,22 +554,10 @@ private:
 	void SetNamedText(FName WidgetName, const FText& Text) const;
 	void EnsureDifficultySelectionPanel();
 	void SelectDifficultyStage(int32 DifficultyStage);
-	void RefreshDifficultyOption(
-		int32 DifficultyStage,
-		UButton* Button,
-		UImage* BackgroundImage,
-		UBorder* SelectionBorder,
-		UTextBlock* TitleText,
-		UTextBlock* DescriptionText);
-	void ApplyDifficultyButtonStyle(UButton* Button) const;
 	void ApplyDemoNoticeVisualStyle();
-	void ConfigureDifficultyCardBackground(UImage* BackgroundImage, bool bSelected);
-	void ConfigureDifficultySelectionBorder(UBorder* SelectionBorder, bool bSelected);
-	void ConfigureDifficultyIcon(UImage* IconImage, int32 DifficultyStage);
 	void LoadDifficultyDefinitions();
 	FText BuildDifficultyTitleText(int32 DifficultyStage) const;
 	FText BuildDifficultyDescriptionText(int32 DifficultyStage) const;
-	UTexture2D* LoadDifficultyTexture(TObjectPtr<UTexture2D>& TextureCache, const TCHAR* TexturePath);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;

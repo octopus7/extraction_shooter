@@ -1,0 +1,19 @@
+{
+  "tool": "built-in image_gen",
+  "purpose": "Approved difficulty selection UI source art",
+  "locales": [
+    "ko",
+    "en",
+    "ja",
+    "zh-Hans",
+    "zh-Hant",
+    "ru"
+  ],
+  "labels": "Cropped from difficulty-selection-v3 locale images; white-filled linear grayscale on black, rendered with M_DifficultyLabel opacity mask.",
+  "characters": "Native-transparent imagegen atlas, cropped without background/alpha extraction.",
+  "character_prompt": "Preserve approved three tuna characters on native transparent canvas: tiny harmless story tuna, cheerful normal tuna, tough large tuna with X-shaped healed scar. No UI or text.",
+  "asset_root": "/Game/UI/Difficulty",
+  "widget": "/Game/UI/Difficulty/WBP_DifficultySelection",
+  "runtime_class": "UDifficultySelectionWidget",
+  "notes": "Descriptions resolve DifficultyTextStrings keys. No runtime tree construction for this screen."
+}

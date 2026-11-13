@@ -1,6 +1,6 @@
 string_key,ko,en,ja,zh-Hans,zh-Hant,ru
-difficulty.stage.1.title,파밍,Farming,ファーミング,搜集,蒐集,Сбор ресурсов
-difficulty.stage.1.description,파밍과 탐색에 여유가 있는 시작 난이도입니다.,A starting difficulty with more room for looting and exploration.,物資収集と探索に余裕のある入門難易度です。,适合从容搜集物资与探索的入门难度。,適合從容蒐集物資與探索的入門難度。,Начальная сложность: больше времени на сбор припасов и исследование.
+difficulty.stage.1.title,스토리,Story,ストーリー,故事,故事,Сюжет
+difficulty.stage.1.description,스토리를 즐기기 위해 퀘스트 아이템이 확정 드랍 됩니다.,Quest items are guaranteed to drop so you can enjoy the story.,ストーリーを楽しめるようにクエストアイテムが必ずドロップします。,任务物品必定掉落，让你尽情享受故事。,任務物品必定掉落，讓你盡情享受故事。,Квестовые предметы выпадают гарантированно — наслаждайтесь сюжетом.
 difficulty.stage.2.title,일반,Normal,ノーマル,普通,普通,Обычная
 difficulty.stage.2.description,생존과 전투가 균형 있게 진행되는 기본 난이도입니다.,The standard difficulty with balanced survival and combat.,生存と戦闘のバランスが取れた標準難易度です。,生存与战斗较为均衡的标准难度。,生存與戰鬥較爲均衡的標準難度。,Стандартная сложность с балансом выживания и боя.
 difficulty.stage.3.title,어려움,Hard,ハード,困难,困難,Сложная

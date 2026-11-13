@@ -349,8 +349,7 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	}
 	StyleButton(DeleteCurrentSaveDataButton, EButtonRole::Danger);
 
-	StyleButton(DifficultyStartButton, EButtonRole::Primary);
-	StyleButton(DifficultyBackButton, EButtonRole::Secondary);
+	// Difficulty action styles are authored in WBP_DifficultySelection.
 	StyleButton(DemoNoticeConfirmButton, EButtonRole::Primary);
 	StyleButton(DemoNoticeBackButton, EButtonRole::Secondary);
 	ApplyReferenceTitleStyle();
