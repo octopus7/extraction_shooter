@@ -1,4 +1,6 @@
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
+#include "UI/TunaSweeperMapWidget.h"
 
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/Engine.h"
@@ -28,13 +30,21 @@ namespace
 
 		virtual bool HandleKeyDownEvent(FSlateApplication& SlateApplication, const FKeyEvent& InKeyEvent) override
 		{
-			if (InKeyEvent.IsRepeat() || InKeyEvent.GetKey() != EKeys::F9)
+			if (InKeyEvent.IsRepeat() || (InKeyEvent.GetKey() != EKeys::F9 && InKeyEvent.GetKey() != EKeys::F6))
 			{
 				return false;
 			}
 
 			UTunaSweeperKeyboardInputSubsystem* KeyboardInputSubsystem = Owner.Get();
-			return KeyboardInputSubsystem && KeyboardInputSubsystem->CaptureScreenshotFromHotkey();
+			if (!KeyboardInputSubsystem)
+			{
+				return false;
+			}
+			if (KeyboardInputSubsystem->HandleMovementCheatHotkey(InKeyEvent.GetKey()))
+			{
+				return true;
+			}
+			return InKeyEvent.GetKey() == EKeys::F9 && KeyboardInputSubsystem->CaptureScreenshotFromHotkey();
 		}
 
 	private:
@@ -55,6 +65,7 @@ void UTunaSweeperKeyboardInputSubsystem::Initialize(FSubsystemCollectionBase& Co
 
 void UTunaSweeperKeyboardInputSubsystem::Deinitialize()
 {
+	MovementCheatMap.Reset();
 	if (ScreenshotInputProcessor.IsValid() && FSlateApplication::IsInitialized())
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(ScreenshotInputProcessor);
@@ -62,6 +73,42 @@ void UTunaSweeperKeyboardInputSubsystem::Deinitialize()
 	ScreenshotInputProcessor.Reset();
 
 	Super::Deinitialize();
+}
+
+void UTunaSweeperKeyboardInputSubsystem::RegisterMovementCheatMap(UTunaSweeperMapWidget* Map)
+{
+	MovementCheatMap = Map;
+}
+
+void UTunaSweeperKeyboardInputSubsystem::UnregisterMovementCheatMap(UTunaSweeperMapWidget* Map)
+{
+	if (MovementCheatMap.Get() == Map)
+	{
+		MovementCheatMap.Reset();
+	}
+}
+
+bool UTunaSweeperKeyboardInputSubsystem::HandleMovementCheatHotkey(const FKey& Key)
+{
+	UGameInstance* Instance = GetGameInstance();
+	UGameViewportClient* Viewport = Instance ? Instance->GetGameViewportClient() : nullptr;
+	UTunaSweeperMovementCheatSubsystem* Cheats = Instance ? Instance->GetSubsystem<UTunaSweeperMovementCheatSubsystem>() : nullptr;
+	if (!Viewport || !Cheats || !Cheats->IsEnabled() || !FSlateApplication::IsInitialized())
+	{
+		return false;
+	}
+	const TSharedPtr<SWindow> Window = Viewport->GetWindow();
+	if (!Window.IsValid() || FSlateApplication::Get().GetActiveTopLevelWindow() != Window)
+	{
+		return false;
+	}
+	if (Key == EKeys::F6)
+	{
+		if (MovementCheatMap.IsValid() && MovementCheatMap->IsTeleportConfirmationOpen()) return true;
+		Cheats->CycleSpeed();
+		return true;
+	}
+	return Key == EKeys::F9 && MovementCheatMap.IsValid() && MovementCheatMap->TryTeleportToMapMarkerAtCursor();
 }
 
 bool UTunaSweeperKeyboardInputSubsystem::CaptureScreenshotFromHotkey()

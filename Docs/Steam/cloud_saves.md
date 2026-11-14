@@ -4,6 +4,8 @@ TunaSweeper uses Steam Auto-Cloud. The Steam client synchronizes files before la
 
 ## Runtime directories
 
+Movement-cheat activation and speed are memory-only, reset each launch, and have no cloud-eligible file representation. F9 targets ordinary map markers, which retain their normal gameplay save rules; there is no separate cheat bookmark store. The retired `%LOCALAPPDATA%/TunaSweeperDeveloper/MovementCheats` directory must not be added to Auto-Cloud rules.
+
 Only a packaged build whose `TunaSweeper.Distribution/DistributionChannel` is `Steam` selects the Steam directory. The account comes from the Steam OnlineSubsystem identity (64-bit Steam ID), including Steam offline mode when the SDK still exposes the account. The selected directory is fixed for the process lifetime.
 
 Windows packaged paths:

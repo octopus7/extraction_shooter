@@ -1,4 +1,5 @@
 #include "AI/TunaSweeperRollingBomber.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/CapsuleComponent.h"
@@ -232,6 +233,11 @@ void ATunaSweeperRollingBomber::Tick(float DeltaSeconds)
 	}
 
 	ATunaSweeperTopDownCharacter* TargetCharacter = ResolvePlayerTarget();
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this) &&
+		(CurrentMode == ETunaSweeperRollingBomberMode::FoldingLegs || CurrentMode == ETunaSweeperRollingBomberMode::Rolling))
+	{
+		EnterRecoveringLegsMode();
+	}
 
 	switch (CurrentMode)
 	{

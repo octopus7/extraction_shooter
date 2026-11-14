@@ -70,6 +70,10 @@ Update it whenever a new state field is expected to persist across save slots, l
 
 ## Cloud Save Roots
 
+Movement cheats use the existing ordinary map markers as teleport destinations. Those markers retain the normal gameplay-slot persistence and cloud rules documented below. F9 over a marker in the M-key map opens an in-game confirmation; accepting requests a safe teleport to that marker on the current map. The dedicated cheat-bookmark collection and local JSON storage have been removed. The external trainer gate, speed multiplier and suppressed combat state remain runtime-only and start inactive on each process launch. Teleport confirmations also remain runtime-only. Ordinary gameplay progress follows its normal save rules.
+
+`TunaBuildHelper` discovers the versioned exported process-memory control, checks its process identity and writes only the enable token. It does not patch executable files or save an enabled setting. Every supported Windows packaging script and the repository Steam upload script run `BuildScripts/ValidateMovementCheatPackage.ps1`, which rejects a nonzero initial gate/runtime state or local developer data/helper artifacts in the package. Live Steamworks cloud rules still require the exact save-root configuration documented below.
+
 All gameplay slots, selected-slot settings, achievements, previous generations, backups, and cleanup logs resolve their root through `TunaSweeperBuildFlavor::GetSaveGameDirectory()`.
 
 - Editor/local saves: `Saved/SaveGames/<Demo|FullGame>/`.

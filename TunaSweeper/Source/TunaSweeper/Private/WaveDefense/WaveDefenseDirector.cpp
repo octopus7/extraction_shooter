@@ -1,4 +1,5 @@
 #include "WaveDefense/WaveDefenseDirector.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 #include "WaveDefense/WaveDefenseCore.h"
 #include "WaveDefense/WaveDefenseFacility.h"
 #include "WaveDefense/WaveDefenseDefinition.h"
@@ -383,6 +384,7 @@ AActor* AWaveDefenseDirector::GetPreferredTarget(const AActor* Enemy, FGuid Even
 {
     if (!Enemy || !IsActiveParticipant(EventRunId, EnemyToken, Enemy)) return nullptr;
     APawn* Player = PlayerPawn.Get();
+    if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this)) Player = nullptr;
     const UWaveDefenseParticipantComponent* Participant = Enemy->FindComponentByClass<UWaveDefenseParticipantComponent>();
     const APawn* EnemyPawn = Cast<APawn>(Enemy);
     const AAIController* AI = EnemyPawn ? Cast<AAIController>(EnemyPawn->GetController()) : nullptr;

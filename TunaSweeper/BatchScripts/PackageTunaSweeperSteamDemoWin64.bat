@@ -79,9 +79,14 @@ call "%RUN_UAT%" BuildCookRun ^
     -unattended ^
     -utf8output
 set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
+
 if not "%PACKAGE_EXIT_CODE%"=="0" goto after_demo_verification
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%BUILD_FLAVOR_DATA%" -Mode VerifyDemo -ArchiveDirectory "%ARCHIVE_DIR%"
 if errorlevel 1 set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
+if "%PACKAGE_EXIT_CODE%"=="0" (
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\ValidateMovementCheatPackage.ps1" -PackageRoot "%ARCHIVE_PLATFORM_DIR%"
+    if errorlevel 1 set "PACKAGE_EXIT_CODE=1"
+)
 :after_demo_verification
 
 echo.

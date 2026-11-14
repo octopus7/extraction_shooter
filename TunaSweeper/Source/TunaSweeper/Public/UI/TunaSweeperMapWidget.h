@@ -15,6 +15,7 @@ class UOverlay;
 class USlider;
 class UTextBlock;
 class UTexture2D;
+class UTeleportConfirmationGPT6Astra;
 
 struct FTunaSweeperMapOverlayDefinition
 {
@@ -33,6 +34,8 @@ class TUNASWEEPER_API UTunaSweeperMapWidget : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
 	void RefreshMapView();
+	bool TryTeleportToMapMarkerAtCursor();
+	bool IsTeleportConfirmationOpen() const { return TeleportConfirmationWidget != nullptr; }
 
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
@@ -47,6 +50,9 @@ protected:
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 private:
+#if WITH_DEV_AUTOMATION_TESTS
+	friend class FTunaSweeperMapMarkerTeleportTest;
+#endif
 	void BuildMapWidget();
 	void EnsureMapTextures();
 	void EnsureFallbackMapTexture();
@@ -60,6 +66,10 @@ private:
 	void SetMapZoom(float InMapZoom, const FVector2D* ZoomAnchorLocalPosition = nullptr);
 	void ClampMapPan();
 	bool TryCloseMapFromKey(const FKey& Key);
+	bool IsMovementCheatMapOpen() const;
+	int32 FindNearestMapMarkerId(const FVector2D& LocalPosition) const;
+	bool CanKeepTeleportConfirmationOpen() const;
+	void HandleTeleportConfirmation(bool bConfirmed);
 	void AddOrRemoveMarkerAtLocalPosition(const FVector2D& MapViewportLocalPosition);
 	bool TryGetMapPositionFromLocal(const FVector2D& MapViewportLocalPosition, FVector2D& OutMapPosition) const;
 	FVector2D MapPositionToLocal(const FVector2D& MapPosition) const;
@@ -178,4 +188,7 @@ private:
 	bool bIsPanningMap = false;
 	bool bHasPlayerMapPosition = false;
 	bool bIsUpdatingZoomSlider = false;
+	UPROPERTY(Transient) TObjectPtr<UTeleportConfirmationGPT6Astra> TeleportConfirmationWidget;
+	int32 PendingTeleportMarkerId = INDEX_NONE;
+	FName PendingTeleportMapId = NAME_None;
 };

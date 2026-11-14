@@ -853,3 +853,8 @@ codex.enemy.carrier.behavior,공격 예고 후 소형 로봇들을 내보냅니�
 codex.enemy.minion.name,소형 구체 로봇,Rolling minion,小型ローリングロボット,小型滚动机器人,小型滾動機器人,Малый катящийся робот
 codex.enemy.minion.desc,굴러서 전개되는 소형 로봇입니다.,A small robot that rolls into position.,転がって展開する小型ロボットです。,滚动展开的小型机器人。,滾動展開的小型機器人。,"Малый робот, выкатывающийся на позицию."
 codex.enemy.minion.behavior,구른 뒤 몸체를 펼쳐 목표를 공격합니다.,Unfolds after rolling and attacks its target.,転がった後に機体を展開し目標を攻撃します。,滚动后展开机体并攻击目标。,滾動後展開機體並攻擊目標。,После качения раскрывается и атакует цель.
+
+ui.movement_cheat.teleport_title,이동 확인,Confirm teleport,移動の確認,确认传送,確認傳送,Подтверждение перемещения
+ui.movement_cheat.teleport_confirm,이 위치로 이동할까요?,Move to this location?,この場所へ移動しますか？,要传送到这个位置吗？,要傳送到這個位置嗎？,Переместиться в эту точку?
+ui.movement_cheat.yes,예,Yes,はい,是,是,Да
+ui.movement_cheat.no,아니요,No,いいえ,否,否,Нет

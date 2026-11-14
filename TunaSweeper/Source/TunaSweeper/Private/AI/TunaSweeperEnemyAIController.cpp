@@ -1,4 +1,5 @@
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 #include "WaveDefense/WaveDefenseParticipantComponent.h"
 #include "AI/TunaSweeperWheeledEnemyCharacter.h"
 
@@ -307,6 +308,17 @@ void ATunaSweeperEnemyAIController::NotifyCombatPatternStarted()
 void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this))
+	{
+		const auto* Factions = GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>();
+		if (AwarenessState == ETunaSweeperEnemyAwarenessState::Suspicious ||
+			(Factions && Factions->GetFactionIdForActor(CurrentTargetActor.Get()) == TunaSweeperFactionIds::Player))
+		{
+			if (auto* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn()); Enemy && Enemy->GetCombatPatternComponent())
+				Enemy->GetCombatPatternComponent()->CancelPatterns();
+			ClearCombatTarget();
+		}
+	}
 	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
 		Enemy && Enemy->IsStandardCombatSuppressed())
 	{
@@ -390,6 +402,8 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 		if (AActor* Preferred = Participant->GetPreferredTarget(); Preferred && CurrentTargetActor.Get() != Preferred)
 		{
 			ClearCombatTarget();
+			const auto* PreferredFactions = World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			if (!PreferredFactions || !PreferredFactions->CanTargetActor(ControlledPawn, Preferred)) return;
 			if (HasDirectSightTo(Preferred)) StartAlerted(Preferred, TEXT("Wave defense target"));
 			else MoveToActor(Preferred, 120.0f);
 			return;
@@ -632,6 +646,7 @@ void ATunaSweeperEnemyAIController::StartSuspicion(
 	const FVector& InSuspicionLocation,
 	const TCHAR* EntryReason)
 {
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this)) return;
 	APawn* ControlledPawn = GetPawn();
 	if (!ControlledPawn || !GetWorld())
 	{

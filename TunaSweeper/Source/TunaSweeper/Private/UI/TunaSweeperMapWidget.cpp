@@ -1,6 +1,11 @@
 #include "UI/TunaSweeperMapWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
+#include "Framework/Application/SlateApplication.h"
+#include "UI/Astra/TeleportConfirmationGPT6Astra.h"
+
+#include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Components/BackgroundBlur.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -107,6 +112,13 @@ TSharedRef<SWidget> UTunaSweeperMapWidget::RebuildWidget()
 void UTunaSweeperMapWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	if (UGameInstance* Instance = GetGameInstance())
+	{
+		if (UTunaSweeperKeyboardInputSubsystem* Keyboard = Instance->GetSubsystem<UTunaSweeperKeyboardInputSubsystem>())
+		{
+			Keyboard->RegisterMovementCheatMap(this);
+		}
+	}
 
 	SetIsFocusable(true);
 	BuildMapWidget();
@@ -183,6 +195,24 @@ void UTunaSweeperMapWidget::NativeConstruct()
 
 void UTunaSweeperMapWidget::NativeDestruct()
 {
+	if (TeleportConfirmationWidget)
+	{
+		TeleportConfirmationWidget->OnResolved.Unbind();
+		TeleportConfirmationWidget->IsStillValid.Unbind();
+		TeleportConfirmationWidget->RemoveFromParent();
+		TeleportConfirmationWidget = nullptr;
+		if (ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+		{
+			Controller->RestoreInputModeAfterTransientModal();
+		}
+	}
+	if (UGameInstance* Instance = GetGameInstance())
+	{
+		if (UTunaSweeperKeyboardInputSubsystem* Keyboard = Instance->GetSubsystem<UTunaSweeperKeyboardInputSubsystem>())
+		{
+			Keyboard->UnregisterMovementCheatMap(this);
+		}
+	}
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnMapMarkersChanged.RemoveAll(this);
@@ -223,6 +253,93 @@ void UTunaSweeperMapWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 	}
 }
 
+bool UTunaSweeperMapWidget::IsMovementCheatMapOpen() const
+{
+	const ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	const UTunaSweeperGameHudWidget* Hud = Controller ? Controller->GetGameHudWidget() : nullptr;
+	return IsVisible() && Hud && Hud->IsVisible() && Hud->GetHudMode() == ETunaSweeperHudMode::Map
+		&& Hud->IsInventoryUiOpen();
+}
+
+bool UTunaSweeperMapWidget::TryTeleportToMapMarkerAtCursor()
+{
+	UGameInstance* Instance = GetGameInstance();
+	UTunaSweeperMovementCheatSubsystem* Cheats = Instance ? Instance->GetSubsystem<UTunaSweeperMovementCheatSubsystem>() : nullptr;
+	if (!IsMovementCheatMapOpen() || !Cheats || !Cheats->IsEnabled() || !MapCanvas || !FSlateApplication::IsInitialized()) return false;
+	if (TeleportConfirmationWidget) return true;
+	const FGeometry& Geometry = MapCanvas->GetCachedGeometry();
+	const FVector2D LocalPosition = Geometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos());
+	const FVector2D Size = Geometry.GetLocalSize();
+	if (LocalPosition.X < 0.0 || LocalPosition.Y < 0.0 || LocalPosition.X > Size.X || LocalPosition.Y > Size.Y) return false;
+	EnsureMapTextures();
+	const int32 MarkerId = FindNearestMapMarkerId(LocalPosition);
+	if (MarkerId <= 0 || !MapDefinition || !MapDefinition->IsValidDefinition()) return true;
+	UClass* DialogClass = LoadClass<UTeleportConfirmationGPT6Astra>(nullptr,
+		TEXT("/Game/UI/Map/WBP_TeleportConfirmation_GPT6Astra.WBP_TeleportConfirmation_GPT6Astra_C"));
+	if (!DialogClass) return true;
+	TeleportConfirmationWidget = CreateWidget<UTeleportConfirmationGPT6Astra>(GetOwningPlayer(), DialogClass);
+	if (!TeleportConfirmationWidget || !TeleportConfirmationWidget->HasAuthoredControls())
+	{
+		TeleportConfirmationWidget = nullptr;
+		return true;
+	}
+	PendingTeleportMarkerId = MarkerId;
+	PendingTeleportMapId = UTunaSweeperMovementCheatSubsystem::GetCurrentMapId(this);
+	bIsPanningMap = false;
+	FSlateApplication::Get().ReleaseAllPointerCapture();
+	TeleportConfirmationWidget->OnResolved.BindUObject(this, &UTunaSweeperMapWidget::HandleTeleportConfirmation);
+	TeleportConfirmationWidget->IsStillValid.BindUObject(this, &UTunaSweeperMapWidget::CanKeepTeleportConfirmationOpen);
+	TeleportConfirmationWidget->AddToViewport(1000);
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(TeleportConfirmationWidget->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	GetOwningPlayer()->SetInputMode(InputMode);
+	TeleportConfirmationWidget->FocusCancel();
+	return true;
+}
+
+int32 UTunaSweeperMapWidget::FindNearestMapMarkerId(const FVector2D& LocalPosition) const
+{
+	int32 MarkerId = INDEX_NONE;
+	double ClosestDistance = FMath::Square(TunaSweeperMap::MarkerHitDistance);
+	for (const FTunaSweeperMapMarkerSaveData& Marker : CachedMapMarkers)
+	{
+		const double Distance = FVector2D::DistSquared(MapPositionToLocal(Marker.MapPosition), LocalPosition);
+		if (Distance <= ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			MarkerId = Marker.MarkerId;
+		}
+	}
+	return MarkerId;
+}
+
+bool UTunaSweeperMapWidget::CanKeepTeleportConfirmationOpen() const
+{
+	const UGameInstance* Instance = GetGameInstance();
+	const UTunaSweeperMovementCheatSubsystem* Cheats = Instance ? Instance->GetSubsystem<UTunaSweeperMovementCheatSubsystem>() : nullptr;
+	return IsMovementCheatMapOpen() && Cheats && Cheats->IsEnabled() && GetOwningPlayerPawn()
+		&& PendingTeleportMapId == UTunaSweeperMovementCheatSubsystem::GetCurrentMapId(this)
+		&& CachedMapMarkers.ContainsByPredicate([this](const FTunaSweeperMapMarkerSaveData& Marker) { return Marker.MarkerId == PendingTeleportMarkerId; });
+}
+
+void UTunaSweeperMapWidget::HandleTeleportConfirmation(bool bConfirmed)
+{
+	if (bConfirmed && CanKeepTeleportConfirmationOpen() && MapDefinition && MapDefinition->IsValidDefinition())
+	{
+		const FTunaSweeperMapMarkerSaveData* Marker = CachedMapMarkers.FindByPredicate(
+			[this](const FTunaSweeperMapMarkerSaveData& Entry) { return Entry.MarkerId == PendingTeleportMarkerId; });
+		const FVector Destination = MapDefinition->ContentUVToWorldLocation(Marker->MapPosition, GetOwningPlayerPawn()->GetActorLocation().Z);
+		GetGameInstance()->GetSubsystem<UTunaSweeperMovementCheatSubsystem>()->TryTeleportToMapPosition(PendingTeleportMapId, Destination);
+	}
+	TeleportConfirmationWidget = nullptr;
+	PendingTeleportMarkerId = INDEX_NONE;
+	PendingTeleportMapId = NAME_None;
+	if (ATunaSweeperPlayerController* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+	{
+		Controller->RestoreInputModeAfterTransientModal();
+	}
+}
 FReply UTunaSweeperMapWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	FVector2D MapViewportLocalPosition;
@@ -906,17 +1023,7 @@ void UTunaSweeperMapWidget::AddOrRemoveMarkerAtLocalPosition(const FVector2D& Ma
 		return;
 	}
 
-	int32 NearestMarkerId = INDEX_NONE;
-	float NearestDistanceSquared = FMath::Square(TunaSweeperMap::MarkerHitDistance);
-	for (const FTunaSweeperMapMarkerSaveData& Marker : CachedMapMarkers)
-	{
-		const float DistanceSquared = FVector2D::DistSquared(MapViewportLocalPosition, MapPositionToLocal(Marker.MapPosition));
-		if (DistanceSquared <= NearestDistanceSquared)
-		{
-			NearestDistanceSquared = DistanceSquared;
-			NearestMarkerId = Marker.MarkerId;
-		}
-	}
+	const int32 NearestMarkerId = FindNearestMapMarkerId(MapViewportLocalPosition);
 
 	if (NearestMarkerId > 0)
 	{

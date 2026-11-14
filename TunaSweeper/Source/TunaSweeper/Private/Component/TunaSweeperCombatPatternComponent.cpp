@@ -1,4 +1,5 @@
 #include "Component/TunaSweeperCombatPatternComponent.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 
 #include "AI/TunaSweeperAttackTelegraph.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
@@ -227,6 +228,15 @@ void UTunaSweeperCombatPatternComponent::RestoreOwnerMovement()
 void UTunaSweeperCombatPatternComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this))
+	{
+		const auto* Factions = GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>();
+		if (!Target.IsValid() || (Factions && Factions->GetFactionIdForActor(Target.Get()) == TunaSweeperFactionIds::Player))
+		{
+			CancelPatterns();
+			return;
+		}
+	}
 	if (!IsOwnerAvailable())
 	{
 		CancelPatterns();

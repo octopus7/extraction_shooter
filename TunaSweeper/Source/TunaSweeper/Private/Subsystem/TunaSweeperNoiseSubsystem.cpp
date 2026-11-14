@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
@@ -17,6 +18,10 @@ void UTunaSweeperNoiseSubsystem::ReportNoiseAtLocation(
 	AActor* SourceActor,
 	AActor* InstigatorActor)
 {
+	const auto* Factions = GetWorld() ? GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>() : nullptr;
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this) && Factions &&
+		(Factions->GetFactionIdForActor(SourceActor) == TunaSweeperFactionIds::Player ||
+		 Factions->GetFactionIdForActor(InstigatorActor) == TunaSweeperFactionIds::Player)) return;
 	const float SafeLoudness = FMath::Max(0.0f, Loudness);
 	const float SafeMaxRange = FMath::Max(0.0f, MaxRange);
 	if (SafeLoudness <= 0.0f || SafeMaxRange <= 0.0f)

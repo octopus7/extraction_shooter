@@ -1,4 +1,5 @@
 #include "Component/TunaSweeperDebuffComponent.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperVitalsComponent.h"
@@ -327,6 +328,7 @@ int32 UTunaSweeperDebuffComponent::RemoveDebuffsInternal(const TArray<FName>& De
 
 void UTunaSweeperDebuffComponent::ApplyTickDamage(const FTunaSweeperActiveDebuffState& DebuffState)
 {
+	if (Cast<ATunaSweeperTopDownCharacter>(GetOwner()) && UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this)) return;
 	if (DebuffState.DamagePerTick <= 0.0f)
 	{
 		return;

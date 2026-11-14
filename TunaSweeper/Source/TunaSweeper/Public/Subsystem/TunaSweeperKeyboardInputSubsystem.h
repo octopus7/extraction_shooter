@@ -5,7 +5,9 @@
 #include "TunaSweeperKeyboardInputSubsystem.generated.h"
 
 class APawn;
+struct FKey;
 class IInputProcessor;
+class UTunaSweeperMapWidget;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperKeyboardInputSubsystem : public UGameInstanceSubsystem
@@ -20,7 +22,11 @@ public:
 	void ReceiveQuickSlotKeyInput(int32 SlotNumber, APawn* InstigatorPawn);
 
 	bool CaptureScreenshotFromHotkey();
+	bool HandleMovementCheatHotkey(const FKey& Key);
+	void RegisterMovementCheatMap(UTunaSweeperMapWidget* Map);
+	void UnregisterMovementCheatMap(UTunaSweeperMapWidget* Map);
 
 private:
 	TSharedPtr<IInputProcessor> ScreenshotInputProcessor;
+	TWeakObjectPtr<UTunaSweeperMapWidget> MovementCheatMap;
 };

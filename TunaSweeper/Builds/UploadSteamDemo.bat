@@ -8,7 +8,7 @@ set "STEAM_LOGIN_FILE=%STEAMWORKS_ROOT%\steamid.txt"
 set "CONTENT_BUILDER=%STEAMWORKS_ROOT%\sdk\tools\ContentBuilder"
 set "STEAMCMD=%CONTENT_BUILDER%\builder\steamcmd.exe"
 set "DEMO_VDF=%CONTENT_BUILDER%\scripts\app_5158070.vdf"
-set "STEAM_APPID_SOURCE=%~dp0Demo\Windows\TunaSweeper\Binaries\Win64\steam_appid.txt"
+set "STEAM_APPID_SOURCE=%~dp0Steam\Demo\Windows\TunaSweeper\Binaries\Win64\steam_appid.txt"
 set "STEAM_APPID_TEMP=%~dp0steam_appid.txt"
 set "STEAM_APPID_MOVED=0"
 
@@ -38,6 +38,9 @@ if not exist "%DEMO_VDF%" (
     echo         %DEMO_VDF%
     exit /b 1
 )
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\ValidateMovementCheatPackage.ps1" -PackageRoot "%~dp0Steam\Demo\Windows"
+if errorlevel 1 exit /b 1
 
 rem Keep the local testing AppID file out of the Steam depot during upload.
 if exist "%STEAM_APPID_SOURCE%" (

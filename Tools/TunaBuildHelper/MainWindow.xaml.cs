@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace TunaBuildHelper;
 
@@ -13,17 +14,143 @@ public partial class MainWindow : Window
     private const string StartupRegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string StartMenuShortcutFileName = "Tuna Helper.lnk";
     private const string FfmpegFolderPath = @"D:\github\ffmpeg";
+    private readonly DispatcherTimer movementCheatStateTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private bool movementCheatStateReadInProgress;
+    private int movementCheatStateRevision;
 
     public MainWindow()
     {
         InitializeComponent();
         RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
         RegisterStartMenuMenuItem.IsChecked = IsStartMenuShortcutRegistered();
+        movementCheatStateTimer.Tick += async (_, _) => await RefreshMovementCheatStateAsync();
+        IsVisibleChanged += (_, _) => UpdateMovementCheatStatePolling();
+        StateChanged += (_, _) => UpdateMovementCheatStatePolling();
     }
 
     private void BuildAndRunButton_Click(object sender, RoutedEventArgs e)
     {
         RunBatchScript("BuildAndRunTunaSweeper.bat", closeOnSuccess: true);
+    }
+
+    private void RefreshMovementCheatTargets_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshMovementCheatTargets();
+    }
+
+    private void HelperTabs_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (!ReferenceEquals(e.Source, sender)) return;
+        if (CheatTab?.IsSelected == true)
+        {
+            RefreshMovementCheatTargets();
+        }
+        UpdateMovementCheatStatePolling();
+    }
+
+    private async void MovementCheatTargets_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (MovementCheatStateText is null) return;
+        movementCheatStateRevision++;
+        MovementCheatStateText.Text = (string)FindResource(MovementCheatTargets.SelectedItem is MovementCheatTarget
+            ? "MovementCheatStateReading" : "MovementCheatStateSelect");
+        await RefreshMovementCheatStateAsync();
+    }
+
+    private void UpdateMovementCheatStatePolling()
+    {
+        movementCheatStateTimer.Stop();
+        if (IsMovementCheatStateVisible)
+        {
+            movementCheatStateTimer.Start();
+            _ = RefreshMovementCheatStateAsync();
+        }
+    }
+
+    private bool IsMovementCheatStateVisible => IsVisible && WindowState != WindowState.Minimized && CheatTab?.IsSelected == true;
+
+    private async Task RefreshMovementCheatStateAsync()
+    {
+        if (!IsMovementCheatStateVisible || movementCheatStateReadInProgress) return;
+        if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
+        {
+            MovementCheatStateText.Text = (string)FindResource("MovementCheatStateSelect");
+            return;
+        }
+        movementCheatStateReadInProgress = true;
+        int revision = movementCheatStateRevision;
+        string resourceKey;
+        try
+        {
+            bool enabled = await Task.Run(() => MovementCheatProcess.IsEnabled(target));
+            resourceKey = enabled ? "MovementCheatStateEnabled" : "MovementCheatStateDisabled";
+        }
+        catch (MovementCheatTargetExitedException)
+        {
+            resourceKey = "MovementCheatStateExited";
+        }
+        catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException)
+        {
+            resourceKey = "MovementCheatStateUnknown";
+        }
+        finally
+        {
+            movementCheatStateReadInProgress = false;
+        }
+        if (revision != movementCheatStateRevision)
+        {
+            await RefreshMovementCheatStateAsync();
+            return;
+        }
+        if (IsMovementCheatStateVisible && Equals(MovementCheatTargets.SelectedItem, target))
+            MovementCheatStateText.Text = (string)FindResource(resourceKey);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        movementCheatStateTimer.Stop();
+        base.OnClosed(e);
+    }
+
+    private void RefreshMovementCheatTargets()
+    {
+        var targets = MovementCheatProcess.FindTargets();
+        MovementCheatTarget? previous = MovementCheatTargets.SelectedItem as MovementCheatTarget;
+        MovementCheatTargets.ItemsSource = targets;
+        MovementCheatTargets.SelectedItem = targets.FirstOrDefault(target => target == previous);
+        if (MovementCheatTargets.SelectedItem is null && targets.Count == 1) MovementCheatTargets.SelectedIndex = 0;
+        string statusKey = targets.Count switch
+        {
+            0 => "MovementCheatNoTarget",
+            1 => "MovementCheatTargetSelected",
+            _ => "MovementCheatSelectTarget"
+        };
+        StatusTextBlock.Text = (string)FindResource(statusKey);
+        _ = RefreshMovementCheatStateAsync();
+    }
+
+    private void EnableMovementCheat_Click(object sender, RoutedEventArgs e) => SetMovementCheat(true);
+
+    private void DisableMovementCheat_Click(object sender, RoutedEventArgs e) => SetMovementCheat(false);
+
+    private async void SetMovementCheat(bool enabled)
+    {
+        if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
+        {
+            StatusTextBlock.Text = (string)FindResource("MovementCheatSelectTarget");
+            return;
+        }
+        try
+        {
+            MovementCheatProcess.SetEnabled(target, enabled);
+            StatusTextBlock.Text = (string)FindResource(enabled ? "MovementCheatEnabled" : "MovementCheatDisabled");
+        }
+        catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException)
+        {
+            StatusTextBlock.Text = (string)FindResource("MovementCheatFailed");
+        }
+        movementCheatStateRevision++;
+        await RefreshMovementCheatStateAsync();
     }
 
     private void KillBuildButton_Click(object sender, RoutedEventArgs e)

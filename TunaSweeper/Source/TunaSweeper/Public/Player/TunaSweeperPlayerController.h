@@ -158,6 +158,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void ApplyDefaultGameInputMode();
+	// Restore the current modal policy without clearing movement/look locks.
+	void RestoreInputModeAfterTransientModal() { ApplyDefaultGameInputModeInternal(false); }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Input")
 	bool IsInventoryUiOpen() const;

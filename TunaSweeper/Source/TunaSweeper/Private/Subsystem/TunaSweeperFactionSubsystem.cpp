@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 #include "WaveDefense/WaveDefenseCore.h"
 #include "WaveDefense/WaveDefenseFacility.h"
 #include "WaveDefense/WaveDefenseParticipantComponent.h"
@@ -72,6 +73,8 @@ bool UTunaSweeperFactionSubsystem::AreActorsHostile(const AActor* SourceActor, c
 
 bool UTunaSweeperFactionSubsystem::CanTargetActor(const AActor* SourceActor, const AActor* TargetActor) const
 {
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this) &&
+		(GetFactionIdForActor(SourceActor) == TunaSweeperFactionIds::Player || GetFactionIdForActor(TargetActor) == TunaSweeperFactionIds::Player)) return false;
 	if (!IsValid(SourceActor) || !IsValid(TargetActor) || SourceActor == TargetActor)
 	{
 		return false;
@@ -93,6 +96,8 @@ bool UTunaSweeperFactionSubsystem::CanTargetActor(const AActor* SourceActor, con
 
 bool UTunaSweeperFactionSubsystem::CanApplyCombatEffect(const AActor* SourceActor, const AActor* TargetActor) const
 {
+	if (UTunaSweeperMovementCheatSubsystem::IsCombatSuppressedFor(this) &&
+		(GetFactionIdForActor(SourceActor) == TunaSweeperFactionIds::Player || GetFactionIdForActor(TargetActor) == TunaSweeperFactionIds::Player)) return false;
 	if (!IsValid(TargetActor))
 	{
 		return false;

@@ -10,6 +10,34 @@
         WindowStartupLocation="CenterScreen"
         Background="#171B22">
     <Window.Resources>
+        <sys:String x:Key="MainTabLabel">Main</sys:String>
+        <sys:String x:Key="CheatTabLabel">Cheat</sys:String>
+        <sys:String x:Key="FolderTabLabel">Folder</sys:String>
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="#AEBBCD" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="22,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder" Background="Transparent"
+                                BorderBrush="Transparent" BorderThickness="0,0,0,2"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="#F4F7FB" />
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#79AFFF" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="#202833" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <sys:String x:Key="BuildSteamDemoLabel">Steam Demo 빌드</sys:String>
         <sys:String x:Key="BuildSteamFullLabel">Steam Full 빌드</sys:String>
         <sys:String x:Key="BuildStoveDemoLabel">STOVE Demo 빌드</sys:String>
@@ -19,6 +47,22 @@
         <sys:String x:Key="KillBuildLabel">빌드·패키징 강제 종료</sys:String>
         <sys:String x:Key="KillBuildTooltip">대기 중이거나 실행 중인 TunaSweeper 빌드·패키징을 강제 종료합니다.</sys:String>
         <sys:String x:Key="KillBuildStartedStatus">빌드·패키징 종료를 요청했습니다.</sys:String>
+        <sys:String x:Key="MovementCheatLabel">이동 치트 · 실행 중인 게임</sys:String>
+        <sys:String x:Key="MovementCheatRefresh">게임 찾기</sys:String>
+        <sys:String x:Key="MovementCheatEnable">이번 실행 활성화</sys:String>
+        <sys:String x:Key="MovementCheatDisable">비활성화</sys:String>
+        <sys:String x:Key="MovementCheatEnabled">선택한 프로세스의 이동 치트를 활성화했습니다.</sys:String>
+        <sys:String x:Key="MovementCheatDisabled">선택한 프로세스의 이동 치트를 비활성화했습니다.</sys:String>
+        <sys:String x:Key="MovementCheatNoTarget">호환되는 실행 중인 게임을 찾지 못했습니다.</sys:String>
+        <sys:String x:Key="MovementCheatSelectTarget">게임 프로세스를 선택하세요.</sys:String>
+        <sys:String x:Key="MovementCheatTargetSelected">게임 프로세스를 자동 선택했습니다. 활성화 또는 비활성화를 누르세요.</sys:String>
+        <sys:String x:Key="MovementCheatFailed">프로세스에 접근하지 못했거나 치트 인터페이스가 호환되지 않습니다. 게임을 다시 찾은 뒤 시도하세요.</sys:String>
+        <sys:String x:Key="MovementCheatStateEnabled">현재 상태 · 활성화</sys:String>
+        <sys:String x:Key="MovementCheatStateDisabled">현재 상태 · 비활성화</sys:String>
+        <sys:String x:Key="MovementCheatStateSelect">현재 상태 · 게임 선택 필요</sys:String>
+        <sys:String x:Key="MovementCheatStateReading">현재 상태 · 확인 중</sys:String>
+        <sys:String x:Key="MovementCheatStateUnknown">현재 상태 · 확인할 수 없음</sys:String>
+        <sys:String x:Key="MovementCheatStateExited">현재 상태 · 선택한 게임 종료됨</sys:String>
         <Style TargetType="Button">
             <Setter Property="Foreground" Value="#F5F7FA" />
             <Setter Property="Background" Value="#273140" />
@@ -80,96 +124,122 @@
 
         <Grid Margin="28,22">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel>
-                <TextBlock Text="Tuna Helper"
-                           FontSize="25"
-                           FontWeight="SemiBold"
-                           Foreground="#F4F7FB" />
-                <TextBlock Margin="0,6,0,0"
-                           Text="자주 쓰는 작업 경로와 Unreal 프로젝트를 빠르게 엽니다."
-                           FontSize="13"
-                           Foreground="#AEBBCD" />
-            </StackPanel>
+            <TabControl Background="Transparent" BorderThickness="0" SelectionChanged="HelperTabs_SelectionChanged">
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TabPanel IsItemsHost="True" />
+                            <ContentPresenter Grid.Row="1" Margin="0,16,0,18"
+                                              ContentSource="SelectedContent" />
+                        </Grid>
+                    </ControlTemplate>
+                </TabControl.Template>
+                <TabItem Header="{DynamicResource MainTabLabel}" IsSelected="True">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <Button Margin="0,0,0,10"
+                                    Click="BuildAndRunButton_Click"
+                                    ToolTip="TunaSweeper를 빌드하고 실행합니다.">
+                                프로젝트 빌드 및 실행
+                            </Button>
+                            <Button Margin="0,0,0,10"
+                                    Background="#5A2630"
+                                    BorderBrush="#82414D"
+                                    Click="KillBuildButton_Click"
+                                    Content="{DynamicResource KillBuildLabel}"
+                                    ToolTip="{DynamicResource KillBuildTooltip}" />
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Button Margin="0,0,5,0"
+                                        Click="BuildSteamDemoButton_Click"
+                                        Content="{DynamicResource BuildSteamDemoLabel}"
+                                        ToolTip="{DynamicResource PackageBuildTooltip}" />
+                                <Button Grid.Column="1"
+                                        Margin="5,0,0,0"
+                                        Click="BuildSteamFullButton_Click"
+                                        Content="{DynamicResource BuildSteamFullLabel}"
+                                        ToolTip="{DynamicResource PackageBuildTooltip}" />
+                            </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Button Margin="0,0,5,0"
+                                        Click="BuildStoveDemoButton_Click"
+                                        Content="{DynamicResource BuildStoveDemoLabel}"
+                                        ToolTip="{DynamicResource PackageBuildTooltip}" />
+                                <Button Grid.Column="1"
+                                        Margin="5,0,0,0"
+                                        Click="BuildStoveFullButton_Click"
+                                        Content="{DynamicResource BuildStoveFullLabel}"
+                                        ToolTip="{DynamicResource PackageBuildTooltip}" />
+                            </Grid>
+                            <Button Margin="0,0,0,10"
+                                    Background="#5A2630"
+                                    BorderBrush="#82414D"
+                                    Click="KillEditorButton_Click"
+                                    ToolTip="실행 중인 TunaSweeper Unreal Editor를 종료합니다.">
+                                Unreal Editor 종료
+                            </Button>
+                            <Button Margin="0,0,0,10"
+                                    Click="OpenUnrealProjectButton_Click"
+                                    ToolTip="TunaSweeper.uproject를 Unreal Editor로 엽니다.">
+                                Unreal 프로젝트 열기
+                            </Button>
 
-            <StackPanel Grid.Row="1" Margin="0,22,0,18">
-                <Button Margin="0,0,0,10"
-                        Click="BuildAndRunButton_Click"
-                        ToolTip="TunaSweeper를 빌드하고 실행합니다.">
-                    프로젝트 빌드 및 실행
-                </Button>
-                <Button Margin="0,0,0,10"
-                        Background="#5A2630"
-                        BorderBrush="#82414D"
-                        Click="KillBuildButton_Click"
-                        Content="{DynamicResource KillBuildLabel}"
-                        ToolTip="{DynamicResource KillBuildTooltip}" />
-                <Grid Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Button Margin="0,0,5,0"
-                            Click="BuildSteamDemoButton_Click"
-                            Content="{DynamicResource BuildSteamDemoLabel}"
-                            ToolTip="{DynamicResource PackageBuildTooltip}" />
-                    <Button Grid.Column="1"
-                            Margin="5,0,0,0"
-                            Click="BuildSteamFullButton_Click"
-                            Content="{DynamicResource BuildSteamFullLabel}"
-                            ToolTip="{DynamicResource PackageBuildTooltip}" />
-                </Grid>
-                <Grid Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Button Margin="0,0,5,0"
-                            Click="BuildStoveDemoButton_Click"
-                            Content="{DynamicResource BuildStoveDemoLabel}"
-                            ToolTip="{DynamicResource PackageBuildTooltip}" />
-                    <Button Grid.Column="1"
-                            Margin="5,0,0,0"
-                            Click="BuildStoveFullButton_Click"
-                            Content="{DynamicResource BuildStoveFullLabel}"
-                            ToolTip="{DynamicResource PackageBuildTooltip}" />
-                </Grid>
-                <Button Margin="0,0,0,10"
-                        Background="#5A2630"
-                        BorderBrush="#82414D"
-                        Click="KillEditorButton_Click"
-                        ToolTip="실행 중인 TunaSweeper Unreal Editor를 종료합니다.">
-                    Unreal Editor 종료
-                </Button>
-                <Button Margin="0,0,0,10"
-                        Click="OpenUnrealProjectButton_Click"
-                        ToolTip="TunaSweeper.uproject를 Unreal Editor로 엽니다.">
-                    Unreal 프로젝트 열기
-                </Button>
-                <Button Margin="0,0,0,10"
-                        Click="OpenProjectFolderButton_Click"
-                        ToolTip="TunaSweeper 프로젝트 폴더를 탐색기로 엽니다.">
-                    Unreal 프로젝트 폴더 열기
-                </Button>
-                <Button Margin="0,0,0,10"
-                        Click="OpenFfmpegFolderButton_Click"
-                        ToolTip="D:\github\ffmpeg 폴더를 탐색기로 엽니다.">
-                    FFmpeg 폴더 열기
-                </Button>
-                <Button Click="OpenDownloadsFolderButton_Click"
-                        ToolTip="다운로드 폴더를 탐색기로 엽니다.">
-                    다운로드 폴더 열기
-                </Button>
-            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem x:Name="CheatTab" Header="{DynamicResource CheatTabLabel}">
+                    <StackPanel>
+                        <TextBlock Margin="0,0,0,6" Foreground="#DCE5F0" Text="{DynamicResource MovementCheatLabel}" />
+                        <ComboBox x:Name="MovementCheatTargets" MinHeight="30" Margin="0,0,0,8" SelectionChanged="MovementCheatTargets_SelectionChanged" />
+                        <TextBlock x:Name="MovementCheatStateText" Margin="0,0,0,12" Foreground="#F4F7FB" FontSize="15" TextWrapping="Wrap" Text="{DynamicResource MovementCheatStateSelect}" />
+                        <Button Margin="0,0,0,8" Click="RefreshMovementCheatTargets_Click" Content="{DynamicResource MovementCheatRefresh}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+                            <Button Margin="0,0,5,0" Click="EnableMovementCheat_Click" Content="{DynamicResource MovementCheatEnable}" />
+                            <Button Grid.Column="1" Margin="5,0,0,0" Click="DisableMovementCheat_Click" Content="{DynamicResource MovementCheatDisable}" />
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="{DynamicResource FolderTabLabel}">
+                    <StackPanel>
+                    <Button Margin="0,0,0,10"
+                            Click="OpenProjectFolderButton_Click"
+                            ToolTip="TunaSweeper 프로젝트 폴더를 탐색기로 엽니다.">
+                        Unreal 프로젝트 폴더 열기
+                    </Button>
+                    <Button Margin="0,0,0,10"
+                            Click="OpenFfmpegFolderButton_Click"
+                            ToolTip="D:\github\ffmpeg 폴더를 탐색기로 엽니다.">
+                        FFmpeg 폴더 열기
+                    </Button>
+                    <Button Click="OpenDownloadsFolderButton_Click"
+                            ToolTip="다운로드 폴더를 탐색기로 엽니다.">
+                        다운로드 폴더 열기
+                    </Button>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
 
             <TextBlock x:Name="StatusTextBlock"
-                       Grid.Row="2"
+                       Grid.Row="1"
                        Foreground="#91A5BE"
                        FontSize="12"
+                       TextWrapping="Wrap"
                        Text="준비됨" />
         </Grid>
     </DockPanel>
