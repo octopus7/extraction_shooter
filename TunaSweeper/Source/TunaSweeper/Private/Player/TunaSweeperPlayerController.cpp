@@ -2280,7 +2280,7 @@ void ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed()
 	ApplyDefaultGameInputMode();
 }
 
-void ATunaSweeperPlayerController::SetDemoEndingInputLock(bool bLocked)
+void ATunaSweeperPlayerController::SetEndingInputLock(bool bLocked)
 {
 	bDialogueSequenceActive = bLocked;
 	if (bLocked) CancelPawnGameplayActions();

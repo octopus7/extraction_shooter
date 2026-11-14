@@ -36,7 +36,7 @@ bool FTunaSweeperConcentratedExplosiveCraftTest::RunTest(const FString& Paramete
 	World->SetGameInstance(Game.Get());
 	// Initialize subsystem fixtures without loading or writing the user's save slots.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->UGameInstance::Init();
 	ON_SCOPE_EXIT
 	{

@@ -131,7 +131,7 @@ bool FTunaSweeperPowerFacilityMaterialsTest::RunTest(const FString& Parameters)
 	Context.OwningGameInstance = Game.Get();
 	World->SetGameInstance(Game.Get());
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Refuse saves before touching user files.
+	Game->bSuppressSaveWritesForTests = true; // Refuse saves before touching user files.
 	Game->UGameInstance::Init();
 	ON_SCOPE_EXIT
 	{

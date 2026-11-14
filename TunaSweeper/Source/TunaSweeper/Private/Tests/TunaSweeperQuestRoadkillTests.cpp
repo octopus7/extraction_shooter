@@ -57,7 +57,7 @@ namespace QuestRoadkillTest
             Context->OwningGameInstance = Game.Get();
             World->SetGameInstance(Game.Get());
             Game->bInventoryStateInitialized = true;
-            Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+            Game->bSuppressSaveWritesForTests = true;
             Game->UGameInstance::Init();
             Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>();
             Quests->QuestDefinitions.Reset();

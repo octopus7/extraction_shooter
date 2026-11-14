@@ -62,7 +62,7 @@ bool FTunaSweeperQuestLockerTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Game.Get());
 	// Initialize subsystems without reading/writing the user's save slots.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->UGameInstance::Init();
 	ON_SCOPE_EXIT
 	{

@@ -34,7 +34,7 @@ bool FTunaSweeperPauseExitSaveFailureTest::RunTest(const FString& Parameters)
 	auto* Instance = NewObject<UTunaSweeperGameInstance>();
 	Instance->bInventoryStateInitialized = true;
 	// The existing retired-slot guard refuses saving before any disk I/O.
-	Instance->RetiredDemoSaveSlotIndex = Instance->ActiveSaveSlotIndex;
+	Instance->bSuppressSaveWritesForTests = true;
 	FTunaSweeperItemInstance Item;
 	Item.Uid = FGuid::NewGuid(); Item.ItemId = 1002; Item.Quantity = 1;
 	Instance->ItemInstancesByUid.Add(Item.Uid, Item);

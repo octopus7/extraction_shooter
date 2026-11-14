@@ -68,7 +68,7 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     FContextAccess::Attach(Game.Get(), &Context);
     Context.OwningGameInstance = Game.Get(); World->SetGameInstance(Game.Get());
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+    Game->bSuppressSaveWritesForTests = true;
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         Game->UGameInstance::Shutdown(); World->SetGameInstance(nullptr); Context.OwningGameInstance = nullptr;

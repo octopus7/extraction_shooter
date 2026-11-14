@@ -62,7 +62,7 @@ bool ATunaSweeperEndingActor::StartEnding(APawn* InstigatorPawn)
     if (!bOwnsPause) { ReleasePresentation(); return false; }
     bEndingActive = true;
     if (auto* MovingCharacter = Cast<ACharacter>(InstigatorPawn)) MovingCharacter->GetCharacterMovement()->StopMovementImmediately();
-    Player->SetDemoEndingInputLock(true);
+    Player->SetEndingInputLock(true);
     Player->SetInputMode(FInputModeUIOnly());
     Player->bShowMouseCursor = true;
     Fade->AddToViewport(1000);
@@ -103,7 +103,7 @@ void ATunaSweeperEndingActor::ReleasePresentation()
     if (Dialogue) { Dialogue->SetFinishedDelegate({}); Dialogue->RemoveFromParent(); }
     if (IsValid(Player))
     {
-        if (bEndingActive) Player->SetDemoEndingInputLock(false);
+        if (bEndingActive) Player->SetEndingInputLock(false);
         if (bOwnsPause) Player->SetPause(false);
         if (bEndingActive) Player->ApplyDefaultGameInputMode();
     }

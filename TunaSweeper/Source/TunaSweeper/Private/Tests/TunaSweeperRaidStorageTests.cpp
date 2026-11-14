@@ -123,10 +123,10 @@ bool FTunaSweeperRaidStoragePersistenceTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Reload after death"), Game->LoadGameState());
     TestEqual(TEXT("Storage survives disk reload"), Game->GetRaidStorageSlots()[0].ItemUid, Tuna);
     Game->OpenRaidStorage(First, FText::GetEmpty());
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // deterministic refused write
+    Game->bSuppressSaveWritesForTests = true; // deterministic refused write
     TestTrue(TEXT("Runtime withdrawal remains available when disk refuses write"), Game->MoveItemBetweenSlots(Chest, Inventory));
     TestTrue(TEXT("Failed write stays pending"), Game->bPendingRaidStorageSave);
-    Game->RetiredDemoSaveSlotIndex = INDEX_NONE;
+    Game->bSuppressSaveWritesForTests = false;
     TestTrue(TEXT("Failed save can retry"), Game->FlushRaidStorageSave());
     TestFalse(TEXT("Successful retry clears dirty state"), Game->bPendingRaidStorageSave);
     Game->ResetRuntimeStateForSaveSlotSelection();

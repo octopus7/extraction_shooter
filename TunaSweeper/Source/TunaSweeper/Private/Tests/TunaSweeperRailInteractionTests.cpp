@@ -59,7 +59,7 @@ bool FTunaSweeperRailInteractionTest::RunTest(const FString& Parameters)
     RailTests::FContextAccess::Attach(Game.Get(), &Context);
     Context.OwningGameInstance = Game.Get(); World->SetGameInstance(Game.Get());
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Never touch user saves, and exercise save refusal.
+    Game->bSuppressSaveWritesForTests = true; // Never touch user saves, and exercise save refusal.
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         World->DestroyWorld(false); Game->UGameInstance::Shutdown(); World->SetGameInstance(nullptr);

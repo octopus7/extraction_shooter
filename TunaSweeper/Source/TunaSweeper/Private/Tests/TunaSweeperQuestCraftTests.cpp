@@ -67,7 +67,7 @@ bool FTunaSweeperQuestCraftTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Game.Get());
 	// Prevent fixture setup and quest notifications from reading/writing player saves.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->UGameInstance::Init();
 	ON_SCOPE_EXIT
 	{

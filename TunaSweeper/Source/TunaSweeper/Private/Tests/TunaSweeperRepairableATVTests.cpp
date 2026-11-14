@@ -38,7 +38,7 @@ bool FTunaSweeperRepairableATVTest::RunTest(const FString& Parameters)
     Context.OwningGameInstance = Game.Get();
     World->SetGameInstance(Game.Get());
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Never read/write player save slots.
+    Game->bSuppressSaveWritesForTests = true; // Never read/write player save slots.
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT
     {

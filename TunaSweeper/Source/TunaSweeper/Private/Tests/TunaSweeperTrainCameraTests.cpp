@@ -129,20 +129,20 @@ bool FTunaSweeperTrainCameraTest::RunTest(const FString& Parameters)
 			FMath::IsNearlyEqual(Boom->TargetArmLength, BeforeInputLockDistance * 1.6f, 1.0f));
 		Character->SetBase(Train->GetVehicleFloor(1));
 	}
-	Controller->SetDemoEndingInputLock(true);
+	Controller->SetEndingInputLock(true);
 	TestTrue(TEXT("Dialogue input lock is active"), Controller->IsDialogueSequenceActive());
 	Train->SetRunning(false);
 	SettleCamera();
 	TestTrue(TEXT("Stopping restores distance while gameplay input is locked"),
 		FMath::IsNearlyEqual(Boom->TargetArmLength, BeforeInputLockDistance, 1.0f));
-	Controller->SetDemoEndingInputLock(false);
+	Controller->SetEndingInputLock(false);
 	SettleCamera();
-	Controller->SetDemoEndingInputLock(true);
+	Controller->SetEndingInputLock(true);
 	ReachCruise();
 	SettleCamera();
 	TestTrue(TEXT("Departure widens distance while gameplay input is locked"),
 		FMath::IsNearlyEqual(Boom->TargetArmLength, BeforeInputLockDistance * 1.6f, 1.0f));
-	Controller->SetDemoEndingInputLock(false);
+	Controller->SetEndingInputLock(false);
 
 	// A real station stop must restore the close view without any explicit camera notification.
 	Character->SetBase(Train->GetVehicleFloor(1));

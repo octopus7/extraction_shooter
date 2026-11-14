@@ -45,7 +45,7 @@ bool FTunaWardrobeInteractionTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Game.Get());
 	// Exercise real UI and gameplay code without loading or overwriting player saves.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->bOutfitUnlocksLoaded = true;
 	Game->UnlockedOutfitIds.Add(TEXT("Maid"));
 	Game->bUnlockAllOutfitsOverride = true;

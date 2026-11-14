@@ -28,7 +28,7 @@ bool FTunaSweeperRegionPassageTest::RunTest(const FString& Parameters)
     RegionPassageTest::FContextAccess::Attach(Game.Get(), &Context);
     Context.OwningGameInstance = Game.Get(); World->SetGameInstance(Game.Get());
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Never touch player saves.
+    Game->bSuppressSaveWritesForTests = true; // Never touch player saves.
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         Game->UGameInstance::Shutdown(); World->SetGameInstance(nullptr); Context.OwningGameInstance = nullptr;

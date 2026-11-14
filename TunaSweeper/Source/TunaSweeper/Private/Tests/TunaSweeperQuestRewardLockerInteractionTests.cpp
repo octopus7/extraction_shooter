@@ -45,7 +45,7 @@ bool FTunaQuestRewardLockerInteractionTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Game.Get());
 	// Exercise real UI and gameplay code without loading or overwriting player saves.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->UGameInstance::Init();
 	Context.GameViewport = NewObject<UGameViewportClient>(GEngine);
 	// The viewport keeps only a weak reference; retain the Slate host through cleanup.

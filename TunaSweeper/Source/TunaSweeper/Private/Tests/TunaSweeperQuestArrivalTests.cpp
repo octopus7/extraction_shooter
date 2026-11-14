@@ -97,7 +97,7 @@ bool FTunaSweeperQuestArrivalTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Game);
 	// Use real subsystems, but prevent access to the user's loadout and save files.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->UGameInstance::Init();
 	ON_SCOPE_EXIT
 	{

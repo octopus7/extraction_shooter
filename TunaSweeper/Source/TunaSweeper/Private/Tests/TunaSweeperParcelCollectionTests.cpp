@@ -33,7 +33,7 @@ bool FTunaSweeperParcelCollectionTest::RunTest(const FString& Parameters)
     Context.OwningGameInstance = Game;
     World->SetGameInstance(Game);
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+    Game->bSuppressSaveWritesForTests = true;
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         Game->UGameInstance::Shutdown(); World->SetGameInstance(nullptr);

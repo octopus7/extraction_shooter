@@ -72,7 +72,7 @@ bool FTunaSweeperShopQuestUnlockTest::RunTest(const FString& Parameters)
 	FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game); Context.SetCurrentWorld(World);
 	auto* Game = NewObject<UTunaSweeperGameInstance>(GEngine);
 	FContextAccess::Attach(Game, &Context); Context.OwningGameInstance = Game; World->SetGameInstance(Game);
-	Game->bInventoryStateInitialized = true; Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bInventoryStateInitialized = true; Game->bSuppressSaveWritesForTests = true;
 	Game->UGameInstance::Init(); Game->ResetPlayerSlotArrays();
 	ON_SCOPE_EXIT
 	{

@@ -187,7 +187,7 @@ bool FTunaSweeperOutfitSaveFailureTest::RunTest(const FString&)
     Context.OwningGameInstance = Game.Get();
     World->SetGameInstance(Game.Get());
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Refuses writes before touching real save files.
+    Game->bSuppressSaveWritesForTests = true; // Refuses writes before touching real save files.
     Game->OutfitUnlockSavePath = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Automation"),
         TEXT("OutfitRollback_") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT(".sav"));
     ON_SCOPE_EXIT

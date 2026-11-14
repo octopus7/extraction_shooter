@@ -1,29 +1,9 @@
-# 외부 식량 창고와 식당 엔딩
+# 식량 창고
 
-## 배치와 조절
+과거 데모 식사 엔딩과 작별 UI·삽화·세이브 삭제 처리는 제거되었다. 식량 창고는 독립적인 퀘스트 상호작용으로 남아 있다.
 
-- `/Game/Interaction/DemoEnding/BP_FoodWarehouse`: `ATunaSweeperFoodWarehouseActor` 기반. 현재 사용하는 `DemoBoxRaidMap` 시작 지점 근처에 배치했다. 다른 외부 맵을 사용하는 경우 그 맵에도 배치한다.
-- `WarehouseMesh`의 Static Mesh를 바꾸면 외형을 교체할 수 있다. 생성자나 Construction Script가 메시를 다시 덮어쓰지 않는다. 교체 메시의 충돌과 상호작용 마커 높이도 필요에 따라 조절한다.
-- 임시 모델은 200×96×약 200cm의 단순 선반형 식량 보관함이다. 메시와 머터리얼은 같은 DemoEnding 폴더에 저장했다.
-- `/Game/Interaction/DemoEnding/BP_DemoDinnerEnding`: `BunkerMap`의 기존 `SM_KitchenTable` 위치에 배치했다. BP 전체를 이동하거나 컴포넌트 `EndingCamera`, `LunaPosition`, `MolePosition`을 따로 조절한다. 위치 기준점은 캐릭터 액터 원점이다(루나는 캡슐 중심, 두더지는 액터 원점).
-- 벙커에는 엔딩 BP를 한 개만 둔다. BP는 `FarewellIllustration`, `FadeSeconds`, `FarewellBgmFadeOutSeconds`와 카메라·캐릭터 위치 같은 연출 설정만 보유하며, 대화는 BP에 직렬화하지 않는다.
-
-## 플레이 흐름
-
-1. 외부 창고는 마지막 퀘스트 `demo_q4_todays_reward`가 수락된 동안에만 `참치캔 획득`으로 활성화되며, 상호작용으로 참치캔(3004) 1개를 얻는다. 가방이 가득 차면 지급과 수집 상태 변경을 모두 하지 않는다.
-2. 한 번 꺼낸 창고는 그 월드에서 재획득할 수 없다. 외부 맵 재입장 시 보충하여 사망·섭취로 캔을 잃어도 진행할 수 있다.
-3. 마지막 퀘스트 `demo_q4_todays_reward`를 수락한 상태에서 두더지의 대화 또는 퀘스트 상호작용을 선택하면 캔 1개를 소모하고 기존 `demo.canned_tuna.deliver / world_progress` 목표를 완료한다.
-4. 보상을 수령한 뒤 식당으로 0.2초 암전/페이드인 전환한다. 보상 수령에 실패하면 RewardAvailable에 남아 다음 상호작용에서 재시도하며 캔을 다시 요구하지 않는다.
-5. 최종 보상 수령 후 기존 ScenarioSubsystem이 `ScenarioDefinitions.json`의 `scenario.demo.ending.dinner`를 해석하고 `ScenarioTextStrings.csv`에서 8줄을 가져와 식당 대화를 진행한다. 대화 완료 플래그는 `dialogue.demo.ending.dinner`로 저장하며, 대화가 끝나면 다시 암전하고 작별 화면을 표시한다.
-6. 원본 삽화를 비율 유지로 화면 높이 2/3 영역에 표시하고 `UITextStrings.csv`의 `ui.demo_ending.farewell_title` 및 `ui.demo_ending.return_to_title` 키로 안내 문구를 표시한다. 화면 진입과 동시에 재생 중인 BGM을 기본 1.5초 동안 페이드 아웃한 뒤 정지한다. 새 키 입력(게임패드 포함), 마우스 버튼 또는 휠로 페이드 후 `IntroMap` 타이틀로 돌아간다. 진입 직후 0.5초 및 키 반복 입력은 이전 대화 입력으로 화면이 즉시 닫히는 것을 막는다.
-
-## 저장과 검증
-
-- 인벤토리·퀘스트 진행은 기존 저장 경로를 사용한다. 별도 저장 스키마는 추가하지 않았다.
-- 데모에서 작별 화면 표시 시 `demo.ending.farewell_seen`을 저장한 직후 현재 세이브 슬롯과 그 백업/복구 파일을 삭제한다. 다른 슬롯은 유지한다. 타이틀 복귀까지 발생하는 자동 저장으로 삭제한 슬롯이 다시 생기지 않게 차단하고, 명시적으로 슬롯을 활성화할 때 해제한다. 대화 도중 종료하면 삭제 전이므로 다음 벙커 진입에서 엔딩을 다시 시작한다. 본편은 무한 플레이이며 이 자동 엔딩/삭제 경로에 진입하지 않는다.
-- 연출용 캐릭터 이동은 임시이며 작별 화면 표시 전 원래 위치를 복원한 뒤 저장한다.
-- 원본 삽화: `TunaSweeper/SourceArt/UI/DemoEnding/T_DemoFarewell.png`.
-- UI 애셋: `/Game/UI/DemoEnding/T_DemoFarewell`.
-- 자동 검사: `Automation RunTests TunaSweeper.DemoEnding`. 창고 획득·중복 차단·외형 교체, 텍스처 원본 크기/UI 설정, 삽화 영역 비율, 진입/키 반복 차단, 키보드·마우스 복귀를 검사한다. 화면 렌더는 `TunaSweeper/Saved/DemoEndingFarewellPreview.png`에 저장한다.
-- Demo 퀘스트 동기화 상태 조회는 보호 토큰 읽기 오류로 실패했다. 기존 퀘스트 데이터 수정/게시 없이 기존 이벤트에 연결했고 `quest:validate`는 성공했다.
-- 일회성 메시/BP 생성·배치 코드는 애셋과 함께 커밋한 뒤 제거한다. 런타임은 저장된 애셋을 사용한다.
+- BP: `/Game/Interaction/DemoEnding/BP_FoodWarehouse` (`ATunaSweeperFoodWarehouseActor`). 기존 에셋 참조 호환을 위해 폴더 경로는 유지한다.
+- 외형: 같은 폴더의 `SM_FoodWarehouse_Placeholder`, `M_FoodWarehouse`. 메시를 바꿔도 상호작용 로직은 유지한다.
+- `bRequireQuest`가 켜져 있으면 양수 `RequiredQuestId`에 해당하는 퀘스트를 수락한 동안만 식량을 획득할 수 있다. 폐기된 마지막 데모 퀘스트에는 대체 ID를 부여하지 않아 기본값은 0이며 상호작용은 비활성이다.
+- `FoodItemId`/`FoodQuantity`로 지급할 아이템을 설정한다. 한 레이드에서는 중복 획득을 차단하며 새 레이드에서 다시 사용할 수 있다.
+- 자동 검사: `TunaSweeper.FoodWarehouse.AssetsAndInteraction`.

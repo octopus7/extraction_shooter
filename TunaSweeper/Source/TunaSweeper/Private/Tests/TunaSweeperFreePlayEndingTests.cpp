@@ -94,17 +94,17 @@ bool FTunaSweeperFreePlayEndingPersistenceTest::RunTest(const FString& Parameter
     Game->TotalExperiencePoints = 100;
     Game->BeginRaidExperienceSession();
     Game->AddRaidExperience(30);
-    Game->RetiredDemoSaveSlotIndex = 3;
+    Game->bSuppressSaveWritesForTests = true;
     TestFalse(TEXT("Write failure prevents ending completion"), Game->SaveFreePlayEnding(true));
     TestFalse(TEXT("Failure rolls back completion flag"), Game->IsScenarioProgressFlagSet(TEXT("ending.freeplay.true_seen")));
     TestEqual(TEXT("Failure preserves pending experience"), Game->PendingRaidExperiencePoints, int64(30));
     TestEqual(TEXT("Failure rolls back total experience"), Game->TotalExperiencePoints, int64(100));
-    Game->RetiredDemoSaveSlotIndex = INDEX_NONE;
+    Game->bSuppressSaveWritesForTests = false;
     TestTrue(TEXT("Normal ending saves"), Game->SaveFreePlayEnding(false));
     TestTrue(TEXT("True ending saves"), Game->SaveFreePlayEnding(true));
     TestEqual(TEXT("Experience credited only once"), Game->TotalExperiencePoints, int64(130));
     TestEqual(TEXT("Save slot remains selected"), Game->ActiveSaveSlotIndex, 3);
-    TestEqual(TEXT("Save is never retired"), Game->RetiredDemoSaveSlotIndex, INDEX_NONE);
+    TestFalse(TEXT("Ending leaves save writes enabled"), Game->bSuppressSaveWritesForTests);
     const FString SavePath = Game->GetSaveGameFilePath(Game->GetSaveGameSlotName(3));
     auto* Saved = Cast<UTunaSweeperSaveGame>(TunaSweeperSafeSave::LoadSaveFileWithRecovery(
         SavePath, {}, [](const USaveGame& Save) { return Save.IsA<UTunaSweeperSaveGame>(); }));

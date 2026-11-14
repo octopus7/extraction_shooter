@@ -29,7 +29,7 @@ bool FTunaSweeperRockfallTest::RunTest(const FString& Parameters)
     FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game); Context.SetCurrentWorld(World);
     TStrongObjectPtr<UTunaSweeperGameInstance> Game(NewObject<UTunaSweeperGameInstance>(GEngine));
     RockfallTest::FContextAccess::Attach(Game.Get(),&Context); Context.OwningGameInstance=Game.Get(); World->SetGameInstance(Game.Get());
-    Game->bInventoryStateInitialized=true; Game->RetiredDemoSaveSlotIndex=Game->ActiveSaveSlotIndex;
+    Game->bInventoryStateInitialized=true; Game->bSuppressSaveWritesForTests=true;
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT
     {

@@ -69,7 +69,7 @@ bool FTunaSweeperMemoLifecycleTest::RunTest(const FString& Parameters)
     World->SetGameInstance(Game);
     Game->bInventoryStateInitialized = true;
     // Exercise a real failed save without writing any user save files.
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+    Game->bSuppressSaveWritesForTests = true;
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         World->DestroyWorld(false);

@@ -263,7 +263,7 @@ UCLASS(BlueprintType, Blueprintable, Config = Game)
 class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public ITunaWarpTransitionProfileProvider
 {
 	GENERATED_BODY()
-	friend class FTunaDemoSaveRetirementTest;
+	friend class FTunaSaveWriteGuardTest;
 	friend class FEncyclopediaRuntimeTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
@@ -494,8 +494,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
 	bool DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex);
-	/** Retire only the finished demo slot; prevent late autosaves until explicit slot activation. */
-	bool DeleteCompletedDemoSave();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Scenario")
 	bool IsScenarioProgressFlagSet(FName ScenarioFlag) const;
@@ -1327,7 +1325,10 @@ private:
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotIndex = 1;
-	int32 RetiredDemoSaveSlotIndex = INDEX_NONE;
+#if WITH_DEV_AUTOMATION_TESTS
+	// Isolated automation fixtures must never overwrite player saves.
+	bool bSuppressSaveWritesForTests = false;
+#endif
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotDifficultyStage = 1;

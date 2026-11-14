@@ -61,7 +61,7 @@ bool FEncyclopediaRuntimeTest::RunTest(const FString&)
     auto* Game = NewObject<UTunaSweeperGameInstance>(GEngine);
     FContextAccess::Attach(Game, &Context); Context.OwningGameInstance = Game; World->SetGameInstance(Game);
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Never write a user's save.
+    Game->bSuppressSaveWritesForTests = true; // Never write a user's save.
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         World->DestroyWorld(false); Game->UGameInstance::Shutdown(); World->SetGameInstance(nullptr);

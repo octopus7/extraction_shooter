@@ -21,7 +21,7 @@ bool FTunaSweeperVolatileArrivalTest::RunTest(const FString&)
     auto* Game = NewObject<UTunaSweeperGameInstance>(GEngine);
     FContextAccess::Attach(Game, &Context); Context.OwningGameInstance = Game; World->SetGameInstance(Game);
     Game->bInventoryStateInitialized = true;
-    Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex; // Never touch player saves.
+    Game->bSuppressSaveWritesForTests = true; // Never touch player saves.
     Game->UGameInstance::Init();
     ON_SCOPE_EXIT {
         Game->UGameInstance::Shutdown(); World->SetGameInstance(nullptr);

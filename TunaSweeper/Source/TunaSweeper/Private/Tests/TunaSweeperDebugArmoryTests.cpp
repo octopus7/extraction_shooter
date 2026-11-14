@@ -76,7 +76,7 @@ bool FTunaDebugArmoryTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Game.Get());
 	// Real subsystems, inventory and HUD, without loading or overwriting player saves.
 	Game->bInventoryStateInitialized = true;
-	Game->RetiredDemoSaveSlotIndex = Game->ActiveSaveSlotIndex;
+	Game->bSuppressSaveWritesForTests = true;
 	Game->bOutfitUnlocksLoaded = true;
 	Game->UGameInstance::Init();
 	Game->ResetPlayerSlotArrays();
