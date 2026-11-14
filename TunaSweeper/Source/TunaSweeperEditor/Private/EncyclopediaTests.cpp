@@ -15,6 +15,9 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
 #include "Encyclopedia/TunaSweeperEncyclopedia.h"
+#include "Encyclopedia/EncyclopediaTerminal.h"
+#include "Player/TunaSweeperPlayerController.h"
+#include "Components/StaticMeshComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "ImageUtils.h"
 #include "Kismet/GameplayStatics.h"
@@ -32,7 +35,7 @@ bool FEncyclopediaContractTest::RunTest(const FString&)
 {
     TestNotNull(TEXT("Enemy discoveries are serialized per save slot"),
         FindFProperty<FArrayProperty>(UTunaSweeperSaveGame::StaticClass(), TEXT("DefeatedEnemyKinds")));
-    for (const TCHAR* Name : {TEXT("Panel"), TEXT("Entry"), TEXT("Launcher")})
+    for (const TCHAR* Name : {TEXT("Panel"), TEXT("Entry")})
     {
         const FString Path = FString::Printf(TEXT("/Game/UI/Encyclopedia/WBP_Encyclopedia%s_GPT6Astra"), Name);
         auto* BP = LoadObject<UWidgetBlueprint>(nullptr, *Path, nullptr, LOAD_NoWarn);
@@ -42,6 +45,21 @@ bool FEncyclopediaContractTest::RunTest(const FString&)
             TestNotNull(TEXT("Saved root"), BP->WidgetTree->RootWidget.Get());
             TestNotNull(TEXT("Compiled Blueprint class"), BP->GeneratedClass.Get());
         }
+    }
+    auto* Hud = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/WBP_GameHud"));
+    if (TestNotNull(TEXT("HUD exists"), Hud))
+        TestNull(TEXT("HUD launcher removed, not hidden"), Hud->WidgetTree->FindWidget(TEXT("EncyclopediaLauncher")));
+    TestNull(TEXT("Old keyboard toggle API removed"), ATunaSweeperPlayerController::StaticClass()->FindFunctionByName(TEXT("ToggleEncyclopedia")));
+    UClass* TerminalClass = LoadClass<AEncyclopediaTerminal>(nullptr,
+        TEXT("/Game/Interaction/BP_EncyclopediaTerminal.BP_EncyclopediaTerminal_C"));
+    if (TestNotNull(TEXT("Placeable terminal Blueprint"), TerminalClass))
+    {
+        auto* Terminal = TerminalClass->GetDefaultObject<AEncyclopediaTerminal>();
+        TestTrue(TEXT("Terminal uses encyclopedia interaction dispatch"), Terminal->GetInteractionType() == ETunaSweeperInteractionType::Encyclopedia);
+        TestNotNull(TEXT("Terminal points to saved panel"), Terminal->ResolvePanelWidgetClass().Get());
+        TestFalse(TEXT("No player cannot open terminal"), Terminal->OpenFor(nullptr));
+        auto* Mesh = Terminal->FindComponentByClass<UStaticMeshComponent>();
+        if (TestNotNull(TEXT("Terminal visual component"), Mesh)) TestNotNull(TEXT("Terminal visible mesh"), Mesh->GetStaticMesh().Get());
     }
     return true;
 }
@@ -186,6 +204,7 @@ bool FEncyclopediaRuntimeTest::RunTest(const FString&)
             for (FName Key : {Definition.NameKey, Definition.DescriptionKey, Definition.BehaviorKey})
                 TestFalse(TEXT("All enemy text resolves in every language"), TunaSweeperEncyclopedia::Text(Game, Key).IsEmpty());
         TestFalse(TEXT("Localized panel title"), Cast<UTextBlock>(Panel->GetWidgetFromName(TEXT("TitleText")))->GetText().IsEmpty());
+        TestFalse(TEXT("Close label has no keyboard hint"), Cast<UTextBlock>(Panel->GetWidgetFromName(TEXT("CloseText")))->GetText().ToString().Contains(TEXT("[")));
     }
     Panel->RemoveFromParent(); Panel.Reset();
     Game->ResetRuntimeStateForSaveSlotSelection();

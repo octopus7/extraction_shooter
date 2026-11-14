@@ -31,6 +31,7 @@ class UWaveDefenseHUDGPT61Terra;
 class AIconEditorTerminal;
 class UIconEditorGPT6Astra;
 class UEncyclopediaPanelGPT6Astra;
+class AEncyclopediaTerminal;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -43,6 +44,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PlayerTick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void OnUnPossess() override;
 	virtual void SetupInputComponent() override;
 	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override;
@@ -137,7 +139,7 @@ public:
 	bool OpenIconEditorPanel(AIconEditorTerminal* Terminal);
 	UFUNCTION()
 	void CloseIconEditorPanel();
-	UFUNCTION(BlueprintCallable, Category = "Encyclopedia") void ToggleEncyclopedia();
+	bool OpenEncyclopedia(AEncyclopediaTerminal* Terminal);
 	UFUNCTION(BlueprintCallable, Category = "Encyclopedia") void CloseEncyclopedia();
 	bool IsEncyclopediaOpen() const { return EncyclopediaPanel != nullptr; }
 	bool IsIconEditorOpen() const { return IconEditorPanel != nullptr; }
@@ -279,6 +281,7 @@ private:
 	bool bIconEditorPausedGame = false;
 	void UpdateIconEditorInteraction();
 	UPROPERTY(Transient) TObjectPtr<UEncyclopediaPanelGPT6Astra> EncyclopediaPanel;
+	TWeakObjectPtr<AEncyclopediaTerminal> ActiveEncyclopediaTerminal;
 	bool bEncyclopediaPausedGame = false;
 	void UpdateEncyclopedia();
 	void ApplyDefaultGameInputModeInternal(bool bReleaseGameplayInputLocks);

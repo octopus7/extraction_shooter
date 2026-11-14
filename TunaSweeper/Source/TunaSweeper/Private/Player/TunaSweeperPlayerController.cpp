@@ -619,7 +619,6 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 
 	if (InputComponent)
 	{
-		InputComponent->BindKey(EKeys::J, IE_Pressed, this, &ATunaSweeperPlayerController::ToggleEncyclopedia);
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ATunaSweeperPlayerController::HandleUseHoveredItem);
 		InputComponent->BindKey(EKeys::L, IE_Pressed, this, &ATunaSweeperPlayerController::HandleToggleHoveredInventorySortLock);
 		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed);
@@ -698,7 +697,6 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
-	UpdateEncyclopedia();
 	if (EncyclopediaPanel) return;
 	UpdateIconEditorInteraction();
 	if (IconEditorPanel) return;

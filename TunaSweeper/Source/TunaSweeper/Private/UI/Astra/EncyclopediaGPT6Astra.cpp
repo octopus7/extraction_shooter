@@ -148,30 +148,6 @@ void UEncyclopediaPanelGPT6Astra::Close()
 }
 FReply UEncyclopediaPanelGPT6Astra::NativeOnPreviewKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
 {
-    if (Event.GetKey() == EKeys::Escape || Event.GetKey() == EKeys::J) { Close(); return FReply::Handled(); }
+    if (Event.GetKey() == EKeys::Escape) { Close(); return FReply::Handled(); }
     return Super::NativeOnPreviewKeyDown(Geometry, Event);
-}
-
-void UEncyclopediaLauncherGPT6Astra::NativeConstruct()
-{
-    Super::NativeConstruct();
-    OpenButton->OnClicked.AddUniqueDynamic(this, &ThisClass::Open);
-    if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
-        LanguageHandle = Game->OnLanguageChanged.AddUObject(this, &ThisClass::RefreshText);
-    RefreshText();
-}
-void UEncyclopediaLauncherGPT6Astra::NativeDestruct()
-{
-    if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>()) Game->OnLanguageChanged.Remove(LanguageHandle);
-    Super::NativeDestruct();
-}
-void UEncyclopediaLauncherGPT6Astra::RefreshText()
-{
-    OpenText->SetText(TunaSweeperEncyclopedia::Text(GetGameInstance<UTunaSweeperGameInstance>(), TEXT("codex.launcher")));
-    TunaSweeperUIFont::ApplyFontToWidgetTree(this);
-    TunaSweeperUIStyle::ApplyButton(OpenButton, TunaSweeperUIStyle::EButtonRole::Tab);
-}
-void UEncyclopediaLauncherGPT6Astra::Open()
-{
-    if (auto* Player = Cast<ATunaSweeperPlayerController>(GetOwningPlayer())) Player->ToggleEncyclopedia();
 }

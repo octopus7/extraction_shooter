@@ -796,11 +796,10 @@ ui.icon_editor.undo_tip,실행 취소 (Ctrl+Z),Undo (Ctrl+Z),元に戻す (Ctrl+
 ui.icon_editor.redo_tip,다시 실행 (Ctrl+Y 또는 Ctrl+Shift+Z),Redo (Ctrl+Y or Ctrl+Shift+Z),やり直す (Ctrl+Y / Ctrl+Shift+Z),重做 (Ctrl+Y / Ctrl+Shift+Z),重做 (Ctrl+Y / Ctrl+Shift+Z),Повторить (Ctrl+Y / Ctrl+Shift+Z)
 ui.title.difficulty.unselected,미선택,Not selected,未選択,未选择,未選擇,Не выбрана
 codex.title,도감,Encyclopedia,図鑑,图鉴,圖鑑,Энциклопедия
-codex.launcher,도감 [J],Codex [J],図鑑 [J],图鉴 [J],圖鑑 [J],Справочник [J]
 codex.enemies,적,Enemies,敵,敌人,敵人,Враги
 codex.weapons,무기,Weapons,武器,武器,武器,Оружие
 codex.ammunition,탄종,Ammunition,弾薬,弹药,彈藥,Боеприпасы
-codex.close,닫기 [Esc],Close [Esc],閉じる [Esc],关闭 [Esc],關閉 [Esc],Закрыть [Esc]
+codex.close,닫기,Close,閉じる,关闭,關閉,Закрыть
 codex.unknown,미발견,Undiscovered,未発見,未发现,未發現,Не открыто
 codex.unlock.enemy,이 적을 1회 처치하면 정보가 해금됩니다.,Defeat this enemy once to unlock its information.,この敵を1回倒すと情報が解放されます。,击败该敌人一次即可解锁信息。,擊敗該敵人一次即可解鎖資訊。,"Победите этого врага один раз, чтобы открыть сведения."
 codex.unlock.item,한 번 획득하면 정보가 해금됩니다.,Acquire this item once to unlock its information.,一度入手すると情報が解放されます。,获取一次即可解锁信息。,取得一次即可解鎖資訊。,"Получите предмет один раз, чтобы открыть сведения."

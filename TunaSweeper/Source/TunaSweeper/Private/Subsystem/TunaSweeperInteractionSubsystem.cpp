@@ -38,6 +38,7 @@
 #include "Interaction/TunaSweeperNpcBarterComponent.h"
 #include "WaveDefense/WaveDefenseTerminal.h"
 #include "IconEditor/IconEditorTerminal.h"
+#include "Encyclopedia/EncyclopediaTerminal.h"
 #include "Scenario/TunaSweeperEndingActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Vehicle/TunaSweeperATVActor.h"
@@ -276,7 +277,7 @@ bool UTunaSweeperInteractionSubsystem::TryInteract(APawn* InstigatorPawn)
 bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn)
 {
 	if (const auto* Controller = InstigatorPawn ? Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController()) : nullptr;
-		Controller && Controller->IsIconEditorOpen()) return false;
+		Controller && (Controller->IsIconEditorOpen() || Controller->IsEncyclopediaOpen())) return false;
 	if (const auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn); Character && (Character->IsMountedInVehicle() || Character->IsDead())) return false;
 	if (!IsValid(Interactable) ||
 		!IsValid(InstigatorPawn) ||
@@ -365,6 +366,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		break;
 	case ETunaSweeperInteractionType::IconEditor:
 		if (auto* Terminal = Cast<AIconEditorTerminal>(Interactable->GetOwner())) bHandled = Terminal->OpenFor(InstigatorPawn);
+		break;
+	case ETunaSweeperInteractionType::Encyclopedia:
+		if (auto* Terminal = Cast<AEncyclopediaTerminal>(Interactable->GetOwner())) bHandled = Terminal->OpenFor(InstigatorPawn);
 		break;
 	case ETunaSweeperInteractionType::QuestRewardLockerOpen:
 	{

@@ -69,18 +69,3 @@ private:
     void ApplyFilter();
     void SelectionChanged(UObject* Object);
 };
-
-UCLASS(Abstract, Blueprintable)
-class TUNASWEEPER_API UEncyclopediaLauncherGPT6Astra : public UUserWidget
-{
-    GENERATED_BODY()
-protected:
-    virtual void NativeConstruct() override;
-    virtual void NativeDestruct() override;
-    UPROPERTY(meta=(BindWidget)) TObjectPtr<UButton> OpenButton;
-    UPROPERTY(meta=(BindWidget)) TObjectPtr<UTextBlock> OpenText;
-private:
-    FDelegateHandle LanguageHandle;
-    void RefreshText();
-    UFUNCTION() void Open();
-};

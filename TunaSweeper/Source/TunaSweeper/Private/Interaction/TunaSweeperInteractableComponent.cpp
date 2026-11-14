@@ -83,6 +83,8 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.wardrobe_open"));
 		case ETunaSweeperInteractionType::IconEditor:
 			return FName(TEXT("ui.icon_editor.title"));
+		case ETunaSweeperInteractionType::Encyclopedia:
+			return FName(TEXT("codex.title"));
 		case ETunaSweeperInteractionType::LadderTransfer:
 			return FName(TEXT("ui.interaction.ladder_transfer"));
 		default:
