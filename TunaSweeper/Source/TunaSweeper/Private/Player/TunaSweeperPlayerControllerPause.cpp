@@ -31,7 +31,6 @@ void ATunaSweeperPlayerController::TogglePauseMenu()
 		CloseIconEditorPanel();
 		return;
 	}
-	if (TutorialPopupWidget) return;
 	if (PauseMenuWidget)
 	{
 		ResumeFromPauseMenu();

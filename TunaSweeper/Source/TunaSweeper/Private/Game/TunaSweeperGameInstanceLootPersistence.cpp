@@ -335,7 +335,6 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 {
 	// Preserve slot-owned fuel but reject final ticks from the departing world.
 	++VehicleFuelSession;
-	bPendingRaidTutorial = false;
     PendingRegionVitalsDestination = NAME_None;
     if (TunaSweeperBuildFlavor::IsRaidGameplayLevelName(SourceLevelName) && TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TargetLevelName))
     {
@@ -366,7 +365,6 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 	{
 		SaveGameState();
 		BeginRaidExperienceSession();
-		bPendingRaidTutorial = !IsScenarioProgressFlagSet(TEXT("tutorial.raid.combat_seen"));
 	}
 }
 

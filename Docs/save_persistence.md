@@ -209,11 +209,7 @@ Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are
 
 Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
 
-The first BunkerMap controls tutorial records `tutorial.bunker.basics_seen` when Continue is pressed. It uses the existing scenario flag save/load/reset path (no save schema/version change). Completion triggers an immediate save attempt; if saving fails, the in-memory flag still prevents repetition during this session and is included in subsequent normal saves. A new slot/reset clears it. Popup visibility, pause and input focus are transient.
-
-The second (combat) tutorial records `tutorial.raid.combat_seen` through the same slot-local path when Continue is pressed. Bunker-to-raid departure queues it only while this flag is absent; it waits for the transition subsystem to become idle and gameplay input to be available. Repeat departures/reloads preserve completion; a new game resets it. The pending arrival flag is transient and is cleared on save load and runtime/new-slot reset, preventing a pending popup from leaking across slots.
-
-The lounge controls interaction opens a repeatable three-page review with cyclic navigation. Review mode, current page and visibility are transient; opening, paging and closing this mode neither writes a save nor changes either automatic tutorial completion flag. The third page has no automatic trigger or completion flag.
+The temporary demo controls tutorials and desk review have been removed. Legacy `tutorial.bunker.basics_seen` and `tutorial.raid.combat_seen` values may remain in existing saves as inert scenario flags; no runtime code reads or writes them. Other scenario progress and the save schema are unchanged.
 
 Demo dinner ending writes `demo.ending.farewell_seen` when the farewell card is shown, then immediately deletes only the active Demo save slot, including its backups/recovery artifacts, and resets its runtime state. A transient slot retirement barrier blocks late autosaves until explicit slot activation so title return cannot recreate the deleted save. Interrupted dinner dialogue can still resume because deletion has not happened yet. Main is unlimited continued play: it never enters this automatic demo ending or deletes its save, even if a legacy demo flag exists. Temporary camera/input state and dinner actor transforms are not persisted.
 

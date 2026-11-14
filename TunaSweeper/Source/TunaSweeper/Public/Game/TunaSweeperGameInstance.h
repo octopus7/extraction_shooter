@@ -265,7 +265,6 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	GENERATED_BODY()
 	friend class FTunaDemoSaveRetirementTest;
 	friend class FEncyclopediaRuntimeTest;
-	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
 	friend class FTunaSweeperEquipmentDataTest;
@@ -952,7 +951,6 @@ public:
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 	// Called only after an actual map load, never when travel is merely requested.
 	void RemoveVolatileItemsOnBaseArrival(FName ArrivedLevelName);
-	bool HasPendingRaidTutorial() const { return bPendingRaidTutorial; }
 	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
 	void ConsumePendingRegionVitals(UTunaSweeperVitalsComponent* Vitals);
 	bool ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent);
@@ -1304,7 +1302,6 @@ private:
 
 	UPROPERTY(Transient)
 	bool bRaidExperienceSessionActive = false;
-	bool bPendingRaidTutorial = false;
 
 	UPROPERTY(Transient)
 	bool bHasPendingRaidExperienceAnimationState = false;

@@ -15,7 +15,6 @@ class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperStartupLogoWidget;
 class UTunaSweeperPauseMenuWidget;
-class UTunaSweeperTutorialPopupWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperScenarioPresentationWidget;
 class UTunaSweeperScreenFadeWidget;
@@ -56,17 +55,8 @@ public:
 	void TogglePauseMenu();
 	void ResumeFromPauseMenu();
 	void ExitFromPauseMenu(bool bQuitGame);
-	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || TutorialPopupWidget != nullptr || IconEditorPanel != nullptr || EncyclopediaPanel != nullptr; }
+	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || IconEditorPanel != nullptr || EncyclopediaPanel != nullptr; }
 
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Tutorial")
-	bool TryShowBunkerBasicsTutorial();
-	bool CanShowBunkerBasicsTutorial() const;
-	bool TryShowRaidCombatTutorial();
-	bool CanShowRaidCombatTutorial() const;
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Tutorial")
-	bool OpenTutorialReview();
-	UFUNCTION()
-	void DismissTutorialPopup();
 	static bool IsPauseMenuKey(const FKey& Key, const UWorld* World);
 
 	/** Device-local development preference; it is deliberately separate from save-slot data. */
@@ -211,7 +201,6 @@ public:
 	bool TryHandleHoveredItemInteract();
 
 protected:
-	friend class FTunaTutorialTriggerTest;
 	friend class FTunaWardrobeInteractionTest;
 	friend class FTunaQuestRewardLockerInteractionTest;
 	friend class FTunaDebugArmoryTest;
@@ -225,31 +214,6 @@ protected:
 
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperWardrobeActor> ActiveWardrobeActor;
-
-	bool IsTutorialGameplayReady() const;
-	bool ShowTutorialPage(int32 PageIndex, FName CompletionFlag, bool bReviewMode = false);
-	FName ActiveTutorialCompletionFlag;
-	bool bTutorialReviewMode = false;
-	UFUNCTION()
-	void ShowPreviousTutorialPage();
-	UFUNCTION()
-	void ShowNextTutorialPage();
-	void StepTutorialPage(int32 Direction);
-	void CloseTutorialPopup();
-	double TutorialReopenBlockedUntilSeconds = 0.0;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Tutorial")
-	TSoftClassPtr<UTunaSweeperTutorialPopupWidget> TutorialPopupClass;
-
-	/** Center of the first-help passage in BunkerMap, in world centimeters. */
-	UPROPERTY(EditDefaultsOnly, Category = "Tutorial")
-	FVector BasicsTutorialCenter = FVector(-439.010357, -135.576503, 79.345408);
-
-	UPROPERTY(EditDefaultsOnly, Category = "Tutorial", meta = (ClampMin = "1.0"))
-	FVector BasicsTutorialExtent = FVector(70.0, 70.0, 100.0);
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTunaSweeperTutorialPopupWidget> TutorialPopupWidget;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperPauseMenuWidget> PauseMenuWidget;

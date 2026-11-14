@@ -6,6 +6,8 @@
 - 블루프린트처럼 이름 붙은 **ObjectRedirector 2개**는 아래 별도 목록에 기록했다. 실제 BP 수에 중복 합산하지 않았다.
 - 엔진 설치 콘텐츠와 access-restricted `ProductionPayload` 저장소는 제외했다. `.umap` 내부 LevelScriptBlueprint는 독립 블루프린트 애셋 목록에 포함하지 않았다.
 
+- 2026-11-15 정리: 임시 튜토리얼 WBP 항목을 제거했다. 아래 집계는 최초 조사 시점의 수치다.
+
 ## 집계
 
 | 실제 애셋 타입 | 개수 |
@@ -217,7 +219,6 @@
 | [/Game/UI/Title/Screens/WBP_TitleMain](../TunaSweeper/Content/UI/Title/Screens/WBP_TitleMain.uasset) | WidgetBP<br>부모: `UMG.UserWidget`<br>`IsDataOnly=False` | 시작·저장 슬롯·설정·종료 버튼이 있는 타이틀 메인 화면 레이아웃이다. IntroMenuWidget이 버튼과 현재 슬롯 문구를 이름으로 찾아 연결·갱신한다. 일반 UserWidget 부모의 구성 자산이며 독립적인 게임 시작 규칙을 가진 부모는 아니다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperIntroMenuWidget.cpp) |
 | [/Game/UI/Title/Screens/WBP_TitleSaveSlots](../TunaSweeper/Content/UI/Title/Screens/WBP_TitleSaveSlots.uasset) | WidgetBP<br>부모: `UMG.UserWidget`<br>`IsDataOnly=False` | 3개 저장 슬롯 선택과 선택 슬롯 삭제 확인을 배치한 타이틀 화면이다. IntroMenuWidget이 슬롯 초점·선택·저장 정보·삭제 확인 버튼을 처리한다. 일반 UserWidget 부모이며 슬롯/확인 대화상자의 저장된 UI 배치이다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperIntroMenuWidget.cpp) |
 | [/Game/UI/Title/Screens/WBP_TitleSettings](../TunaSweeper/Content/UI/Title/Screens/WBP_TitleSettings.uasset) | WidgetBP<br>부모: `UMG.UserWidget`<br>`IsDataOnly=False` | 그래픽·인터페이스·개발 설정 탭을 담는 타이틀 설정 화면 레이아웃이다. IntroMenuWidget이 언어·개발 토글·뒤로/적용 버튼을 연결하고 내부 GraphicsSettingsWidget을 제어한다. 일반 UserWidget 부모이며 WBP_TitleGraphics 참조와 설정 탭 배치를 포함한다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperIntroMenuWidget.cpp) |
-| [/Game/UI/Tutorial/WBP_TutorialPopup](../TunaSweeper/Content/UI/Tutorial/WBP_TutorialPopup.uasset) | WidgetBP<br>부모: `TunaSweeper.TunaSweeperTutorialPopupWidget`<br>`IsDataOnly=False` | 페이지별 튜토리얼 내용을 보여주고 기존 문자열 키로 현지화하는 팝업이다. F를 새로 눌렀다 놓으면 계속 버튼을 실행하고 A/D로 이전/다음 페이지 버튼을 실행한다. 전체 레이아웃은 WBP에 저장되고 LocalizedTextKeys가 디자이너 위젯명과 문자열 키를 연결한다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperTutorialPopupWidget.cpp) |
 | [/Game/UI/Vehicle/WBP_ATV_HUD](../TunaSweeper/Content/UI/Vehicle/WBP_ATV_HUD.uasset) | WidgetBP<br>부모: `TunaSweeper.TunaSweeperVehicleDismountWidget`<br>`IsDataOnly=False` | 탑승 중 ATV 내구도와 하차 키 안내를 표시하는 HUD이다. 차량 참조에서 내구도 비율을 매 tick 읽고 하차 힌트 표시 상태 및 현지화 문구를 갱신한다. 실제 하차 동작은 차량/탑승 시스템이 수행한다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperVehicleDismountWidget.cpp) |
 | [/Game/UI/WBP_GameHud](../TunaSweeper/Content/UI/WBP_GameHud.uasset) | WidgetBP<br>부모: `TunaSweeper.TunaSweeperGameHudWidget`<br>`IsDataOnly=False` | 게임 중 인벤토리·퀘스트·지도·메모·외부 컨테이너와 하단 전투 HUD를 통합하는 화면이다. HUD 모드 전환, 상점·제작·옷장·하우징 패널 열기, 탈출 진행률·재장전·피해 숫자·헤드폰 소음 표시를 C++에서 처리한다. WBP는 하위 위젯 배치와 연결을 제공하고 HUD 전환 방향·크로스헤어·소음 표시 값은 부모 설정이다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperGameHudWidget.cpp) |
 | [/Game/UI/WBP_HudBottomStatus](../TunaSweeper/Content/UI/WBP_HudBottomStatus.uasset) | WidgetBP<br>부모: `TunaSweeper.TunaSweeperHudBottomStatusWidget`<br>`IsDataOnly=False` | 체력·허기·수분과 스크래치 상태를 표시하는 하단 생존 상태 패널이다. SetHudState와 SetScratchState에서 받은 상태를 게이지·상태 링에 반영한다. 게임 규칙 계산은 상태 제공자에 있고 이 WBP는 표시 배치를 담당한다.<br>[C++ 근거](../TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperHudBottomStatusWidget.cpp) |

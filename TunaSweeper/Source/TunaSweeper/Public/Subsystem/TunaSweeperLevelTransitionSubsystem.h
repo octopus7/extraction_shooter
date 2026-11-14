@@ -36,7 +36,6 @@ public:
 		const FText& InTransitionMessage);
 
 private:
-	friend class FTunaTutorialTriggerTest;
 	enum class ETransitionPhase : uint8
 	{
 		Idle,
