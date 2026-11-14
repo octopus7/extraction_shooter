@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Encyclopedia discoveries
+
+`DefeatedEnemyKinds` is an additive `TArray<FName>` on `UTunaSweeperSaveGame`, backed by a runtime set on the GameInstance. A local-player kill resolves the most-specific authored enemy class to a stable kind ID; its first kill adds that ID and requests an ordinary gameplay save. Repeated kills are idempotent. Combat-lab kills never modify this history. If the disk save fails, the runtime discovery is retained for the next ordinary save attempt.
+
+Discoveries belong to the selected gameplay slot. Level travel, raid death/abandonment and inventory loss preserve them; slot selection and new-game initialization clear/replace them. Existing tagged-property saves load an empty enemy list without a version bump or destructive migration. Unknown IDs are retained for forward compatibility, but only catalog entries are displayed. Weapons and ammunition reuse `EverAcquiredItemIds`, including its old-save backfill from currently saved owned items. No attachment or other general-item entries are exposed by the encyclopedia, even when those IDs appear in acquisition history. See [encyclopedia authoring](encyclopedia.md).
+
 ## Global RGB icon
 
 `UIconStorageSubsystem` stores one `GlobalIcon.rgb` under `TunaSweeperBuildFlavor::GetSaveGameDirectory()`. It is shared by all gameplay save slots in that account/store/build flavor; it is not a `USaveGame` field and no save-version bump is required. Slot initialization, new games, death, retirement and slot deletion do not read, clear or replace it. Existing Steam account, LocalOnly fallback and Demo/FullGame directory isolation are retained.

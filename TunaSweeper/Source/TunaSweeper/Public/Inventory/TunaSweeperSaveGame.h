@@ -127,6 +127,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	TArray<int32> EverAcquiredItemIds;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Encyclopedia")
+	TArray<FName> DefeatedEnemyKinds;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Map")
 	TArray<FTunaSweeperMapMarkerSaveData> MapMarkers;
 

@@ -822,3 +822,59 @@ ui.icon_editor.redo,다시 실행,Redo,やり直す,重做,重做,Повтори
 ui.icon_editor.undo_tip,실행 취소 (Ctrl+Z),Undo (Ctrl+Z),元に戻す (Ctrl+Z),撤销 (Ctrl+Z),復原 (Ctrl+Z),Отменить (Ctrl+Z)
 ui.icon_editor.redo_tip,다시 실행 (Ctrl+Y 또는 Ctrl+Shift+Z),Redo (Ctrl+Y or Ctrl+Shift+Z),やり直す (Ctrl+Y / Ctrl+Shift+Z),重做 (Ctrl+Y / Ctrl+Shift+Z),重做 (Ctrl+Y / Ctrl+Shift+Z),Повторить (Ctrl+Y / Ctrl+Shift+Z)
 ui.title.difficulty.unselected,미선택,Not selected,未選択,未选择,未選擇,Не выбрана
+codex.title,도감,Encyclopedia,図鑑,图鉴,圖鑑,Энциклопедия
+codex.launcher,도감 [J],Codex [J],図鑑 [J],图鉴 [J],圖鑑 [J],Справочник [J]
+codex.enemies,적,Enemies,敵,敌人,敵人,Враги
+codex.weapons,무기,Weapons,武器,武器,武器,Оружие
+codex.ammunition,탄종,Ammunition,弾薬,弹药,彈藥,Боеприпасы
+codex.close,닫기 [Esc],Close [Esc],閉じる [Esc],关闭 [Esc],關閉 [Esc],Закрыть [Esc]
+codex.unknown,미발견,Undiscovered,未発見,未发现,未發現,Не открыто
+codex.unlock.enemy,이 적을 1회 처치하면 정보가 해금됩니다.,Defeat this enemy once to unlock its information.,この敵を1回倒すと情報が解放されます。,击败该敌人一次即可解锁信息。,擊敗該敵人一次即可解鎖資訊。,"Победите этого врага один раз, чтобы открыть сведения."
+codex.unlock.item,한 번 획득하면 정보가 해금됩니다.,Acquire this item once to unlock its information.,一度入手すると情報が解放されます。,获取一次即可解锁信息。,取得一次即可解鎖資訊。,"Получите предмет один раз, чтобы открыть сведения."
+codex.all_types,모든 종류,All types,すべての種類,所有类型,所有類型,Все типы
+codex.progress,해금 {0} / {1},Unlocked {0} / {1},解放 {0} / {1},已解锁 {0} / {1},已解鎖 {0} / {1},Открыто {0} / {1}
+codex.meta,{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1},{0} · {1}
+codex.empty,등록된 항목이 없습니다.,No entries available.,登録された項目がありません。,暂无条目。,暫無項目。,Нет записей.
+codex.grade.common,일반,Common,コモン,普通,普通,Обычное
+codex.grade.uncommon,고급,Uncommon,アンコモン,优良,優良,Необычное
+codex.grade.rare,희귀,Rare,レア,稀有,稀有,Редкое
+codex.grade.epic,영웅,Epic,エピック,史诗,史詩,Эпическое
+codex.grade.legendary,전설,Legendary,レジェンダリー,传说,傳說,Легендарное
+codex.weapon.type.pistol,권총,Pistols,ハンドガン,手枪,手槍,Пистолеты
+codex.weapon.type.rifle,소총,Rifles,ライフル,步枪,步槍,Винтовки
+codex.weapon.type.smg,기관단총,Submachine guns,サブマシンガン,冲锋枪,衝鋒槍,Пистолеты-пулемёты
+codex.weapon.type.shotgun,산탄총,Shotguns,ショットガン,霰弹枪,霰彈槍,Дробовики
+codex.weapon.type.melee,근접 무기,Melee weapons,近接武器,近战武器,近戰武器,Холодное оружие
+codex.weapon.type.other,기타,Other,その他,其他,其他,Прочее
+codex.gun_stats,기본 탄창 {0}발 · 재장전 {1}초,Base magazine {0} · Reload {1}s,基本装弾数 {0} · リロード {1}秒,基础弹匣 {0} · 装填 {1}秒,基礎彈匣 {0} · 裝填 {1}秒,Магазин {0} · Перезарядка {1} с
+codex.ammo_stats,관통 등급 {0} · 피해 배율 {1}%,Penetration tier {0} · Damage {1}%,貫通等級 {0} · ダメージ {1}%,穿透等级 {0} · 伤害倍率 {1}%,穿透等級 {0} · 傷害倍率 {1}%,Пробитие {0} · Урон {1}%
+codex.enemy.guard.name,보초,Sentry,歩哨,哨兵,哨兵,Часовой
+codex.enemy.guard.desc,주변을 경계하는 적입니다.,An enemy that watches its surroundings.,周囲を警戒する敵です。,警戒周围的敌人。,警戒周圍的敵人。,"Враг, следящий за окружающей местностью."
+codex.enemy.guard.behavior,목표를 발견하면 추적하며 공격합니다.,Pursues and attacks detected targets.,目標を発見すると追跡して攻撃します。,发现目标后追踪并攻击。,發現目標後追蹤並攻擊。,Преследует и атакует обнаруженные цели.
+codex.enemy.quadruped.name,사족 보행 로봇,Quadruped robot,四脚ロボット,四足机器人,四足機器人,Четвероногий робот
+codex.enemy.quadruped.desc,네 다리로 이동하는 무장 로봇입니다.,An armed robot that moves on four legs.,四本の脚で移動する武装ロボットです。,用四条腿移动的武装机器人。,用四條腿移動的武裝機器人。,Вооружённый робот на четырёх ногах.
+codex.enemy.quadruped.behavior,장착된 총기로 목표를 사격합니다.,Fires its equipped weapon at targets.,装備した銃で目標を射撃します。,使用装备的枪械射击目标。,使用裝備的槍械射擊目標。,Стреляет по целям из установленного оружия.
+codex.enemy.wheeled.name,차륜형 로봇,Wheeled robot,車輪型ロボット,轮式机器人,輪式機器人,Колёсный робот
+codex.enemy.wheeled.desc,바퀴로 주행하는 전투 로봇입니다.,A combat robot that travels on wheels.,車輪で走行する戦闘ロボットです。,靠轮子行驶的战斗机器人。,靠輪子行駛的戰鬥機器人。,Боевой робот на колёсах.
+codex.enemy.wheeled.behavior,차체를 돌려 이동 방향을 맞추며 교전합니다.,Turns its chassis to steer during combat.,車体を旋回させて進行方向を合わせながら交戦します。,交战时转动车身调整方向。,交戰時轉動車身調整方向。,Поворачивает корпус для маневрирования в бою.
+codex.enemy.rolling.name,구체 폭탄 로봇,Rolling bomber,球体爆弾ロボット,球形炸弹机器人,球形炸彈機器人,Катящийся бомбардировщик
+codex.enemy.rolling.desc,다리를 접고 구를 수 있는 폭탄 로봇입니다.,A bomber that folds its legs to roll.,脚を折り畳んで転がる爆弾ロボットです。,可收起腿部滚动的炸弹机器人。,可收起腿部滾動的炸彈機器人。,"Робот-бомба, складывающий ноги для качения."
+codex.enemy.rolling.behavior,투사체 공격과 구르기를 사용하며 가까이에서 자폭합니다.,"Uses projectiles and rolling movement, and self-destructs at close range.",投射物攻撃と転がり移動を行い、近距離で自爆します。,使用投射物和滚动移动，并在近距离自爆。,使用投射物和滾動移動，並在近距離自爆。,"Использует снаряды, катится и взрывается вблизи цели."
+codex.enemy.hopper.name,호퍼,Hopper,ホッパー,跳跃者,跳躍者,Прыгун
+codex.enemy.hopper.desc,도약하며 이동하는 적입니다.,An enemy that moves by hopping.,跳躍して移動する敵です。,通过跳跃移动的敌人。,透過跳躍移動的敵人。,"Враг, передвигающийся прыжками."
+codex.enemy.hopper.behavior,도약으로 목표와의 거리를 좁힙니다.,Closes the distance to its target with jumps.,跳躍して目標との距離を詰めます。,通过跳跃接近目标。,透過跳躍接近目標。,Сближается с целью прыжками.
+codex.enemy.charger.name,돌진 로봇,Charging robot,突進ロボット,冲锋机器人,衝鋒機器人,Штурмовой робот
+codex.enemy.charger.desc,돌진 공격을 사용하는 로봇입니다.,A robot that uses charging attacks.,突進攻撃を行うロボットです。,使用冲锋攻击的机器人。,使用衝鋒攻擊的機器人。,"Робот, атакующий рывками."
+codex.enemy.charger.behavior,공격 예고 후 돌진합니다.,Charges after telegraphing its attack.,攻撃予告の後に突進します。,预警后发动冲锋。,預警後發動衝鋒。,Совершает рывок после предупреждения об атаке.
+codex.enemy.red_boss.name,붉은 중장 로봇,Red heavy robot,赤い重装ロボット,红色重装机器人,紅色重裝機器人,Красный тяжёлый робот
+codex.enemy.red_boss.desc,붉은 외장을 가진 대형 전투 로봇입니다.,A large combat robot with red armor.,赤い装甲を持つ大型戦闘ロボットです。,拥有红色装甲的大型战斗机器人。,擁有紅色裝甲的大型戰鬥機器人。,Крупный боевой робот с красной бронёй.
+codex.enemy.red_boss.behavior,일반 적과 구분되는 보스 개체입니다.,A boss variant distinct from ordinary enemies.,通常の敵とは異なるボス個体です。,区别于普通敌人的首领个体。,區別於普通敵人的首領個體。,"Босс, отличающийся от обычных врагов."
+codex.enemy.turret.name,미사일 포탑,Missile turret,ミサイル砲塔,导弹炮塔,飛彈砲塔,Ракетная турель
+codex.enemy.turret.desc,설치된 위치에서 공격하는 포탑입니다.,A turret that attacks from a fixed position.,設置された位置から攻撃する砲塔です。,在固定位置攻击的炮塔。,在固定位置攻擊的砲塔。,"Турель, атакующая с неподвижной позиции."
+codex.enemy.turret.behavior,목표 지점을 예고한 뒤 미사일로 공격합니다.,Marks a target location before launching a missile attack.,目標地点を予告してからミサイルで攻撃します。,标记目标位置后发射导弹攻击。,標記目標位置後發射飛彈攻擊。,Отмечает точку перед ракетной атакой.
+codex.enemy.carrier.name,로봇 운반체,Robot carrier,ロボット運搬機,机器人运输体,機器人運輸體,Носитель роботов
+codex.enemy.carrier.desc,소형 로봇을 탑재한 전투 로봇입니다.,A combat robot carrying smaller robots.,小型ロボットを搭載した戦闘ロボットです。,搭载小型机器人的战斗机器人。,搭載小型機器人的戰鬥機器人。,"Боевой робот, несущий малых роботов."
+codex.enemy.carrier.behavior,공격 예고 후 소형 로봇들을 내보냅니다.,Deploys small robots after an attack warning.,攻撃予告の後に小型ロボットを放出します。,攻击预警后释放小型机器人。,攻擊預警後釋放小型機器人。,Выпускает малых роботов после предупреждения.
+codex.enemy.minion.name,소형 구체 로봇,Rolling minion,小型ローリングロボット,小型滚动机器人,小型滾動機器人,Малый катящийся робот
+codex.enemy.minion.desc,굴러서 전개되는 소형 로봇입니다.,A small robot that rolls into position.,転がって展開する小型ロボットです。,滚动展开的小型机器人。,滾動展開的小型機器人。,"Малый робот, выкатывающийся на позицию."
+codex.enemy.minion.behavior,구른 뒤 몸체를 펼쳐 목표를 공격합니다.,Unfolds after rolling and attacks its target.,転がった後に機体を展開し目標を攻撃します。,滚动后展开机体并攻击目标。,滾動後展開機體並攻擊目標。,После качения раскрывается и атакует цель.

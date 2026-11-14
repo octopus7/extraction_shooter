@@ -6,7 +6,7 @@
 
 namespace
 {
-	constexpr const TCHAR* Section = TEXT("TunaSweeper.StartupLogo");
+	constexpr const TCHAR* StartupLogoConfigSection = TEXT("TunaSweeper.StartupLogo");
 	constexpr const TCHAR* DateKey = TEXT("MainLastCompletedLocalDate");
 }
 
@@ -17,7 +17,7 @@ bool UTunaSweeperGameInstance::TryBeginDeveloperLogo(bool* OutSkippedByDailyLimi
 	if (bDeveloperLogoOncePerDay && GConfig)
 	{
 		FString LastDate;
-		GConfig->GetString(Section, DateKey, LastDate, GGameUserSettingsIni);
+		GConfig->GetString(StartupLogoConfigSection, DateKey, LastDate, GGameUserSettingsIni);
 		bSeenToday = LastDate == FDateTime::Now().ToString(TEXT("%Y-%m-%d"));
 	}
 	if (OutSkippedByDailyLimit)
@@ -38,6 +38,6 @@ bool UTunaSweeperGameInstance::TryBeginDeveloperLogo(bool* OutSkippedByDailyLimi
 void UTunaSweeperGameInstance::RecordDeveloperLogoCompleted()
 {
 	if (!bDeveloperLogoOncePerDay || TunaSweeperBuildFlavor::IsDemo() || !GConfig) return;
-	GConfig->SetString(Section, DateKey, *FDateTime::Now().ToString(TEXT("%Y-%m-%d")), GGameUserSettingsIni);
+	GConfig->SetString(StartupLogoConfigSection, DateKey, *FDateTime::Now().ToString(TEXT("%Y-%m-%d")), GGameUserSettingsIni);
 	GConfig->Flush(false, GGameUserSettingsIni);
 }

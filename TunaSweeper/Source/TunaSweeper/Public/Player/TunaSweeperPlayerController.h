@@ -31,6 +31,7 @@ class UWaveDefensePanelGPT61Terra;
 class UWaveDefenseHUDGPT61Terra;
 class AIconEditorTerminal;
 class UIconEditorGPT6Astra;
+class UEncyclopediaPanelGPT6Astra;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -55,7 +56,7 @@ public:
 	void TogglePauseMenu();
 	void ResumeFromPauseMenu();
 	void ExitFromPauseMenu(bool bQuitGame);
-	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || TutorialPopupWidget != nullptr || IconEditorPanel != nullptr; }
+	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr || TutorialPopupWidget != nullptr || IconEditorPanel != nullptr || EncyclopediaPanel != nullptr; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Tutorial")
 	bool TryShowBunkerBasicsTutorial();
@@ -146,6 +147,9 @@ public:
 	bool OpenIconEditorPanel(AIconEditorTerminal* Terminal);
 	UFUNCTION()
 	void CloseIconEditorPanel();
+	UFUNCTION(BlueprintCallable, Category = "Encyclopedia") void ToggleEncyclopedia();
+	UFUNCTION(BlueprintCallable, Category = "Encyclopedia") void CloseEncyclopedia();
+	bool IsEncyclopediaOpen() const { return EncyclopediaPanel != nullptr; }
 	bool IsIconEditorOpen() const { return IconEditorPanel != nullptr; }
 	
 	bool OpenQuestRewardLockerPanel(ATunaSweeperQuestRewardLockerActor* LockerActor);
@@ -308,6 +312,9 @@ private:
 	TWeakObjectPtr<AIconEditorTerminal> ActiveIconEditorTerminal;
 	bool bIconEditorPausedGame = false;
 	void UpdateIconEditorInteraction();
+	UPROPERTY(Transient) TObjectPtr<UEncyclopediaPanelGPT6Astra> EncyclopediaPanel;
+	bool bEncyclopediaPausedGame = false;
+	void UpdateEncyclopedia();
 	void ApplyDefaultGameInputModeInternal(bool bReleaseGameplayInputLocks);
 
 	void EnsureGameHudWidget();

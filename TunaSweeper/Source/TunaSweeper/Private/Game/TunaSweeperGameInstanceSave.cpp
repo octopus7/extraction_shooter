@@ -613,7 +613,12 @@ bool UTunaSweeperGameInstance::LoadGameState()
 			AcquiredMemoIds.Add(MemoId);
 		}
 	}
+	DefeatedEnemyKinds.Reset();
 	EverAcquiredItemIds.Reset();
+	for (FName Kind : SaveGame->DefeatedEnemyKinds)
+	{
+		if (!Kind.IsNone()) DefeatedEnemyKinds.Add(Kind);
+	}
 	for (int32 ItemId : SaveGame->EverAcquiredItemIds)
 	{
 		if (ItemId != INDEX_NONE)
@@ -918,6 +923,8 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->AcquiredMemoIds.Sort();
 	SaveGame->EverAcquiredItemIds = EverAcquiredItemIds.Array();
 	SaveGame->EverAcquiredItemIds.Sort();
+	SaveGame->DefeatedEnemyKinds = DefeatedEnemyKinds.Array();
+	SaveGame->DefeatedEnemyKinds.Sort(FNameLexicalLess());
 	SaveGame->MapMarkers = MapMarkers;
 	SaveGame->MapMarkers.Sort([](
 		const FTunaSweeperMapMarkerSaveData& Left,
@@ -1148,6 +1155,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	bPendingRaidTutorial = false;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
+	DefeatedEnemyKinds.Reset();
 	EverAcquiredItemIds.Reset();
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
@@ -1193,6 +1201,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	bPendingRaidTutorial = false;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
+	DefeatedEnemyKinds.Reset();
 	EverAcquiredItemIds.Reset();
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;

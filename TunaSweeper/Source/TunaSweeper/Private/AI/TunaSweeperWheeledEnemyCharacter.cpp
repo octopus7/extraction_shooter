@@ -2,6 +2,7 @@
 
 #include "AI/TunaSweeperWheeledMovementComponent.h"
 #include "AIController.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Component/TunaSweeperFactionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"

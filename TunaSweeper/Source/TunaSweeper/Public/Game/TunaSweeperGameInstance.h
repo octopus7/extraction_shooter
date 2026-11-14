@@ -264,6 +264,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 {
 	GENERATED_BODY()
 	friend class FTunaDemoSaveRetirementTest;
+	friend class FEncyclopediaRuntimeTest;
 	friend class FTunaTutorialTriggerTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
@@ -523,6 +524,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	bool HasEverAcquiredItem(int32 ItemId);
+
+	bool HasDefeatedEnemyKind(FName Kind);
+	bool RecordEncyclopediaKill(const UClass* EnemyClass, bool bSaveImmediately = true);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
 	void GetMapMarkers(TArray<FTunaSweeperMapMarkerSaveData>& OutMapMarkers);
@@ -1275,6 +1279,7 @@ private:
 
 	UPROPERTY(Transient)
 	TSet<int32> EverAcquiredItemIds;
+	TSet<FName> DefeatedEnemyKinds;
 
 	UPROPERTY(Transient)
 	TSet<int32> AcquiredMemoIds;

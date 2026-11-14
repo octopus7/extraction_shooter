@@ -1,5 +1,6 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "UI/Astra/IconEditorGPT6Astra.h"
+#include "UI/Astra/EncyclopediaGPT6Astra.h"
 
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraActor.h"
@@ -516,6 +517,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	CloseEncyclopedia();
 	CloseIconEditorPanel();
 	if (StartupLogoWidget)
 	{
@@ -625,6 +627,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 
 	if (InputComponent)
 	{
+		InputComponent->BindKey(EKeys::J, IE_Pressed, this, &ATunaSweeperPlayerController::ToggleEncyclopedia);
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ATunaSweeperPlayerController::HandleUseHoveredItem);
 		InputComponent->BindKey(EKeys::L, IE_Pressed, this, &ATunaSweeperPlayerController::HandleToggleHoveredInventorySortLock);
 		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed);
@@ -703,6 +706,8 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+	UpdateEncyclopedia();
+	if (EncyclopediaPanel) return;
 	UpdateIconEditorInteraction();
 	if (IconEditorPanel) return;
 	UpdateWardrobeInteraction();
@@ -2448,6 +2453,15 @@ void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 
 void ATunaSweeperPlayerController::ApplyDefaultGameInputModeInternal(bool bReleaseGameplayInputLocks)
 {
+	if (EncyclopediaPanel)
+	{
+		FInputModeUIOnly Mode;
+		Mode.SetWidgetToFocus(EncyclopediaPanel->TakeWidget());
+		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(Mode);
+		bShowMouseCursor = true;
+		return;
+	}
 	if (IconEditorPanel)
 	{
 		FInputModeUIOnly IconInputMode;

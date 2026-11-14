@@ -1306,6 +1306,11 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 	}
 
 	OnDeathPresentationStarted();
+	if (KillerController && KillerController->IsLocalPlayerController())
+	{
+		if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+			Game->RecordEncyclopediaKill(GetClass());
+	}
 	DetachFromControllerPendingDestroy();
 	if ((!WaveParticipant || WaveParticipant->ShouldGrantDefaultKillRewards()) && KillerController && KillerController->IsPlayerController())
 	{

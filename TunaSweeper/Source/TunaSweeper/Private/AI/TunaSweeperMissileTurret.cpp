@@ -1,4 +1,6 @@
 #include "AI/TunaSweeperMissileTurret.h"
+#include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/Controller.h"
 #include "Combat/TunaSweeperCombatValue.h"
 
 #include "AI/TunaSweeperAttackTelegraph.h"
@@ -394,6 +396,9 @@ float ATunaSweeperMissileTurret::TakeDamage(float DamageAmount, const FDamageEve
 	if (CurrentHealth <= 0.0f)
 	{
 		bDead = true;
+		if (EventInstigator && EventInstigator->IsLocalPlayerController())
+			if (auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+				Game->RecordEncyclopediaKill(GetClass());
 		FactionComponent->SetCanBeCombatTarget(false);
 		ClearWarning();
 		SpawnExplosion(GetActorLocation(), 85.0f);
