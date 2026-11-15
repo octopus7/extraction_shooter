@@ -29,7 +29,17 @@ ALoopRailTrain::ALoopRailTrain()
 void ALoopRailTrain::OnConstruction(const FTransform& Transform)
 { Super::OnConstruction(Transform); RebuildTrain(); HeadDistance = StartDistance; UpdateVehicles(); }
 void ALoopRailTrain::BeginPlay()
-{ Super::BeginPlay(); RebuildTrain(); if (HasAuthority()) ResetTrain(); else OnRep_State(); }
+{
+    Super::BeginPlay();
+    RebuildTrain();
+    if (HasAuthority())
+    {
+        // Draw once per level instance. ResetTrain reuses this session's chosen start.
+        if (HasUsableTrack()) StartDistance = FMath::FRand() * Track->GetLength() * .5;
+        ResetTrain();
+    }
+    else OnRep_State();
+}
 void ALoopRailTrain::RebuildTrain()
 {
     // Arrays are transient; serialized construction components can still exist after map load.

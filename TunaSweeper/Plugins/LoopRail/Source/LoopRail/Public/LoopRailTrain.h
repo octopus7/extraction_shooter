@@ -40,6 +40,7 @@ public:
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, ReplicatedUsing=OnRep_Configuration, Category="LoopRail") TObjectPtr<ALoopRailTrack> Track;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing=OnRep_Configuration, Category="LoopRail", meta=(ClampMin="1", ClampMax="16")) int32 VehicleCount = 4;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, ReplicatedUsing=OnRep_Configuration, Category="LoopRail", meta=(ClampMin="0", Units="cm")) float VehicleGap = 80;
+    /** Editor preview distance; authority chooses a distance in the first half of the route at BeginPlay. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail", meta=(Units="cm")) double StartDistance = 4500;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail", meta=(ClampMin="0", Units="cm/s")) float CruiseSpeed = 600;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="LoopRail", meta=(ClampMin="1")) float Acceleration = 120;

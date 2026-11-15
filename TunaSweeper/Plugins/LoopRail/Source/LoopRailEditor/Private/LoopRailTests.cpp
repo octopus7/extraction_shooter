@@ -34,6 +34,43 @@ struct FTestWorld
 };
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoopRailBeginPlayStartTest,"LoopRail.Runtime.BeginPlayRandomStart",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FLoopRailBeginPlayStartTest::RunTest(const FString& Parameters)
+{
+    FTestWorld T;
+    auto* Track = T.World->SpawnActor<ALoopRailTrack>();
+    TArray<ALoopRailTrain*> Trains;
+    for (int32 Index = 0; Index < 12; ++Index)
+    {
+        auto* Train = T.World->SpawnActor<ALoopRailTrain>();
+        Train->Track = Track;
+        Train->StartDistance = Track->GetLength() * .75;
+        Train->bAutoRun = false;
+        Trains.Add(Train);
+    }
+    auto* Unlinked = T.World->SpawnActor<ALoopRailTrain>();
+    Unlinked->StartDistance = 1234;
+    T.World->InitializeActorsForPlay(FURL());
+    T.World->BeginPlay();
+    T.World->GetWorldSettings()->NotifyBeginPlay();
+    bool bVaried = false;
+    for (auto* Train : Trains)
+    {
+        const double Start = Train->GetHeadDistance();
+        TestTrue(TEXT("Level start lies in the first half of the route"), Start >= 0 && Start <= Track->GetLength() * .5);
+        bVaried |= FMath::Abs(Start - Trains[0]->GetHeadDistance()) > 1;
+        Train->Tick(.1f);
+        TestEqual(TEXT("Stopped tick retains start"), Train->GetHeadDistance(), Start);
+        Train->ResetTrain();
+        TestEqual(TEXT("Reset does not redraw start"), Train->GetHeadDistance(), Start);
+        TestNotNull(TEXT("Trailing carriage exists"), Train->GetVehicleFloor(3));
+    }
+    TestTrue(TEXT("Independent level-start draws vary"), bVaried);
+    TestEqual(TEXT("Unlinked train retains configured fallback"), Unlinked->GetHeadDistance(), 1234.0);
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoopRailActorTest,"LoopRail.Runtime.StationsAndCrossings",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FLoopRailActorTest::RunTest(const FString& Parameters)
@@ -235,6 +272,9 @@ bool FLoopRailRidingTest::RunTest(const FString& Parameters)
     T.World->InitializeActorsForPlay(FURL()); T.World->BeginPlay();
     // This isolated world has no GameMode, so explicitly dispatch the world-settings start notification.
     T.World->GetWorldSettings()->NotifyBeginPlay();
+    // Passenger test needs its known straight segment after the randomized level start.
+    Train->StartDistance = 4500;
+    Train->ResetTrain();
     for(int32 I=0;I<20;++I) { ++GFrameCounter; T.World->Tick(LEVELTICK_All,.02f); }
     TestTrue(TEXT("Rider finds passenger floor"),Rider->GetMovementBase()==Train->GetVehicleFloor(1));
     const FVector InitialLocal=Train->GetVehicleFloor(1)->GetComponentTransform().InverseTransformPosition(Rider->GetActorLocation());
