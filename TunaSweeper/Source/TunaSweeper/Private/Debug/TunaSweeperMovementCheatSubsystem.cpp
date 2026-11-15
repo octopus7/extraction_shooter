@@ -8,7 +8,6 @@
 #include "HAL/PlatformProcess.h"
 #include "Kismet/GameplayStatics.h"
 
-extern "C" DLLEXPORT FTunaSweeperMovementCheatControl TunaSweeperMovementCheatControl;
 FTunaSweeperMovementCheatControl TunaSweeperMovementCheatControl;
 static_assert(sizeof(FTunaSweeperMovementCheatControl) == 32);
 static_assert(STRUCT_OFFSET(FTunaSweeperMovementCheatControl, EnableToken) == 16);

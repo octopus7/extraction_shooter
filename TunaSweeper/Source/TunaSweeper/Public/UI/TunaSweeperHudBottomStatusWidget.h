@@ -6,6 +6,7 @@
 #include "TunaSweeperHudBottomStatusWidget.generated.h"
 
 class UProgressBar;
+class UImage;
 class UTextBlock;
 class UWidget;
 class UTunaSweeperHudStatusRingWidget;
@@ -25,6 +26,11 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativePreConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	// The image and its health-relative layout are authored in the Widget Blueprint.
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> CheatActiveBadge;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> WeightText;
@@ -73,6 +79,7 @@ protected:
 
 private:
 	void ApplyHudState();
+	void UpdateCheatActiveBadge();
 
 	UPROPERTY(EditAnywhere, Category = "TunaSweeper|HUD")
 	FTunaSweeperPlayerHudState PreviewHudState;

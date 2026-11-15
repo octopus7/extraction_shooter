@@ -16,7 +16,13 @@ struct alignas(8) FTunaSweeperMovementCheatControl
 	uint64 Reserved = 0;
 };
 
+// Keep the helper's external ABI exported in monolithic builds, while editor
+// consumers import the variable from the runtime module in modular builds.
+#if IS_MONOLITHIC
 extern "C" DLLEXPORT FTunaSweeperMovementCheatControl TunaSweeperMovementCheatControl;
+#else
+extern "C" TUNASWEEPER_API FTunaSweeperMovementCheatControl TunaSweeperMovementCheatControl;
+#endif
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperMovementCheatSubsystem : public UGameInstanceSubsystem, public FTickableGameObject

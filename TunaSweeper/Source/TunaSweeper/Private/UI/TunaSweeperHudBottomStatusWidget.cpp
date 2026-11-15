@@ -1,5 +1,7 @@
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "Combat/TunaSweeperCombatValue.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
+#include "Components/Image.h"
 
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
@@ -65,6 +67,21 @@ void UTunaSweeperHudBottomStatusWidget::SetHudState(const FTunaSweeperPlayerHudS
 	ApplyHudState();
 }
 
+void UTunaSweeperHudBottomStatusWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	UpdateCheatActiveBadge();
+}
+
+void UTunaSweeperHudBottomStatusWidget::UpdateCheatActiveBadge()
+{
+	if (!CheatActiveBadge) return;
+	const UGameInstance* Instance = GetGameInstance();
+	const auto* Cheats = Instance ? Instance->GetSubsystem<UTunaSweeperMovementCheatSubsystem>() : nullptr;
+	CheatActiveBadge->SetVisibility(Cheats && Cheats->IsEnabled()
+		? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+}
+
 void UTunaSweeperHudBottomStatusWidget::SetScratchState(float CurrentScratch, float MaxScratch)
 {
 	ScratchPercent = TunaSweeperHudStatus::MakeVitalsPercent(CurrentScratch, MaxScratch);
@@ -76,6 +93,7 @@ void UTunaSweeperHudBottomStatusWidget::SetScratchState(float CurrentScratch, fl
 
 void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 {
+	UpdateCheatActiveBadge();
 	PreviewHudState.NormalizeWeightLimits();
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	auto ResolveText = [TunaGameInstance](const TCHAR* StringKey, const TCHAR* Fallback)
