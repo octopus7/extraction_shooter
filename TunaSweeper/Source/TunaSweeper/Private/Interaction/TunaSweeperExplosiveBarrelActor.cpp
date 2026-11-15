@@ -1,4 +1,5 @@
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
+#include "Interaction/TunaSweeperBreakableConcreteWall.h"
 #include "Combat/TunaSweeperCombatValue.h"
 
 #include "Components/BoxComponent.h"
@@ -665,7 +666,11 @@ void ATunaSweeperExplosiveBarrelActor::ApplyExplosionDamage()
 	{
 		AActor* Target = Result.GetActor();
 		if (!IsValid(Target) || Target == this || DamagedActors.Contains(Target)) continue;
-		if (!Target->IsA<APawn>() && !Target->IsA<ATunaSweeperCookableChickenActor>() && !Target->IsA<ATunaSweeperExplosiveBarrelActor>()) continue;
+		if (!Target->IsA<APawn>() && !Target->IsA<ATunaSweeperCookableChickenActor>() &&
+			!Target->IsA<ATunaSweeperExplosiveBarrelActor>() && !Target->IsA<ATunaSweeperBreakableConcreteWall>())
+		{
+			continue;
+		}
 		DamagedActors.Add(Target);
 		const float Distance = FVector::Distance(GetActorLocation(), Target->GetActorLocation());
 		const float Alpha = FMath::Clamp((Distance - ExplosionDamageInnerRadiusCm) / FMath::Max(1.0f, ExplosionVisualRadiusCm - ExplosionDamageInnerRadiusCm), 0.0f, 1.0f);
