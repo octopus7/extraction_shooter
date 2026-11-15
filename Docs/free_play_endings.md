@@ -5,7 +5,7 @@
 - 실제 BP: `/Game/Interactables/Ending/BP_EndingInteraction`
 - 부모 클래스: `ATunaSweeperEndingActor`
 - 임시 외형은 철제 단말기다. BP에서 본체·화면·받침·버튼 메시를 교체할 수 있다.
-- 특정 맵에는 자동 배치하지 않았다. 원하는 레벨에 BP를 하나 배치한다.
+- `/Game/MainRaid/RaidPlains`의 SSTO 실내에 `TS_Plains_SSTO_Ending`으로 하나 배치되어 있다. 선체 기준 로컬 위치는 `(365, 185, 181)`cm이며 중앙 통로를 향한다. 맞은편에 공용 참치 보관함이 있다.
 
 기본 상호작용 표시명은 **엔딩?!**이다. 현재 세이브 슬롯의 공용 레이드 보관함 10칸이 모두 일반 참치(아이템 3004) 10개씩이면 **엔딩!?**로 바뀐다. 총 100개이며, 미식 참치·빈칸·덜 찬 칸은 조건을 만족하지 않는다. 보관함 변경 시 표시명을 갱신하고 상호작용 순간 다시 판정한다. 진엔딩에서 참치를 소모하지 않는다.
 
@@ -31,3 +31,7 @@
 ## 검증
 
 `TunaSweeper.FreePlayEnding` 자동화는 native 클래스·실제 BP/스토리 애셋·참치 조건·세이브 거부와 재시도·경험치 중복 방지·슬롯 재로드·반복 엔딩을 확인한다. 디스크 시험은 `-UserDir=<project>/Saved/RaidStorageAutomation/`에서만 수행한다. `RenderStories`는 렌더링 가능한 실행에서 실제 대사 UI 이미지를 생성하고 문장 진행을 검증한다.
+
+`Tools/SSTOLander/verify_ending.ps1`은 저장된 RaidPlains를 PIE로 열어 사다리 입장, 중앙 통로 캡슐 충돌, 두 액터의 상호작용 거리, 보관함 열기·아이템 이동·즉시 파일 변경·LED, 두 엔딩의 대사 입력과 타이틀 복귀, 실제 시작 버튼을 통한 같은 슬롯 이어하기를 검사한다. 테스트 세이브는 `Saved/SSTOEndingAutomation/` 아래에 격리하며 이 경로가 아니면 실행을 거부한다. 사용자 세이브를 테스트에 사용하지 않는다. 실행 전 `Docs/unreal_editor_coordination.md`에 따라 에디터를 조율하고 최신 에디터 모듈을 빌드한다.
+
+PIE 테스트는 레이드에 도달한 슬롯을 재현하기 위해 테스트 슬롯에만 오프닝 완료 기록을 넣는다. 기존 `IntroMap`의 `BP_Morph` Construction Script 오류는 [기존 점검 기록](demo_build_implementation_audit_2026-09-02.md)의 알려진 문제로 한정해 허용한다. 이 테스트가 해당 표정 제어 문제까지 수정하거나 무오류를 보증하는 것은 아니다. 나머지 테스트 오류는 실패 처리한다.
