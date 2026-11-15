@@ -1,5 +1,6 @@
 #include "Game/TunaSweeperSaveToolInternal.h"
 #if WITH_EDITOR
+#include "Game/TunaSweeperMapMarkerSave.h"
 #include "Game/TunaSweeperSafeSave.h"
 #include "Game/TunaSweeperGameInstanceShared.h"
 #include "Engine/Engine.h"
@@ -181,9 +182,13 @@ namespace TunaSweeperSaveTool::Internal
         if (!Snapshot) return Result(TEXT("invalid_snapshot"));
         TArray<uint8> Check;
         if (!Snapshots::Read(Path, Check) || Check != Original) return Result(TEXT("stale_save"));
+        const auto& CurrentProgress = *CastChecked<UTunaSweeperSaveGame>(Current.Get());
+        if (!TunaSweeperMapMarkerSave::LoadOrMigrate(
+            Path, Slot, CurrentProgress.BuildFlavor, CurrentProgress.MapMarkers)) return Result(TEXT("save_failed"));
         FString Backup;
         if (!Snapshots::WriteCopy(Directory, Original, true, Backup)) return Result(TEXT("backup_failed"));
-        // Preserve every gameplay field and the original save time; do not touch account-wide saves.
+        // Ignore markers embedded in legacy snapshots, including old pre-restore backups.
+        CastChecked<UTunaSweeperSaveGame>(Snapshot.Get())->MapMarkers.Reset();
         if (!TunaSweeperSafeSave::SaveGameFileFailClosed(Snapshot.Get(), Path, Validator)) return Result(TEXT("save_failed"));
         auto R = Result(); R->SetStringField(TEXT("backupPath"), Backup); return R;
     }

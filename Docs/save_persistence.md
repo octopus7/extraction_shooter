@@ -243,7 +243,7 @@ This history is separate from current item ownership. It is updated when items e
 
 ### Map Markers
 
-Player-created map markers are persisted per save slot through `UTunaSweeperSaveGame::MapMarkers`.
+Player-created map markers are stored in `MapMarkers_SlotNN.sav` next to the corresponding gameplay file. The file validates its own version, slot index, and build flavor and uses the existing verified save writer with independent `.sav.previous` recovery. It follows the same save root and store cloud file patterns as the gameplay slot.
 
 Each `FTunaSweeperMapMarkerSaveData` preserves:
 
@@ -252,7 +252,11 @@ Each `FTunaSweeperMapMarkerSaveData` preserves:
 - `MarkerIconIndex`: fixed marker icon palette index.
 - `MarkerColorIndex`: fixed marker color palette index.
 
-Marker add/delete actions update `UTunaSweeperGameInstance` memory immediately and broadcast `OnMapMarkersChanged`. They do not force an immediate save by default; the marker array is written on the next normal save, level-travel save, death save, or any other call to `SaveGameStateInternal()`.
+Right-click add/delete writes the marker file immediately and updates the displayed markers after the write succeeds. A failed write leaves the previous markers in place. Callers using the existing deferred API still flush their changes at the next gameplay save, using the marker file.
+
+On first load, markers embedded in a legacy gameplay save are copied to the new file. Subsequent gameplay saves clear the legacy field after the separate copy is verified. If migration fails, the embedded markers remain available for retry. A committed marker file takes precedence over legacy data even when its marker list is empty.
+
+Automatic gameplay recovery and editor snapshot restore leave the separate marker file in place. Before restoring an old snapshot, the editor migrates any embedded markers from the **current** slot and ignores the embedded markers in the snapshot. Explicit deletion of the entire slot also deletes its marker file and recovery generations.
 
 ### Player-Owned Item Instances
 
@@ -610,7 +614,7 @@ The selected snapshot can be deleted after a confirmation showing its timestamp 
 
 Restore requires a readable, valid current slot and a CRC-valid snapshot whose exact save class, dataset, slot and supported save version match. It rejects path traversal and rechecks current bytes before writing, retains the current slot as a separate automatic backup, and uses the existing candidate/previous fail-closed save writer. Restored gameplay fields and original saved time are retained. Load the selected slot in the next play session to use the restored state; there is no live in-memory replacement. A pre-restore backup can be selected to undo a restore.
 
-The snapshot includes all gameplay-slot fields (inventory, storage, pending rewards, quests and world progress). Account-global achievements, outfit unlocks, language/settings and other slots are not captured or rolled back. These developer snapshots are outside the active SaveGames/cloud-save root and are not packaged or tracked in Git.
+The snapshot restores gameplay fields such as inventory, storage, pending rewards, quests, and world progress. Independent map marker files, account-global achievements, outfit unlocks, language/settings, and other slots remain outside the restore. These developer snapshots are outside the active SaveGames/cloud-save root and are not packaged or tracked in Git.
 
 ## Quest-gated NPC food exchange and item reward notices
 

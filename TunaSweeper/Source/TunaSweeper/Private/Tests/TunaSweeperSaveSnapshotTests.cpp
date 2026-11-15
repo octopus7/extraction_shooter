@@ -95,6 +95,7 @@ bool FTunaSweeperSaveSnapshotTest::RunTest(const FString& Parameters)
     Save->BuildFlavor = TEXT("Main"); Save->SaveSlotIndex = 1;
     Save->QuestCoinBalance = 123; Save->LastSavedAtTicks = 456789;
     Save->CompletedScenarioFlags.Add(TEXT("snapshot.fixture"));
+    Save->MapMarkers.AddDefaulted_GetRef().MarkerId = 1;
     auto Validator = [](const USaveGame& S) { return S.GetClass() == UTunaSweeperSaveGame::StaticClass(); };
     if (!TestTrue(TEXT("Fixture saved"), TunaSweeperSafeSave::SaveGameFileFailClosed(Save, Path, Validator))) return false;
     auto Request = [&](const TCHAR* Op, const FString& Id = FString())
@@ -114,6 +115,7 @@ bool FTunaSweeperSaveSnapshotTest::RunTest(const FString& Parameters)
     FFileHelper::LoadFileToArray(Copy, *Created->GetStringField(TEXT("snapshotPath")));
     TestTrue(TEXT("Snapshot preserves exact saved bytes"), Original == Copy);
     Save->QuestCoinBalance = 999;
+    Save->MapMarkers[0].MarkerId = 2;
     TestTrue(TEXT("Changed fixture saved"), TunaSweeperSafeSave::SaveGameFileFailClosed(Save, Path, Validator));
     TArray<uint8> Changed; FFileHelper::LoadFileToArray(Changed, *Path);
     auto Restored = TunaSweeperSaveTool::Execute(Request(TEXT("snapshot-restore"), Id));
@@ -125,6 +127,19 @@ bool FTunaSweeperSaveSnapshotTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Currency restored"), Reload->QuestCoinBalance, 123);
     TestEqual(TEXT("Original timestamp retained"), Reload->LastSavedAtTicks, int64(456789));
     TestTrue(TEXT("Other state retained"), Reload->CompletedScenarioFlags.Contains(TEXT("snapshot.fixture")));
+    TestTrue(TEXT("Restored gameplay payload has no map markers"), Reload->MapMarkers.IsEmpty());
+    const FString MarkerPath = FPaths::GetPath(Path) / TEXT("MapMarkers_Slot01.sav");
+    TestTrue(TEXT("Restore migrates current markers before replacing progress"), IFileManager::Get().FileExists(*MarkerPath));
+    const auto* Migrated = Cast<UTunaSweeperMapMarkerSaveGame>(TunaSweeperSafeSave::LoadVerifiedSaveFile(
+        MarkerPath, [](const USaveGame& S) { return S.IsA<UTunaSweeperMapMarkerSaveGame>(); }));
+    if (TestNotNull(TEXT("Migrated marker file loads"), Migrated) &&
+        TestEqual(TEXT("One current marker migrated"), Migrated->MapMarkers.Num(), 1))
+    {
+        TestEqual(TEXT("Restore preserves the current marker rather than the snapshot marker"),
+            Migrated->MapMarkers[0].MarkerId, 2);
+    }
+    TArray<uint8> MarkerBytes;
+    FFileHelper::LoadFileToArray(MarkerBytes, *MarkerPath);
     auto Listed = TunaSweeperSaveTool::Execute(Request(TEXT("snapshot-list")));
     TestEqual(TEXT("Manual snapshot and automatic backup listed"), Listed->GetArrayField(TEXT("snapshots")).Num(), 2);
     FFileHelper::LoadFileToArray(Original, *Path);
@@ -142,6 +157,8 @@ bool FTunaSweeperSaveSnapshotTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Automatic backup is restorable"), Undo->GetBoolField(TEXT("ok")));
     Reload = Cast<UTunaSweeperSaveGame>(TunaSweeperSafeSave::LoadVerifiedSaveFile(Path, Validator));
     TestTrue(TEXT("Undo restores replaced state"), Reload && Reload->QuestCoinBalance == 999);
+    TestTrue(TEXT("Undo leaves migrated marker bytes intact"),
+        FFileHelper::LoadFileToArray(After, *MarkerPath) && After == MarkerBytes);
     TestTrue(TEXT("Automatic backups can also be deleted"), TunaSweeperSaveTool::Execute(Request(TEXT("snapshot-delete"),
         FPaths::GetCleanFilename(Restored->GetStringField(TEXT("backupPath")))))->GetBoolField(TEXT("ok")));
     IFileManager::Get().DeleteDirectory(*FPaths::GetPath(SnapshotPath), false, true);

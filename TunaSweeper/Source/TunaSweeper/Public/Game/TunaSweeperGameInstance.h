@@ -1000,6 +1000,8 @@ private:
 	void EnsureInventoryStateInitialized();
 	void CompleteInventoryStateInitialization();
 	bool LoadGameState();
+	void LoadMapMarkerState(const TArray<FTunaSweeperMapMarkerSaveData>& LegacyMarkers);
+	bool SaveMapMarkerState() const;
 	bool SaveGameStateInternal(EUsableQuickSlotSaveMode UsableQuickSlotSaveMode = EUsableQuickSlotSaveMode::PreserveExisting) const;
 	void MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker = false);
 	void ResetRuntimeStateForSaveSlotSelection();
@@ -1294,6 +1296,7 @@ private:
 
 	UPROPERTY(Transient)
 	int32 NextMapMarkerId = 1;
+	mutable bool bMapMarkersDirty = false;
 
 	UPROPERTY(Transient)
 	int64 TotalExperiencePoints = 0;

@@ -165,18 +165,28 @@ int32 UTunaSweeperGameInstance::AddMapMarker(
 	EnsureInventoryStateInitialized();
 
 	FTunaSweeperMapMarkerSaveData NewMarker;
-	NewMarker.MarkerId = FMath::Max(1, NextMapMarkerId++);
+	while (MapMarkers.ContainsByPredicate([this](const FTunaSweeperMapMarkerSaveData& Marker)
+	{
+		return Marker.MarkerId == NextMapMarkerId;
+	}))
+	{
+		NextMapMarkerId = NextMapMarkerId == MAX_int32 ? 1 : NextMapMarkerId + 1;
+	}
+	NewMarker.MarkerId = NextMapMarkerId;
 	NewMarker.MapPosition = MapPosition;
 	NewMarker.MarkerIconIndex = MarkerIconIndex;
 	NewMarker.MarkerColorIndex = MarkerColorIndex;
 	NewMarker = TunaSweeperMapMarkers::SanitizeMarker(NewMarker);
 
 	MapMarkers.Add(NewMarker);
-	OnMapMarkersChanged.Broadcast();
-	if (bSaveImmediately)
+	if (bSaveImmediately && !SaveMapMarkerState())
 	{
-		SaveGameStateInternal();
+		MapMarkers.Pop();
+		return INDEX_NONE;
 	}
+	NextMapMarkerId = NextMapMarkerId == MAX_int32 ? 1 : NextMapMarkerId + 1;
+	bMapMarkersDirty = !bSaveImmediately;
+	OnMapMarkersChanged.Broadcast();
 
 	return NewMarker.MarkerId;
 }
@@ -189,20 +199,24 @@ bool UTunaSweeperGameInstance::RemoveMapMarker(int32 MarkerId, bool bSaveImmedia
 	}
 
 	EnsureInventoryStateInitialized();
-	const int32 RemovedCount = MapMarkers.RemoveAll([MarkerId](const FTunaSweeperMapMarkerSaveData& Marker)
+	const int32 Index = MapMarkers.IndexOfByPredicate([MarkerId](const FTunaSweeperMapMarkerSaveData& Marker)
 	{
 		return Marker.MarkerId == MarkerId;
 	});
-	if (RemovedCount <= 0)
+	if (Index == INDEX_NONE)
 	{
 		return false;
 	}
 
-	OnMapMarkersChanged.Broadcast();
-	if (bSaveImmediately)
+	const FTunaSweeperMapMarkerSaveData RemovedMarker = MapMarkers[Index];
+	MapMarkers.RemoveAt(Index);
+	if (bSaveImmediately && !SaveMapMarkerState())
 	{
-		SaveGameStateInternal();
+		MapMarkers.Insert(RemovedMarker, Index);
+		return false;
 	}
+	bMapMarkersDirty = !bSaveImmediately;
+	OnMapMarkersChanged.Broadcast();
 	return true;
 }
 

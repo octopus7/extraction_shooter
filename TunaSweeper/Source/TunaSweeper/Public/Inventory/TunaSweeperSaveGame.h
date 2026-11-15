@@ -130,6 +130,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Encyclopedia")
 	TArray<FName> DefeatedEnemyKinds;
 
+	// Retained to read existing gameplay saves and backups during migration.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Map")
 	TArray<FTunaSweeperMapMarkerSaveData> MapMarkers;
 
@@ -223,6 +224,25 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Research")
 	int64 ResearchLastObservedUtcTicks = 0;
+};
+
+UCLASS()
+class TUNASWEEPER_API UTunaSweeperMapMarkerSaveGame : public USaveGame
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	int32 SaveVersion = 1;
+
+	UPROPERTY()
+	int32 SaveSlotIndex = 0;
+
+	UPROPERTY()
+	FName BuildFlavor;
+
+	UPROPERTY()
+	TArray<FTunaSweeperMapMarkerSaveData> MapMarkers;
 };
 
 UCLASS()

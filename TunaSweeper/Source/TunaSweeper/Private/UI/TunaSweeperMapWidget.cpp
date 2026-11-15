@@ -1027,14 +1027,14 @@ void UTunaSweeperMapWidget::AddOrRemoveMarkerAtLocalPosition(const FVector2D& Ma
 
 	if (NearestMarkerId > 0)
 	{
-		TunaGameInstance->RemoveMapMarker(NearestMarkerId, false);
+		TunaGameInstance->RemoveMapMarker(NearestMarkerId, true);
 		return;
 	}
 
 	FVector2D MapPosition;
 	if (TryGetMapPositionFromLocal(MapViewportLocalPosition, MapPosition))
 	{
-		TunaGameInstance->AddMapMarker(MapPosition, SelectedMarkerIconIndex, SelectedMarkerColorIndex, false);
+		TunaGameInstance->AddMapMarker(MapPosition, SelectedMarkerIconIndex, SelectedMarkerColorIndex, true);
 	}
 }
 

@@ -1,6 +1,7 @@
 #include "TunaSweeperGameInstanceShared.h"
 
 #include "Game/TunaSweeperSafeSave.h"
+#include "Game/TunaSweeperMapMarkerSave.h"
 #include "Character/TunaSweeperOutfitCatalog.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 
@@ -154,6 +155,13 @@ namespace TunaSweeperSave
 				bDeletedAll = TunaSweeperSafeSave::DeleteSaveArtifacts(BackupFilePath) && bDeletedAll;
 			}
 			return bDeletedAll;
+		}
+
+		bool DeleteGameplaySlot(const FString& SlotName, int32 SlotIndex)
+		{
+			// Keep the markers if the progress slot could not be deleted.
+			return DeleteFlavorSave(SlotName) && TunaSweeperSafeSave::DeleteSaveArtifacts(
+				TunaSweeperMapMarkerSave::GetFilePath(GetFlavorSaveFilePath(SlotName), SlotIndex));
 		}
 
 		bool TryReadSaveVersion(const FString& SaveFilePath, int32& OutSaveVersion)
@@ -398,6 +406,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		LoadedSlotTotalPlaySeconds = 0.0f;
 		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 		GenerateDefaultInventoryState();
+		LoadMapMarkerState({});
 		if (TunaSweeperBuildFlavor::IsDemo())
 		{
 			ActiveSaveSlotDifficultyStage = 2;
@@ -455,8 +464,10 @@ bool UTunaSweeperGameInstance::DeleteSaveSlot(int32 SaveSlotIndex)
 {
 	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
 	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
-	const bool bDeleted = TunaSweeperSave::DoesFlavorSaveExist(SlotName) &&
-		TunaSweeperSave::DeleteFlavorSave(SlotName);
+	const FString MarkerPath = TunaSweeperMapMarkerSave::GetFilePath(GetSaveGameFilePath(SlotName), SanitizedSlotIndex);
+	const bool bHadData = TunaSweeperSave::DoesFlavorSaveExist(SlotName) || FPaths::FileExists(MarkerPath) ||
+		FPaths::FileExists(TunaSweeperSafeSave::GetPreviousFilePath(MarkerPath));
+	const bool bDeleted = TunaSweeperSave::DeleteGameplaySlot(SlotName, SanitizedSlotIndex) && bHadData;
 
 	if (ActiveSaveSlotIndex == SanitizedSlotIndex)
 	{
@@ -471,8 +482,7 @@ bool UTunaSweeperGameInstance::DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex
 {
 	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
 	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
-	if (TunaSweeperSave::DoesFlavorSaveExist(SlotName) &&
-		!TunaSweeperSave::DeleteFlavorSave(SlotName))
+	if (!TunaSweeperSave::DeleteGameplaySlot(SlotName, SanitizedSlotIndex))
 	{
 		return false;
 	}
@@ -500,6 +510,7 @@ void UTunaSweeperGameInstance::EnsureInventoryStateInitialized()
 		LoadedSlotTotalPlaySeconds = 0.0f;
 		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 		GenerateDefaultInventoryState();
+		LoadMapMarkerState({});
 	}
 
 	CompleteInventoryStateInitialization();
@@ -604,27 +615,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 			EverAcquiredItemIds.Add(TunaSweeperInventory::MigrateRetiredAmmoId(ItemId));
 		}
 	}
-	MapMarkers.Reset();
-	NextMapMarkerId = 1;
-	TSet<int32> LoadedMapMarkerIds;
-	for (const FTunaSweeperMapMarkerSaveData& SavedMapMarker : SaveGame->MapMarkers)
-	{
-		if (SavedMapMarker.MarkerId <= 0 || LoadedMapMarkerIds.Contains(SavedMapMarker.MarkerId))
-		{
-			continue;
-		}
-
-		FTunaSweeperMapMarkerSaveData LoadedMapMarker = TunaSweeperMapMarkers::SanitizeMarker(SavedMapMarker);
-		MapMarkers.Add(LoadedMapMarker);
-		LoadedMapMarkerIds.Add(LoadedMapMarker.MarkerId);
-		NextMapMarkerId = FMath::Max(NextMapMarkerId, LoadedMapMarker.MarkerId + 1);
-	}
-	MapMarkers.Sort([](
-		const FTunaSweeperMapMarkerSaveData& Left,
-		const FTunaSweeperMapMarkerSaveData& Right)
-	{
-		return Left.MarkerId < Right.MarkerId;
-	});
+	LoadMapMarkerState(SaveGame->MapMarkers);
 	WorldProgressStatesById.Reset();
 	for (const FTunaSweeperWorldProgressSaveData& SavedWorldProgressState : SaveGame->WorldProgressStates)
 	{
@@ -836,6 +827,52 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	return true;
 }
 
+void UTunaSweeperGameInstance::LoadMapMarkerState(const TArray<FTunaSweeperMapMarkerSaveData>& LegacyMarkers)
+{
+	const FString ProgressPath = GetSaveGameFilePath(GetSaveGameSlotName(ActiveSaveSlotIndex));
+	TArray<FTunaSweeperMapMarkerSaveData> SavedMarkers;
+	if (!TunaSweeperMapMarkerSave::LoadOrMigrate(
+		ProgressPath, ActiveSaveSlotIndex, TunaSweeperBuildFlavor::GetName(), LegacyMarkers, &SavedMarkers))
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Could not load or migrate map markers for slot %d."), ActiveSaveSlotIndex);
+	}
+
+	MapMarkers.Reset();
+	NextMapMarkerId = 1;
+	bMapMarkersDirty = false;
+	TSet<int32> LoadedIds;
+	for (const FTunaSweeperMapMarkerSaveData& Marker : SavedMarkers)
+	{
+		if (Marker.MarkerId > 0 && !LoadedIds.Contains(Marker.MarkerId))
+		{
+			MapMarkers.Add(TunaSweeperMapMarkers::SanitizeMarker(Marker));
+			LoadedIds.Add(Marker.MarkerId);
+			if (Marker.MarkerId < MAX_int32)
+			{
+				NextMapMarkerId = FMath::Max(NextMapMarkerId, Marker.MarkerId + 1);
+			}
+		}
+	}
+}
+
+bool UTunaSweeperGameInstance::SaveMapMarkerState() const
+{
+#if WITH_DEV_AUTOMATION_TESTS
+	if (bSuppressSaveWritesForTests) return false;
+#endif
+	if (IsCombatTestSession()) return false;
+
+	const FString ProgressPath = GetSaveGameFilePath(GetSaveGameSlotName(ActiveSaveSlotIndex));
+	if (!TunaSweeperMapMarkerSave::Save(
+		ProgressPath, ActiveSaveSlotIndex, TunaSweeperBuildFlavor::GetName(), MapMarkers))
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Could not save map markers for slot %d."), ActiveSaveSlotIndex);
+		return false;
+	}
+	bMapMarkersDirty = false;
+	return true;
+}
+
 bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	UTunaSweeperGameInstance::EUsableQuickSlotSaveMode UsableQuickSlotSaveMode) const
 {
@@ -850,6 +887,11 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
 	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;
+	TArray<FTunaSweeperMapMarkerSaveData> UnmigratedMarkers;
+	if (bMapMarkersDirty)
+	{
+		SaveMapMarkerState();
+	}
 	if (!ExistingSlotName.IsEmpty())
 	{
 		UTunaSweeperSaveGame* LoadedExistingSaveGame = Cast<UTunaSweeperSaveGame>(
@@ -867,6 +909,13 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 		if (UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PreserveExisting)
 		{
 			ExistingSaveGame = LoadedExistingSaveGame;
+		}
+
+		if (!TunaSweeperMapMarkerSave::LoadOrMigrate(GetSaveGameFilePath(ExistingSlotName),
+			ActiveSaveSlotIndex, LoadedExistingSaveGame->BuildFlavor, LoadedExistingSaveGame->MapMarkers))
+		{
+			// Retain the legacy source so a later load or save can retry the migration.
+			UnmigratedMarkers = LoadedExistingSaveGame->MapMarkers;
 		}
 	}
 
@@ -906,13 +955,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->EverAcquiredItemIds.Sort();
 	SaveGame->DefeatedEnemyKinds = DefeatedEnemyKinds.Array();
 	SaveGame->DefeatedEnemyKinds.Sort(FNameLexicalLess());
-	SaveGame->MapMarkers = MapMarkers;
-	SaveGame->MapMarkers.Sort([](
-		const FTunaSweeperMapMarkerSaveData& Left,
-		const FTunaSweeperMapMarkerSaveData& Right)
-	{
-		return Left.MarkerId < Right.MarkerId;
-	});
+	SaveGame->MapMarkers = MoveTemp(UnmigratedMarkers);
 	SaveGame->VehicleFuelByPlacement = VehicleFuelByPlacement;
 	WorldProgressStatesById.GenerateValueArray(SaveGame->WorldProgressStates);
 	SaveGame->WorldProgressStates.Sort([](
@@ -1140,6 +1183,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	EverAcquiredItemIds.Reset();
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
+	bMapMarkersDirty = false;
 	WorldProgressStatesById.Reset();
 	PiggyBankStatesById.Reset();
 	HousingFacilities.Reset();
@@ -1185,6 +1229,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	EverAcquiredItemIds.Reset();
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
+	bMapMarkersDirty = false;
 	WorldProgressStatesById.Reset();
 	PiggyBankStatesById.Reset();
 	HousingFacilities.Reset();
