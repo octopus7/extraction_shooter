@@ -2,7 +2,7 @@
 
 bool UTunaSweeperGameInstance::IsRaidStorageReadyForTrueEnding()
 {
-    EnsureInventoryStateInitialized();
+    EnsureRaidStorageInitialized();
     SynchronizeRaidStorage();
     if (RaidStorageSlots.Num() != RaidStorageCapacity) return false;
     TSet<FGuid> Seen;

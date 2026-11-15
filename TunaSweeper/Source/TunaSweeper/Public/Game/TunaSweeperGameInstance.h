@@ -1186,6 +1186,8 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> RaidStorageSlots;
+	bool bRaidStorageInitialized = false;
+	void EnsureRaidStorageInitialized();
 	bool bActiveLootContainerIsRaidStorage = false;
 	bool bPendingRaidStorageSave = false;
 	void SynchronizeRaidStorage();

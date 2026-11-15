@@ -149,7 +149,7 @@ struct FRun
             if (!Check(Game->GetActiveLootContainerOwner() == Storage, TEXT("Storage UI uses persistent owner"))) return true;
             if (bTrue)
             {
-                for (int32 SlotIndex = 0; SlotIndex < 10; ++SlotIndex)
+                for (int32 SlotIndex = 1; SlotIndex < 10; ++SlotIndex)
                 {
                     if (!Check(Game->AddItemToFirstAvailableInventorySlot(3004,10), TEXT("Seed full test stack"))) return true;
                     int32 InventoryIndex = INDEX_NONE;
@@ -182,7 +182,7 @@ struct FRun
                 if (Mesh->ComponentHasTag(FName(*FString::Printf(TEXT("RaidStorageLED_%d"),I))))
                 {
                     auto* MID=Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
-                    Check(MID && MID->K2_GetVectorParameterValue(TEXT("IndicatorColor")).Equals(bTrue ? Storage->FullTunaColor : FLinearColor::Black),TEXT("Live LED material matches contents"));
+                    Check(MID && MID->K2_GetVectorParameterValue(TEXT("IndicatorColor")).Equals((bTrue || I==0) ? Storage->FullTunaColor : FLinearColor::Black),TEXT("Live LED material matches contents"));
                     ++LEDs;
                 }
             Check(LEDs==10,TEXT("All ten LED materials inspected"));

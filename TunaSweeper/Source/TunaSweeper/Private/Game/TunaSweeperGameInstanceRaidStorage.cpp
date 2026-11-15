@@ -1,17 +1,35 @@
 #include "TunaSweeperGameInstanceShared.h"
 #include "Engine/Engine.h"
 
-const TArray<FTunaSweeperInventorySlot>& UTunaSweeperGameInstance::GetRaidStorageSlots()
+void UTunaSweeperGameInstance::EnsureRaidStorageInitialized()
 {
     EnsureInventoryStateInitialized();
     EnsureSlotArraySize(RaidStorageSlots, RaidStorageCapacity);
+    if (bInventoryStateInitializing || bRaidStorageInitialized || IsCombatTestSession()) return;
+    // Preserve existing warehouse contents when upgrading an older save.
+    const bool bHasContents = RaidStorageSlots.ContainsByPredicate(
+        [this](const auto& Slot) { return ItemInstancesByUid.Contains(Slot.ItemUid); });
+    if (!bHasContents)
+    {
+        const FGuid StarterTuna = CreateItemInstance(3004, 10);
+        if (!StarterTuna.IsValid()) return;
+        RaidStorageSlots[0].ItemUid = StarterTuna;
+    }
+    // Set before saving: save callbacks must never issue a second starter stack.
+    bRaidStorageInitialized = true;
+    bPendingRaidStorageSave = true;
+    FlushRaidStorageSave();
+}
+
+const TArray<FTunaSweeperInventorySlot>& UTunaSweeperGameInstance::GetRaidStorageSlots()
+{
+    EnsureRaidStorageInitialized();
     return RaidStorageSlots;
 }
 
 void UTunaSweeperGameInstance::OpenRaidStorage(UObject* Owner, const FText& DisplayName)
 {
-    EnsureInventoryStateInitialized();
-    EnsureSlotArraySize(RaidStorageSlots, RaidStorageCapacity);
+    EnsureRaidStorageInitialized();
     FTunaSweeperLootContainerInstance Container;
     Container.Capacity = RaidStorageCapacity;
     Container.DisplayName = DisplayName;

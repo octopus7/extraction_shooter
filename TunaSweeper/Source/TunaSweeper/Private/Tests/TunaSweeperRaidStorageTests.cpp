@@ -66,6 +66,53 @@ bool FTunaSweeperRaidStoragePersistenceTest::RunTest(const FString& Parameters)
     Game->StorageSlots.SetNum(100);
     Game->RaidStorageSlots.SetNum(10);
     Game->ActiveSaveSlotIndex = 1;
+    Game->bInventoryStateInitializing = true;
+    TestTrue(TEXT("Partial inventory initialization cannot grant or save a starter"), Game->GetRaidStorageSlots()[0].IsEmpty());
+    TestFalse(TEXT("Partial load does not mark warehouse initialized"), Game->bRaidStorageInitialized);
+    Game->bInventoryStateInitializing = false;
+    Game->bSuppressSaveWritesForTests = true;
+    const FGuid Starter = Game->GetRaidStorageSlots()[0].ItemUid;
+    FTunaSweeperItemInstance StarterItem;
+    if (!TestTrue(TEXT("First access seeds one full tuna stack"),
+        Game->TryGetItemInstance(Starter, StarterItem) && StarterItem.ItemId == 3004 && StarterItem.Quantity == 10)) return false;
+    TestEqual(TEXT("Only one starter slot is occupied"),
+        Game->RaidStorageSlots.FilterByPredicate([](const auto& Slot) { return !Slot.IsEmpty(); }).Num(), 1);
+    TestTrue(TEXT("Initialization write failure remains pending"), Game->bPendingRaidStorageSave);
+    TestEqual(TEXT("Repeated access never duplicates starter after failed write"), Game->GetRaidStorageSlots()[0].ItemUid, Starter);
+    Game->bSuppressSaveWritesForTests = false;
+    TestTrue(TEXT("Starter initialization save retry"), Game->FlushRaidStorageSave());
+    TestTrue(TEXT("Reload starter save"), Game->LoadGameState());
+    TestTrue(TEXT("Initialization flag survives reload"), Game->bRaidStorageInitialized);
+    TestEqual(TEXT("Reload preserves starter UID"), Game->GetRaidStorageSlots()[0].ItemUid, Starter);
+    UObject* StarterOwner = NewObject<UTunaSweeperSaveGame>(Game.Get());
+    Game->OpenRaidStorage(StarterOwner, FText::GetEmpty());
+    FTunaSweeperItemSlotReference StarterSource, StarterTarget;
+    StarterSource.Source = ETunaSweeperItemSlotSource::LootContainer; StarterSource.SlotIndex = 0;
+    StarterTarget.Source = ETunaSweeperItemSlotSource::Inventory; StarterTarget.SlotIndex = 0;
+    TestTrue(TEXT("Withdraw entire starter"), Game->MoveItemBetweenSlots(StarterSource, StarterTarget));
+    Game->CloseRaidStorage(StarterOwner);
+    TestTrue(TEXT("Reload emptied starter chest"), Game->LoadGameState());
+    TestTrue(TEXT("Empty initialized chest never refills"), Game->GetRaidStorageSlots()[0].IsEmpty());
+    // An older occupied save has no flag: preserve its items instead of adding a gift.
+    Game->bRaidStorageInitialized = false;
+    const FGuid Existing = Game->CreateItemInstance(3004, 3);
+    Game->RaidStorageSlots[4].ItemUid = Existing;
+    Game->GetRaidStorageSlots();
+    TestTrue(TEXT("Legacy occupied storage does not get a starter"), Game->RaidStorageSlots[0].IsEmpty());
+    TestEqual(TEXT("Legacy contents stay in their original slot"), Game->RaidStorageSlots[4].ItemUid, Existing);
+    Game->ResetRuntimeStateForSaveSlotSelection();
+    TestFalse(TEXT("Slot switch resets initialization state"), Game->bRaidStorageInitialized);
+    Game->bInventoryStateInitialized = true;
+    Game->ActiveSaveSlotIndex = 2;
+    TestTrue(TEXT("Another slot receives its own starter"), Game->GetRaidStorageSlots()[0].ItemUid.IsValid());
+    TestNotEqual(TEXT("Starter is unique per slot"), Game->RaidStorageSlots[0].ItemUid, Starter);
+    // The remainder covers arbitrary warehouse transfers independently of its initial gift.
+    Game->ResetPlayerSlotArrays();
+    Game->StorageSlots.SetNum(100);
+    Game->RaidStorageSlots.Empty(); Game->RaidStorageSlots.SetNum(10);
+    Game->ItemInstancesByUid.Reset();
+    Game->bRaidStorageInitialized = true;
+    Game->ActiveSaveSlotIndex = 1;
     const FGuid Tuna = Game->CreateItemInstance(3004, 10);
     Game->PlayerInventorySlots[0].ItemUid = Tuna;
     UObject* First = NewObject<UTunaSweeperSaveGame>(Game.Get());

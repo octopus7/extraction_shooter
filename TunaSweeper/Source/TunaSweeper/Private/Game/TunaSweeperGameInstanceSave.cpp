@@ -735,6 +735,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	StorageSlotCapacity = NormalizeStorageSlotCapacity(SaveGame->StorageSlotCapacity);
 	StorageSlots = SaveGame->StorageSlots;
 	RaidStorageSlots = SaveGame->RaidStorageSlots;
+	bRaidStorageInitialized = SaveGame->bRaidStorageInitialized;
 	EnsureSlotArraySize(RaidStorageSlots, RaidStorageCapacity);
 	bPendingRaidStorageSave = false;
     PendingQuestRewards = SaveGame->PendingQuestRewards;
@@ -1009,6 +1010,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->StorageSlotCapacity = NormalizeStorageSlotCapacity(StorageSlotCapacity);
 	SaveGame->StorageSlots = StorageSlots;
 	SaveGame->RaidStorageSlots = RaidStorageSlots;
+	SaveGame->bRaidStorageInitialized = bRaidStorageInitialized;
     SaveGame->PendingQuestRewards = PendingQuestRewards;
 	EnsureSlotArraySize(SaveGame->StorageSlots, SaveGame->StorageSlotCapacity);
 	ShopStockStatesByKey.GenerateValueArray(SaveGame->ShopStockStates);
@@ -1141,6 +1143,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	StorageSlots.Reset();
 	RaidStorageSlots.Reset();
 	RaidStorageSlots.SetNum(RaidStorageCapacity);
+	bRaidStorageInitialized = false;
 	bPendingRaidStorageSave = false;
     PendingQuestRewards.Reset();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
@@ -1251,6 +1254,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	StorageSlots.Reset();
 	RaidStorageSlots.Reset();
 	RaidStorageSlots.SetNum(RaidStorageCapacity);
+	bRaidStorageInitialized = false;
 	bPendingRaidStorageSave = false;
     PendingQuestRewards.Reset();
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);

@@ -158,6 +158,8 @@ public:
 	// Secondary warehouse belongs to the active gameplay save, not the raid session.
 	UPROPERTY(SaveGame)
 	TArray<FTunaSweeperInventorySlot> RaidStorageSlots;
+	UPROPERTY(SaveGame)
+	bool bRaidStorageInitialized = false;
 
     UPROPERTY()
     TArray<FTunaSweeperItemStack> PendingQuestRewards;
