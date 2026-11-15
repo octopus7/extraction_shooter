@@ -18,6 +18,18 @@ public partial class MainWindow : Window
     private bool movementCheatStateReadInProgress;
     private int movementCheatStateRevision;
 
+    private void OpenWorldProgress_Click(object sender, RoutedEventArgs e)
+    {
+        if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
+        {
+            StatusTextBlock.Text = (string)FindResource("MovementCheatSelectTarget");
+            return;
+        }
+        var popup = new WorldProgressWindow(target) { Owner = this };
+        popup.Resources.Add(typeof(System.Windows.Controls.Button), FindResource(typeof(System.Windows.Controls.Button)));
+        popup.Show();
+    }
+
     public MainWindow()
     {
         InitializeComponent();

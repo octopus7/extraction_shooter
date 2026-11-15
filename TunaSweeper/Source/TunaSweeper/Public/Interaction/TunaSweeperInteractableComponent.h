@@ -52,7 +52,9 @@ enum class ETunaSweeperInteractionType : uint8
 	WaveDefense = 38 UMETA(DisplayName = "Wave Defense"),
 	Ending = 39 UMETA(DisplayName = "Ending"),
 	IconEditor = 40 UMETA(DisplayName = "Icon Editor"),
-	Encyclopedia = 41 UMETA(DisplayName = "Encyclopedia")
+	Encyclopedia = 41 UMETA(DisplayName = "Encyclopedia"),
+	ChainLinkGate = 42 UMETA(DisplayName = "Chain-link Gate"),
+	GateLockControl = 43 UMETA(DisplayName = "Gate Lock Control")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))

@@ -62,7 +62,7 @@ internal static class MovementCheatProcess
         return BitConverter.ToUInt32(Read(handle, control + 16, 4)) == EnabledToken;
     }
 
-    private static Process GetSelectedProcess(MovementCheatTarget target)
+    internal static Process GetSelectedProcess(MovementCheatTarget target)
     {
         Process process;
         try
@@ -97,7 +97,7 @@ internal static class MovementCheatProcess
             name.Equals(target + "-Win64-Test", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static SafeProcessHandle Open(int processId, bool writable)
+    internal static SafeProcessHandle Open(int processId, bool writable)
     {
         const uint queryAndRead = 0x0400 | 0x0010;
         SafeProcessHandle handle = OpenProcess(queryAndRead | (writable ? 0x0020u | 0x0008u : 0), false, processId);
@@ -111,25 +111,31 @@ internal static class MovementCheatProcess
 
     private static nint FindControl(Process process, SafeProcessHandle handle)
     {
+        nint address = FindInterface(process, handle, ExportName, 32);
+        byte[] header = Read(handle, address, 32);
+        if (BitConverter.ToUInt64(header, 0) != Magic || BitConverter.ToUInt32(header, 8) != 1 ||
+            BitConverter.ToUInt32(header, 12) != 32 || BitConverter.ToUInt32(header, 20) != (uint)process.Id ||
+            BitConverter.ToUInt64(header, 24) != 0)
+            throw new InvalidOperationException("MovementCheatProtocolMismatch");
+        return address;
+    }
+
+    internal static nint FindInterface(Process process, SafeProcessHandle handle, string exportName, int size)
+    {
         foreach (ProcessModule module in process.Modules)
         {
             bool editorModule = module.ModuleName.Equals("UnrealEditor-TunaSweeper.dll", StringComparison.OrdinalIgnoreCase);
             bool gameModule = module.BaseAddress == process.MainModule?.BaseAddress &&
                 !process.ProcessName.Equals("UnrealEditor", StringComparison.OrdinalIgnoreCase);
             if (!editorModule && !gameModule) continue;
-            nint address = FindExport(handle, module);
+            nint address = FindExport(handle, module, exportName, size);
             if (address == 0) continue;
-            byte[] header = Read(handle, address, 32);
-            if (BitConverter.ToUInt64(header, 0) != Magic || BitConverter.ToUInt32(header, 8) != 1 ||
-                BitConverter.ToUInt32(header, 12) != 32 || BitConverter.ToUInt32(header, 20) != (uint)process.Id ||
-                BitConverter.ToUInt64(header, 24) != 0)
-                throw new InvalidOperationException("MovementCheatProtocolMismatch");
             return address;
         }
         throw new InvalidOperationException("MovementCheatInterfaceMissing");
     }
 
-    private static nint FindExport(SafeProcessHandle handle, ProcessModule module)
+    private static nint FindExport(SafeProcessHandle handle, ProcessModule module, string exportName, int interfaceSize)
     {
         byte[] ReadRva(uint rva, int size)
         {
@@ -155,20 +161,26 @@ internal static class MovementCheatProcess
         for (int i = 0; i < nameCount; i++)
         {
             uint nameRva = BitConverter.ToUInt32(names, i * 4);
-            byte[] name = ReadRva(nameRva, ExportName.Length + 1);
-            if (name[^1] != 0 || Encoding.ASCII.GetString(name, 0, name.Length - 1) != ExportName) continue;
+            byte[] name = ReadRva(nameRva, exportName.Length + 1);
+            if (name[^1] != 0 || Encoding.ASCII.GetString(name, 0, name.Length - 1) != exportName) continue;
             ushort ordinal = BitConverter.ToUInt16(ordinals, i * 2);
             if (ordinal >= functionCount) throw new InvalidOperationException("MovementCheatInvalidImage");
             uint functionRva = BitConverter.ToUInt32(ReadRva(BitConverter.ToUInt32(directory, 28) + ordinal * 4u, 4));
             if (functionRva >= exportRva && (ulong)functionRva < (ulong)exportRva + exportSize)
                 throw new InvalidOperationException("MovementCheatInvalidImage");
-            ReadRva(functionRva, 32);
+            ReadRva(functionRva, interfaceSize);
             return module.BaseAddress + (nint)functionRva;
         }
         return 0;
     }
 
-    private static byte[] Read(SafeProcessHandle handle, nint address, int size)
+    internal static void Write(SafeProcessHandle handle, nint address, byte[] bytes)
+    {
+        if (!WriteProcessMemory(handle, address, bytes, (nuint)bytes.Length, out nuint written) || written != (nuint)bytes.Length)
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+    }
+
+    internal static byte[] Read(SafeProcessHandle handle, nint address, int size)
     {
         byte[] result = new byte[size];
         if (size == 0) return result;

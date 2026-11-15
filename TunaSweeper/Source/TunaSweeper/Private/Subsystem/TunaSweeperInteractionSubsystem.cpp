@@ -29,6 +29,8 @@
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperMemoAnchor.h"
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
+#include "Interaction/TunaSweeperChainLinkGate.h"
+#include "Interaction/TunaSweeperGateLockControl.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
@@ -326,6 +328,14 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::PersistentDoor:
 		bHandled = HandlePersistentDoorInteraction(Interactable);
 		break;
+	case ETunaSweeperInteractionType::ChainLinkGate:
+		if (auto* Gate = Cast<ATunaSweeperChainLinkGate>(Interactable->GetOwner()))
+			return Gate->InspectLock(InstigatorPawn);
+		return false;
+	case ETunaSweeperInteractionType::GateLockControl:
+		if (auto* Control = Cast<ATunaSweeperGateLockControl>(Interactable->GetOwner()))
+			return Control->OpenGate(InstigatorPawn);
+		return false;
 	case ETunaSweeperInteractionType::WarpPoint:
 		bHandled = HandleWarpPointInteraction(Interactable, InstigatorPawn);
 		break;
@@ -460,6 +470,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (const auto* Feeding = Cast<UTunaSweeperNpcFeedingComponent>(Interactable); Feeding && !Feeding->IsUnlocked()) return false;
 	if (const auto* Barter = Cast<UTunaSweeperNpcBarterComponent>(Interactable); Barter && !Barter->IsUnlocked()) return false;
 	if (const auto* Rail = Cast<UTunaSweeperRailInteractionComponent>(Interactable); Rail && !Rail->CanOffer()) return false;
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::GateLockControl)
+	{
+		const auto* Control = Cast<ATunaSweeperGateLockControl>(Interactable->GetOwner());
+		return Control && Control->CanOpenGate();
+	}
 	const auto* Armory = Cast<ATunaSweeperDebugArmoryActor>(Interactable->GetOwner());
 	if (Armory && !ATunaSweeperDebugArmoryActor::IsArmoryEnabled()) return false;
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DebugArmoryOpen)

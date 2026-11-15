@@ -1,5 +1,7 @@
 # Agent Instructions
 
+- Progress-reset cheats are opt-in per category: implement only the progression items explicitly requested by the user. Do not independently add reset categories, bulk resets, or automatic progression resets. The currently authorized runtime helper reset targets only rotating chain-link gates and persists the selected gate reset in the current save slot.
+
 - Permanent UI text rule: use the project's existing localization/string-key workflow for all user-facing UI text. Add or update the appropriate string-table entries and resolve them by key; do not hardcode labels, messages, warnings, or fallback display text in code.
 - Permanent player-facing terminology rule: `Bunker` / `벙커` is an internal implementation name. All player-facing Korean text (UI, dialogue, quest descriptions, objectives, and notifications) must consistently use `기지`. Internal code, map names, asset paths, and identifiers may retain `Bunker`.
 

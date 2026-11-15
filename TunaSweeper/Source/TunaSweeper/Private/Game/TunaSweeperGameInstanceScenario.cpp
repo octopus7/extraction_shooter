@@ -26,6 +26,40 @@ void UTunaSweeperGameInstance::MarkScenarioProgressFlag(FName ScenarioFlag, bool
 	}
 }
 
+bool UTunaSweeperGameInstance::TrySaveGateUnlock(FName UnlockFlag)
+{
+	if (UnlockFlag.IsNone() || IsCombatTestSession())
+	{
+		return false;
+	}
+	EnsureInventoryStateInitialized();
+	if (CompletedScenarioFlags.Contains(UnlockFlag))
+	{
+		return true;
+	}
+
+	CompletedScenarioFlags.Add(UnlockFlag);
+	if (!SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime))
+	{
+		CompletedScenarioFlags.Remove(UnlockFlag);
+		return false;
+	}
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TrySaveGateReset(FName UnlockFlag)
+{
+	// Never initialize a user save merely because an external helper is polling/resetting.
+	if (UnlockFlag.IsNone() || !IsGateCheatSaveReady() || IsCombatTestSession()) return false;
+	const bool bHadFlag = CompletedScenarioFlags.Remove(UnlockFlag) > 0;
+	if (!SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime))
+	{
+		if (bHadFlag) CompletedScenarioFlags.Add(UnlockFlag);
+		return false;
+	}
+	return true;
+}
+
 FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 {
 	EnsureInventoryStateInitialized();

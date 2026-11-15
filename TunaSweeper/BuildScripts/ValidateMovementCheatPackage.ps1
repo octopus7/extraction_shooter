@@ -37,22 +37,33 @@ if ($nameCount -gt 1000000) { throw 'Invalid export name count.' }
 $names = FileOffset (U32 ($directory+32))
 $ordinals = FileOffset (U32 ($directory+36))
 $functions = FileOffset (U32 ($directory+28))
-$control = -1
+function FindControlExport([string]$exportName) {
 for ($i=0; $i -lt $nameCount; $i++) {
     $nameOffset = FileOffset (U32 ($names+$i*4))
     $end = [Array]::IndexOf($bytes, [byte]0, $nameOffset)
     if ($end -lt $nameOffset) { throw 'Invalid export string.' }
     $name = [Text.Encoding]::ASCII.GetString($bytes, $nameOffset, $end-$nameOffset)
-    if ($name -eq 'TunaSweeperMovementCheatControl') {
+    if ($name -eq $exportName) {
         $ordinal = U16 ($ordinals+$i*2)
         if ($ordinal -ge (U32 ($directory+20))) { throw 'Invalid export ordinal.' }
         $controlRva = U32 ($functions+$ordinal*4)
         if ($controlRva -ge $exportRva -and [uint64]$controlRva -lt ([uint64]$exportRva+$exportSize)) { throw 'Forwarded control export is not supported.' }
-        $control = FileOffset $controlRva
-        break
+        return $controlRva
     }
 }
-if ($control -lt 0) { throw 'Movement cheat control export missing.' }
+throw "Required cheat control export missing: $exportName"
+}
+$control = FileOffset (FindControlExport 'TunaSweeperMovementCheatControl')
 if ((U64 $control) -ne 0x54534D4F56454348 -or (U32 ($control+8)) -ne 1 -or (U32 ($control+12)) -ne 32) { throw 'Unexpected movement cheat control protocol.' }
 if ((U32 ($control+16)) -ne 0 -or (U32 ($control+20)) -ne 0 -or (U64 ($control+24)) -ne 0) { throw 'Packaged movement cheat control must be inactive with zero runtime state.' }
-Write-Host 'Movement cheat package guard passed: inactive runtime gate; no local bookmark/helper artifacts.'
+$gateControlRva = FindControlExport 'TunaSweeperGateCheatControl'
+$gateControl = FileOffset $gateControlRva
+# The independent gate mailbox has no persisted request or activation state.
+# Header validation and the complete zero-runtime-state check are kept in sync
+# with FTunaSweeperGateCheatControl when its protocol changes.
+if ((U64 $gateControl) -ne 0x5453474154454348 -or (U32 ($gateControl+8)) -ne 1 -or (U32 ($gateControl+12)) -ne 25864) { throw 'Unexpected gate cheat control protocol.' }
+for ($i = 16; $i -lt 25864; $i++) {
+    $offset = FileOffset ([uint32]($gateControlRva + $i))
+    if ($bytes[$offset] -ne 0) { throw 'Packaged gate cheat mailbox must have zero runtime state and no queued reset.' }
+}
+Write-Host 'Cheat package guard passed: inactive movement gate, empty gate-reset mailbox; no local bookmark/helper artifacts.'

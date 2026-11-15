@@ -1,0 +1,53 @@
+<Window x:Class="TunaBuildHelper.WorldProgressWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:sys="clr-namespace:System;assembly=mscorlib"
+ Title="{DynamicResource GateTitle}" Width="780" Height="560" MinWidth="640" MinHeight="430"
+ Background="#171B22" Foreground="#DCE5F0" WindowStartupLocation="CenterOwner">
+ <Window.Resources>
+  <Style TargetType="GridViewColumnHeader">
+   <Setter Property="Background" Value="#273140"/>
+   <Setter Property="Foreground" Value="#DCE5F0"/>
+   <Setter Property="Padding" Value="8,7"/>
+  </Style>
+  <sys:String x:Key="GateTitle">월드 진행 초기화 · 철망문</sys:String>
+  <sys:String x:Key="GateScope">선택한 철망문만 닫고 잠급니다. 변경은 현재 세이브 슬롯에 저장됩니다.</sys:String>
+  <sys:String x:Key="GateTarget">고정 대상 · {0}</sys:String>
+  <sys:String x:Key="GateContext">맵 · {0}    세이브 슬롯 · {1}</sys:String>
+  <sys:String x:Key="GateReading">게임 상태를 확인하는 중입니다…</sys:String>
+  <sys:String x:Key="GateReady">초기화할 철망문을 선택하세요.</sys:String>
+  <sys:String x:Key="GateEmpty">현재 맵에 초기화 가능한 철망문이 없습니다.</sys:String>
+  <sys:String x:Key="GateUnavailable">유효한 게임 맵·세이브 슬롯을 확인할 수 없습니다.</sys:String>
+  <sys:String x:Key="GateUnsupported">호환되는 초기화 인터페이스가 없거나 프로세스에 접근할 수 없습니다.</sys:String>
+  <sys:String x:Key="GateDisabled">이동 치트를 활성화한 뒤 이용하세요.</sys:String>
+  <sys:String x:Key="GateStale">게임 맵·슬롯 또는 문 상태가 바뀌었습니다. 다시 선택하세요.</sys:String>
+  <sys:String x:Key="GateBusy">다른 헬퍼에서 초기화 요청을 처리 중입니다.</sys:String>
+  <sys:String x:Key="GateTimeout">요청 시간이 만료되었습니다. 문 상태를 다시 확인하세요.</sys:String>
+  <sys:String x:Key="GateWorking">선택한 문을 초기화하고 저장하는 중입니다…</sys:String>
+  <sys:String x:Key="GateSuccess">선택한 철망문을 초기화하고 현재 슬롯에 저장했습니다.</sys:String>
+  <sys:String x:Key="GateFailure">초기화하지 못했습니다. 게임 상태와 세이브 접근 권한을 확인하세요.</sys:String>
+  <sys:String x:Key="GateConfirm">철망문 {0}을 닫고 다시 잠글까요?&#10;&#10;맵: {1}&#10;현재 세이브 슬롯: {2}&#10;&#10;현재 슬롯의 저장 데이터에도 반영됩니다.</sys:String>
+  <sys:String x:Key="GateReset">선택한 철망문 초기화…</sys:String>
+  <sys:String x:Key="GateIdLabel">철망문 ID</sys:String>
+  <sys:String x:Key="GateLevelLabel">레벨</sys:String>
+  <sys:String x:Key="GateStateLabel">상태</sys:String>
+  <sys:String x:Key="GateLocked">잠김</sys:String>
+  <sys:String x:Key="GateUnlocked">잠금 해제됨</sys:String>
+  <sys:String x:Key="GateInvalid">ID 오류 · 초기화 불가</sys:String>
+ </Window.Resources>
+ <Grid Margin="24">
+  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <TextBlock x:Name="TargetText" TextWrapping="Wrap" Foreground="#91A5BE"/>
+  <TextBlock x:Name="ContextText" Grid.Row="1" Margin="0,10,0,0" FontSize="17" TextWrapping="Wrap" Text="{DynamicResource GateReading}"/>
+  <TextBlock Grid.Row="2" Margin="0,12,0,16" TextWrapping="Wrap" Text="{DynamicResource GateScope}"/>
+  <ListView x:Name="GateList" Grid.Row="3" Background="#202833" Foreground="#DCE5F0" BorderBrush="#3C4C61" SelectionMode="Single" SelectionChanged="GateList_SelectionChanged">
+   <ListView.View><GridView>
+    <GridViewColumn Header="{DynamicResource GateIdLabel}" DisplayMemberBinding="{Binding Row.GateId}" Width="200"/>
+    <GridViewColumn Header="{DynamicResource GateStateLabel}" DisplayMemberBinding="{Binding State}" Width="150"/>
+    <GridViewColumn Header="{DynamicResource GateLevelLabel}" DisplayMemberBinding="{Binding Row.Level}" Width="300"/>
+   </GridView></ListView.View>
+  </ListView>
+  <TextBlock x:Name="StatusText" Grid.Row="4" Margin="0,16,0,12" TextWrapping="Wrap" Foreground="#91A5BE" Text="{DynamicResource GateReading}"/>
+  <Button x:Name="ResetButton" Grid.Row="5" Content="{DynamicResource GateReset}" IsEnabled="False" Click="Reset_Click"/>
+ </Grid>
+</Window>

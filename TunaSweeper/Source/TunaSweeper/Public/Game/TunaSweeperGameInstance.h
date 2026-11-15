@@ -282,6 +282,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperUndergroundStorageTest;
 	friend class FTunaSweeperRaidStoragePersistenceTest;
 	friend class FTunaSweeperFreePlayEndingPersistenceTest;
+	friend class FTunaSweeperChainLinkGatePersistenceTest;
 	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperFeedingRewardsTest;
 	friend class FTunaSweeperQuestArrivalTest;
@@ -295,6 +296,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperDeliveryTest;
 	friend class FTunaSweeperRegionPassageTest;
 #if WITH_DEV_AUTOMATION_TESTS
+	friend class FTunaSweeperGateCheatTest;
 	friend class FTunaSweeperConcentratedExplosiveCraftTest;
 	friend class FTunaSweeperHighOutputMotorCraftTest;
 	friend class FTunaSweeperQuestCraftTest;
@@ -500,6 +502,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
 	void MarkScenarioProgressFlag(FName ScenarioFlag, bool bSaveImmediately = true);
+
+	bool TrySaveGateUnlock(FName UnlockFlag);
+	bool TrySaveGateReset(FName UnlockFlag);
+	bool IsGateCheatSaveReady() const { return bInventoryStateInitialized && !bInventoryStateInitializing; }
+	uint64 GetGateCheatSaveEpoch() const { return GateCheatSaveEpoch; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
 	FName ResolveInitialGameplayLevelName();
@@ -1248,6 +1255,8 @@ private:
 
 	UPROPERTY(Transient)
 	bool bInventoryStateInitialized = false;
+	// Memory-only context generation: slot reset and every attempted load invalidate helper selections.
+	uint64 GateCheatSaveEpoch = 0;
 
 	UPROPERTY(Transient)
 	bool bInventoryStateInitializing = false;

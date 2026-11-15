@@ -525,6 +525,7 @@ void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
 
 bool UTunaSweeperGameInstance::LoadGameState()
 {
+	++GateCheatSaveEpoch;
 	ResetVehicleFuelSession();
 	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
 	if (ExistingSlotName.IsEmpty())
@@ -1075,6 +1076,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	++GateCheatSaveEpoch;
 	WaveDefenseProgress.Reset();
 	bWaveDefenseInterruptedNeedsSave = false;
 	ResetVehicleFuelSession();

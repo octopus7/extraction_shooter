@@ -1,5 +1,13 @@
 # Save/Load Persistence Contract
 
+## Chain-link gates
+
+Each gate uses a unique, stable instance `GateId` within its level. `CompletedScenarioFlags` stores `gate.unlocked:<level package>:<GateId>` in the selected gameplay slot, with the PIE prefix removed from the package. The linked control writes the flag immediately through the standard gameplay save. A failed write rolls back the flag and leaves the gate locked for a retry. A successful write starts the hinge animation. On subsequent entry the gate starts in its fully open pose. Old saves start with the gate locked. The opening animation's progress has no separate save data.
+
+The helper's separate world-progress popup can explicitly reset a selected, currently loaded rotating chain-link gate while cheats are enabled. This removes only that gate's unlock flag from the current slot through the normal gameplay save, then restores the closed/locked pose and interaction. Save failure restores the flag and leaves the live gate unchanged. The resulting slot follows ordinary cloud synchronization; the reset request, process selection, context token and result mailbox are never persisted. World/slot/load changes invalidate earlier selections and requests. Automatic cheat activation does not submit reset requests.
+
+Progress-reset categories are strictly user-directed. The runtime helper currently supports only rotating chain-link gates; do not add other categories, bulk resets or automatic resets without an explicit user instruction.
+
 ## Encyclopedia discoveries
 
 `DefeatedEnemyKinds` is an additive `TArray<FName>` on `UTunaSweeperSaveGame`, backed by a runtime set on the GameInstance. A local-player kill resolves the most-specific authored enemy class to a stable kind ID; its first kill adds that ID and requests an ordinary gameplay save. Repeated kills are idempotent. Combat-lab kills never modify this history. If the disk save fails, the runtime discovery is retained for the next ordinary save attempt.
@@ -72,7 +80,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 
 Movement cheats use the existing ordinary map markers as teleport destinations. Those markers retain the normal gameplay-slot persistence and cloud rules documented below. F9 over a marker in the M-key map opens an in-game confirmation; accepting requests a safe teleport to that marker on the current map. The dedicated cheat-bookmark collection and local JSON storage have been removed. The external trainer gate, speed multiplier and suppressed combat state remain runtime-only and start inactive on each process launch. Teleport confirmations also remain runtime-only. Ordinary gameplay progress follows its normal save rules.
 
-`TunaBuildHelper` discovers the versioned exported process-memory control, checks its process identity and writes only the enable token. It does not patch executable files or save an enabled setting. Every supported Windows packaging script and the repository Steam upload script run `BuildScripts/ValidateMovementCheatPackage.ps1`, which rejects a nonzero initial gate/runtime state or local developer data/helper artifacts in the package. Live Steamworks cloud rules still require the exact save-root configuration documented below.
+`TunaBuildHelper` discovers versioned exported process-memory controls and checks process identity. Movement activation writes only the enable token; explicit chain-link gate resets use a separate request/result mailbox processed by the game thread. It does not patch executable files or save an enabled setting. Every supported Windows packaging script and the repository Steam upload script run `BuildScripts/ValidateMovementCheatPackage.ps1`, which rejects a nonzero initial movement gate, nonempty gate-reset mailbox or local developer data/helper artifacts in the package. Live Steamworks cloud rules still require the exact save-root configuration documented below.
 
 All gameplay slots, selected-slot settings, achievements, previous generations, backups, and cleanup logs resolve their root through `TunaSweeperBuildFlavor::GetSaveGameDirectory()`.
 
