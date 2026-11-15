@@ -297,6 +297,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperRegionPassageTest;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperGateCheatTest;
+    friend class FTunaSweeperTunaFillCheatTest;
 	friend class FTunaSweeperConcentratedExplosiveCraftTest;
 	friend class FTunaSweeperHighOutputMotorCraftTest;
 	friend class FTunaSweeperQuestCraftTest;
@@ -651,6 +652,7 @@ public:
 	void CloseRaidStorage(UObject* Owner);
 	bool IsRaidStorageOpen() const { return bActiveLootContainerIsRaidStorage; }
 	bool IsRaidStorageReadyForTrueEnding();
+    bool TryFillRaidStorageForTrueEndingTest();
 	bool SaveFreePlayEnding(bool bTrueEnding);
 	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();

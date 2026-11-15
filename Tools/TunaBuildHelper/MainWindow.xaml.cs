@@ -23,6 +23,63 @@ public partial class MainWindow : Window
     private CancellationTokenSource? movementCheatAutoCancellation;
     private CancellationTokenSource? movementCheatAutoTargetCancellation;
     private CancellationTokenSource? movementCheatManualCancellation;
+    private CancellationTokenSource? tunaFillCancellation;
+
+    // Only the explicit button path can publish a tuna request. AUTO never calls this action.
+    private async void FillTuna_Click(object sender, RoutedEventArgs e)
+    {
+        if (isClosed || tunaFillCancellation is not null) return;
+        if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
+        {
+            StatusTextBlock.Text = (string)FindResource("MovementCheatSelectTarget");
+            return;
+        }
+        using var cancellation = new CancellationTokenSource();
+        tunaFillCancellation = cancellation;
+        TunaFillButton.IsEnabled = false;
+        try
+        {
+            StatusTextBlock.Text = (string)FindResource("TunaReading");
+            var expected = await Task.Run(() => GateProgressProcess.ReadTuna(target), cancellation.Token);
+            cancellation.Token.ThrowIfCancellationRequested();
+            if (isClosed || !Equals(MovementCheatTargets.SelectedItem, target)) return;
+            if (MessageBox.Show(this, string.Format((string)FindResource("TunaConfirm"), target.DisplayName, expected.Map, expected.Slot),
+                (string)FindResource("TunaTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes)
+            {
+                StatusTextBlock.Text = (string)FindResource("TunaCanceled");
+                return;
+            }
+            cancellation.Token.ThrowIfCancellationRequested();
+            if (isClosed || !Equals(MovementCheatTargets.SelectedItem, target)) return;
+            StatusTextBlock.Text = (string)FindResource("TunaWorking");
+            uint result = await Task.Run(() => GateProgressProcess.FillTuna(target, expected, cancellation.Token), cancellation.Token);
+            if (!isClosed && !cancellation.IsCancellationRequested)
+                StatusTextBlock.Text = (string)FindResource(result switch
+                {
+                    14 => "TunaSuccess", 3 => "TunaDisabled", 6 => "TunaTimeout",
+                    7 or 8 or 9 => "TunaStale", _ => "TunaFailure"
+                });
+        }
+        catch (OperationCanceledException)
+        {
+            if (!isClosed) StatusTextBlock.Text = (string)FindResource("TunaCanceled");
+        }
+        catch (Exception ex)
+        {
+            if (!isClosed && !cancellation.IsCancellationRequested)
+                StatusTextBlock.Text = (string)FindResource(ex.Message switch
+                {
+                    "TunaDisabled" => "TunaDisabled", "TunaUnsupported" => "TunaUnsupported",
+                    "TunaUnavailable" => "TunaUnavailable", "GateStale" => "TunaStale",
+                    "GateBusy" => "TunaBusy", "GateTimeout" => "TunaTimeout", _ => "TunaFailure"
+                });
+        }
+        finally
+        {
+            if (ReferenceEquals(tunaFillCancellation, cancellation)) tunaFillCancellation = null;
+            if (!isClosed) TunaFillButton.IsEnabled = true;
+        }
+    }
 
     private void OpenWorldProgress_Click(object sender, RoutedEventArgs e)
     {
@@ -77,6 +134,7 @@ public partial class MainWindow : Window
         if (MovementCheatStateText is null) return;
         movementCheatAutoTargetCancellation?.Cancel();
         movementCheatManualCancellation?.Cancel();
+        tunaFillCancellation?.Cancel();
         movementCheatStateRevision++;
         MovementCheatStateText.Text = (string)FindResource(MovementCheatTargets.SelectedItem is MovementCheatTarget
             ? "MovementCheatStateReading" : "MovementCheatStateSelect");
@@ -141,6 +199,7 @@ public partial class MainWindow : Window
         movementCheatAutoCancellation?.Cancel();
         movementCheatAutoTargetCancellation?.Cancel();
         movementCheatManualCancellation?.Cancel();
+        tunaFillCancellation?.Cancel();
         base.OnClosed(e);
     }
 

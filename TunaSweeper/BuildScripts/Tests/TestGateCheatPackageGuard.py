@@ -63,7 +63,9 @@ def main():
 
         run('clean binary')
         run('active movement token rejected', movement + 16)
+        run('old progression protocol rejected', gate + 8)
         run('queued gate reset rejected', gate + 24)
+        run('queued progression operation rejected', gate + 56)
         run('stale gate snapshot rejected', gate + 88)
         run('tail row runtime state rejected', gate + 25863)
         run('helper artifact rejected', extra_helper=True)

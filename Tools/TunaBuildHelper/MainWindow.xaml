@@ -13,6 +13,20 @@
         <sys:String x:Key="ReadyStatus">준비됨</sys:String>
         <sys:String x:Key="MainTabLabel">Main</sys:String>
         <sys:String x:Key="CheatTabLabel">Cheat</sys:String>
+        <sys:String x:Key="TunaFillButton">진엔딩 테스트 · 참치 꽉 채우기…</sys:String>
+        <sys:String x:Key="TunaTitle">진엔딩 테스트 · 참치 채우기</sys:String>
+        <sys:String x:Key="TunaConfirm">대상: {0}&#10;현재 맵: {1}&#10;저장 슬롯: {2}&#10;&#10;레이드 창고의 기존 내용물을 모두 교체하여 참치를 10칸 × 10개 = 100개 채우고 현재 슬롯에 저장합니다.&#10;일반 인벤토리, 장비, 엔딩 플래그는 변경하지 않습니다.&#10;&#10;진행할까요?</sys:String>
+        <sys:String x:Key="TunaReading">참치 채우기 · 선택한 게임의 맵과 슬롯을 확인하는 중입니다…</sys:String>
+        <sys:String x:Key="TunaWorking">참치 채우기 · 게임의 저장 완료 응답을 기다리는 중입니다…</sys:String>
+        <sys:String x:Key="TunaSuccess">레이드 창고를 참치 100개로 채우고 현재 슬롯에 저장했습니다.</sys:String>
+        <sys:String x:Key="TunaDisabled">이동 치트를 활성화한 뒤 다시 시도하세요.</sys:String>
+        <sys:String x:Key="TunaUnsupported">참치 채우기를 지원하지 않는 게임입니다. 최신 빌드로 실행해 주세요.</sys:String>
+        <sys:String x:Key="TunaUnavailable">게임플레이 중인 맵과 저장 슬롯을 확인할 수 없습니다. 게임에 진입한 뒤 다시 시도하세요.</sys:String>
+        <sys:String x:Key="TunaStale">게임의 맵 또는 슬롯이 변경되었습니다. 대상을 다시 확인해 주세요.</sys:String>
+        <sys:String x:Key="TunaBusy">이 게임에서 다른 진행 상태 요청을 처리 중입니다. 잠시 뒤 다시 시도하세요.</sys:String>
+        <sys:String x:Key="TunaTimeout">완료 응답을 받지 못했습니다. 게임에서 창고 상태를 확인해 주세요.</sys:String>
+        <sys:String x:Key="TunaFailure">참치 채우기를 완료하지 못했습니다. 게임 상태를 확인해 주세요.</sys:String>
+        <sys:String x:Key="TunaCanceled">참치 채우기 요청을 취소했습니다. 이미 처리된 요청은 되돌릴 수 없습니다.</sys:String>
         <sys:String x:Key="WorldProgressOpen">월드 진행 초기화…</sys:String>
         <sys:String x:Key="FolderTabLabel">Folder</sys:String>
         <Style TargetType="TabItem">
@@ -208,19 +222,20 @@
                     <StackPanel>
                         <TextBlock Margin="0,0,0,6" Foreground="#DCE5F0" Text="{DynamicResource MovementCheatLabel}" />
                         <ComboBox x:Name="MovementCheatTargets" MinHeight="30" Margin="0,0,0,8" SelectionChanged="MovementCheatTargets_SelectionChanged" />
-                        <TextBlock x:Name="MovementCheatStateText" Margin="0,0,0,12" Foreground="#F4F7FB" FontSize="15" TextWrapping="Wrap" Text="{DynamicResource MovementCheatStateSelect}" />
-                        <Button x:Name="MovementCheatRefreshButton" Margin="0,0,0,8" Click="RefreshMovementCheatTargets_Click" Content="{DynamicResource MovementCheatRefresh}" />
+                        <TextBlock x:Name="MovementCheatStateText" Margin="0,0,0,8" Foreground="#F4F7FB" FontSize="15" TextWrapping="Wrap" Text="{DynamicResource MovementCheatStateSelect}" />
+                        <Button MinHeight="40" x:Name="MovementCheatRefreshButton" Margin="0,0,0,8" Click="RefreshMovementCheatTargets_Click" Content="{DynamicResource MovementCheatRefresh}" />
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
-                            <Button Margin="0,0,5,0" Click="EnableMovementCheat_Click" Content="{DynamicResource MovementCheatEnable}" />
-                            <Button Grid.Column="1" Margin="5,0,0,0" Click="DisableMovementCheat_Click" Content="{DynamicResource MovementCheatDisable}" />
+                            <Button MinHeight="40" Margin="0,0,5,0" Click="EnableMovementCheat_Click" Content="{DynamicResource MovementCheatEnable}" />
+                            <Button MinHeight="40" Grid.Column="1" Margin="5,0,0,0" Click="DisableMovementCheat_Click" Content="{DynamicResource MovementCheatDisable}" />
                         </Grid>
-                        <Button x:Name="MovementCheatAutoButton" Margin="0,12,0,6" Click="ToggleMovementCheatAuto_Click" Content="{DynamicResource MovementCheatAutoOff}" ToolTip="{DynamicResource MovementCheatAutoTooltip}" />
+                        <Button MinHeight="40" x:Name="MovementCheatAutoButton" Margin="0,8,0,6" Click="ToggleMovementCheatAuto_Click" Content="{DynamicResource MovementCheatAutoOff}" ToolTip="{DynamicResource MovementCheatAutoTooltip}" />
                         <TextBlock x:Name="MovementCheatAutoStatus" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatAutoIdle}" />
-                        <Button Margin="0,12,0,0" Click="OpenWorldProgress_Click" Content="{DynamicResource WorldProgressOpen}" />
-                        <Border Margin="0,12,0,0" Padding="14" Background="#202833" CornerRadius="4">
+                        <Button MinHeight="40" Margin="0,8,0,0" Click="OpenWorldProgress_Click" Content="{DynamicResource WorldProgressOpen}" />
+                        <Button MinHeight="40" x:Name="TunaFillButton" Margin="0,8,0,0" Click="FillTuna_Click" Content="{DynamicResource TunaFillButton}" />
+                        <Border Margin="0,8,0,0" Padding="10" Background="#202833" CornerRadius="4">
                             <StackPanel>
-                                <TextBlock Margin="0,0,0,10" Foreground="#DCE5F0" FontWeight="SemiBold" TextWrapping="Wrap" Text="{DynamicResource MovementCheatKeysTitle}" />
+                                <TextBlock Margin="0,0,0,6" Foreground="#DCE5F0" FontWeight="SemiBold" TextWrapping="Wrap" Text="{DynamicResource MovementCheatKeysTitle}" />
                                 <TextBlock Margin="0,0,0,6" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatSpeedKey}" />
                                 <TextBlock Margin="0,0,0,6" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatMapKey}" />
                                 <TextBlock Margin="0,0,0,6" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatTeleportKey}" />

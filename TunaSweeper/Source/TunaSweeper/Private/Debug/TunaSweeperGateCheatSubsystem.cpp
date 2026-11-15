@@ -96,7 +96,7 @@ void UTunaSweeperGateCheatSubsystem::Tick(float DeltaTime)
  check(IsInGameThread());
  auto& Control = TunaSweeperGateCheatControl;
  // A modified/unsupported header must never result in a game mutation.
- if (Control.Magic != 0x5453474154454348ULL || Control.Version != 1 || Control.Size != sizeof(Control)
+ if (Control.Magic != 0x5453474154454348ULL || Control.Version != 2 || Control.Size != sizeof(Control)
   || Control.ProcessId != FPlatformProcess::GetCurrentProcessId() || Control.Reserved != 0) return;
  UWorld* World = nullptr;
  UTunaSweeperGameInstance* Game = nullptr;
@@ -178,11 +178,16 @@ void UTunaSweeperGateCheatSubsystem::Tick(float DeltaTime)
   {
    HighSequence = Request.Sequence;
    const int64 Now = UtcMs();
-   if (Request.ProcessId != Control.ProcessId || Request.Reserved[0] || Request.Reserved[1] || Request.Reserved[2] || (Request.Operation != 1 && Request.Operation != 2)) Result = EResult::InvalidRequest;
+   if (Request.ProcessId != Control.ProcessId || Request.Reserved[0] || Request.Reserved[1] || Request.Reserved[2] || (Request.Operation != 1 && Request.Operation != 2 && Request.Operation != 3) || (Request.Operation == 3 && Request.RowKey != 0)) Result = EResult::InvalidRequest;
    else if (Request.DeadlineUtcMs <= Now || Request.DeadlineUtcMs > Now + 5000) Result = EResult::Expired;
    else if (State != 0) Result = static_cast<EResult>(State);
    else if (Request.ContextEpoch != ContextEpoch) Result = EResult::StaleContext;
    else if (Request.Operation == 1) Result = EResult::Refreshed;
+   else if (Request.Operation == 3)
+   {
+    if (Control.Request.Sequence != Request.Sequence || Control.Request.DeadlineUtcMs <= UtcMs()) Result = EResult::Expired;
+    else Result = Game->TryFillRaidStorageForTrueEndingTest() ? EResult::TunaFilled : EResult::SaveFailed;
+   }
    else if (Gates.Num() > UE_ARRAY_COUNT(Snapshot.Rows)) Result = EResult::Overflow;
    else if (ATunaSweeperChainLinkGate** Found = LiveRows.Find(Request.RowKey))
    {
