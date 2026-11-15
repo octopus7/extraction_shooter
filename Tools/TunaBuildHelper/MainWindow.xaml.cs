@@ -336,19 +336,9 @@ public partial class MainWindow : Window
         RunBatchScript("KillTunaSweeperBuild.bat", closeAlways: true, statusResourceKey: "KillBuildStartedStatus");
     }
 
-    private void BuildSteamDemoButton_Click(object sender, RoutedEventArgs e)
-    {
-        RunBatchScript("PackageTunaSweeperSteamDemoWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
-    }
-
     private void BuildSteamFullButton_Click(object sender, RoutedEventArgs e)
     {
         RunBatchScript("PackageTunaSweeperSteamFullWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
-    }
-
-    private void BuildStoveDemoButton_Click(object sender, RoutedEventArgs e)
-    {
-        RunBatchScript("PackageTunaSweeperStoveDemoWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
     }
 
     private void BuildStoveFullButton_Click(object sender, RoutedEventArgs e)

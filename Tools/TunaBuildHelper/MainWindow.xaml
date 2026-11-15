@@ -40,10 +40,8 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <sys:String x:Key="BuildSteamDemoLabel">Steam Demo 빌드</sys:String>
-        <sys:String x:Key="BuildSteamFullLabel">Steam Full 빌드</sys:String>
-        <sys:String x:Key="BuildStoveDemoLabel">STOVE Demo 빌드</sys:String>
-        <sys:String x:Key="BuildStoveFullLabel">STOVE Full 빌드</sys:String>
+        <sys:String x:Key="BuildSteamFullLabel">Steam 빌드</sys:String>
+        <sys:String x:Key="BuildStoveFullLabel">STOVE 빌드</sys:String>
         <sys:String x:Key="PackageBuildTooltip">Shipping 패키지를 생성하고 콘솔 창을 유지합니다.</sys:String>
         <sys:String x:Key="PackageBuildStartedStatus">패키징을 시작했습니다. 콘솔 창에서 진행 상황을 확인하세요.</sys:String>
         <sys:String x:Key="KillBuildLabel">빌드·패키징 강제 종료</sys:String>
@@ -180,23 +178,8 @@
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
                                 <Button Margin="0,0,5,0"
-                                        Click="BuildSteamDemoButton_Click"
-                                        Content="{DynamicResource BuildSteamDemoLabel}"
-                                        ToolTip="{DynamicResource PackageBuildTooltip}" />
-                                <Button Grid.Column="1"
-                                        Margin="5,0,0,0"
                                         Click="BuildSteamFullButton_Click"
                                         Content="{DynamicResource BuildSteamFullLabel}"
-                                        ToolTip="{DynamicResource PackageBuildTooltip}" />
-                            </Grid>
-                            <Grid Margin="0,0,0,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <Button Margin="0,0,5,0"
-                                        Click="BuildStoveDemoButton_Click"
-                                        Content="{DynamicResource BuildStoveDemoLabel}"
                                         ToolTip="{DynamicResource PackageBuildTooltip}" />
                                 <Button Grid.Column="1"
                                         Margin="5,0,0,0"
