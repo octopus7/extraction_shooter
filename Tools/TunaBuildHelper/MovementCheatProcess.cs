@@ -18,6 +18,7 @@ internal static class MovementCheatProcess
     private const string ExportName = "TunaSweeperMovementCheatControl";
     private const ulong Magic = 0x54534D4F56454348;
     private const uint EnabledToken = 0x54534D43;
+    private static readonly object WriteLock = new();
 
     public static IReadOnlyList<MovementCheatTarget> FindTargets()
     {
@@ -42,16 +43,21 @@ internal static class MovementCheatProcess
         return targets;
     }
 
-    public static void SetEnabled(MovementCheatTarget target, bool enabled)
+    public static void SetEnabled(MovementCheatTarget target, bool enabled, CancellationToken cancellationToken = default)
     {
-        using Process process = GetSelectedProcess(target);
-        using SafeProcessHandle handle = Open(process.Id, true);
-        nint control = FindControl(process, handle);
-        byte[] token = BitConverter.GetBytes(enabled ? EnabledToken : 0u);
-        if (!WriteProcessMemory(handle, control + 16, token, (nuint)token.Length, out nuint written) || written != 4)
-            throw new Win32Exception(Marshal.GetLastWin32Error());
-        byte[] actual = Read(handle, control + 16, 4);
-        if (!actual.SequenceEqual(token)) throw new InvalidOperationException("MovementCheatWriteFailed");
+        lock (WriteLock)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            using Process process = GetSelectedProcess(target);
+            using SafeProcessHandle handle = Open(process.Id, true);
+            nint control = FindControl(process, handle);
+            byte[] token = BitConverter.GetBytes(enabled ? EnabledToken : 0u);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!WriteProcessMemory(handle, control + 16, token, (nuint)token.Length, out nuint written) || written != 4)
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            byte[] actual = Read(handle, control + 16, 4);
+            if (!actual.SequenceEqual(token)) throw new InvalidOperationException("MovementCheatWriteFailed");
+        }
     }
 
     public static bool IsEnabled(MovementCheatTarget target)

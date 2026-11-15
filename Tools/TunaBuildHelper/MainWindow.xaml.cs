@@ -17,6 +17,12 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer movementCheatStateTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private bool movementCheatStateReadInProgress;
     private int movementCheatStateRevision;
+    private Task<IReadOnlyList<MovementCheatTarget>>? movementCheatSearchTask;
+    private int movementCheatSearchRevision;
+    private bool isClosed;
+    private CancellationTokenSource? movementCheatAutoCancellation;
+    private CancellationTokenSource? movementCheatAutoTargetCancellation;
+    private CancellationTokenSource? movementCheatManualCancellation;
 
     private void OpenWorldProgress_Click(object sender, RoutedEventArgs e)
     {
@@ -45,24 +51,32 @@ public partial class MainWindow : Window
         RunBatchScript("BuildAndRunTunaSweeper.bat", closeOnSuccess: true);
     }
 
-    private void RefreshMovementCheatTargets_Click(object sender, RoutedEventArgs e)
+    private async void RefreshMovementCheatTargets_Click(object sender, RoutedEventArgs e)
     {
-        RefreshMovementCheatTargets();
+        await RefreshMovementCheatTargetsAsync();
     }
 
-    private void HelperTabs_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    private async void HelperTabs_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (!ReferenceEquals(e.Source, sender)) return;
+        UpdateMovementCheatStatePolling();
         if (CheatTab?.IsSelected == true)
         {
-            RefreshMovementCheatTargets();
+            await RefreshMovementCheatTargetsAsync();
         }
-        UpdateMovementCheatStatePolling();
+        else
+        {
+            movementCheatSearchRevision++;
+            if (movementCheatSearchTask is not null)
+                StatusTextBlock.Text = (string)FindResource("ReadyStatus");
+        }
     }
 
     private async void MovementCheatTargets_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
         if (MovementCheatStateText is null) return;
+        movementCheatAutoTargetCancellation?.Cancel();
+        movementCheatManualCancellation?.Cancel();
         movementCheatStateRevision++;
         MovementCheatStateText.Text = (string)FindResource(MovementCheatTargets.SelectedItem is MovementCheatTarget
             ? "MovementCheatStateReading" : "MovementCheatStateSelect");
@@ -83,7 +97,7 @@ public partial class MainWindow : Window
 
     private async Task RefreshMovementCheatStateAsync()
     {
-        if (!IsMovementCheatStateVisible || movementCheatStateReadInProgress) return;
+        if (isClosed || !IsMovementCheatStateVisible || movementCheatStateReadInProgress || movementCheatSearchTask is not null) return;
         if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
         {
             MovementCheatStateText.Text = (string)FindResource("MovementCheatStateSelect");
@@ -120,25 +134,165 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        isClosed = true;
+        movementCheatSearchRevision++;
+        movementCheatStateRevision++;
         movementCheatStateTimer.Stop();
+        movementCheatAutoCancellation?.Cancel();
+        movementCheatAutoTargetCancellation?.Cancel();
+        movementCheatManualCancellation?.Cancel();
         base.OnClosed(e);
     }
 
-    private void RefreshMovementCheatTargets()
+    private async Task<IReadOnlyList<MovementCheatTarget>> GetMovementCheatTargetsAsync()
     {
-        var targets = MovementCheatProcess.FindTargets();
-        MovementCheatTarget? previous = MovementCheatTargets.SelectedItem as MovementCheatTarget;
-        MovementCheatTargets.ItemsSource = targets;
-        MovementCheatTargets.SelectedItem = targets.FirstOrDefault(target => target == previous);
-        if (MovementCheatTargets.SelectedItem is null && targets.Count == 1) MovementCheatTargets.SelectedIndex = 0;
-        string statusKey = targets.Count switch
+        var search = movementCheatSearchTask ??= Task.Run(MovementCheatProcess.FindTargets);
+        try
         {
-            0 => "MovementCheatNoTarget",
-            1 => "MovementCheatTargetSelected",
-            _ => "MovementCheatSelectTarget"
-        };
-        StatusTextBlock.Text = (string)FindResource(statusKey);
-        _ = RefreshMovementCheatStateAsync();
+            return await search;
+        }
+        finally
+        {
+            if (ReferenceEquals(movementCheatSearchTask, search)) movementCheatSearchTask = null;
+        }
+    }
+
+    private void ApplyMovementCheatTargets(IReadOnlyList<MovementCheatTarget> targets)
+    {
+        MovementCheatTarget? previous = MovementCheatTargets.SelectedItem as MovementCheatTarget;
+        var current = MovementCheatTargets.ItemsSource as IReadOnlyList<MovementCheatTarget>;
+        if (current is null || !current.SequenceEqual(targets))
+        {
+            MovementCheatTargets.ItemsSource = targets;
+            MovementCheatTargets.SelectedItem = targets.FirstOrDefault(target => target == previous);
+        }
+        if (MovementCheatTargets.SelectedItem is null && targets.Count == 1) MovementCheatTargets.SelectedIndex = 0;
+    }
+
+    private void ToggleMovementCheatAuto_Click(object sender, RoutedEventArgs e)
+    {
+        if (isClosed) return;
+        if (movementCheatAutoCancellation is not null)
+        {
+            movementCheatAutoCancellation.Cancel();
+            movementCheatAutoTargetCancellation?.Cancel();
+            movementCheatAutoCancellation = null;
+            MovementCheatAutoButton.Content = FindResource("MovementCheatAutoOff");
+            MovementCheatAutoStatus.Text = (string)FindResource("MovementCheatAutoIdle");
+            return;
+        }
+        var cancellation = new CancellationTokenSource();
+        movementCheatAutoCancellation = cancellation;
+        MovementCheatAutoButton.Content = FindResource("MovementCheatAutoOn");
+        MovementCheatAutoStatus.Text = (string)FindResource("MovementCheatAutoWaiting");
+        _ = MonitorMovementCheatAutoAsync(cancellation);
+    }
+
+    private async Task MonitorMovementCheatAutoAsync(CancellationTokenSource cancellation)
+    {
+        CancellationToken token = cancellation.Token;
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                string statusKey;
+                try
+                {
+                    var targets = await GetMovementCheatTargetsAsync();
+                    token.ThrowIfCancellationRequested();
+                    if (isClosed) return;
+                    ApplyMovementCheatTargets(targets);
+                    if (MovementCheatTargets.SelectedItem is MovementCheatTarget target)
+                    {
+                        using var targetCancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+                        movementCheatAutoTargetCancellation = targetCancellation;
+                        try
+                        {
+                            await Task.Run(() =>
+                            {
+                                targetCancellation.Token.ThrowIfCancellationRequested();
+                                if (!MovementCheatProcess.IsEnabled(target))
+                                    MovementCheatProcess.SetEnabled(target, true, targetCancellation.Token);
+                            }, targetCancellation.Token);
+                        }
+                        finally
+                        {
+                            if (ReferenceEquals(movementCheatAutoTargetCancellation, targetCancellation)) movementCheatAutoTargetCancellation = null;
+                        }
+                        statusKey = "MovementCheatAutoActive";
+                        movementCheatStateRevision++;
+                        await RefreshMovementCheatStateAsync();
+                    }
+                    else
+                    {
+                        statusKey = targets.Count == 0 ? "MovementCheatAutoWaiting" : "MovementCheatAutoSelect";
+                    }
+                }
+                catch (OperationCanceledException) when (!token.IsCancellationRequested)
+                {
+                    statusKey = "MovementCheatAutoSelect";
+                }
+                catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException or NotSupportedException)
+                {
+                    statusKey = "MovementCheatAutoRetry";
+                }
+                token.ThrowIfCancellationRequested();
+                if (isClosed) return;
+                MovementCheatAutoStatus.Text = (string)FindResource(statusKey);
+                await Task.Delay(TimeSpan.FromSeconds(1), token);
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+        }
+        catch (Exception)
+        {
+            if (!isClosed && ReferenceEquals(movementCheatAutoCancellation, cancellation))
+                MovementCheatAutoStatus.Text = (string)FindResource("MovementCheatAutoFailed");
+        }
+        finally
+        {
+            if (ReferenceEquals(movementCheatAutoCancellation, cancellation))
+            {
+                movementCheatAutoCancellation = null;
+                if (!isClosed) MovementCheatAutoButton.Content = FindResource("MovementCheatAutoOff");
+            }
+            cancellation.Dispose();
+        }
+    }
+
+    private async Task RefreshMovementCheatTargetsAsync()
+    {
+        if (isClosed || CheatTab?.IsSelected != true) return;
+        int revision = ++movementCheatSearchRevision;
+        movementCheatStateRevision++;
+        MovementCheatRefreshButton.IsEnabled = false;
+        StatusTextBlock.Text = (string)FindResource("MovementCheatSearching");
+        // Reentry shares an in-flight scan. All process/module access runs off the UI thread.
+        try
+        {
+            var targets = await GetMovementCheatTargetsAsync();
+            if (isClosed || revision != movementCheatSearchRevision || CheatTab.IsSelected != true) return;
+            ApplyMovementCheatTargets(targets);
+            string statusKey = targets.Count switch
+            {
+                0 => "MovementCheatNoTarget",
+                1 => "MovementCheatTargetSelected",
+                _ => "MovementCheatSelectTarget"
+            };
+            StatusTextBlock.Text = (string)FindResource(statusKey);
+        }
+        catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException or NotSupportedException)
+        {
+            if (!isClosed && revision == movementCheatSearchRevision && CheatTab.IsSelected == true)
+                StatusTextBlock.Text = (string)FindResource("MovementCheatSearchFailed");
+        }
+        finally
+        {
+            if (!isClosed && revision == movementCheatSearchRevision)
+                MovementCheatRefreshButton.IsEnabled = true;
+        }
+        await RefreshMovementCheatStateAsync();
     }
 
     private void EnableMovementCheat_Click(object sender, RoutedEventArgs e) => SetMovementCheat(true);
@@ -147,19 +301,31 @@ public partial class MainWindow : Window
 
     private async void SetMovementCheat(bool enabled)
     {
+        if (isClosed) return;
         if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
         {
             StatusTextBlock.Text = (string)FindResource("MovementCheatSelectTarget");
             return;
         }
+        movementCheatManualCancellation?.Cancel();
+        using var cancellation = new CancellationTokenSource();
+        movementCheatManualCancellation = cancellation;
         try
         {
-            MovementCheatProcess.SetEnabled(target, enabled);
-            StatusTextBlock.Text = (string)FindResource(enabled ? "MovementCheatEnabled" : "MovementCheatDisabled");
+            await Task.Run(() => MovementCheatProcess.SetEnabled(target, enabled, cancellation.Token), cancellation.Token);
+            if (!isClosed && !cancellation.IsCancellationRequested)
+                StatusTextBlock.Text = (string)FindResource(enabled ? "MovementCheatEnabled" : "MovementCheatDisabled");
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
         }
         catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException or ArgumentException)
         {
-            StatusTextBlock.Text = (string)FindResource("MovementCheatFailed");
+            if (!isClosed && !cancellation.IsCancellationRequested) StatusTextBlock.Text = (string)FindResource("MovementCheatFailed");
+        }
+        finally
+        {
+            if (ReferenceEquals(movementCheatManualCancellation, cancellation)) movementCheatManualCancellation = null;
         }
         movementCheatStateRevision++;
         await RefreshMovementCheatStateAsync();

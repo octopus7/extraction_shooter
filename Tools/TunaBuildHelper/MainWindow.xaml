@@ -10,9 +10,10 @@
         WindowStartupLocation="CenterScreen"
         Background="#171B22">
     <Window.Resources>
-        <sys:String x:Key="WorldProgressOpen">월드 진행 초기화…</sys:String>
+        <sys:String x:Key="ReadyStatus">준비됨</sys:String>
         <sys:String x:Key="MainTabLabel">Main</sys:String>
         <sys:String x:Key="CheatTabLabel">Cheat</sys:String>
+        <sys:String x:Key="WorldProgressOpen">월드 진행 초기화…</sys:String>
         <sys:String x:Key="FolderTabLabel">Folder</sys:String>
         <Style TargetType="TabItem">
             <Setter Property="Foreground" Value="#AEBBCD" />
@@ -50,6 +51,8 @@
         <sys:String x:Key="KillBuildStartedStatus">빌드·패키징 종료를 요청했습니다.</sys:String>
         <sys:String x:Key="MovementCheatLabel">이동 치트 · 실행 중인 게임</sys:String>
         <sys:String x:Key="MovementCheatRefresh">게임 찾기</sys:String>
+        <sys:String x:Key="MovementCheatSearching">실행 중인 게임을 찾는 중입니다…</sys:String>
+        <sys:String x:Key="MovementCheatSearchFailed">게임 목록을 확인하지 못했습니다. 다시 찾아 주세요.</sys:String>
         <sys:String x:Key="MovementCheatEnable">이번 실행 활성화</sys:String>
         <sys:String x:Key="MovementCheatDisable">비활성화</sys:String>
         <sys:String x:Key="MovementCheatEnabled">선택한 프로세스의 이동 치트를 활성화했습니다.</sys:String>
@@ -64,6 +67,20 @@
         <sys:String x:Key="MovementCheatStateReading">현재 상태 · 확인 중</sys:String>
         <sys:String x:Key="MovementCheatStateUnknown">현재 상태 · 확인할 수 없음</sys:String>
         <sys:String x:Key="MovementCheatStateExited">현재 상태 · 선택한 게임 종료됨</sys:String>
+        <sys:String x:Key="MovementCheatAutoOff">AUTO · 꺼짐</sys:String>
+        <sys:String x:Key="MovementCheatAutoOn">AUTO · 켜짐</sys:String>
+        <sys:String x:Key="MovementCheatAutoIdle">AUTO를 켜면 게임 실행을 감지해 치트를 활성화합니다.</sys:String>
+        <sys:String x:Key="MovementCheatAutoWaiting">게임 실행 대기 중</sys:String>
+        <sys:String x:Key="MovementCheatAutoSelect">게임이 여러 개입니다. 대상을 선택하세요.</sys:String>
+        <sys:String x:Key="MovementCheatAutoActive">자동 활성화 유지 중 · 수동 해제해도 다시 활성화됩니다.</sys:String>
+        <sys:String x:Key="MovementCheatAutoRetry">프로세스 접근 재시도 중</sys:String>
+        <sys:String x:Key="MovementCheatAutoFailed">자동 감시를 중지했습니다. AUTO를 다시 켜세요.</sys:String>
+        <sys:String x:Key="MovementCheatAutoTooltip">AUTO를 끄면 감시만 중지됩니다. 치트를 해제하려면 AUTO를 끈 뒤 비활성화를 누르세요.</sys:String>
+        <sys:String x:Key="MovementCheatKeysTitle">사용키 · 이동 치트 활성화 후</sys:String>
+        <sys:String x:Key="MovementCheatSpeedKey">F6 · 이동속도 1 → 3 → 8 → 1배 전환</sys:String>
+        <sys:String x:Key="MovementCheatMapKey">M · 지도 열기</sys:String>
+        <sys:String x:Key="MovementCheatTeleportKey">F9 · 지도의 기존 마커 위에 커서를 놓고 누르면 이동 확인</sys:String>
+        <sys:String x:Key="MovementCheatCancelKey">Esc · 이동 확인창 취소</sys:String>
         <Style TargetType="Button">
             <Setter Property="Foreground" Value="#F5F7FA" />
             <Setter Property="Background" Value="#273140" />
@@ -204,18 +221,31 @@
                     </ScrollViewer>
                 </TabItem>
                 <TabItem x:Name="CheatTab" Header="{DynamicResource CheatTabLabel}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
                         <TextBlock Margin="0,0,0,6" Foreground="#DCE5F0" Text="{DynamicResource MovementCheatLabel}" />
                         <ComboBox x:Name="MovementCheatTargets" MinHeight="30" Margin="0,0,0,8" SelectionChanged="MovementCheatTargets_SelectionChanged" />
                         <TextBlock x:Name="MovementCheatStateText" Margin="0,0,0,12" Foreground="#F4F7FB" FontSize="15" TextWrapping="Wrap" Text="{DynamicResource MovementCheatStateSelect}" />
-                        <Button Margin="0,0,0,8" Click="RefreshMovementCheatTargets_Click" Content="{DynamicResource MovementCheatRefresh}" />
+                        <Button x:Name="MovementCheatRefreshButton" Margin="0,0,0,8" Click="RefreshMovementCheatTargets_Click" Content="{DynamicResource MovementCheatRefresh}" />
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
                             <Button Margin="0,0,5,0" Click="EnableMovementCheat_Click" Content="{DynamicResource MovementCheatEnable}" />
                             <Button Grid.Column="1" Margin="5,0,0,0" Click="DisableMovementCheat_Click" Content="{DynamicResource MovementCheatDisable}" />
                         </Grid>
-                    <Button Margin="0,12,0,0" Click="OpenWorldProgress_Click" Content="{DynamicResource WorldProgressOpen}" />
+                        <Button x:Name="MovementCheatAutoButton" Margin="0,12,0,6" Click="ToggleMovementCheatAuto_Click" Content="{DynamicResource MovementCheatAutoOff}" ToolTip="{DynamicResource MovementCheatAutoTooltip}" />
+                        <TextBlock x:Name="MovementCheatAutoStatus" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatAutoIdle}" />
+                        <Button Margin="0,12,0,0" Click="OpenWorldProgress_Click" Content="{DynamicResource WorldProgressOpen}" />
+                        <Border Margin="0,12,0,0" Padding="14" Background="#202833" CornerRadius="4">
+                            <StackPanel>
+                                <TextBlock Margin="0,0,0,10" Foreground="#DCE5F0" FontWeight="SemiBold" TextWrapping="Wrap" Text="{DynamicResource MovementCheatKeysTitle}" />
+                                <TextBlock Margin="0,0,0,6" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatSpeedKey}" />
+                                <TextBlock Margin="0,0,0,6" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatMapKey}" />
+                                <TextBlock Margin="0,0,0,6" Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatTeleportKey}" />
+                                <TextBlock Foreground="#AEBBCD" TextWrapping="Wrap" Text="{DynamicResource MovementCheatCancelKey}" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
+                    </ScrollViewer>
                 </TabItem>
                 <TabItem Header="{DynamicResource FolderTabLabel}">
                     <StackPanel>
@@ -242,7 +272,7 @@
                        Foreground="#91A5BE"
                        FontSize="12"
                        TextWrapping="Wrap"
-                       Text="준비됨" />
+                       Text="{DynamicResource ReadyStatus}" />
         </Grid>
     </DockPanel>
 </Window>
