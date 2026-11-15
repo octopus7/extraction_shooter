@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformProcess.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
+#include "UI/MovementSpeedNotice.h"
 
 FTunaSweeperMovementCheatControl TunaSweeperMovementCheatControl;
 static_assert(sizeof(FTunaSweeperMovementCheatControl) == 32);
@@ -30,6 +32,8 @@ void UTunaSweeperMovementCheatSubsystem::Initialize(FSubsystemCollectionBase& Co
 
 void UTunaSweeperMovementCheatSubsystem::Deinitialize()
 {
+	if (SpeedNotice) SpeedNotice->RemoveFromParent();
+	SpeedNotice = nullptr;
 	SpeedIndex = 0;
 	Super::Deinitialize();
 }
@@ -49,11 +53,36 @@ bool UTunaSweeperMovementCheatSubsystem::IsEnabled() const
 void UTunaSweeperMovementCheatSubsystem::Tick(float DeltaTime)
 {
 	if (!IsEnabled()) SpeedIndex = 0;
+	UpdateSpeedNotice();
 }
 
 void UTunaSweeperMovementCheatSubsystem::CycleSpeed()
 {
 	if (IsEnabled()) SpeedIndex = (SpeedIndex + 1) % UE_ARRAY_COUNT(Speeds);
+	UpdateSpeedNotice();
+}
+
+void UTunaSweeperMovementCheatSubsystem::UpdateSpeedNotice()
+{
+	UWorld* World = GetWorld();
+	APlayerController* Player = World ? World->GetFirstPlayerController() : nullptr;
+	if (SpeedNotice && (SpeedNotice->GetWorld() != World || SpeedNotice->GetOwningPlayer() != Player))
+	{
+		SpeedNotice->RemoveFromParent();
+		SpeedNotice = nullptr;
+	}
+	const float Multiplier = GetSpeedMultiplier();
+	if (Multiplier > 1.0f && Player && Player->IsLocalController() && Player->GetLocalPlayer() && GetGameInstance()->GetGameViewportClient())
+	{
+		if (!SpeedNotice)
+		{
+			UClass* Class = LoadClass<UMovementSpeedNotice>(nullptr,
+				TEXT("/Game/UI/Debug/WBP_MovementSpeedNotice.WBP_MovementSpeedNotice_C"));
+			if (Class) SpeedNotice = CreateWidget<UMovementSpeedNotice>(Player, Class);
+		}
+		if (SpeedNotice && !SpeedNotice->IsInViewport()) SpeedNotice->AddToViewport(900);
+	}
+	if (SpeedNotice) SpeedNotice->UpdateSpeed(Multiplier);
 }
 
 float UTunaSweeperMovementCheatSubsystem::GetSpeedMultiplier() const

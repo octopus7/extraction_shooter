@@ -855,6 +855,8 @@ ui.movement_cheat.teleport_title,이동 확인,Confirm teleport,移動の確認,
 ui.movement_cheat.teleport_confirm,이 위치로 이동할까요?,Move to this location?,この場所へ移動しますか？,要传送到这个位置吗？,要傳送到這個位置嗎？,Переместиться в эту точку?
 ui.movement_cheat.yes,예,Yes,はい,是,是,Да
 ui.movement_cheat.no,아니요,No,いいえ,否,否,Нет
+ui.movement_cheat.speed_notice,▶▶▶  배속 이동 중 · {Multiplier}x,▶▶▶  Fast movement · {Multiplier}x,▶▶▶  倍速移動中 · {Multiplier}x,▶▶▶  加速移动中 · {Multiplier}x,▶▶▶  加速移動中 · {Multiplier}x,▶▶▶  Ускоренное движение · {Multiplier}x
+
 ui.gate.chain_link,철망문,Chain-link gate,金網ゲート,铁丝网门,鐵絲網門,Сетчатые ворота
 ui.gate.locked,문이 잠겨 있다,The gate is locked.,門が施錠されている。,门锁着。,門鎖著。,Ворота заперты.
 ui.gate.control_open,잠금 제어장치 열기,Open gate,ゲートを開く,打开铁丝网门,打開鐵絲網門,Открыть ворота

@@ -44,5 +44,7 @@ public:
 	static FName GetCurrentMapId(const UObject* WorldContext);
 	bool TryTeleportToMapPosition(FName ExpectedMapId, const FVector& WorldPosition);
 private:
+	void UpdateSpeedNotice();
+	UPROPERTY(Transient) TObjectPtr<class UMovementSpeedNotice> SpeedNotice;
 	int32 SpeedIndex = 0;
 };
