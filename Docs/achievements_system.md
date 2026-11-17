@@ -18,7 +18,7 @@
 | SafeSave | CRC, candidate/previous 검증·교체·복원 재사용. v1 읽기와 v2 갱신 지원 |
 | 플랫폼 | 기존 IOnlineAchievements publisher와 전송 대기/확인 기록 재사용. STOVE GameSupport 업적 어댑터는 아직 없음 |
 
-BabyBoar 블루프린트, 리프트 시퀀스/맵, LoopRail 열차·역, MainRaid 맵과 보스 테스트 애셋의 존재를 확인했다. 애셋 이름만으로 합류 확정, 실제 사용, 지역 번호 또는 보스 정체성을 추측하지 않는다. LoopRail은 물리 열차 이동이며 빠른 이동 완료 이벤트는 확인되지 않았다. ATV 피해 수신 코드는 있지만 충돌로 적에게 피해를 주는 경로는 확인되지 않았다. 대전차 RPG 대상/발사기와 전체 엔딩 확정 이벤트도 연결 대기다. 데모 엔딩을 전체 엔딩의 대체 이벤트로 쓰지 않는다.
+BabyBoar 블루프린트, 리프트 시퀀스/맵, LoopRail 열차·역, MainRaid 맵과 보스 테스트 애셋의 존재를 확인했다. 애셋 이름만으로 합류 확정, 실제 사용, 지역 번호 또는 보스 정체성을 추측하지 않는다. LoopRail은 물리 열차 이동이며 빠른 이동 완료 이벤트는 확인되지 않았다. ATV 피해 수신 코드는 있지만 충돌로 적에게 피해를 주는 경로는 확인되지 않았다. 대전차 로켓 무기 대상/발사기와 전체 엔딩 확정 이벤트도 연결 대기다. 데모 엔딩을 전체 엔딩의 대체 이벤트로 쓰지 않는다.
 
 ## 도전과제별 상태
 
@@ -40,7 +40,7 @@ BabyBoar 블루프린트, 리프트 시퀀스/맵, LoopRail 열차·역, MainRai
 | 12 | 퇴근합니다 | 동일 레이드 5명 이상, 295–305초 탈출 | 완료: 양끝 포함, 실제 진입 후 게임 시간 |
 | 13 | 미지와 조우 | 호수 지정 구역 최초 진입 | 연결 대기: 범위와 LocationId, 트리거 배치 |
 | 14 | 예약 | 없음 | 미구현(의도적 예약): 로컬·저장 복원·플랫폼 병합/전송 모두 차단 |
-| 15 | 요술봉 | 대전차 RPG 실제 발사 | 연결 대기: 발사 성공 훅 구현, RPG ItemId와 전용 발사기 확정 필요 |
+| 15 | 요술봉 | 대전차 로켓 무기 실제 발사 | 연결 대기: 발사 성공 훅 구현, 로켓 무기 ItemId와 전용 발사기 확정 필요 |
 | 16 | 안전운전 | 차량 충돌로 아무 적 처치 | 연결 대기: 사망 원인 판정 구현, 차량 충돌 피해 발행자 필요 |
 | 17 | 부자 | 참치 100개 동시 보유 | 완료: 사용자 확인한 참치 통조림 3004, 휴대 + 기지 창고 |
 | 18 | 동네최강 | 적 100명 누적 처치 | 완료: 독립 계정 기록에 레이드 간 누적 |
@@ -54,7 +54,7 @@ BabyBoar 블루프린트, 리프트 시퀀스/맵, LoopRail 열차·역, MainRai
 - 지역/호수: 기존 `ATunaSweeperAchievementLocationTrigger.LocationId`와 정의의 `target_id`를 승인된 값으로 맞춘다. 독립 맵이면 `map_paths`에 정확한 `/Game/...` 패키지를 지정할 수도 있다. 스트리밍 지역은 실제 경계 트리거를 사용한다. 처음부터 볼륨 안에 스폰하는 배치도 PIE로 점검한다.
 - 시설: `required_facility_ids`에 시설 종류/표시 이름이 아닌 `WorldProgress`의 ObjectId를 넣는다. 한 슬롯의 현재 상태를 검사하므로 여러 슬롯의 부분 복구를 합치지 않는다.
 - 합류·이전·리프트·빠른 이동·엔딩: 소유 시스템이 행동/상태를 확정한 코드 또는 BP에서 `ReportGameplayEvent(EventType, TargetId)`를 보고한다. 요청·수락·복구·보상 단계에서 호출하지 않는다.
-- RPG: 승인된 양의 아이템 ID의 10진 문자열을 `target_id`로 지정한다. 일반 FireWeapon은 FireWithAimIntent 성공 후 `ReportWeaponFired(ItemId)`를 호출한다. 별도 RPG 발사기는 실제 발사 성공 후 같은 API로 연결한다.
+- 대전차 로켓 무기: 승인된 양의 아이템 ID의 10진 문자열을 `target_id`로 지정한다. 일반 FireWeapon은 FireWithAimIntent 성공 후 `ReportWeaponFired(ItemId)`를 호출한다. 별도 로켓 발사기는 실제 발사 성공 후 같은 API로 연결한다.
 - 로드킬: 차량 충돌 피해에만 `UTunaSweeperVehicleCollisionDamageType`과 실제 운전자 Controller를 전달한다. 차량 무기/폭발에는 이 타입을 쓰지 않는다. 이번 작업으로 차량 피해량이나 충돌 규칙은 추가하지 않았다.
 - 새 탈출 경로: 실제 탈출 완료 시 `CaptureCompletedExtraction(Player, Destination)`을 호출한다. 일반 이동은 `DiscardPendingExtraction`으로 이전 탈출 증거를 폐기한다.
 

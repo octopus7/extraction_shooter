@@ -38,7 +38,7 @@ achievement.16.description,차량 충돌로 적을 처치했다.,Defeated an ene
 achievement.17.description,참치 통조림을 동시에 100개 보유했다.,Had 100 cans of tuna at the same time.,ツナ缶を同時に100個所持した。,同时持有了100罐金枪鱼罐头。,同時持有了100罐鮪魚罐頭。,У вас было 100 банок тунца одновременно.
 achievement.18.description,적을 누적 100명 처치했다.,Defeated a total of 100 enemies.,累計100体の敵を倒した。,累计击败了100名敌人。,累計擊敗了100名敵人。,Вы победили в общей сложности 100 врагов.
 achievement.19.description,평원에 진입했다.,Entered the plains.,平原に入った。,进入了平原。,進入了平原。,Вы вошли на равнину.
-achievement.20.description,대전차 RPG를 발사했다.,Fired an anti-tank RPG.,対戦車RPGを発射した。,发射了反坦克RPG。,發射了反戰車RPG。,Вы выстрелили из противотанкового РПГ.
+achievement.20.description,대전차 로켓 무기를 발사했다.,Fired an anti-tank rocket launcher.,対戦車ロケットランチャーを発射した。,发射了反坦克火箭筒。,發射了反戰車火箭筒。,Вы выстрелили из противотанкового ракетного гранатомёта.
 ui.achievement.unlocked,도전 과제 달성: {0},Achievement unlocked: {0},実績解除：{0},解锁成就：{0},解鎖成就：{0},Получено достижение: {0}
 ui.interaction.travel_basement,지하실로 이동,Go to basement,地下室へ移動,前往地下室,前往地下室,Перейти в подвал
 ui.interaction.travel_control_room,관제실로 이동,Enter control room,管制室へ移動,进入控制室,進入控制室,Войти в диспетчерскую

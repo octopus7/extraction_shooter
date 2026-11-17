@@ -178,7 +178,7 @@ bool FTunaAchievementEndingDefinitions::RunTest(const FString& Parameters)
 		TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked);
 		TestTrue(TEXT("Repeated ending does not unlock twice"), Unlocked.IsEmpty());
 	}
-	TestEqual(TEXT("RPG moved to 20"), Definitions[19].EventType, ETunaSweeperAchievementEvent::WeaponFired);
+	TestEqual(TEXT("Rocket launcher achievement uses the weapon-fired event"), Definitions[19].EventType, ETunaSweeperAchievementEvent::WeaponFired);
 	return true;
 }
 
