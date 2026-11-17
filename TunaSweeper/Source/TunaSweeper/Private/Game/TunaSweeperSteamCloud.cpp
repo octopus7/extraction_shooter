@@ -25,6 +25,13 @@ namespace TunaSweeperSteamCloud
 		}
 		bValidAccount = bValidAccount && LexTryParseString(NumericId, *SteamId) && NumericId != 0;
 		const FString AccountDirectory = bValidAccount ? SteamId : TEXT("LocalOnly");
+		// The full-game Auto-Cloud rules point directly at the Steam account root.
+		// Preserve the demo and unavailable-identity local directories.
+		if (bValidAccount && !bDemo)
+		{
+			return FPaths::ConvertRelativePathToFull(FPaths::Combine(SavedDirectory,
+				TEXT("SaveGames/Steam"), AccountDirectory));
+		}
 		return FPaths::ConvertRelativePathToFull(FPaths::Combine(SavedDirectory,
 			TEXT("SaveGames/Steam"), AccountDirectory, bDemo ? TEXT("Demo") : TEXT("FullGame")));
 	}

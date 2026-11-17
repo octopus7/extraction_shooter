@@ -15,8 +15,8 @@ bool FTunaSweeperSteamCloudDirectoryTest::RunTest(const FString& Parameters)
 	{
 		return TunaSweeperSteamCloud::ResolveDirectory(Saved, bPackaged, Channel, bDemo, Id);
 	};
-	TestEqual(TEXT("Steam full game uses account-specific FullGame directory"), Resolve(true, TEXT("Steam"), false, Account),
-		FPaths::Combine(Saved, TEXT("SaveGames/Steam/76561198000000001/FullGame")));
+	TestEqual(TEXT("Steam full game matches the Auto-Cloud account root"), Resolve(true, TEXT("Steam"), false, Account),
+		FPaths::Combine(Saved, TEXT("SaveGames/Steam/76561198000000001")));
 	TestEqual(TEXT("Steam demo stays separate"), Resolve(true, TEXT("Steam"), true, Account),
 		FPaths::Combine(Saved, TEXT("SaveGames/Steam/76561198000000001/Demo")));
 	TestNotEqual(TEXT("Steam accounts cannot share a local save directory"), Resolve(true, TEXT("Steam"), false, Account),

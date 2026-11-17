@@ -8636,3 +8636,38 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: Steamworks 클라우드 설정을 시작하려고 하며 현재 저장 경로 정책과 입력값을 확인 요청.
 - 답변: Steam 패키지 빌드만 WinAppDataLocal 아래 TunaSweeper/Saved/SaveGames/Steam/{64BitSteamID}/Demo 또는 FullGame을 사용한다. 앱별로 *.sav와 *.sav.previous는 Recursive 켜짐, GlobalIcon.rgb는 꺼짐의 세 규칙을 등록한다. OS Restriction Cross-Platform, Shared cloud APP ID 0, 초기 제안 할당량 268435456 bytes/200 files. 현재 지도 마커도 같은 루트의 MapMarkers_SlotNN.sav여서 포함된다. 계정 미확인 LocalOnly와 에디터 저장, 로그·임시 파일은 제외한다. 저장·게시 후 Steam 배포 빌드에서 두 PC 동기화를 확인해야 하며 설정 자체는 수행하지 않았다. 프로젝트 문서·현재 소스·Valve 공식 Steam Cloud 문서를 대조했다.
 
+## 2026-11-17 12:24:36 (소요시간: 00:00:11)
+
+- 질문: 상대 경로 `..\astra-prochat-models\sweet_potato_astra_pro`에 접근할 수 있는가?
+- 답변: 현재 작업 폴더 기준으로 `D:\github\astra-prochat-models\sweet_potato_astra_pro` 디렉터리가 확인된다.
+
+
+## 2026-11-17 12:35:26 (소요시간: 00:00:17)
+
+- 질문: 클라우드 세이브 설정을 한 단계씩 진행하려고 하며 첫 진입 위치를 요청.
+- 답변: Steamworks에 로그인한 뒤 대상 앱의 Steam Cloud 설정 화면으로 진입한다. 본편 5137900과 데모 5158070을 구분한 직접 링크를 안내하고, 사용자당 바이트 용량과 파일 수 입력란이 보이면 다음 단계로 진행하도록 안내한다. 컴퓨터 유즈나 실제 설정 변경은 하지 않았다.
+
+
+## 2026-11-17 12:45:35 (소요시간: 00:00:23)
+
+- 질문: FullGame 구분이 불필요하며 Steam ID 경로를 쓰려면 클라이언트 저장 경로도 바꿔야 하는가?
+- 답변: 현재 소스의 Steam 패키지 빌드는 이미 SaveGames/Steam/<64BitSteamID>/FullGame에 저장하도록 구현되어 있다. Steam ID 분리를 새로 구현할 필요는 없지만 FullGame 폴더를 없애려면 클라이언트 경로와 Steamworks Subdirectory를 함께 변경하고 새 빌드를 배포해야 한다. Steam ID는 계정 분리이며 Demo/FullGame은 버전 분리로 역할이 다르다. 기존 저장을 유지하려면 별도 이전 처리가 필요하다. 이번 답변에서는 코드를 변경하지 않았다.
+
+
+## 2026-11-17 12:48:35 (소요시간: 00:00:07)
+
+- 질문: 지도 마커 저장 파일명은 무엇인가?
+- 답변: MapMarkers_SlotNN.sav 형식이며 슬롯 1은 MapMarkers_Slot01.sav, 슬롯 2는 MapMarkers_Slot02.sav이다. 게임플레이 세이브와 같은 폴더에 저장되므로 해당 폴더의 *.sav 규칙에 포함된다. 저장 코드에서 확인했다.
+
+
+## 2026-11-17 12:49:17 (소요시간: 00:00:14)
+
+- 질문: 슬롯별 세이브 파일은 메인 세이브와 마커 세이브 두 개인가?
+- 답변: 슬롯별 기본 파일은 TunaSweeperSave_SlotNN.sav와 MapMarkers_SlotNN.sav 두 개다. 복구용 .previous 및 Backups 아래 백업은 별도로 생성될 수 있어 실제 파일 수가 두 개로 고정되는 것은 아니다. 설정과 도전과제 등 슬롯 공통 파일도 별도로 존재한다.
+
+
+## 2026-11-17 12:49:57 (소요시간: 00:00:20)
+
+- 질문: 슬롯 공통 파일의 정확한 이름은 무엇인가?
+- 답변: Steam 설정 기준 TunaSweeperSaveSettings.sav(마지막 선택 슬롯), Achievements_Steam.sav(도전과제 진행 및 해금), GlobalIcon.rgb(공통 사용자 아이콘)이다. 앞의 두 파일은 *.sav에 포함되며 아이콘은 별도 GlobalIcon.rgb 규칙이 필요하다. 소스와 Steam 배포 설정에서 확인했다.
+
