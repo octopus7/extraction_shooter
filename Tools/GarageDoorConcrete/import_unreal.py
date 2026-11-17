@@ -1,6 +1,6 @@
 """UE 5.7 commandlet: import/verify the separate concrete garage kit.
 
-UnrealEditor-Cmd TunaSweeper.uproject -EnablePlugins=PythonScriptPlugin,EditorScriptingUtilities
+UnrealEditor-Cmd TunaSweeper.uproject -EnablePlugins=PythonScriptPlugin,EditorScriptingUtilities,GeometryScripting
   -run=pythonscript -script=.../import_unreal.py -unattended -nullrhi -nosplash
 Set GARAGE_VERIFY_ONLY=1 in the environment for a fresh-process read-only audit.
 """
@@ -8,6 +8,7 @@ from pathlib import Path
 import hashlib
 import json
 import os
+import sys
 import unreal
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -38,7 +39,8 @@ def save(asset):
 
 
 before=protected_hashes()
-if not VERIFY_ONLY:
+legacy_texture_missing=not unreal.EditorAssetLibrary.does_asset_exist(texture_path)
+if not VERIFY_ONLY and legacy_texture_missing:
     task=unreal.AssetImportTask()
     task.filename=str(SOURCE/'Textures'/f'{texture_name}.png')
     task.destination_path=DEST+'/Textures'
@@ -47,7 +49,7 @@ if not VERIFY_ONLY:
     assets.import_asset_tasks([task])
 texture=unreal.load_asset(texture_path)
 assert isinstance(texture,unreal.Texture2D),texture_path
-if not VERIFY_ONLY:
+if not VERIFY_ONLY and legacy_texture_missing:
     texture.set_editor_property('srgb',True)
     texture.set_editor_property('lod_group',unreal.TextureGroup.TEXTUREGROUP_WORLD)
     texture.set_editor_property('power_of_two_mode',unreal.TexturePowerOfTwoSetting.STRETCH_TO_POWER_OF_TWO)
@@ -60,9 +62,8 @@ for spec in MANIFEST['materials'].values():
     name=spec['name']
     path=f'{DEST}/Materials/{name}'
     mat=unreal.load_asset(path)
-    if not VERIFY_ONLY:
-        if not mat:
-            mat=assets.create_asset(name,DEST+'/Materials',unreal.Material,unreal.MaterialFactoryNew())
+    if not VERIFY_ONLY and not mat:
+        mat=assets.create_asset(name,DEST+'/Materials',unreal.Material,unreal.MaterialFactoryNew())
         assert mat
         unreal.MaterialEditingLibrary.delete_all_material_expressions(mat)
         tex=unreal.MaterialEditingLibrary.create_material_expression(mat,unreal.MaterialExpressionTextureSample,-450,-140)
@@ -86,9 +87,8 @@ lib=unreal.MaterialEditingLibrary
 for kind in ['LED','Signal']:
     name='M_GarageConcrete_'+kind
     mat=unreal.load_asset(f'{DEST}/Materials/{name}')
-    if not VERIFY_ONLY:
-        if not mat:
-            mat=assets.create_asset(name,DEST+'/Materials',unreal.Material,unreal.MaterialFactoryNew())
+    if not VERIFY_ONLY and not mat:
+        mat=assets.create_asset(name,DEST+'/Materials',unreal.Material,unreal.MaterialFactoryNew())
         lib.delete_all_material_expressions(mat)
         color=lib.create_material_expression(mat,unreal.MaterialExpressionVectorParameter,-600,0)
         color.set_editor_property('parameter_name','SignalColor' if kind=='Signal' else 'LEDColor')
@@ -127,9 +127,76 @@ for kind in ['LED','Signal']:
         assert strength.get_editor_property('default_value')==5
     materials[name]=mat
 
+surface_sets={}
+for page,mat_name in MANIFEST['surface_materials'].items():
+    maps={}
+    for suffix,compression,sampler in [
+            ('BaseColor',unreal.TextureCompressionSettings.TC_DEFAULT,unreal.MaterialSamplerType.SAMPLERTYPE_COLOR),
+            ('Normal',unreal.TextureCompressionSettings.TC_NORMALMAP,unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL),
+            ('ORM',unreal.TextureCompressionSettings.TC_MASKS,unreal.MaterialSamplerType.SAMPLERTYPE_MASKS)]:
+        name=f'T_GarageConcrete_{page}_{suffix}'
+        path=f'{DEST}/Textures/{name}'
+        if not VERIFY_ONLY:
+            task=unreal.AssetImportTask()
+            task.filename=str(SOURCE/'Textures'/(name+'.png'))
+            task.destination_name=name;task.destination_path=DEST+'/Textures'
+            task.automated=True;task.replace_existing=True;task.save=False
+            assets.import_asset_tasks([task])
+            assert task.get_objects(),path
+        tex=unreal.load_asset(path)
+        assert isinstance(tex,unreal.Texture2D),path
+        if not VERIFY_ONLY:
+            tex.set_editor_property('compression_settings',compression)
+            tex.set_editor_property('srgb',suffix=='BaseColor')
+            tex.set_editor_property('flip_green_channel',suffix=='Normal')
+            tex.set_editor_property('lod_group',unreal.TextureGroup.TEXTUREGROUP_WORLD_NORMAL_MAP if suffix=='Normal' else unreal.TextureGroup.TEXTUREGROUP_WORLD)
+            save(tex)
+        assert (tex.blueprint_get_size_x(),tex.blueprint_get_size_y())==(2048,2048),path
+        assert tex.get_editor_property('srgb')==(suffix=='BaseColor')
+        assert tex.get_editor_property('compression_settings')==compression
+        assert tex.get_editor_property('flip_green_channel')==(suffix=='Normal')
+        maps[suffix]=(tex,sampler)
+    path=f'{DEST}/Materials/{mat_name}'
+    mat=unreal.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
+    connections=[('BaseColor','RGB',unreal.MaterialProperty.MP_BASE_COLOR),
+                 ('Normal','RGB',unreal.MaterialProperty.MP_NORMAL),
+                 ('ORM','R',unreal.MaterialProperty.MP_AMBIENT_OCCLUSION),
+                 ('ORM','G',unreal.MaterialProperty.MP_ROUGHNESS),
+                 ('ORM','B',unreal.MaterialProperty.MP_METALLIC)]
+    if not VERIFY_ONLY:
+        if not mat:
+            mat=assets.create_asset(mat_name,DEST+'/Materials',unreal.Material,unreal.MaterialFactoryNew())
+        lib.delete_all_material_expressions(mat)
+        nodes={}
+        for index,(suffix,(tex,sampler)) in enumerate(maps.items()):
+            node=lib.create_material_expression(mat,unreal.MaterialExpressionTextureSample,-520,-180+index*290)
+            node.set_editor_property('texture',tex);node.set_editor_property('sampler_type',sampler)
+            nodes[suffix]=node
+        for suffix,channel,prop in connections:
+            assert lib.connect_material_property(nodes[suffix],channel,prop)
+        lib.recompile_material(mat);save(mat)
+    assert isinstance(mat,unreal.Material),path
+    for suffix,channel,prop in connections:
+        expr=lib.get_material_property_input_node(mat,prop)
+        assert expr and expr.get_editor_property('texture')==maps[suffix][0],(path,prop)
+        if suffix=='ORM':
+            assert lib.get_material_property_input_node_output_name(mat,prop)==channel,(path,prop)
+    materials[mat_name]=mat
+    surface_sets[page]={suffix:tex.get_path_name() for suffix,(tex,_) in maps.items()}
+
 if not VERIFY_ONLY:
     for entry in MANIFEST['assets']:
+        mesh_path=f"{DEST}/Meshes/{entry['name']}"
+        existing=unreal.load_asset(mesh_path) if unreal.EditorAssetLibrary.does_asset_exist(mesh_path) else None
+        if 'Temporary' in entry['name'] and existing:
+            continue
+        collision_source=existing
+        if not existing and entry['name'].endswith(('UpperPanel02','UpperPanel03','UpperPanel04')):
+            collision_source=unreal.load_asset(DEST+'/Meshes/SM_GarageConcrete_UpperPanel')
+        previous_shape=(collision_source.get_editor_property('body_setup').get_editor_property('agg_geom').copy()
+                        if collision_source else None)
         options=unreal.FbxImportUI()
+        options.set_editor_property('reset_to_fbx_on_material_conflict',True)
         options.set_editor_property('import_mesh',True)
         options.set_editor_property('import_as_skeletal',False)
         options.set_editor_property('import_animations',False)
@@ -138,11 +205,11 @@ if not VERIFY_ONLY:
         options.set_editor_property('automated_import_should_detect_type',False)
         options.set_editor_property('mesh_type_to_import',unreal.FBXImportType.FBXIT_STATIC_MESH)
         data=options.static_mesh_import_data
-        for key,value in {'combine_meshes':True,'auto_generate_collision':True,
+        for key,value in {'combine_meshes':True,'auto_generate_collision':previous_shape is None,
                           'one_convex_hull_per_ucx':True,'generate_lightmap_u_vs':True,
                           'convert_scene':True,'convert_scene_unit':True,'force_front_x_axis':False,
                           'transform_vertex_to_absolute':True,'build_nanite':False,
-                          'remove_degenerates':True,'import_uniform_scale':1.0}.items():
+                          'remove_degenerates':True,'import_uniform_scale':1.0,'reorder_material_to_fbx_order':True}.items():
             data.set_editor_property(key,value)
         data.set_editor_property('normal_import_method',unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS)
         data.set_editor_property('normal_generation_method',unreal.FBXNormalGenerationMethod.BUILT_IN)
@@ -152,6 +219,7 @@ if not VERIFY_ONLY:
         task.automated=True;task.replace_existing=True;task.replace_existing_settings=True
         task.save=True;task.options=options;task.factory=unreal.FbxFactory()
         assets.import_asset_tasks([task])
+        assert task.get_objects(),entry['name']
         mesh=unreal.load_asset(f"{DEST}/Meshes/{entry['name']}")
         assert isinstance(mesh,unreal.StaticMesh),entry['name']
         slots=list(mesh.get_editor_property('static_materials'))
@@ -162,18 +230,23 @@ if not VERIFY_ONLY:
             assert name in materials,('Unknown slot',entry['name'],name)
             mesh.set_material(index,materials[name])
         build=mesh_editor.get_lod_build_settings(mesh,0)
-        for key,value in {'recompute_tangents':True,'use_mikk_t_space':False,
+        for key,value in {'recompute_tangents':True,'use_mikk_t_space':True,
                           'use_full_precision_u_vs':True,'use_high_precision_tangent_basis':True,
                           'generate_lightmap_u_vs':True,'src_lightmap_index':0,'dst_lightmap_index':1}.items():
             build.set_editor_property(key,value)
         mesh_editor.set_lod_build_settings(mesh,0,build)
         mesh.set_editor_property('light_map_coordinate_index',1)
+        if previous_shape is not None:
+            body=mesh.get_editor_property('body_setup')
+            if body.get_editor_property('agg_geom').export_text()!=previous_shape.export_text():
+                body.modify()
+                body.set_editor_property('agg_geom',previous_shape)
         save(mesh)
 
 report={'destination':DEST,'engine':unreal.SystemLibrary.get_engine_version(),
         'verification':'fresh-process reload' if VERIFY_ONLY else 'import process',
         'texture':texture.get_path_name(),'texture_srgb':texture.get_editor_property('srgb'),
-        'materials':[m.get_path_name() for m in materials.values()], 'assets':[]}
+        'materials':[m.get_path_name() for m in materials.values()], 'surface_sets':surface_sets,'assets':[]}
 assert report['texture_srgb']
 for entry in MANIFEST['assets']:
     mesh=unreal.load_asset(f"{DEST}/Meshes/{entry['name']}")
@@ -186,11 +259,14 @@ for entry in MANIFEST['assets']:
     assert verts>0 and uv_count>=1,(entry['name'],verts,uv_count)
     assert build.get_editor_property('generate_lightmap_u_vs')
     assert mesh.get_editor_property('light_map_coordinate_index')==1
-    assert collision_count>0,(entry['name'],collision_count)
+    assert collision_count==1,(entry['name'],collision_count)
     slots=list(mesh.get_editor_property('static_materials'))
     for slot in slots:
         mat=slot.get_editor_property('material_interface')
         assert mat and mat.get_path_name().startswith(DEST+'/Materials/')
+    section_mats=[mesh.get_material(mesh_editor.get_lod_material_slot(mesh,0,i)).get_name()
+                  for i in range(mesh.get_num_sections(0))]
+    assert set(section_mats)==set(entry['materials']),(entry['name'],section_mats,entry['materials'])
     bounds=mesh.get_bounds()
     center=[bounds.origin.x,bounds.origin.y,bounds.origin.z]
     extent=[bounds.box_extent.x,bounds.box_extent.y,bounds.box_extent.z]
@@ -198,7 +274,7 @@ for entry in MANIFEST['assets']:
     report['assets'].append({'name':entry['name'],'path':mesh.get_path_name(),'vertices_lod0':verts,
                             'source_uv_channels':uv_count,'generated_lightmap_uv_channel':1,
                             'simple_collisions':collision_count,
-                            'material_slots':len(slots),'bounds_cm':actual})
+                            'material_slots':len(slots),'render_section_materials':section_mats,'bounds_cm':actual})
 
 # Verify the centered native X/Y/Z dimension contract against loaded render bounds.
 for source,imported in zip(MANIFEST['assets'],report['assets']):
@@ -211,6 +287,10 @@ after=protected_hashes()
 assert before==after,'Existing garage/BP assets changed'
 report['existing_garage_assets_unchanged']=True
 report['protected_assets_sha256']=after
+if VERIFY_ONLY:
+    sys.path.insert(0,str(Path(__file__).resolve().parent))
+    from verify_paint import audit
+    report['saved_paint_uv']=audit(DEST,MANIFEST)
 report['passed']=True
 result_path=SOURCE/('unreal_reload_validation.json' if VERIFY_ONLY else 'unreal_import_validation.json')
 result_path.write_text(json.dumps(report,indent=2),encoding='utf-8')

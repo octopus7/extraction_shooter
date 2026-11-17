@@ -1,6 +1,9 @@
 {
-  "build": "UE 5.7 TunaSweeperEditor Win64 Development: Succeeded",
-  "startup_note": "Existing Niagara NE_PostProcess typed element registry ensure occurs before tests.",
+  "engine": "UE 5.7.4 Win64 Development Editor",
+  "automation_exit_code": 0,
+  "succeeded": 1,
+  "succeeded_with_warnings": 0,
+  "failed": 0,
   "checks": [
     "opening green only",
     "closing red only",

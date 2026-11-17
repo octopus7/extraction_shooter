@@ -1,27 +1,11 @@
 {
-  "passed": true,
-  "mode": "connect and construct",
-  "blueprint": "/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor",
-  "mesh_properties": {
-    "frame_top_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameTop",
-    "frame_left_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameLeft",
-    "frame_right_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameRight",
-    "canopy_rail_left_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_CanopyRailLeft",
-    "canopy_rail_right_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_CanopyRailRight",
-    "temporary_wall_left_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryWallLeft",
-    "temporary_wall_right_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryWallRight",
-    "temporary_roof_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryRoof",
-    "led_bar_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_LEDBar",
-    "lower_panel_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_LowerEmbeddedPanel",
-    "motion_indicator_mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_MotionIndicator"
-  },
+  "instance": "/Temp/Untitled_1.Untitled:PersistentLevel.BP_RaidBunkerGarageDoor_C_0",
   "upper_panel_meshes": [
     "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
-    "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
-    "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
-    "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel"
+    "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel02.SM_GarageConcrete_UpperPanel02",
+    "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel03.SM_GarageConcrete_UpperPanel03",
+    "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel04.SM_GarageConcrete_UpperPanel04"
   ],
-  "use_authored_mesh_materials": true,
   "preserved_settings": {
     "door_width": 200.0,
     "door_thickness": 16.0,
@@ -49,141 +33,223 @@
       45.0,
       45.0,
       45.0
-    ]
+    ],
+    "indicator_height_ratio": 0.6499999761581421,
+    "indicator_vertical_spacing": 18.0,
+    "indicator_diameter": 12.0,
+    "indicator_depth": 4.0,
+    "use_authored_mesh_materials": true
   },
+  "original_collision_shapes_matched": 15,
   "constructed_components": [
     {
       "component": "FrameTop",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameTop.SM_GarageConcrete_FrameTop",
+      "mesh": "SM_GarageConcrete_FrameTop",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Concrete.M_GarageConcrete_Concrete",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel"
+        "M_GarageConcrete_WeatheredFrame"
       ]
     },
     {
       "component": "FrameLeft",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameLeft.SM_GarageConcrete_FrameLeft",
+      "mesh": "SM_GarageConcrete_FrameLeft",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Concrete.M_GarageConcrete_Concrete",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel"
+        "M_GarageConcrete_WeatheredFrame"
       ]
     },
     {
       "component": "FrameRight",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameRight.SM_GarageConcrete_FrameRight",
+      "mesh": "SM_GarageConcrete_FrameRight",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Concrete.M_GarageConcrete_Concrete",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel"
+        "M_GarageConcrete_WeatheredFrame"
       ]
     },
     {
       "component": "OpeningIndicator",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_MotionIndicator.SM_GarageConcrete_MotionIndicator",
+      "mesh": "SM_GarageConcrete_MotionIndicator",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Signal.M_GarageConcrete_Signal"
+        "M_GarageConcrete_WeatheredMetal",
+        "M_GarageConcrete_Signal"
       ]
     },
     {
       "component": "ClosingIndicator",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_MotionIndicator.SM_GarageConcrete_MotionIndicator",
+      "mesh": "SM_GarageConcrete_MotionIndicator",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Signal.M_GarageConcrete_Signal"
+        "M_GarageConcrete_WeatheredMetal",
+        "M_GarageConcrete_Signal"
       ]
     },
     {
       "component": "CanopyRailLeft",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_CanopyRailLeft.SM_GarageConcrete_CanopyRailLeft",
+      "mesh": "SM_GarageConcrete_CanopyRailLeft",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber"
+        "M_GarageConcrete_WeatheredMetal"
       ]
     },
     {
       "component": "CanopyRailRight",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_CanopyRailRight.SM_GarageConcrete_CanopyRailRight",
+      "mesh": "SM_GarageConcrete_CanopyRailRight",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber"
+        "M_GarageConcrete_WeatheredMetal"
       ]
     },
     {
       "component": "TemporaryWallLeft",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryWallLeft.SM_GarageConcrete_TemporaryWallLeft",
+      "mesh": "SM_GarageConcrete_TemporaryWallLeft",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Concrete.M_GarageConcrete_Concrete"
+        "M_GarageConcrete_Concrete"
       ]
     },
     {
       "component": "TemporaryWallRight",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryWallRight.SM_GarageConcrete_TemporaryWallRight",
+      "mesh": "SM_GarageConcrete_TemporaryWallRight",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Concrete.M_GarageConcrete_Concrete"
+        "M_GarageConcrete_Concrete"
       ]
     },
     {
       "component": "TemporaryRoof",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryRoof.SM_GarageConcrete_TemporaryRoof",
+      "mesh": "SM_GarageConcrete_TemporaryRoof",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Concrete.M_GarageConcrete_Concrete"
+        "M_GarageConcrete_Concrete"
       ]
     },
     {
       "component": "UpperPanel01",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
+      "mesh": "SM_GarageConcrete_UpperPanel",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Panel.M_GarageConcrete_Panel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber"
+        "M_GarageConcrete_WeatheredMetal"
       ]
     },
     {
       "component": "LedBar",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_LEDBar.SM_GarageConcrete_LEDBar",
+      "mesh": "SM_GarageConcrete_LEDBar",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_LED.M_GarageConcrete_LED"
+        "M_GarageConcrete_WeatheredMetal",
+        "M_GarageConcrete_LED"
       ]
     },
     {
       "component": "UpperPanel02",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
+      "mesh": "SM_GarageConcrete_UpperPanel02",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Panel.M_GarageConcrete_Panel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber"
+        "M_GarageConcrete_WeatheredMetal"
       ]
     },
     {
       "component": "UpperPanel03",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
+      "mesh": "SM_GarageConcrete_UpperPanel03",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Panel.M_GarageConcrete_Panel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber"
+        "M_GarageConcrete_WeatheredMetal"
       ]
     },
     {
       "component": "UpperPanel04",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
+      "mesh": "SM_GarageConcrete_UpperPanel04",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Panel.M_GarageConcrete_Panel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber"
+        "M_GarageConcrete_WeatheredMetal"
       ]
     },
     {
       "component": "LowerEmbeddedPanel",
-      "mesh": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_LowerEmbeddedPanel.SM_GarageConcrete_LowerEmbeddedPanel",
+      "mesh": "SM_GarageConcrete_LowerEmbeddedPanel",
       "materials": [
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Steel.M_GarageConcrete_Steel",
-        "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Panel.M_GarageConcrete_Panel"
+        "M_GarageConcrete_WeatheredMetal"
+      ]
+    },
+    {
+      "component": "SignalBackplate",
+      "mesh": "SM_GarageConcrete_SignalBackplate",
+      "materials": [
+        "M_GarageConcrete_WeatheredMetal"
       ]
     }
   ],
-  "other_garage_assets_unchanged": true
+  "poses": [
+    {
+      "alpha": 0,
+      "hinge_roll_deg": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "passage_blocked": true
+    },
+    {
+      "alpha": 0.46,
+      "hinge_roll_deg": [
+        90.0,
+        86.913,
+        41.913,
+        0.0
+      ],
+      "passage_blocked": false
+    },
+    {
+      "alpha": 1,
+      "hinge_roll_deg": [
+        90.0,
+        90.0,
+        90.0,
+        90.0
+      ],
+      "passage_blocked": false
+    },
+    {
+      "alpha": 0,
+      "hinge_roll_deg": [
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0
+      ],
+      "passage_blocked": true
+    }
+  ],
+  "blueprint": "/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor",
+  "passed": true,
+  "mode": "constructed from saved Blueprint in a fresh editor process",
+  "paint_probes_uv0": {
+    "SM_GarageConcrete_UpperPanel": {
+      "ochre": [
+        0.13993444914169337,
+        0.07217077029302055
+      ],
+      "grey": [
+        0.46727816741913597,
+        0.07217077029302056
+      ]
+    },
+    "SM_GarageConcrete_UpperPanel02": {
+      "ochre": [
+        0.13993444914169337,
+        0.23086217654302055
+      ],
+      "grey": [
+        0.46727816741913597,
+        0.23086217654302055
+      ]
+    },
+    "SM_GarageConcrete_UpperPanel03": {
+      "ochre": [
+        0.13993444914169337,
+        0.38955358279302055
+      ],
+      "grey": [
+        0.46727816741913597,
+        0.38955358279302055
+      ]
+    },
+    "SM_GarageConcrete_UpperPanel04": {
+      "ochre": [
+        0.13993444914169337,
+        0.5482449890430205
+      ],
+      "grey": [
+        0.46727816741913597,
+        0.5482449890430205
+      ]
+    }
+  }
 }

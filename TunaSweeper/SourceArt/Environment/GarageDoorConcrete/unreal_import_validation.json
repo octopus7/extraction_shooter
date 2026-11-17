@@ -10,17 +10,34 @@
     "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Panel.M_GarageConcrete_Panel",
     "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Rubber.M_GarageConcrete_Rubber",
     "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_LED.M_GarageConcrete_LED",
-    "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Signal.M_GarageConcrete_Signal"
+    "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_Signal.M_GarageConcrete_Signal",
+    "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_WeatheredFrame.M_GarageConcrete_WeatheredFrame",
+    "/Game/Environment/Bunker/GarageDoorConcrete/Materials/M_GarageConcrete_WeatheredMetal.M_GarageConcrete_WeatheredMetal"
   ],
+  "surface_sets": {
+    "Frame": {
+      "BaseColor": "/Game/Environment/Bunker/GarageDoorConcrete/Textures/T_GarageConcrete_Frame_BaseColor.T_GarageConcrete_Frame_BaseColor",
+      "Normal": "/Game/Environment/Bunker/GarageDoorConcrete/Textures/T_GarageConcrete_Frame_Normal.T_GarageConcrete_Frame_Normal",
+      "ORM": "/Game/Environment/Bunker/GarageDoorConcrete/Textures/T_GarageConcrete_Frame_ORM.T_GarageConcrete_Frame_ORM"
+    },
+    "Metal": {
+      "BaseColor": "/Game/Environment/Bunker/GarageDoorConcrete/Textures/T_GarageConcrete_Metal_BaseColor.T_GarageConcrete_Metal_BaseColor",
+      "Normal": "/Game/Environment/Bunker/GarageDoorConcrete/Textures/T_GarageConcrete_Metal_Normal.T_GarageConcrete_Metal_Normal",
+      "ORM": "/Game/Environment/Bunker/GarageDoorConcrete/Textures/T_GarageConcrete_Metal_ORM.T_GarageConcrete_Metal_ORM"
+    }
+  },
   "assets": [
     {
       "name": "SM_GarageConcrete_FrameLeft",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameLeft.SM_GarageConcrete_FrameLeft",
-      "vertices_lod0": 1084,
+      "vertices_lod0": 1382,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 2,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredFrame"
+      ],
       "bounds_cm": [
         -17.500001907348633,
         -22.5,
@@ -34,11 +51,14 @@
     {
       "name": "SM_GarageConcrete_FrameRight",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameRight.SM_GarageConcrete_FrameRight",
-      "vertices_lod0": 1086,
+      "vertices_lod0": 1512,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 2,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredFrame"
+      ],
       "bounds_cm": [
         -17.500001907348633,
         -22.5,
@@ -52,11 +72,14 @@
     {
       "name": "SM_GarageConcrete_FrameTop",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_FrameTop.SM_GarageConcrete_FrameTop",
-      "vertices_lod0": 768,
+      "vertices_lod0": 1058,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 2,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredFrame"
+      ],
       "bounds_cm": [
         -135.0,
         -22.500011444091797,
@@ -70,11 +93,14 @@
     {
       "name": "SM_GarageConcrete_CanopyRailLeft",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_CanopyRailLeft.SM_GarageConcrete_CanopyRailLeft",
-      "vertices_lod0": 1080,
+      "vertices_lod0": 1074,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 2,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
       "bounds_cm": [
         -9.62500286102295,
         -37.0,
@@ -88,11 +114,14 @@
     {
       "name": "SM_GarageConcrete_CanopyRailRight",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_CanopyRailRight.SM_GarageConcrete_CanopyRailRight",
-      "vertices_lod0": 1080,
+      "vertices_lod0": 1078,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 2,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
       "bounds_cm": [
         -9.62500286102295,
         -37.0,
@@ -106,11 +135,77 @@
     {
       "name": "SM_GarageConcrete_UpperPanel",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel.SM_GarageConcrete_UpperPanel",
-      "vertices_lod0": 3486,
+      "vertices_lod0": 3544,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 3,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
+      "bounds_cm": [
+        -99.99999237060547,
+        -8.000008583068848,
+        -22.5,
+        99.99999237060547,
+        8.000008583068848,
+        22.5
+      ],
+      "max_bounds_error_cm": 8.761882781982422e-06
+    },
+    {
+      "name": "SM_GarageConcrete_UpperPanel02",
+      "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel02.SM_GarageConcrete_UpperPanel02",
+      "vertices_lod0": 3548,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
+      "bounds_cm": [
+        -99.99999237060547,
+        -8.000008583068848,
+        -22.5,
+        99.99999237060547,
+        8.000008583068848,
+        22.5
+      ],
+      "max_bounds_error_cm": 8.761882781982422e-06
+    },
+    {
+      "name": "SM_GarageConcrete_UpperPanel03",
+      "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel03.SM_GarageConcrete_UpperPanel03",
+      "vertices_lod0": 3544,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
+      "bounds_cm": [
+        -99.99999237060547,
+        -8.000008583068848,
+        -22.5,
+        99.99999237060547,
+        8.000008583068848,
+        22.5
+      ],
+      "max_bounds_error_cm": 8.761882781982422e-06
+    },
+    {
+      "name": "SM_GarageConcrete_UpperPanel04",
+      "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_UpperPanel04.SM_GarageConcrete_UpperPanel04",
+      "vertices_lod0": 3548,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
       "bounds_cm": [
         -99.99999237060547,
         -8.000008583068848,
@@ -124,11 +219,14 @@
     {
       "name": "SM_GarageConcrete_LowerEmbeddedPanel",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_LowerEmbeddedPanel.SM_GarageConcrete_LowerEmbeddedPanel",
-      "vertices_lod0": 754,
+      "vertices_lod0": 764,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 2,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
       "bounds_cm": [
         -100.0,
         -8.000008583068848,
@@ -142,11 +240,15 @@
     {
       "name": "SM_GarageConcrete_LEDBar",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_LEDBar.SM_GarageConcrete_LEDBar",
-      "vertices_lod0": 790,
+      "vertices_lod0": 796,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 3,
+      "material_slots": 2,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal",
+        "M_GarageConcrete_LED"
+      ],
       "bounds_cm": [
         -55.0,
         -3.000004768371582,
@@ -160,11 +262,15 @@
     {
       "name": "SM_GarageConcrete_MotionIndicator",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_MotionIndicator.SM_GarageConcrete_MotionIndicator",
-      "vertices_lod0": 1067,
+      "vertices_lod0": 1064,
       "source_uv_channels": 1,
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
-      "material_slots": 3,
+      "material_slots": 2,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal",
+        "M_GarageConcrete_Signal"
+      ],
       "bounds_cm": [
         -6.0,
         -2.000000476837158,
@@ -176,6 +282,27 @@
       "max_bounds_error_cm": 3.3527612686157227e-07
     },
     {
+      "name": "SM_GarageConcrete_SignalBackplate",
+      "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_SignalBackplate.SM_GarageConcrete_SignalBackplate",
+      "vertices_lod0": 1832,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_WeatheredMetal"
+      ],
+      "bounds_cm": [
+        -6.699999809265137,
+        -3.5000009536743164,
+        -18.5,
+        6.699999809265137,
+        3.500000476837158,
+        18.5
+      ],
+      "max_bounds_error_cm": 5.662441253662109e-07
+    },
+    {
       "name": "SM_GarageConcrete_TemporaryWallLeft",
       "path": "/Game/Environment/Bunker/GarageDoorConcrete/Meshes/SM_GarageConcrete_TemporaryWallLeft.SM_GarageConcrete_TemporaryWallLeft",
       "vertices_lod0": 268,
@@ -183,6 +310,9 @@
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
       "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_Concrete"
+      ],
       "bounds_cm": [
         -100.0,
         -22.50000762939453,
@@ -201,6 +331,9 @@
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
       "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_Concrete"
+      ],
       "bounds_cm": [
         -100.0,
         -22.50000762939453,
@@ -219,6 +352,9 @@
       "generated_lightmap_uv_channel": 1,
       "simple_collisions": 1,
       "material_slots": 1,
+      "render_section_materials": [
+        "M_GarageConcrete_Concrete"
+      ],
       "bounds_cm": [
         -335.0,
         -100.00003051757812,
@@ -232,9 +368,9 @@
   ],
   "existing_garage_assets_unchanged": true,
   "protected_assets_sha256": {
-    "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\BP_RaidBunkerGarageDoor.uasset": "5f107ff14d58feb5de6c98608a3ec0dd0efb33043df0d6fc96e968498855b8be",
-    "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Materials\\M_GarageDoorLED.uasset": "545d0ecb156b53aff8b5c553bf599117a41edce5cda6c50f9d7b71d54ac46659",
-    "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Materials\\M_GarageDoorMetal.uasset": "99f67e7f3e4b06815dc907a5e82968084d1d5941108120a343686613cafa30af",
+    "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\BP_RaidBunkerGarageDoor.uasset": "c0e26723bfce17499242282f0c5560ba70d327150de9e65d1447d18e2e4a0555",
+    "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Materials\\M_GarageDoorLED.uasset": "57506b34d4ea2f02c7bf76d04816298482e4e7c8d47abfee87564b19116437ab",
+    "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Materials\\M_GarageDoorMetal.uasset": "06ca57d3c194c5f31b9c5a61f56e8a4338dfabbaf2631223ceac52b6ca92cf8a",
     "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Meshes\\SM_GarageDoor_CanopyRailLeft.uasset": "85b7446e6ed3d826ff3581bfe8d7df8c6b043a23fa6b842f1d71a80a8762e23b",
     "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Meshes\\SM_GarageDoor_CanopyRailRight.uasset": "a68ef3e67a5342cb921272062ca31ddb831f72a168f61e479d8f49e8ce91fada",
     "TunaSweeper\\Content\\Environment\\Bunker\\GarageDoor\\Meshes\\SM_GarageDoor_FrameLeft.uasset": "0304b645d4ca1341533b32649e65a6a36b7440b44bd8c88cd40e91392f018c4c",

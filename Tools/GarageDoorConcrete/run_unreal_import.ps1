@@ -8,11 +8,12 @@ $taskStarted = Get-Date
 try {
     $env:GARAGE_VERIFY_ONLY = if ($VerifyOnly) { '1' } else { '0' }
     & $taskEngine (Join-Path $taskRoot 'TunaSweeper\TunaSweeper.uproject') `
-        '-EnablePlugins=PythonScriptPlugin,EditorScriptingUtilities' `
+        '-EnablePlugins=PythonScriptPlugin,EditorScriptingUtilities,GeometryScripting' `
         '-run=pythonscript' "-script=$PSScriptRoot\import_unreal.py" `
         '-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.SyncToBrowser=0' `
         '-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.FBX=0' `
-        '-unattended' '-nullrhi' '-nosplash' '-nosound' '-stdout' '-FullStdOutLogOutput' `
+        '-ini:Engine:[/Script/EngineSettings.GameMapsSettings]:EditorStartupMap=/Engine/Maps/Entry' `
+        '-NoLoadStartupPackages' '-unattended' '-nullrhi' '-nosplash' '-nosound' '-stdout' '-FullStdOutLogOutput' `
         "-abslog=$taskRoot\TunaSweeper\Saved\Logs\GarageDoorConcrete_$taskMode.log" `
         *> "$taskRoot\TunaSweeper\Saved\GarageDoorConcrete_$taskMode.stdout.log"
     $taskEngineExit = $LASTEXITCODE

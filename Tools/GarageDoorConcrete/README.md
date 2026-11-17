@@ -1,36 +1,31 @@
-# Concrete bunker automatic door
+# Concrete garage door
 
-Blender 4.5 replacement kit for the existing four-panel FoldingCanopyGarageDoor. Textures were generated with ImageGen; the exact prompt is in `texture.prompt.txt`.
+The raid entrance uses `/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor`. The Blender source, FBX meshes, PBR maps, UV guides and pose renders are under `TunaSweeper/SourceArt/Environment/GarageDoorConcrete`. Imported assets are under `/Game/Environment/Bunker/GarageDoorConcrete`.
 
-## Existing structure and dimensions
+## Painting the door
 
-Read the existing BP_RaidBunkerGarageDoor class defaults and the native actor equations. Its actual opening is 200 cm wide, with four 45 cm upper panels, a 25 cm bottom panel embedded 10 cm into the floor, and 16 cm panel thickness. The 600 cm legacy OBJ files were prototypes scaled by the actor and are not the current opening dimensions. The fixed concrete frame is 270 × 45 × 230 cm. X is width, -Y is outdoors, Z is up.
+Open `GarageDoorConcrete.blend`. The four closed leaves are selected, and the Base Color image is active on each paint material. The metal UV guide arranges the twelve front plates as they appear on the closed door, with the top leaf in the first row and the lowest folding leaf in the fourth. Paint across corresponding rows to make a continuous marking or work on a single leaf to localize a scratch. Each plate, return, fastener and rail has its own islands within the metal set. The two signal lenses share one indicator mesh and receive their colors from the actor.
 
-The moving upper slabs remain gray metal with inset plates, while the jambs, lintel and optional shell are gray concrete. Separate rail recesses follow the real inward rail offset. The original four hinge pivots, moving lower slab and canopy equations are preserved. A white emissive bar follows the first hinge. Two 12 cm circular lamps sit on the solid outer strip of the right jamb: red above green.
+| UV0 texture set | Size | Principal exterior density | Triangle coverage | Guide |
+| --- | --- | --- | --- | --- |
+| Frame | 2048 × 2048 | 691 px/m | 72.50% | [Frame UV](../../TunaSweeper/SourceArt/Environment/GarageDoorConcrete/Previews/GarageConcrete_FrameUV.png) |
+| Metal | 2048 × 2048 | 1,080 px/m | 72.88% | [Metal UV](../../TunaSweeper/SourceArt/Environment/GarageDoorConcrete/Previews/GarageConcrete_MetalUV.png) |
 
-## Connected Blueprint and manual setup reference
+Each island has an eight-pixel edge margin at full resolution. Each set has an sRGB Base Color, a linear tangent-space Normal and a linear ORM texture with ambient occlusion in red, roughness in green and metallic in blue. Blender uses +Y normal maps. Unreal imports them with Flip Green Channel and generates lightmap UVs in channel 1. The optional side walls and roof use the original concrete atlas.
 
-After the user's follow-up authorization, `/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor` now uses this kit, including both motion indicators and authored mesh materials. The door's dimensions and motion settings are preserved. Level assets are unchanged. Imported assets live under `/Game/Environment/Bunker/GarageDoorConcrete`.
+The cast frame has chipped edges, runoff at the lintel and moss around the exposed joint and feet. The ochre stripe crosses the painted faces, with iron oxide at exposed lips, short trails below selected fasteners and trolley scratches on the lowest folding leaf. The shared indicator backing and folded rain hood are a separate mesh.
 
-The connection was compiled, saved, reloaded in a fresh process and verified by constructing the BP: all 16 mesh components resolve to this kit's meshes and materials. See `blueprint_connection_validation.json` and `blueprint_reload_validation.json` in the SourceArt folder. The one-off connection script was removed after its asset commit, per project policy. Reload the BP or restart an already-open editor to see the saved defaults.
+## Blueprint assembly
 
-1. In the existing door's mesh fields, assign the corresponding `SM_GarageConcrete_FrameTop`, `FrameLeft`, `FrameRight`, `CanopyRailLeft`, `CanopyRailRight`, `LEDBar` and `LowerEmbeddedPanel` meshes.
-2. Assign `SM_GarageConcrete_UpperPanel` to all four Upper Panel Meshes entries. Optional TemporaryWallLeft/Right and TemporaryRoof meshes are also supplied.
-3. Enable **Use Authored Mesh Materials** to preserve the new concrete, metal, rubber, LED and lens material slots instead of applying the legacy single metal override.
-4. Set **Motion Indicator Mesh** to `SM_GarageConcrete_MotionIndicator`. The native actor supplies both lamp components, placement and signals; no Blueprint event wiring is required.
+The clear width is 200 cm. Each of the four upper leaves is 45 cm tall and 16 cm deep. The 25 cm lower panel extends 10 cm below the floor when closed. The fixed portal is 270 × 45 × 230 cm. X spans the opening, local −Y faces outside and Z points up.
 
-Default lamp settings: diameter 12 cm, depth 4 cm, vertical spacing 18 cm, height ratio 0.65, emissive strength 8. Opening lights only green; closing lights only red. Fully open, fully closed and disabled/paused states have zero lens emission. Re-enabling a paused moving door resumes its previous direction. Reversing swaps the active lamp immediately. The white bar is continuously emissive. Emission is a material effect, not a separate dynamic point light.
+The existing `UpperPanelMeshes` entries use `SM_GarageConcrete_UpperPanel`, `UpperPanel02`, `UpperPanel03` and `UpperPanel04` in descending order. Their centered origins, bounds and hinge placements match the native dimensions. `Use Authored Mesh Materials` is enabled. The LED follows the first hinge. The noncolliding `SignalBackplate` is attached to `ClosingIndicator` at local (0, −1.5, −9) cm.
 
-The shared lens material uses Custom Primitive Data scalar index 0 for emission and vector indices 1–3 for linear RGB. Colors remain dimly visible when emission is zero. No new persisted save state is introduced.
+The lamps use Custom Primitive Data index 0 for emissive strength and indices 1–3 for RGB. Opening illuminates green, closing illuminates red and stationary states set both emissive strengths to zero.
 
-## Reproduction and validation
+## Rebuilding and verifying
 
-Run Blender in background with `--python-exit-code 1 --python Tools/GarageDoorConcrete/build_garage.py`. FBX meshes are centered, measured in cm after import, with authored UVs, beveled edges and material slots. Export copies compensate for UE's Y-axis conversion; the review blend uses project axes directly. Four renders show closed, opening, open and closing poses. Optional shell meshes and studio props are hidden from the review/export as appropriate.
-
-Build `TunaSweeperEditor Win64 Development`. Run automation test `TunaSweeper.GarageDoor.MotionIndicators` to check start, reversal, pause/resume, endpoints and manual endpoint changes in a real transient UE world. The test does not modify project assets.
-
-Import with `run_unreal_import.ps1`; reload/audit with `run_unreal_import.ps1 -VerifyOnly`. These scripts save only the new kit folder and compare hashes of the existing garage assets. Existing editor/BP instances need an editor restart to load the rebuilt native class.
-
-Verified import results: 12 meshes, 6 materials and 1 ImageGen atlas imported and reloaded in UE 5.7.4; centered bounds match the native contract within 0.1 cm. Material graph checks confirm LED emission and lens CPD indices with zero default lens emission. The initial import preserved all existing garage assets; the subsequent authorized connection changes only the door BP. Static meshes include simple collision; the actor disables collision on the moving/visual components as before, and always disables it on the indicators. Frame recesses are visual details within each jamb's simple collision hull.
-
-The project currently raises a pre-existing Niagara `NE_PostProcess` typed-element registry ensure at engine startup. Asset validation passes, but import/reload commandlets exit with code 1 because of that engine error. The runner deliberately reports this separately instead of hiding the nonzero exit. Native motion automation passes.
+1. For a procedural rebake, set `GARAGE_BAKE_PYTHON` to a Python executable with NumPy and Pillow. The default executable is `python`. Run Blender 4.5 in background with `--python-exit-code 1 --python Tools/GarageDoorConcrete/build_garage.py`. This regenerates the paint textures, UV guides, FBX meshes, packed blend and four pose renders from the surface swatches. Keep any manually painted PNG edits before rebaking.
+2. With UE 5.7, run `Tools/GarageDoorConcrete/run_unreal_import.ps1` to import the kit. Reimport preserves existing collision shapes. Newly created folding leaves inherit the first leaf's collision shape.
+3. Run `Tools/GarageDoorConcrete/run_unreal_import.ps1 -VerifyOnly` for a fresh-process audit of dimensions, actual render section materials, PBR connections and serialized UV0 triangles across each complete paint set. Results are in `unreal_reload_validation.json`.
+4. The placed door in `DemoBoxRaidMap` and a newly constructed Blueprint instance were checked at closed, partially open, open and reclosed poses. See `blueprint_reload_validation.json` and `blueprint_connection_validation.json`. The native automation test `TunaSweeper.GarageDoor.MotionIndicators` covers reversal, pause/resume and the endpoint signals.
