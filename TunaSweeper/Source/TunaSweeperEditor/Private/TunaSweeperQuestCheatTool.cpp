@@ -364,6 +364,7 @@ void FTunaSweeperQuestCheatTool::RegisterMenus()
         FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperQuestCheatTool::Open)));
 }
 void FTunaSweeperQuestCheatTool::Open() { FGlobalTabmanager::Get()->TryInvokeTab(TunaSweeperQuestCheatEditor::TabId); }
+bool FTunaSweeperQuestCheatTool::IsEditingLocked() { return TunaSweeperQuestCheatEditor::IsLocked(); }
 TSharedRef<SDockTab> FTunaSweeperQuestCheatTool::Spawn(const FSpawnTabArgs& Args)
 { return SNew(SDockTab).TabRole(ETabRole::NomadTab)[ SNew(TunaSweeperQuestCheatEditor::SQuestCheatPanel) ]; }
 

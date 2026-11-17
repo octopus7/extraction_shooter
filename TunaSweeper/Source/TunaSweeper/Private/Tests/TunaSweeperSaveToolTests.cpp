@@ -12,6 +12,38 @@
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperSaveToolTest, "TunaSweeper.SaveTool.Transactions",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperItemGrantTest, "TunaSweeper.SaveTool.ItemGrant",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperItemGrantTest::RunTest(const FString& Parameters)
+{
+	const FString Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Automation/SaveTool") / FGuid::NewGuid().ToString() / TEXT("TunaSweeperSave_Slot01.sav"));
+	auto* Save = NewObject<UTunaSweeperSaveGame>();
+	Save->BuildFlavor = TEXT("Demo"); Save->InventorySlots.SetNum(40); Save->EquipmentSlots.SetNum(8);
+	auto Validator = [](const USaveGame& Object) { return Object.IsA<UTunaSweeperSaveGame>(); };
+	if (!TestTrue(TEXT("Fixture saved"), TunaSweeperSafeSave::SaveGameFileFailClosed(Save, Path, Validator))) return false;
+	auto Request = MakeShared<FJsonObject>();
+	Request->SetNumberField(TEXT("version"), 1); Request->SetStringField(TEXT("operation"), TEXT("add"));
+	Request->SetStringField(TEXT("savePath"), Path); Request->SetStringField(TEXT("flavor"), TEXT("Demo")); Request->SetNumberField(TEXT("slot"), 1);
+	TArray<TSharedPtr<FJsonValue>> Items;
+	for (int32 Id : {6019, 6033, 6016, 3005, 7001})
+	{
+		auto Item = MakeShared<FJsonObject>(); Item->SetNumberField(TEXT("itemId"), Id); Item->SetNumberField(TEXT("quantity"), 1);
+		Items.Add(MakeShared<FJsonValueObject>(Item));
+	}
+	Request->SetArrayField(TEXT("items"), Items);
+	auto Preview = TunaSweeperSaveTool::Execute(Request);
+	if (!TestTrue(TEXT("Rocket, materials, crafted item and blueprint can be granted"), Preview->GetBoolField(TEXT("ok")))) return false;
+	Request->SetStringField(TEXT("expectedHash"), Preview->GetStringField(TEXT("sourceHash"))); Request->SetBoolField(TEXT("commit"), true);
+	TestTrue(TEXT("Grant committed"), TunaSweeperSaveTool::Execute(Request)->GetBoolField(TEXT("ok")));
+	auto* Reload = Cast<UTunaSweeperSaveGame>(TunaSweeperSafeSave::LoadVerifiedSaveFile(Path, Validator));
+	if (!TestNotNull(TEXT("Granted save reloads"), Reload)) return false;
+	for (int32 Id : {6019, 6033, 6016, 3005, 7001})
+		TestTrue(TEXT("Granted item persists"), Reload->ItemInstances.ContainsByPredicate([Id](const auto& Item) { return Item.ItemId == Id && Item.Quantity == 1; }));
+	TestEqual(TEXT("Stale repeat rejected"), TunaSweeperSaveTool::Execute(Request)->GetStringField(TEXT("code")), FString(TEXT("stale_save")));
+	return true;
+}
+
 bool FTunaSweeperSaveToolTest::RunTest(const FString& Parameters)
 {
 	const FString Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Automation/SaveTool") / FGuid::NewGuid().ToString() / TEXT("TunaSweeperSave_Slot01.sav"));

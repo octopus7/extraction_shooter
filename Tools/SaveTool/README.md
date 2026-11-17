@@ -38,7 +38,9 @@ dotnet run --project Tools/SaveTool -- validate --save $save --flavor Demo --slo
 
 Main은 `--flavor Main`과 해당 파일의 `--slot 1`, `2`, `3`을 사용합니다. 로컬 Main 저장 폴더명은 `FullGame`입니다. 다른 저장 위치는 [저장 규약](../../Docs/save_persistence.md)을 참고하세요.
 
-## 무기·탄약·방어구 추가
+## 아이템 추가
+
+등록된 아이템 ID를 사용하며 무기·탄약·방어구뿐 아니라 퀘스트 재료·제작품·소모품도 지급할 수 있습니다.
 
 ```powershell
 # 미리보기: 소총탄 250발. 현재 최대 중첩 120이면 여러 스택으로 분할합니다.

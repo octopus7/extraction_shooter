@@ -111,7 +111,9 @@ Machine-specific settings, candidate files, corrupt archives, and cleanup audit 
 
 ## Offline Save Tool
 
-The editor-only `TunaSweeperEditor.TunaSweeperSaveTool` commandlet and .NET 10 wrapper inspect gameplay saves and add weapons/ammunition/armor or replace equipment from a versioned JSON preset. See [agent commandlet protocol](save_tool_commandlet.md) and [human CLI guide](../Tools/SaveTool/README.md).
+The editor-only `TunaSweeperEditor.TunaSweeperSaveTool` commandlet and .NET 10 wrapper inspect gameplay saves and add registered items (including quest materials, crafted items, and consumables) or replace equipment from a versioned JSON preset. See [agent commandlet protocol](save_tool_commandlet.md) and [human CLI guide](../Tools/SaveTool/README.md).
+
+The editor's `TunaSweeper` menu exposes `아이템 지급 치트` in the same Debug section as the quest cheat. It edits the selected offline save slot through the same preview/hash/commit service, using a manual item ID and quantity (default 1). A separate picker lists 43 test items, with rocket 6019 first, followed by quest materials and process items. Queued/running PIE and tracked standalone play lock grants; a changed selected slot requires refreshing the selection. This adds no save fields and does not synthesize quest or achievement events.
 
 Reads never trigger recovery or migration. Mutations require current save version 22, explicit path/flavor/slot, and explicit commit; previews leave the file unchanged. The tool uses native serialization and the existing fail-closed writer after validating the complete mutation. A unique byte-for-byte `.tool-backup-*` original is retained in addition to `.previous`. Stop game/PIE before editing; the tool mutex does not coordinate gameplay or cloud writers.
 

@@ -886,3 +886,15 @@ ui.gate.open_failed,문을 열지 못했다. 다시 시도하자.,Could not open
 ui.rocket.aim_cancel,조준 모드 [X] 취소,Aiming [X] Cancel,照準モード [X] キャンセル,瞄准模式 [X] 取消,瞄準模式 [X] 取消,Прицеливание [X] Отмена
 ui.action.cancel_key,X,X,X,X,X,X
 ui.action.cancel,동작 취소,Cancel action,動作をキャンセル,取消动作,取消動作,Отменить действие
+ui.item_grant.title,아이템 지급 치트,Item grant cheat,アイテム付与チート,物品发放作弊,物品發放作弊,Выдача предметов
+ui.item_grant.description,플레이를 중지한 상태에서 선택된 저장 슬롯의 소지품에 아이템을 지급합니다.,Grant items to the selected save slot inventory while play is stopped.,プレイ停止中に選択したセーブスロットの所持品へアイテムを付与します。,停止游玩后向所选存档的背包发放物品。,停止遊玩後向所選存檔的背包發放物品。,Выдать предметы в инвентарь выбранного сохранения после остановки игры.
+ui.item_grant.id,아이템 ID,Item ID,アイテムID,物品 ID,物品 ID,ID предмета
+ui.item_grant.quantity,수량,Quantity,数量,数量,數量,Количество
+ui.item_grant.picker,테스트 아이템 선택,Choose test item,テストアイテムを選択,选择测试物品,選擇測試物品,Выбрать тестовый предмет
+ui.item_grant.grant,아이템 지급,Grant item,アイテムを付与,发放物品,發放物品,Выдать предмет
+ui.item_grant.row,{0}  ·  {1},{0}  ·  {1},{0}  ·  {1},{0}  ·  {1},{0}  ·  {1},{0}  ·  {1}
+ui.item_grant.success,{0} {1}개를 지급했습니다.,Granted {1} × {0}.,{0}を{1}個付与しました。,已发放 {1} 个{0}。,已發放 {1} 個{0}。,Выдано {1} × {0}.
+ui.item_grant.unknown,등록되지 않은 아이템 ID입니다.,Unknown item ID.,未登録のアイテムIDです。,未知的物品 ID。,未知的物品 ID。,Неизвестный ID предмета.
+ui.item_grant.catalog_error,아이템 목록을 불러오지 못했습니다.,Could not load the item list.,アイテム一覧を読み込めませんでした。,无法加载物品列表。,無法載入物品清單。,Не удалось загрузить список предметов.
+ui.item_grant.full,소지품에 빈 공간이 부족합니다.,Not enough inventory space.,所持品の空き容量が足りません。,背包空间不足。,背包空間不足。,Недостаточно места в инвентаре.
+ui.item_grant.failed,아이템 지급에 실패했습니다. 저장 슬롯을 새로고침한 뒤 다시 시도하세요.,Item grant failed. Refresh the save slot and try again.,付与に失敗しました。セーブスロットを更新して再試行してください。,物品发放失败。请刷新存档后重试。,物品發放失敗。請重新整理存檔後再試。,Не удалось выдать предмет. Обновите сохранение и повторите попытку.

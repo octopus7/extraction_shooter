@@ -34,9 +34,8 @@ namespace TunaSweeperSaveTool::Internal
 
 	bool AllowedItem(const FTunaSweeperItemDefinition& D)
 	{
-		using namespace TunaSweeperInventory;
-		return D.CategoryTag == GunCategoryTag || D.CategoryTag == MeleeCategoryTag || D.CategoryTag == AmmoCategoryTag ||
-			D.CategoryTag == HeadCategoryTag || D.CategoryTag == BodyCategoryTag;
+		// The editor grant tool supports every registered item, including quest materials and throwables.
+		return D.Id > 0;
 	}
 
 	bool FitsEquipment(int32 Slot, const FTunaSweeperItemDefinition& D)
