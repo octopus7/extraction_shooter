@@ -145,6 +145,7 @@ private:
 	friend class FTunaSweeperParcelCollectionTest;
 	friend class FTunaSweeperQuestCraftTest;
 	friend class FTunaSweeperQuestEnemyClassTest;
+	friend class FTunaQuestRewardAchievementsTest;
 	friend class FTunaSweeperEthanolFacilityTest;
 	friend class FTunaSweeperRepairableATVTest;
 	friend class FTunaSweeperATVFuelTest;

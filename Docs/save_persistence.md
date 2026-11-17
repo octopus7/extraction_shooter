@@ -1,5 +1,9 @@
 # Save/Load Persistence Contract
 
+## Quest reward achievements
+
+Achievements 03 and 08 use `quest_reward_claimed` for numeric quest IDs 4 and 24 respectively. RewardAvailable does not qualify. After a gameplay save succeeds, its committed `NumericQuestProgressStates` snapshot reports RewardCompleted entries to the independent achievement save. Failed writes report nothing; a later successful save reconciles completed rewards. Loading existing RewardCompleted quest records also reconciles achievements without granting quest rewards again. Existing ClaimedQuestIds and unlocked IDs remain account-wide and idempotent; no new save fields or version change are required.
+
 ## Elephant lake achievement
 
 Forest lake arrival records `location.forest.elephant_lake` in the existing achievement `ReachedLocationIds` and unlocks `13` in `UnlockedAchievementIds`. Both use the independent achievement save, survive slot changes and restart, and do not add gameplay-slot fields or change the save version. The trigger's per-instance overlap guard is transient. See [placement and validation](elephant_lake_encounter.md).

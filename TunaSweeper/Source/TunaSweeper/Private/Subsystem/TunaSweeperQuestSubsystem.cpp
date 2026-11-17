@@ -705,14 +705,7 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
 
 	CoinBalance += FMath::Max(0, Definition->Rewards.Coins);
 	SetQuestState(QuestId, ETunaSweeperQuestState::RewardCompleted);
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =
-			GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
-		{
-			AchievementSubsystem->ReportQuestRewardClaimed(QuestId);
-		}
-	}
+	// Achievement reporting waits until the gameplay save commits this reward state.
 	if (TrackedQuestId == QuestId)
 	{
 		TrackedQuestId = 0;

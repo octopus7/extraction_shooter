@@ -4,6 +4,7 @@
 #include "Game/TunaSweeperMapMarkerSave.h"
 #include "Character/TunaSweeperOutfitCatalog.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 
 namespace TunaSweeperSave
 {
@@ -1114,9 +1115,25 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 		return false;
 	}
 
-	return TunaSweeperSave::SaveFlavorSave(
+	if (!TunaSweeperSave::SaveFlavorSave(
 		SaveGame,
-		GetSaveGameSlotName(ActiveSaveSlotIndex));
+		GetSaveGameSlotName(ActiveSaveSlotIndex)))
+	{
+		return false;
+	}
+
+	// Reconcile the committed snapshot, including rewards from an earlier failed save.
+	if (UTunaSweeperAchievementSubsystem* Achievements = GetSubsystem<UTunaSweeperAchievementSubsystem>())
+	{
+		for (const FTunaSweeperNumericQuestProgressSaveData& Progress : SaveGame->NumericQuestProgressStates)
+		{
+			if (Progress.State == ETunaSweeperQuestState::RewardCompleted)
+			{
+				Achievements->ReportQuestRewardClaimed(Progress.QuestId);
+			}
+		}
+	}
+	return true;
 }
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
