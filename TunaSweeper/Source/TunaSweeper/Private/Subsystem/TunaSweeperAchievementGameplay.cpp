@@ -64,6 +64,7 @@ void UTunaSweeperAchievementSubsystem::RefreshGameplaySnapshot()
 	CountSlots(Instance->GetAuxiliaryBagSlots());
 	CountSlots(Instance->GetUsableQuickSlots());
 	CountSlots(Instance->GetStorageSlots());
+	CountSlots(Instance->GetRaidStorageSlots());
 	for (const auto& Definition : Definitions)
 	{
 		if (!TunaSweeperAchievementModel::CanUnlock(Definition)) continue;

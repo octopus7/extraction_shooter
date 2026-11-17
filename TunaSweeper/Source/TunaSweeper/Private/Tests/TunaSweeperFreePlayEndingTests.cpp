@@ -75,6 +75,14 @@ bool FTunaSweeperFreePlayEndingPersistenceTest::RunTest(const FString& Parameter
     TestFalse(TEXT("Cannot save unqualified true ending"), Game->SaveFreePlayEnding(true));
     TestFalse(TEXT("Unqualified ending does not unlock"), Achievements->IsAchievementUnlocked(TEXT("15")));
     for (auto& Slot : Game->RaidStorageSlots) Slot.ItemUid = Game->CreateItemInstance(3004, 10);
+    // Count the actual inventory snapshot: 2 carried + 97 stored is still below 100.
+    Game->ItemInstancesByUid[Game->RaidStorageSlots[0].ItemUid].Quantity = 7;
+    Game->BroadcastInventoryStateChanged();
+    TestFalse(TEXT("Combined carried and raid storage tuna below 100 remains locked"), Achievements->IsAchievementUnlocked(TEXT("17")));
+    Game->ItemInstancesByUid[Game->RaidStorageSlots[0].ItemUid].Quantity = 8;
+    Game->BroadcastInventoryStateChanged();
+    TestTrue(TEXT("Combined carried and raid storage tuna at 100 unlocks rich"), Achievements->IsAchievementUnlocked(TEXT("17")));
+    Game->ItemInstancesByUid[Game->RaidStorageSlots[0].ItemUid].Quantity = 10;
     Game->BroadcastInventoryStateChanged();
     TestEqual(TEXT("Full storage refreshes live prompt"), Ending->GetInteractionDisplayName().ToString(),
         Game->ResolveLocalizedText(TEXT("ui.freeplay_ending.true_prompt"), FText::GetEmpty()).ToString());
