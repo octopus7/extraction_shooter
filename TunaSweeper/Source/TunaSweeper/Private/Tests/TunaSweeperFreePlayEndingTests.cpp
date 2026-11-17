@@ -77,8 +77,12 @@ bool FTunaSweeperFreePlayEndingPersistenceTest::RunTest(const FString& Parameter
     for (auto& Slot : Game->RaidStorageSlots) Slot.ItemUid = Game->CreateItemInstance(3004, 10);
     // Count the actual inventory snapshot: 2 carried + 97 stored is still below 100.
     Game->ItemInstancesByUid[Game->RaidStorageSlots[0].ItemUid].Quantity = 7;
+    Game->EquipmentSlots[0].ItemUid = Game->CreateItemInstance(3004, 10);
+    Game->UsableQuickSlots[0].ItemUid = Game->CreateItemInstance(3004, 10);
     Game->BroadcastInventoryStateChanged();
-    TestFalse(TEXT("Combined carried and raid storage tuna below 100 remains locked"), Achievements->IsAchievementUnlocked(TEXT("17")));
+    TestFalse(TEXT("99 carried/stored tuna remains locked even with equipment and quick-slot tuna"), Achievements->IsAchievementUnlocked(TEXT("17")));
+    Game->EquipmentSlots[0].ItemUid.Invalidate();
+    Game->UsableQuickSlots[0].ItemUid.Invalidate();
     Game->ItemInstancesByUid[Game->RaidStorageSlots[0].ItemUid].Quantity = 8;
     Game->BroadcastInventoryStateChanged();
     TestTrue(TEXT("Combined carried and raid storage tuna at 100 unlocks rich"), Achievements->IsAchievementUnlocked(TEXT("17")));

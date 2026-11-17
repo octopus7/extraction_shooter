@@ -58,11 +58,9 @@ void UTunaSweeperAchievementSubsystem::RefreshGameplaySnapshot()
 				GameplaySnapshot.OwnedItemCounts.FindOrAdd(Item.ItemId) += Item.Quantity;
 		}
 	};
-	// Quick slots may reference the same item; UID deduplication prevents double counting.
+	// Count carried bags and both warehouses; equipment and quick slots are excluded.
 	CountSlots(Instance->GetInventorySlots());
-	CountSlots(Instance->GetEquipmentSlots());
 	CountSlots(Instance->GetAuxiliaryBagSlots());
-	CountSlots(Instance->GetUsableQuickSlots());
 	CountSlots(Instance->GetStorageSlots());
 	CountSlots(Instance->GetRaidStorageSlots());
 	for (const auto& Definition : Definitions)
