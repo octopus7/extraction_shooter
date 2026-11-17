@@ -109,6 +109,7 @@ item.waterproof_tape.desc,기지의 새는 배관을 임시로 막을 수 있는
 container.lumber_crate,목재 상자,Lumber Crate,木材箱,木材箱,木材箱,Ящик с древесиной
 container.developer_crate,개발상자,Developer Crate,開発箱,开发者箱,開發者箱,Ящик разработчика
 container.north_crate,북쪽 상자,North Crate,北側の箱,北侧箱子,北側箱子,Северный ящик
+container.wild_sweet_potato,야생고구마,Wild Sweet Potato,野生のサツマイモ,野生红薯,野生地瓜,Дикий батат
 item.pistol_advanced_ap_ammo,권총용 고급 철갑탄,Advanced AP Pistol Ammo,拳銃用高性能徹甲弾,高级穿甲手枪弹,高級穿甲手槍彈,Улучшенные бронебойные пистолетные патроны
 item.pistol_advanced_ap_ammo.desc,관통 4등급 탄약. 철갑탄과 기본 피해는 같지만 높은 등급의 방어구를 더 잘 관통한다.,Tier 4 penetration. Same base damage as AP ammunition with improved penetration against high-tier armor.,貫通等級4。徹甲弾と基本ダメージは同じだが、高等級の防具をより貫通する。,穿透等级4。基础伤害与穿甲弹相同，但对高级护甲的穿透效果更强。,穿透等級4。基礎傷害與穿甲彈相同，但對高級護甲的穿透效果更強。,"Боеприпасы с пробитием 4-го уровня. Базовый урон такой же, как у бронебойных патронов, но лучше пробивают броню высокого уровня."
 item.rifle_advanced_ap_ammo,소총용 고급 철갑탄,Advanced AP Rifle Ammo,ライフル用高性能徹甲弾,高级穿甲步枪弹,高級穿甲步槍彈,Улучшенные бронебойные винтовочные патроны

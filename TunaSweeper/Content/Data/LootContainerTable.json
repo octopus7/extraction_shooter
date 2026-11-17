@@ -70,5 +70,12 @@
     "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
     "material_path": "/Game/Interaction/M_Container_Wood.M_Container_Wood",
     "mesh_scale": [0.95, 0.7, 0.48]
+  },
+  {
+    "id": 7010,
+    "name_string_key": "container.wild_sweet_potato",
+    "capacity": 5,
+    "static_mesh_path": "/Game/Nature/ForestProps/SweetPotato/SM_WildSweetPotato.SM_WildSweetPotato",
+    "mesh_scale": [1, 1, 1]
   }
 ]
