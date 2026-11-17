@@ -93,9 +93,24 @@ public partial class MainWindow : Window
         popup.Show();
     }
 
+    private void OpenItemGrant_Click(object sender, RoutedEventArgs e)
+    {
+        if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
+        {
+            StatusTextBlock.Text = (string)FindResource("MovementCheatSelectTarget");
+            return;
+        }
+        foreach (Window window in OwnedWindows)
+            if (window is ItemGrantWindow) { window.Activate(); return; }
+        var popup = new ItemGrantWindow(target) { Owner = this };
+        popup.Resources.Add(typeof(System.Windows.Controls.Button), FindResource(typeof(System.Windows.Controls.Button)));
+        popup.Show();
+    }
+
     public MainWindow()
     {
         InitializeComponent();
+        Resources["ui.item_grant.title"] = ItemGrantCatalog.Text("ui.item_grant.title");
         RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
         RegisterStartMenuMenuItem.IsChecked = IsStartMenuShortcutRegistered();
         movementCheatStateTimer.Tick += async (_, _) => await RefreshMovementCheatStateAsync();

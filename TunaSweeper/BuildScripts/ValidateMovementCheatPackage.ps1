@@ -61,7 +61,7 @@ $gateControl = FileOffset $gateControlRva
 # The independent gate mailbox has no persisted request or activation state.
 # Header validation and the complete zero-runtime-state check are kept in sync
 # with FTunaSweeperGateCheatControl when its protocol changes.
-if ((U64 $gateControl) -ne 0x5453474154454348 -or (U32 ($gateControl+8)) -ne 2 -or (U32 ($gateControl+12)) -ne 25864) { throw 'Unexpected progression cheat control protocol.' }
+if ((U64 $gateControl) -ne 0x5453474154454348 -or (U32 ($gateControl+8)) -ne 3 -or (U32 ($gateControl+12)) -ne 25864) { throw 'Unexpected progression cheat control protocol.' }
 for ($i = 16; $i -lt 25864; $i++) {
     $offset = FileOffset ([uint32]($gateControlRva + $i))
     if ($bytes[$offset] -ne 0) { throw 'Packaged gate cheat mailbox must have zero runtime state and no queued reset.' }

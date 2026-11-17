@@ -4,11 +4,11 @@
 #include "Tickable.h"
 #include "TunaSweeperGateCheatSubsystem.generated.h"
 
-// Process-memory ABI v2. All strings are zero-terminated UTF-8. No reflected/save/config state.
+// Process-memory ABI v3. All strings are zero-terminated UTF-8. No reflected/save/config state.
 enum class ETunaSweeperGateCheatResult : uint32
 {
  None, Refreshed, Reset, Disabled, NoContext, AmbiguousContext, Expired,
- StaleContext, MissingGate, DuplicateId, SaveFailed, InvalidRequest, Replay, Overflow, TunaFilled
+ StaleContext, MissingGate, DuplicateId, SaveFailed, InvalidRequest, Replay, Overflow, TunaFilled, ItemGranted, InventoryFull
 };
 struct alignas(8) FTunaSweeperGateCheatRequest
 {
@@ -16,7 +16,7 @@ struct alignas(8) FTunaSweeperGateCheatRequest
  int64 DeadlineUtcMs = 0;
  uint64 ContextEpoch = 0;
  uint64 RowKey = 0;
- uint32 Operation = 0; // 1 refresh; 2 reset exactly one gate; 3 fill true-ending tuna (RowKey 0).
+ uint32 Operation = 0; // 1 refresh; 2 reset gate; 3 fill tuna; 4 grant item (RowKey low32 ID, high32 quantity).
  uint32 ProcessId = 0;
  uint64 Reserved[3] = {};
 };
@@ -44,7 +44,7 @@ struct alignas(8) FTunaSweeperGateCheatSnapshot
 struct alignas(8) FTunaSweeperGateCheatControl
 {
  uint64 Magic = 0x5453474154454348ULL;
- uint32 Version = 2;
+ uint32 Version = 3;
  uint32 Size = 25864;
  uint32 ProcessId = 0;
  uint32 Reserved = 0;

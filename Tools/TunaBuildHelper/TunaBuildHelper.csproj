@@ -11,4 +11,10 @@
     <RootNamespace>TunaBuildHelper</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TunaBuildHelper.Tests" />
+    <EmbeddedResource Include="../../TunaSweeper/Content/Data/UITextStrings.csv" LogicalName="UITextStrings.csv" />
+    <EmbeddedResource Include="../../TunaSweeper/Content/Data/ItemNameStrings.csv" LogicalName="ItemNameStrings.csv" />
+    <EmbeddedResource Include="../../TunaSweeper/Content/Data/ItemTable.json" LogicalName="ItemTable.json" />
+  </ItemGroup>
 </Project>

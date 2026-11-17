@@ -14,15 +14,16 @@ internal sealed record GateProgressSnapshot(ulong Ack, ulong Context, long Publi
 internal static class GateProgressProcess
 {
     internal const int Size = 25864;
-    private static nint Locate(System.Diagnostics.Process process, SafeProcessHandle handle, bool requireTuna = false)
+    private static nint Locate(System.Diagnostics.Process process, SafeProcessHandle handle, bool requireTuna = false, bool requireItem = false)
     {
         nint address = MovementCheatProcess.FindInterface(process, handle, "TunaSweeperGateCheatControl", Size);
         byte[] h = MovementCheatProcess.Read(handle, address, 24);
         uint version = BitConverter.ToUInt32(h, 8);
-        if (BitConverter.ToUInt64(h) != 0x5453474154454348 || version is not (1 or 2) ||
+        if (BitConverter.ToUInt64(h) != 0x5453474154454348 || version is not (1 or 2 or 3) ||
             BitConverter.ToUInt32(h, 12) != Size || BitConverter.ToUInt32(h, 16) != process.Id || BitConverter.ToUInt32(h, 20) != 0)
             throw new InvalidOperationException("GateUnsupported");
         if (requireTuna && version < 2) throw new InvalidOperationException("TunaUnsupported");
+        if (requireItem && version < 3) throw new InvalidOperationException("ui.helper_item_grant.unsupported");
         return address;
     }
     public static GateProgressSnapshot ReadTuna(MovementCheatTarget target)
@@ -39,6 +40,12 @@ internal static class GateProgressProcess
         using var process = MovementCheatProcess.GetSelectedProcess(target);
         using var handle = MovementCheatProcess.Open(process.Id, false);
         return ReadSnapshot(handle, Locate(process, handle));
+    }
+    public static GateProgressSnapshot ReadItemGrant(MovementCheatTarget target)
+    {
+        using var process = MovementCheatProcess.GetSelectedProcess(target);
+        using var handle = MovementCheatProcess.Open(process.Id, false);
+        return ReadSnapshot(handle, Locate(process, handle, requireItem: true));
     }
     private static GateProgressSnapshot ReadSnapshot(SafeProcessHandle handle, nint address)
     {
@@ -74,7 +81,13 @@ internal static class GateProgressProcess
     public static uint FillTuna(MovementCheatTarget target, GateProgressSnapshot expected, CancellationToken token)
         => Publish(target, expected, null, 3, token);
 
-    private static uint Publish(MovementCheatTarget target, GateProgressSnapshot expected, GateProgressRow? row, uint operation, CancellationToken token)
+    public static uint GrantItem(MovementCheatTarget target, GateProgressSnapshot expected, int itemId, int quantity, CancellationToken token)
+    {
+        if (itemId <= 0 || quantity is < 1 or > 1000000) throw new ArgumentOutOfRangeException(nameof(quantity));
+        return Publish(target, expected, null, 4, token, ((ulong)(uint)quantity << 32) | (uint)itemId);
+    }
+
+    private static uint Publish(MovementCheatTarget target, GateProgressSnapshot expected, GateProgressRow? row, uint operation, CancellationToken token, ulong itemPayload = 0)
     {
         using var mutex = new Mutex(false, $@"Local\TunaGateReset_{target.ProcessId}_{target.StartTime.ToUniversalTime().Ticks}");
         bool acquired = false;
@@ -85,7 +98,7 @@ internal static class GateProgressProcess
             token.ThrowIfCancellationRequested();
             using var process = MovementCheatProcess.GetSelectedProcess(target);
             using var handle = MovementCheatProcess.Open(process.Id, true);
-            nint address = Locate(process, handle, requireTuna: operation == 3);
+            nint address = Locate(process, handle, requireTuna: operation == 3, requireItem: operation == 4);
             var current = ReadSnapshot(handle, address);
             if (operation == 3 && current.State == 3) throw new InvalidOperationException("TunaDisabled");
             if (!current.Ready || current.Context != expected.Context || current.Map != expected.Map || current.Slot != expected.Slot ||
@@ -99,7 +112,7 @@ internal static class GateProgressProcess
             byte[] body = new byte[56];
             BitConverter.GetBytes(deadline).CopyTo(body, 0);
             BitConverter.GetBytes(expected.Context).CopyTo(body, 8);
-            BitConverter.GetBytes(row?.Key ?? 0UL).CopyTo(body, 16);
+            BitConverter.GetBytes(operation == 4 ? itemPayload : row?.Key ?? 0UL).CopyTo(body, 16);
             BitConverter.GetBytes(operation).CopyTo(body, 24);
             BitConverter.GetBytes(target.ProcessId).CopyTo(body, 28);
             token.ThrowIfCancellationRequested();

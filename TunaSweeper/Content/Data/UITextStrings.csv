@@ -898,3 +898,18 @@ ui.item_grant.unknown,등록되지 않은 아이템 ID입니다.,Unknown item ID
 ui.item_grant.catalog_error,아이템 목록을 불러오지 못했습니다.,Could not load the item list.,アイテム一覧を読み込めませんでした。,无法加载物品列表。,無法載入物品清單。,Не удалось загрузить список предметов.
 ui.item_grant.full,소지품에 빈 공간이 부족합니다.,Not enough inventory space.,所持品の空き容量が足りません。,背包空间不足。,背包空間不足。,Недостаточно места в инвентаре.
 ui.item_grant.failed,아이템 지급에 실패했습니다. 저장 슬롯을 새로고침한 뒤 다시 시도하세요.,Item grant failed. Refresh the save slot and try again.,付与に失敗しました。セーブスロットを更新して再試行してください。,物品发放失败。请刷新存档后重试。,物品發放失敗。請重新整理存檔後再試。,Не удалось выдать предмет. Обновите сохранение и повторите попытку.
+ui.helper_item_grant.scope,실행 중인 게임의 소지품에 지급하고 현재 슬롯에 저장합니다.,Grant items to the running game and save the current slot.,実行中のゲームにアイテムを付与し、現在のスロットに保存します。,向运行中的游戏发放物品并保存当前存档。,向執行中的遊戲發放物品並儲存目前存檔。,Выдать предметы в запущенной игре и сохранить текущую ячейку.
+ui.helper_item_grant.target,"대상: {0}
+맵: {1} · 저장 슬롯: {2}","Target: {0}
+Map: {1} · Save slot: {2}","対象: {0}
+マップ: {1} · スロット: {2}","目标：{0}
+地图：{1} · 存档：{2}","目標：{0}
+地圖：{1} · 存檔：{2}","Цель: {0}
+Карта: {1} · Ячейка: {2}"
+ui.helper_item_grant.waiting,게임플레이 중인 맵과 저장 슬롯을 기다리는 중입니다.,Waiting for an active gameplay map and save slot.,ゲームマップと保存スロットを待っています。,正在等待游戏地图和存档。,正在等待遊戲地圖和存檔。,Ожидание игровой карты и ячейки сохранения.
+ui.helper_item_grant.ready,아이템 ID와 수량을 지정한 뒤 지급하세요.,"Choose an item ID and quantity, then grant.",アイテムIDと数量を指定して付与してください。,请选择物品ID和数量后发放。,請選擇物品ID和數量後發放。,"Укажите ID и количество, затем выдайте предметы."
+ui.helper_item_grant.disabled,이동 치트를 활성화한 뒤 이용하세요.,Enable movement cheats first.,先に移動チートを有効にしてください。,请先启用移动作弊。,請先啟用移動作弊。,Сначала включите чит перемещения.
+ui.helper_item_grant.unsupported,아이템 지급 인터페이스에 접근할 수 없습니다. 최신 게임 빌드와 선택한 프로세스를 확인하세요.,Cannot access item grants. Check the selected process and use the latest game build.,付与機能にアクセスできません。最新ビルドと対象プロセスを確認してください。,无法访问物品发放功能。请检查所选进程和最新游戏版本。,無法存取物品發放功能。請檢查所選程序和最新遊戲版本。,Выдача недоступна. Проверьте процесс и версию игры.
+ui.helper_item_grant.working,아이템 지급 및 저장 응답을 기다리는 중입니다…,Waiting for item grant and save confirmation…,付与と保存の応答を待っています…,正在等待发放和保存确认…,正在等待發放和儲存確認…,Ожидание подтверждения выдачи и сохранения…
+ui.helper_item_grant.stale,맵 또는 슬롯이 바뀌었거나 요청이 만료되었습니다. 현재 대상을 확인하세요.,"The map or slot changed, or the request expired. Check the current target.",マップまたはスロットが変更されたか、要求が期限切れです。対象を確認してください。,地图或存档已更改，或请求已过期。请检查当前目标。,地圖或存檔已變更，或請求已過期。請檢查目前目標。,Карта или ячейка изменилась либо запрос истёк. Проверьте цель.
+ui.helper_item_grant.timeout,응답 시간이 초과됐습니다. 중복 지급 방지를 위해 게임 소지품을 확인한 뒤 다시 시도하세요.,Response timed out. Check the inventory before retrying to avoid duplicate grants.,応答がタイムアウトしました。重複付与を避けるため、所持品を確認してください。,响应超时。请先检查背包，避免重复发放。,回應逾時。請先檢查背包，避免重複發放。,Время ожидания истекло. Проверьте инвентарь перед повторной выдачей.
