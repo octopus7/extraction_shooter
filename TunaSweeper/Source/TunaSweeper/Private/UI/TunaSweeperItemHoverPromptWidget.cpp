@@ -1,4 +1,5 @@
 #include "UI/TunaSweeperItemHoverPromptWidget.h"
+#include "Weapon/TunaSweeperTopAttackRocket.h"
 
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetTree.h"
@@ -835,7 +836,8 @@ bool UTunaSweeperItemHoverPromptWidget::CanUseCachedItem() const
 		return false;
 	}
 
-	return !FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHealthDelta) ||
+	return CachedTileData.ItemInstance.ItemId == ATunaSweeperTopAttackRocket::ItemId ||
+		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHealthDelta) ||
 		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseFoodDelta) ||
 		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHydrationDelta);
 }

@@ -20,6 +20,6 @@
     { "achievement_id": "17", "name_string_key": "achievement.17.name", "condition_type": "current_item_quantity", "target_item_id": 3004, "required_count": 100, "platform_ids": {} },
     { "achievement_id": "18", "name_string_key": "achievement.18.name", "condition_type": "total_enemy_kills", "required_count": 100, "platform_ids": {} },
     { "achievement_id": "19", "name_string_key": "achievement.19.name", "condition_type": "location_reached", "enabled": true, "target_id": "region.plains", "map_paths": ["/Game/MainRaid/RaidPlains"], "platform_ids": {} },
-    { "achievement_id": "20", "name_string_key": "achievement.20.name", "condition_type": "gameplay_event", "event_type": "WeaponFired", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm anti-tank rocket launcher item ID (decimal target_id) and successful launch path." }
+    { "achievement_id": "20", "name_string_key": "achievement.20.name", "condition_type": "gameplay_event", "event_type": "WeaponFired", "enabled": true, "target_id": "6019", "platform_ids": {} }
   ]
 }

@@ -237,6 +237,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item")
 	bool StartItemUseFromSlot(const FTunaSweeperItemSlotReference& SlotReference);
 
+	bool IsRocketAiming() const { return bRocketAiming; }
+	bool IsRocketTargetLocked() const;
+	float GetRocketLockProgress() const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Rocket", meta = (ClampMin = "0.01"))
+	float RocketLockSeconds = 1.2f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Rocket", meta = (ClampMin = "1.0"))
+	float RocketLockRadiusPixels = 30.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Rocket", meta = (ClampMin = "1.0"))
+	float RocketLockRange = 10000.0f;
+
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Item")
 	bool IsUsingItem() const { return bIsUsingItem; }
 
@@ -244,7 +258,7 @@ public:
 	float GetItemUseProgress() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Action")
-	bool IsCancelableActionActive() const { return bIsReloading || bIsUsingItem; }
+	bool IsCancelableActionActive() const { return bIsReloading || bIsUsingItem || bRocketAiming; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Action")
 	float GetCancelableActionProgress() const;
@@ -580,6 +594,12 @@ private:
 	void StartReload();
 	void CompleteReload();
 	void CancelReload();
+	void UpdateRocketAim(float DeltaSeconds);
+	void FireAimedRocket();
+	bool bRocketAiming = false;
+	float RocketLockElapsed = 0.0f;
+	TWeakObjectPtr<AActor> RocketAimTarget;
+	FVector RocketAimLocation = FVector::ZeroVector;
 	void CompleteItemUse();
 	void CancelItemUse();
 	void OpenAmmoSelection();

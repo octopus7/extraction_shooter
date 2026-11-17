@@ -932,7 +932,7 @@
     "experience_value": 0,
     "item_grade": "common",
     "icon_file_name": "T_UIIcon_RocketLauncher.uasset",
-    "category_tag": "item.category.material",
+    "category_tag": "item.category.throwable",
     "weight_kg": 5.0,
     "max_stack_category_key": "stack.rocket_launcher"
   },

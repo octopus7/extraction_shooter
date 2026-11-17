@@ -290,6 +290,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperShopQuestUnlockTest;
 	friend class FTunaSweeperQuestVendingTest;
 	friend class FTunaQuestRewardAchievementsTest;
+	friend class FTunaRocketItemUseTest;
 	friend class FTunaSweeperSpecialVehicleWorldProgressTest;
 	friend class FTunaSweeperParcelCollectionTest;
 	friend class FTunaSweeperVolatileArrivalTest;
@@ -703,6 +704,12 @@ public:
 	float GetItemUseSecondsInSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	bool TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn);
 	bool TryUseHoveredItem(APawn* InstigatorPawn);
+
+	bool TryLaunchRocketFromSlot(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ExpectedUid,
+		APawn* InstigatorPawn, AActor* LockedTarget, const FVector& TargetLocation);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Rocket")
+	TSoftClassPtr<AActor> RocketProjectileClass = TSoftClassPtr<AActor>(FSoftObjectPath(TEXT("/Game/Weapons/Rocket/BP_TopAttackRocket.BP_TopAttackRocket_C")));
 	bool CanStackItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
 		const FTunaSweeperItemSlotReference& TargetSlot,

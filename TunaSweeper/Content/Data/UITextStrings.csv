@@ -882,3 +882,7 @@ ui.gate.chain_link,철망문,Chain-link gate,金網ゲート,铁丝网门,鐵絲
 ui.gate.locked,문이 잠겨 있다,The gate is locked.,門が施錠されている。,门锁着。,門鎖著。,Ворота заперты.
 ui.gate.control_open,잠금 제어장치 열기,Open gate,ゲートを開く,打开铁丝网门,打開鐵絲網門,Открыть ворота
 ui.gate.open_failed,문을 열지 못했다. 다시 시도하자.,Could not open the gate. Try again.,門を開けられない。もう一度試そう。,无法打开门。请重试。,無法打開門。請重試。,Не удалось открыть ворота. Попробуйте ещё раз.
+
+ui.rocket.aim_cancel,조준 모드 [X] 취소,Aiming [X] Cancel,照準モード [X] キャンセル,瞄准模式 [X] 取消,瞄準模式 [X] 取消,Прицеливание [X] Отмена
+ui.action.cancel_key,X,X,X,X,X,X
+ui.action.cancel,동작 취소,Cancel action,動作をキャンセル,取消动作,取消動作,Отменить действие

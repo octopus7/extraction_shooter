@@ -173,6 +173,12 @@ void ATunaSweeperTopDownCharacter::BeginFire(const FInputActionValue& Value)
 		return;
 	}
 
+	if (bRocketAiming)
+	{
+		FireAimedRocket();
+		return;
+	}
+
 	bFireHeld = true;
 	if (bIsUsingItem)
 	{

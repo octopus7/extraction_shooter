@@ -1,5 +1,9 @@
 # Save/Load Persistence Contract
 
+## Single-use rocket
+
+Item 6019 is consumed once by the existing inventory mutation/save workflow after its projectile is successfully created. The existing WeaponFired fact for target `6019` unlocks achievement 20 in the independent achievement save. Aiming, lock progress, the in-flight actor and guidance decal are transient. Cancellation and failed launch preserve inventory and achievement state. Existing saves retain their item UID and quantity with no new fields or version change.
+
 ## Quest reward achievements
 
 Achievements 03 and 08 use `quest_reward_claimed` for numeric quest IDs 4 and 24 respectively. RewardAvailable does not qualify. After a gameplay save succeeds, its committed `NumericQuestProgressStates` snapshot reports RewardCompleted entries to the independent achievement save. Failed writes report nothing; a later successful save reconciles completed rewards. Loading existing RewardCompleted quest records also reconciles achievements without granting quest rewards again. Existing ClaimedQuestIds and unlocked IDs remain account-wide and idempotent; no new save fields or version change are required.

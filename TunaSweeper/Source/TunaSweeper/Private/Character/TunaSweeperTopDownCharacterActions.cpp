@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Weapon/TunaSweeperTopAttackRocket.h"
 
 float ATunaSweeperTopDownCharacter::GetReloadProgress() const
 {
@@ -31,6 +32,7 @@ float ATunaSweeperTopDownCharacter::GetItemUseProgress() const
 
 float ATunaSweeperTopDownCharacter::GetCancelableActionProgress() const
 {
+	if (bRocketAiming) return GetRocketLockProgress();
 	if (bIsUsingItem)
 	{
 		return GetItemUseProgress();
@@ -51,7 +53,7 @@ void ATunaSweeperTopDownCharacter::StartReload()
 		return;
 	}
 
-	if (bIsUsingItem)
+	if (bIsUsingItem || bRocketAiming)
 	{
 		CancelItemUse();
 	}
@@ -174,6 +176,21 @@ bool ATunaSweeperTopDownCharacter::StartItemUseFromSlot(const FTunaSweeperItemSl
 		return false;
 	}
 
+	FTunaSweeperItemInstance UseInstance;
+	if (TunaGameInstance->TryGetItemInstance(ItemUid, UseInstance) && UseInstance.ItemId == ATunaSweeperTopAttackRocket::ItemId)
+	{
+		CancelActiveCancelableAction();
+		CloseAmmoSelection();
+		CancelMeleeSwing();
+		bFireHeld = false;
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+		PendingItemUseSlotReference = SlotReference;
+		PendingItemUseUid = ItemUid;
+		bRocketAiming = true;
+		RocketAimLocation = GetActorLocation() + GetActorForwardVector() * 1000.0f;
+		return true;
+	}
+
 	const float UseSeconds = TunaGameInstance->GetItemUseSecondsInSlot(SlotReference);
 	if (UseSeconds <= 0.0f)
 	{
@@ -187,7 +204,7 @@ bool ATunaSweeperTopDownCharacter::StartItemUseFromSlot(const FTunaSweeperItemSl
 	}
 
 	CancelReload();
-	if (bIsUsingItem)
+	if (bIsUsingItem || bRocketAiming)
 	{
 		CancelItemUse();
 	}
@@ -240,6 +257,9 @@ void ATunaSweeperTopDownCharacter::CancelItemUse()
 		GetWorldTimerManager().ClearTimer(ItemUseTimerHandle);
 	}
 
+	bRocketAiming = false;
+	RocketAimTarget.Reset();
+	RocketLockElapsed = 0.0f;
 	bIsUsingItem = false;
 	PendingItemUseSlotReference = FTunaSweeperItemSlotReference();
 	PendingItemUseUid.Invalidate();

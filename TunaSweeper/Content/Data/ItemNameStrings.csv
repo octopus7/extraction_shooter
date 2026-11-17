@@ -154,7 +154,7 @@ item.model_boat,모형배,Model Boat,模型の船,模型船,模型船,Модел
 item.model_boat.desc,작게 만들어진 모형배. 파손되지 않도록 조심해서 운반해야 한다.,A miniature boat. Handle carefully to avoid damage.,小さく作られた模型の船。壊さないよう慎重に運ぶ必要がある。,小型模型船，需要小心搬运以免损坏。,小型模型船，需要小心搬運以免損壞。,Миниатюрная модель корабля. Беречь от повреждений при переноске.
 item.tire,타이어,Tire,タイヤ,轮胎,輪胎,Шина
 item.tire.desc,차량 바퀴에 장착하는 고무 타이어.,A rubber tire fitted to a vehicle wheel.,車両の車輪に取り付けるゴム製タイヤ。,安装在车辆车轮上的橡胶轮胎。,安裝在車輛車輪上的橡膠輪胎。,Резиновая шина для колеса транспортного средства.
-item.rocket_launcher,로켓무기,Rocket Launcher,ロケットランチャー,火箭发射器,火箭發射器,Ракетная пусковая установка
+item.rocket_launcher,대전차 로켓 무기,Rocket Launcher,ロケットランチャー,火箭发射器,火箭發射器,Ракетная пусковая установка
 item.rocket_launcher.desc,로켓탄을 발사하도록 만들어진 휴대용 발사기.,A portable launcher designed to fire rockets.,ロケット弾を発射するために作られた携帯式発射器。,用于发射火箭弹的便携式发射器。,用於發射火箭彈的攜帶式發射器。,"Переносная пусковая установка, предназначенная для запуска ракет."
 item.hammer,망치,Hammer,ハンマー,锤子,鎚子,Молоток
 item.hammer.desc,못을 박거나 간단한 수리에 쓰는 망치.,A hammer for driving nails and simple repairs.,釘打ちや簡単な修理に使うハンマー。,用于钉钉子和简单维修的锤子。,用於釘釘子和簡單維修的鎚子。,Молоток для забивания гвоздей и простого ремонта.
@@ -185,7 +185,7 @@ item.desk_clock.desc,작업대에서 제작 재료로 사용할 수 있는 작�
 item.rabbit_token,토끼코인,Rabbit Token,ウサギコイン,兔子代币,兔子代幣,Кроличий жетон
 item.rabbit_token.desc,토끼 바이크가 지니고 있던 자판기용 코인.,A vending-machine token carried by a rabbit bike.,ウサギバイクが持っていた自販機用コイン。,兔子三轮机器人携带的自动售货机代币。,兔子三輪機器人攜帶的自動販賣機代幣。,Жетон для торгового автомата из кроличьего трицикла.
 item.empty_launcher_tube,빈 발사관,Empty Launcher Tube,空の発射管,空发射管,空發射管,Пустая пусковая труба
-item.empty_launcher_tube.desc,토끼 바이크에서 회수한 빈 발사관. 로켓무기를 만드는 데 사용한다.,An empty launcher tube recovered from a rabbit bike. Used to craft a rocket launcher.,ウサギバイクから回収した空の発射管。ロケットランチャーの製作に使用する。,从兔子三轮机器人回收的空发射管。用于制作火箭发射器。,從兔子三輪機器人回收的空發射管。用於製作火箭發射器。,Пустая пусковая труба с кроличьего трицикла. Используется для изготовления ракетной пусковой установки.
+item.empty_launcher_tube.desc,토끼 바이크에서 회수한 빈 발사관. 대전차 로켓 무기를 만드는 데 사용한다.,An empty launcher tube recovered from a rabbit bike. Used to craft a rocket launcher.,ウサギバイクから回収した空の発射管。ロケットランチャーの製作に使用する。,从兔子三轮机器人回收的空发射管。用于制作火箭发射器。,從兔子三輪機器人回收的空發射管。用於製作火箭發射器。,Пустая пусковая труба с кроличьего трицикла. Используется для изготовления ракетной пусковой установки.
 item.high_output_motor,고출력 모터,High-Output Motor,高出力モーター,高功率电机,高功率馬達,Мощный электродвигатель
 item.high_output_motor.desc,무거운 화물을 끌어올리기 위해 구동력을 강화한 모터. 화물용 엘리베이터 같은 대형 운반 설비에 사용한다.,A reinforced motor built to lift heavy cargo. Used in large transport machinery such as freight elevators.,重い貨物を引き上げるために駆動力を強化したモーター。貨物用エレベーターなどの大型運搬設備に使われる。,为提升重型货物而增强驱动力的电机。用于货运电梯等大型搬运设备。,為提升重型貨物而增強驅動力的馬達。用於貨運電梯等大型搬運設備。,Усиленный электродвигатель для подъёма тяжёлых грузов. Используется в грузовых лифтах и другом крупном транспортном оборудовании.
 item.gourmet_tuna,미식 참치 통조림,Gourmet Canned Tuna,高級ツナ缶,高级金枪鱼罐头,高級鮪魚罐頭,Изысканные консервы из тунца

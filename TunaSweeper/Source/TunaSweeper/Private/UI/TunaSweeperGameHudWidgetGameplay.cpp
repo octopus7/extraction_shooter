@@ -116,7 +116,7 @@ bool UTunaSweeperGameHudWidget::TryGetWeaponCrosshairLocalPosition(const FGeomet
 	{
 		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
 		{
-			OutLocalPosition += TunaCharacter->GetWeaponRecoilCrosshairScreenOffset();
+			if (!TunaCharacter->IsRocketAiming()) OutLocalPosition += TunaCharacter->GetWeaponRecoilCrosshairScreenOffset();
 		}
 	}
 

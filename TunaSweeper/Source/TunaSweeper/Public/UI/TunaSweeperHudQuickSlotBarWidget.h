@@ -43,7 +43,7 @@ public:
 
 	void SetWeaponAmmoTypeText(int32 SlotNumber, const FText& AmmoTypeText, bool bVisible);
 	void SetWeaponAmmoText(int32 SlotNumber, int32 LoadedAmmoCount, int32 InventoryAmmoCount, bool bVisible);
-	void SetCancelableActionProgress(float Progress, bool bVisible);
+	void SetCancelableActionProgress(float Progress, bool bVisible, bool bRocketAiming = false);
 	void SetReloadProgress(float Progress, bool bVisible) { SetCancelableActionProgress(Progress, bVisible); }
 	void SetAmmoSelectorOptions(const TArray<FText>& OptionTexts, int32 FocusedOptionIndex, int32 WeaponSlotNumber, bool bVisible);
 	void SetAmmoSelectorPrompt(int32 WeaponSlotNumber, const FText& PromptText, bool bVisible);

@@ -379,12 +379,12 @@ void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets(const FGeometry* 
 
 	if (QuickSlotBarWidget)
 	{
-		QuickSlotBarWidget->SetCancelableActionProgress(CancelableActionProgress, bShowCancelableAction);
+		QuickSlotBarWidget->SetCancelableActionProgress(CancelableActionProgress, bShowCancelableAction, TunaCharacter && TunaCharacter->IsRocketAiming());
 	}
 
 	if (CenterCancelableActionGaugeRoot)
 	{
-		CenterCancelableActionGaugeRoot->SetVisibility(bShowCancelableAction ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		CenterCancelableActionGaugeRoot->SetVisibility(bShowCancelableAction && !TunaCharacter->IsRocketAiming() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
 	if (CenterReloadPromptRoot)
@@ -402,7 +402,7 @@ void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets(const FGeometry* 
 
 	if (CenterCancelableActionRingWidget)
 	{
-		CenterCancelableActionRingWidget->SetCancelableActionProgress(CancelableActionProgress, bShowCancelableAction);
+		CenterCancelableActionRingWidget->SetCancelableActionProgress(CancelableActionProgress, bShowCancelableAction && !TunaCharacter->IsRocketAiming());
 	}
 
 	const int32 FilledSegmentCount = FMath::CeilToInt(CancelableActionProgress * CenterCancelableActionSegments.Num());

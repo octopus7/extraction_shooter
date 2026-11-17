@@ -322,10 +322,12 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		return CurrentLayerId;
 	}
 
+	const auto* RocketCharacter = GetOwningPlayer() ? Cast<ATunaSweeperTopDownCharacter>(GetOwningPlayer()->GetPawn()) : nullptr;
+	const bool bRocketCrosshair = RocketCharacter && RocketCharacter->IsRocketAiming();
 	const FName WeaponTypeTag = GetSelectedWeaponTypeTag();
 	const bool bShotgunCrosshair = WeaponTypeTag == ShotgunWeaponTypeTag;
 	const bool bPrecisionCrosshair = IsPrecisionCrosshairWeaponType(WeaponTypeTag);
-	if (!bShotgunCrosshair && !bPrecisionCrosshair)
+	if (!bRocketCrosshair && !bShotgunCrosshair && !bPrecisionCrosshair)
 	{
 		return CurrentLayerId;
 	}
@@ -357,6 +359,26 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 			true,
 			FMath::Max(1.0f, Thickness));
 	};
+
+	if (bRocketCrosshair)
+	{
+		const FLinearColor CornerColor = RocketCharacter->IsRocketTargetLocked()
+			? FLinearColor(0.1f, 1.0f, 0.25f) : FLinearColor::White;
+		for (float X : {-1.0f, 1.0f})
+		{
+			for (float Y : {-1.0f, 1.0f})
+			{
+				TArray<FVector2D> Points = {
+					CrosshairLocalPosition + FVector2D(X * 12.0f, Y * 24.0f),
+					CrosshairLocalPosition + FVector2D(X * 24.0f, Y * 24.0f),
+					CrosshairLocalPosition + FVector2D(X * 24.0f, Y * 12.0f)};
+				DrawLineStrip(Points, CornerColor, 2.5f, CurrentLayerId + 1);
+			}
+		}
+		DrawLineStrip({CrosshairLocalPosition + FVector2D(-6.0f, 0.0f), CrosshairLocalPosition + FVector2D(6.0f, 0.0f)}, FLinearColor::White, 1.5f, CurrentLayerId + 1);
+		DrawLineStrip({CrosshairLocalPosition + FVector2D(0.0f, -6.0f), CrosshairLocalPosition + FVector2D(0.0f, 6.0f)}, FLinearColor::White, 1.5f, CurrentLayerId + 1);
+		return CurrentLayerId + 1;
+	}
 
 	auto BuildArcPoints = [](
 		const FVector2D& Center,

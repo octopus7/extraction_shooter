@@ -233,6 +233,7 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 		return;
 	}
 
+	UpdateRocketAim(DeltaSeconds);
 	UpdateRoll(DeltaSeconds);
 	UpdateMeleeSwing(DeltaSeconds);
 	UpdateSprintAndStamina(DeltaSeconds);

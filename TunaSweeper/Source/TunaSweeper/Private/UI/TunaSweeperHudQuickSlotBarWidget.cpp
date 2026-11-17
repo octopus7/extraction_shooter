@@ -1,4 +1,5 @@
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
+#include "Game/TunaSweeperGameInstance.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
@@ -323,7 +324,7 @@ void UTunaSweeperHudQuickSlotBarWidget::SetWeaponAmmoText(
 			: FText::GetEmpty());
 }
 
-void UTunaSweeperHudQuickSlotBarWidget::SetCancelableActionProgress(float Progress, bool bVisible)
+void UTunaSweeperHudQuickSlotBarWidget::SetCancelableActionProgress(float Progress, bool bVisible, bool bRocketAiming)
 {
 	CacheNamedWidgets();
 
@@ -347,17 +348,22 @@ void UTunaSweeperHudQuickSlotBarWidget::SetCancelableActionProgress(float Progre
 	}
 	if (CancelableActionCancelKeyBackground)
 	{
-		CancelableActionCancelKeyBackground->SetVisibility(TargetVisibility);
+		CancelableActionCancelKeyBackground->SetVisibility(bRocketAiming ? ESlateVisibility::Collapsed : TargetVisibility);
 	}
 	if (CancelableActionCancelKeyText)
 	{
-		CancelableActionCancelKeyText->SetVisibility(TargetVisibility);
-		CancelableActionCancelKeyText->SetText(bVisible ? FText::FromString(TEXT("X")) : FText::GetEmpty());
+		CancelableActionCancelKeyText->SetVisibility(bRocketAiming ? ESlateVisibility::Collapsed : TargetVisibility);
+		const auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+		CancelableActionCancelKeyText->SetText(bVisible && Game
+			? Game->ResolveLocalizedText(TEXT("ui.action.cancel_key"), FText::GetEmpty()) : FText::GetEmpty());
 	}
 	if (CancelableActionCancelText)
 	{
 		CancelableActionCancelText->SetVisibility(TargetVisibility);
-		CancelableActionCancelText->SetText(bVisible ? FText::FromString(TEXT("\uB3D9\uC791 \uCDE8\uC18C")) : FText::GetEmpty());
+		const auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+		CancelableActionCancelText->SetText(bVisible && Game
+			? Game->ResolveLocalizedText(bRocketAiming ? TEXT("ui.rocket.aim_cancel") : TEXT("ui.action.cancel"), FText::GetEmpty())
+			: FText::GetEmpty());
 	}
 }
 

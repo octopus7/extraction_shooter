@@ -1,6 +1,10 @@
 #include "TunaSweeperGameInstanceShared.h"
 #include "Combat/TunaSweeperArmor.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Weapon/TunaSweeperTopAttackRocket.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
 {
@@ -225,6 +229,12 @@ bool UTunaSweeperGameInstance::CanUseItemInSlot(
 		return false;
 	}
 
+	if (ItemInstance->ItemId == ATunaSweeperTopAttackRocket::ItemId)
+	{
+		const auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn);
+		return Character && !Character->IsDead() && !Character->IsMountedInVehicle();
+	}
+
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	FTunaSweeperItemDefinition ItemDefinition;
 	if (!ItemDataSubsystem ||
@@ -284,6 +294,15 @@ float UTunaSweeperGameInstance::GetItemUseSecondsInSlot(const FTunaSweeperItemSl
 bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn)
 {
 	EnsureInventoryStateInitialized();
+	FGuid UseUid;
+	FTunaSweeperItemInstance UseInstance;
+	if (TryGetSlotItemUid(SlotReference, UseUid) && TryGetItemInstance(UseUid, UseInstance) &&
+		UseInstance.ItemId == ATunaSweeperTopAttackRocket::ItemId)
+	{
+		auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn);
+		return Character && Character->StartItemUseFromSlot(SlotReference);
+	}
+
 	if (!SlotReference.IsValid() || !InstigatorPawn)
 	{
 		return false;
@@ -1514,4 +1533,49 @@ int32 UTunaSweeperGameInstance::GetMaxStorageSlotCapacity() const
 int32 UTunaSweeperGameInstance::NormalizeStorageSlotCapacity(int32 RequestedCapacity) const
 {
 	return FMath::Clamp(RequestedCapacity, GetDefaultStorageSlotCapacity(), GetMaxStorageSlotCapacity());
+}
+
+
+bool UTunaSweeperGameInstance::TryLaunchRocketFromSlot(
+	const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ExpectedUid,
+	APawn* InstigatorPawn, AActor* LockedTarget, const FVector& TargetLocation)
+{
+	EnsureInventoryStateInitialized();
+	FGuid CurrentUid;
+	FTunaSweeperItemInstance Instance;
+	if (!ExpectedUid.IsValid() || !CanUseItemInSlot(SlotReference, InstigatorPawn) ||
+		!TryGetSlotItemUid(SlotReference, CurrentUid) || CurrentUid != ExpectedUid ||
+		!TryGetItemInstance(CurrentUid, Instance) || Instance.ItemId != ATunaSweeperTopAttackRocket::ItemId ||
+		!InstigatorPawn->GetWorld() || TargetLocation.ContainsNaN()) return false;
+
+	UClass* RocketClass = RocketProjectileClass.LoadSynchronous();
+	if (!RocketClass || !RocketClass->IsChildOf(ATunaSweeperTopAttackRocket::StaticClass())) return false;
+	const FVector LaunchPosition = InstigatorPawn->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
+	const FTransform LaunchTransform(FRotator(90.0f, 0.0f, 0.0f), LaunchPosition);
+	auto* Rocket = InstigatorPawn->GetWorld()->SpawnActorDeferred<ATunaSweeperTopAttackRocket>(
+		RocketClass, LaunchTransform, InstigatorPawn, InstigatorPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (!Rocket) return false;
+	Rocket->TargetActor = ATunaSweeperTopAttackRocket::IsValidTarget(InstigatorPawn, LockedTarget) ? LockedTarget : nullptr;
+	Rocket->bTargetLocked = Rocket->TargetActor != nullptr;
+	Rocket->TargetLocation = TargetLocation;
+	UGameplayStatics::FinishSpawningActor(Rocket, LaunchTransform);
+	// Construction can fail or run Blueprint logic. Revalidate before committing the inventory mutation.
+	if (!IsValid(Rocket) || !TryGetSlotItemUid(SlotReference, CurrentUid) || CurrentUid != ExpectedUid ||
+		!CanUseItemInSlot(SlotReference, InstigatorPawn) || !TryConsumeSingleItemFromSlot(SlotReference))
+	{
+		if (IsValid(Rocket)) Rocket->Destroy();
+		return false;
+	}
+	RemoveInvalidSlotReferences(PlayerInventorySlots);
+	RemoveInvalidSlotReferences(EquipmentSlots);
+	RemoveInvalidSlotReferences(AuxiliaryBagSlots);
+	RemoveInvalidSlotReferences(UsableQuickSlots);
+	RemoveInvalidSlotReferences(StorageSlots);
+	RemoveInvalidSlotReferences(ActiveLootContainerSlots);
+	ClearSelectedItemIfInvalid();
+	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
+	if (auto* Achievements = GetSubsystem<UTunaSweeperAchievementSubsystem>())
+		Achievements->ReportWeaponFired(ATunaSweeperTopAttackRocket::ItemId);
+	return true;
 }
