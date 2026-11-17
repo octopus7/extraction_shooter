@@ -8,7 +8,7 @@ internal static class Program
     private static int Main()
     {
         void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
-        Check(ItemGrantCatalog.Featured.Count == 43, "Featured item count");
+        Check(ItemGrantCatalog.Featured.Count == 41, "Featured item count");
         Check(ItemGrantCatalog.Featured[0].Id == 6019, "Rocket first");
         Check(ItemGrantCatalog.Items.All(i => !i.Name.StartsWith("item.")), "Resolved item names");
         var window = new ItemGrantWindow(new(123, DateTime.Now, "synthetic test target"));

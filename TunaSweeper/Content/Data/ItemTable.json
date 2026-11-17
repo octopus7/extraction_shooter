@@ -344,19 +344,6 @@
     "use_hydration_delta": 80
   },
   {
-    "id": 3006,
-    "name_string_key": "item.king_water_bottle",
-    "description_string_key": "item.king_water_bottle.desc",
-    "shop_sell_price": 18,
-    "experience_value": 12,
-    "item_grade": "rare",
-    "icon_file_name": "T_UIIcon_WaterBottle.uasset",
-    "category_tag": "item.category.consumable",
-    "use_health_delta": 0,
-    "use_food_delta": 0,
-    "use_hydration_delta": 120
-  },
-  {
     "id": 4001,
     "name_string_key": "item.bandage",
     "description_string_key": "item.bandage.desc",
@@ -619,17 +606,6 @@
     "category_tag": "item.category.material",
     "max_stack_category_key": "stack.toot_toot",
     "weight_kg": 0
-  },
-  {
-    "id": 7001,
-    "name_string_key": "item.blueprint_king_water_bottle",
-    "description_string_key": "item.blueprint_king_water_bottle.desc",
-    "shop_sell_price": 30,
-    "experience_value": 0,
-    "item_grade": "rare",
-    "icon_file_name": "T_UIIcon_WaterBottle.uasset",
-    "category_tag": "item.category.blueprint",
-    "blueprint_recipe_id": "recipe.king_water_bottle"
   },
   {
     "id": 7002,

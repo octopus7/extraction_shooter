@@ -4,7 +4,7 @@ quest.ui.list_title,퀘스트 목록,Quest List,クエスト一覧,任务列表,
 quest.ui.tab.available,수락가능,Available,受注可能,可接取,可接取,Доступные
 quest.ui.tab.in_progress,진행중,In Progress,進行中,进行中,進行中,Выполняются
 quest.ui.tab.completed,보상완료,Rewards Claimed,報酬受取済み,奖励已领取,獎勵已領取,Награды получены
-quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select a quest from the right list.,右の一覧からクエストを選択してください,请从右侧列表选择任务。,請從右側列表選擇任務。,Выберите задание в списке справа.
+quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select a quest from the list on the right.,右の一覧からクエストを選択してください,请从右侧列表选择任务。,請從右側列表選擇任務。,Выберите задание в списке справа.
 quest.ui.empty.available,수락 가능한 퀘스트가 없습니다.,No available quests.,受注可能なクエストはありません,没有可接取的任务。,沒有可接取的任務。,Нет доступных заданий.
 quest.ui.empty.in_progress,진행 중인 퀘스트가 없습니다.,No active quests.,進行中のクエストはありません,没有进行中的任务。,沒有進行中的任務。,Нет активных заданий.
 quest.ui.empty.completed,보상을 완료한 퀘스트가 없습니다.,No quests with claimed rewards.,報酬を受け取ったクエストはありません,没有已领取奖励的任务。,沒有已領取獎勵的任務。,Нет заданий с полученной наградой.
@@ -24,16 +24,13 @@ quest.ui.button.accept,수락,Accept,受注,接取,接取,Принять
 quest.ui.button.locked,잠김,Locked,ロック中,未解锁,未解鎖,Заблокировано
 quest.ui.button.in_progress,진행 중,In Progress,進行中,进行中,進行中,Выполняется
 quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る,领取奖励,領取獎勵,Получить награду
-quest.ui.button.completed,완료,Complete,完了,已完成,已完成,Завершено
+quest.ui.button.completed,완료,Completed,完了,已完成,已完成,Завершено
 quest.speaker.mole,두더지,Mole,モグラ,鼹鼠,鼴鼠,Крот
 quest.first_outing.title,첫 외출,First Outing,初めての外出,初次外出,初次外出,Первая вылазка
 quest.first_outing.description,기지 밖으로 나가 레이드 구역을 확인하고 돌아올 준비를 하세요.,"Head outside the base, check the raid zone, and prepare to return.",基地の外へ出てレイド区域を確認し、帰還の準備をしましょう,走出基地，确认突袭区域并准备返回。,走出基地，確認突襲區域並準備返回。,"Выйдите с базы, осмотрите зону рейда и приготовьтесь вернуться."
 quest.first_outing.objective.leave_bunker,기지 밖으로 이동,Move outside the base,基地の外へ移動,前往基地外,前往基地外,Выйти с базы
 quest.first_outing.accept.line1,몸은 괜찮아 보여. 장비도 챙겼으니 이제 밖으로 나갈 준비가 됐어.,You look all right and your gear is ready. You're set to head outside.,体は大丈夫そうだね。装備もそろったし、外へ出る準備はできたよ。,你看起来没事，装备也带齐了。现在可以出去了。,你看起來沒事，裝備也帶齊了。現在可以出去了。,"Выглядишь нормально, снаряжение на месте. Теперь можно выходить."
 quest.first_outing.accept.line2,왼쪽 사다리가 바깥 구역으로 이어져. 서두르지 말고 준비되면 가자.,The ladder on the left leads outside. Take your time and we'll go when you're ready.,左のはしごが外につながってる。焦らず、準備ができたら行こう。,左边的梯子通往外面。别急，准备好了再走。,左邊的梯子通往外面。別急，準備好了再走。,"Лестница слева ведёт наружу. Не спеши, пойдём, когда подготовишься."
-quest.lumberjack_first_kill.title,벌목기 제거,Remove the Lumberjack,伐採機の排除,消灭伐木机,消滅伐木機,Уничтожить лесоруба
-quest.lumberjack_first_kill.description,레이드 구역에서 벌목기를 처치하고 생환하세요.,Eliminate a lumberjack in the raid zone and return alive.,レイド区域で伐採機を排除して生還しましょう,在突袭区域消灭一台伐木机并活着返回。,在突襲區域消滅一臺伐木機並活着返回。,Уничтожьте лесоруба в зоне рейда и вернитесь в целости и сохранности.
-quest.lumberjack_first_kill.objective.kill_lumberjack,벌목기 처치,Eliminate a lumberjack,伐採機を排除,消灭伐木机,消滅伐木機,Уничтожить лесоруба
 quest.signalbot_map_check.title,신호 관제 확인,Signal Control Check,通信管制確認,检查通信控制设施,檢查通信控制設施,Проверка центра связи
 quest.signalbot_map_check.description,신호봇과 함께 새 통신 관제 시설을 확인하세요.,Check the new signal control facility with Signal Bot.,シグナルボットと新しい通信管制施設を確認しましょう,与信号机器人一起检查新的通信控制设施。,與信號機器人一起檢查新的通信控制設施。,Проверьте новый центр связи вместе с Сигналботом.
 quest.signalbot_map_check.objective.talk_to_signalbot,신호봇과 대화,Talk to Signal Bot,シグナルボットと話す,与信号机器人交谈,與信號機器人交談,Поговорить с Сигналботом

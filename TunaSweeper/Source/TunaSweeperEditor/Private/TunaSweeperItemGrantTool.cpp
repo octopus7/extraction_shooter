@@ -21,8 +21,8 @@ namespace TunaSweeperItemGrantEditor
 	FText Text(const TCHAR* Key) { return TunaSweeperEditorText::Resolve(Key, ETunaSweeperItemTextLanguage::Korean); }
 	bool IsFeaturedItem(int32 Id)
 	{
-		return (Id >= 6001 && Id <= 6035) || (Id >= 7001 && Id <= 7004) ||
-			Id == 3002 || Id == 3004 || Id == 3005 || Id == 3006;
+		return (Id >= 6001 && Id <= 6035) || (Id >= 7002 && Id <= 7004) ||
+			Id == 3002 || Id == 3004 || Id == 3005;
 	}
 
 	// Editor Slate state uses existing Slate controls; no runtime widget class or widget tree is created.

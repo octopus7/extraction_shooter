@@ -26,19 +26,19 @@ bool FTunaSweeperItemGrantTest::RunTest(const FString& Parameters)
 	Request->SetNumberField(TEXT("version"), 1); Request->SetStringField(TEXT("operation"), TEXT("add"));
 	Request->SetStringField(TEXT("savePath"), Path); Request->SetStringField(TEXT("flavor"), TEXT("Demo")); Request->SetNumberField(TEXT("slot"), 1);
 	TArray<TSharedPtr<FJsonValue>> Items;
-	for (int32 Id : {6019, 6033, 6016, 3005, 7001})
+	for (int32 Id : {6019, 6033, 6016, 3005})
 	{
 		auto Item = MakeShared<FJsonObject>(); Item->SetNumberField(TEXT("itemId"), Id); Item->SetNumberField(TEXT("quantity"), 1);
 		Items.Add(MakeShared<FJsonValueObject>(Item));
 	}
 	Request->SetArrayField(TEXT("items"), Items);
 	auto Preview = TunaSweeperSaveTool::Execute(Request);
-	if (!TestTrue(TEXT("Rocket, materials, crafted item and blueprint can be granted"), Preview->GetBoolField(TEXT("ok")))) return false;
+	if (!TestTrue(TEXT("Rocket, materials, and crafted item can be granted"), Preview->GetBoolField(TEXT("ok")))) return false;
 	Request->SetStringField(TEXT("expectedHash"), Preview->GetStringField(TEXT("sourceHash"))); Request->SetBoolField(TEXT("commit"), true);
 	TestTrue(TEXT("Grant committed"), TunaSweeperSaveTool::Execute(Request)->GetBoolField(TEXT("ok")));
 	auto* Reload = Cast<UTunaSweeperSaveGame>(TunaSweeperSafeSave::LoadVerifiedSaveFile(Path, Validator));
 	if (!TestNotNull(TEXT("Granted save reloads"), Reload)) return false;
-	for (int32 Id : {6019, 6033, 6016, 3005, 7001})
+	for (int32 Id : {6019, 6033, 6016, 3005})
 		TestTrue(TEXT("Granted item persists"), Reload->ItemInstances.ContainsByPredicate([Id](const auto& Item) { return Item.ItemId == Id && Item.Quantity == 1; }));
 	TestEqual(TEXT("Stale repeat rejected"), TunaSweeperSaveTool::Execute(Request)->GetStringField(TEXT("code")), FString(TEXT("stale_save")));
 	return true;

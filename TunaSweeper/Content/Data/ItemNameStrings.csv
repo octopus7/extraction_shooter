@@ -23,7 +23,6 @@ item.laser_sight,레이저 사이트,Laser Sight,レーザーサイト,激光瞄
 item.canned_food,통조림,Canned Food,缶詰,罐头食品,罐頭食品,Консервы
 item.water_bottle,생수,Bottled Water,飲料水,瓶装水,瓶裝水,Бутылка воды
 item.large_water_bottle,큰생수,Large Bottled Water,大容量の飲料水,大瓶装水,大瓶裝水,Большая бутылка воды
-item.king_water_bottle,왕생수,Jumbo Bottled Water,特大の飲料水,超大瓶装水,超大瓶裝水,Огромная бутылка воды
 item.energy_bar,에너지바,Energy Bar,エナジーバー,能量棒,能量棒,Энергетический батончик
 item.canned_tuna,참치 통조림,Canned Tuna,ツナ缶,金枪鱼罐头,鮪魚罐頭,Консервированный тунец
 item.bandage,붕대,Bandage,包帯,绷带,繃帶,Бинт
@@ -67,7 +66,6 @@ item.laser_sight.desc,소총의 전술 장비 슬롯에 장착하는 레이저 �
 item.canned_food.desc,오래 보관할 수 있는 평범한 식량 통조림이다,A plain canned meal with a long shelf life,長期保存できる普通の缶詰食品,可以长期保存的普通罐头食品。,可以長期保存的普通罐頭食品。,Обычные консервы с длительным сроком хранения.
 item.water_bottle.desc,갈증을 줄이는 깨끗한 생수다,Clean bottled water that eases thirst,渇きを抑えるきれいな飲料水,能解渴的干净瓶装水。,能解渴的乾淨瓶裝水。,"Чистая питьевая вода, утоляющая жажду."
 item.large_water_bottle.desc,생수 두 병을 합친 큰 생수다,Two bottles worth of clean water,2本分のきれいな飲料水,相当于两瓶水的大瓶装水。,相當於兩瓶水的大瓶裝水。,Большая бутылка чистой воды объёмом в две обычные.
-item.king_water_bottle.desc,생수와 큰생수를 조합한 왕생수다,Clean water crafted from bottled water and large bottled water,飲料水と大容量の飲料水を組み合わせた特大の飲料水,由普通瓶装水和大瓶装水组合而成的超大瓶装水。,由普通瓶裝水和大瓶裝水組合而成的超大瓶裝水。,"Огромная бутылка воды, полученная из обычной и большой бутылок воды."
 item.energy_bar.desc,빠르게 허기를 채우는 작은 에너지바다,A small energy bar that quickly eases hunger,素早く空腹を満たす小さなエナジーバー,能迅速缓解饥饿的小型能量棒。,能迅速緩解飢餓的小型能量棒。,"Небольшой батончик, который быстро утоляет голод."
 item.canned_tuna.desc,노란 라벨의 참치 통조림이다,A yellow labeled can of tuna,黄色いラベルのツナ缶,贴着黄色标签的金枪鱼罐头。,貼着黃色標籤的鮪魚罐頭。,Банка тунца с жёлтой этикеткой.
 item.bandage.desc,가벼운 상처를 응급 처치하는 붕대다,A bandage for simple first aid,軽い傷を応急処置する包帯,用于处理轻伤的绷带。,用於處理輕傷的繃帶。,Бинт для оказания первой помощи при лёгких ранениях.
@@ -94,8 +92,6 @@ item.backpack_tier4.desc,단순하고 튼튼한 군용배낭. 인벤토리를 10
 item.backpack_tier5.desc,가벼운 카본프레임이 받쳐 주는 대형 가방. 인벤토리를 120칸으로 확장한다,A large backpack supported by a lightweight carbon frame. Expands inventory to 120 slots,軽量カーボンフレームで支える大型バッグ。インベントリを120スロットに拡張する,由轻质碳纤维框架支撑的大背包。将背包容量扩展至 120 格。,由輕質碳纖維框架支撐的大背包。將背包容量擴展至 120 格。,Большой рюкзак с лёгкой карбоновой рамой. Увеличивает инвентарь до 120 ячеек.
 item.wood,목재,Wood,木材,木材,木材,Древесина
 item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材,从伐木机上取得的粗糙木材。,從伐木機上取得的粗糙木材。,"Необработанная древесина, полученная от робота-лесоруба."
-item.blueprint_king_water_bottle,설계도 왕생수,Blueprint: Jumbo Bottled Water,設計図 特大の飲料水,蓝图：超大瓶装水,藍圖：超大瓶裝水,Чертёж: огромная бутылка воды
-item.blueprint_king_water_bottle.desc,왕생수 제조법을 등록할 수 있는 설계도다,A blueprint that unlocks the jumbo bottled water recipe,特大の飲料水の製造法を登録できる設計図,可解锁超大瓶装水制作配方的蓝图。,可解鎖超大瓶裝水製作配方的藍圖。,"Чертёж, открывающий рецепт огромной бутылки воды."
 item.ancient_coin,옛 문명의 동전,Ancient Civilization Coin,古代文明の硬貨,古文明硬币,古文明硬幣,Монета древней цивилизации
 item.ancient_coin.desc,로켓 모양 탑이 양각된 오래된 동전이다. 함께 발견되는 왕국은행권 때문에 종교단체의 물건으로 오해받곤 한다.,An old coin embossed with a rocket-shaped tower. It is often found with Kingdom Banknotes and is sometimes mistaken for a religious group relic.,ロケット型の塔が浮き彫りになった古い硬貨。王国銀行券と一緒に見つかるため宗教団体の遺物と誤解されることがある。,印有火箭形塔楼浮雕的古老硬币。因为常与王国纸币一同出土，偶尔被误认为宗教团体的遗物。,印有火箭形塔樓浮雕的古老硬幣。因爲常與王國紙幣一同出土，偶爾被誤認爲宗教團體的遺物。,Старинная монета с рельефом башни в форме ракеты. Из-за найденных рядом банкнот Королевства её иногда принимают за религиозную реликвию.
 item.ancient_banknote,옛 문명의 지폐,Ancient Civilization Banknote,古代文明の紙幣,古文明纸币,古文明紙幣,Банкнота древней цивилизации

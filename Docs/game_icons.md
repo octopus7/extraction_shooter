@@ -68,7 +68,7 @@
 | ![T_UIIcon_TacticalJacket](Images/icons/T_UIIcon_TacticalJacket.png) | `/Game/UI/Icons/T_UIIcon_TacticalJacket`<br>아이템: 5010 (`item.tactical_jacket`) | 256 × 256 |
 | ![T_UIIcon_TacticalSunglasses](Images/icons/T_UIIcon_TacticalSunglasses.png) | `/Game/UI/Icons/T_UIIcon_TacticalSunglasses`<br>아이템: 5007 (`item.tactical_sunglasses`) | 256 × 256 |
 | ![T_UIIcon_ValuablesCrate](Images/icons/T_UIIcon_ValuablesCrate.png) | `/Game/UI/Icons/T_UIIcon_ValuablesCrate`<br>아이템: 6001 (`item.valuables_crate`), 6002 (`item.wood`) | 256 × 256 |
-| ![T_UIIcon_WaterBottle](Images/icons/T_UIIcon_WaterBottle.png) | `/Game/UI/Icons/T_UIIcon_WaterBottle`<br>아이템: 3002 (`item.water_bottle`), 3005 (`item.large_water_bottle`), 3006 (`item.king_water_bottle`), 7001 (`item.blueprint_king_water_bottle`) | 256 × 256 |
+| ![T_UIIcon_WaterBottle](Images/icons/T_UIIcon_WaterBottle.png) | `/Game/UI/Icons/T_UIIcon_WaterBottle`<br>아이템: 3002 (`item.water_bottle`), 3005 (`item.large_water_bottle`) | 256 × 256 |
 | ![T_UIIcon_WaterproofTape](Images/icons/T_UIIcon_WaterproofTape.png) | `/Game/UI/Icons/T_UIIcon_WaterproofTape`<br>아이템: 6005 (`item.waterproof_tape`) | 256 × 256 |
 | ![T_UIIcon_WoodenClub](Images/icons/T_UIIcon_WoodenClub.png) | `/Game/UI/Icons/T_UIIcon_WoodenClub`<br>아이템: 1004 (`item.wooden_club`) | 256 × 256 |
 

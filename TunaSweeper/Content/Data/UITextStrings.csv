@@ -1,7 +1,7 @@
 string_key,ko,en,ja,zh-Hans,zh-Hant,ru
 achievement.01.name,첫 외출,First Outing,初めてのお出かけ,初次外出,初次外出,Первая вылазка
 achievement.02.name,붉은 신고식,First Blood,紅の洗礼,血色洗礼,血色洗禮,Кровавое посвящение
-achievement.03.name,새로운 가족,New Family,新しい家族,新家人,新家人,Новая семья
+achievement.03.name,새로운 가족,A New Family Member,新しい家族,家庭新成员,家庭新成員,Новый член семьи
 achievement.04.name,발사,Blast Off!,発射！,发射！,發射！,Пуск!
 achievement.05.name,아늑한 집,Home Sweet Home,居心地のいい我が家,温馨的家,溫馨的家,"Дом, милый дом"
 achievement.06.name,골목대장,King of the Block,路地裏の番長,街头霸王,街頭霸王,Гроза квартала
@@ -765,7 +765,7 @@ ui.freeplay_ending.true.title,백 개의 내일,A Hundred Tomorrows,百の明日
 ui.freeplay_ending.true.1,열 개의 칸에 참치 통조림 백 개가 가지런히 쌓였다.,One hundred cans of tuna stood neatly stacked across ten storage slots.,十の収納枠に、百個のツナ缶がきれいに積み上がった。,十个格子里整整齐齐地堆着一百罐金枪鱼。,十個格子裡整整齊齊地堆著一百罐鮪魚。,В десяти ячейках аккуратно лежали сто банок тунца.
 ui.freeplay_ending.true.2,"루나는 창고 문에 적었다. 혼자 버티기 위한 식량이 아니라, 함께 돌아오기 위한 약속.",Luna wrote on the storage door: Not food for surviving alone but a promise that we will come home together.,ルナは倉庫の扉に書いた。一人で耐えるための食料ではなく、みんなで帰ってくるための約束。,露娜在仓库门上写道：这不是独自求生的口粮而是一同归来的约定。,露娜在倉庫門上寫道：這不是獨自求生的口糧而是一同歸來的約定。,Луна написала на двери склада: это не припасы для одиночки. Это обещание вернуться домой вместе.
 ui.freeplay_ending.true.3,그날부터 기지의 불빛은 구조 신호가 되었다. 돌아갈 곳이 없던 이들이 하나둘 문을 두드렸다.,From that day on the light of the base became a beacon. One by one those with nowhere to go came knocking.,その日から、基地の灯りは救いの目印になった。帰る場所のない人々が、一人、また一人と扉を叩いた。,从那天起基地的灯光成了救援的信号。无家可归的人们陆续敲响了门。,從那天起基地的燈光成了救援的信號。無家可歸的人們陸續敲響了門。,"С того дня свет базы стал маяком. В дверь стали стучаться те, кому некуда было вернуться."
-ui.freeplay_ending.true.4,"백 개의 내일. 살아남는 일은, 함께 살아가는 일이 되었다. 타이틀로 돌아간 뒤 같은 슬롯에서 계속 플레이할 수 있습니다.",A hundred tomorrows. Surviving had become living together. You can continue this save slot after returning to the title screen.,百の明日。生き延びることは、共に生きることになった。 タイトルに戻った後も、同じセーブスロットでプレイを続けられます。,一百个明天。活下去变成了一起生活。 返回标题画面后仍可使用同一存档继续游玩。,一百個明天。活下去變成了一起生活。 返回標題畫面後仍可使用同一存檔繼續遊玩。,Сто завтрашних дней. Выживание превратилось в совместную жизнь. После возврата на титульный экран можно продолжить игру в этом слоте.
+ui.freeplay_ending.true.4,"백 개의 내일. 살아남는 일은, 함께 살아가는 일이 되었다. 타이틀로 돌아간 뒤 같은 슬롯에서 계속 플레이할 수 있습니다.",A hundred tomorrows. They had gone from surviving to building a life together. You can continue this save slot after returning to the title screen.,百の明日。生き延びる日々は、共に生きていく日々へと変わった。 タイトルに戻った後も、同じセーブスロットでプレイを続けられます。,一百个明天。曾经只求活下去，如今，他们一起迎接每一天。 返回标题画面后仍可使用同一存档继续游玩。,一百個明天。曾經只求活下去，如今，他們一起迎接每一天。 返回標題畫面後仍可使用同一存檔繼續遊玩。,Сто завтрашних дней. Прежде они выживали. Теперь они жили сообща. После возврата на титульный экран можно продолжить игру в этом слоте.
 ui.wave_defense.direction_north,북쪽,North,北,北,北,Север
 ui.wave_defense.direction_west,서쪽,West,西,西,西,Запад
 ui.wave_defense.direction_east,동쪽,East,東,东,東,Восток
