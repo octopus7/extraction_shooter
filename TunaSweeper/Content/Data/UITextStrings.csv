@@ -12,12 +12,33 @@ achievement.10.name,토끼사냥,Rabbit Hunt,ウサギ狩り,猎兔行动,獵兔
 achievement.11.name,구사일생,Close Call,九死に一生,九死一生,九死一生,На волосок от смерти
 achievement.12.name,퇴근합니다,Clocking Out,定時で帰ります！,下班了,下班了,Рабочий день окончен
 achievement.13.name,미지와 조우,Encounter with the Unknown,未知との遭遇,邂逅未知,邂逅未知,Встреча с неизвестным
-achievement.15.name,요술봉,Magic Wand,魔法のステッキ,魔法棒,魔法棒,Волшебная палочка
+achievement.14.name,결말,The End,結末,结局,結局,Конец
+achievement.15.name,든든해,I’m Full!,お腹いっぱい,吃饱啦,吃飽啦,Сытно!
 achievement.16.name,안전운전,Drive Safely,安全運転,安全驾驶,安全駕駛,Безопасное вождение
 achievement.17.name,부자,Rich,お金持ち,有钱人,有錢人,Богатство
 achievement.18.name,동네최강,Top Dog,町内最強,全村最强,全村最強,Сильнейший в округе
 achievement.19.name,황무지,Wasteland,荒野,荒原,荒原,Пустошь
-achievement.20.name,결말,The End,結末,结局,結局,Конец
+achievement.20.name,요술봉,Magic Wand,魔法のステッキ,魔法棒,魔法棒,Волшебная палочка
+achievement.01.description,처음으로 숲에 진입했다.,Entered the forest for the first time.,初めて森に入った。,首次进入森林。,首次進入森林。,Вы впервые вошли в лес.
+achievement.02.description,처음으로 적을 처치했다.,Defeated an enemy for the first time.,初めて敵を倒した。,首次击败敌人。,首次擊敗敵人。,Вы впервые победили врага.
+achievement.03.description,새끼 멧돼지를 동료로 맞이했다.,Welcomed the baby boar as a companion.,ウリ坊を仲間に迎えた。,让小野猪成为了伙伴。,讓小野豬成為了夥伴。,Вы приняли кабанчика в свои спутники.
+achievement.04.description,리프트를 이용했다.,Used the lift.,リフトを利用した。,使用了升降机。,使用了升降機。,Вы воспользовались подъёмником.
+achievement.05.description,1지역의 모든 시설을 복구했다.,Restored every facility in Region 1.,第1エリアのすべての施設を修復した。,修复了第一区域的所有设施。,修復了第一區域的所有設施。,Вы восстановили все объекты в первом регионе.
+achievement.06.description,1지역의 보스를 처치했다.,Defeated the boss of Region 1.,第1エリアのボスを倒した。,击败了第一区域的首领。,擊敗了第一區域的首領。,Вы победили босса первого региона.
+achievement.07.description,마을에 진입했다.,Entered the village.,村に入った。,进入了村庄。,進入了村莊。,Вы вошли в деревню.
+achievement.08.description,AI 자판기를 기지로 옮겼다.,Moved the AI vending machine to the base.,AI自販機を拠点に移した。,将AI自动售货机搬到了基地。,將AI自動販賣機搬到了基地。,Вы перевезли торговый автомат с ИИ на базу.
+achievement.09.description,순환철도로 빠른 이동을 이용했다.,Used the loop railway to fast travel.,環状鉄道でファストトラベルした。,通过环线铁路进行了快速旅行。,透過環線鐵路進行了快速旅行。,Вы воспользовались быстрым перемещением по кольцевой железной дороге.
+achievement.10.description,토끼대장을 처치했다.,Defeated the rabbit captain.,ウサギ隊長を倒した。,击败了兔子队长。,擊敗了兔子隊長。,Вы победили кроличьего капитана.
+achievement.11.description,체력이 10% 이하인 상태로 탈출에 성공했다.,Successfully extracted with 10% health or less.,体力10％以下で脱出に成功した。,在生命值不超过10%的状态下成功撤离。,在生命值不超過10%的狀態下成功撤離。,Вы успешно эвакуировались с запасом здоровья не более 10%.
+achievement.12.description,"한 번의 레이드에서 적을 5명 이상 처치하고, 진입 후 약 5분에 맞춰 탈출했다.",Defeated at least 5 enemies in a single raid and extracted around 5 minutes after entering.,1回のレイドで敵を5体以上倒し、開始から約5分で脱出した。,在一次突袭中击败至少5名敌人，并在进入约5分钟后撤离。,在一次突襲中擊敗至少5名敵人，並在進入約5分鐘後撤離。,Вы победили не менее 5 врагов за один рейд и эвакуировались примерно через 5 минут после входа.
+achievement.13.description,호수의 미지의 구역을 발견했다.,Discovered an uncharted area of the lake.,湖の未知のエリアを発見した。,发现了湖泊的未知区域。,發現了湖泊的未知區域。,Вы обнаружили неизведанную область озера.
+achievement.14.description,일반 엔딩을 확인했다.,Reached the normal ending.,通常エンディングを迎えた。,达成了普通结局。,達成了普通結局。,Вы увидели обычную концовку.
+achievement.15.description,진엔딩을 확인했다.,Reached the true ending.,真のエンディングを迎えた。,达成了真结局。,達成了真結局。,Вы увидели истинную концовку.
+achievement.16.description,차량 충돌로 적을 처치했다.,Defeated an enemy by ramming them with a vehicle.,車両で敵をひいて倒した。,驾驶载具撞倒并击败了敌人。,駕駛載具撞倒並擊敗了敵人。,Вы убили врага наездом на транспортном средстве.
+achievement.17.description,참치 통조림을 동시에 100개 보유했다.,Had 100 cans of tuna at the same time.,ツナ缶を同時に100個所持した。,同时持有了100罐金枪鱼罐头。,同時持有了100罐鮪魚罐頭。,У вас было 100 банок тунца одновременно.
+achievement.18.description,적을 누적 100명 처치했다.,Defeated a total of 100 enemies.,累計100体の敵を倒した。,累计击败了100名敌人。,累計擊敗了100名敵人。,Вы победили в общей сложности 100 врагов.
+achievement.19.description,평원에 진입했다.,Entered the plains.,平原に入った。,进入了平原。,進入了平原。,Вы вошли на равнину.
+achievement.20.description,대전차 RPG를 발사했다.,Fired an anti-tank RPG.,対戦車RPGを発射した。,发射了反坦克RPG。,發射了反戰車RPG。,Вы выстрелили из противотанкового РПГ.
 ui.achievement.unlocked,도전 과제 달성: {0},Achievement unlocked: {0},実績解除：{0},解锁成就：{0},解鎖成就：{0},Получено достижение: {0}
 ui.interaction.travel_basement,지하실로 이동,Go to basement,地下室へ移動,前往地下室,前往地下室,Перейти в подвал
 ui.interaction.travel_control_room,관제실로 이동,Enter control room,管制室へ移動,进入控制室,進入控制室,Войти в диспетчерскую

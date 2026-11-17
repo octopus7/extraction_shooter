@@ -1,4 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 
 bool UTunaSweeperGameInstance::IsRaidStorageReadyForTrueEnding()
 {
@@ -40,5 +41,9 @@ bool UTunaSweeperGameInstance::SaveFreePlayEnding(bool bTrueEnding)
     bPendingRaidStorageSave = false;
     RefreshCarryWeightState();
     OnExperienceChanged.Broadcast();
+    if (auto* Achievements = GetSubsystem<UTunaSweeperAchievementSubsystem>())
+    {
+        Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::EndingReached, Flag);
+    }
     return true;
 }

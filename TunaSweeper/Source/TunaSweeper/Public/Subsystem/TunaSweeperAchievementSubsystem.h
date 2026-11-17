@@ -69,7 +69,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	bool IsAchievementUnlocked(FName AchievementId) const
 	{
-		return AchievementId != FName(TEXT("14")) && ProgressState.UnlockedAchievementIds.Contains(AchievementId);
+		return ProgressState.UnlockedAchievementIds.Contains(AchievementId);
 	}
 
 private:

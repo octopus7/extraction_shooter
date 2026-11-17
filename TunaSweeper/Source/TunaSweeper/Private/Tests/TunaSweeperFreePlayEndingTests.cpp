@@ -14,6 +14,7 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/UnrealType.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperFreePlayEndingContractTest,
     "TunaSweeper.FreePlayEnding.Contract", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaSweeperFreePlayEndingContractTest::RunTest(const FString& Parameters)
@@ -51,6 +52,7 @@ bool FTunaSweeperFreePlayEndingPersistenceTest::RunTest(const FString& Parameter
     Context.OwningGameInstance = Game.Get(); World->SetGameInstance(Game.Get());
     Game->bInventoryStateInitialized = true;
     Game->UGameInstance::Init();
+    auto* Achievements = Game->GetSubsystem<UTunaSweeperAchievementSubsystem>();
     ON_SCOPE_EXIT
     {
         Game->UGameInstance::Shutdown();
@@ -71,6 +73,7 @@ bool FTunaSweeperFreePlayEndingPersistenceTest::RunTest(const FString& Parameter
     Game->PlayerInventorySlots[0].ItemUid = Carried;
     TestFalse(TEXT("Empty storage is normal ending"), Game->IsRaidStorageReadyForTrueEnding());
     TestFalse(TEXT("Cannot save unqualified true ending"), Game->SaveFreePlayEnding(true));
+    TestFalse(TEXT("Unqualified ending does not unlock"), Achievements->IsAchievementUnlocked(TEXT("15")));
     for (auto& Slot : Game->RaidStorageSlots) Slot.ItemUid = Game->CreateItemInstance(3004, 10);
     Game->BroadcastInventoryStateChanged();
     TestEqual(TEXT("Full storage refreshes live prompt"), Ending->GetInteractionDisplayName().ToString(),
@@ -96,12 +99,16 @@ bool FTunaSweeperFreePlayEndingPersistenceTest::RunTest(const FString& Parameter
     Game->AddRaidExperience(30);
     Game->bSuppressSaveWritesForTests = true;
     TestFalse(TEXT("Write failure prevents ending completion"), Game->SaveFreePlayEnding(true));
+    TestFalse(TEXT("Write failure does not unlock ending achievement"), Achievements->IsAchievementUnlocked(TEXT("15")));
     TestFalse(TEXT("Failure rolls back completion flag"), Game->IsScenarioProgressFlagSet(TEXT("ending.freeplay.true_seen")));
     TestEqual(TEXT("Failure preserves pending experience"), Game->PendingRaidExperiencePoints, int64(30));
     TestEqual(TEXT("Failure rolls back total experience"), Game->TotalExperiencePoints, int64(100));
     Game->bSuppressSaveWritesForTests = false;
     TestTrue(TEXT("Normal ending saves"), Game->SaveFreePlayEnding(false));
+    TestTrue(TEXT("Normal ending unlocks 14"), Achievements->IsAchievementUnlocked(TEXT("14")));
+    TestFalse(TEXT("Normal ending does not unlock 15"), Achievements->IsAchievementUnlocked(TEXT("15")));
     TestTrue(TEXT("True ending saves"), Game->SaveFreePlayEnding(true));
+    TestTrue(TEXT("True ending unlocks 15"), Achievements->IsAchievementUnlocked(TEXT("15")));
     TestEqual(TEXT("Experience credited only once"), Game->TotalExperiencePoints, int64(130));
     TestEqual(TEXT("Save slot remains selected"), Game->ActiveSaveSlotIndex, 3);
     TestFalse(TEXT("Ending leaves save writes enabled"), Game->bSuppressSaveWritesForTests);

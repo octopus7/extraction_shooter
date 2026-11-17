@@ -45,7 +45,7 @@ namespace TunaSweeperAchievementModel
 
 	bool CanUnlock(const FTunaSweeperAchievementDefinition& Definition)
 	{
-		return Definition.bEnabled && Definition.AchievementId != FName(TEXT("14")) &&
+		return Definition.bEnabled &&
 			Definition.ConditionType != ETunaSweeperAchievementConditionType::Reserved;
 	}
 
@@ -84,7 +84,7 @@ namespace TunaSweeperAchievementModel
 			if (Numeric > 0) State.ClaimedQuestIds.Add(Numeric);
 		}
 		for (FName Id : Save.UnlockedAchievementIds)
-			if (!Id.IsNone() && Id != FName(TEXT("14"))) State.UnlockedAchievementIds.Add(Id);
+			if (!Id.IsNone()) State.UnlockedAchievementIds.Add(Id);
 		for (const FString& Key : Save.ConfirmedPlatformUnlockKeys) if (!Key.IsEmpty()) State.ConfirmedPlatformUnlockKeys.Add(Key);
 		for (const FString& Key : Save.GameplayFacts) if (!Key.IsEmpty()) State.GameplayFacts.Add(Key);
 	}
@@ -96,7 +96,6 @@ namespace TunaSweeperAchievementModel
 		Save.ReachedLocationIds = State.ReachedLocationIds.Array();
 		Save.NumericClaimedQuestIds = State.ClaimedQuestIds.Array();
 		Save.UnlockedAchievementIds = State.UnlockedAchievementIds.Array();
-		Save.UnlockedAchievementIds.Remove(FName(TEXT("14")));
 		Save.ConfirmedPlatformUnlockKeys = State.ConfirmedPlatformUnlockKeys.Array();
 		Save.GameplayFacts = State.GameplayFacts.Array();
 		Save.GameplayFacts.Sort();

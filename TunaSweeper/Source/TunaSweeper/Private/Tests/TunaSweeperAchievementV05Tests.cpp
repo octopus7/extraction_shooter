@@ -130,25 +130,24 @@ bool FTunaAchievementCatalog::RunTest(const FString& Parameters)
 		{TEXT("발사"), TEXT("Blast Off!"), TEXT("発射！")},
 		{TEXT("아늑한 집"), TEXT("Home Sweet Home"), TEXT("居心地のいい我が家")},
 		{TEXT("골목대장"), TEXT("King of the Block"), TEXT("路地裏の番長")},
-		{TEXT("마을"), TEXT("The Town"), TEXT("街")},
+		{TEXT("마을"), TEXT("The Village"), TEXT("村")},
 		{TEXT("또 다른 가족?"), TEXT("Another Family Member?"), TEXT("また家族が増えた？")},
 		{TEXT("문명의 맛"), TEXT("Now That’s Civilization!"), TEXT("これが文明か！")},
 		{TEXT("토끼사냥"), TEXT("Rabbit Hunt"), TEXT("ウサギ狩り")},
 		{TEXT("구사일생"), TEXT("Close Call"), TEXT("九死に一生")},
 		{TEXT("퇴근합니다"), TEXT("Clocking Out"), TEXT("定時で帰ります！")},
 		{TEXT("미지와 조우"), TEXT("Encounter with the Unknown"), TEXT("未知との遭遇")},
-		{TEXT(""), TEXT(""), TEXT("")},
-		{TEXT("요술봉"), TEXT("Magic Wand"), TEXT("魔法のステッキ")},
+		{TEXT("결말"), TEXT("The End"), TEXT("結末")},
+		{TEXT("든든해"), TEXT("I’m Full!"), TEXT("お腹いっぱい")},
 		{TEXT("안전운전"), TEXT("Drive Safely"), TEXT("安全運転")},
 		{TEXT("부자"), TEXT("Rich"), TEXT("お金持ち")},
 		{TEXT("동네최강"), TEXT("Top Dog"), TEXT("町内最強")},
 		{TEXT("황무지"), TEXT("Wasteland"), TEXT("荒野")},
-		{TEXT("결말"), TEXT("The End"), TEXT("結末")}};
+		{TEXT("요술봉"), TEXT("Magic Wand"), TEXT("魔法のステッキ")}};
 	const ETunaSweeperItemTextLanguage Languages[] = {ETunaSweeperItemTextLanguage::Korean, ETunaSweeperItemTextLanguage::English, ETunaSweeperItemTextLanguage::Japanese};
 	for (int32 Index = 0; Index < Definitions.Num(); ++Index)
 	{
 		TestEqual(TEXT("Fixed ID order"), Definitions[Index].AchievementId.ToString(), FString::Printf(TEXT("%02d"), Index + 1));
-		if (Index == 13) { TestFalse(TEXT("Reserved slot disabled"), TunaSweeperAchievementModel::CanUnlock(Definitions[Index])); continue; }
 		for (int32 Language = 0; Language < 3; ++Language)
 		{
 			FText Resolved;
@@ -156,6 +155,30 @@ bool FTunaAchievementCatalog::RunTest(const FString& Parameters)
 			TestEqual(TEXT("Exact v0.5 spelling"), Resolved.ToString(), FString(Names[Index][Language]));
 		}
 	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaAchievementEndingDefinitions, "TunaSweeper.Achievement.EndingDefinitions", TunaAchievementV05Tests::Flags)
+bool FTunaAchievementEndingDefinitions::RunTest(const FString& Parameters)
+{
+	TStrongObjectPtr<UGameInstance> Owner(NewObject<UGameInstance>());
+	TStrongObjectPtr<UTunaSweeperAchievementSubsystem> Achievements(NewObject<UTunaSweeperAchievementSubsystem>(Owner.Get()));
+	if (!TestTrue(TEXT("Production catalog loads"), Achievements->LoadAchievementDefinitions())) return false;
+	const auto Definitions = Achievements->GetAchievementDefinitions();
+	if (!TestEqual(TEXT("20 definitions"), Definitions.Num(), 20)) return false;
+	for (int32 EndingIndex : {13, 14})
+	{
+		FTunaSweeperAchievementProgressState State;
+		TArray<FName> Unlocked;
+		const FName Target(EndingIndex == 13 ? TEXT("ending.freeplay.normal_seen") : TEXT("ending.freeplay.true_seen"));
+		TunaSweeperAchievementModel::RecordGameplayEvent(State, ETunaSweeperAchievementEvent::EndingReached, Target);
+		TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked);
+		TestTrue(TEXT("Matching ending unlocks"), Unlocked.Contains(Definitions[EndingIndex].AchievementId));
+		TestFalse(TEXT("Other ending remains locked"), Unlocked.Contains(Definitions[EndingIndex == 13 ? 14 : 13].AchievementId));
+		TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked);
+		TestTrue(TEXT("Repeated ending does not unlock twice"), Unlocked.IsEmpty());
+	}
+	TestEqual(TEXT("RPG moved to 20"), Definitions[19].EventType, ETunaSweeperAchievementEvent::WeaponFired);
 	return true;
 }
 
@@ -168,7 +191,8 @@ bool FTunaAchievementPersistence::RunTest(const FString& Parameters)
 	TArray<FName> Unlocked;
 	TunaSweeperAchievementModel::EvaluateDefinitions({Definition(TEXT("18"), ETunaSweeperAchievementConditionType::TotalEnemyKills, 100)}, State, Unlocked);
 	TunaSweeperAchievementModel::RecordGameplayEvent(State, ETunaSweeperAchievementEvent::FacilityUsed, TEXT("test.lift"));
-	State.UnlockedAchievementIds.Add(TEXT("14")); // sanitize legacy/malformed saves
+	State.UnlockedAchievementIds.Add(TEXT("14")); // normal-ending unlock
+	State.UnlockedAchievementIds.Add(TEXT("15")); // true-ending unlock
 	TStrongObjectPtr<UTunaSweeperAchievementSaveGame> Save(NewObject<UTunaSweeperAchievementSaveGame>());
 	Save->SaveVersion = 2;
 	TunaSweeperAchievementModel::CaptureProgress(State, *Save);
@@ -181,7 +205,8 @@ bool FTunaAchievementPersistence::RunTest(const FString& Parameters)
 	TunaSweeperAchievementModel::RestoreProgress(*Loaded, Restored);
 	TestEqual(TEXT("Cumulative kills survive serialization"), Restored.TotalEnemyKills, int64(100));
 	TestTrue(TEXT("Unlock survives serialization"), Restored.UnlockedAchievementIds.Contains(TEXT("18")));
-	TestFalse(TEXT("Reserved unlock discarded"), Restored.UnlockedAchievementIds.Contains(TEXT("14")));
+	TestTrue(TEXT("Normal ending unlock persists"), Restored.UnlockedAchievementIds.Contains(TEXT("14")));
+	TestTrue(TEXT("True ending unlock persists"), Restored.UnlockedAchievementIds.Contains(TEXT("15")));
 	TestTrue(TEXT("Actual-use fact survives"), Restored.GameplayFacts.Contains(TunaSweeperAchievementModel::MakeGameplayFactKey(ETunaSweeperAchievementEvent::FacilityUsed, TEXT("test.lift"))));
 	TunaSweeperAchievementModel::EvaluateDefinitions({Definition(TEXT("18"), ETunaSweeperAchievementConditionType::TotalEnemyKills, 100)}, Restored, Unlocked);
 	TestTrue(TEXT("Restoring does not notify twice"), Unlocked.IsEmpty());
@@ -202,7 +227,8 @@ bool FTunaAchievementRestartRead::RunTest(const FString& Parameters)
 	TunaSweeperAchievementModel::RestoreProgress(*Save, State);
 	TestEqual(TEXT("Restart cumulative kills"), State.TotalEnemyKills, int64(100));
 	TestTrue(TEXT("Restart unlock state"), State.UnlockedAchievementIds.Contains(TEXT("18")));
-	TestFalse(TEXT("Restart reserved state"), State.UnlockedAchievementIds.Contains(TEXT("14")));
+	TestTrue(TEXT("Restart normal ending state"), State.UnlockedAchievementIds.Contains(TEXT("14")));
+	TestTrue(TEXT("Restart true ending state"), State.UnlockedAchievementIds.Contains(TEXT("15")));
 	return true;
 }
 
