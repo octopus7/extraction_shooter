@@ -13,7 +13,7 @@
     { "achievement_id": "10", "name_string_key": "achievement.10.name", "condition_type": "specific_enemy_first_kill", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm rabbit captain EnemyId." },
     { "achievement_id": "11", "name_string_key": "achievement.11.name", "condition_type": "extraction_health", "platform_ids": {} },
     { "achievement_id": "12", "name_string_key": "achievement.12.name", "condition_type": "timed_extraction", "required_count": 5, "platform_ids": {} },
-    { "achievement_id": "13", "name_string_key": "achievement.13.name", "condition_type": "location_reached", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Approve lake volume bounds and LocationId, then place the existing location trigger." },
+    { "achievement_id": "13", "name_string_key": "achievement.13.name", "condition_type": "location_reached", "enabled": true, "target_id": "location.forest.elephant_lake", "platform_ids": {} },
     { "achievement_id": "14", "name_string_key": "achievement.14.name", "condition_type": "gameplay_event", "event_type": "EndingReached", "enabled": true, "target_id": "ending.freeplay.normal_seen", "platform_ids": {} },
     { "achievement_id": "15", "name_string_key": "achievement.15.name", "condition_type": "gameplay_event", "event_type": "EndingReached", "enabled": true, "target_id": "ending.freeplay.true_seen", "platform_ids": {} },
     { "achievement_id": "16", "name_string_key": "achievement.16.name", "condition_type": "gameplay_event", "event_type": "VehicleCollisionKill", "platform_ids": {}, "todo": "Vehicle collision damage producer must supply VehicleCollisionDamageType and actual driver instigator. No such producer currently exists." },

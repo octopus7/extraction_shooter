@@ -182,6 +182,30 @@ bool FTunaAchievementEndingDefinitions::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaAchievementElephantLakeDefinition, "TunaSweeper.Achievement.ElephantLakeDefinition", TunaAchievementV05Tests::Flags)
+bool FTunaAchievementElephantLakeDefinition::RunTest(const FString& Parameters)
+{
+	TStrongObjectPtr<UGameInstance> Owner(NewObject<UGameInstance>());
+	TStrongObjectPtr<UTunaSweeperAchievementSubsystem> Subject(NewObject<UTunaSweeperAchievementSubsystem>(Owner.Get()));
+	if (!TestTrue(TEXT("Production definitions load"), Subject->LoadAchievementDefinitions())) return false;
+	const auto Definitions = Subject->GetAchievementDefinitions();
+	const auto* Lake = Definitions.FindByPredicate([](const auto& D) { return D.AchievementId == TEXT("13"); });
+	if (!TestNotNull(TEXT("Lake definition exists"), Lake)) return false;
+	TestTrue(TEXT("Lake is enabled"), Lake->bEnabled);
+	TestTrue(TEXT("Map entry cannot award the lake"), Lake->MapPaths.IsEmpty());
+	FTunaSweeperAchievementProgressState State;
+	TArray<FName> Unlocked;
+	TunaSweeperAchievementModel::RecordLocationReached(State, TEXT("region.forest"));
+	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked);
+	TestFalse(TEXT("Forest entry does not imply lake entry"), Unlocked.Contains(TEXT("13")));
+	TunaSweeperAchievementModel::RecordLocationReached(State, TEXT("location.forest.elephant_lake"));
+	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked);
+	TestTrue(TEXT("Authored location unlocks 13"), Unlocked.Contains(TEXT("13")));
+	TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked);
+	TestTrue(TEXT("Repeated entry has no duplicate notification"), Unlocked.IsEmpty());
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaAchievementPersistence, "TunaSweeper.Achievement.PersistenceRoundTrip", TunaAchievementV05Tests::Flags)
 bool FTunaAchievementPersistence::RunTest(const FString& Parameters)
 {
@@ -193,6 +217,8 @@ bool FTunaAchievementPersistence::RunTest(const FString& Parameters)
 	TunaSweeperAchievementModel::RecordGameplayEvent(State, ETunaSweeperAchievementEvent::FacilityUsed, TEXT("test.lift"));
 	State.UnlockedAchievementIds.Add(TEXT("14")); // normal-ending unlock
 	State.UnlockedAchievementIds.Add(TEXT("15")); // true-ending unlock
+	TunaSweeperAchievementModel::RecordLocationReached(State, TEXT("location.forest.elephant_lake"));
+	State.UnlockedAchievementIds.Add(TEXT("13"));
 	TStrongObjectPtr<UTunaSweeperAchievementSaveGame> Save(NewObject<UTunaSweeperAchievementSaveGame>());
 	Save->SaveVersion = 2;
 	TunaSweeperAchievementModel::CaptureProgress(State, *Save);
@@ -207,6 +233,8 @@ bool FTunaAchievementPersistence::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Unlock survives serialization"), Restored.UnlockedAchievementIds.Contains(TEXT("18")));
 	TestTrue(TEXT("Normal ending unlock persists"), Restored.UnlockedAchievementIds.Contains(TEXT("14")));
 	TestTrue(TEXT("True ending unlock persists"), Restored.UnlockedAchievementIds.Contains(TEXT("15")));
+	TestTrue(TEXT("Lake unlock persists"), Restored.UnlockedAchievementIds.Contains(TEXT("13")));
+	TestTrue(TEXT("Lake location persists"), Restored.ReachedLocationIds.Contains(TEXT("location.forest.elephant_lake")));
 	TestTrue(TEXT("Actual-use fact survives"), Restored.GameplayFacts.Contains(TunaSweeperAchievementModel::MakeGameplayFactKey(ETunaSweeperAchievementEvent::FacilityUsed, TEXT("test.lift"))));
 	TunaSweeperAchievementModel::EvaluateDefinitions({Definition(TEXT("18"), ETunaSweeperAchievementConditionType::TotalEnemyKills, 100)}, Restored, Unlocked);
 	TestTrue(TEXT("Restoring does not notify twice"), Unlocked.IsEmpty());
@@ -229,6 +257,8 @@ bool FTunaAchievementRestartRead::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Restart unlock state"), State.UnlockedAchievementIds.Contains(TEXT("18")));
 	TestTrue(TEXT("Restart normal ending state"), State.UnlockedAchievementIds.Contains(TEXT("14")));
 	TestTrue(TEXT("Restart true ending state"), State.UnlockedAchievementIds.Contains(TEXT("15")));
+	TestTrue(TEXT("Restart lake unlock"), State.UnlockedAchievementIds.Contains(TEXT("13")));
+	TestTrue(TEXT("Restart lake location"), State.ReachedLocationIds.Contains(TEXT("location.forest.elephant_lake")));
 	return true;
 }
 
