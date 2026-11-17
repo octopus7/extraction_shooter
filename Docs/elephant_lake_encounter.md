@@ -1,10 +1,10 @@
 # 숲 호수와 미지와 조우
 
 - 레벨: `/Game/MainRaid/RaidForest`.
-- 호수 중심: `(5400, 6200, 0)` cm. 기존 주요 배치에서 약 32m 이상 떨어진 평지다. 기존 62개 액터는 유지하고 아래 세 액터만 추가했다.
+- 호수 중심: `(-4580.562, 6200, 0)` cm. 사용자 지정 코끼리 위치 `(-5630.562, 6200, 0)`에 맞춰 세 요소를 X축으로 `-9980.562` cm 평행 이동했다. 기존 62개 액터의 위치는 유지했다.
 - `Forest_ElephantLake_Decal`: 15×10m 투영 범위의 이미지 데칼. `/Game/Environment/ElephantLake/M_LakeDecal`이 생성 이미지의 RGB/알파를 사용한다. 수영·수심·물리 수면은 없다.
 - `Forest_LakeElephant`: `/Game/Environment/ElephantLake/BP_LakeElephant`. StaticMeshActor 기반 BP의 StaticMeshComponent에서 메시와 머터리얼을 교체할 수 있다. 달성 판정은 외형과 분리돼 있다.
-- `Forest_ElephantLake_Achievement13`: 기존 `TunaSweeperAchievementLocationTrigger`. 중심 `(5400, 6200, 200)`, 반크기 `(1300, 850, 300)` cm의 호숫가 영역. `LocationId=location.forest.elephant_lake`.
+- `Forest_ElephantLake_Achievement13`: 기존 `TunaSweeperAchievementLocationTrigger`. 중심 `(-4580.562, 6200, 200)`, 반크기 `(1300, 850, 300)` cm의 호숫가 영역. `LocationId=location.forest.elephant_lake`.
 
 13번은 숲을 로드했다는 이유로 달성되지 않는다. 로컬 플레이어가 트리거에 겹치면 기존 서브시스템에 위치 도착을 보고하고, 독립 도전과제 저장 경로를 통해 기록한다. 이미 달성한 뒤 재진입해도 다시 알리지 않는다. 새 저장 필드나 초기화 치트는 추가하지 않았다.
 
