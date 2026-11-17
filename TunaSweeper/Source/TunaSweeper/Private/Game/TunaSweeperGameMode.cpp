@@ -3,6 +3,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperRaidArrivalSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "EngineUtils.h"
 #include "Engine/PlayerStartPIE.h"
@@ -15,6 +16,7 @@ ATunaSweeperGameMode::ATunaSweeperGameMode()
 
 AActor* ATunaSweeperGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
+	PendingLiftAchievementPlayer.Reset();
 	if (UGameInstance* Instance = GetGameInstance())
 	{
 		if (auto* Arrival = Instance->GetSubsystem<UTunaSweeperRaidArrivalSubsystem>())
@@ -27,6 +29,7 @@ AActor* ATunaSweeperGameMode::ChoosePlayerStart_Implementation(AController* Play
 				FRandomStream Random(FMath::Rand());
 				APlayerStart* Start = Arrival->SelectRandomStart(Starts, Group, Random);
 				bLiftArrivalMissingStart = Start == nullptr;
+				if (Start) PendingLiftAchievementPlayer = Player;
 				if (!Start) UE_LOG(LogTemp, Warning, TEXT("Lift arrival has no PlayerStart for group %d in %s"), static_cast<int32>(Group), *GetWorld()->GetMapName());
 				return Start;
 			}
@@ -59,4 +62,16 @@ AActor* ATunaSweeperGameMode::FindPlayerStart_Implementation(AController* Player
 	// GameModeBase substitutes world origin for nullptr; a missing lift group must
 	// remain an authoring failure instead of silently spawning outside its region.
 	return bLiftArrivalMissingStart ? nullptr : Start;
+}
+
+void ATunaSweeperGameMode::FinishRestartPlayer(AController* NewPlayer, const FRotator& StartRotation)
+{
+	const bool bLiftArrival = NewPlayer && PendingLiftAchievementPlayer.Get() == NewPlayer;
+	PendingLiftAchievementPlayer.Reset();
+	Super::FinishRestartPlayer(NewPlayer, StartRotation);
+	// Destination selection and map loading alone do not prove a usable arrival.
+	if (bLiftArrival && NewPlayer->IsLocalPlayerController() && NewPlayer->GetPawn())
+		if (auto* Instance = GetGameInstance())
+			if (auto* Achievements = Instance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+				Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::FacilityUsed, TEXT("facility.raid_lift"));
 }

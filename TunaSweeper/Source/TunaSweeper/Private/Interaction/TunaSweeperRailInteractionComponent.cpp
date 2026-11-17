@@ -15,6 +15,7 @@
 #include "LoopRailTrack.h"
 #include "LoopRailTrain.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
 
@@ -236,6 +237,10 @@ bool UTunaSweeperRailInteractionComponent::ExecuteTravel(APawn* Pawn)
     Character->SetBase(nullptr);
     Character->GetCharacterMovement()->StopMovementImmediately();
     Character->ConsumeMovementInputVector();
+    if (Character->IsLocallyControlled())
+        if (auto* Game = GetWorld()->GetGameInstance())
+            if (auto* Achievements = Game->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+                Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::FastTravelUsed, TEXT("travel.loop_rail"));
     return true;
 }
 

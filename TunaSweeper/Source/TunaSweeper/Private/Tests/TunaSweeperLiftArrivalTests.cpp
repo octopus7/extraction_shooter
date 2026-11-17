@@ -1,11 +1,19 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
+#include "Misc/Paths.h"
+#include "HAL/FileManager.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Game/TunaSweeperRaidPlayerStart.h"
 #include "Game/TunaSweeperGameMode.h"
 #include "Subsystem/TunaSweeperRaidArrivalSubsystem.h"
 #include "Engine/World.h"
 #include "Misc/ScopeExit.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
+#include "Game/TunaSweeperGameInstance.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
+#include "Engine/Engine.h"
+#include "GameFramework/PlayerController.h"
+#include "UObject/StrongObjectPtr.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperLiftArrivalTest, "TunaSweeper.Region.LiftArrival",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -62,6 +70,44 @@ bool FTunaSweeperLiftArrivalTest::RunTest(const FString& Parameters)
         TestEqual(TEXT("Actual ordinary GameMode selection excludes dedicated lift starts"),
             Mode->ChoosePlayerStart_Implementation(nullptr), static_cast<AActor*>(Ordinary));
     }
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperLiftAchievementTest, "TunaSweeper.Region.LiftAchievement",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaSweeperLiftAchievementTest::RunTest(const FString& Parameters)
+{
+    const FString TestRoot = FPaths::ProjectSavedDir() / TEXT("Automation/WaveDefense/AchievementHooks") / FGuid::NewGuid().ToString();
+    if (!TestTrue(TEXT("Isolated achievement save root"), TunaSweeperBuildFlavor::SetWaveDefenseTestSaveDirectory(TestRoot))) return false;
+    ON_SCOPE_EXIT { TunaSweeperBuildFlavor::SetWaveDefenseTestSaveDirectory(FString()); IFileManager::Get().DeleteDirectory(*TestRoot, false, true); };
+    struct FContextAccess : UGameInstance
+    {
+        static void Attach(UGameInstance* Instance, FWorldContext* Context)
+        { auto Member = &FContextAccess::WorldContext; Instance->*Member = Context; }
+    };
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
+    Context.SetCurrentWorld(World);
+    TStrongObjectPtr<UTunaSweeperGameInstance> Game(NewObject<UTunaSweeperGameInstance>(GEngine));
+    FContextAccess::Attach(Game.Get(), &Context); World->SetGameInstance(Game.Get());
+    Game->UGameInstance::Init();
+    ON_SCOPE_EXIT { Game->UGameInstance::Shutdown(); FContextAccess::Attach(Game.Get(), nullptr);
+        World->SetGameInstance(nullptr); World->DestroyWorld(false); GEngine->DestroyWorldContext(World); World->RemoveFromRoot(); };
+    auto* Achievements = Game->GetSubsystem<UTunaSweeperAchievementSubsystem>();
+    auto* Arrival = Game->GetSubsystem<UTunaSweeperRaidArrivalSubsystem>();
+    auto* Mode = World->SpawnActor<ATunaSweeperGameMode>();
+    auto* Controller = World->SpawnActor<APlayerController>();
+    Controller->SetAsLocalPlayerController();
+    auto* Start = World->SpawnActor<ATunaSweeperRaidPlayerStart>();
+    Start->ArrivalGroup = ETunaSweeperRaidArrivalGroup::Forest;
+    Start->SetActorLocation(FVector(2000, 0, 150));
+    Arrival->PrepareArrival(TEXT("WrongMap"), ETunaSweeperRaidArrivalGroup::Forest);
+    Mode->ChoosePlayerStart_Implementation(Controller);
+    TestFalse(TEXT("Failed or wrong lift destination does not unlock 04"), Achievements->IsAchievementUnlocked(TEXT("04")));
+    Arrival->PrepareArrival(FName(*World->GetMapName()), ETunaSweeperRaidArrivalGroup::Forest);
+    TestFalse(TEXT("Choosing a lift destination is not use completion"), Achievements->IsAchievementUnlocked(TEXT("04")));
+    Mode->RestartPlayer(Controller);
+    TestTrue(TEXT("Lift arrival spawned the player"), Controller->GetPawn() != nullptr);
+    TestTrue(TEXT("Successful lift arrival unlocks 04"), Achievements->IsAchievementUnlocked(TEXT("04")));
     return true;
 }
 #endif

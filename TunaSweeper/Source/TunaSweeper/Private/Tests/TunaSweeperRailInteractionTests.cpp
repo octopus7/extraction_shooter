@@ -1,11 +1,15 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
+#include "Misc/Paths.h"
+#include "HAL/FileManager.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Misc/ScopeExit.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperRailDisplaySubsystem.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Inventory/TunaSweeperSaveGame.h"
@@ -163,11 +167,18 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperRailTravelTest, "TunaSweeper.Rail.T
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaSweeperRailTravelTest::RunTest(const FString& Parameters)
 {
+    const FString TestRoot = FPaths::ProjectSavedDir() / TEXT("Automation/WaveDefense/AchievementHooks") / FGuid::NewGuid().ToString();
+    if (!TestTrue(TEXT("Isolated achievement save root"), TunaSweeperBuildFlavor::SetWaveDefenseTestSaveDirectory(TestRoot))) return false;
+    ON_SCOPE_EXIT { TunaSweeperBuildFlavor::SetWaveDefenseTestSaveDirectory(FString()); IFileManager::Get().DeleteDirectory(*TestRoot, false, true); };
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
-    GEngine->CreateNewWorldContext(EWorldType::Game).SetCurrentWorld(World);
+    FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
+    Context.SetCurrentWorld(World);
     TStrongObjectPtr<UTunaSweeperGameInstance> Game(NewObject<UTunaSweeperGameInstance>(GEngine));
     Game->bInventoryStateInitialized = true; World->SetGameInstance(Game.Get());
-    ON_SCOPE_EXIT { World->DestroyWorld(false); World->SetGameInstance(nullptr); GEngine->DestroyWorldContext(World); World->RemoveFromRoot(); };
+    RailTests::FContextAccess::Attach(Game.Get(), &Context);
+    Game->UGameInstance::Init();
+    auto* Achievements = Game->GetSubsystem<UTunaSweeperAchievementSubsystem>();
+    ON_SCOPE_EXIT { Game->UGameInstance::Shutdown(); RailTests::FContextAccess::Attach(Game.Get(), nullptr); World->DestroyWorld(false); World->SetGameInstance(nullptr); GEngine->DestroyWorldContext(World); World->RemoveFromRoot(); };
     auto* Track = World->SpawnActor<ALoopRailTrack>();
     auto* Source = RailTests::AddStation(World, Track, 0);
     auto* Target = RailTests::AddStation(World, Track, 1);
@@ -184,10 +195,17 @@ bool FTunaSweeperRailTravelTest::RunTest(const FString& Parameters)
         FVector(0, 0, Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 3.f);
     Character->SetActorLocation(Start, false, nullptr, ETeleportType::TeleportPhysics);
     auto* Controller = World->SpawnActor<APlayerController>();
+    Controller->SetAsLocalPlayerController();
     Controller->Possess(Character);
     ALoopRailStation* ResolvedStation; ALoopRailTrain* ResolvedTrain; FVector Destination;
+    Target->bEnabled = false;
+    TestFalse(TEXT("Invalid target rejects travel before first achievement"), Travel->ExecuteTravel(Character));
+    TestFalse(TEXT("Failed rail transfer never unlocks 09"), Achievements->IsAchievementUnlocked(TEXT("09")));
+    Target->bEnabled = true;
     TestTrue(TEXT("Safe platform arrival resolves"), Travel->ResolveTravel(Character, ResolvedStation, ResolvedTrain, Destination));
+    TestFalse(TEXT("Repair and resolving destination do not unlock fast travel"), Achievements->IsAchievementUnlocked(TEXT("09")));
     TestTrue(TEXT("Black-screen transfer arrives"), Travel->ExecuteTravel(Character));
+    TestTrue(TEXT("Successful rail transfer unlocks 09"), Achievements->IsAchievementUnlocked(TEXT("09")));
     TestTrue(TEXT("Character appears at next platform"), Character->GetActorLocation().Equals(Destination, 1.f));
     TestTrue(TEXT("Train is already stopped"), Train->IsDwelling());
     TestEqual(TEXT("Train speed is zero"), Train->GetSpeed(), 0.f);

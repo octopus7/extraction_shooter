@@ -13,7 +13,9 @@ public:
 	ATunaSweeperGameMode();
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
+	virtual void FinishRestartPlayer(AController* NewPlayer, const FRotator& StartRotation) override;
 
 private:
 	bool bLiftArrivalMissingStart = false;
+	TWeakObjectPtr<AController> PendingLiftAchievementPlayer;
 };

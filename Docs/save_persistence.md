@@ -4,6 +4,10 @@
 
 Forest lake arrival records `location.forest.elephant_lake` in the existing achievement `ReachedLocationIds` and unlocks `13` in `UnlockedAchievementIds`. Both use the independent achievement save, survive slot changes and restart, and do not add gameplay-slot fields or change the save version. The trigger's per-instance overlap guard is transient. See [placement and validation](elephant_lake_encounter.md).
 
+## Lift and rail achievements
+
+Successful lift arrival and player restart record the existing `FacilityUsed` fact with `facility.raid_lift` (04); successful loop-rail teleport and train arrival record `FastTravelUsed` with `travel.loop_rail` (09). Selection, repair, cancellation and failed travel do not record these facts. Pending lift player identity is transient and never saved.
+
 ## Chain-link gates
 
 Each gate uses a unique, stable instance `GateId` within its level. `CompletedScenarioFlags` stores `gate.unlocked:<level package>:<GateId>` in the selected gameplay slot, with the PIE prefix removed from the package. The linked control writes the flag immediately through the standard gameplay save. A failed write rolls back the flag and leaves the gate locked for a retry. A successful write starts the hinge animation. On subsequent entry the gate starts in its fully open pose. Old saves start with the gate locked. The opening animation's progress has no separate save data.
