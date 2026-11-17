@@ -1378,27 +1378,6 @@
       }
     },
     {
-      "name": "HOPPER_Eye",
-      "pbrMetallicRoughness": {
-        "baseColorTexture": {
-          "index": 0
-        },
-        "metallicRoughnessTexture": {
-          "index": 1
-        },
-        "metallicFactor": 1.0,
-        "roughnessFactor": 1.0
-      },
-      "normalTexture": {
-        "index": 2,
-        "scale": 0.8
-      },
-      "occlusionTexture": {
-        "index": 1,
-        "strength": 0.7
-      }
-    },
-    {
       "name": "HOPPER_Glass",
       "pbrMetallicRoughness": {
         "baseColorTexture": {
@@ -1735,11 +1714,6 @@
       -0.0,
       0.0
     ],
-    "Rabbit_Pilot": [
-      -0.0,
-      -0.0,
-      0.0
-    ],
     "Hatch_Pivot": [
       27.55135,
       -0.0,
@@ -2037,8 +2011,8 @@
     ]
   },
   "pilot": {
-    "mesh": "/Game/Characters/Hopper/Pilot/SK_Rabbit_Pilot",
-    "skeleton": "/Game/Characters/Hopper/Pilot/SK_Rabbit_Pilot_Skeleton",
+    "mesh": "/Game/Characters/Hopper/Captain/SK_Captain_Pilot",
+    "skeleton": "/Game/Characters/Hopper/Captain/SK_Captain_Pilot_Skeleton",
     "seat_location_cm": [
       17.0,
       -0.0,
@@ -2056,32 +2030,39 @@
       "upperarm_l",
       "forearm_l",
       "hand_l",
+      "thigh_l",
+      "calf_l",
+      "foot_l",
       "upperarm_r",
       "forearm_r",
       "hand_r",
-      "thigh_l",
-      "foot_l",
       "thigh_r",
+      "calf_r",
       "foot_r"
     ],
     "weighted_vertices": {
-      "spine": 238,
-      "head": 470,
-      "ear_l": 126,
-      "upperarm_l": 43,
-      "hand_l": 43,
-      "thigh_l": 43,
-      "foot_l": 43,
-      "ear_r": 126,
-      "upperarm_r": 43,
-      "hand_r": 43,
-      "thigh_r": 43,
-      "foot_r": 43
+      "pelvis": 1203,
+      "spine": 1525,
+      "head": 863,
+      "ear_l": 351,
+      "ear_r": 351,
+      "upperarm_l": 204,
+      "forearm_l": 180,
+      "hand_l": 258,
+      "thigh_l": 115,
+      "calf_l": 73,
+      "foot_l": 267,
+      "upperarm_r": 202,
+      "forearm_r": 180,
+      "hand_r": 258,
+      "thigh_r": 115,
+      "calf_r": 74,
+      "foot_r": 270
     },
     "root_motion": false,
     "clips": {
       "Idle": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Idle",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Idle",
         "duration": 1.6,
         "root_offset_cm": [
           0,
@@ -2090,7 +2071,7 @@
         ]
       },
       "Boarding": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Boarding",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Boarding",
         "duration": 2.0,
         "root_offset_cm": [
           0,
@@ -2099,7 +2080,7 @@
         ]
       },
       "Seated": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Seated",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Seated",
         "duration": 2.0,
         "root_offset_cm": [
           0,
@@ -2108,7 +2089,7 @@
         ]
       },
       "Disembark": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Disembark",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Disembark",
         "duration": 1.4,
         "root_offset_cm": [
           0,
@@ -2117,7 +2098,7 @@
         ]
       },
       "Walk": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Walk",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Walk",
         "duration": 0.8,
         "root_offset_cm": [
           0,
@@ -2126,7 +2107,7 @@
         ]
       },
       "Fire": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Fire",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Fire",
         "duration": 0.5,
         "root_offset_cm": [
           0,
@@ -2135,7 +2116,7 @@
         ]
       },
       "Melee": {
-        "asset": "/Game/Characters/Hopper/Animations/A_Rabbit_Melee",
+        "asset": "/Game/Characters/Hopper/Captain/Animations/A_Captain_Melee",
         "duration": 0.7,
         "root_offset_cm": [
           0,
@@ -2144,36 +2125,36 @@
         ]
       }
     },
-    "rest_pose": "Original seated pose. Idle and Walk straighten thighs/feet. Component movement handles seat travel.",
+    "rest_pose": "Standing Captain reference. The assembly plays A_Captain_Seated at the runtime seat mount.",
     "weapon_bone": "hand_r",
     "animation_bounds": {
       "Idle": {
-        "min_z_cm": -6.51925802230835e-07,
-        "max_z_cm": 69.9670672416687
+        "min_z_cm": -0.001,
+        "max_z_cm": 70.319
       },
       "Boarding": {
-        "min_z_cm": -8.381903171539307e-07,
-        "max_z_cm": 69.79080438613892
+        "min_z_cm": -2.865,
+        "max_z_cm": 71.2
       },
       "Seated": {
-        "min_z_cm": -2.1295467611537333e-07,
-        "max_z_cm": 64.66028094291687
+        "min_z_cm": -2.865,
+        "max_z_cm": 61.019
       },
       "Disembark": {
-        "min_z_cm": -6.51925802230835e-07,
-        "max_z_cm": 69.79080438613892
+        "min_z_cm": -2.865,
+        "max_z_cm": 70.0
       },
       "Walk": {
-        "min_z_cm": -7.450580596923828e-07,
-        "max_z_cm": 72.10249900817871
+        "min_z_cm": 0.164,
+        "max_z_cm": 71.139
       },
       "Fire": {
-        "min_z_cm": -6.51925802230835e-07,
-        "max_z_cm": 69.87484693527222
+        "min_z_cm": 0.013,
+        "max_z_cm": 70.138
       },
       "Melee": {
-        "min_z_cm": -6.51925802230835e-07,
-        "max_z_cm": 70.39741277694702
+        "min_z_cm": 0.013,
+        "max_z_cm": 70.139
       }
     }
   },

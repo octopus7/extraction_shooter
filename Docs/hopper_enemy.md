@@ -5,7 +5,7 @@
 - 배치용 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemy`
 - 전투·경사면 확인 맵: `/Game/Maps/HopperCombatTestMap`
 - 모델/애니메이션 설정: `/Game/Characters/Hopper/DA_HopperVisual`
-- 편집 원본: `TunaSweeper/SourceArt/Characters/Hopper/Hopper.blend`, 토끼 재수출용 `HopperPilot_UE.blend`
+- 메카 조립 원본은 `TunaSweeper/SourceArt/Characters/Hopper/Hopper.blend`, 토끼대장 편집·재수출 원본은 같은 폴더의 `Captain/CaptainPilot_UE.blend`다.
 - 원본 메시 출처: 로컬 `HOPPER_03_ArmModules_v5/preview/FitCheck.glb`. 원본 파일은 수정하지 않는다.
 
 기존 레이드 배치 데이터와 사용자 맵은 변경하지 않는다. 테스트 맵은 기존 전투 테스트 게임 모드를 상속한 `BP_HopperTestGameMode`로 테스트 장비 세션을 시작한다.
@@ -60,7 +60,7 @@ UE 5.7 에디터 빌드와 호퍼·기존 전투 54개 통합 검사를 통과�
 
 현재 파일럿은 사용자가 제공한 `Captain_Outfit_Refined.glb` 모델이다. `/Game/Characters/Hopper/Captain/SK_Captain_Pilot`의 18개 관절과 새 7개 클립을 `DA_HopperVisual`에 연결했다. 기존 탑승·몸통 부착·하차·유한 탄약 사격·근접 전환을 그대로 사용하며 총 부착 변환을 새 손 관절에 맞췄다.
 
-몸체와 군장의 BaseColor, Normal, Metallic/Roughness 6개 텍스처를 실제 512×512 PNG로 다운샘플한 뒤 UE에 임포트했다. 편집 원본은 `TunaSweeper/SourceArt/Characters/Hopper/Captain/CaptainPilot_UE.blend`다. 기존 `Hopper.blend`와 `HopperPilot_UE.blend`는 이전 파일럿이 포함된 초기 원본이므로 현재 토끼 편집에는 Captain 원본을 사용한다.
+몸체와 군장의 BaseColor, Normal, Metallic/Roughness 6개 텍스처를 실제 512×512 PNG로 다운샘플한 뒤 UE에 임포트했다. `Hopper.blend`는 `Captain/CaptainPilot_UE.blend`의 메시·골격·착석 클립을 상대 경로로 연결한다. 조립 원본을 열면 게임과 같은 좌석 위치에 토끼대장이 앉아 있다.
 
 메시 크기는 약 70cm로 유지했다. 새 무릎 관절, 어깨·발목 경계의 연속 가중치, 정상화된 노멀맵을 검증했다. 새 프로세스 에셋 검사 및 UE 5.7 빌드와 54개 전투 통합 검사가 통과했다(경고 포함 통과 2개, 실패 0개). 재임포트 시 필요한 루트 트랙 보정과 검증 방법은 Captain 폴더의 README를 참고한다.
 ## 메카 전용 피격 및 높이 조준 (2026-10-18)

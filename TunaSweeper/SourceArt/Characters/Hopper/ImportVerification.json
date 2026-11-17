@@ -1,4 +1,5 @@
 {
+  "scope": "Historical initial import measurements. Current pilot verification is in Captain/UEVerification.json.",
   "static_meshes": 62,
   "skeletal_mesh": "/Game/Characters/Hopper/Pilot/SK_Rabbit_Pilot.SK_Rabbit_Pilot",
   "skeleton": "/Game/Characters/Hopper/Pilot/SK_Rabbit_Pilot_Skeleton.SK_Rabbit_Pilot_Skeleton",

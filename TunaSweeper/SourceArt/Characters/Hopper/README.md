@@ -1,8 +1,6 @@
 # Hopper source assets
-> Active pilot update (2026-10-07): use "Captain/CaptainPilot_UE.blend" and Captain/README.md for the current rigged rabbit with 512px textures. The original Rabbit section and the assembly Blender files below describe the initial pilot and are retained as historical source.
 
-
-`Hopper.blend` is the editable assembly source, containing the original textured mech split into 62 static components and the separately rigged Rabbit pilot. `HopperPilot_UE.blend` contains the exact centimeter-native pilot export rig, with positive unit object scales and the original mesh and bone handedness preserved. The GLB reference was read without modifying its source repository. Its SHA-256 is recorded in `HopperManifest.json`.
+`Hopper.blend` assembles the original 62 static mech components with the seated Captain. The rig, mesh, materials, and seated action are linked from [the Captain authoring file](Captain/CaptainPilot_UE.blend). The source GLB checksum and assembly pivots are recorded in `HopperManifest.json`.
 
 ## Coordinates and parts
 
@@ -12,9 +10,9 @@
 - Leg pivots are measured estimates at the visible joint housings; the source legs did not contain a skeleton.
 - The manifest includes 31 samples of the original cockpit opening animation for each of its 13 moving parts. These are delta transforms relative to the closed assembly.
 
-## Rabbit pilot
+## Captain pilot
 
-The source Rabbit was a single mesh of disconnected anatomical islands. It now has a 16-bone rig. Rigid island weights preserve the original low-poly appearance, eyes, ears, clothing, and paws. The pilot skeleton includes `hand_r` for a weapon attachment.
+The Captain has an 18-bone rig with calf joints and a `hand_r` attachment. The assembly instance uses the centimeter-native source at 0.01 scale in the meter-scale mech scene. See [Captain authoring and export](Captain/README.md) for material, rig, and FBX settings.
 
 All seven clips are in place at 30 fps:
 
@@ -28,12 +26,10 @@ All seven clips are in place at 30 fps:
 | Fire | 0.5 | Aiming and recoil |
 | Melee | 0.7 | Arm swing |
 
-The root stays at zero; a pelvis offset keeps the lowest foot point at floor height. The standing pilot is approximately 70 cm tall; its walk reaches 72.11 cm. A capsule radius of 16 cm and half-height of 37 cm covers these poses. The seated mesh origin attaches at `(17, 0, 119.7806)` cm in the mech assembly.
-
-In `Hopper.blend` the pilot is displayed at its seat location in the original meter-scale authoring frame. Use `HopperPilot_UE.blend` for skeletal re-export: its mesh and rig stay at zero with object scale 1, scene unit scale 0.01, and 16 bones. Export selected armature and mesh with -Y forward, Z up, Apply Scalings = FBX All, and no leaf bones. Import with Convert Scene, Convert Scene Unit, and Force Front X Axis enabled. Reference and gameplay poses use the same skeleton; there is no runtime regeneration.
+The standing pilot is approximately 70 cm tall. The gameplay capsule has a 16 cm radius and 37 cm half-height. The seated mesh origin attaches at `(17, 0, 119.7806)` cm in Unreal coordinates.
 
 ## Verification
 
-The `Preview` images show the assembled source and sample pilot poses. `ImportVerification.json` records imported Unreal counts, clip lengths, coordinate checks, DirectX 12 SM6 compilation for all 14 materials, and outward winding checks for all 28,346 static triangles. The UE_MechWalking, UE_PilotRanged, and UE_PilotMelee previews are captures from the passing in-editor gameplay test; the other previews show Blender source poses.
+The [assembly preview](Preview/Hopper_Assembly.png) shows the Captain in the closed cockpit. [Pilot poses and gameplay captures](Captain/Preview) show the current pilot. `ImportVerification.json` preserves the initial import measurements, including outward winding checks for 28,346 static triangles. [Captain verification](Captain/UEVerification.json) records the current pilot, rig, textures, and animation checks.
 
 The existing standard pistol is reused at 0.45 scale. Its grip center is aligned to hand_r with the inverse reference hand rotation; the saved GunTransform remains editable in DA_HopperVisual.
