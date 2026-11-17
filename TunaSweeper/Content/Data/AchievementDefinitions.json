@@ -10,7 +10,7 @@
     { "achievement_id": "07", "name_string_key": "achievement.07.name", "condition_type": "location_reached", "enabled": true, "target_id": "region.village", "map_paths": ["/Game/MainRaid/RaidVillage"], "platform_ids": {} },
     { "achievement_id": "08", "name_string_key": "achievement.08.name", "condition_type": "gameplay_event", "event_type": "FacilityRelocated", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm AI vending machine identity and committed relocation event." },
     { "achievement_id": "09", "name_string_key": "achievement.09.name", "condition_type": "gameplay_event", "event_type": "FastTravelUsed", "enabled": true, "target_id": "travel.loop_rail", "platform_ids": {} },
-    { "achievement_id": "10", "name_string_key": "achievement.10.name", "condition_type": "specific_enemy_first_kill", "enabled": false, "target_id": "", "platform_ids": {}, "todo": "Confirm rabbit captain EnemyId." },
+    { "achievement_id": "10", "name_string_key": "achievement.10.name", "condition_type": "specific_enemy_first_kill", "enabled": true, "target_id": "/Game/Characters/Hopper/BP_HopperEnemy.BP_HopperEnemy_C", "platform_ids": {} },
     { "achievement_id": "11", "name_string_key": "achievement.11.name", "condition_type": "extraction_health", "platform_ids": {} },
     { "achievement_id": "12", "name_string_key": "achievement.12.name", "condition_type": "timed_extraction", "required_count": 5, "platform_ids": {} },
     { "achievement_id": "13", "name_string_key": "achievement.13.name", "condition_type": "location_reached", "enabled": true, "target_id": "location.forest.elephant_lake", "platform_ids": {} },

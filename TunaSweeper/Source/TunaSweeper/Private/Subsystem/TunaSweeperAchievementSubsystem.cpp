@@ -261,11 +261,14 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 	return true;
 }
 
-void UTunaSweeperAchievementSubsystem::ReportEnemyKilled(FName EnemyId)
+void UTunaSweeperAchievementSubsystem::ReportEnemyKilled(FName EnemyId, UClass* EnemyClass)
 {
 	// Practice events must never reach the separate achievement save or platform publisher.
 	if (!IsGameplayReportingAllowed()) return;
 	RaidState.RecordKill();
+	// Quests match exact enemy classes, not subclasses or a placement-specific ID.
+	// Store that same identity without incrementing the total kill count a second time.
+	if (EnemyClass) ProgressState.KilledEnemyIds.Add(FName(*FSoftClassPath(EnemyClass).ToString()));
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordEnemyKilled(ProgressState, EnemyId));
 }
 

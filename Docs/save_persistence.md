@@ -4,9 +4,11 @@
 
 Forest lake arrival records `location.forest.elephant_lake` in the existing achievement `ReachedLocationIds` and unlocks `13` in `UnlockedAchievementIds`. Both use the independent achievement save, survive slot changes and restart, and do not add gameplay-slot fields or change the save version. The trigger's per-instance overlap guard is transient. See [placement and validation](elephant_lake_encounter.md).
 
-## Lift and rail achievements
+## Lift, rail and captain achievements
 
 Successful lift arrival and player restart record the existing `FacilityUsed` fact with `facility.raid_lift` (04); successful loop-rail teleport and train arrival record `FastTravelUsed` with `travel.loop_rail` (09). Selection, repair, cancellation and failed travel do not record these facts. Pending lift player identity is transient and never saved.
+
+Player-attributed enemy deaths now record the exact `FSoftClassPath` alongside the existing enemy ID in `KilledEnemyIds`, while incrementing total kills only once. Achievement 10 targets `/Game/Characters/Hopper/BP_HopperEnemy.BP_HopperEnemy_C`, using the same exact-class comparison and death event as the quest objective; quest acceptance and reward claim are not required. Historical saves remain readable without a version change, but old kills that stored only an enemy ID are not inferred to have matched a class.
 
 ## Chain-link gates
 

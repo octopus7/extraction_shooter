@@ -1319,7 +1319,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =
 				GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
 			{
-				if (KillerController->IsLocalPlayerController()) AchievementSubsystem->ReportEnemyKilled(EnemyId);
+				if (KillerController->IsLocalPlayerController()) AchievementSubsystem->ReportEnemyKilled(EnemyId, GetClass());
 			}
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{

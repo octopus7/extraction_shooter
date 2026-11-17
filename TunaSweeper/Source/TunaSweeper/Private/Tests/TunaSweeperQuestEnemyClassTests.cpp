@@ -1,5 +1,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
+#include "Misc/Paths.h"
+#include "HAL/FileManager.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/Hopper/HopperPresentationComponent.h"
@@ -12,6 +15,7 @@
 #include "Misc/ScopeExit.h"
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace TunaSweeperQuestData
@@ -56,6 +60,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperQuestEnemyClassTest,
 
 bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
 {
+    const FString TestRoot = FPaths::ProjectSavedDir() / TEXT("Automation/WaveDefense/AchievementHooks") / FGuid::NewGuid().ToString();
+    if (!TestTrue(TEXT("Isolated achievement save root"), TunaSweeperBuildFlavor::SetWaveDefenseTestSaveDirectory(TestRoot))) return false;
+    ON_SCOPE_EXIT { TunaSweeperBuildFlavor::SetWaveDefenseTestSaveDirectory(FString()); IFileManager::Get().DeleteDirectory(*TestRoot, false, true); };
     struct FContextAccess : UGameInstance
     {
         static void Attach(UGameInstance* Instance, FWorldContext* Context)
@@ -98,6 +105,7 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     AddQuest(BlueId, FString::Printf(TEXT(",\"enemy_class_paths\":[\"%s\"]"), *Blue->GetPathName()));
     AddQuest(LegacyId, TEXT(",\"enemy_id\":\"placement.1\""));
     auto* Killer = World->SpawnActor<APlayerController>();
+    Killer->SetAsLocalPlayerController();
     if (!TestNotNull(TEXT("Player kill instigator"), Killer)) return false;
     auto Kill = [&](UClass* Class)
     {
@@ -149,10 +157,16 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     HopperSpawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
     auto* Hopper = World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(HopperClass, FVector::ZeroVector, FRotator::ZeroRotator, HopperSpawn);
     if (!TestNotNull(TEXT("Actual hopper BP instance"), Hopper)) return false;
+    auto* Achievements = Game->GetSubsystem<UTunaSweeperAchievementSubsystem>();
+    const int64 KillsBeforeHopper = Achievements->GetTotalEnemyKills();
+    TestFalse(TEXT("Other enemies do not unlock rabbit captain"), Achievements->IsAchievementUnlocked(TEXT("10")));
     Hopper->TakeDamage(Hopper->GetMechHealth()-1.f, FDamageEvent(), Killer, nullptr);
     TestEqual(TEXT("Surviving mech does not count as a kill"), Quests->GetObjectiveProgressCount(HopperId, TEXT("kill")), 0);
+    TestFalse(TEXT("Surviving captain does not unlock 10"), Achievements->IsAchievementUnlocked(TEXT("10")));
     Hopper->TakeDamage(1.f, FDamageEvent(), Killer, nullptr);
     TestTrue(TEXT("Mech zero health ends combat immediately"), Hopper->IsDead());
+    TestTrue(TEXT("Same actual class kill as the quest unlocks captain achievement"), Achievements->IsAchievementUnlocked(TEXT("10")));
+    TestEqual(TEXT("Class and enemy ID reporting count as one kill"), Achievements->GetTotalEnemyKills(), KillsBeforeHopper + 1);
     TestFalse(TEXT("Open cockpit wreck remains in level"), Hopper->IsActorBeingDestroyed());
     Hopper->GetPresentation()->TickComponent(.7f, LEVELTICK_All, nullptr);
     TestEqual(TEXT("Destroyed mech opens cockpit before ejection"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);

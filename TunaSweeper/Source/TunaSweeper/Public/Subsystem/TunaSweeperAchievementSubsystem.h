@@ -25,7 +25,7 @@ public:
 	bool LoadAchievementDefinitions(bool bForceReload = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Achievement")
-	void ReportEnemyKilled(FName EnemyId);
+	void ReportEnemyKilled(FName EnemyId, UClass* EnemyClass = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Achievement")
 	void ReportLocationReached(FName LocationId);
