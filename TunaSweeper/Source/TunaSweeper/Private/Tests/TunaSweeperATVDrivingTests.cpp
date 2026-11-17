@@ -12,8 +12,15 @@
 #include "Vehicle/TunaSweeperATVActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperATVDrivingTest,
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FTunaSweeperATVDrivingTest,
 	"TunaSweeper.Vehicle.Driving", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+void FTunaSweeperATVDrivingTest::GetTests(TArray<FString>& Names, TArray<FString>& Commands) const
+{
+	Names.Add(TEXT("ATV"));
+	Commands.Add(TEXT("/Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA.BP_ATV_TypeA_C"));
+	Names.Add(TEXT("LightTruck"));
+	Commands.Add(TEXT("/Game/Blueprints/Vehicles/LightTruck/BP_LightTruck.BP_LightTruck_C"));
+}
 bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 {
 	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
@@ -27,7 +34,7 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	Ground->SetActorLocation(FVector(0,0,-10));
 	FActorSpawnParameters Spawn;
 	Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	UClass* ATVClass = LoadClass<ATunaSweeperATVActor>(nullptr, TEXT("/Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA.BP_ATV_TypeA_C"));
+	UClass* ATVClass = LoadClass<ATunaSweeperATVActor>(nullptr, *Parameters);
 	if (!TestNotNull(TEXT("Saved ATV Blueprint"), ATVClass)) return false;
 	auto* ATV = World->SpawnActor<ATunaSweeperATVActor>(ATVClass, FVector(0,0,30), FRotator::ZeroRotator, Spawn);
 	UClass* PlayerClass = LoadClass<ATunaSweeperTopDownCharacter>(nullptr, TEXT("/Game/Characters/Player/BP_TunaSweeperPlayerCharacter.BP_TunaSweeperPlayerCharacter_C"));
@@ -40,14 +47,39 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	Mount->EngineDriveSound = Mount->EngineBoostSound = nullptr;
 	auto* Movement = ATV->VehicleMovement.Get();
 	TestNotNull(TEXT("Chassis Physics Asset is saved"), ATV->VehicleMesh->GetPhysicsAsset());
-	TestEqual(TEXT("Four wheels initialized"), Movement->Wheels.Num(), 4);
+	const USkeletalMesh* Mesh = ATV->VehicleMesh->GetSkeletalMeshAsset();
+	bool bReady = TestNotNull(TEXT("Vehicle mesh"), Mesh) && TestEqual(TEXT("Four wheels initialized"), Movement->Wheels.Num(), 4);
+	if (Mesh)
+	{
+		for (FName Name : {FName(TEXT("wheel_FL")), FName(TEXT("wheel_FR")), FName(TEXT("wheel_RL")), FName(TEXT("wheel_RR")),
+			FName(TEXT("handlebar")), FName(TEXT("seat")), FName(TEXT("grip_l")), FName(TEXT("grip_r"))})
+		{
+			bReady &= TestTrue(*FString::Printf(TEXT("Vehicle bone %s"), *Name.ToString()), Mesh->GetRefSkeleton().FindBoneIndex(Name) != INDEX_NONE);
+		}
+	}
+	if (!bReady)
+	{
+		World->DestroyWorld(false);
+		GEngine->DestroyWorldContext(World);
+		World->RemoveFromRoot();
+		return false;
+	}
 	TestTrue(TEXT("Physics is enabled"), ATV->VehicleMesh->IsSimulatingPhysics());
 	World->InitializeActorsForPlay(FURL());
 	// This isolated world has no GameMode to dispatch BeginPlay to actors.
 	World->GetWorldSettings()->NotifyBeginPlay();
 	World->GetWorldSettings()->NotifyMatchStarted();
 	World->BeginPlay();
-	ATV->FuelSeconds = 60.0f;
+	const bool bTruck = Parameters.Contains(TEXT("BP_LightTruck"));
+	TestEqual(TEXT("Saved fuel policy"), ATV->bRequiresFuel, !bTruck);
+	if (bTruck)
+	{
+		TestEqual(TEXT("Empty truck can mount"), ATV->FuelSeconds, 0.f);
+		TestTrue(TEXT("Fuel-independent engine is available"), ATV->HasFuel());
+		TestFalse(TEXT("Truck rejects fuel supplies"), ATV->Refuel(Player));
+		TestEqual(TEXT("Truck mesh loaded"), ATV->VehicleMesh->GetSkeletalMeshAsset()->GetName(), FString(TEXT("SKM_LightTruck")));
+	}
+	else ATV->FuelSeconds = 60.0f;
 	ATV->RefreshFuelInteraction();
 	ATV->SetDriveInput(FVector2D(1,1));
 	TestTrue(TEXT("Unoccupied input is rejected"), ATV->GetDriveInput().IsNearlyZero());
@@ -113,7 +145,7 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 		*ATV->GetVelocity().ToString(), *Mount->GetComponentLocation().ToString(),
 		Mount->IsDismountHintVisible(), Mount->StationarySpeedThreshold, Mount->IsComponentTickEnabled()));
 	TestTrue(TEXT("Stationary saved Blueprint shows the delayed dismount hint after driving"), Mount->IsDismountHintVisible());
-	Mount->ReleaseRiderForEndPlay();
+	TestTrue(TEXT("Player dismounts onto the ground"), Mount->TryDismount());
 	TestTrue(TEXT("Dismount applies parking brake"), Movement->GetHandbrakeInput());
 	TestTrue(TEXT("Dismount clears input"), ATV->GetDriveInput().IsNearlyZero());
 	World->EndPlay(EEndPlayReason::Quit);

@@ -91,7 +91,7 @@ void UTunaSweeperVehicleDismountWidget::RefreshFuelGauge()
 	const auto* ATV = Vehicle.Get();
 	auto* Controller = GetOwningPlayer();
 	const auto* Rider = ATV && ATV->MountComponent ? ATV->MountComponent->GetRider() : nullptr;
-	if (!IsVisible() || !ATV || ATV->IsActorBeingDestroyed() || ATV->IsVehicleDestroyed() ||
+	if (!IsVisible() || !ATV || !ATV->bRequiresFuel || ATV->IsActorBeingDestroyed() || ATV->IsVehicleDestroyed() ||
 		!Controller || !Rider || Rider->IsDead() || Rider->GetController() != Controller)
 	{
 		FuelGauge->SetVisibility(ESlateVisibility::Collapsed);

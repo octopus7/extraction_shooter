@@ -24,7 +24,9 @@ class TUNASWEEPER_API ATunaSweeperATVActor : public APawn
 public:
 	ATunaSweeperATVActor();
 	UFUNCTION(BlueprintPure, Category="ATV|Fuel") float GetFuelRatio() const { return FMath::Clamp(FuelSeconds / 60.f, 0.f, 1.f); }
-	UFUNCTION(BlueprintPure, Category="ATV|Fuel") bool HasFuel() const { return FuelSeconds > 0.f; }
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="ATV|Fuel")
+	bool bRequiresFuel = true;
+	UFUNCTION(BlueprintPure, Category="ATV|Fuel") bool HasFuel() const { return !bRequiresFuel || FuelSeconds > 0.f; }
 	bool Refuel(APawn* InstigatorPawn);
 	void ConsumeFuel(float DeltaSeconds, bool bEngineOn, bool bMoving);
 	void RefreshFuelInteraction();

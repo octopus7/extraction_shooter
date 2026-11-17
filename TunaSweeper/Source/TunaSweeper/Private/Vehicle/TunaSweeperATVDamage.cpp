@@ -105,7 +105,7 @@ void ATunaSweeperATVActor::DestroyVehicle()
 	bVehicleDestroyed = true;
 	FuelSeconds = 0.f;
 	StoreSessionFuel();
-	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>(); Game && FuelSession == Game->GetVehicleFuelSession())
+	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>(); bRequiresFuel && Game && FuelSession == Game->GetVehicleFuelSession())
 		Game->SaveGameState();
 	ClearDriveInput();
 	MountComponent->ReleaseRiderForVehicleDestruction();

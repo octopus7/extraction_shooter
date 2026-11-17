@@ -9,6 +9,7 @@
 
 void ATunaSweeperATVActor::InitializeSessionFuel()
 {
+    if (!bRequiresFuel) return;
     FuelSeconds = 0.f;
     FuelSessionKey = UWorld::RemovePIEPrefix(GetLevel()->GetOutermost()->GetName()) + TEXT(":") +
         (FuelSessionId.IsNone() ? GetName() : FuelSessionId.ToString());
@@ -22,12 +23,14 @@ void ATunaSweeperATVActor::InitializeSessionFuel()
 
 void ATunaSweeperATVActor::StoreSessionFuel()
 {
+    if (!bRequiresFuel) return;
     if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
         Game->StoreVehicleFuel(FuelSessionKey, FuelSeconds, FuelSession);
 }
 
 bool ATunaSweeperATVActor::Refuel(APawn* InstigatorPawn)
 {
+    if (!bRequiresFuel) return false;
     auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
     const auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn);
     if (!Game || !IsValid(Character) || Character->IsDead() || Character->IsMountedInVehicle() ||
@@ -53,7 +56,7 @@ bool ATunaSweeperATVActor::Refuel(APawn* InstigatorPawn)
 
 void ATunaSweeperATVActor::ConsumeFuel(float DeltaSeconds, bool bEngineOn, bool bMoving)
 {
-    if (!bEngineOn || bVehicleDestroyed || !FMath::IsFinite(DeltaSeconds) || DeltaSeconds <= 0 || !HasFuel()) return;
+    if (!bRequiresFuel || !bEngineOn || bVehicleDestroyed || !FMath::IsFinite(DeltaSeconds) || DeltaSeconds <= 0 || !HasFuel()) return;
     FuelSeconds = FMath::Max(0.f, FuelSeconds - DeltaSeconds * (bMoving ? 1.f : 0.1f));
     StoreSessionFuel();
     if (!HasFuel())
