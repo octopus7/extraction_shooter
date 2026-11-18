@@ -100,6 +100,7 @@ void ATunaSweeperPlayerController::UpdateDebugArmoryInteraction()
 
 void ATunaSweeperPlayerController::OnUnPossess()
 {
+	EndHopperShot(true);
 	CloseEncyclopedia();
 	CloseIconEditorPanel();
 	CloseQuestRewardLockerPanel();

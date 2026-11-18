@@ -515,6 +515,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	EndHopperShot(false);
 	CloseEncyclopedia();
 	CloseIconEditorPanel();
 	if (StartupLogoWidget)
@@ -697,6 +698,11 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+	if (IsHopperShotActive())
+	{
+		UpdateHopperShot(DeltaTime);
+		return;
+	}
 	if (EncyclopediaPanel) return;
 	UpdateIconEditorInteraction();
 	if (IconEditorPanel) return;

@@ -11,6 +11,7 @@
 #include "TunaSweeperPlayerController.generated.h"
 
 class ACameraActor;
+class ATunaSweeperHopperEnemyCharacter;
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperStartupLogoWidget;
@@ -44,6 +45,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PlayerTick(float DeltaTime) override;
+	virtual bool InputKey(const FInputKeyEventArgs& Params) override;
+	virtual void FlushPressedKeys() override;
+	virtual void BuildInputStack(TArray<UInputComponent*>& InputStack) override;
+	bool StartHopperShot(ATunaSweeperHopperEnemyCharacter* Hopper, bool bEjection, float Duration);
+	bool IsHopperShotActive() const { return HopperCamera != nullptr; }
+	bool IsViewingHopper(const AActor* Actor) const;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnUnPossess() override;
 	virtual void SetupInputComponent() override;
@@ -281,6 +288,23 @@ protected:
 	TSoftClassPtr<ATunaSweeperPickupItemActor> PickupItemActorClass;
 
 private:
+	void UpdateHopperShot(float DeltaSeconds);
+	void FrameHopperShot();
+	void EndHopperShot(bool bRestoreView);
+	UPROPERTY(Transient) TObjectPtr<ACameraActor> HopperCamera;
+	TWeakObjectPtr<ATunaSweeperHopperEnemyCharacter> HopperSubject;
+	TWeakObjectPtr<AActor> HopperReturnView;
+	TOptional<FTransform> InterruptedBoardingView;
+	float InterruptedBoardingFOV = 0.f;
+	TSet<FKey> PhysicalKeysDown;
+	TSet<FKey> HopperKeysAwaitingRelease;
+	float HopperShotTime = 0.f;
+	float HopperShotDuration = 0.f;
+	float HopperCameraSide = 1.f;
+	bool bHopperEjection = false;
+	bool bHopperReturning = false;
+	bool bHopperPreviousCursor = false;
+	ESlateVisibility HopperPreviousHudVisibility = ESlateVisibility::Visible;
 	UPROPERTY(Transient) TObjectPtr<UWaveDefensePanelGPT61Terra> WaveDefensePanel;
 	UPROPERTY(Transient) TObjectPtr<UWaveDefenseHUDGPT61Terra> WaveDefenseHUD;
 	UPROPERTY(Transient) TObjectPtr<UIconEditorGPT6Astra> IconEditorPanel;

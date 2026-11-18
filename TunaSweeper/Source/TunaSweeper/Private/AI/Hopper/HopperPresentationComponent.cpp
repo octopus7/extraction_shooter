@@ -88,13 +88,21 @@ void UHopperPresentationComponent::PlayClip(UAnimSequence* Clip,bool bLoop,bool 
  }
  if (bOverrideAction) ActionRemaining=Clip->GetPlayLength();
 }
-void UHopperPresentationComponent::StartBoarding(float Duration)
+void UHopperPresentationComponent::WaitBesideMech()
 {
  if (!Pilot || !Seat) return;
  TransferStart=BodyRoot->GetComponentTransform().TransformPosition(FVector(VisualData->BoardingStartDistance,0,0));
  TransferEnd=Seat->GetComponentLocation();
+ Pilot->AttachToComponent(BodyRoot,FAttachmentTransformRules::KeepWorldTransform);
+ Pilot->SetWorldLocationAndRotation(TransferStart,Seat->GetComponentQuat());
+ bSeated=false;
+ SetPilotLocomotion(false);
+}
+void UHopperPresentationComponent::StartBoarding(float Duration)
+{
+ if (!Pilot || !Seat) return;
+ WaitBesideMech();
  Pilot->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
- Pilot->SetWorldLocation(TransferStart);
  BeginTransfer(Duration,true);
 }
 void UHopperPresentationComponent::SeatPilot()

@@ -23,6 +23,7 @@ public:
  UHopperPresentationComponent();
  void Initialize(UHopperVisualData* Data);
  USceneComponent* GetArmSocket(bool bLeft) const;
+ void WaitBesideMech();
  void StartBoarding(float Duration);
  void SeatPilot();
  void StartDisembark(const FVector& GroundDestination, float Duration);

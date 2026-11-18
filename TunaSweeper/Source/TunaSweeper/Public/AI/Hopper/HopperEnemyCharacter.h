@@ -5,6 +5,7 @@
 #include "HopperEnemyCharacter.generated.h"
 
 class AHopperArmModule;
+class ATunaSweeperPlayerController;
 class UHopperPresentationComponent;
 class UHopperVisualData;
 class UNiagaraSystem;
@@ -12,7 +13,7 @@ class UNiagaraSystem;
 UENUM(BlueprintType)
 enum class EHopperCombatPhase : uint8
 {
-    Boarding, Mech, Disembarking, PilotRanged, PilotMelee, Dead
+    Boarding, Mech, Disembarking, PilotRanged, PilotMelee, Dead, WaitingForSight
 };
 
 /** One AI and one final death/loot event, with a separately destructible mech. */
@@ -85,6 +86,7 @@ private:
     friend class FHopperCombatOwnershipTest;
     friend class FHopperTransitionClearanceTest;
     void InitializePresentation();
+    void TryStartEncounterBoarding();
     void BeginMechDestruction();
     void UpdateDisembark(float DeltaSeconds);
     bool FindPilotExit(FVector& OutGroundDestination) const;
@@ -97,6 +99,7 @@ private:
     UPROPERTY(Transient) TObjectPtr<UHopperVisualData> LoadedVisualData;
     UPROPERTY(Transient) TObjectPtr<AHopperArmModule> LeftArm;
     UPROPERTY(Transient) TObjectPtr<AHopperArmModule> RightArm;
+    TWeakObjectPtr<ATunaSweeperPlayerController> BoardingViewer;
     EHopperCombatPhase Phase = EHopperCombatPhase::Boarding;
     float MechHealth = 180.f;
     int32 PilotAmmo = 24;

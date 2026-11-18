@@ -9,6 +9,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperVisionVisibilitySubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperVisionMaskWidget.h"
@@ -501,6 +502,12 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		ResetVisionSubjectVisibility();
 	}
 
+	const auto* GameplayController = Cast<ATunaSweeperPlayerController>(PlayerController);
+	if (GameplayController && GameplayController->IsHopperShotActive())
+	{
+		if (VisionMaskWidget) VisionMaskWidget->SetMaskVisible(false);
+		return;
+	}
 	if (!bHasValidViewport)
 	{
 		return;
@@ -743,6 +750,26 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisibleRaySamples(
 	return !OutRaySamples.IsEmpty();
 }
 
+bool UTunaSweeperPlayerVisionComponent::HasSightOf(const UTunaSweeperVisionSubjectComponent& Subject) const
+{
+	const AActor* Viewer = GetOwner();
+	if (!Viewer || !GetWorld() || !Subject.GetOwner()) return false;
+	const FVector Start = Viewer->GetActorLocation() + FVector::UpVector * FMath::Max(0.f, VisionSettings.TraceHeight);
+	const FVector Target = Subject.GetVisionTestLocation();
+	const FVector Delta = Target - Viewer->GetActorLocation();
+	const float Padding = Subject.GetVisibilityPaddingCm();
+	const float Radius = FMath::Max(0.f, VisionSettings.AlwaysVisibleRadius);
+	if (Delta.Size() > FMath::Max(Radius, VisionSettings.SightDistance) + Padding) return false;
+	const float Angle = FMath::Abs(FMath::FindDeltaAngleDegrees(Viewer->GetActorRotation().Yaw, Delta.Rotation().Yaw));
+	if (Delta.Size2D() > Radius + Padding && Angle > .5f * FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.f, 360.f)) return false;
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(HopperEncounterSight), false, Viewer);
+	Params.AddIgnoredActor(Subject.GetOwner());
+	// The vision mask traces horizontally; keep the same height relative to each actor on slopes.
+	return !GetWorld()->LineTraceTestByChannel(Start, Target + FVector::UpVector * FMath::Max(0.f, VisionSettings.TraceHeight),
+		VisionSettings.TraceChannel, Params);
+}
+
 float UTunaSweeperPlayerVisionComponent::TraceVisibleDistance(
 	const FVector& TraceOrigin,
 	const FVector& Direction,
@@ -880,8 +907,9 @@ void UTunaSweeperPlayerVisionComponent::ApplyVisionSubjectVisibility(
 	}
 
 	const AActor* OwnerActor = GetOwner();
+	const auto* Viewer = Cast<ATunaSweeperPlayerController>(ResolveLocalPlayerController());
 	VisionSubsystem->ForEachVisionSubject(
-		[this, &RaySamples, &TraceOrigin, FacingYawDegrees, OwnerActor](
+		[this, &RaySamples, &TraceOrigin, FacingYawDegrees, OwnerActor, Viewer](
 			UTunaSweeperVisionSubjectComponent* VisionSubject)
 		{
 			if (!VisionSubject || VisionSubject->GetOwner() == OwnerActor)
@@ -890,6 +918,7 @@ void UTunaSweeperPlayerVisionComponent::ApplyVisionSubjectVisibility(
 			}
 
 			VisionSubject->ApplyVisionVisible(
+				(Viewer && Viewer->IsViewingHopper(VisionSubject->GetOwner())) ||
 				IsVisionSubjectVisible(VisionSubject, RaySamples, TraceOrigin, FacingYawDegrees));
 		});
 }

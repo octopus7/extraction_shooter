@@ -75,6 +75,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
 	UTexture2D* GetMaskTexture() const { return MaskTexture; }
 
+	/** Query one encounter at the same height, range and facing angle as the player's vision mask. */
+	bool HasSightOf(const UTunaSweeperVisionSubjectComponent& Subject) const;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
 	FTunaSweeperPlayerVisionSettings VisionSettings;

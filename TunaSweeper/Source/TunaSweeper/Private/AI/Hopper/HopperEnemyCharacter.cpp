@@ -6,6 +6,7 @@
 #include "AI/Hopper/HopperVisualData.h"
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Component/TunaSweeperFactionComponent.h"
+#include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -15,6 +16,7 @@
 #include "NavigationData.h"
 #include "NavigationSystem.h"
 #include "NiagaraSystem.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
@@ -99,12 +101,41 @@ void ATunaSweeperHopperEnemyCharacter::BeginPlay()
     }
     else
     {
-        Phase = EHopperCombatPhase::Boarding;
         GetCharacterMovement()->DisableMovement();
         Presentation->SetMechActive(false);
-        Presentation->StartBoarding(BoardingSeconds);
+        if (LoadedVisualData && LoadedVisualData->bUseEncounterCamera)
+        {
+            Phase = EHopperCombatPhase::WaitingForSight;
+            Presentation->WaitBesideMech();
+        }
+        else
+        {
+            Phase = EHopperCombatPhase::Boarding;
+            Presentation->StartBoarding(BoardingSeconds);
+        }
     }
     ApplyPhaseMovementSpeed();
+}
+
+void ATunaSweeperHopperEnemyCharacter::TryStartEncounterBoarding()
+{
+    auto* Viewer = Cast<ATunaSweeperPlayerController>(GetWorld()->GetFirstPlayerController());
+    APawn* Pawn = Viewer ? Viewer->GetPawn() : nullptr;
+    const auto* Vision = Pawn ? Pawn->FindComponentByClass<UTunaSweeperPlayerVisionComponent>() : nullptr;
+    if (!Vision || !VisionSubjectComponent || !Vision->HasSightOf(*VisionSubjectComponent)) return;
+    // The top-down view can be shorter than the sight cone, especially when aiming or zoomed in.
+    int32 Width = 0, Height = 0;
+    Viewer->GetViewportSize(Width, Height);
+    FVector2D Screen;
+    const FVector Cockpit = Presentation->GetBodyRoot()->GetComponentTransform().TransformPosition(LoadedVisualData->SeatLocation);
+    if (Width <= 0 || Height <= 0 || !Viewer->ProjectWorldLocationToScreen(Cockpit, Screen)
+        || Screen.X < 0 || Screen.X >= Width || Screen.Y < 0 || Screen.Y >= Height) return;
+    const float ShotDuration = BoardingSeconds + LoadedVisualData->HatchTravelSeconds + .6f;
+    if (!Viewer->StartHopperShot(this, false, ShotDuration)) return;
+    BoardingViewer = Viewer;
+    Phase = EHopperCombatPhase::Boarding;
+    PhaseSeconds = 0.f;
+    Presentation->StartBoarding(BoardingSeconds);
 }
 
 void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
@@ -114,7 +145,9 @@ void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
     const float AngularRate = DeltaSeconds > UE_SMALL_NUMBER ? FMath::Abs(FMath::FindDeltaAngleDegrees(PreviousGaitYaw,GetActorRotation().Yaw))/DeltaSeconds : 0.f;
     TurningFootSpeed = FMath::DegreesToRadians(AngularRate)*45.f;
     PreviousGaitYaw = GetActorRotation().Yaw;
-    if (Phase == EHopperCombatPhase::Boarding)
+    if (Phase == EHopperCombatPhase::WaitingForSight)
+        TryStartEncounterBoarding();
+    else if (Phase == EHopperCombatPhase::Boarding)
     {
         PhaseSeconds += DeltaSeconds;
         if (PhaseSeconds >= FMath::Max(0.f, BoardingSeconds))
@@ -138,7 +171,7 @@ void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
 void ATunaSweeperHopperEnemyCharacter::ApplyPhaseMovementSpeed()
 {
     float Speed = 0.f;
-    if (!IsDead() && Phase == EHopperCombatPhase::Mech)
+    if (!IsDead() && Phase == EHopperCombatPhase::Mech && !(BoardingViewer.IsValid() && BoardingViewer->IsViewingHopper(this)))
         Speed = FMath::Min(MechMoveSpeed, FMath::Max(0.f,Presentation->GetMaxStableWalkSpeed()-TurningFootSpeed));
     else if (!IsDead() && (Phase == EHopperCombatPhase::PilotRanged || Phase == EHopperCombatPhase::PilotMelee))
         Speed = PilotMoveSpeed;
@@ -152,7 +185,8 @@ bool ATunaSweeperHopperEnemyCharacter::UsesMeleeAttack() const
 
 bool ATunaSweeperHopperEnemyCharacter::IsStandardCombatSuppressed() const
 {
-    return IsDead() || Phase == EHopperCombatPhase::Boarding || Phase == EHopperCombatPhase::Disembarking
+    return IsDead() || Phase == EHopperCombatPhase::WaitingForSight || Phase == EHopperCombatPhase::Boarding
+        || Phase == EHopperCombatPhase::Disembarking || (BoardingViewer.IsValid() && BoardingViewer->IsViewingHopper(this))
         || Super::IsStandardCombatSuppressed();
 }
 
@@ -483,7 +517,16 @@ void ATunaSweeperHopperEnemyCharacter::OnDeathPresentationStarted()
     Presentation->SetMechActive(false);
     Presentation->SetGunVisible(false);
     Presentation->SetPilotLocomotion(false);
-    if (ShouldKeepDefeatedBody()) Presentation->StartSeatEjection();
+    if (ShouldKeepDefeatedBody())
+    {
+        Presentation->StartSeatEjection();
+        if (LoadedVisualData && LoadedVisualData->bUseEncounterCamera && GetWorld())
+            if (auto* Viewer = Cast<ATunaSweeperPlayerController>(GetWorld()->GetFirstPlayerController()))
+            {
+                const float FollowTime = FMath::Min(.85f, Presentation->EjectionFlightSeconds);
+                Viewer->StartHopperShot(this, true, Presentation->GetEjectionHatchDuration() + Presentation->EjectionSlideSeconds + FollowTime);
+            }
+    }
 }
 
 void ATunaSweeperHopperEnemyCharacter::EndPlay(EEndPlayReason::Type Reason)

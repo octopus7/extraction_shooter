@@ -4,11 +4,14 @@
 #include "AI/Hopper/HopperVisualData.h"
 #include "AI/Hopper/HopperArmModule.h"
 #include "Component/TunaSweeperFactionComponent.h"
+#include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraActor.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Editor.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
@@ -34,6 +37,15 @@
 namespace HopperPlayTest
 {
  FVector WalkStart;
+ bool OpenNavigationFixture()
+ {
+  if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir()/TEXT("Maps/HopperCombatTestMap.umap"),false,true)) return false;
+  // PIE copies the editor's static tiles. Finish generation before duplicating a freshly opened level.
+  auto* Navigation=FNavigationSystem::GetCurrent<UNavigationSystemV1>(GEditor->GetEditorWorldContext().World());
+  if (!Navigation) return false;
+  Navigation->Build();
+  return true;
+ }
  ATunaSweeperHopperEnemyCharacter* Find(UWorld* W)
  {
   if (W) for(TActorIterator<ATunaSweeperHopperEnemyCharacter> I(W);I;++I) return *I;
@@ -65,18 +77,36 @@ bool FHopperWaitForReady::Update()
 {
  UWorld* World=GEditor->PlayWorld;
  ATunaSweeperHopperEnemyCharacter* Hopper=HopperPlayTest::Find(World);
+ auto* Viewer=World ? Cast<ATunaSweeperPlayerController>(World->GetFirstPlayerController()) : nullptr;
+ if (Hopper && Viewer && Hopper->GetCombatPhase()==EHopperCombatPhase::WaitingForSight)
+ {
+  if(auto* Pawn=Cast<ATunaSweeperTopDownCharacter>(Viewer->GetPawn()))
+  {
+   const FVector Position=Hopper->GetActorLocation()+Hopper->GetActorRightVector()*300.f;
+   Pawn->SetActorLocation(Position);
+   Pawn->SetActorRotation((-Hopper->GetActorRightVector()).Rotation());
+   Pawn->SetAimWorldPoint(Hopper->GetActorLocation());
+   FVector2D Screen;
+   if (Viewer->ProjectWorldLocationToScreen(Hopper->GetActorLocation(),Screen)) Viewer->SetMouseLocation(FMath::RoundToInt(Screen.X),FMath::RoundToInt(Screen.Y));
+  }
+ }
  UNavigationSystemV1* Navigation=World ? FNavigationSystem::GetCurrent<UNavigationSystemV1>(World) : nullptr;
  FNavLocation Start, Destination;
  const FVector Feet=Hopper ? Hopper->GetNavAgentLocation() : FVector::ZeroVector;
- const bool bReady=Hopper && Hopper->GetCombatPhase()==EHopperCombatPhase::Mech && Navigation
+ const bool bReady=Hopper && Hopper->GetCombatPhase()==EHopperCombatPhase::Mech && (!Viewer || !Viewer->IsHopperShotActive()) && Navigation
   && !Navigation->IsNavigationBuildInProgress()
   && Navigation->ProjectPointToNavigation(Feet,Start,FVector(2,2,180))
   && Navigation->ProjectPointToNavigation(Feet+Hopper->GetActorForwardVector()*150.f,Destination,FVector(2,2,180));
  if(bReady) return true;
  if(FPlatformTime::Seconds()-StartTime < 30.f) return false;
- Test->AddError(FString::Printf(TEXT("Hopper PIE did not become ready: world=%s phase=%d navigation=%s building=%d feet=%s gameTime=%.2f"),
+ auto* Player=Viewer ? Cast<ATunaSweeperTopDownCharacter>(Viewer->GetPawn()) : nullptr;
+ auto* Subject=Hopper ? Hopper->FindComponentByClass<UTunaSweeperVisionSubjectComponent>() : nullptr;
+ const bool bSight=Player && Subject && Player->GetPlayerVisionComponent()->HasSightOf(*Subject);
+ Test->AddError(FString::Printf(TEXT("Hopper PIE did not become ready: world=%s phase=%d navigation=%s building=%d feet=%s gameTime=%.2f viewer=%s player=%s at=%s sight=%d shot=%d"),
   *GetNameSafe(World),Hopper ? static_cast<int32>(Hopper->GetCombatPhase()) : -1,*GetNameSafe(Navigation),
-  Navigation ? Navigation->IsNavigationBuildInProgress() : false,*Feet.ToCompactString(),World ? World->GetTimeSeconds() : 0.f));
+  Navigation ? Navigation->IsNavigationBuildInProgress() : false,*Feet.ToCompactString(),World ? World->GetTimeSeconds() : 0.f,
+  *GetNameSafe(Viewer),*GetNameSafe(Player),Player ? *Player->GetActorLocation().ToCompactString() : TEXT("none"),
+  bSight,Viewer && Viewer->IsHopperShotActive()));
  return true;
 }
 
@@ -203,8 +233,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHopperPlayablePresentationTest,"TunaSweeper.Ho
  EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FHopperPlayablePresentationTest::RunTest(const FString& Parameters)
 {
- if(!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir()/TEXT("Maps/HopperCombatTestMap.umap"),false,true))return false;
+ if(!HopperPlayTest::OpenNavigationFixture()) return false;
  FRequestPlaySessionParams Play;
+ Play.StartLocation=FVector(650,-320,110);
+ Play.StartRotation=FRotator(0,90,0);
  Play.EditorPlaySettings=NewObject<ULevelEditorPlaySettings>(GetTransientPackage());
  Play.EditorPlaySettings->NewWindowWidth=1280;
  Play.EditorPlaySettings->NewWindowHeight=800;
@@ -300,8 +332,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHopperEjectionPresentationTest,"TunaSweeper.Ho
  EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FHopperEjectionPresentationTest::RunTest(const FString& Parameters)
 {
- if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir()/TEXT("Maps/HopperCombatTestMap.umap"),false,true)) return false;
+ if (!HopperPlayTest::OpenNavigationFixture()) return false;
  FRequestPlaySessionParams Play;
+ Play.StartLocation=FVector(650,-320,110);
+ Play.StartRotation=FRotator(0,90,0);
  Play.EditorPlaySettings=NewObject<ULevelEditorPlaySettings>(GetTransientPackage());
  Play.EditorPlaySettings->NewWindowWidth=1280; Play.EditorPlaySettings->NewWindowHeight=800;
  GEditor->RequestPlaySession(Play);

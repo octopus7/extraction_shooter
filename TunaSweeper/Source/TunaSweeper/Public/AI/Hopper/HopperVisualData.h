@@ -27,6 +27,8 @@ class TUNASWEEPER_API UHopperVisualData : public UDataAsset
 public:
  UPROPERTY(EditAnywhere) TArray<FHopperMeshPart> Parts;
  UPROPERTY(EditAnywhere) TArray<FHopperPartMotion> HatchMotion;
+ /** Wait for player sight and frame boarding and seat ejection with the encounter camera. */
+ UPROPERTY(EditAnywhere, Category="Encounter") bool bUseEncounterCamera = false;
  /** Time for a full hatch cycle in one direction. Zero starts transfers with the hatch already open. */
  UPROPERTY(EditAnywhere, Category="Hatch", meta=(ClampMin="0", Units="s")) float HatchTravelSeconds = 0.f;
  UPROPERTY(EditAnywhere, Category="Hatch", meta=(ClampMin="0", Units="cm")) float BoardingStartDistance = 85.f;
