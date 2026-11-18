@@ -1,6 +1,9 @@
 #include "Component/TunaSweeperVerticalOcclusionRevealComponent.h"
 
 #include "Components/MeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/Character.h"
 #include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Actor.h"
@@ -189,19 +192,42 @@ void UTunaSweeperVerticalOcclusionRevealComponent::UpdateRevealParameters()
 	APawn* Pawn = PlayerController ? PlayerController->GetPawn() : nullptr;
 	const UTunaSweeperGameInstance* GameInstance = World ? World->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
 	const UTunaSweeperOcclusionRevealSettingsDataAsset* Settings = GameInstance ? GameInstance->GetOcclusionRevealSettingsDataAsset() : nullptr;
-	if (!Pawn || !Settings)
+	const bool bInteriorMode = !InteriorVolumeTag.IsNone();
+	if (!Settings || (!Pawn && !bInteriorMode))
 	{
 		return;
 	}
 
-	const FVector PlayerLocation = Pawn->GetActorLocation();
-	FVector CursorLocation = PlayerLocation;
-	const bool bHasCursor = bUseCursorProximity && ResolveCursorWorldPoint(PlayerController, PlayerLocation.Z, CursorLocation);
-	const float RadiusCm = ProximityRadiusOverrideCm > 0.0f ? ProximityRadiusOverrideCm : Settings->VerticalRevealProximityRadiusCm;
-	const bool bShouldReveal =
-		(bUsePlayerProximity && IsPointNearOwnerBoundsXY(PlayerLocation, RadiusCm)) ||
-		(bHasCursor && IsPointNearOwnerBoundsXY(CursorLocation, RadiusCm));
-	const float RevealStartZ = PlayerLocation.Z + Settings->VerticalRevealStartAbovePlayerCm;
+	const FVector PlayerLocation = Pawn ? Pawn->GetActorLocation() : FVector::ZeroVector;
+	bool bShouldReveal = false;
+	float RevealStartZ = PlayerLocation.Z + Settings->VerticalRevealStartAbovePlayerCm;
+	if (bInteriorMode)
+	{
+		if (const ACharacter* Character = Cast<ACharacter>(Pawn))
+		{
+			const UCapsuleComponent* Capsule = Character->GetCapsuleComponent();
+			RevealStartZ = Capsule->Bounds.Origin.Z + Capsule->Bounds.BoxExtent.Z;
+			TInlineComponentArray<UBoxComponent*> Volumes(GetOwner());
+			for (const UBoxComponent* Volume : Volumes)
+			{
+				if (Volume->ComponentHasTag(InteriorVolumeTag) &&
+					FBox::BuildAABB(FVector::ZeroVector, Volume->GetUnscaledBoxExtent()).IsInsideOrOn(
+						Volume->GetComponentTransform().InverseTransformPosition(PlayerLocation)))
+				{
+					bShouldReveal = true;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		FVector CursorLocation = PlayerLocation;
+		const bool bHasCursor = bUseCursorProximity && ResolveCursorWorldPoint(PlayerController, PlayerLocation.Z, CursorLocation);
+		const float RadiusCm = ProximityRadiusOverrideCm > 0.0f ? ProximityRadiusOverrideCm : Settings->VerticalRevealProximityRadiusCm;
+		bShouldReveal = (bUsePlayerProximity && IsPointNearOwnerBoundsXY(PlayerLocation, RadiusCm)) ||
+			(bHasCursor && IsPointNearOwnerBoundsXY(CursorLocation, RadiusCm));
+	}
 
 	for (const FVerticalOcclusionRevealMaterialState& State : MaterialStates)
 	{

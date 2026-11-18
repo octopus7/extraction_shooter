@@ -55,6 +55,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vertical Occlusion Reveal")
 	bool bUseCursorProximity = true;
 
+	/** When set, reveal only inside tagged owner box components and cut at the character capsule top. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vertical Occlusion Reveal")
+	FName InteriorVolumeTag;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vertical Occlusion Reveal", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm"))
 	float ProximityRadiusOverrideCm = 0.0f;
 
