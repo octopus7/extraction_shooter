@@ -1,0 +1,5 @@
+Key,SourceString
+Node.Points,Forest Scatter Points
+Warning.GridTooLarge,The planting density and outline exceed the supported PCG point grid.
+Warning.NoMapGuide,No readable projected map guide was found for this forest region.
+Warning.NoLandscape,No loaded landscape provides a planting surface for this forest region.

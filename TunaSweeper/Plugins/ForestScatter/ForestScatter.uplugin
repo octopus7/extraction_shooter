@@ -1,0 +1,15 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Forest Scatter",
+	"Description": "Paint vegetation on landscape map guides inside editable spline regions.",
+	"Category": "Environment",
+	"CanContainContent": false,
+	"Modules": [
+		{ "Name": "ForestScatter", "Type": "Runtime", "LoadingPhase": "Default" }
+	],
+	"Plugins": [
+		{ "Name": "PCG", "Enabled": true }
+	]
+}

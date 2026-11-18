@@ -35,6 +35,14 @@
 			"Enabled": true
 		},
 		{
+			"Name": "PCG",
+			"Enabled": true
+		},
+		{
+			"Name": "ForestScatter",
+			"Enabled": true
+		},
+		{
 			"Name": "StylizedWater",
 			"Enabled": true
 		},

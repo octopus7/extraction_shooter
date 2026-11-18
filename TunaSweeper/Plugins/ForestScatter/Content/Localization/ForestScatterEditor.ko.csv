@@ -1,0 +1,5 @@
+Key,SourceString
+Node.Points,숲 식생 배치 지점
+Warning.GridTooLarge,이 경계 안에 지정한 밀도로 식생을 배치하면 PCG 포인트 격자의 크기 제한을 초과합니다.
+Warning.NoMapGuide,이 숲 구역에 투영된 지도 가이드 텍스처를 읽을 수 없습니다.
+Warning.NoLandscape,이 숲 구역에 식생을 배치할 랜드스케이프가 로드되어 있지 않습니다.
