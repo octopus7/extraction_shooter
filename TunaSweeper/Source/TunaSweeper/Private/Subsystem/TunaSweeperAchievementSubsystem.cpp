@@ -174,16 +174,20 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 		Definition.NameStringKey = ReadNameField(AchievementObject, TEXT("name_string_key"));
 		AchievementObject->TryGetBoolField(TEXT("enabled"), Definition.bEnabled);
 		AchievementObject->TryGetNumberField(TEXT("target_item_id"), Definition.TargetItemId);
-		for (const TCHAR* Field : {TEXT("required_facility_ids"), TEXT("map_paths")})
+		const TPair<const TCHAR*, TArray<FName>*> NameArrays[] = {
+			{TEXT("required_facility_ids"), &Definition.RequiredFacilityIds},
+			{TEXT("map_paths"), &Definition.MapPaths},
+			{TEXT("alternate_enemy_ids"), &Definition.AlternateEnemyIds}
+		};
+		for (const auto& Field : NameArrays)
 		{
 			const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
-			if (!AchievementObject->TryGetArrayField(Field, Values)) continue;
-			TArray<FName>& Destination = FCString::Strcmp(Field, TEXT("map_paths")) == 0 ? Definition.MapPaths : Definition.RequiredFacilityIds;
+			if (!AchievementObject->TryGetArrayField(Field.Key, Values)) continue;
 			for (const auto& Value : *Values)
 			{
 				FString Id;
 				if (!Value->TryGetString(Id) || Id.TrimStartAndEnd().IsEmpty()) return false;
-				Destination.Add(FName(*Id));
+				Field.Value->Add(FName(*Id));
 			}
 		}
 

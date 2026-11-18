@@ -13,7 +13,8 @@ namespace TunaSweeperAchievementModel
 			switch (Definition.ConditionType)
 			{
 			case ETunaSweeperAchievementConditionType::SpecificEnemyFirstKill:
-				return State.KilledEnemyIds.Contains(Definition.TargetId);
+				return State.KilledEnemyIds.Contains(Definition.TargetId) ||
+					Definition.AlternateEnemyIds.ContainsByPredicate([&State](FName Id) { return State.KilledEnemyIds.Contains(Id); });
 			case ETunaSweeperAchievementConditionType::TotalEnemyKills:
 				return State.TotalEnemyKills >= Definition.RequiredCount;
 			case ETunaSweeperAchievementConditionType::LocationReached:

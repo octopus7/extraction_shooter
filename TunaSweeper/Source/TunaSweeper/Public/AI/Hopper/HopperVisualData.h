@@ -27,6 +27,11 @@ class TUNASWEEPER_API UHopperVisualData : public UDataAsset
 public:
  UPROPERTY(EditAnywhere) TArray<FHopperMeshPart> Parts;
  UPROPERTY(EditAnywhere) TArray<FHopperPartMotion> HatchMotion;
+ /** Time for a full hatch cycle in one direction. Zero starts transfers with the hatch already open. */
+ UPROPERTY(EditAnywhere, Category="Hatch", meta=(ClampMin="0", Units="s")) float HatchTravelSeconds = 0.f;
+ UPROPERTY(EditAnywhere, Category="Hatch", meta=(ClampMin="0", Units="cm")) float BoardingStartDistance = 85.f;
+ /** Optional visual field fitted to the closed frame, with field and spark material slots. */
+ UPROPERTY(EditAnywhere, Category="Hatch") TSoftObjectPtr<UStaticMesh> CockpitShieldMesh;
  UPROPERTY(EditAnywhere) TSoftObjectPtr<USkeletalMesh> PilotMesh;
  UPROPERTY(EditAnywhere) TSoftObjectPtr<UStaticMesh> PilotGun;
  UPROPERTY(EditAnywhere) FTransform GunTransform;

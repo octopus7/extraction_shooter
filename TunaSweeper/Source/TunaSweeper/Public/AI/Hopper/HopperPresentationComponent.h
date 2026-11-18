@@ -12,6 +12,7 @@ class UAnimSequence;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UProceduralMeshComponent;
+class UNiagaraSystem;
 
 /** Presentation only: authoritative health/phase/attacks remain on the enemy. */
 UCLASS(ClassGroup=(Hopper), meta=(BlueprintSpawnableComponent))
@@ -36,7 +37,12 @@ public:
  UBoxComponent* CreateMechHitBox(UStaticMeshComponent* Part);
  void DisableMechHitBoxes();
  void StartSeatEjection();
+ float StartDestructionEffects(UNiagaraSystem* MechEffect);
+ bool IsWaitingForShieldBreak() const;
  float GetHatchOpenAlpha() const { return HatchOpen; }
+ float GetEjectionHatchDuration() const;
+ float GetPilotTravelAlpha(float Elapsed) const;
+ FVector GetTransferPosition(const FVector& Start, const FVector& End, float Alpha, bool bIsBoarding) const;
  float GetMaxStableWalkSpeed() const;
  virtual void TickComponent(float DeltaTime,ELevelTick TickType,FActorComponentTickFunction* ThisTickFunction) override;
  UFUNCTION(BlueprintPure,Category="Hopper") USkeletalMeshComponent* GetPilotMesh() const { return Pilot; }
@@ -59,8 +65,13 @@ protected:
  virtual void BeginPlay() override;
  virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
+ enum class EShieldStage : uint8 { Off, Deploying, Stable, Failing, Fragments };
+ void InitializeCockpitShield();
+ void TickCockpitShield(float Dt);
+ void EmitDestructionEffect(UNiagaraSystem* Effect) const;
  void TickMech(float Dt);
  void TickTransfer(float Dt);
+ void BeginTransfer(float Duration, bool bIsBoarding);
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
@@ -74,6 +85,10 @@ private:
  UPROPERTY(Transient) TObjectPtr<USceneComponent> Seat;
  UPROPERTY(Transient) TObjectPtr<USceneComponent> LeftSocket;
  UPROPERTY(Transient) TObjectPtr<USceneComponent> RightSocket;
+ UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> CockpitShield;
+ UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> PendingDestructionEffect;
+ EShieldStage ShieldStage = EShieldStage::Off;
+ float ShieldAge = 0, ShieldCoverage = 0, EjectionShieldDelay = 0;
  UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> Pilot;
  UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Gun;
  UPROPERTY(Transient) TMap<FName,TObjectPtr<UStaticMeshComponent>> Parts;
@@ -93,5 +108,6 @@ private:
  FVector TransferEnd = FVector::ZeroVector;
  float BodyCrouch = 0;
  float TransferTime = 0, TransferDuration = 1, ActionRemaining = 0, HatchOpen = 0;
+ float HatchLeadTime = 0, TransferInitialHatch = 0;
  bool bTransferring = false, bBoarding = false, bSeated = true, bMechActive = false, bWreck = false;
 };

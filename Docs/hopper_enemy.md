@@ -2,13 +2,22 @@
 
 ## 사용 위치
 
-- 배치용 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemy`
+- 구형 호퍼 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemy`
+- 마을 호퍼 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemyMk2`
 - 전투·경사면 확인 맵: `/Game/Maps/HopperCombatTestMap`
-- 모델/애니메이션 설정: `/Game/Characters/Hopper/DA_HopperVisual`
+- 모델·애니메이션은 구형의 `DA_HopperVisual`과 Mk2의 `/Game/Characters/Hopper/Mk2/DA_HopperVisualMk2`에서 설정한다.
 - 메카 조립 원본은 `TunaSweeper/SourceArt/Characters/Hopper/Hopper.blend`, 토끼대장 편집·재수출 원본은 같은 폴더의 `Captain/CaptainPilot_UE.blend`다.
 - 원본 메시 출처: 로컬 `HOPPER_03_ArmModules_v5/preview/FitCheck.glb`. 원본 파일은 수정하지 않는다.
 
-기존 레이드 배치 데이터와 사용자 맵은 변경하지 않는다. 테스트 맵은 기존 전투 테스트 게임 모드를 상속한 `BP_HopperTestGameMode`로 테스트 장비 세션을 시작한다.
+테스트맵은 `BP_HopperTestGameMode`로 테스트 장비 세션을 시작한다.
+
+### 마을 호퍼 Mk2
+
+`RaidVillage`의 적 배치 7번은 `enemy.village_hopper_boss` 프로필을 통해 `BP_HopperEnemyMk2`를 생성한다. Mk2의 상부 보호 프레임은 토끼 귀 뒤를 지나며, 양쪽 힌지의 잠금쇠가 풀리면 피스톤을 따라 뒤로 젖혀진다. 이어서 앞문이 앞으로 회전하고 내부 발판이 늘어난다. 하차와 사출 때도 같은 개폐 트랙을 사용한다.
+
+프레임과 발판의 편집 원본은 [HopperMk2_GuardAndRamp.blend](../TunaSweeper/SourceArt/Characters/Hopper/Mk2/HopperMk2_GuardAndRamp.blend)다. 타임라인 0번 프레임이 닫힘, 48번이 완전 열림이다. 게임에서는 `DA_HopperVisualMk2`의 `HatchMotion`이 부품별 변환을 재생한다. 완전히 여는 시간은 1.12초로 설정했고, 기본 2초 탑승에서는 처음 0.8초 동안 프레임과 발판이 먼저 움직인다.
+
+토끼대장이 탑승하고 상부 프레임이 닫히면 푸른 실드가 콕핏 앞쪽에서 뒤쪽으로 0.34초 동안 펼쳐진다. 전개를 시작하고 1초가 지나면 밝기가 낮아져 조종사가 비친다. 실드가 켜진 채로 기체가 격파되면 0.96초 동안 세 번 점멸하며 금이 간다. 실드가 꺼지는 프레임에 유리 조각과 스파크가 튀고 기체 파괴 이펙트가 재생된다. 이어서 프레임이 열리고 좌석이 사출된다. 실드의 발광과 파편은 연출 전용이다.
 
 ## 동작
 
@@ -54,7 +63,7 @@
 
 UE 5.7 에디터 빌드와 호퍼·기존 전투 54개 통합 검사를 통과했다(52개 정상 통과, 2개 기존 경고 포함 통과). PIE 검사는 고정 시간 대신 탑승 완료·내비게이션 생성 완료·시작/목적지 투영, 실제 25cm 이동, 안전한 하차 완료를 기다린다. 준비·이동·하차가 제한 시간 안에 완료되지 않으면 실패를 기록한다. 캐시 로딩으로 프레임이 지연되어도 준비 전에 이동 검사를 시작하지 않는다.
 
-레이드 스폰 프로필·앵커 ID는 아직 연결하지 않았다. BP_HopperEnemy를 레벨에 직접 배치하거나 HopperCombatTestMap에서 확인한다.
+구형 외형과 별도로 비교할 때는 `BP_HopperEnemy`를 사용한다.
 
 ## Captain 토끼 모델 교체 (2026-10-07)
 

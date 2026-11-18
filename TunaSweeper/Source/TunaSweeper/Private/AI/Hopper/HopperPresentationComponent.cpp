@@ -75,7 +75,8 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  Gun->SetStaticMesh(Data->PilotGun.LoadSynchronous()); Gun->SetRelativeTransform(Data->GunTransform);
  Gun->RegisterComponent(); Gun->SetVisibility(false);
  PlayClip(Data->PilotSeated.LoadSynchronous(),true);
- bWreck=false; bSeated=true; bMechActive=false;
+ HatchOpen=0; bWreck=false; bTransferring=false; bSeated=true; bMechActive=false;
+ InitializeCockpitShield();
 }
 USceneComponent* UHopperPresentationComponent::GetArmSocket(bool bLeft) const { return bLeft?LeftSocket:RightSocket; }
 void UHopperPresentationComponent::PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction)
@@ -90,15 +91,11 @@ void UHopperPresentationComponent::PlayClip(UAnimSequence* Clip,bool bLoop,bool 
 void UHopperPresentationComponent::StartBoarding(float Duration)
 {
  if (!Pilot || !Seat) return;
- bBoarding=true; bTransferring=true; bSeated=false;
- TransferTime=0; TransferDuration=FMath::Max(.05f,Duration);
- TransferStart=BodyRoot->GetComponentTransform().TransformPosition(FVector(85,0,0));
+ TransferStart=BodyRoot->GetComponentTransform().TransformPosition(FVector(VisualData->BoardingStartDistance,0,0));
  TransferEnd=Seat->GetComponentLocation();
  Pilot->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
  Pilot->SetWorldLocation(TransferStart);
- PlayClip(VisualData->PilotBoarding.LoadSynchronous(),false,true);
- if (CurrentClip) Pilot->SetPlayRate(CurrentClip->GetPlayLength()/TransferDuration);
- SetHatchOpen(1);
+ BeginTransfer(Duration,true);
 }
 void UHopperPresentationComponent::SeatPilot()
 {
@@ -115,10 +112,21 @@ void UHopperPresentationComponent::StartDisembark(const FVector& GroundDestinati
  BodyRoot->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
  TransferStart=Pilot->GetComponentLocation(); TransferEnd=GroundDestination;
  Pilot->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
- bBoarding=false; bTransferring=true; TransferTime=0; TransferDuration=FMath::Max(.05f,Duration);
- PlayClip(VisualData->PilotDisembark.LoadSynchronous(),false,true);
- if (CurrentClip) Pilot->SetPlayRate(CurrentClip->GetPlayLength()/TransferDuration);
- SetHatchOpen(1);
+ BeginTransfer(Duration,false);
+}
+void UHopperPresentationComponent::BeginTransfer(float Duration, bool bIsBoarding)
+{
+ bBoarding=bIsBoarding; bTransferring=true; bSeated=false;
+ TransferTime=0; TransferDuration=FMath::Max(.05f,Duration);
+ TransferInitialHatch=HatchOpen;
+ // Leave time to climb even when a placement shortens the overall boarding animation.
+ HatchLeadTime=FMath::Clamp(VisualData->HatchTravelSeconds*(1.f-HatchOpen),0.f,TransferDuration*.4f);
+ if (HatchLeadTime<=0.f) SetHatchOpen(1.f);
+ if (UAnimSequence* Clip=(bIsBoarding?VisualData->PilotBoarding:VisualData->PilotDisembark).LoadSynchronous())
+ {
+  PlayClip(Clip,false,true);
+  Pilot->SetPlayRate(HatchLeadTime>0.f ? 0.f : Clip->GetPlayLength()/TransferDuration);
+ }
 }
 void UHopperPresentationComponent::FinishDisembark()
 {
@@ -205,15 +213,41 @@ void UHopperPresentationComponent::SetHatchOpen(float Alpha)
   (*Hatch)->SetRelativeTransform(FTransform(Rotation,Pivot-Rotation.RotateVector(Pivot)));
  }
 }
+float UHopperPresentationComponent::GetPilotTravelAlpha(float Elapsed) const
+{
+ return FMath::Clamp((Elapsed-HatchLeadTime)/(TransferDuration-HatchLeadTime),0.f,1.f);
+}
+FVector UHopperPresentationComponent::GetTransferPosition(const FVector& Start, const FVector& End, float Alpha, bool bIsBoarding) const
+{
+ const float T=FMath::Clamp(Alpha,0.f,1.f);
+ const float Arc=FMath::Sin(PI*T)*(bIsBoarding?22.f:30.f);
+ if (VisualData && VisualData->HatchTravelSeconds>0.f)
+ {
+  // Clear the extended step vertically before crossing its outer edge. Reverse the path on exit.
+  const float Climb=bIsBoarding?T:1.f-T;
+  const FVector& Ground=bIsBoarding?Start:End;
+  const FVector& Cockpit=bIsBoarding?End:Start;
+  FVector P=FMath::Lerp(Ground,Cockpit,FMath::SmoothStep(.22f,1.f,Climb));
+  P.Z=FMath::Lerp(Ground.Z,Cockpit.Z,FMath::SmoothStep(0.f,.68f,Climb))+Arc;
+  return P;
+ }
+ return FMath::Lerp(Start,End,T*T*(3.f-2.f*T))+FVector(0,0,Arc);
+}
 void UHopperPresentationComponent::TickTransfer(float Dt)
 {
+ const float PreviousTime=TransferTime;
  TransferTime+=Dt;
- const float T=FMath::Clamp(TransferTime/TransferDuration,0.f,1.f);
- const float Smooth=T*T*(3-2*T);
- // Lift first to clear the open hatch, then settle into seat/on ground.
- FVector P=FMath::Lerp(TransferStart,TransferEnd,Smooth);
- P.Z+=FMath::Sin(PI*T)*(bBoarding?22.f:30.f);
- Pilot->SetWorldLocation(P);
+ if (PreviousTime<HatchLeadTime)
+ {
+  const float OpenFraction=FMath::Min(TransferTime/HatchLeadTime,1.f);
+  SetHatchOpen(FMath::Lerp(TransferInitialHatch,1.f,OpenFraction));
+  if (TransferTime>=HatchLeadTime && CurrentClip)
+  {
+   Pilot->SetPlayRate(CurrentClip->GetPlayLength()/(TransferDuration-HatchLeadTime));
+   Pilot->SetPosition(CurrentClip->GetPlayLength()*GetPilotTravelAlpha(TransferTime),false);
+  }
+ }
+ Pilot->SetWorldLocation(GetTransferPosition(TransferStart,TransferEnd,GetPilotTravelAlpha(TransferTime),bBoarding));
  if (bBoarding && Seat) Pilot->SetWorldRotation(Seat->GetComponentQuat());
 }
 void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FActorComponentTickFunction* TickFunction)
@@ -221,10 +255,17 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  Super::TickComponent(Dt,TickType,TickFunction);
  if (!VisualData || !BodyRoot || !FMath::IsFinite(Dt) || Dt<=0) return;
  ActionRemaining=FMath::Max(0.f,ActionRemaining-Dt);
- if (EjectionTime>=0.f) { TickSeatEjection(Dt); return; }
+ if (EjectionTime>=0.f) { TickCockpitShield(Dt); TickSeatEjection(Dt); return; }
  if (bTransferring) TickTransfer(Dt);
  if (bMechActive) TickMech(Dt);
- if (bSeated && !bWreck && !bTransferring && HatchOpen>0) SetHatchOpen(FMath::Max(0.f,HatchOpen-Dt*1.8f));
+ float ShieldDt=Dt;
+ if (bSeated && !bWreck && !bTransferring && HatchOpen>0)
+ {
+  const float CloseRate=VisualData->HatchTravelSeconds>0.f ? 1.f/VisualData->HatchTravelSeconds : 1.8f;
+  ShieldDt=FMath::Max(0.f,Dt-HatchOpen/CloseRate);
+  SetHatchOpen(FMath::Max(0.f,HatchOpen-Dt*CloseRate));
+ }
+ TickCockpitShield(ShieldDt);
 }
 void UHopperPresentationComponent::TickMech(float Dt)
 {

@@ -14,7 +14,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavigationData.h"
 #include "NavigationSystem.h"
-#include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -338,11 +337,7 @@ void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction()
     GetCharacterMovement()->DisableMovement();
     if (AController* AI = GetController()) AI->StopMovement();
     Presentation->SetMechActive(false);
-    if (HasActorBegunPlay())
-    {
-        if (UNiagaraSystem* Effect = MechDestructionEffect.LoadSynchronous())
-            UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Effect, GetActorLocation());
-    }
+    Presentation->StartDestructionEffects(HasActorBegunPlay() ? MechDestructionEffect.LoadSynchronous() : nullptr);
 }
 
 bool ATunaSweeperHopperEnemyCharacter::IsPilotExitClear(const FVector& Ground) const
@@ -364,10 +359,9 @@ bool ATunaSweeperHopperEnemyCharacter::IsPilotTransferClear(const FVector& Start
     FCollisionQueryParams Query(SCENE_QUERY_STAT(HopperTransferClearance), false, this);
     if (LeftArm) Query.AddIgnoredActor(LeftArm);
     if (RightArm) Query.AddIgnoredActor(RightArm);
-    auto CenterAt = [&StartFeet, &Ground](float T)
+    auto CenterAt = [this, &StartFeet, &Ground](float T)
     {
-        FVector Feet = FMath::Lerp(StartFeet, Ground, T*T*(3.f-2.f*T));
-        Feet.Z += FMath::Sin(PI*T)*30.f;
+        const FVector Feet = Presentation->GetTransferPosition(StartFeet, Ground, T, false);
         return Feet + FVector(0,0,PilotHalfHeight+2.f);
     };
     const float FirstAlpha = FMath::Clamp(StartAlpha,0.f,1.f);
@@ -438,6 +432,7 @@ bool ATunaSweeperHopperEnemyCharacter::FindPilotExit(FVector& OutGround) const
 
 void ATunaSweeperHopperEnemyCharacter::UpdateDisembark(float DeltaSeconds)
 {
+    if (Presentation->IsWaitingForShieldBreak()) return;
     if (!bExitInProgress)
     {
         ExitRetrySeconds -= DeltaSeconds;
@@ -449,7 +444,7 @@ void ATunaSweeperHopperEnemyCharacter::UpdateDisembark(float DeltaSeconds)
         ExitStartFeet = Presentation->GetPilotMesh() ? Presentation->GetPilotMesh()->GetComponentLocation() : GetActorLocation();
         Presentation->StartDisembark(ExitGroundDestination, DisembarkSeconds);
     }
-    if (!IsPilotTransferClear(ExitStartFeet, ExitGroundDestination, PhaseSeconds / FMath::Max(.05f, DisembarkSeconds)))
+    if (!IsPilotTransferClear(ExitStartFeet, ExitGroundDestination, Presentation->GetPilotTravelAlpha(PhaseSeconds)))
     {
         bExitInProgress = false;
         Presentation->PauseTransfer();

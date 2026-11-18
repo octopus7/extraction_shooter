@@ -67,6 +67,9 @@ struct TUNASWEEPER_API FTunaSweeperAchievementDefinition
 	FName TargetId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement")
+	TArray<FName> AlternateEnemyIds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement")
 	int32 TargetQuestId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement", meta = (ClampMin = "1", UIMin = "1"))

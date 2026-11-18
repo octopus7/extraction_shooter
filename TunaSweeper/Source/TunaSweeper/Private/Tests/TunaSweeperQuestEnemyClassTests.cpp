@@ -143,7 +143,7 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     Quests->NotifyEnemyKilled(TEXT("placement.1")); Quests->NotifyEnemyKilled(TEXT("placement.1"));
     TestEqual(TEXT("Legacy callers still advance ID-only quests"), Quests->GetQuestState(LegacyId), ETunaSweeperQuestState::RewardAvailable);
     UClass* HopperClass = LoadClass<ATunaSweeperHopperEnemyCharacter>(nullptr,
-        TEXT("/Game/Characters/Hopper/BP_HopperEnemy.BP_HopperEnemy_C"));
+        TEXT("/Game/Characters/Hopper/BP_HopperEnemyMk2.BP_HopperEnemyMk2_C"));
     if (!TestNotNull(TEXT("Actual hopper BP"), HopperClass)) return false;
     constexpr int32 HopperId = 900304;
     AddQuest(HopperId, FString::Printf(TEXT(",\"enemy_class_paths\":[\"%s\"]"), *HopperClass->GetPathName()));
@@ -168,7 +168,7 @@ bool FTunaSweeperQuestEnemyClassTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Same actual class kill as the quest unlocks captain achievement"), Achievements->IsAchievementUnlocked(TEXT("10")));
     TestEqual(TEXT("Class and enemy ID reporting count as one kill"), Achievements->GetTotalEnemyKills(), KillsBeforeHopper + 1);
     TestFalse(TEXT("Open cockpit wreck remains in level"), Hopper->IsActorBeingDestroyed());
-    Hopper->GetPresentation()->TickComponent(.7f, LEVELTICK_All, nullptr);
+    Hopper->GetPresentation()->TickComponent(Hopper->GetPresentation()->GetEjectionHatchDuration(), LEVELTICK_All, nullptr);
     TestEqual(TEXT("Destroyed mech opens cockpit before ejection"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);
     Hopper->GetPresentation()->TickComponent(5.f, LEVELTICK_All, nullptr);
     TestEqual(TEXT("Cockpit does not close again after defeat"), Hopper->GetPresentation()->GetHatchOpenAlpha(), 1.f);

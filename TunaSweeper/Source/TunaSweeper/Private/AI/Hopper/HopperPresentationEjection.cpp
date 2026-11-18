@@ -1,4 +1,5 @@
 #include "AI/Hopper/HopperPresentationComponent.h"
+#include "AI/Hopper/HopperVisualData.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -19,6 +20,7 @@ namespace
 void UHopperPresentationComponent::StartSeatEjection()
 {
  if (EjectionTime>=0.f || !Seat || !Pilot) return;
+ EjectionShieldDelay=StartDestructionEffects(nullptr);
  // Defeat can interrupt boarding. Re-seat the pilot before moving the entire cabin assembly.
  SeatPilot();
  bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
@@ -37,15 +39,21 @@ FVector UHopperPresentationComponent::EjectionPosition(float FlightTime) const
   FVector::UpVector*(EjectionUpSpeed*FlightTime+.5f*EjectionUpAcceleration*FlightTime*FlightTime);
 }
 
+float UHopperPresentationComponent::GetEjectionHatchDuration() const
+{
+ return EjectionShieldDelay+FMath::Max3(.05f,EjectionHatchSeconds,VisualData ? VisualData->HatchTravelSeconds : 0.f);
+}
+
 void UHopperPresentationComponent::TickSeatEjection(float Dt)
 {
  if (!Seat || !Pilot) return;
  EjectionTime+=Dt;
- const float HatchDuration=FMath::Max(.05f,EjectionHatchSeconds);
+ const float HatchDuration=GetEjectionHatchDuration();
  const float SlideDuration=FMath::Max(.05f,EjectionSlideSeconds);
  const float LaunchTime=HatchDuration+SlideDuration;
  const float FlightDuration=FMath::Max(.1f,EjectionFlightSeconds);
- SetHatchOpen(FMath::Lerp(EjectionInitialHatch,1.f,Smooth(EjectionTime/HatchDuration)));
+ const float OpeningAlpha=(EjectionTime-EjectionShieldDelay)/(HatchDuration-EjectionShieldDelay);
+ SetHatchOpen(FMath::Lerp(EjectionInitialHatch,1.f,Smooth(OpeningAlpha)));
  if (EjectionTime<HatchDuration) return;
  if (!bSeatLaunched)
  {
