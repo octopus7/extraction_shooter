@@ -281,7 +281,8 @@ bool FHopperEjectionStage::Update()
  else
  {
   const float HalfSlide=P->EjectionSlideSeconds*.5f;
-  const float Steps[]={0.f,P->GetEjectionHatchDuration(),HalfSlide,HalfSlide+.2f,.6f,10.f};
+  const float FullyRaised=P->GetEjectionLaunchTime()-P->EjectionSlideSeconds;
+  const float Steps[]={0.f,P->GetEjectionHatchDuration(),FullyRaised-P->GetEjectionHatchDuration()+HalfSlide,HalfSlide+.2f,.6f,10.f};
   P->TickComponent(Steps[Stage],LEVELTICK_All,nullptr);
  }
  APlayerController* PC=World->GetFirstPlayerController();
@@ -320,6 +321,8 @@ bool FHopperEjectionRealtime::Update()
   for (TActorIterator<ATunaSweeperHopperEnemyCharacter> It(World);It;++It)
    if (It->ActorHasTag(TEXT("EjectionRealtimeTest")))
    {
+    const float FlightSample=It->GetPresentation()->GetEjectionLaunchTime()+.60f;
+    if (It->GetGameTimeSinceCreation()<FlightSample && FPlatformTime::Seconds()-StartTime<12.f) return false;
     Test->TestTrue(TEXT("Dead mech presentation keeps ticking in real gameplay"),It->GetPresentation()->GetPilotMesh()->GetComponentLocation().Z>400.f);
     Test->TestNull(TEXT("Real-time ejection detaches the complete seat"),It->GetPresentation()->GetPilotMesh()->GetAttachParent()->GetAttachParent());
     return true;
@@ -347,7 +350,6 @@ bool FHopperEjectionPresentationTest::RunTest(const FString& Parameters)
   ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionCapture(this,Stage));
  }
  ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionRealtime(this,true));
- ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(2.2f));
  ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionRealtime(this,false));
  ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
  return true;

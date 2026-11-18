@@ -132,7 +132,7 @@ void ATunaSweeperPlayerController::FrameHopperShot()
 	float FieldOfView;
 	if (bHopperEjection)
 	{
-		const float FlightTime = HopperShotTime - Stage->GetEjectionHatchDuration() - Stage->EjectionSlideSeconds;
+		const float FlightTime = HopperShotTime - Stage->GetEjectionLaunchTime();
 		const float Follow = FMath::SmoothStep(0.f, .22f, FlightTime);
 		Aim = FMath::Lerp(Ground + Forward * 23.f + FVector::UpVector * 158.f, Pilot + FVector::UpVector * 32.f, Follow);
 		Offset = Forward * 302.f + Side * 239.f + FVector::UpVector * FMath::Lerp(159.f, 125.f, Follow);

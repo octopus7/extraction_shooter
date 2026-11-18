@@ -130,7 +130,7 @@ void ATunaSweeperHopperEnemyCharacter::TryStartEncounterBoarding()
     const FVector Cockpit = Presentation->GetBodyRoot()->GetComponentTransform().TransformPosition(LoadedVisualData->SeatLocation);
     if (Width <= 0 || Height <= 0 || !Viewer->ProjectWorldLocationToScreen(Cockpit, Screen)
         || Screen.X < 0 || Screen.X >= Width || Screen.Y < 0 || Screen.Y >= Height) return;
-    const float ShotDuration = BoardingSeconds + LoadedVisualData->HatchTravelSeconds + .6f;
+    const float ShotDuration = BoardingSeconds + Presentation->GetSeatDockDuration() + LoadedVisualData->HatchTravelSeconds + .6f;
     if (!Viewer->StartHopperShot(this, false, ShotDuration)) return;
     BoardingViewer = Viewer;
     Phase = EHopperCombatPhase::Boarding;
@@ -150,7 +150,8 @@ void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
     else if (Phase == EHopperCombatPhase::Boarding)
     {
         PhaseSeconds += DeltaSeconds;
-        if (PhaseSeconds >= FMath::Max(0.f, BoardingSeconds))
+        if (PhaseSeconds >= FMath::Max(0.f, BoardingSeconds) &&
+            (Presentation->GetSeatDockDuration() == 0.f || !Presentation->IsBoardingInProgress()))
         {
             Phase = EHopperCombatPhase::Mech;
             ApplyPhaseMovementSpeed();
@@ -524,7 +525,7 @@ void ATunaSweeperHopperEnemyCharacter::OnDeathPresentationStarted()
             if (auto* Viewer = Cast<ATunaSweeperPlayerController>(GetWorld()->GetFirstPlayerController()))
             {
                 const float FollowTime = FMath::Min(.85f, Presentation->EjectionFlightSeconds);
-                Viewer->StartHopperShot(this, true, Presentation->GetEjectionHatchDuration() + Presentation->EjectionSlideSeconds + FollowTime);
+                Viewer->StartHopperShot(this, true, Presentation->GetEjectionLaunchTime() + FollowTime);
             }
     }
 }

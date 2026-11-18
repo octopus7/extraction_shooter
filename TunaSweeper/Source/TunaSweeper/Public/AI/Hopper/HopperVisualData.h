@@ -5,6 +5,7 @@
 class UStaticMesh;
 class USkeletalMesh;
 class UAnimSequence;
+class UNiagaraSystem;
 USTRUCT(BlueprintType)
 struct FHopperMeshPart
 {
@@ -45,6 +46,13 @@ public:
  UPROPERTY(EditAnywhere) TSoftObjectPtr<UAnimSequence> PilotFire;
  UPROPERTY(EditAnywhere) TSoftObjectPtr<UAnimSequence> PilotMelee;
  UPROPERTY(EditAnywhere) FVector SeatLocation = FVector(17,0,119.7806);
+ /** Distance from the locked seat to the outer end of the boarding rail. */
+ UPROPERTY(EditAnywhere, Category="Seat", meta=(ClampMin="0", Units="cm")) float SeatBoardingReach = 0.f;
+ /** Vertical stroke between rail height and the seat lock. */
+ UPROPERTY(EditAnywhere, Category="Seat", meta=(ClampMin="0", Units="cm")) float SeatLockDrop = 0.f;
+ /** Center of the positive-Y nozzle mouth in seat space. The second nozzle mirrors it across Y. */
+ UPROPERTY(EditAnywhere, Category="Seat", meta=(Units="cm")) FVector SeatExhaustNozzle = FVector(0,17,-18);
+ UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatExhaustSystem;
  UPROPERTY(EditAnywhere) FVector LeftArmMount = FVector(-5.8716,56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector RightArmMount = FVector(-5.8716,-56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector LeftHip = FVector(-4.5166,39.0687,85.8);

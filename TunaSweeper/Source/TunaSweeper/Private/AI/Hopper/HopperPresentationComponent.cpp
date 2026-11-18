@@ -12,6 +12,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraSystem.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 
 UHopperPresentationComponent::UHopperPresentationComponent()
@@ -29,7 +30,7 @@ float UHopperPresentationComponent::CapsuleHalfHeight() const
 void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
 {
  if (!Data || (VisualData==Data && IsValid(BodyRoot))) return;
- ClearEjectionExhaust(); EjectionTime=-1.f; bSeatLaunched=false;
+ ClearEjectionExhaust(); EjectionTime=-1.f; EjectionInitialHatch=0.f; bSeatLaunched=false;
  // This component owns every generated component. Reconstruct only when its data changes.
  TArray<USceneComponent*> Old;
  TArray<USceneComponent*> Owned;
@@ -41,6 +42,7 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  Old.Append({Gun.Get(),Pilot.Get(),Seat.Get(),LeftSocket.Get(),RightSocket.Get(),BodyRoot.Get()});
  for (USceneComponent* C:Old) if (IsValid(C)) C->DestroyComponent();
  Parts.Empty(); VisualData=Data; CurrentClip=nullptr; BodyCrouch=0; Gait.Reset();
+ LoadedSeatExhaust=Data->SeatExhaustSystem.LoadSynchronous();
  AActor* Owner=GetOwner();
  const auto Creation=HasBegunPlay()?EComponentCreationMethod::Instance:EComponentCreationMethod::UserConstructionScript;
  auto Scene=[Owner,Creation](FName Name,USceneComponent* Parent)
@@ -51,6 +53,7 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  BodyRoot=Scene(TEXT("HopperBody"),Owner->GetRootComponent());
  BodyRoot->SetRelativeLocation(FVector(0,0,-CapsuleHalfHeight()));
  Seat=Scene(TEXT("PilotSeat"),BodyRoot); Seat->SetRelativeLocation(Data->SeatLocation);
+ EjectionSeatStart=Data->SeatLocation;
  LeftSocket=Scene(TEXT("LeftArmSocket"),BodyRoot); LeftSocket->SetRelativeLocation(Data->LeftArmMount);
  RightSocket=Scene(TEXT("RightArmSocket"),BodyRoot); RightSocket->SetRelativeLocation(Data->RightArmMount);
  for (const FHopperMeshPart& Part:Data->Parts)
@@ -62,6 +65,8 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
   C->SetCanEverAffectNavigation(false); C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   C->CreationMethod=Creation; C->ComponentTags.Add(TEXT("HopperGenerated")); C->SetupAttachment(BodyRoot); C->SetStaticMesh(Mesh);
   C->SetMobility(EComponentMobility::Movable); C->RegisterComponent(); C->SetHiddenInGame(HasBegunPlay() && Part.PartName.ToString().StartsWith(TEXT("Arm_"))); Parts.Add(Part.PartName,C);
+  if (Part.PartName==TEXT("Cabin_Interior") && GetSeatDockDuration()>0.f)
+   C->AttachToComponent(Seat,FAttachmentTransformRules::KeepWorldTransform);
   if (!Part.PartName.ToString().StartsWith(TEXT("Arm_"))) CreateMechHitBox(C);
  }
  Pilot=NewObject<USkeletalMeshComponent>(Owner,MakeUniqueObjectName(Owner,USkeletalMeshComponent::StaticClass(),TEXT("HopperPilot")),RF_Transient);
@@ -92,10 +97,15 @@ void UHopperPresentationComponent::WaitBesideMech()
 {
  if (!Pilot || !Seat) return;
  TransferStart=BodyRoot->GetComponentTransform().TransformPosition(FVector(VisualData->BoardingStartDistance,0,0));
- TransferEnd=Seat->GetComponentLocation();
+ if (GetSeatDockDuration()>0.f)
+ {
+  Seat->SetRelativeLocation(VisualData->SeatLocation);
+  TransferEnd=BodyRoot->GetComponentTransform().TransformPosition(VisualData->SeatLocation+GetSeatDockOffset(0.f));
+ }
+ else TransferEnd=Seat->GetComponentLocation();
  Pilot->AttachToComponent(BodyRoot,FAttachmentTransformRules::KeepWorldTransform);
  Pilot->SetWorldLocationAndRotation(TransferStart,Seat->GetComponentQuat());
- bSeated=false;
+ bSeated=false; bMechActive=false;
  SetPilotLocomotion(false);
 }
 void UHopperPresentationComponent::StartBoarding(float Duration)
@@ -108,10 +118,26 @@ void UHopperPresentationComponent::StartBoarding(float Duration)
 void UHopperPresentationComponent::SeatPilot()
 {
  if (!Pilot || !Seat) return;
- bTransferring=false; bSeated=true; bMechActive=true; ActionRemaining=0;
+ if (!bSeated || Pilot->GetAttachParent()!=Seat) AttachPilotToSeat();
+ bTransferring=false; bMechActive=true;
+}
+void UHopperPresentationComponent::AttachPilotToSeat()
+{
+ bSeated=true; ActionRemaining=0;
  Pilot->AttachToComponent(Seat,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
  Pilot->SetRelativeRotation(FRotator::ZeroRotator);
  PlayClip(VisualData->PilotSeated.LoadSynchronous(),true);
+}
+float UHopperPresentationComponent::GetSeatDockDuration() const
+{
+ return VisualData && (VisualData->SeatBoardingReach>0.f || VisualData->SeatLockDrop>0.f)
+  ? RailTravelSeconds+RailStopSeconds+SeatLiftSeconds : 0.f;
+}
+FVector UHopperPresentationComponent::GetSeatDockOffset(float DockTime) const
+{
+ const float LiftStart=RailTravelSeconds+RailStopSeconds;
+ return FVector(VisualData->SeatBoardingReach*(1.f-FMath::SmoothStep(0.f,RailTravelSeconds,DockTime)),0.f,
+  VisualData->SeatLockDrop*(1.f-FMath::SmoothStep(LiftStart,LiftStart+SeatLiftSeconds,DockTime)));
 }
 void UHopperPresentationComponent::StartDisembark(const FVector& GroundDestination,float Duration)
 {
@@ -255,7 +281,27 @@ void UHopperPresentationComponent::TickTransfer(float Dt)
    Pilot->SetPosition(CurrentClip->GetPlayLength()*GetPilotTravelAlpha(TransferTime),false);
   }
  }
- Pilot->SetWorldLocation(GetTransferPosition(TransferStart,TransferEnd,GetPilotTravelAlpha(TransferTime),bBoarding));
+ const float PilotAlpha=GetPilotTravelAlpha(TransferTime);
+ const float DockDuration=GetSeatDockDuration();
+ if (bBoarding && DockDuration>0.f)
+ {
+  // With the hatch clear, run the empty carriage out in reverse while the captain climbs.
+  // Hold it at the boarding stop before contact. Both directions use the same two physical axes.
+  if (TransferTime<TransferDuration-UE_KINDA_SMALL_NUMBER)
+  {
+   const float Extension=FMath::Min(PilotAlpha/.72f,1.f);
+   Seat->SetRelativeLocation(VisualData->SeatLocation+GetSeatDockOffset(DockDuration*(1.f-Extension)));
+  }
+  else
+  {
+   const float DockTime=FMath::Max(0.f,TransferTime-TransferDuration);
+   Seat->SetRelativeLocation(VisualData->SeatLocation+GetSeatDockOffset(DockTime));
+   if (DockTime>=DockDuration-UE_KINDA_SMALL_NUMBER) SeatPilot();
+   else if (!bSeated) AttachPilotToSeat();
+   return;
+  }
+ }
+ Pilot->SetWorldLocation(GetTransferPosition(TransferStart,TransferEnd,PilotAlpha,bBoarding));
  if (bBoarding && Seat) Pilot->SetWorldRotation(Seat->GetComponentQuat());
 }
 void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FActorComponentTickFunction* TickFunction)
@@ -264,8 +310,13 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  if (!VisualData || !BodyRoot || !FMath::IsFinite(Dt) || Dt<=0) return;
  ActionRemaining=FMath::Max(0.f,ActionRemaining-Dt);
  if (EjectionTime>=0.f) { TickCockpitShield(Dt); TickSeatEjection(Dt); return; }
- if (bTransferring) TickTransfer(Dt);
- if (bMechActive) TickMech(Dt);
+ if (bTransferring)
+ {
+  TickTransfer(Dt);
+  if (!bTransferring && bBoarding)
+   Dt=FMath::Clamp(TransferTime-TransferDuration-GetSeatDockDuration(),0.f,Dt);
+ }
+ if (bMechActive && Dt>0.f) TickMech(Dt);
  float ShieldDt=Dt;
  if (bSeated && !bWreck && !bTransferring && HatchOpen>0)
  {

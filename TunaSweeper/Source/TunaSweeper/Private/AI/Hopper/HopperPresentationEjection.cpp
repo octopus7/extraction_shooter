@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "ProceduralMeshComponent.h"
 
 namespace
@@ -41,7 +43,19 @@ FVector UHopperPresentationComponent::EjectionPosition(float FlightTime) const
 
 float UHopperPresentationComponent::GetEjectionHatchDuration() const
 {
- return EjectionShieldDelay+FMath::Max3(.05f,EjectionHatchSeconds,VisualData ? VisualData->HatchTravelSeconds : 0.f);
+ const float FullStroke=FMath::Max3(.05f,EjectionHatchSeconds,VisualData ? VisualData->HatchTravelSeconds : 0.f);
+ const float RemainingStroke=GetSeatDockDuration()>0.f ? 1.f-EjectionInitialHatch : 1.f;
+ return EjectionShieldDelay+FullStroke*RemainingStroke;
+}
+float UHopperPresentationComponent::GetEjectionLaunchTime() const
+{
+ float LiftDuration=0.f;
+ if (VisualData && VisualData->SeatLockDrop>0.f)
+ {
+  const float RemainingLift=VisualData->SeatLocation.Z+VisualData->SeatLockDrop-EjectionSeatStart.Z;
+  LiftDuration=SeatLiftSeconds*FMath::Clamp(RemainingLift/VisualData->SeatLockDrop,0.f,1.f);
+ }
+ return GetEjectionHatchDuration()+LiftDuration+FMath::Max(.05f,EjectionSlideSeconds);
 }
 
 void UHopperPresentationComponent::TickSeatEjection(float Dt)
@@ -50,23 +64,48 @@ void UHopperPresentationComponent::TickSeatEjection(float Dt)
  EjectionTime+=Dt;
  const float HatchDuration=GetEjectionHatchDuration();
  const float SlideDuration=FMath::Max(.05f,EjectionSlideSeconds);
- const float LaunchTime=HatchDuration+SlideDuration;
+ const float LaunchTime=GetEjectionLaunchTime();
+ const float SlideStart=LaunchTime-SlideDuration;
  const float FlightDuration=FMath::Max(.1f,EjectionFlightSeconds);
- const float OpeningAlpha=(EjectionTime-EjectionShieldDelay)/(HatchDuration-EjectionShieldDelay);
+ const float OpeningDuration=HatchDuration-EjectionShieldDelay;
+ const float OpeningAlpha=OpeningDuration>UE_SMALL_NUMBER ? (EjectionTime-EjectionShieldDelay)/OpeningDuration : 1.f;
  SetHatchOpen(FMath::Lerp(EjectionInitialHatch,1.f,Smooth(OpeningAlpha)));
  if (EjectionTime<HatchDuration) return;
  if (!bSeatLaunched)
  {
-  Seat->SetRelativeLocation(EjectionSeatStart+FVector(EjectionSlideDistance*Smooth((EjectionTime-HatchDuration)/SlideDuration),0,0));
+  FVector Position=EjectionSeatStart;
+  const float LiftDuration=SlideStart-HatchDuration;
+  if (LiftDuration>UE_SMALL_NUMBER)
+   Position.Z=FMath::Lerp(EjectionSeatStart.Z,VisualData->SeatLocation.Z+VisualData->SeatLockDrop,
+    Smooth((EjectionTime-HatchDuration)/LiftDuration));
+  // If defeat interrupts docking, continue from the carriage's live position to the same rail exit.
+  const float RailOrigin=GetSeatDockDuration()>0.f ? VisualData->SeatLocation.X : EjectionSeatStart.X;
+  Position.X=FMath::Lerp(EjectionSeatStart.X,RailOrigin+EjectionSlideDistance,Smooth((EjectionTime-SlideStart)/SlideDuration));
+  Seat->SetRelativeLocation(Position);
   if (EjectionTime<LaunchTime) return;
   EjectionLaunchTransform=Seat->GetComponentTransform();
   Seat->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
   bSeatLaunched=true;
-  CreateEjectionExhaust();
+  if (EjectionTime<LaunchTime+FlightDuration) CreateEjectionExhaust();
  }
  const float FlightTime=EjectionTime-LaunchTime;
  Seat->SetWorldLocation(EjectionPosition(FMath::Min(FlightTime,FlightDuration)));
  const bool bFlying=FlightTime<FlightDuration;
+ if (LoadedSeatExhaust)
+ {
+  if (!bFlying)
+  {
+   for (UNiagaraComponent* Jet:SeatJets)
+   {
+    if (!IsValid(Jet)) continue;
+    Jet->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+    Jet->Deactivate(); // Stop emitting. Existing embers and smoke finish in world space.
+   }
+   Seat->SetHiddenInGame(true,true);
+   SetComponentTickEnabled(false);
+  }
+  return;
+ }
  if (EjectionFlame)
  {
   EjectionFlame->SetVisibility(bFlying);
@@ -115,6 +154,22 @@ void UHopperPresentationComponent::TickSeatEjection(float Dt)
 void UHopperPresentationComponent::CreateEjectionExhaust()
 {
  if (GetWorld()->GetNetMode()==NM_DedicatedServer) return;
+ if (LoadedSeatExhaust)
+ {
+  for (const float Side : {-1.f,1.f})
+  {
+   FVector Nozzle=VisualData->SeatExhaustNozzle;
+   Nozzle.Y*=Side;
+   if (UNiagaraComponent* Jet=UNiagaraFunctionLibrary::SpawnSystemAttached(LoadedSeatExhaust,Seat,NAME_None,
+      Nozzle,FRotator::ZeroRotator,EAttachLocation::KeepRelativeOffset,true,false,ENCPoolMethod::None,false))
+   {
+    Jet->AddTickPrerequisiteComponent(this);
+    Jet->Activate();
+    SeatJets.Add(Jet);
+   }
+  }
+  return;
+ }
  NextSmokeTime=0.f; NextSmokeIndex=0;
  UMaterialInterface* Glow=EjectionFlameMaterial.LoadSynchronous();
  if (Glow)
@@ -171,6 +226,8 @@ void UHopperPresentationComponent::CreateEjectionExhaust()
 
 void UHopperPresentationComponent::ClearEjectionExhaust()
 {
+ for (UNiagaraComponent* Jet:SeatJets) if (IsValid(Jet)) Jet->DestroyComponent();
+ SeatJets.Reset();
  if (IsValid(EjectionFlame)) EjectionFlame->DestroyComponent();
  EjectionFlame=nullptr;
  for (UStaticMeshComponent* Sprite:EjectionSmoke) if (IsValid(Sprite)) Sprite->DestroyComponent();

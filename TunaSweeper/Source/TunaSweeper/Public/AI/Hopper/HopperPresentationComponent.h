@@ -13,6 +13,7 @@ class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UProceduralMeshComponent;
 class UNiagaraSystem;
+class UNiagaraComponent;
 
 /** Presentation only: authoritative health/phase/attacks remain on the enemy. */
 UCLASS(ClassGroup=(Hopper), meta=(BlueprintSpawnableComponent))
@@ -42,6 +43,9 @@ public:
  bool IsWaitingForShieldBreak() const;
  float GetHatchOpenAlpha() const { return HatchOpen; }
  float GetEjectionHatchDuration() const;
+ float GetEjectionLaunchTime() const;
+ float GetSeatDockDuration() const;
+ bool IsBoardingInProgress() const { return bBoarding && bTransferring; }
  float GetPilotTravelAlpha(float Elapsed) const;
  FVector GetTransferPosition(const FVector& Start, const FVector& End, float Alpha, bool bIsBoarding) const;
  float GetMaxStableWalkSpeed() const;
@@ -73,6 +77,11 @@ private:
  void TickMech(float Dt);
  void TickTransfer(float Dt);
  void BeginTransfer(float Duration, bool bIsBoarding);
+ void AttachPilotToSeat();
+ FVector GetSeatDockOffset(float DockTime) const;
+ static constexpr float RailTravelSeconds = .52f;
+ static constexpr float RailStopSeconds = .10f;
+ static constexpr float SeatLiftSeconds = .30f;
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
@@ -95,6 +104,8 @@ private:
  UPROPERTY(Transient) TMap<FName,TObjectPtr<UStaticMeshComponent>> Parts;
  UPROPERTY(Transient) TObjectPtr<UAnimSequence> CurrentClip;
  UPROPERTY(Transient) TObjectPtr<UProceduralMeshComponent> EjectionFlame;
+ UPROPERTY(Transient) TArray<TObjectPtr<UNiagaraComponent>> SeatJets;
+ UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedSeatExhaust;
  UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> EjectionSmoke;
  UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> EjectionSmokeMIDs;
  TArray<float> SmokeBirthTimes;
