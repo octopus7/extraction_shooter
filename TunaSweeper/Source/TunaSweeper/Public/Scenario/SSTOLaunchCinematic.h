@@ -51,6 +51,18 @@ private:
         TWeakObjectPtr<UStaticMeshComponent> Component;
         TWeakObjectPtr<UMaterialInstanceDynamic> Material;
     };
+    struct FNozzle
+    {
+        FVector Socket;
+        double Radius;
+        double GroundZ;
+        bool bAxial;
+        float Seed;
+        FVaporCard Core;
+        FVaporCard Exhaust;
+        FVaporCard Dust;
+        FVaporCard DriftingDust;
+    };
     struct FScreenWidget
     {
         TWeakObjectPtr<UUserWidget> Widget;
@@ -58,11 +70,14 @@ private:
     };
 
     UStaticMeshComponent* MakeMesh(UStaticMesh* Mesh, USceneComponent* Parent, bool bCastsShadow);
+    FVaporCard MakeVaporCard(UStaticMesh* Plane, UMaterialInterface* Master, const FLinearColor& Tint, float Seed, int32 Priority);
     bool BuildStage(AActor* Lander);
     void HideGameplay(AActor* Lander);
     void SetUpLighting();
     void CutTo(int32 NewShot);
+    void SetBoardingPose(float Time);
     void SetFlightPose(float Time);
+    void DrawNozzles(float Time);
     void DrawVapor(float ShotFraction);
     FVector StagePosition(const FVector& LevelLocal) const;
 
@@ -70,6 +85,8 @@ private:
     UPROPERTY() TObjectPtr<UCameraComponent> Lens;
     UPROPERTY(Transient) TArray<TObjectPtr<UActorComponent>> BuiltComponents;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Stair;
+    UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> AftRail;
+    UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> ForeRail;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Hatch;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Backdrop;
     UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> BackdropMaterial;
@@ -94,6 +111,7 @@ private:
     TArray<FScreenWidget> HiddenWidgets;
     TArray<FGear> Gear;
     TArray<FVaporCard> Plume;
+    TArray<FNozzle> Nozzles;
     FTransform ParkedPose;
     FTransform LevelFrame;
     FTransform StairRest;

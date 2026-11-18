@@ -17,13 +17,15 @@
 
 | 시간 | 고정 카메라에 보이는 장면 |
 | --- | --- |
-| 0–5.6초 | 석양의 좌현 계단이 접히고 객실에서 내려온 해치가 밀착된다. |
-| 5.6–10.9초 | 넓은 측면 구도에서 기체가 제자리에서 떠오르고 착륙발이 접힌다. |
-| 10.9–16.6초 | 구름과 먼 평원 위로 수평을 잡은 기체가 상승하며 긴 연소 구름을 남긴다. |
-| 16.6–21초 | 행성 가장자리의 노을 위로 작은 기체와 희미한 꼬리가 보인다. |
-| 21초 이후 | 1.7초에 걸쳐 암전한 뒤 1.1초간 검은 화면을 유지한다. 중앙 독백이 0.8초 동안 나타나고 5초 동안 머문다. |
+| 0–2.45초 | 좌현 아래에서 양쪽 난간이 발판 위로 접히고 계단 끝이 지면을 떠나는 순간을 본다. |
+| 2.45–5.4초 | 출입구 반대 각도로 컷을 바꾼다. 계단은 객실 바닥 아래에 수납되어 있고, 위쪽 해치가 내려와 문틀에 밀착된다. |
+| 5.4–10.4초 | 뒤쪽 주 분사구 두 개와 기수 아래 보조 분사구 두 개가 동시에 지면을 향해 점화한다. 흙먼지가 퍼지고, 기체가 수평 자세로 떠오르며 착륙발을 접는다. |
+| 10.4–16초 | 넓은 고정 구도에서 고도를 확보한 기체가 기수를 90도 세운다. 하부 분사가 잦아들면서 꼬리의 쌍발 엔진이 추력을 이어받는다. |
+| 16–21.6초 | 구름 위 중경에서 기수를 위로 세운 기체가 계속 상승한다. 꼬리에서 나온 긴 연소 구름이 석양에 남는다. |
+| 21.6–25.85초 | 행성 가장자리의 노을 위로 작은 기체와 희미한 꼬리가 보인다. |
+| 25.85초 이후 | 1.7초에 걸쳐 암전한 뒤 1.1초간 검은 화면을 유지한다. 중앙 독백이 0.8초 동안 나타나고 5초 동안 머문다. |
 
-재생 시간은 첫 번째 고정 컷을 기준으로 한다. [연출 스토리보드](../chatgpt/SSTOEnding/ssto_ending_storyboard.png) · [평원 단말기에서 촬영한 진 엔딩 영상](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_TrueEnding.mp4)
+재생 시간은 첫 번째 고정 컷을 기준으로 한다. [초기 스토리보드](../chatgpt/SSTOEnding/ssto_ending_storyboard.png) · [현재 게임의 여섯 컷](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_Launch_Cuts.jpg) · [평원 단말기에서 촬영한 진 엔딩 영상](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_TrueEnding.mp4)
 
 연출이 끝나면 현재 슬롯에 저장하고 `/Game/Maps/IntroMap`으로 돌아간다. 저장에 실패하면 화면의 안내에 따라 같은 슬롯에 재시도한다.
 
@@ -46,6 +48,6 @@
 
 `TunaSweeper.FreePlayEnding` 자동화는 native 클래스·실제 BP/스토리 애셋·참치 조건·세이브 거부와 재시도·경험치 중복 방지·슬롯 재로드·반복 엔딩을 확인한다. 디스크 시험은 `-UserDir=<project>/Saved/RaidStorageAutomation/`에서만 수행한다. `RenderStories`는 렌더링 가능한 실행에서 실제 대사 UI 이미지를 생성하고 문장 진행을 검증한다.
 
-`Tools/SSTOLander/verify_ending.ps1`은 저장된 평원맵에서 승하차, 보관함과 단말기 접근, 아이템 이동, 일반 엔딩 대사, 진 엔딩의 네 고정 카메라와 암전·중앙 독백, 타이틀에서 같은 슬롯 이어하기를 실행한다. `-RecordFilm`을 주면 진 엔딩 재생 중 실제 뷰포트 프레임을 경과 밀리초 이름으로 격리된 테스트 저장 폴더의 `SSTOEnding/Film`에 기록한다. 테스트 세이브는 `Saved/SSTOEndingAutomation/` 아래에 격리한다. 실행 전 `Docs/unreal_editor_coordination.md`에 따라 에디터를 조율하고 최신 에디터 모듈을 빌드한다.
+`Tools/SSTOLander/verify_ending.ps1`은 저장된 평원맵에서 승하차, 보관함과 단말기 접근, 일반·진 엔딩, 같은 슬롯 이어하기를 실행한다. 진 엔딩에서는 여섯 고정 컷과 하부 수납 위치, 네 분사구의 지면 방향과 먼지, 기립 중 꼬리의 지면 여유, 하늘 컷에서 기체의 자세와 화면 점유율, 암전·중앙 독백을 검사한다. `-RecordFilm`을 주면 실제 뷰포트 프레임을 경과 밀리초 이름으로 테스트 폴더의 `SSTOEnding/Film`에 기록한다. 테스트 세이브는 `Saved/SSTOEndingAutomation/` 아래에 격리한다. 실행 전 `Docs/unreal_editor_coordination.md`에 따라 에디터를 조율하고 최신 에디터 모듈을 빌드한다.
 
 PIE 테스트는 레이드에 도달한 슬롯을 재현하기 위해 테스트 슬롯에만 오프닝 완료 기록을 넣는다. 기존 `IntroMap`의 `BP_Morph` Construction Script 오류는 [기존 점검 기록](demo_build_implementation_audit_2026-09-02.md)의 알려진 문제로 한정해 허용한다. 이 테스트가 해당 표정 제어 문제까지 수정하거나 무오류를 보증하는 것은 아니다. 나머지 테스트 오류는 실패 처리한다.

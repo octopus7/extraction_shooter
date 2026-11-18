@@ -12,6 +12,7 @@
 #include "EngineUtils.h"
 #include "Engine/World.h"
 #include "Engine/GameViewportClient.h"
+#include "Engine/StaticMesh.h"
 #include "Widgets/SWindow.h"
 #include "UObject/UnrealType.h"
 #include "Kismet/GameplayStatics.h"
@@ -74,6 +75,14 @@ struct FRun
     int32 ObservedShot = INDEX_NONE;
     FTransform FixedCamera;
     FTransform ParkedShip;
+    TWeakObjectPtr<UStaticMeshComponent> BoardingStair;
+    TWeakObjectPtr<UStaticMeshComponent> PressureDoor;
+    bool bSawStairLift = false;
+    bool bDoorSwungShut = false;
+    bool bSawIntermediatePitch = false;
+    bool bReachedUpright = false;
+    float PreviousHatchSample = -1.f;
+    FVector PreviousStairFoot = FVector::ZeroVector;
     const bool bRecordFilm = FParse::Param(FCommandLine::Get(), TEXT("RecordSSTOEnding"));
     double LastFilmFrame = -1.0;
     FString FilmDirectory;
@@ -89,7 +98,7 @@ struct FRun
     bool RecordFilmFrame(UWorld* World)
     {
         const double Seconds = FPlatformTime::Seconds() - Changed;
-        if (!bRecordFilm || Seconds - LastFilmFrame < 1.0 / 15.0) return true;
+        if (!bRecordFilm || Seconds - LastFilmFrame < 1.0 / 30.0) return true;
         LastFilmFrame = Seconds;
         if (FilmDirectory.IsEmpty())
         {
@@ -108,6 +117,95 @@ struct FRun
         return FImageUtils::CompressImage(Frame, TEXT("jpg"), FImageView(Pixels.GetData(), Size.X, Size.Y), 92)
             && FFileHelper::SaveArrayToFile(Frame, *File);
     }
+    bool InspectHatch(ASSTOLaunchCinematic* Launch, int32 Shot)
+    {
+        if (!BoardingStair.IsValid() || !PressureDoor.IsValid())
+        {
+            TInlineComponentArray<UStaticMeshComponent*> Parts(Launch);
+            for (auto* Part : Parts)
+            {
+                const FName Mesh = GetFNameSafe(Part->GetStaticMesh());
+                if (Mesh == TEXT("SM_SSTO_StairTray") || Mesh == TEXT("SM_SSTO_Ladder")) BoardingStair = Part;
+                else if (Mesh == TEXT("SM_SSTO_CinematicHatch")) PressureDoor = Part;
+            }
+            if (!Check(BoardingStair.IsValid() && PressureDoor.IsValid(), TEXT("Both moving boarding parts are present"))) return false;
+        }
+        if (!Check(BoardingStair->IsVisible() && !BoardingStair->bHiddenInGame,
+            TEXT("The physical stair stays rendered across the mechanical cut"))) return false;
+        const FVector Foot = BoardingStair->GetRelativeTransform().TransformPosition(FVector(395, -598, 0));
+        const float Now = Launch->GetElapsedSeconds();
+        if (Shot == 0)
+        {
+            if (PreviousHatchSample >= 0.f && !Check(FVector::Dist(PreviousStairFoot, Foot) <= 600. * (Now - PreviousHatchSample) + 2.,
+                TEXT("The foot moves continuously while the camera shows it"))) return false;
+            PreviousStairFoot = Foot;
+            PreviousHatchSample = Now;
+            bSawStairLift |= Foot.Z > 57. && Foot.Y < -400.;
+        }
+        else
+        {
+            if (!Check(bSawStairLift && Foot.Y > -300. && Foot.Z < 165., TEXT("After the cut the actual stair is inside the belly below the cabin deck"))) return false;
+            if (PressureDoor->GetRelativeTransform().Equals(FTransform::Identity, .01f)) bDoorSwungShut = true;
+        }
+        return true;
+    }
+    bool InspectFlight(ASSTOLaunchCinematic* Launch, int32 Shot)
+    {
+        TInlineComponentArray<UStaticMeshComponent*> Parts(Launch);
+        const UStaticMeshComponent* Hull = nullptr;
+        TArray<const UStaticMeshComponent*, TInlineAllocator<4>> LiftCores;
+        int32 WashCount = 0;
+        for (const auto* Part : Parts)
+        {
+            if (GetFNameSafe(Part->GetStaticMesh()) == TEXT("SM_SSTO_LowHull")) Hull = Part;
+            if (!Part->IsVisible()) continue;
+            if (Part->ComponentHasTag(TEXT("SSTO_MainLiftCore")) || Part->ComponentHasTag(TEXT("SSTO_NoseLiftCore"))) LiftCores.Add(Part);
+            if (Part->ComponentHasTag(TEXT("SSTO_GroundWash"))) ++WashCount;
+        }
+        if (!Check(Hull != nullptr, TEXT("Flight uses the modeled hull"))) return false;
+        const double NoseUp = Hull->GetForwardVector().Z;
+        if (Shot == 2 && Launch->GetElapsedSeconds() > 7.3f)
+        {
+            if (!Check(LiftCores.Num() == 4 && WashCount == 4 && FMath::Abs(NoseUp) < .12,
+                TEXT("Both main and forward pairs fire together and disturb the ground during level lift"))) return false;
+            const FVector Outlets[] = {{-810,-204,94},{-810,204,94},{752,-146,90},{752,146,90}};
+            for (const FVector& Outlet : Outlets)
+            {
+                const FVector Lip = Hull->GetComponentTransform().TransformPosition(Outlet);
+                const FName Type = Outlet.X < 0 ? TEXT("SSTO_MainLiftCore") : TEXT("SSTO_NoseLiftCore");
+                if (!Check(LiftCores.ContainsByPredicate([&](const UStaticMeshComponent* Core)
+                {
+                    const FVector Center = Core->GetComponentLocation();
+                    return Core->ComponentHasTag(Type) && FVector::Dist2D(Lip, Center) < 1. && Center.Z < Lip.Z;
+                }), TEXT("A live jet points straight down from each modeled outlet"))) return false;
+            }
+        }
+        if (Shot == 3)
+        {
+            bSawIntermediatePitch |= NoseUp > .25 && NoseUp < .85;
+            bReachedUpright |= NoseUp > .995;
+            if (!Check(Hull->GetComponentTransform().TransformPosition(FVector(-1145,0,300)).Z > ParkedShip.GetLocation().Z + 80.,
+                TEXT("The tail clears the ground throughout pitch-up"))) return false;
+        }
+        if (Shot == 4)
+        {
+            FMinimalViewInfo View;
+            Launch->CalcCamera(0.f, View);
+            const FVector Up = View.Rotation.RotateVector(FVector::UpVector);
+            const double VerticalTangent = FMath::Tan(FMath::DegreesToRadians(View.FOV * .5)) / View.AspectRatio;
+            auto ScreenY = [&](const FVector& Local)
+            {
+                const FVector Ray = Hull->GetComponentTransform().TransformPosition(Local) - View.Location;
+                return FVector::DotProduct(Ray, Up) / (FVector::DotProduct(Ray, View.Rotation.Vector()) * VerticalTangent);
+            };
+            const double Nose = ScreenY(FVector(1260,0,300)), Tail = ScreenY(FVector(-1145,0,300));
+            return Check(bSawIntermediatePitch && bReachedUpright && NoseUp > .995,
+                TEXT("The sky shot inherits the completed nose-up rotation")) &&
+                Check(Nose < .98 && Tail > -.98 && (Nose-Tail)*.5 > .30 && (Nose-Tail)*.5 < .68,
+                    TEXT("The entire upright craft reads at medium distance against the sky"));
+        }
+        return true;
+    }
     bool InspectDeparture(UWorld* World, APlayerController* PC, UTunaSweeperGameInstance* Game)
     {
         if (!Check(RecordFilmFrame(World), TEXT("Save optional real-time review frame"))) return false;
@@ -116,16 +214,21 @@ struct FRun
             FMinimalViewInfo View;
             Launch->CalcCamera(0.f, View);
             const int32 Shot = Launch->GetShotIndex();
+            if (Shot <= 1 && !InspectHatch(Launch, Shot)) return false;
+            if (Shot >= 2 && !InspectFlight(Launch, Shot)) return false;
             const FTransform Camera(View.Rotation, View.Location);
             if (Shot != ObservedShot)
             {
                 if (!Check(Shot == ObservedShot + 1, TEXT("Locked shots play in storyboard order"))) return false;
+                if (Shot == 2 && !Check(bDoorSwungShut, TEXT("The fixed hatch shot holds until the door is seated"))) return false;
+                if (ObservedShot != INDEX_NONE && !Check(!FixedCamera.Equals(Camera, 1.f), TEXT("The ellipsis and subsequent cuts change camera position"))) return false;
                 ObservedShot = Shot;
                 FixedCamera = Camera;
             }
             if (!Check(Camera.Equals(FixedCamera, .01), TEXT("Camera stays fixed during each shot"))) return false;
-            const float CaptureTimes[] = {2.05f, 9.85f, 14.5f, 18.5f};
-            const TCHAR* Names[] = {TEXT("True_01_Hatch"), TEXT("True_02_Hover"), TEXT("True_03_Clouds"), TEXT("True_04_Orbit")};
+            const float CaptureTimes[] = {1.97f, 3.68f, 8.65f, 13.35f, 18.55f, 23.5f};
+            const TCHAR* Names[] = {TEXT("True_00_Stair"), TEXT("True_01_Hatch"), TEXT("True_02_Hover"), TEXT("True_02_Pitch"),
+                TEXT("True_03_Clouds"), TEXT("True_04_Orbit")};
             if (Shot == CapturedShots && Launch->GetElapsedSeconds() >= CaptureTimes[Shot])
             {
                 if (!Check(PC->GetViewTarget() == Launch, TEXT("Game camera sees the real-time launch")) ||
@@ -154,7 +257,7 @@ struct FRun
             const auto& TextGeometry = Text->GetCachedGeometry();
             const FVector2D CardCenter = CardGeometry.LocalToAbsolute(CardGeometry.GetLocalSize() * .5f);
             const FVector2D TextCenter = TextGeometry.LocalToAbsolute(TextGeometry.GetLocalSize() * .5f);
-            if (!Check(bSawBlack && CapturedShots == 4, TEXT("Clean black beat precedes the monologue")) ||
+            if (!Check(bSawBlack && CapturedShots == 6, TEXT("Clean black beat precedes the monologue after all six fixed shots")) ||
                 !Check(!Expected.IsEmpty() && Expected.EqualTo(Text->GetText()), TEXT("Localized storyboard line is displayed")) ||
                 !Check(FVector2D::Distance(CardCenter,TextCenter) < 4.0, TEXT("Monologue is centered in both axes"))) return false;
             Capture(Test, TEXT("True_06_Monologue"));
@@ -315,7 +418,7 @@ struct FRun
         {
             if (World->GetName().Contains(TEXT("IntroMap")))
             {
-                if (bTrue) Check(bCapturedStory && bSawBlack && CapturedShots == 4, TEXT("True ending completed all six storyboard frames"));
+                if (bTrue) Check(bCapturedStory && bSawBlack && CapturedShots == 6, TEXT("True ending completed six fixed shots, blackout and monologue"));
                 Check(Game->IsScenarioProgressFlagSet(bTrue ? TEXT("ending.freeplay.true_seen") : TEXT("ending.freeplay.normal_seen")), TEXT("Ending completion persisted"));
                 Check(!Game->IsScenarioProgressFlagSet(TEXT("demo.ending.farewell_seen")), TEXT("Slot not retired"));
                 Check(Game->GetSaveSlotSummary(1).bHasData,TEXT("Same save slot still exists"));

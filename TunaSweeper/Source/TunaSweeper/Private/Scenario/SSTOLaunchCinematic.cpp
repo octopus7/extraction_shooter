@@ -30,10 +30,16 @@
 
 namespace SSTOLaunch
 {
-    constexpr float HoverCut = 5.6f;
-    constexpr float CloudCut = 10.9f;
-    constexpr float OrbitCut = 16.6f;
-    constexpr float End = 21.0f;
+    enum EShot { StairDetail, HatchDetail, GroundLift, PitchUp, CloudMedium, Orbit };
+    constexpr float HatchCut = 2.45f;
+    constexpr float HatchSwingStart = 2.65f;
+    constexpr float HatchUpright = 4.33f;
+    constexpr float HatchSeated = 4.82f;
+    constexpr float HoverCut = 5.4f;
+    constexpr float PitchCut = 10.4f;
+    constexpr float CloudCut = 16.0f;
+    constexpr float OrbitCut = 21.6f;
+    constexpr float End = 25.85f;
     constexpr double CloudAltitude = 210000.0;
     constexpr double OrbitAltitude = 1400000.0;
     constexpr double Aspect = 16.0 / 9.0;
@@ -42,6 +48,8 @@ namespace SSTOLaunch
     constexpr float CabinLumens = 215.f;
     const FVector StairHinge(395, -353, 181);
     const FVector DoorHinge(395, -312, 410);
+    const FVector FlightCenter(0, 0, 270);
+    const FVector TailCenter(-1145, 0, 300);
     const FName RevealParameter(TEXT("VerticalRevealActive"));
     const FName PlateParameter(TEXT("Plate"));
     const FName TintParameter(TEXT("Tint"));
@@ -83,6 +91,11 @@ namespace SSTOLaunch
         // The Engine plane is 100 cm square. Its UV axes are camera right and camera down.
         Card->SetWorldTransform(FTransform(Facing, Location, FVector(Width * .01, Height * .01, 1.0)),
             false, nullptr, ETeleportType::TeleportPhysics);
+    }
+
+    UStaticMesh* LoadMechanism(const TCHAR* Name)
+    {
+        return LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/Effects/SSTOEnding/%s.%s"), Name, Name));
     }
 }
 
@@ -142,15 +155,35 @@ UStaticMeshComponent* ASSTOLaunchCinematic::MakeMesh(UStaticMesh* Mesh, USceneCo
     return Part;
 }
 
+ASSTOLaunchCinematic::FVaporCard ASSTOLaunchCinematic::MakeVaporCard(UStaticMesh* Plane, UMaterialInterface* Master,
+    const FLinearColor& Tint, float Seed, int32 Priority)
+{
+    auto* Card = MakeMesh(Plane, GetRootComponent(), false);
+    auto* Material = UMaterialInstanceDynamic::Create(Master, this);
+    Material->SetVectorParameterValue(SSTOLaunch::TintParameter, Tint);
+    Material->SetScalarParameterValue(SSTOLaunch::SeedParameter, Seed);
+    Material->SetScalarParameterValue(SSTOLaunch::DensityParameter, 0.f);
+    Card->SetMaterial(0, Material);
+    Card->SetTranslucentSortPriority(Priority);
+    Card->SetVisibility(false);
+    return {Card, Material};
+}
+
 bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
 {
+    using namespace SSTOLaunch;
     UStaticMesh* DoorMesh = HatchAsset.LoadSynchronous();
+    UStaticMesh* TrayMesh = LoadMechanism(TEXT("SM_SSTO_StairTray"));
+    UStaticMesh* AftRailMesh = LoadMechanism(TEXT("SM_SSTO_StairAftRail"));
+    UStaticMesh* ForeRailMesh = LoadMechanism(TEXT("SM_SSTO_StairForeRail"));
+    UStaticMesh* HardwareMesh = LoadMechanism(TEXT("SM_SSTO_LiftHardware"));
     UStaticMesh* Plane = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
     UMaterialInterface* PlateMaster = BackdropAsset.LoadSynchronous();
     UMaterialInterface* VaporMaster = VaporAsset.LoadSynchronous();
     CloudPlate = CloudAsset.LoadSynchronous();
     OrbitPlate = OrbitAsset.LoadSynchronous();
-    if (!DoorMesh || !Plane || !PlateMaster || !VaporMaster || !CloudPlate || !OrbitPlate)
+    if (!DoorMesh || !TrayMesh || !AftRailMesh || !ForeRailMesh || !HardwareMesh ||
+        !Plane || !PlateMaster || !VaporMaster || !CloudPlate || !OrbitPlate)
     {
         return false;
     }
@@ -190,11 +223,13 @@ bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
         if (MeshNames.Contains(Name)) return false;
         MeshNames.Add(Name);
         const FTransform Rest = Source->GetComponentTransform().GetRelativeTransform(ParkedPose);
+        const bool bStair = Name == TEXT("SM_SSTO_Ladder");
+        if (bStair) Mesh = TrayMesh;
         UStaticMeshComponent* Copy = MakeMesh(Mesh, Airframe, Source->CastShadow);
         Copy->SetRelativeTransform(Rest);
         AssignHullMaterials(Copy, Mesh);
         FVector Mount;
-        if (Name == TEXT("SM_SSTO_Ladder"))
+        if (bStair)
         {
             Stair = Copy;
             StairRest = Rest;
@@ -206,6 +241,11 @@ bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
     }
     if (MeshNames.Num() != 13 || !Stair || Gear.Num() != 3) return false;
 
+    AftRail = MakeMesh(AftRailMesh, Airframe, true);
+    ForeRail = MakeMesh(ForeRailMesh, Airframe, true);
+    AssignHullMaterials(AftRail, AftRailMesh);
+    AssignHullMaterials(ForeRail, ForeRailMesh);
+    AssignHullMaterials(MakeMesh(HardwareMesh, Airframe, true), HardwareMesh);
     Hatch = MakeMesh(DoorMesh, Airframe, true);
     AssignHullMaterials(Hatch, DoorMesh);
     Backdrop = MakeMesh(Plane, GetRootComponent(), false);
@@ -225,17 +265,43 @@ bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
     Plume.Reserve(SSTOLaunch::PlumeCount);
     for (int32 Index = 0; Index < SSTOLaunch::PlumeCount; ++Index)
     {
-        UStaticMeshComponent* Card = MakeMesh(Plane, GetRootComponent(), false);
-        UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(VaporMaster, this);
         const float Depth = static_cast<float>(Index) / (SSTOLaunch::PlumeCount - 1);
-        MID->SetVectorParameterValue(SSTOLaunch::TintParameter, FMath::Lerp(
-            FLinearColor(1.95f,1.48f,.97f), FLinearColor(1.08f,.72f,.59f), Depth));
-        MID->SetScalarParameterValue(SSTOLaunch::DensityParameter, 0.0f);
-        MID->SetScalarParameterValue(SSTOLaunch::SeedParameter, .37f + Index * 1.793f);
-        Card->SetMaterial(0, MID);
-        Card->SetTranslucentSortPriority(1 + SSTOLaunch::PlumeCount - Index);
-        Card->SetVisibility(false);
-        Plume.Add({Card, MID});
+        Plume.Add(MakeVaporCard(Plane, VaporMaster, FMath::Lerp(FLinearColor(1.95f,1.48f,.97f),
+            FLinearColor(1.08f,.72f,.59f), Depth), .37f + Index * 1.793f, 1 + PlumeCount - Index));
+    }
+
+    // Centers are the open lips of the four ventral nozzles and the two existing tail bells.
+    struct FOutlet { FVector Center; double Radius; FName Tag; };
+    const FOutlet Outlets[] = {
+        {FVector(-810,-204,94),61,TEXT("SSTO_MainLiftCore")}, {FVector(-810,204,94),61,TEXT("SSTO_MainLiftCore")},
+        {FVector(752,-146,90),34,TEXT("SSTO_NoseLiftCore")}, {FVector(752,146,90),34,TEXT("SSTO_NoseLiftCore")},
+        {TailCenter + FVector(0,-154,0),145,TEXT("SSTO_AxialCore")}, {TailCenter + FVector(0,154,0),145,TEXT("SSTO_AxialCore")}
+    };
+    FCollisionQueryParams Trace(SCENE_QUERY_STAT(SSTOGroundWash), false, Lander);
+    Trace.AddIgnoredActor(this);
+    if (Controller.IsValid()) Trace.AddIgnoredActor(Controller->GetPawn());
+    TArray<AActor*> Attached;
+    Lander->GetAllChildActors(Attached);
+    Trace.AddIgnoredActors(Attached);
+    for (const FOutlet& Outlet : Outlets)
+    {
+        const float Seed = .81f + Nozzles.Num() * 1.71f;
+        const bool bAxial = Outlet.Tag == TEXT("SSTO_AxialCore");
+        const FVector Start = ParkedPose.TransformPosition(Outlet.Center);
+        FNozzle Jet{Outlet.Center, Outlet.Radius, ParkedPose.GetLocation().Z, bAxial, Seed, {}, {}, {}, {}};
+        Jet.Core = MakeVaporCard(Plane, VaporMaster, FLinearColor(4.6f,2.70f,1.22f), Seed, 31);
+        Jet.Exhaust = MakeVaporCard(Plane, VaporMaster, FLinearColor(1.80f,1.41f,1.35f), Seed+.71f, 27);
+        Jet.Core.Component->ComponentTags.Add(Outlet.Tag);
+        if (!bAxial)
+        {
+            FHitResult Hit;
+            if (GetWorld()->LineTraceSingleByChannel(Hit, Start + FVector::UpVector * 80.,
+                Start - FVector::UpVector * 4000., ECC_Visibility, Trace)) Jet.GroundZ = Hit.ImpactPoint.Z;
+            Jet.Dust = MakeVaporCard(Plane, VaporMaster, FLinearColor(.87f,.62f,.40f), Seed+2.21f, 19);
+            Jet.DriftingDust = MakeVaporCard(Plane, VaporMaster, FLinearColor(.78f,.57f,.44f), Seed+4.71f, 18);
+            Jet.Dust.Component->ComponentTags.Add(TEXT("SSTO_GroundWash"));
+        }
+        Nozzles.Add(Jet);
     }
     return true;
 }
@@ -394,19 +460,30 @@ void ASSTOLaunchCinematic::CutTo(int32 NewShot)
     float Fov = 42.0f;
     switch (NewShot)
     {
-    case 0:
-        Position = ParkedPose.TransformPosition(FVector(995,-1470,245));
-        Target = ParkedPose.TransformPosition(FVector(520,-387,206));
-        Fov = 42.0f;
+    case StairDetail:
+        Position = ParkedPose.TransformPosition(FVector(1050,-1340,155));
+        Target = ParkedPose.TransformPosition(FVector(445,-419,155));
+        Fov = 42.f;
         break;
-    case 1:
-        Position = StagePosition(FVector(520,-4050,293));
-        Target = StagePosition(FVector(0,0,555));
-        Fov = 45.0f;
+    case HatchDetail:
+        Position = ParkedPose.TransformPosition(FVector(155,-1040,309));
+        Target = ParkedPose.TransformPosition(FVector(395,-321,302));
+        Fov = 48.f;
         break;
-    case 2:
-        Position = StagePosition(FVector(3800,-23400,CloudAltitude + 200));
-        Target = StagePosition(FVector(0,0,CloudAltitude - 1225));
+    case GroundLift:
+        Position = StagePosition(FVector(2340,-4210,760));
+        Target = StagePosition(FVector(-60,0,407));
+        Fov = 43.f;
+        break;
+    case PitchUp:
+        Position = StagePosition(FVector(1560,-7940,925));
+        Target = StagePosition(FVector(0,0,1925));
+        Fov = 49.f;
+        break;
+    case CloudMedium:
+        Position = StagePosition(FVector(-8650,-12100,CloudAltitude + 650));
+        Target = StagePosition(FVector(-260,0,CloudAltitude - 400));
+        Fov = 42.f;
         break;
     default:
         Position = StagePosition(FVector(5400,-36500,OrbitAltitude - 2400));
@@ -418,7 +495,7 @@ void ASSTOLaunchCinematic::CutTo(int32 NewShot)
     // Building from a direction keeps the horizon level even though the parked ship is tilted.
     Lens->SetWorldLocationAndRotation(Position, (Target - Position).Rotation());
     CardRotation = FRotationMatrix::MakeFromXY(Lens->GetRightVector(), -Lens->GetUpVector()).ToQuat();
-    const bool bMatte = NewShot >= 2;
+    const bool bMatte = NewShot >= CloudMedium;
     FPostProcessSettings& Grade = Lens->PostProcessSettings;
     Grade.bOverride_ColorGain = !bMatte;
     Grade.ColorGain = FVector4(.98,.90,.86,1);
@@ -439,9 +516,9 @@ void ASSTOLaunchCinematic::CutTo(int32 NewShot)
     Backdrop->SetVisibility(bMatte);
     if (bMatte)
     {
-        UTexture2D* Plate = NewShot == 2 ? CloudPlate.Get() : OrbitPlate.Get();
+        UTexture2D* Plate = NewShot == CloudMedium ? CloudPlate.Get() : OrbitPlate.Get();
         BackdropMaterial->SetTextureParameterValue(PlateParameter, Plate);
-        const double Distance = NewShot == 2 ? 39000.0 : 58000.0;
+        const double Distance = NewShot == CloudMedium ? 39000.0 : 58000.0;
         const double ViewWidth = 2.0 * Distance * FMath::Tan(FMath::DegreesToRadians(Fov * .5));
         const double ArtAspect = static_cast<double>(Plate->GetSizeX()) / FMath::Max(1, Plate->GetSizeY());
         const double Width = FMath::Max(ViewWidth, ViewWidth / Aspect * ArtAspect) * 1.025;
@@ -449,61 +526,82 @@ void ASSTOLaunchCinematic::CutTo(int32 NewShot)
     }
     if (bMatte)
     {
-        // Keep the low-altitude lighting in shots 0/1. These distant plates already include atmospheric haze.
+        // These distant plates already include atmospheric haze.
         for (const auto& Weak : GroundFog)
             if (auto* Fog = Weak.Get()) Fog->SetVisibility(false);
     }
     for (int32 Index = 0; Index < Plume.Num(); ++Index)
     {
-        const bool bVisible = NewShot == 2 || (NewShot == 3 && Index < OrbitalVaporCount);
+        const bool bVisible = NewShot == CloudMedium || (NewShot == Orbit && Index < OrbitalVaporCount);
         Plume[Index].Component->SetVisibility(bVisible);
     }
     if (Controller.IsValid() && Controller->PlayerCameraManager)
         Controller->PlayerCameraManager->SetGameCameraCutThisFrame();
 }
 
-void ASSTOLaunchCinematic::SetFlightPose(float Time)
+void ASSTOLaunchCinematic::SetBoardingPose(float Time)
 {
     using namespace SSTOLaunch;
-    FTransform ShipPose = ParkedPose;
-    if (ShotIndex == 0)
+    // The reverse angle cuts over the middle of the stroke. The folded physical meshes stay
+    // under the deck for the rest of the flight instead of vanishing in the open doorway.
+    const bool bShowingFold = ShotIndex == StairDetail;
+    const float RailFold = bShowingFold ? Ease(Time,.67f,2.77f) : 1.f;
+    const float TrayFold = bShowingFold ? Ease(Time,.94f,3.48f) : 1.f;
+    const float Inboard = bShowingFold ? 14.f * Ease(Time,1.72f,HatchCut) : 419.f;
+    const float Drop = bShowingFold ? 5.f * TrayFold : 46.f;
+    const FVector DeployedVector = StairRest.TransformVector(FVector(0,-245,-181));
+    const double LevelAngle = FMath::Atan2(DeployedVector.Z, -DeployedVector.Y);
+    const FQuat TrayRotation(FVector::ForwardVector, LevelAngle * TrayFold);
+    const FVector Hinge = StairRest.TransformPosition(StairHinge);
+    const FTransform Carriage(TrayRotation, Hinge - TrayRotation.RotateVector(Hinge) + FVector(0,Inboard,-Drop));
+    Stair->SetRelativeTransform(StairRest * Carriage);
+    const FVector RailAxis = DeployedVector.GetSafeNormal();
+    // The two rails stack at different stop angles to clear each other at the center of the tray.
+    AftRail->SetRelativeTransform(AtHinge(StairRest, FVector(320,-356,176),
+        FQuat(RailAxis, FMath::DegreesToRadians(-80.0 * RailFold))) * Carriage);
+    ForeRail->SetRelativeTransform(AtHinge(StairRest, FVector(470,-356,176),
+        FQuat(RailAxis, FMath::DegreesToRadians(87.0 * RailFold))) * Carriage);
+
+    const float Swing = Ease(Time, HatchSwingStart, HatchUpright);
+    const float Seat = Ease(Time, HatchUpright, HatchSeated);
+    const FQuat DoorRotation(FVector::ForwardVector, FMath::DegreesToRadians(92.0 * (1.0 - Swing)));
+    Hatch->SetRelativeTransform(AtHinge(FTransform::Identity, DoorHinge, DoorRotation, FVector::OneVector,
+        FVector(0, 26.0 * (1.0 - Seat), 0)));
+    if (ShotIndex <= HatchDetail)
     {
-        const float Fold = Ease(Time, .58f, 2.78f);
-        const float Closing = Ease(Time, 2.62f, 4.12f);
-        const float Seating = Ease(Time, 4.12f, 4.63f);
-        const FQuat FoldRotation(FVector::ForwardVector, FMath::DegreesToRadians(-152.0 * Fold));
-        const FQuat DoorRotation(FVector::ForwardVector, FMath::DegreesToRadians(92.0 * (1.0 - Closing)));
-        // The stair swings around the existing, terrain-adjusted hinge, then nests behind the pressure door.
-        Stair->SetRelativeTransform(AtHinge(StairRest, StairHinge, FoldRotation, FVector::OneVector,
-            FVector(0, 30.0 * Ease(Time, 2.0f, 2.78f), 0)));
-        Stair->SetVisibility(Fold < .999f);
-        // The panel pivots inside the cabin, then translates outwards into the pressure seal.
-        Hatch->SetRelativeTransform(AtHinge(FTransform::Identity, DoorHinge, DoorRotation, FVector::OneVector,
-            FVector(0,26.0 * (1.0 - Seating),0)));
-        const float CabinGlow = 1.0f - Ease(Time, 3.64f, 4.63f);
+        const float CabinGlow = 1.0f - Ease(Time, HatchSwingStart, HatchSeated);
         DockMaterial->SetScalarParameterValue(DensityParameter, .72f * CabinGlow);
         DockStrip->SetVisibility(CabinGlow > .002f);
         if (CabinLight) CabinLight->SetIntensity(CabinLumens * CabinGlow);
     }
     else
     {
-        // A skipped tick may cross a whole shot. Set the sealed pose explicitly on every later cut.
-        Hatch->SetRelativeTransform(FTransform::Identity);
-        Stair->SetVisibility(false);
         DockStrip->SetVisibility(false);
         if (CabinLight) CabinLight->SetVisibility(false);
-        const float Lift = Ease(Time, HoverCut + .28f, CloudCut - .72f);
-        ShipPose.SetRotation(FQuat::Slerp(ParkedPose.GetRotation(), LevelFrame.GetRotation(), Lift));
-        double Height = 378.0 * Lift;
-        if (ShotIndex == 2)
-            Height = CloudAltitude + 1230.0 * Ease(Time, CloudCut, OrbitCut);
-        else if (ShotIndex == 3)
+    }
+}
+
+void ASSTOLaunchCinematic::SetFlightPose(float Time)
+{
+    using namespace SSTOLaunch;
+    SetBoardingPose(Time);
+    FTransform ShipPose = ParkedPose;
+    if (ShotIndex >= GroundLift)
+    {
+        const float Lift = Ease(Time, HoverCut + .83f, PitchCut - .55f);
+        const float Rotation = Ease(Time, PitchCut + .64f, CloudCut - .83f);
+        FQuat Attitude = FQuat::Slerp(ParkedPose.GetRotation(), LevelFrame.GetRotation(), Lift);
+        if (ShotIndex >= PitchUp) Attitude = LevelFrame.GetRotation() * FRotator(90.0 * Rotation, 0, 0).Quaternion();
+        ShipPose.SetRotation(Attitude);
+        double Height = 470.0 * Lift + 1820.0 * Ease(Time, PitchCut, CloudCut - .43f);
+        if (ShotIndex == CloudMedium) Height = CloudAltitude + 805.0 * Ease(Time, CloudCut, OrbitCut);
+        if (ShotIndex == Orbit)
         {
-            // A forced-perspective set keeps the distant point and plate within the same depth range.
             Height = OrbitAltitude + 225.0 * Ease(Time, OrbitCut, End);
             ShipPose.SetScale3D(ParkedPose.GetScale3D() * .12);
         }
-        ShipPose.SetLocation(ParkedPose.GetLocation() + FVector::UpVector * Height);
+        const FVector Center = ParkedPose.TransformPosition(FlightCenter) + FVector::UpVector * Height;
+        ShipPose.SetLocation(Center - ShipPose.TransformVector(FlightCenter));
         const float Retract = Ease(Time, HoverCut + 1.4f, HoverCut + 3.94f);
         for (const FGear& Leg : Gear)
         {
@@ -516,16 +614,70 @@ void ASSTOLaunchCinematic::SetFlightPose(float Time)
         }
     }
     Airframe->SetWorldTransform(ShipPose, false, nullptr, ETeleportType::TeleportPhysics);
-    if (ShotIndex == 2) DrawVapor(FMath::Clamp((Time - CloudCut) / (OrbitCut - CloudCut), 0.0f, 1.0f));
-    else if (ShotIndex == 3) DrawVapor(FMath::Clamp((Time - OrbitCut) / (End - OrbitCut), 0.0f, 1.0f));
+    DrawNozzles(Time);
+    if (ShotIndex == CloudMedium) DrawVapor(FMath::Clamp((Time - CloudCut) / (OrbitCut - CloudCut), 0.0f, 1.0f));
+    else if (ShotIndex == Orbit) DrawVapor(FMath::Clamp((Time - OrbitCut) / (End - OrbitCut), 0.0f, 1.0f));
+}
+
+void ASSTOLaunchCinematic::DrawNozzles(float Time)
+{
+    using namespace SSTOLaunch;
+    const float LiftBurn = Ease(Time, HoverCut+.18f, HoverCut+.78f) * (1.f - Ease(Time, PitchCut+1.05f, PitchCut+3.05f));
+    const float AxialBurn = ShotIndex == Orbit ? 0.f : Ease(Time, PitchCut+1.12f, PitchCut+3.15f);
+    const FVector TowardCamera = -Lens->GetForwardVector();
+    const FVector Wind = LevelFrame.TransformVectorNoScale(FVector(-.94,.34,0));
+    for (FNozzle& Jet : Nozzles)
+    {
+        const float Power = Jet.bAxial ? AxialBurn : LiftBurn;
+        const bool bLit = Power > .005f;
+        Jet.Core.Component->SetVisibility(bLit);
+        Jet.Exhaust.Component->SetVisibility(bLit);
+        if (Jet.Dust.Component.IsValid() && !bLit)
+        {
+            Jet.Dust.Component->SetVisibility(false);
+            Jet.DriftingDust.Component->SetVisibility(false);
+        }
+        if (!bLit) continue;
+
+        const FVector Mouth = Airframe->GetComponentTransform().TransformPosition(Jet.Socket);
+        const FVector Axis = Jet.bAxial ? -Airframe->GetForwardVector() : FVector::DownVector;
+        FVector Across = FVector::CrossProduct(TowardCamera, Axis).GetSafeNormal();
+        if (Across.IsNearlyZero()) Across = Lens->GetRightVector();
+        const FQuat BeamFacing = FRotationMatrix::MakeFromXY(Across, FVector::CrossProduct(Across, TowardCamera)).ToQuat();
+        const double GroundGap = FMath::Max(18., Mouth.Z - Jet.GroundZ);
+        const double Length = (Jet.bAxial ? Jet.Radius * (3.0 + 3.4 * Power) : FMath::Min(GroundGap, 850.)) * (.38 + .62 * Power);
+        const double Width = Jet.Radius * (.85 + .49 * Power);
+        SetCard(Jet.Core.Component.Get(), Mouth + Axis * (.15 * Length), BeamFacing, Width, Length * .43);
+        SetCard(Jet.Exhaust.Component.Get(), Mouth + Axis * (.53 * Length), BeamFacing, Width * 1.40 + Length * .095, Length * 1.13);
+        Jet.Core.Material->SetScalarParameterValue(DensityParameter, Power * .8f);
+        Jet.Exhaust.Material->SetScalarParameterValue(DensityParameter, Power * .42f);
+        Jet.Exhaust.Material->SetScalarParameterValue(SeedParameter, Jet.Seed + .71f + .52f * Time);
+        if (Jet.Dust.Component.IsValid())
+        {
+            const float Wash = Power * (1.f - FMath::SmoothStep(560., 1220., GroundGap));
+            const double Diameter = Jet.Radius * (3.3 + 3.9 * Wash) + FMath::Min(GroundGap,650.) * .29;
+            const double Depth = Diameter * .21;
+            const FVector Ground(Mouth.X, Mouth.Y, Jet.GroundZ);
+            SetCard(Jet.Dust.Component.Get(), Ground + FVector::UpVector * Depth * .27, CardRotation, Diameter, Depth);
+            Jet.Dust.Material->SetScalarParameterValue(DensityParameter, Wash * .50f);
+            Jet.Dust.Material->SetScalarParameterValue(SeedParameter, Jet.Seed + 2.21f + Time * .28f);
+            Jet.Dust.Component->SetVisibility(Wash > .005f);
+            const float Age = FMath::Frac((Time - HoverCut) * .66f + .23f * Jet.Seed);
+            const float Envelope = FMath::Square(FMath::Sin(PI * Age));
+            const FVector Drift = Wind * Diameter * (.15 + .72 * Age) + FVector::UpVector * Depth * (.24 + .37 * Age);
+            SetCard(Jet.DriftingDust.Component.Get(), Ground + Drift, CardRotation, Diameter * (.72 + .54 * Age), Depth * (1.1 + .56 * Age));
+            Jet.DriftingDust.Material->SetScalarParameterValue(DensityParameter, Wash * Envelope * .36f);
+            Jet.DriftingDust.Component->SetVisibility(Wash > .005f);
+        }
+    }
 }
 
 void ASSTOLaunchCinematic::DrawVapor(float ShotFraction)
 {
     using namespace SSTOLaunch;
-    const bool bOrbit = ShotIndex == 3;
+    const bool bOrbit = ShotIndex == Orbit;
     const int32 Count = bOrbit ? OrbitalVaporCount : Plume.Num();
-    const FVector Origin = Airframe->GetComponentTransform().TransformPosition(FVector(-83,0,87));
+    const FVector Origin = Airframe->GetComponentTransform().TransformPosition(bOrbit ? FlightCenter : TailCenter);
     const FVector Right = Lens->GetRightVector();
     const FVector TowardCamera = -Lens->GetForwardVector();
     for (int32 Index = 0; Index < Count; ++Index)
@@ -578,7 +730,8 @@ void ASSTOLaunchCinematic::Tick(float DeltaSeconds)
     }
     using namespace SSTOLaunch;
     Elapsed = static_cast<float>(FMath::Clamp(FPlatformTime::Seconds() - StartedAt, 0.0, static_cast<double>(End)));
-    const int32 CurrentShot = Elapsed < HoverCut ? 0 : Elapsed < CloudCut ? 1 : Elapsed < OrbitCut ? 2 : 3;
+    const int32 CurrentShot = Elapsed < HatchCut ? StairDetail : Elapsed < HoverCut ? HatchDetail :
+        Elapsed < PitchCut ? GroundLift : Elapsed < CloudCut ? PitchUp : Elapsed < OrbitCut ? CloudMedium : Orbit;
     if (CurrentShot != ShotIndex) CutTo(CurrentShot);
     SetFlightPose(Elapsed);
     if (Elapsed >= End && !bOrbitReported)
@@ -633,7 +786,8 @@ void ASSTOLaunchCinematic::Stop()
     GroundFog.Reset();
     Gear.Reset();
     Plume.Reset();
-    Stair = nullptr; Hatch = nullptr; Backdrop = nullptr; BackdropMaterial = nullptr;
+    Nozzles.Reset();
+    Stair = nullptr; AftRail = nullptr; ForeRail = nullptr; Hatch = nullptr; Backdrop = nullptr; BackdropMaterial = nullptr;
     DockStrip = nullptr; DockMaterial = nullptr; CabinLight = nullptr;
     CloudPlate = nullptr; OrbitPlate = nullptr;
     PreviousView.Reset();

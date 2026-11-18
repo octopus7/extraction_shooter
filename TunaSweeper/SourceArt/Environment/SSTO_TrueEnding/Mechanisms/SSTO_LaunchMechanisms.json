@@ -1,0 +1,124 @@
+{
+  "units": "UE centimeters, common aircraft origin; nose +X, port -Y, up +Z",
+  "parts": {
+    "SM_SSTO_StairTray": {
+      "triangles": 3508,
+      "min_cm": [
+        310.5,
+        -608.0,
+        0.0
+      ],
+      "max_cm": [
+        479.5,
+        -331.0,
+        184.469
+      ]
+    },
+    "SM_SSTO_StairAftRail": {
+      "triangles": 476,
+      "min_cm": [
+        317.0,
+        -588.99,
+        20.751
+      ],
+      "max_cm": [
+        323.0,
+        -358.014,
+        255.977
+      ]
+    },
+    "SM_SSTO_StairForeRail": {
+      "triangles": 476,
+      "min_cm": [
+        467.0,
+        -588.99,
+        20.751
+      ],
+      "max_cm": [
+        473.0,
+        -358.014,
+        255.977
+      ]
+    },
+    "SM_SSTO_LiftHardware": {
+      "triangles": 3148,
+      "min_cm": [
+        -884.42,
+        -330.5,
+        90.0
+      ],
+      "max_cm": [
+        793.48,
+        278.42,
+        166.0
+      ]
+    }
+  },
+  "ventral_outlets": [
+    {
+      "center_cm": [
+        -810,
+        -204,
+        94
+      ],
+      "radius_cm": 61
+    },
+    {
+      "center_cm": [
+        -810,
+        204,
+        94
+      ],
+      "radius_cm": 61
+    },
+    {
+      "center_cm": [
+        752,
+        -146,
+        90
+      ],
+      "radius_cm": 34
+    },
+    {
+      "center_cm": [
+        752,
+        146,
+        90
+      ],
+      "radius_cm": 34
+    }
+  ],
+  "aft_bell_centers_cm": [
+    [
+      -1145,
+      -154,
+      300
+    ],
+    [
+      -1145,
+      154,
+      300
+    ]
+  ],
+  "rail_hinges_cm": [
+    [
+      320,
+      -356,
+      176
+    ],
+    [
+      470,
+      -356,
+      176
+    ]
+  ],
+  "deck_bottom_cm": 165,
+  "stowed_on_plains": {
+    "rail_stop_degrees_aft_fore": [-80, 87],
+    "carriage_inboard_cm": 419,
+    "carriage_drop_cm": 46,
+    "lowest_vertex_z_cm": 117.46,
+    "highest_vertex_z_cm": 149.56,
+    "clearance_below_cabin_deck_cm": 15.44
+  }
+}
