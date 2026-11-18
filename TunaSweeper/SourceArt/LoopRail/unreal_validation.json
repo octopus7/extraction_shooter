@@ -1,51 +1,241 @@
 {
   "engine": "5.7.4-51494982+++UE5+Release-5.7",
-  "verification": "fresh-process reload",
+  "verification": "Fresh-process package reload, RaidVillage Play In Editor, and D3D12 scene captures",
   "meshes": [
     {
       "asset": "/LoopRail/Meshes/SM_Locomotive.SM_Locomotive",
-      "triangles": 4916,
-      "bounds_cm": [
-        900.0,
-        220.0000762939453,
-        277.5
+      "triangles": 11956,
+      "bounds_min_cm": [
+        -450,
+        -110,
+        0
       ],
-      "collision_shapes": 3,
-      "material": "/LoopRail/Materials/M_LocomotiveDetail.M_LocomotiveDetail"
+      "bounds_max_cm": [
+        450,
+        110,
+        278.37
+      ],
+      "collision_shapes": 5,
+      "material": "/LoopRail/Materials/M_LocomotiveDetail.M_LocomotiveDetail",
+      "uv0_range": [
+        [
+          0.0022,
+          0.00269
+        ],
+        [
+          0.9978,
+          0.9978
+        ]
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "source_matches": true,
+      "geometry_uv_sha256": "167b8974485ea4605c79d9433b1a1e2c2437e45684758630b359ea7866eecaa3"
     },
     {
       "asset": "/LoopRail/Meshes/SM_Carriage.SM_Carriage",
-      "triangles": 9012,
-      "bounds_cm": [
-        900.0,
-        220.0000762939453,
-        251.0
+      "triangles": 12372,
+      "bounds_min_cm": [
+        -450,
+        -109.96,
+        0
       ],
-      "collision_shapes": 52,
-      "material": "/LoopRail/Materials/M_CarriageDetail.M_CarriageDetail"
+      "bounds_max_cm": [
+        450,
+        109.96,
+        158.35
+      ],
+      "collision_shapes": 42,
+      "material": "/LoopRail/Materials/M_CarriageDetail.M_CarriageDetail",
+      "uv0_range": [
+        [
+          0.0022,
+          0.00269
+        ],
+        [
+          0.9978,
+          0.9978
+        ]
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "source_matches": true,
+      "geometry_uv_sha256": "074122750dd3bcbea7b3b80dd282528e7cedccaaddd70fc8463f48e8e1c65ac6"
     },
     {
       "asset": "/LoopRail/Meshes/SM_CarriageRoof.SM_CarriageRoof",
-      "triangles": 188,
-      "bounds_cm": [
-        900.0,
-        220.0000762939453,
-        32.0
+      "triangles": 3248,
+      "bounds_min_cm": [
+        -449.96,
+        -110,
+        60
+      ],
+      "bounds_max_cm": [
+        449.96,
+        110,
+        279.98
       ],
       "collision_shapes": 0,
-      "material": "/LoopRail/Materials/M_CarriageRoofDetail.M_CarriageRoofDetail"
+      "material": "/LoopRail/Materials/M_CarriageRoofDetail.M_CarriageRoofDetail",
+      "uv0_range": [
+        [
+          0.0022,
+          0.00269
+        ],
+        [
+          0.9978,
+          0.9978
+        ]
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "source_matches": true,
+      "geometry_uv_sha256": "cc0130b330ea8625e3941525105c81ef9a31fac014a1aae69d17a137edabb19e"
     },
     {
       "asset": "/LoopRail/Meshes/SM_CarriageConnection.SM_CarriageConnection",
-      "triangles": 396,
-      "bounds_cm": [
-        100.00000762939453,
-        100.00000762939453,
-        100.0
+      "triangles": 2228,
+      "bounds_min_cm": [
+        -50,
+        -50,
+        -10
+      ],
+      "bounds_max_cm": [
+        50,
+        50,
+        90
       ],
       "collision_shapes": 0,
-      "material": "/LoopRail/Materials/M_CarriageConnectionDetail.M_CarriageConnectionDetail"
+      "material": "/LoopRail/Materials/M_CarriageConnectionDetail.M_CarriageConnectionDetail",
+      "uv0_range": [
+        [
+          0.0022,
+          0.00269
+        ],
+        [
+          0.9978,
+          0.9978
+        ]
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "source_matches": true,
+      "geometry_uv_sha256": "3721ba19e71c91bd5f0b4c7add790de30ff83c4980c4b41b64589b841a099d24"
+    },
+    {
+      "asset": "/Game/MainRaid/Rail/SM_CarriageRoofReveal.SM_CarriageRoofReveal",
+      "triangles": 3248,
+      "bounds_min_cm": [
+        -449.96,
+        -110,
+        60
+      ],
+      "bounds_max_cm": [
+        449.96,
+        110,
+        279.98
+      ],
+      "collision_shapes": 0,
+      "material": "/Game/MainRaid/Rail/M_CarriageRoofReveal.M_CarriageRoofReveal",
+      "uv0_range": [
+        [
+          0.0022,
+          0.00269
+        ],
+        [
+          0.9978,
+          0.9978
+        ]
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "source_matches": true,
+      "geometry_uv_sha256": "cc0130b330ea8625e3941525105c81ef9a31fac014a1aae69d17a137edabb19e"
     }
   ],
+  "texture_atlases": {
+    "count": 12,
+    "size_px": [
+      2048,
+      2048
+    ],
+    "base_color": "sRGB / TC_Default",
+    "roughness_and_metallic": "linear / TC_Masks",
+    "filter": "Texture group default",
+    "provenance": "All 17 package-relative import paths resolve to SourceArt/LoopRail and all import MD5s match.",
+    "embedded_pixels": "All 12 UTexture2D source images independently exported by UE match their original PNGs at every decoded RGB8 pixel."
+  },
+  "village_train": {
+    "map": "/Game/MainRaid/RaidVillage",
+    "actor": "TS_Village_Train",
+    "vehicles": 4,
+    "masked_upper_components": 3,
+    "opaque_body_components": 3,
+    "upper_collision": "NoCollision",
+    "lower_collision": "QueryAndPhysics"
+  },
+  "reveal_material": {
+    "asset": "/Game/MainRaid/Rail/M_CarriageRoofReveal.M_CarriageRoofReveal",
+    "blend": "Masked",
+    "collection": "/Game/Effects/MPC_OcclusionReveal",
+    "shared_mask_code_and_inputs_identical": true,
+    "opaque_lower_material": "/LoopRail/Materials/M_CarriageDetail.M_CarriageDetail"
+  },
+  "gameplay": {
+    "map": "/Game/MainRaid/RaidVillage",
+    "pawn_class": "BP_TunaSweeperPlayerCharacter_C",
+    "controller_class": "TunaSweeperPlayerController",
+    "pie_reveal": "Moved pawn and mouse independently. Both valid flags, radii, and viewport-projected centers matched at both positions within three pixels.",
+    "seat_rays_hit": 16,
+    "seat_pan_above_floor_component_origin_cm": 52.4,
+    "passenger_capsule_diameter_cm": 68,
+    "central_aisle_and_both_side_entrances": "Simple collision sweeps clear.",
+    "intercar_walk": "In both directions across coach/coach and locomotive/coach connections while stopped and on a curve at 600 cm/s.",
+    "moving_passenger_full_lap_max_drift_cm": 0
+  },
+  "gpu_reveal_comparison": {
+    "renderer": "D3D12",
+    "method": "Same map and camera. Compare each MPC circle to the upper mesh hidden as a reference. For both circles together, separate the two screen-space centers. Count a pixel when any RGB8 channel differs by more than 8.",
+    "size_px": [
+      1200,
+      740
+    ],
+    "closed_to_player_changed_px": 68524,
+    "closed_to_cursor_changed_px": 68524,
+    "distinct_player_cursor_centres_changed_px": 116404,
+    "restored_different_px": 0,
+    "lower_only_player_different_px": 0,
+    "lower_only_cursor_different_px": 0,
+    "window_frame": {
+      "reference_upper_px": 2284,
+      "player_matches_hidden_upper": 0.98774,
+      "cursor_matches_hidden_upper": 0.98774
+    },
+    "roof": {
+      "reference_upper_px": 17432,
+      "player_matches_hidden_upper": 0.99134,
+      "cursor_matches_hidden_upper": 0.99134
+    }
+  },
+  "automation": {
+    "tests": [
+      "LoopRail.Assets.DetailedSurfaceTextures",
+      "LoopRail.Assets.NoProjectDependencies",
+      "LoopRail.Assets.SavedPreviewMap",
+      "LoopRail.Assets.VehicleBudgetAndAisle",
+      "LoopRail.Runtime.Connections.Rebuild",
+      "LoopRail.Runtime.Connections.Walking",
+      "LoopRail.Runtime.ArrivalEstimate",
+      "LoopRail.Runtime.BeginPlayRandomStart",
+      "LoopRail.Runtime.MovingPassenger",
+      "LoopRail.Runtime.ReplicatedDwell",
+      "LoopRail.Runtime.StationsAndCrossings",
+      "LoopRail.Visual.Blockout",
+      "TunaSweeper.Player.Camera.TrainRide"
+    ],
+    "passed": 13,
+    "failed": 0,
+    "process_exit_code": 0
+  },
   "passed": true
 }

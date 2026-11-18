@@ -76,14 +76,13 @@
   "materials_external_to_fbx": true,
   "assets": {
     "Locomotive": {
-      "triangles": 4916,
-      "mesh_parts": 69,
-      "collision_boxes": 3,
-      "uv_islands": 2170,
-      "uv_overlap_count": 0,
+      "triangles": 11956,
+      "mesh_parts": 113,
+      "collision_boxes": 5,
+      "uv_charts": 2174,
       "atlas_size": 2048,
-      "atlas_padded_occupancy": 0.9164588451385498,
-      "density_scale": 1.1615575372303042,
+      "atlas_padded_occupancy": 0.95126,
+      "texels_per_cm": 0.9811,
       "bounds_cm": {
         "min": [
           -450.0,
@@ -93,77 +92,78 @@
         "max": [
           450.0,
           110.0,
-          277.5
+          278.37
         ],
         "size": [
           900.0,
           220.0,
-          277.5
+          278.37
         ]
       },
       "material": "M_LocomotiveDetail"
     },
     "Carriage": {
-      "triangles": 9012,
-      "mesh_parts": 175,
-      "collision_boxes": 52,
-      "uv_islands": 4806,
-      "uv_overlap_count": 0,
+      "triangles": 12372,
+      "mesh_parts": 113,
+      "collision_boxes": 42,
+      "uv_charts": 3098,
       "atlas_size": 2048,
-      "atlas_padded_occupancy": 0.8947620391845703,
-      "density_scale": 1.0046311139504902,
+      "atlas_padded_occupancy": 0.96634,
+      "texels_per_cm": 0.9727,
       "bounds_cm": {
         "min": [
           -450.0,
-          -110.0,
+          -109.96,
           0.0
         ],
         "max": [
           450.0,
-          110.0,
-          251.0
+          109.96,
+          158.35
         ],
         "size": [
           900.0,
-          220.0,
-          251.0
+          219.92,
+          158.35
         ]
       },
       "material": "M_CarriageDetail"
     },
     "CarriageRoof": {
-      "triangles": 188,
-      "mesh_parts": 3,
+      "triangles": 3248,
+      "mesh_parts": 54,
       "collision_boxes": 0,
-      "uv_islands": 102,
-      "uv_overlap_count": 0,
+      "uv_charts": 526,
       "atlas_size": 2048,
-      "atlas_padded_occupancy": 0.5567054748535156,
-      "density_scale": 2.232,
+      "atlas_padded_occupancy": 0.85794,
+      "texels_per_cm": 1.725,
       "bounds_cm": {
         "min": [
-          -450.0,
+          -449.96,
           -110.0,
-          248.0
+          60.0
         ],
         "max": [
-          450.0,
+          449.96,
           110.0,
-          280.0
+          279.98
         ],
         "size": [
-          900.0,
+          899.92,
           220.0,
-          32.0
+          219.98
         ]
       },
       "material": "M_CarriageRoofDetail"
     },
     "CarriageConnection": {
-      "triangles": 396,
-      "mesh_parts": 9,
+      "triangles": 2228,
+      "mesh_parts": 47,
       "collision_boxes": 0,
-      "uv_islands": 234,
+      "uv_charts": 290,
+      "atlas_size": 2048,
+      "atlas_padded_occupancy": 0.90643,
+      "texels_per_cm": 5.0247,
       "bounds_cm": {
         "min": [
           -50.0,
@@ -181,38 +181,7 @@
           100.0
         ]
       },
-      "material": "M_CarriageConnectionDetail",
-      "uv_overlap_count": 0,
-      "atlas_size": 2048,
-      "atlas_padded_occupancy": 0.617340087890625,
-      "density_scale": 7.44,
-      "origin": "floor centre at top surface",
-      "floor_top_cm": 0,
-      "clear_width_between_guardrails_cm": 92
+      "material": "M_CarriageConnectionDetail"
     }
-  },
-  "outward_normals_all_parts": true,
-  "roof_signed_volumes_cm3": {
-    "Locomotive_CabCanopy": 310580.0463460287,
-    "CarriageRoof_ArchedCanopy": 990000.1832682289
-  },
-  "carriage_end_opening_width_cm": 90,
-  "locomotive_rear_entry": {
-    "target_capsule_centre_cm": [
-      -420.0,
-      0.0,
-      148.0
-    ],
-    "capsule_radius_cm": 34,
-    "capsule_half_height_cm": 88,
-    "rear_deck_x_cm": [
-      -450,
-      -379
-    ],
-    "rear_deck_width_cm": 220,
-    "rear_deck_depth_cm": 71,
-    "closest_body_collision_clearance_cm": 7.0,
-    "body_collision_blockers": [],
-    "note": "Rear platform access only; cab remains closed. Back 4cm of the capsule projection is supported by the overlapping intercar floor."
   }
 }

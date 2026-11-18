@@ -11,6 +11,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "Materials/MaterialInterface.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
@@ -182,9 +183,15 @@ bool FLoopRailMeshTest::RunTest(const FString& Parameters)
         TestTrue(TEXT("9m body scale"),FMath::Abs(Mesh->GetBoundingBox().GetSize().X-900)<1);
         if (FString(Name)==TEXT("Carriage"))
         {
+            TestTrue(TEXT("Opaque carriage ends at its lower panels and seats"), Mesh->GetBoundingBox().Max.Z < 170);
             auto* Roof=LoadObject<UStaticMesh>(nullptr,TEXT("/LoopRail/Meshes/SM_CarriageRoof.SM_CarriageRoof"));
             if (TestNotNull(TEXT("Optional roof"),Roof))
+            {
                 TestTrue(TEXT("Carriage including roof stays within 16000 triangles"),Mesh->GetRenderData()->LODResources[0].GetNumTriangles()+Roof->GetRenderData()->LODResources[0].GetNumTriangles()<=16000);
+                const FBox UpperBounds = Roof->GetBoundingBox();
+                TestTrue(TEXT("Removable upper mesh includes window framing and roof"), UpperBounds.Min.Z <= 145 && UpperBounds.Max.Z > 250);
+                TestTrue(TEXT("Upper carriage art adds no boarding collision"), !Roof->GetBodySetup() || Roof->GetBodySetup()->AggGeom.GetElementCount() == 0);
+            }
         }
     }
     FTestWorld T;
@@ -195,17 +202,19 @@ bool FLoopRailMeshTest::RunTest(const FString& Parameters)
     // Character-sized capsule travels through the entire central aisle and each end entrance.
     const FTransform Frame=Floor->GetComponentTransform();
     FHitResult Hit;
+    // Character movement uses the UCX hulls, including the solid pans under the slatted seats.
+    const FCollisionQueryParams PassengerCollision(SCENE_QUERY_STAT(LoopRailPassengerCollision), false);
     const FCollisionShape Capsule=FCollisionShape::MakeCapsule(34,88);
     const FVector A=Frame.TransformPosition(FVector(-400,0,100)), B=Frame.TransformPosition(FVector(400,0,100));
-    TestFalse(TEXT("68cm capsule clears central aisle"),T.World->SweepSingleByChannel(Hit,A,B,Frame.GetRotation(),ECC_Pawn,Capsule));
+    TestFalse(TEXT("68cm capsule clears central aisle"),T.World->SweepSingleByChannel(Hit,A,B,Frame.GetRotation(),ECC_Pawn,Capsule,PassengerCollision));
     for (double X : {-390.0,390.0})
         TestFalse(TEXT("Entrance clears capsule"),T.World->SweepSingleByChannel(Hit,Frame.TransformPosition(FVector(X,-170,100)),
-            Frame.TransformPosition(FVector(X,170,100)),Frame.GetRotation(),ECC_Pawn,Capsule));
+            Frame.TransformPosition(FVector(X,170,100)),Frame.GetRotation(),ECC_Pawn,Capsule,PassengerCollision));
     int32 SeatHits=0;
     for (int32 Row=0;Row<8;++Row) for (double Side : {-1.0,1.0})
     {
         const FVector P=Frame.TransformPosition(FVector(-297.5+85*Row,Side*70,0));
-        if (T.World->LineTraceSingleByChannel(Hit,P+FVector(0,0,200),P+FVector(0,0,20),ECC_Visibility)
+        if (T.World->LineTraceSingleByChannel(Hit,P+FVector(0,0,200),P+FVector(0,0,20),ECC_Visibility,PassengerCollision)
             && Hit.ImpactPoint.Z>Floor->GetComponentLocation().Z+40) ++SeatHits;
     }
     TestEqual(TEXT("Sixteen solid seat positions"),SeatHits,16);
@@ -216,13 +225,18 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoopRailTextureTest,"LoopRail.Assets.DetailedS
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FLoopRailTextureTest::RunTest(const FString& Parameters)
 {
-    for (const TCHAR* Name : {TEXT("Locomotive"),TEXT("Carriage"),TEXT("CarriageRoof"),TEXT("CarriageConnection")})
+    struct FVehicleExport { const TCHAR* Name; int32 Triangles; };
+    const FVehicleExport Exports[] = {
+        {TEXT("Locomotive"), 11956}, {TEXT("Carriage"), 12372},
+        {TEXT("CarriageRoof"), 3248}, {TEXT("CarriageConnection"), 2228}
+    };
+    for (const FVehicleExport& Export : Exports)
     {
+        const TCHAR* Name = Export.Name;
         const FString MeshPath=FString::Printf(TEXT("/LoopRail/Meshes/SM_%s.SM_%s"),Name,Name);
         auto* Mesh=LoadObject<UStaticMesh>(nullptr,*MeshPath);
         if (!TestNotNull(TEXT("Detailed mesh exists"),Mesh) || !TestNotNull(TEXT("Detailed mesh render data"),Mesh->GetRenderData())) continue;
-        const int32 ExportedTriangles=FString(Name)==TEXT("Locomotive") ? 4916 : FString(Name)==TEXT("Carriage") ? 9012 : FString(Name)==TEXT("CarriageRoof") ? 188 : 396;
-        TestEqual(FString(Name)+TEXT(" matches the detailed FBX export"),Mesh->GetNumTriangles(0),ExportedTriangles);
+        TestEqual(FString(Name) + TEXT(" matches the detailed FBX export"), Mesh->GetNumTriangles(0), Export.Triangles);
         auto* Material=Mesh->GetMaterial(0);
         const FString MaterialPath=FString::Printf(TEXT("/LoopRail/Materials/M_%sDetail.M_%sDetail"),Name,Name);
         TestTrue(FString(Name)+TEXT(" uses its dedicated texture material"),Material && Material->GetPathName()==MaterialPath);

@@ -86,12 +86,10 @@ bool FLoopRailConnectionWalkTest::RunTest(const FString& Parameters)
         ConfigureRoute(Track, bMovingCurve);
         auto* Train = T.World->SpawnActor<ALoopRailTrain>();
         Train->Track = Track;
-        Train->StartDistance = bMovingCurve ? 4000 : 8000;
         Train->CruiseSpeed = 600;
         Train->Acceleration = 1000;
         Train->bAutoRun = false;
         Train->RebuildTrain();
-        Train->ResetTrain();
         if (!TestEqual(TEXT("Connection floors exist before walking"), GetConnectionFloors(Train).Num(), 3)) continue;
 
         FActorSpawnParameters Spawn;
@@ -103,6 +101,9 @@ bool FLoopRailConnectionWalkTest::RunTest(const FString& Parameters)
         T.World->InitializeActorsForPlay(FURL());
         T.World->BeginPlay();
         T.World->GetWorldSettings()->NotifyBeginPlay();
+        // BeginPlay chooses a random route position. Put this walking case on its intended segment.
+        Train->StartDistance = bMovingCurve ? 4000 : 8000;
+        Train->ResetTrain();
 
         // Passenger aisles are fully traversable; the locomotive destination is its rear platform.
         Rider->SetActorLocation(Train->GetVehicleFloor(FollowingCar)->GetComponentTransform().TransformPosition(FVector(300, 0, 100)));

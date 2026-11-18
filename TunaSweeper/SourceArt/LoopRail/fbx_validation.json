@@ -2,90 +2,114 @@
   "passed": true,
   "final_source_to_fbx_audit": {
     "Locomotive": {
-      "source_closed_outward_parts": 69,
-      "fbx_triangles": 4916,
-      "uv_corner_count": 14748,
+      "fbx_triangles": 11956,
+      "source_closed_outward_parts": 113,
+      "uv_corner_count": 35868,
       "uv_mismatches": 0,
+      "degenerate_uv_triangles": 0,
       "uv_min": [
-        0.002197265625,
-        0.002197265625
+        0.0021973,
+        0.0021973
       ],
       "uv_max": [
-        0.997802734375,
-        0.985595703125
-      ]
+        0.9978027,
+        0.9973145
+      ],
+      "collision_boxes": 5,
+      "bounds_min_cm": [
+        -450.0,
+        -110.0,
+        0.0
+      ],
+      "bounds_max_cm": [
+        450.0,
+        110.0,
+        278.37
+      ],
+      "rear_boarding_clear": true
     },
     "Carriage": {
-      "source_closed_outward_parts": 175,
-      "fbx_triangles": 9012,
-      "uv_corner_count": 27036,
+      "fbx_triangles": 12372,
+      "source_closed_outward_parts": 113,
+      "uv_corner_count": 37116,
       "uv_mismatches": 0,
+      "degenerate_uv_triangles": 0,
       "uv_min": [
-        0.002197265625,
-        0.002197265625
+        0.0021973,
+        0.0021973
       ],
       "uv_max": [
-        0.997802734375,
-        0.952880859375
+        0.9978027,
+        0.9973145
       ],
-      "collision_boxes": 52,
-      "central_end_opening_cm": 90,
-      "passenger_capsule_diameter_cm": 68,
-      "through_end_passage_clear": true,
+      "collision_boxes": 42,
+      "bounds_min_cm": [
+        -450.0,
+        -109.96,
+        0.0
+      ],
+      "bounds_max_cm": [
+        450.0,
+        109.96,
+        158.35
+      ],
+      "solid_seats": 16,
+      "central_clear_width_cm": 96.0,
       "side_entrances_clear": true,
-      "solid_seats": 16
+      "side_entry_clear_radius_cm": 45.3
     },
     "CarriageRoof": {
-      "source_closed_outward_parts": 3,
-      "fbx_triangles": 188,
-      "uv_corner_count": 564,
+      "fbx_triangles": 3248,
+      "source_closed_outward_parts": 54,
+      "uv_corner_count": 9744,
       "uv_mismatches": 0,
+      "degenerate_uv_triangles": 0,
       "uv_min": [
-        0.002197265625,
-        0.002197265625
+        0.0021973,
+        0.0021973
       ],
       "uv_max": [
-        0.997314453125,
-        0.624755859375
+        0.9978027,
+        0.9973145
       ],
-      "top_atlas_sample_min_rgb": [
-        0.14901961386203766,
-        0.18431372940540314,
-        0.2039215862751007
+      "collision_boxes": 0,
+      "bounds_min_cm": [
+        -449.96,
+        -110.0,
+        60.0
       ],
-      "top_atlas_sample_max_rgb": [
-        0.7137255072593689,
-        0.5215686559677124,
-        0.24705883860588074
-      ]
+      "bounds_max_cm": [
+        449.96,
+        110.0,
+        279.98
+      ],
+      "ivory_frame_parts": 38
     },
     "CarriageConnection": {
-      "source_closed_outward_parts": 9,
-      "fbx_triangles": 396,
-      "uv_corner_count": 1188,
+      "fbx_triangles": 2228,
+      "source_closed_outward_parts": 47,
+      "uv_corner_count": 6684,
       "uv_mismatches": 0,
+      "degenerate_uv_triangles": 0,
       "uv_min": [
-        0.002197265625,
-        0.002197265625
+        0.0021973,
+        0.0021973
       ],
       "uv_max": [
-        0.997802734375,
-        0.957275390625
+        0.9978027,
+        0.9973145
       ],
+      "collision_boxes": 0,
       "bounds_min_cm": [
-        -50.000003814697266,
-        -50.000003814697266,
+        -50.0,
+        -50.0,
         -10.0
       ],
       "bounds_max_cm": [
-        50.000003814697266,
-        50.000003814697266,
+        50.0,
+        50.0,
         90.0
-      ],
-      "collision_boxes": 0,
-      "clear_guard_width_cm": 92
+      ]
     }
-  },
-  "all_four_atlases_px": 2048,
-  "notes": "Every FBX corner keeps authored UVs. Coach central 90cm openings and original side entrances clear a 68cm capsule; connection floors/guards use runtime collision."
+  }
 }
