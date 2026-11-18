@@ -17,7 +17,13 @@ WIDTH, HEIGHT = 1600, 900
 MAPS = [
     ("SSTO_Exterior", "/Game/MainRaid/RaidPlains", "exterior"),
     ("SSTO_Interior", "/Game/MainRaid/RaidPlains", "interior"),
+    ("SSTO_Windshield", "/Game/MainRaid/RaidPlains", "windshield"),
 ]
+CAMERAS = {
+    "exterior": ((1920, -3450, 1100), (0, 0, 245), 44.0),
+    "interior": ((520, -140, 2350), (60, 0, 190), 44.0),
+    "windshield": ((1550, -1270, 650), (900, -75, 385), 38.0),
+}
 
 
 def package_hashes():
@@ -52,6 +58,7 @@ class CaptureMaps:
         self.stage_started = self.started
         self.handle = None
         self.task = None
+        self.camera = None
         self.pending_path = None
         self.previous_mtime = None
         self.report = {"passed": False, "engine_version": unreal.SystemLibrary.get_engine_version(), "captures": []}
@@ -106,12 +113,22 @@ class CaptureMaps:
                 return
             evidence["map"] = MAPS[self.index][1]
             self.report["captures"].append(evidence)
+            self.release_camera()
             self.index += 1
-            self.task = None
             if self.index >= len(MAPS):
-                self.finish()
+                self.transition("settle_after_capture")
             else:
                 self.load_map()
+        elif self.state == "settle_after_capture" and self.frames >= 8:
+            self.finish()
+
+    def release_camera(self):
+        self.task = None
+        if self.camera:
+            self.levels.set_exact_camera_view(False)
+            self.levels.eject_pilot_level_actor()
+            self.actors.destroy_actor(self.camera)
+            self.camera = None
 
     def load_map(self):
         if self.index > 0:
@@ -126,18 +143,19 @@ class CaptureMaps:
         _name, _path, mode = MAPS[self.index]
         ship = next(a for a in self.actors.get_all_level_actors() if a.get_actor_label() == "TS_Plains_SSTOLander")
         transform = ship.get_actor_transform()
-        local = unreal.Vector(2500, -3400, 2350) if mode == "exterior" else unreal.Vector(1700, -2300, 2550)
-        target = unreal.MathLibrary.transform_location(transform, unreal.Vector(0, 0, 250))
-        location = unreal.MathLibrary.transform_location(transform, local)
+        local, center, fov = CAMERAS[mode]
+        target = unreal.MathLibrary.transform_location(transform, unreal.Vector(*center))
+        location = unreal.MathLibrary.transform_location(transform, unreal.Vector(*local))
         self.camera = self.actors.spawn_actor_from_class(unreal.CameraActor, location, unreal.MathLibrary.find_look_at_rotation(location, target))
-        self.camera.get_component_by_class(unreal.CameraComponent).set_field_of_view(44.0)
+        self.camera.get_component_by_class(unreal.CameraComponent).set_field_of_view(fov)
         shell = ship.get_components_by_class(unreal.ChildActorComponent)[0].get_editor_property('child_actor')
         cls = unreal.load_class(None, "/Script/TunaSweeper.TunaSweeperVerticalOcclusionRevealComponent")
         reveal = shell.get_components_by_class(cls)[0]
         reveal.restore_original_materials()
         reveal.apply_vertical_reveal_material()
         settings = unreal.load_asset("/Game/Effects/DA_OcclusionRevealSettings")
-        floor = unreal.MathLibrary.transform_location(transform, unreal.Vector(-350, -130, 180))
+        exit_actor = next(a for a in self.actors.get_all_level_actors() if a.get_actor_label() == "TS_Plains_SSTO_Exit")
+        floor = exit_actor.get_editor_property("arrival_point").get_world_location()
         cutoff = floor.z + 88.0 + settings.get_editor_property("vertical_reveal_start_above_player_cm")
         fade = settings.get_editor_property("vertical_reveal_fade_height_cm")
         for mesh in shell.get_components_by_class(unreal.StaticMeshComponent):
@@ -169,6 +187,7 @@ class CaptureMaps:
         if self.handle is not None:
             unreal.unregister_slate_post_tick_callback(self.handle)
             self.handle = None
+        self.release_camera()
         after = package_hashes()
         changed = sorted(key for key in set(self.baseline) | set(after) if self.baseline.get(key) != after.get(key))
         self.report["asset_packages_unchanged"] = not changed
@@ -184,7 +203,6 @@ class CaptureMaps:
         if error:
             unreal.log_error(error)
         unreal.EditorPythonScripting.set_keep_python_script_alive(False)
-        unreal.SystemLibrary.quit_editor()
 
 
 def main():
@@ -204,5 +222,4 @@ if __name__ == "__main__":
         REPORT.write_text(json.dumps({"passed": False, "error": traceback.format_exc()}, indent=2), encoding="utf-8")
         unreal.log_error(traceback.format_exc())
         unreal.EditorPythonScripting.set_keep_python_script_alive(False)
-        unreal.SystemLibrary.quit_editor()
         raise

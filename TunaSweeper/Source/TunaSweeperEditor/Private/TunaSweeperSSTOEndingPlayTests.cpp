@@ -31,6 +31,7 @@
 #include "Scenario/TunaSweeperEndingActor.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 namespace SSTOEndingPlay
 {
@@ -70,6 +71,46 @@ struct FRun
         Test->AddInfo(FString::Printf(TEXT("SSTO stage=%d true=%d"),Stage,bTrue));
     }
     bool Check(bool Value, const TCHAR* Message) { return Test->TestTrue(Message, Value); }
+    bool WalkToDevice(ACharacter* Pawn, AActor* Ship, AActor* Device)
+    {
+        UWorld* World = Pawn->GetWorld();
+        const auto& Hull = Ship->GetActorTransform();
+        const double Half = Pawn->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+        const auto Capsule = FCollisionShape::MakeCapsule(Pawn->GetCapsuleComponent()->GetScaledCapsuleRadius(), Half);
+        const FCollisionQueryParams Params(SCENE_QUERY_STAT(SSTODeviceApproach), false, Pawn);
+        const FVector Front = Hull.InverseTransformPosition(Device->GetActorLocation() + 110.0 * Device->GetActorForwardVector());
+        const FVector Feet = Pawn->GetActorLocation() - FVector(0, 0, Half);
+        const double StartX = Hull.InverseTransformPosition(Feet).X;
+        const FVector Route[] = { FVector(StartX, 0, Front.Z), FVector(Front.X, 0, Front.Z), Front };
+        FVector Previous = Pawn->GetActorLocation() + FVector(0, 0, 8);
+        FVector SegmentStart = Feet;
+        for (const FVector& LocalPoint : Route)
+        {
+            const FVector End = Hull.TransformPosition(LocalPoint);
+            const int32 Steps = FMath::Max(1, FMath::CeilToInt32(FVector::Dist2D(SegmentStart, End) / 40.0));
+            for (int32 Step = 1; Step <= Steps; ++Step)
+            {
+                const FVector Floor = FMath::Lerp(SegmentStart, End, static_cast<double>(Step) / Steps);
+                FHitResult Ground, Blocker;
+                if (!World->LineTraceSingleByChannel(Ground, Floor + FVector(0,0,35), Floor - FVector(0,0,45), ECC_Pawn, Params)
+                    || Ground.GetActor() != Ship || !Pawn->GetCharacterMovement()->IsWalkable(Ground))
+                {
+                    Test->AddError(FString::Printf(TEXT("Missing walkable deck approaching %s at %s"), *Device->GetActorLabel(), *Floor.ToString()));
+                    return false;
+                }
+                const FVector NextPoint = Ground.ImpactPoint + FVector(0, 0, Half + 10);
+                if (World->SweepSingleByChannel(Blocker, Previous, NextPoint, FQuat::Identity, ECC_Pawn, Capsule, Params))
+                {
+                    Test->AddError(FString::Printf(TEXT("Approach to %s blocked by %s at %s"),
+                        *Device->GetActorLabel(), *GetNameSafe(Blocker.GetComponent()), *Blocker.Location.ToString()));
+                    return false;
+                }
+                Previous = NextPoint;
+            }
+            SegmentStart = End;
+        }
+        return Check(Pawn->SetActorLocation(Previous), TEXT("Player reaches the tested approach"));
+    }
     bool Tick()
     {
         UWorld* World = GEditor->PlayWorld;
@@ -117,28 +158,8 @@ struct FRun
             auto* Storage = Find<ATunaSweeperRaidStorageActor>(World);
             auto* Ship = Find<AActor>(World, TEXT("TS_Plains_SSTOLander"));
             if (!Check(Pawn && Ending && Storage && Ship, TEXT("Interior actors alive"))) return true;
-            // Sweep the player's real upright capsule along the central aisle to the interaction position.
-            const float Half = Pawn->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-            const float Radius = Pawn->GetCapsuleComponent()->GetScaledCapsuleRadius();
-            FCollisionQueryParams Params(SCENE_QUERY_STAT(SSTOEndingWalk), false, Pawn);
-            FVector Previous = Pawn->GetActorLocation() + FVector(0,0,8);
-            for (int32 X = -300; X <= 365; X += 35)
-            {
-                const FVector Floor = Ship->GetActorTransform().TransformPosition(FVector(X,0,181));
-                const FVector Point = Floor + FVector(0,0,Half+10);
-                FHitResult Hit;
-                const bool Blocked = World->SweepSingleByChannel(Hit, Previous, Point, FQuat::Identity, ECC_Pawn,
-                    FCollisionShape::MakeCapsule(Radius, Half), Params);
-                if (Blocked)
-                {
-                    Test->AddError(FString::Printf(TEXT("Interior aisle blocked by %s at %s"), *GetNameSafe(Hit.GetActor()), *Hit.Location.ToString()));
-                    return true;
-                }
-                Previous = Point;
-            }
-            Pawn->SetActorLocation(Previous);
-            if (!Check(Storage->GetInteractableComponent()->IsWithinInteractionDistance(Pawn), TEXT("Storage reachable from aisle")) ||
-                !Check(Ending->IsWithinInteractionDistance(Pawn), TEXT("Ending reachable from aisle")) ||
+            if (!WalkToDevice(Pawn, Ship, Storage) ||
+                !Check(Storage->GetInteractableComponent()->IsWithinInteractionDistance(Pawn), TEXT("Storage reachable from aisle")) ||
                 !Check(Storage->GetInteractableComponent()->RequestInteraction(Pawn), TEXT("Actual storage interaction opens"))) return true;
             Next(2); return false;
         }
@@ -190,7 +211,11 @@ struct FRun
             auto* Player = Cast<ATunaSweeperPlayerController>(PC);
             if (!Check(Player != nullptr, TEXT("Gameplay controller owns inventory UI"))) return true;
             Player->ToggleInventoryOnlyPanel();
-            if (!Check(Ending->RequestInteraction(Pawn), TEXT("Actual ending interaction starts"))) return true;
+            auto* Ship = Find<AActor>(World, TEXT("TS_Plains_SSTOLander"));
+            if (!Check(Pawn && Ship && Ending, TEXT("Terminal and player present after closing storage")) ||
+                !WalkToDevice(Pawn, Ship, Ending) ||
+                !Check(Ending->IsWithinInteractionDistance(Pawn), TEXT("Ending reachable from aisle")) ||
+                !Check(Ending->RequestInteraction(Pawn), TEXT("Actual ending interaction starts"))) return true;
             Next(3); return false;
         }
         if (Stage == 3)

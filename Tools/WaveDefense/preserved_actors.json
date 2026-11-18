@@ -1427,25 +1427,25 @@
     "pos": [
       0.0,
       0.0,
-      137.65917922821004
+      66.84434
     ]
   },
   {
     "name": "TS_Plains_SSTO_Entry",
     "class": "/Script/TunaSweeper.TunaSweeperLadderTransferActor",
     "pos": [
-      63.25921241212275,
-      -696.2985278856277,
-      34.32042423728308
+      709.72715,
+      -322.5757,
+      42.76377
     ]
   },
   {
     "name": "TS_Plains_SSTO_Exit",
     "class": "/Script/TunaSweeper.TunaSweeperLadderTransferActor",
     "pos": [
-      -217.65788970115892,
-      -287.2679881210913,
-      342.3593161399833
+      402.83954,
+      107.26884,
+      241.84348
     ]
   },
   {
@@ -1580,7 +1580,7 @@
     "pos": [
       0.0,
       0.0,
-      137.65917922821004
+      66.84434
     ]
   }
 ]

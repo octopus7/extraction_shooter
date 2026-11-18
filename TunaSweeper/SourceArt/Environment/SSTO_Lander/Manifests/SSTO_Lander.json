@@ -1,120 +1,131 @@
 {
   "name": "SSTO_Lander",
   "engine": "Unreal Engine 5.7",
-  "axis_contract": "+X nose / +Y right / +Z up; cm",
-  "authoring_conversion": "FBX: Blender metres (UE X/100, -UE Y/100, UE Z/100), -Y forward Z up; studio GLB retains review orientation",
-  "pivot_contract": "All parts: identity transform; shared hull bottom origin at (0,0,0)",
-  "collision_contract": "Use complex-as-simple static collision; never one convex hull across the cabin",
+  "axis_contract": "+X nose / +Y starboard / +Z up; UE centimeters",
+  "authoring_conversion": "Blender metres (UE X/100, -UE Y/100, UE Z/100); FBX -Y forward and Z up; GLB Y up.",
+  "editable_source": "SSTO_Lander.blend",
+  "studio_glb": "GLB/SSTO_Lander.glb",
+  "studio_previews": {
+    "exterior": "Previews/SSTO_Exterior.png",
+    "rear": "Previews/SSTO_Rear.png",
+    "roof_off": "Previews/SSTO_Interior.png",
+    "windshield_detail": "Previews/SSTO_Windshield.png",
+    "windshield_front_port": "Previews/SSTO_Windshield_ThreeQuarter.png",
+    "windshield_profile": "Previews/SSTO_Windshield_Profile.png",
+    "nose_front": "Previews/SSTO_Nose_Front.png"
+  },
+  "pivot_contract": "All mesh parts share a single identity origin. The three gear contacts use the original unscaled feet and hinge calibration.",
+  "collision_contract": "Complex-as-simple open shell surfaces, a contiguous deck and a through-cut port hatch. The windshield is visual only.",
   "materials": {
-    "M_SSTO_Orange": {
+    "M_SSTO_WarmGray": {
       "base_color": [
-        0.5,
-        0.13,
-        0.035,
+        0.735,
+        0.661,
+        0.553,
         1
       ],
-      "metallic": 0.22,
-      "roughness": 0.42,
-      "emission_strength": 0
-    },
-    "M_SSTO_Rust": {
-      "base_color": [
-        0.26,
-        0.045,
-        0.011,
-        1
-      ],
-      "metallic": 0.25,
-      "roughness": 0.5,
+      "metallic": 0.09,
+      "roughness": 0.49,
       "emission_strength": 0
     },
     "M_SSTO_Structure": {
       "base_color": [
-        0.042,
-        0.07,
-        0.103,
+        0.055,
+        0.051,
+        0.048,
         1
       ],
-      "metallic": 0.56,
-      "roughness": 0.42,
+      "metallic": 0.34,
+      "roughness": 0.57,
       "emission_strength": 0
     },
-    "M_SSTO_WarmGray": {
+    "M_SSTO_Orange": {
       "base_color": [
-        0.71,
-        0.69,
-        0.6,
+        0.365,
+        0.098,
+        0.039,
         1
       ],
-      "metallic": 0.1,
+      "metallic": 0.14,
       "roughness": 0.53,
+      "emission_strength": 0
+    },
+    "M_SSTO_Rust": {
+      "base_color": [
+        0.224,
+        0.077,
+        0.034,
+        1
+      ],
+      "metallic": 0.48,
+      "roughness": 0.48,
       "emission_strength": 0
     },
     "M_SSTO_Interior": {
       "base_color": [
-        0.28,
-        0.33,
-        0.34,
+        0.328,
+        0.338,
+        0.315,
         1
       ],
-      "metallic": 0.2,
-      "roughness": 0.58,
+      "metallic": 0.41,
+      "roughness": 0.43,
       "emission_strength": 0
     },
     "M_SSTO_Floor": {
       "base_color": [
-        0.078,
-        0.105,
-        0.126,
+        0.116,
+        0.131,
+        0.129,
         1
       ],
-      "metallic": 0.38,
-      "roughness": 0.62,
+      "metallic": 0.37,
+      "roughness": 0.6,
       "emission_strength": 0
     },
     "M_SSTO_Rubber": {
       "base_color": [
-        0.018,
-        0.025,
-        0.032,
+        0.021,
+        0.024,
+        0.024,
         1
       ],
-      "metallic": 0.03,
-      "roughness": 0.72,
+      "metallic": 0.04,
+      "roughness": 0.67,
       "emission_strength": 0
     },
     "M_SSTO_Glass": {
       "base_color": [
-        0.024,
-        0.11,
-        0.17,
+        0.012,
+        0.046,
+        0.044,
         1
       ],
-      "metallic": 0.65,
-      "roughness": 0.18,
+      "metallic": 0.38,
+      "roughness": 0.23,
       "emission_strength": 0
     },
     "M_SSTO_Amber": {
       "base_color": [
         1.0,
-        0.39,
-        0.07,
+        0.335,
+        0.048,
         1
       ],
-      "metallic": 0.05,
-      "roughness": 0.33,
-      "emission_strength": 0.7
+      "metallic": 0.06,
+      "roughness": 0.31,
+      "emission_strength": 1.0
     },
     "M_SSTO_Light": {
       "base_color": [
-        0.9,
-        0.82,
-        0.61,
+        0.97,
+        0.845,
+        0.62,
         1
       ],
-      "metallic": 0.03,
-      "roughness": 0.35,
-      "emission_strength": 1.4
+      "metallic": 0.04,
+      "roughness": 0.32,
+      "emission_strength": 1.45
     }
   },
   "parts": [
@@ -123,437 +134,458 @@
       "fbx": "Models/SM_SSTO_LowHull.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 2944,
-      "vertices": 1544,
+      "triangles": 14314,
+      "vertices": 10885,
       "bounds_cm": [
-        -1010.0000381469727,
-        -349.0000009536743,
-        28.00000011920929,
-        1450.0,
-        349.0000009536743,
-        434.7270965576172
+        -1115.0,
+        -532.2596,
+        99.33,
+        1271.8,
+        532.2596,
+        419.5428
       ],
       "dimensions_cm": [
-        2460.0000381469727,
-        698.0000019073486,
-        406.7270964384079
+        2386.8,
+        1064.5192,
+        320.2128
       ],
       "materials": [
         "M_SSTO_Structure",
-        "M_SSTO_Rust",
-        "M_SSTO_Orange",
         "M_SSTO_WarmGray",
-        "M_SSTO_Light",
-        "M_SSTO_Interior"
+        "M_SSTO_Interior",
+        "M_SSTO_Rubber",
+        "M_SSTO_Amber"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 2944
+      "unreal_triangles": 14314
     },
     {
       "name": "SM_SSTO_InteriorFloor",
       "fbx": "Models/SM_SSTO_InteriorFloor.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 1568,
-      "vertices": 856,
+      "triangles": 4960,
+      "vertices": 3020,
       "bounds_cm": [
-        -1009.999942779541,
-        -365.99998474121094,
-        158.00000429153442,
-        960.4999542236328,
-        252.99999713897705,
-        180.9999942779541
+        -918.0,
+        -358.0,
+        165.0,
+        1020.0,
+        272.0,
+        181.45
       ],
       "dimensions_cm": [
-        1970.4998970031738,
-        618.999981880188,
-        22.999989986419678
+        1938.0,
+        630.0,
+        16.45
       ],
       "materials": [
+        "M_SSTO_Rubber",
         "M_SSTO_Structure",
         "M_SSTO_Floor",
-        "M_SSTO_WarmGray"
+        "M_SSTO_Interior",
+        "M_SSTO_Orange"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 1568
+      "unreal_triangles": 4960
     },
     {
       "name": "SM_SSTO_UpperHull",
       "fbx": "Models/SM_SSTO_UpperHull.fbx",
       "reveal": true,
       "collision": true,
-      "triangles": 3768,
-      "vertices": 2008,
+      "triangles": 8542,
+      "vertices": 6282,
       "bounds_cm": [
-        -1003.5000801086426,
-        -391.9999837875366,
-        185.50000190734863,
-        1030.29203414917,
-        336.21551990509033,
-        561.7691040039062
+        -921.5693,
+        -348.963,
+        174.6802,
+        889.6811,
+        348.963,
+        500.0799
       ],
       "dimensions_cm": [
-        2033.7921142578125,
-        728.215503692627,
-        376.2691020965576
+        1811.2504,
+        697.926,
+        325.3997
       ],
       "materials": [
-        "M_SSTO_Orange",
-        "M_SSTO_Rust",
+        "M_SSTO_WarmGray",
         "M_SSTO_Interior",
         "M_SSTO_Structure",
-        "M_SSTO_Glass",
-        "M_SSTO_WarmGray",
+        "M_SSTO_Rubber",
         "M_SSTO_Amber"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 3766
+      "unreal_triangles": 8542
     },
     {
       "name": "SM_SSTO_Roof",
       "fbx": "Models/SM_SSTO_Roof.fbx",
       "reveal": true,
       "collision": true,
-      "triangles": 1452,
-      "vertices": 780,
+      "triangles": 10932,
+      "vertices": 7841,
       "bounds_cm": [
-        -988.0000114440918,
-        -291.9020414352417,
-        429.2996406555176,
-        433.99996757507324,
-        291.9020414352417,
-        600.5000114440918
+        -993.9473,
+        -311.2986,
+        342.8882,
+        1175.9999,
+        311.2986,
+        555.5119
       ],
       "dimensions_cm": [
-        1421.999979019165,
-        583.8040828704834,
-        171.20037078857422
+        2169.9472,
+        622.5972,
+        212.6237
       ],
       "materials": [
-        "M_SSTO_Orange",
-        "M_SSTO_Rust",
-        "M_SSTO_Structure",
         "M_SSTO_WarmGray",
-        "M_SSTO_Light"
+        "M_SSTO_Interior",
+        "M_SSTO_Structure",
+        "M_SSTO_Rubber"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 1452
+      "unreal_triangles": 10932
     },
     {
       "name": "SM_SSTO_CockpitGlass",
       "fbx": "Models/SM_SSTO_CockpitGlass.fbx",
       "reveal": true,
       "collision": false,
-      "triangles": 264,
-      "vertices": 144,
+      "triangles": 10172,
+      "vertices": 5834,
       "bounds_cm": [
-        434.99999046325684,
-        -320.4829454421997,
-        290.78943729400635,
-        1012.8127098083496,
-        320.4829454421997,
-        539.703369140625
+        582.9141,
+        -305.8265,
+        341.1163,
+        1179.1937,
+        305.8265,
+        456.0155
       ],
       "dimensions_cm": [
-        577.8127193450928,
-        640.9658908843994,
-        248.91393184661865
+        596.2796,
+        611.653,
+        114.8992
       ],
       "materials": [
-        "M_SSTO_Glass"
+        "M_SSTO_Glass",
+        "M_SSTO_Rubber",
+        "M_SSTO_Structure",
+        "M_SSTO_Interior"
       ],
       "transform_identity": true,
-      "uv_channels": 1,
-      "unreal_triangles": 264
+      "uv_channels": 2,
+      "unreal_triangles": 10172
     },
     {
       "name": "SM_SSTO_Wings",
       "fbx": "Models/SM_SSTO_Wings.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 2280,
-      "vertices": 1200,
+      "triangles": 13888,
+      "vertices": 11206,
       "bounds_cm": [
-        -1069.1591262817383,
-        -899.2560386657715,
-        111.00000143051147,
-        333.1284284591675,
-        899.2560386657715,
-        686.7722511291504
+        -1141.6577,
+        -901.234,
+        132.7557,
+        192.54,
+        901.234,
+        471.1487
       ],
       "dimensions_cm": [
-        1402.2875547409058,
-        1798.512077331543,
-        575.7722496986389
+        1334.1977,
+        1802.468,
+        338.393
       ],
       "materials": [
-        "M_SSTO_Structure",
-        "M_SSTO_Orange",
         "M_SSTO_WarmGray",
-        "M_SSTO_Rust",
-        "M_SSTO_Amber"
+        "M_SSTO_Structure",
+        "M_SSTO_Rubber",
+        "M_SSTO_Interior",
+        "M_SSTO_Amber",
+        "M_SSTO_Floor"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 2248
+      "unreal_triangles": 13888
     },
     {
       "name": "SM_SSTO_Engines",
       "fbx": "Models/SM_SSTO_Engines.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 9020,
-      "vertices": 4616,
+      "triangles": 6910,
+      "vertices": 4912,
       "bounds_cm": [
-        -1250.0,
-        -570.4261302947998,
-        119.57385540008545,
-        -632.9999923706055,
-        570.4261302947998,
-        448.42615127563477
+        -1145.0,
+        -800.0,
+        116.0,
+        -866.9137,
+        800.0,
+        527.2285
       ],
       "dimensions_cm": [
-        617.0000076293945,
-        1140.8522605895996,
-        328.8522958755493
+        278.0863,
+        1600.0,
+        411.2285
       ],
       "materials": [
-        "M_SSTO_Structure",
-        "M_SSTO_Orange",
         "M_SSTO_WarmGray",
-        "M_SSTO_Rubber",
+        "M_SSTO_Structure",
         "M_SSTO_Interior",
-        "M_SSTO_Rust"
+        "M_SSTO_Rubber",
+        "M_SSTO_Rust",
+        "M_SSTO_Floor"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 9020
+      "unreal_triangles": 6910
     },
     {
       "name": "SM_SSTO_LandingGear0",
       "fbx": "Models/SM_SSTO_LandingGear0.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 412,
-      "vertices": 216,
+      "triangles": 1560,
+      "vertices": 832,
       "bounds_cm": [
-        805.5000305175781,
-        -60.00000238418579,
+        813.64,
+        -57.63,
         0.0,
-        984.4999313354492,
-        60.00000238418579,
-        124.27283525466919
+        975.23,
+        57.63,
+        129.8329
       ],
       "dimensions_cm": [
-        178.9999008178711,
-        120.00000476837158,
-        124.27283525466919
+        161.59,
+        115.26,
+        129.8329
       ],
       "materials": [
+        "M_SSTO_Rubber",
         "M_SSTO_Structure",
-        "M_SSTO_Rust",
+        "M_SSTO_Interior",
+        "M_SSTO_Orange",
         "M_SSTO_WarmGray"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 412
+      "unreal_triangles": 1560
     },
     {
       "name": "SM_SSTO_LandingGear1",
       "fbx": "Models/SM_SSTO_LandingGear1.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 412,
-      "vertices": 216,
+      "triangles": 1560,
+      "vertices": 832,
       "bounds_cm": [
-        -769.5000171661377,
-        -325.0,
+        -769.28,
+        -328.24,
         0.0,
-        -590.500020980835,
-        -205.00001907348633,
-        124.27282333374023
+        -591.96,
+        -201.76,
+        129.8329
       ],
       "dimensions_cm": [
-        178.99999618530273,
-        119.99998092651367,
-        124.27282333374023
+        177.32,
+        126.48,
+        129.8329
       ],
       "materials": [
+        "M_SSTO_Rubber",
         "M_SSTO_Structure",
-        "M_SSTO_Rust",
+        "M_SSTO_Interior",
+        "M_SSTO_Orange",
         "M_SSTO_WarmGray"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 412
+      "unreal_triangles": 1560
     },
     {
       "name": "SM_SSTO_LandingGear2",
       "fbx": "Models/SM_SSTO_LandingGear2.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 412,
-      "vertices": 216,
+      "triangles": 1560,
+      "vertices": 832,
       "bounds_cm": [
-        -769.5000171661377,
-        205.00001907348633,
+        -769.28,
+        201.76,
         0.0,
-        -590.500020980835,
-        325.0,
-        124.27282333374023
+        -591.96,
+        328.24,
+        129.8329
       ],
       "dimensions_cm": [
-        178.99999618530273,
-        119.99998092651367,
-        124.27282333374023
+        177.32,
+        126.48,
+        129.8329
       ],
       "materials": [
+        "M_SSTO_Rubber",
         "M_SSTO_Structure",
-        "M_SSTO_Rust",
+        "M_SSTO_Interior",
+        "M_SSTO_Orange",
         "M_SSTO_WarmGray"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 412
+      "unreal_triangles": 1560
     },
     {
       "name": "SM_SSTO_Ladder",
       "fbx": "Models/SM_SSTO_Ladder.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 1056,
-      "vertices": 576,
+      "triangles": 4460,
+      "vertices": 2356,
       "bounds_cm": [
-        -438.99998664855957,
-        -550.5000114440918,
-        10.480475425720215,
-        -261.00001335144043,
-        -329.9999952316284,
-        269.0206289291382
+        310.5,
+        -608.0,
+        0.0,
+        479.5,
+        -331.0,
+        255.9768
       ],
       "dimensions_cm": [
-        177.99997329711914,
-        220.50001621246338,
-        258.54015350341797
+        169.0,
+        277.0,
+        255.9768
       ],
       "materials": [
-        "M_SSTO_Structure",
+        "M_SSTO_Interior",
         "M_SSTO_Floor",
         "M_SSTO_WarmGray",
-        "M_SSTO_Orange"
+        "M_SSTO_Structure",
+        "M_SSTO_Orange",
+        "M_SSTO_Rubber"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 1056
+      "unreal_triangles": 4460
     },
     {
       "name": "SM_SSTO_InteriorProps",
       "fbx": "Models/SM_SSTO_InteriorProps.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 7588,
-      "vertices": 4072,
+      "triangles": 10840,
+      "vertices": 5856,
       "bounds_cm": [
-        -961.0000610351562,
-        -251.99999809265137,
-        180.9999942779541,
-        247.49994277954102,
-        247.00000286102295,
-        403.00002098083496
+        -920.0,
+        -314.0,
+        183.0,
+        1041.0,
+        314.0,
+        466.0
       ],
       "dimensions_cm": [
-        1208.5000038146973,
-        499.0000009536743,
-        222.00002670288086
+        1961.0,
+        628.0,
+        283.0
       ],
       "materials": [
         "M_SSTO_Interior",
         "M_SSTO_Structure",
         "M_SSTO_WarmGray",
-        "M_SSTO_Rust",
-        "M_SSTO_Orange",
         "M_SSTO_Light",
-        "M_SSTO_Amber"
+        "M_SSTO_Floor"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 7588
+      "unreal_triangles": 10840
     },
     {
       "name": "SM_SSTO_CockpitFurniture",
       "fbx": "Models/SM_SSTO_CockpitFurniture.fbx",
       "reveal": false,
       "collision": true,
-      "triangles": 2916,
-      "vertices": 1536,
+      "triangles": 5440,
+      "vertices": 2904,
       "bounds_cm": [
-        523.9999771118164,
-        -216.49999618530273,
-        180.9999942779541,
-        895.4999923706055,
-        216.49999618530273,
-        392.4999952316284
+        648.4067,
+        -197.0,
+        181.0,
+        969.004,
+        197.0,
+        359.2941
       ],
       "dimensions_cm": [
-        371.50001525878906,
-        432.99999237060547,
-        211.50000095367432
+        320.5972,
+        394.0,
+        178.2941
       ],
       "materials": [
         "M_SSTO_Structure",
+        "M_SSTO_Interior",
         "M_SSTO_WarmGray",
         "M_SSTO_Rubber",
-        "M_SSTO_Orange",
-        "M_SSTO_Interior",
         "M_SSTO_Glass",
+        "M_SSTO_Light",
         "M_SSTO_Amber"
       ],
       "transform_identity": true,
       "uv_channels": 2,
-      "unreal_triangles": 2916
+      "unreal_triangles": 5440
     }
   ],
   "interaction": {
     "entry_hatch_bounds_cm": [
-      -440,
-      -352,
-      180,
-      -260,
-      -245,
-      430
+      291,
+      -350,
+      181,
+      499,
+      -275,
+      417
     ],
     "interior_destination_foot_cm": [
-      -350,
-      -130,
-      180
+      395,
+      -125,
+      181
     ],
     "exterior_destination_foot_cm": [
-      -350,
-      -610,
+      395,
+      -675,
       0
     ],
     "ladder_trigger_center_cm": [
-      -350,
-      -520,
-      100
+      395,
+      -589,
+      93
     ],
     "ladder_top_cm": [
-      -350,
-      -376,
-      180
+      395,
+      -353,
+      181
     ],
-    "floor_z_cm": 180,
-    "central_aisle_width_cm": 190,
-    "interior_clear_height_cm": 325
+    "floor_z_cm": 181,
+    "central_aisle_width_cm": 180,
+    "cockpit_seat_aisle_width_cm": 130,
+    "interior_clear_height_cm": 307.89,
+    "ending_terminal_footprint_center_cm": [
+      155,
+      185,
+      181
+    ],
+    "storage_footprint_center_cm": [
+      55,
+      -185,
+      181
+    ]
   },
   "design_notes": [
-    "Rust orange armor, blue-gray structure, warm gray panels.",
-    "Real hollow cabin, two seats, forward console and wall cargo racks.",
-    "Roof and upper hull/glass use existing vertical reveal; lower shell, floor and furniture remain visible."
+    "Unmarked mineral-ceramic lifting body with a wrapped graphite thermal chine and two recessed stern bells.",
+    "The pressure vessel, wing roots and cropped aerofoils share one continuous cross-section surface. The low canted tips follow the outboard chine.",
+    "Two flight chairs, instrument coaming, shallow interior lining and aft service bulkhead surround the walkable deck. The interactive terminal and storage use separate level actors.",
+    "Five separate laminated petrol-glass panels wrap under the rising graphite brow. Four structural posts, two on each side, support the continuous gasketed windshield.",
+    "A broad graphite forecap rises across the nose cheeks below an ivory bridge. Its low-contrast expansion joints divide the heat shield into large tiles."
   ],
   "gear_contacts": [
     {
@@ -599,655 +631,699 @@
   "ladder_contacts": {
     "part": "SM_SSTO_Ladder",
     "local_foot_cm": [
-      -350,
-      -536,
-      10.5
+      395,
+      -598,
+      0
     ],
     "upper_landing_cm": [
-      -350,
-      -376,
-      180
+      395,
+      -353,
+      181
     ]
   },
-  "total_triangles": 34092,
+  "total_triangles": 95138,
   "bounds_cm": [
-    -1250.0,
-    -899.2560386657715,
+    -1145.0,
+    -901.234,
     0.0,
-    1450.0,
-    899.2560386657715,
-    686.7722511291504
+    1271.8,
+    901.234,
+    555.5119
   ],
   "dimensions_cm": [
-    2700.0,
-    1798.512077331543,
-    686.7722511291504
+    2416.8,
+    1802.468,
+    555.5119
   ],
   "validation": {
-    "non_degenerate_triangles": true,
     "finite_vertices": true,
+    "non_degenerate_triangles": true,
     "common_identity_origin": true,
-    "walkable_floor_top_cm": 180,
+    "walkable_floor_top_cm": 181,
     "hatch_unobstructed": true,
     "central_aisle_y_cm": [
-      -95,
-      95
+      -90,
+      90
     ],
+    "main_cabin_center_paths_y_cm": [
+      -56,
+      56
+    ],
+    "main_cabin_path_x_cm": [
+      -821,
+      565
+    ],
+    "cockpit_aisle_y_cm": [
+      -65,
+      65
+    ],
+    "cockpit_center_paths_y_cm": [
+      -31,
+      31
+    ],
+    "cockpit_path_x_cm": [
+      583,
+      791
+    ],
+    "standing_capsule_radius_cm": 34,
+    "standing_capsule_half_height_cm": 88,
+    "fully_assembled_capsule_centers_tested": 1864,
+    "minimum_sampled_headroom_cm": 307.89,
+    "geometry_check_count": 54,
     "geometry_checks": [
       {
         "kind": "floor",
         "point_cm": [
-          -900,
-          -80,
-          180
+          -835,
+          -70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -900,
+          -835,
           0,
-          180
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -900,
-          80,
-          180
+          -835,
+          70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -700,
-          -80,
-          180
+          -650,
+          -70,
+          180.86
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -700,
+          -650,
           0,
-          180
+          180.86
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -700,
-          80,
-          180
+          -650,
+          70,
+          180.86
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -500,
-          -80,
-          180
+          -450,
+          -70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -500,
+          -450,
           0,
-          180
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -500,
-          80,
-          180
+          -450,
+          70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -350,
-          -80,
-          180
+          -250,
+          -70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -350,
+          -250,
           0,
-          180
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -350,
-          80,
-          180
+          -250,
+          70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -150,
-          -80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          -150,
           0,
-          180
+          -70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          -150,
-          80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          100,
-          -80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          100,
           0,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          100,
-          80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          350,
-          -80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          350,
           0,
-          180
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          350,
-          80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          550,
-          -80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          550,
           0,
-          180
+          70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          550,
-          80,
-          180
+          155,
+          -70,
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          750,
-          -80,
-          180
-        ]
-      },
-      {
-        "kind": "floor",
-        "point_cm": [
-          750,
+          155,
           0,
-          180
+          181.0
         ]
       },
       {
         "kind": "floor",
         "point_cm": [
-          750,
-          80,
-          180
+          155,
+          70,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          395,
+          -70,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          395,
+          0,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          395,
+          70,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          540,
+          -70,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          540,
+          0,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          540,
+          70,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          735,
+          -70,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          735,
+          0,
+          181.0
+        ]
+      },
+      {
+        "kind": "floor",
+        "point_cm": [
+          735,
+          70,
+          181.0
         ]
       },
       {
         "kind": "hatch_clear_ray",
         "from_cm": [
-          -395,
-          -850,
+          346,
+          -740,
           225
         ],
         "to_cm": [
-          -395,
-          -100,
-          225
-        ]
-      },
-      {
-        "kind": "hatch_clear_ray",
-        "from_cm": [
-          -395,
-          -850,
-          290
-        ],
-        "to_cm": [
-          -395,
-          -100,
-          290
-        ]
-      },
-      {
-        "kind": "hatch_clear_ray",
-        "from_cm": [
-          -395,
-          -850,
-          370
-        ],
-        "to_cm": [
-          -395,
-          -100,
-          370
-        ]
-      },
-      {
-        "kind": "hatch_clear_ray",
-        "from_cm": [
-          -350,
-          -850,
-          225
-        ],
-        "to_cm": [
-          -350,
-          -100,
+          346,
+          -120,
           225
         ]
       },
       {
         "kind": "hatch_clear_ray",
         "from_cm": [
-          -350,
-          -850,
-          290
+          346,
+          -740,
+          296
         ],
         "to_cm": [
-          -350,
-          -100,
-          290
+          346,
+          -120,
+          296
         ]
       },
       {
         "kind": "hatch_clear_ray",
         "from_cm": [
-          -350,
-          -850,
-          370
+          346,
+          -740,
+          380
         ],
         "to_cm": [
-          -350,
-          -100,
-          370
+          346,
+          -120,
+          380
         ]
       },
       {
         "kind": "hatch_clear_ray",
         "from_cm": [
-          -305,
-          -850,
+          395,
+          -740,
           225
         ],
         "to_cm": [
-          -305,
-          -100,
+          395,
+          -120,
           225
         ]
       },
       {
         "kind": "hatch_clear_ray",
         "from_cm": [
-          -305,
-          -850,
-          290
+          395,
+          -740,
+          296
         ],
         "to_cm": [
-          -305,
-          -100,
-          290
+          395,
+          -120,
+          296
         ]
       },
       {
         "kind": "hatch_clear_ray",
         "from_cm": [
-          -305,
-          -850,
-          370
+          395,
+          -740,
+          380
         ],
         "to_cm": [
-          -305,
-          -100,
-          370
+          395,
+          -120,
+          380
         ]
       },
       {
-        "kind": "aisle_clear_ray",
+        "kind": "hatch_clear_ray",
         "from_cm": [
-          -890,
-          -60,
-          230
+          444,
+          -740,
+          225
         ],
         "to_cm": [
-          750,
-          -60,
-          230
+          444,
+          -120,
+          225
         ]
       },
       {
-        "kind": "aisle_clear_ray",
+        "kind": "hatch_clear_ray",
         "from_cm": [
-          -890,
-          -60,
-          310
+          444,
+          -740,
+          296
         ],
         "to_cm": [
-          750,
-          -60,
-          310
+          444,
+          -120,
+          296
         ]
       },
       {
-        "kind": "aisle_clear_ray",
+        "kind": "hatch_clear_ray",
         "from_cm": [
-          -890,
-          -60,
-          410
+          444,
+          -740,
+          380
         ],
         "to_cm": [
-          750,
-          -60,
-          410
-        ]
-      },
-      {
-        "kind": "aisle_clear_ray",
-        "from_cm": [
-          -890,
-          0,
-          230
-        ],
-        "to_cm": [
-          750,
-          0,
-          230
-        ]
-      },
-      {
-        "kind": "aisle_clear_ray",
-        "from_cm": [
-          -890,
-          0,
-          310
-        ],
-        "to_cm": [
-          750,
-          0,
-          310
-        ]
-      },
-      {
-        "kind": "aisle_clear_ray",
-        "from_cm": [
-          -890,
-          0,
-          410
-        ],
-        "to_cm": [
-          750,
-          0,
-          410
-        ]
-      },
-      {
-        "kind": "aisle_clear_ray",
-        "from_cm": [
-          -890,
-          60,
-          230
-        ],
-        "to_cm": [
-          750,
-          60,
-          230
-        ]
-      },
-      {
-        "kind": "aisle_clear_ray",
-        "from_cm": [
-          -890,
-          60,
-          310
-        ],
-        "to_cm": [
-          750,
-          60,
-          310
-        ]
-      },
-      {
-        "kind": "aisle_clear_ray",
-        "from_cm": [
-          -890,
-          60,
-          410
-        ],
-        "to_cm": [
-          750,
-          60,
-          410
+          444,
+          -120,
+          380
         ]
       },
       {
         "kind": "headroom",
         "point_cm": [
-          -850,
-          -80,
-          180
+          -800,
+          -70,
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 532.375
       },
       {
         "kind": "headroom",
         "point_cm": [
-          -850,
+          -800,
           0,
-          180
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 536.685
       },
       {
         "kind": "headroom",
         "point_cm": [
-          -850,
-          80,
-          180
+          -800,
+          70,
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 532.375
       },
       {
         "kind": "headroom",
         "point_cm": [
-          -350,
-          -80,
-          180
+          -400,
+          -70,
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 547.461
       },
       {
         "kind": "headroom",
         "point_cm": [
-          -350,
+          -400,
           0,
-          180
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 551.4
       },
       {
         "kind": "headroom",
         "point_cm": [
-          -350,
-          80,
-          180
+          -400,
+          70,
+          181
         ],
-        "ceiling_cm": 510.0
-      },
-      {
-        "kind": "headroom",
-        "point_cm": [
-          0,
-          -80,
-          180
-        ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 547.461
       },
       {
         "kind": "headroom",
         "point_cm": [
           0,
-          0,
-          180
+          -70,
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 545.853
       },
       {
         "kind": "headroom",
         "point_cm": [
           0,
-          80,
-          180
-        ],
-        "ceiling_cm": 510.0
-      },
-      {
-        "kind": "headroom",
-        "point_cm": [
-          350,
-          -80,
-          180
-        ],
-        "ceiling_cm": 510.0
-      },
-      {
-        "kind": "headroom",
-        "point_cm": [
-          350,
           0,
-          180
+          181
         ],
-        "ceiling_cm": 510.0
+        "ceiling_cm": 548.88
       },
       {
         "kind": "headroom",
         "point_cm": [
-          350,
-          80,
-          180
-        ],
-        "ceiling_cm": 510.0
-      },
-      {
-        "kind": "headroom",
-        "point_cm": [
-          600,
-          -80,
-          180
-        ],
-        "ceiling_cm": 493.08
-      },
-      {
-        "kind": "headroom",
-        "point_cm": [
-          600,
           0,
-          180
+          70,
+          181
         ],
-        "ceiling_cm": 496.48
+        "ceiling_cm": 545.865
       },
       {
         "kind": "headroom",
         "point_cm": [
-          600,
-          80,
-          180
+          395,
+          -70,
+          181
         ],
-        "ceiling_cm": 493.08
+        "ceiling_cm": 527.598
       },
       {
         "kind": "headroom",
         "point_cm": [
-          750,
-          -80,
-          180
-        ],
-        "ceiling_cm": 457.66
-      },
-      {
-        "kind": "headroom",
-        "point_cm": [
-          750,
+          395,
           0,
-          180
+          181
         ],
-        "ceiling_cm": 460.64
+        "ceiling_cm": 530.386
       },
       {
         "kind": "headroom",
         "point_cm": [
-          750,
-          80,
-          180
+          395,
+          70,
+          181
         ],
-        "ceiling_cm": 457.66
+        "ceiling_cm": 527.598
+      },
+      {
+        "kind": "headroom",
+        "point_cm": [
+          585,
+          -70,
+          181
+        ],
+        "ceiling_cm": 510.599
+      },
+      {
+        "kind": "headroom",
+        "point_cm": [
+          585,
+          0,
+          181
+        ],
+        "ceiling_cm": 513.394
+      },
+      {
+        "kind": "headroom",
+        "point_cm": [
+          585,
+          70,
+          181
+        ],
+        "ceiling_cm": 510.6
+      },
+      {
+        "kind": "headroom",
+        "point_cm": [
+          740,
+          -70,
+          181
+        ],
+        "ceiling_cm": 488.894
+      },
+      {
+        "kind": "headroom",
+        "point_cm": [
+          740,
+          0,
+          181
+        ],
+        "ceiling_cm": 491.727
+      },
+      {
+        "kind": "headroom",
+        "point_cm": [
+          740,
+          70,
+          181
+        ],
+        "ceiling_cm": 488.895
       }
-    ],
-    "geometry_check_count": 63
+    ]
   },
-  "unreal_build_note": "UE removes tiny degenerate bevel triangles during static-mesh build; source GLB/FBX triangle counts retained separately."
+  "unreal_build_note": "Source triangles are calculated from the editable mesh. Unreal built triangles are recorded after static mesh import.",
+  "windshield": {
+    "panes": 5,
+    "load_bearing_posts": 4,
+    "shoulder_glass_height_cm": 34.05,
+    "glazing_inset_cm": 2.1,
+    "port_rim_samples_ue_cm": {
+      "brow": [
+        [
+          1063.0,
+          -0.0,
+          406.6164
+        ],
+        [
+          996.9999,
+          -141.6627,
+          420.3414
+        ],
+        [
+          901.0,
+          -201.4479,
+          433.9352
+        ],
+        [
+          777.0,
+          -246.5357,
+          441.1914
+        ],
+        [
+          588.0,
+          -278.9377,
+          452.6695
+        ]
+      ],
+      "sill": [
+        [
+          1175.9999,
+          -0.0,
+          345.8656
+        ],
+        [
+          1125.9999,
+          -138.8966,
+          359.4734
+        ],
+        [
+          1052.0,
+          -195.5162,
+          372.9391
+        ],
+        [
+          916.0,
+          -241.4804,
+          404.1559
+        ],
+        [
+          635.0,
+          -303.1952,
+          418.6151
+        ]
+      ]
+    },
+    "starboard_rim_samples_ue_cm": {
+      "brow": [
+        [
+          1063.0,
+          0.0,
+          406.6164
+        ],
+        [
+          996.9999,
+          141.6627,
+          420.3414
+        ],
+        [
+          901.0,
+          201.4479,
+          433.9352
+        ],
+        [
+          777.0,
+          246.5357,
+          441.1914
+        ],
+        [
+          588.0,
+          278.9377,
+          452.6695
+        ]
+      ],
+      "sill": [
+        [
+          1175.9999,
+          0.0,
+          345.8656
+        ],
+        [
+          1125.9999,
+          138.8966,
+          359.4734
+        ],
+        [
+          1052.0,
+          195.5162,
+          372.9391
+        ],
+        [
+          916.0,
+          241.4804,
+          404.1559
+        ],
+        [
+          635.0,
+          303.1952,
+          418.6151
+        ]
+      ]
+    },
+    "shoulder_rise_from_forehead_cm": {
+      "brow": 46.05,
+      "sill": 72.75
+    },
+    "front_port_view_degrees": {
+      "outer_brow_rise": 6.95,
+      "outer_sill_rise": 9.26,
+      "structural_posts_from_horizontal": [
+        70.76,
+        69.58
+      ]
+    },
+    "verified_glass_surface_rays": 42
+  },
+  "forecap": {
+    "finish": "M_SSTO_Structure",
+    "joints": "M_SSTO_Rubber",
+    "verified_nose_and_cheek_rays": 6,
+    "pressure_shell": "SM_SSTO_LowHull"
+  }
 }

@@ -20,7 +20,6 @@ ROOT = Path(__file__).resolve().parents[2]
 SAVED = ROOT / "TunaSweeper/Saved/SSTOLander_20261003"
 REPORT = SAVED / "verification.json"
 PLACEMENT = ROOT / "TunaSweeper/SourceArt/Environment/SSTO_Lander/Manifests/SSTO_Placement.json"
-LAYOUT_SNAPSHOT = ROOT / "Docs/level_layout_snapshots/RaidPlains_2026-10-12.json"
 MANIFEST = ROOT / "TunaSweeper/SourceArt/Environment/SSTO_Lander/Manifests/SSTO_Lander.json"
 MAP_PATH = "/Game/MainRaid/RaidPlains"
 ASSET_ROOT = "/Game/MainRaid/SSTO/"
@@ -136,10 +135,7 @@ class Verifier:
                 assert PLACEMENT.is_file(), f"Missing placement evidence: {PLACEMENT}"
                 self.manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
                 self.placement = json.loads(PLACEMENT.read_text(encoding="utf-8"))
-                if LAYOUT_SNAPSHOT.is_file():
-                    layout = json.loads(LAYOUT_SNAPSHOT.read_text(encoding="utf-8"))
-                    assert layout["map"] == MAP_PATH, "Wrong map in current layout snapshot"
-                    self.placement = layout["ssto_verification"]
+                assert self.placement["map"] == MAP_PATH, "Wrong map in SSTO placement report"
                 assert self.placement.get("passed"), "Placement report did not pass"
                 assert self.levels.load_level(MAP_PATH), f"Unable to load {MAP_PATH}"
                 self.state = "settle"
@@ -201,7 +197,10 @@ class Verifier:
         self.report['built_triangle_counts']={c.static_mesh.get_name():c.static_mesh.get_num_triangles(0) for c in lower_parts+upper_parts}
         self.check_meshes(ship, lower_parts + upper_parts, upper_parts)
         self.check_boundaries(labels)
-        self.check_endpoints(unique)
+        self.check_contacts(ship, lower_parts)
+        self.check_endpoints(unique, ship)
+        self.check_hatch(ship)
+        self.check_devices(unique, ship)
         self.report["checks"]["interior"] = self.check_paths("interior_floor_paths_cm", ship, shell)
         self.report["checks"]["exterior"] = self.check_paths("external_approach_paths_cm", ship, shell)
         unreal.SystemLibrary.execute_console_command(self.world, "MAP CHECK")
@@ -239,20 +238,23 @@ class Verifier:
             assert mesh.get_num_triangles(0) == source['unreal_triangles'], f"Imported built triangle count differs: {mesh.get_path_name()} actual={mesh.get_num_triangles(0)} expected={source['unreal_triangles']}"
             actual_bounds = vector(bounds.origin - bounds.box_extent) + vector(bounds.origin + bounds.box_extent)
             assert close(actual_bounds, source["bounds_cm"], 0.1), f"Imported bounds/axes differ from source: {mesh.get_path_name()}"
-            for slot in mesh.static_materials:
+            slots = list(mesh.static_materials)
+            section_slots = {mesh_editor.get_lod_material_slot(mesh, 0, i) for i in range(mesh.get_num_sections(0))}
+            assert {str(slots[i].material_slot_name) for i in section_slots} == set(source["materials"]), f"Rendered material sections differ: {mesh.get_name()}"
+            assert mesh_editor.get_num_uv_channels(mesh, 0) >= source["uv_channels"], f"Missing authored UVs: {mesh.get_name()}"
+            for i in section_slots:
+                slot = slots[i]
                 material = slot.material_interface
                 assert material, f"Unassigned material on {mesh.get_path_name()}"
-                assert material.get_path_name().startswith(ASSET_ROOT), f"Non-SSTO mesh material: {material.get_path_name()}"
-                material_paths.add(material.get_path_name())
                 source_name = str(slot.material_slot_name)
-                if source_name not in self.manifest["materials"]:
-                    source_name = str(slot.imported_material_slot_name)
-                assert source_name in source["materials"], f"Unexpected material slot on {mesh.get_path_name()}: {source_name}"
+                expected_mi = ASSET_ROOT + "Materials/" + source_name.replace("M_SSTO_", "MI_SSTO_", 1)
+                assert material.get_path_name().split(".")[0] == expected_mi, f"Palette swapped on {mesh.get_name()} {source_name}"
+                chain = material_chain(component.get_material(i))
+                assert material.get_path_name() in chain, f"Component overrides the imported surface: {component.get_name()} {source_name}"
+                material_paths.add(material.get_path_name())
                 if material.get_path_name() not in checked_materials:
                     checked_materials[material.get_path_name()] = self.check_palette(material, source_name)
-            if component in upper_parts:
-                for material in component.get_materials():
-                    chain = material_chain(material)
+                if component in upper_parts:
                     assert any(path.split(".")[0] == REVEAL_MATERIAL for path in chain), f"Upper shell does not inherit the reveal shader: {chain}"
             entries.append({"component": component.get_name(), "mesh": mesh.get_path_name(), "triangles": mesh.get_num_triangles(0), "collision": str(flag)})
         minimum = [min(point[axis] for point in local_points) for axis in range(3)]
@@ -298,7 +300,51 @@ class Verifier:
             actual.append(after)
         self.report["checks"]["preserved_boundaries"] = actual
 
-    def check_endpoints(self, unique):
+    def check_contacts(self, ship, components):
+        by_mesh = {c.static_mesh.get_name(): c for c in components}
+        ignore = [a for a in self.actors if not isinstance(a, unreal.LandscapeProxy)]
+        ladder = self.manifest["ladder_contacts"]
+        mounts = [(part, part["mount_cm"]) for part in self.manifest["gear_contacts"]]
+        mounts.append((ladder, ladder["upper_landing_cm"]))
+        contacts = []
+        for part, mount in mounts:
+            transform = by_mesh[part["part"]].get_world_transform()
+            foot = unreal.MathLibrary.transform_location(transform, unreal.Vector(*part["local_foot_cm"]))
+            top = unreal.MathLibrary.transform_location(transform, unreal.Vector(*mount))
+            expected_top = unreal.MathLibrary.transform_location(ship.get_actor_transform(), unreal.Vector(*mount))
+            assert (top - expected_top).length() < 0.5, f"Detached mount: {part['part']}"
+            trace = unreal.SystemLibrary.line_trace_single(self.world, foot + unreal.Vector(0, 0, 100), foot - unreal.Vector(0, 0, 100),
+                unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ignore, unreal.DrawDebugTrace.NONE, True)
+            ground = hit_result(trace)
+            assert ground and abs(foot.z - ground[5].z) < 2.0, f"Missed terrain contact: {part['part']} at {foot}"
+            contacts.append({"part": part["part"], "foot_world_cm": vector(foot), "terrain_z_cm": ground[5].z})
+        self.report["checks"]["terrain_contacts"] = contacts
+
+    def check_hatch(self, ship):
+        transform = ship.get_actor_transform()
+        rays = [sample for sample in self.manifest["validation"]["geometry_checks"] if sample["kind"] == "hatch_clear_ray"]
+        assert rays, "Missing source hatch clearances"
+        for ray in rays:
+            start, end = (unreal.MathLibrary.transform_location(transform, unreal.Vector(*ray[k])) for k in ("from_cm", "to_cm"))
+            trace = unreal.SystemLibrary.line_trace_single_by_profile(self.world, start, end, "Pawn", False, [], unreal.DrawDebugTrace.NONE, True)
+            assert not hit_result(trace), f"Collision seals hatch between {ray['from_cm']} and {ray['to_cm']}"
+        self.report["checks"]["clear_hatch_rays"] = len(rays)
+
+    def check_devices(self, unique, ship):
+        checked = []
+        transform = ship.get_actor_transform()
+        for label, desired in self.placement["devices"].items():
+            device = unique(label)
+            local = unreal.MathLibrary.inverse_transform_location(transform, device.get_actor_location())
+            assert close(vector(local), desired["local_floor_cm"]), f"Incorrect cabin placement: {label}"
+            yaw = math.radians(desired["local_yaw"])
+            expected = unreal.MathLibrary.transform_direction(transform, unreal.Vector(math.cos(yaw), math.sin(yaw), 0))
+            assert expected.dot(device.get_actor_forward_vector()) > 0.999, f"Device front does not face the aisle: {label}"
+            checked.append({"label": label, "local_floor_cm": vector(local)})
+        assert {r["label"] for r in checked} == {"TS_Plains_SSTO_Ending", "TS_Plains_SSTO_RaidStorage"}
+        self.report["checks"]["devices"] = checked
+
+    def check_endpoints(self, unique, ship):
         endpoint_cls = unreal.load_class(None, ENDPOINT_CLASS)
         assert endpoint_cls, "Native ladder class is unavailable; compile before verification"
         entry, exit_actor = unique("TS_Plains_SSTO_Entry"), unique("TS_Plains_SSTO_Exit")
@@ -311,6 +357,13 @@ class Verifier:
             arrival = actor.get_editor_property("arrival_point")
             assert isinstance(arrival, unreal.SceneComponent), "ArrivalPoint must be a floor-level SceneComponent"
             location = vector(arrival.get_world_location())
+            key = "exterior_destination_foot_cm" if actor == entry else "interior_destination_foot_cm"
+            authored = unreal.MathLibrary.transform_location(ship.get_actor_transform(), unreal.Vector(*self.manifest["interaction"][key]))
+            assert math.dist(location[:2], vector(authored)[:2]) < 0.5, f"Endpoint is not aligned with hatch: {actor.get_actor_label()}"
+            assert actor == entry or abs(location[2] - authored.z) < 0.5, "Interior endpoint is not at deck height"
+            target = self.placement["endpoints"][actor.get_actor_label()]
+            assert close(location, target["world_cm"]), f"Endpoint differs from placement report: {actor.get_actor_label()}"
+            assert abs((arrival.get_world_rotation().yaw - target["yaw"] + 180) % 360 - 180) < 0.1
             floor = self.floor_trace(location)
             assert abs(floor[5].z - location[2]) <= FLOOR_TOLERANCE_CM, f"Arrival point is not on its floor: {actor.get_actor_label()}"
             self.clear_capsule(location, location)
