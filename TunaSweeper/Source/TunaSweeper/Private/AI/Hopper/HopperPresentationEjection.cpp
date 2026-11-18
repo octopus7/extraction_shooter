@@ -27,7 +27,7 @@ void UHopperPresentationComponent::StartSeatEjection()
  SeatPilot();
  bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
  SetGunVisible(false);
- EjectionTime=0.f; EjectionInitialHatch=HatchOpen; bSeatLaunched=false;
+ EjectionTime=0.f; EjectionInitialHatch=HatchOpen; bSeatLaunched=false; bRailReleaseFlashed=false;
  EjectionSeatStart=Seat->GetRelativeLocation();
  if (auto* Cabin=Parts.Find(TEXT("Cabin_Interior")))
   (*Cabin)->AttachToComponent(Seat,FAttachmentTransformRules::KeepWorldTransform);
@@ -53,7 +53,10 @@ float UHopperPresentationComponent::GetEjectionLaunchTime() const
  if (VisualData && VisualData->SeatLockDrop>0.f)
  {
   const float RemainingLift=VisualData->SeatLocation.Z+VisualData->SeatLockDrop-EjectionSeatStart.Z;
-  LiftDuration=SeatLiftSeconds*FMath::Clamp(RemainingLift/VisualData->SeatLockDrop,0.f,1.f);
+  const bool bAtPickup=LadderBoardingClip && VisualData->SeatPickupLift>0.f &&
+   FMath::IsNearlyEqual(EjectionSeatStart.X,VisualData->SeatLocation.X+VisualData->SeatBoardingReach,.1);
+  LiftDuration=bAtPickup ? PickupLiftSeconds*FMath::Clamp(RemainingLift/VisualData->SeatPickupLift,0.f,1.f) :
+   SeatLiftSeconds*FMath::Clamp(RemainingLift/VisualData->SeatLockDrop,0.f,1.f);
  }
  return GetEjectionHatchDuration()+LiftDuration+FMath::Max(.05f,EjectionSlideSeconds);
 }
@@ -82,6 +85,14 @@ void UHopperPresentationComponent::TickSeatEjection(float Dt)
   const float RailOrigin=GetSeatDockDuration()>0.f ? VisualData->SeatLocation.X : EjectionSeatStart.X;
   Position.X=FMath::Lerp(EjectionSeatStart.X,RailOrigin+EjectionSlideDistance,Smooth((EjectionTime-SlideStart)/SlideDuration));
   Seat->SetRelativeLocation(Position);
+  // The rear roller clears the end keeper before the rocket takes over.
+  const double ExitStation=RailOrigin+VisualData->RailReleaseTravel;
+  if (LoadedEjectSparks && !bRailReleaseFlashed && EjectionTime>=SlideStart &&
+      (Position.X>=ExitStation || EjectionTime>=LaunchTime))
+  {
+   EmitRailSparks(true);
+   bRailReleaseFlashed=true;
+  }
   if (EjectionTime<LaunchTime) return;
   EjectionLaunchTransform=Seat->GetComponentTransform();
   Seat->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);

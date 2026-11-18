@@ -45,6 +45,7 @@ public:
  float GetEjectionHatchDuration() const;
  float GetEjectionLaunchTime() const;
  float GetSeatDockDuration() const;
+ float GetBoardingClimbEndTime(float ClimbSeconds) const;
  bool IsBoardingInProgress() const { return bBoarding && bTransferring; }
  float GetPilotTravelAlpha(float Elapsed) const;
  FVector GetTransferPosition(const FVector& Start, const FVector& End, float Alpha, bool bIsBoarding) const;
@@ -78,10 +79,14 @@ private:
  void TickTransfer(float Dt);
  void BeginTransfer(float Duration, bool bIsBoarding);
  void AttachPilotToSeat();
+ void TickLadderBoarding();
+ void EmitRailSparks(bool bEjection);
  FVector GetSeatDockOffset(float DockTime) const;
  static constexpr float RailTravelSeconds = .52f;
  static constexpr float RailStopSeconds = .10f;
  static constexpr float SeatLiftSeconds = .30f;
+ static constexpr float PickupLiftSeconds = .48f;
+ static constexpr float PickupStopSeconds = .10f;
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
@@ -106,6 +111,9 @@ private:
  UPROPERTY(Transient) TObjectPtr<UProceduralMeshComponent> EjectionFlame;
  UPROPERTY(Transient) TArray<TObjectPtr<UNiagaraComponent>> SeatJets;
  UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedSeatExhaust;
+ UPROPERTY(Transient) TObjectPtr<UAnimSequence> LadderBoardingClip;
+ UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedLockSparks;
+ UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedEjectSparks;
  UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> EjectionSmoke;
  UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> EjectionSmokeMIDs;
  TArray<float> SmokeBirthTimes;
@@ -115,6 +123,7 @@ private:
  float EjectionTime = -1.f, EjectionInitialHatch = 0.f, NextSmokeTime = 0.f;
  int32 NextSmokeIndex = 0;
  bool bSeatLaunched = false;
+ bool bRailReleaseFlashed = false;
  TunaSweeperHopper::FBipedGait Gait;
  FVector TransferStart = FVector::ZeroVector;
  FVector TransferEnd = FVector::ZeroVector;

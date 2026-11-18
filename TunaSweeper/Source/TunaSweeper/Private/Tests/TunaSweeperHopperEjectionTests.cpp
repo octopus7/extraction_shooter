@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Engine/DamageEvents.h"
+#include "GameFramework/WorldSettings.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/Hopper/HopperPresentationComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -94,11 +95,50 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestTrue(TEXT("Captain waits outside for the ramp"),Pilot->GetComponentLocation().Equals(Ground,.01f));
  Tick(.57f);
  const FTransform OpenGuard=Brow->GetRelativeTransform();
+ TestTrue(TEXT("Rabbit turns to face the machine before pushing off"),FVector::DotProduct(Pilot->GetForwardVector(),P->GetBodyRoot()->GetForwardVector())<-.95f);
  TestTrue(TEXT("Hatch opens and step extends past its carrier"),
   !Door->GetRelativeTransform().Equals(FTransform::Identity,.01f) && !Step->GetRelativeTransform().Equals(Door->GetRelativeTransform(),.01f));
- Tick(1.19f);
+ auto BurstCount=[World](const TCHAR* Name)
+ {
+  TArray<UNiagaraComponent*> Fx; World->GetWorldSettings()->GetComponents(Fx);
+  return Fx.FilterByPredicate([Name](const UNiagaraComponent* C){return C->GetAsset() && C->GetAsset()->GetFName()==Name;}).Num();
+ };
+ const float SeatedTime=P->GetBoardingClimbEndTime(2.f);
+ const float ClimbStart=SeatedTime-2.f;
+ float BoardTime=.81f;
+ auto BoardTo=[&](float T) { Tick(T-BoardTime); BoardTime=T; };
+ auto PilotPosition=[&]() {return P->GetBodyRoot()->GetComponentTransform().InverseTransformPosition(Pilot->GetComponentLocation());};
+ BoardTo(ClimbStart);
+ const FVector Pickup=Seat->GetRelativeLocation();
+ TestTrue(TEXT("The empty carriage waits below the locked seat at the ladder head"),Pickup.X>Locked.X+30 && Pickup.Z<Locked.Z-18);
+ BoardTo(ClimbStart+2.f*.23f); const FVector FirstApex=PilotPosition();
+ BoardTo(ClimbStart+2.f*.33f); const FVector Lower=PilotPosition();
+ BoardTo(ClimbStart+2.f*.39f);
+ TestTrue(TEXT("First hop lands and loads both boots on the lower tread"),FirstApex.Z>Lower.Z+8 && Lower.Z>45 && Lower.Z<65 && PilotPosition().Equals(Lower,.05));
+ BoardTo(ClimbStart+2.f*.55f); const FVector SecondApex=PilotPosition();
+ BoardTo(ClimbStart+2.f*.65f); const FVector Middle=PilotPosition();
+ BoardTo(ClimbStart+2.f*.71f);
+ TestTrue(TEXT("Second hop lands and compresses on a higher tread"),SecondApex.Z>Middle.Z+7 && Middle.Z>Lower.Z+12 && Middle.X<Lower.X-6 && PilotPosition().Equals(Middle,.05));
+ TestTrue(TEXT("The rabbit faces into the ladder on both footfalls"),FVector::DotProduct(Pilot->GetForwardVector(),P->GetBodyRoot()->GetForwardVector())<-.99f);
+ bool bTurnedInFlight=false;
+ double Peak=Middle.Z;
+ for (int32 Sample=73;Sample<91;++Sample)
+ {
+  BoardTo(ClimbStart+2.f*Sample/100.f);
+  Peak=FMath::Max(Peak,PilotPosition().Z);
+  bTurnedInFlight|=PilotPosition().Z>Middle.Z+5 && FMath::Abs(FVector::DotProduct(Pilot->GetForwardVector(),P->GetBodyRoot()->GetForwardVector()))<.9f;
+ }
+ TestTrue(TEXT("The rabbit turns during the final leap and clears the loading seat"),bTurnedInFlight && Peak>Pickup.Z+10);
+ BoardTo(ClimbStart+2.f*.94f);
+ TestTrue(TEXT("Third hop lands facing mech forward on the stationary low seat"),Pilot->GetAttachParent()==Seat && Seat->GetRelativeLocation().Equals(Pickup,.05) &&
+  FVector::DotProduct(Pilot->GetForwardVector(),P->GetBodyRoot()->GetForwardVector())>.99f);
+ BoardTo(SeatedTime);
+ Tick(.24f);
+ const FVector LoadedLift=Seat->GetRelativeLocation();
+ TestTrue(TEXT("Occupied chair first climbs the vertical guide"),FMath::IsNearlyEqual(LoadedLift.X,Pickup.X,.05) && LoadedLift.Z>Pickup.Z+10 && LoadedLift.Z<Locked.Z+4);
+ Tick(.34f);
  const FVector Outer=Seat->GetRelativeLocation();
- TestTrue(TEXT("Empty carriage presents a raised seat outside the locked position"),Outer.X>Locked.X+10 && Outer.Z>Locked.Z+4);
+ TestTrue(TEXT("Occupied carriage reaches the horizontal rail"),FMath::IsNearlyEqual(Outer.X,Pickup.X,.05) && Outer.Z>Locked.Z+4);
  TestTrue(TEXT("Pilot and control consoles share the carriage when seated"),Pilot->GetAttachParent()==Seat && Cabin->GetAttachParent()==Seat);
  Tick(.26f);
  const FVector Inward=Seat->GetRelativeLocation();
@@ -109,9 +149,12 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  const FVector Lowering=Seat->GetRelativeLocation();
  TestTrue(TEXT("Seat drops vertically only after docking"),FMath::IsNearlyEqual(Lowering.X,Locked.X,.05) && Lowering.Z<Outer.Z-1 && Lowering.Z>Locked.Z+1);
  TestTrue(TEXT("Front hatch stays fully open until the seat locks"),P->GetHatchOpenAlpha()==1.f && Shield->bHiddenInGame);
+ TestEqual(TEXT("Lock sparks wait for metal contact"),BurstCount(TEXT("NS_HopperMk2SeatLockSparks")),0);
  Tick(.15f);
  TestTrue(TEXT("Carriage reaches its locking position"),Seat->GetRelativeLocation().Equals(Locked,.05));
+ TestEqual(TEXT("One fine lock strike on each keeper"),BurstCount(TEXT("NS_HopperMk2SeatLockSparks")),2);
  Tick(.27f);
+ TestEqual(TEXT("Holding the latch never replays the strike"),BurstCount(TEXT("NS_HopperMk2SeatLockSparks")),2);
  TestTrue(TEXT("Guard stays back while the ramp begins folding"),Brow->GetRelativeTransform().Equals(OpenGuard,.01f));
  TestTrue(TEXT("Field stays off while the guard is unlatched"),Shield->bHiddenInGame);
  Tick(P->GetEjectionHatchDuration());
@@ -146,6 +189,7 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  const FVector Outward=Seat->GetRelativeLocation();
  TestTrue(TEXT("Ejection rail advances at the raised height"),Outward.X>Locked.X+10 && FMath::IsNearlyEqual(Outward.Z,Outer.Z,.05));
  Tick(P->EjectionSlideSeconds*.5f+.25f);
+ TestEqual(TEXT("Both rail mouths flash with the stronger ejection effect"),BurstCount(TEXT("NS_HopperMk2SeatEjectSparks")),2);
  TestNull(TEXT("Mk2 seat launches free of the mech"),Pilot->GetAttachParent()->GetAttachParent());
  TestTrue(TEXT("No lingering shield or burst on the wreck"),Shield->bHiddenInGame);
  TArray<UNiagaraComponent*> Jets;
@@ -169,7 +213,7 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  auto* Interrupted=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(-600,0,0),FRotator::ZeroRotator)->GetPresentation();
  auto* InterruptedSeat=Interrupted->GetPilotMesh()->GetAttachParent();
  Interrupted->StartBoarding(2.f);
- Interrupted->TickComponent(2.26f,LEVELTICK_All,nullptr);
+ Interrupted->TickComponent(SeatedTime+.58f+.26f,LEVELTICK_All,nullptr);
  const FVector MidRail=InterruptedSeat->GetRelativeLocation();
  Interrupted->StartSeatEjection();
  TestTrue(TEXT("Interrupting docking preserves the occupied carriage position"),InterruptedSeat->GetRelativeLocation().Equals(MidRail,.05));
@@ -181,6 +225,15 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  const FVector Launch=Interrupted->GetBodyRoot()->GetComponentTransform().InverseTransformPosition(InterruptedSeat->GetComponentLocation());
  TestTrue(TEXT("Interrupted ejection never adds the remaining boarding offset to the rail length"),
   Launch.Equals(FVector(Locked.X+Interrupted->EjectionSlideDistance,Locked.Y,Outer.Z),.05));
+ auto* Low=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(0,600,0),FRotator(0,70,0))->GetPresentation();
+ auto* LowSeat=Low->GetPilotMesh()->GetAttachParent();
+ Low->StartBoarding(2.f);
+ Low->TickComponent(ClimbStart+1.9f,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("Rotated mech receives the pilot in its lowered chair"),Low->GetPilotMesh()->GetAttachParent()==LowSeat && LowSeat->GetRelativeLocation().Equals(Pickup,.05));
+ Low->StartSeatEjection();
+ Low->TickComponent(.24f,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("Interrupting pickup lifts vertically from its actual height before release"),
+  FMath::IsNearlyEqual(LowSeat->GetRelativeLocation().X,Pickup.X,.05) && LowSeat->GetRelativeLocation().Z>Pickup.Z+10 && LowSeat->GetRelativeLocation().Z<Outer.Z-10);
  return true;
 }
 #endif

@@ -53,6 +53,18 @@ public:
  /** Center of the positive-Y nozzle mouth in seat space. The second nozzle mirrors it across Y. */
  UPROPERTY(EditAnywhere, Category="Seat", meta=(Units="cm")) FVector SeatExhaustNozzle = FVector(0,17,-18);
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatExhaustSystem;
+ /** In-place climb from ground to the two open treads and the lowered seat. */
+ UPROPERTY(EditAnywhere, Category="Boarding") TSoftObjectPtr<UAnimSequence> PilotLadderBoarding;
+ /** Pilot root positions when both boots contact each tread, in fully open mech space. */
+ UPROPERTY(EditAnywhere, Category="Boarding", meta=(Units="cm")) FVector LowerTreadLanding = FVector::ZeroVector;
+ UPROPERTY(EditAnywhere, Category="Boarding", meta=(Units="cm")) FVector MiddleTreadLanding = FVector::ZeroVector;
+ UPROPERTY(EditAnywhere, Category="Boarding", meta=(ClampMin="0", Units="cm")) float SeatPickupLift = 0.f;
+ /** Positive-Y contact points in chassis space. The other rail mirrors Y. */
+ UPROPERTY(EditAnywhere, Category="Seat") FVector RailLockContact = FVector::ZeroVector;
+ UPROPERTY(EditAnywhere, Category="Seat") FVector RailExitContact = FVector::ZeroVector;
+ UPROPERTY(EditAnywhere, Category="Seat", meta=(ClampMin="0", Units="cm")) float RailReleaseTravel = 0.f;
+ UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatLockSparks;
+ UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatEjectSparks;
  UPROPERTY(EditAnywhere) FVector LeftArmMount = FVector(-5.8716,56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector RightArmMount = FVector(-5.8716,-56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector LeftHip = FVector(-4.5166,39.0687,85.8);

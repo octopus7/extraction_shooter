@@ -43,6 +43,9 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  for (USceneComponent* C:Old) if (IsValid(C)) C->DestroyComponent();
  Parts.Empty(); VisualData=Data; CurrentClip=nullptr; BodyCrouch=0; Gait.Reset();
  LoadedSeatExhaust=Data->SeatExhaustSystem.LoadSynchronous();
+ LadderBoardingClip=Data->PilotLadderBoarding.LoadSynchronous();
+ LoadedLockSparks=Data->SeatLockSparks.LoadSynchronous();
+ LoadedEjectSparks=Data->SeatEjectSparks.LoadSynchronous();
  AActor* Owner=GetOwner();
  const auto Creation=HasBegunPlay()?EComponentCreationMethod::Instance:EComponentCreationMethod::UserConstructionScript;
  auto Scene=[Owner,Creation](FName Name,USceneComponent* Parent)
@@ -80,7 +83,7 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  Gun->SetStaticMesh(Data->PilotGun.LoadSynchronous()); Gun->SetRelativeTransform(Data->GunTransform);
  Gun->RegisterComponent(); Gun->SetVisibility(false);
  PlayClip(Data->PilotSeated.LoadSynchronous(),true);
- HatchOpen=0; bWreck=false; bTransferring=false; bSeated=true; bMechActive=false;
+ HatchOpen=0; bWreck=false; bBoarding=false; bTransferring=false; bSeated=true; bMechActive=false;
  InitializeCockpitShield();
 }
 USceneComponent* UHopperPresentationComponent::GetArmSocket(bool bLeft) const { return bLeft?LeftSocket:RightSocket; }
@@ -131,13 +134,15 @@ void UHopperPresentationComponent::AttachPilotToSeat()
 float UHopperPresentationComponent::GetSeatDockDuration() const
 {
  return VisualData && (VisualData->SeatBoardingReach>0.f || VisualData->SeatLockDrop>0.f)
-  ? RailTravelSeconds+RailStopSeconds+SeatLiftSeconds : 0.f;
+  ? RailTravelSeconds+RailStopSeconds+SeatLiftSeconds+(LadderBoardingClip?PickupLiftSeconds+PickupStopSeconds:0.f) : 0.f;
 }
 FVector UHopperPresentationComponent::GetSeatDockOffset(float DockTime) const
 {
- const float LiftStart=RailTravelSeconds+RailStopSeconds;
- return FVector(VisualData->SeatBoardingReach*(1.f-FMath::SmoothStep(0.f,RailTravelSeconds,DockTime)),0.f,
-  VisualData->SeatLockDrop*(1.f-FMath::SmoothStep(LiftStart,LiftStart+SeatLiftSeconds,DockTime)));
+ const float RailStart=LadderBoardingClip ? PickupLiftSeconds+PickupStopSeconds : 0.f;
+ const float LockStart=RailStart+RailTravelSeconds+RailStopSeconds;
+ const float RailHeight=VisualData->SeatLockDrop*(1.f-FMath::SmoothStep(LockStart,LockStart+SeatLiftSeconds,DockTime));
+ const float BelowRail=LadderBoardingClip ? VisualData->SeatPickupLift*(1.f-FMath::SmoothStep(0.f,PickupLiftSeconds,DockTime)) : 0.f;
+ return FVector(VisualData->SeatBoardingReach*(1.f-FMath::SmoothStep(RailStart,RailStart+RailTravelSeconds,DockTime)),0.f,RailHeight-BelowRail);
 }
 void UHopperPresentationComponent::StartDisembark(const FVector& GroundDestination,float Duration)
 {
@@ -156,6 +161,12 @@ void UHopperPresentationComponent::BeginTransfer(float Duration, bool bIsBoardin
  // Leave time to climb even when a placement shortens the overall boarding animation.
  HatchLeadTime=FMath::Clamp(VisualData->HatchTravelSeconds*(1.f-HatchOpen),0.f,TransferDuration*.4f);
  if (HatchLeadTime<=0.f) SetHatchOpen(1.f);
+ if (bIsBoarding && LadderBoardingClip)
+ {
+  PlayClip(LadderBoardingClip,false,true);
+  Pilot->SetPlayRate(0.f);
+  return;
+ }
  if (UAnimSequence* Clip=(bIsBoarding?VisualData->PilotBoarding:VisualData->PilotDisembark).LoadSynchronous())
  {
   PlayClip(Clip,false,true);
@@ -275,11 +286,16 @@ void UHopperPresentationComponent::TickTransfer(float Dt)
  {
   const float OpenFraction=FMath::Min(TransferTime/HatchLeadTime,1.f);
   SetHatchOpen(FMath::Lerp(TransferInitialHatch,1.f,OpenFraction));
-  if (TransferTime>=HatchLeadTime && CurrentClip)
+  if (TransferTime>=HatchLeadTime && CurrentClip && !(bBoarding && LadderBoardingClip))
   {
    Pilot->SetPlayRate(CurrentClip->GetPlayLength()/(TransferDuration-HatchLeadTime));
    Pilot->SetPosition(CurrentClip->GetPlayLength()*GetPilotTravelAlpha(TransferTime),false);
   }
+ }
+ if (bBoarding && LadderBoardingClip)
+ {
+  TickLadderBoarding();
+  return;
  }
  const float PilotAlpha=GetPilotTravelAlpha(TransferTime);
  const float DockDuration=GetSeatDockDuration();
@@ -314,7 +330,7 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  {
   TickTransfer(Dt);
   if (!bTransferring && bBoarding)
-   Dt=FMath::Clamp(TransferTime-TransferDuration-GetSeatDockDuration(),0.f,Dt);
+   Dt=FMath::Clamp(TransferTime-GetBoardingClimbEndTime(TransferDuration)-GetSeatDockDuration(),0.f,Dt);
  }
  if (bMechActive && Dt>0.f) TickMech(Dt);
  float ShieldDt=Dt;

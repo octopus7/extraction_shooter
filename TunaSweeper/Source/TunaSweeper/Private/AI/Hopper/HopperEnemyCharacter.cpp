@@ -130,7 +130,7 @@ void ATunaSweeperHopperEnemyCharacter::TryStartEncounterBoarding()
     const FVector Cockpit = Presentation->GetBodyRoot()->GetComponentTransform().TransformPosition(LoadedVisualData->SeatLocation);
     if (Width <= 0 || Height <= 0 || !Viewer->ProjectWorldLocationToScreen(Cockpit, Screen)
         || Screen.X < 0 || Screen.X >= Width || Screen.Y < 0 || Screen.Y >= Height) return;
-    const float ShotDuration = BoardingSeconds + Presentation->GetSeatDockDuration() + LoadedVisualData->HatchTravelSeconds + .6f;
+    const float ShotDuration = Presentation->GetBoardingClimbEndTime(BoardingSeconds) + Presentation->GetSeatDockDuration() + LoadedVisualData->HatchTravelSeconds + .6f;
     if (!Viewer->StartHopperShot(this, false, ShotDuration)) return;
     BoardingViewer = Viewer;
     Phase = EHopperCombatPhase::Boarding;

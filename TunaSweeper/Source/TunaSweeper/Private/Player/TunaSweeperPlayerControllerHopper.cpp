@@ -140,12 +140,17 @@ void ATunaSweeperPlayerController::FrameHopperShot()
 	}
 	else
 	{
-		// Hold the wider two-shot while the pilot is on the ground and the upper guard rises.
-		const float CloseIn = FMath::SmoothStep(Hopper->BoardingSeconds * .65f, Hopper->BoardingSeconds + .4f, HopperShotTime);
-		Aim = Ground + Forward * FMath::Lerp(75.f, 17.f, CloseIn) + FVector::UpVector * FMath::Lerp(120.f, 156.f, CloseIn);
-		Offset = Forward * FMath::Lerp(388.f, 290.f, CloseIn) + Side * FMath::Lerp(390.f, 245.f, CloseIn)
-			+ FVector::UpVector * FMath::Lerp(245.f, 165.f, CloseIn);
-		FieldOfView = FMath::Lerp(54.f, 50.f, CloseIn);
+		// Frame the open treads perpendicular to the climb, then settle on the cockpit as the rabbit turns.
+		const float SeatedTime = Stage->GetBoardingClimbEndTime(Hopper->BoardingSeconds);
+		const float ClimbStart = SeatedTime - Hopper->BoardingSeconds;
+		const float LadderView = ClimbStart > 0.f ? FMath::SmoothStep(.35f, ClimbStart, HopperShotTime) : 0.f;
+		const float CloseIn = FMath::SmoothStep(SeatedTime - Hopper->BoardingSeconds * .34f, SeatedTime + .36f, HopperShotTime);
+		const FVector ApproachAim = Forward * FMath::Lerp(75.f, 88.f, LadderView) + FVector::UpVector * FMath::Lerp(120.f, 83.f, LadderView);
+		const FVector ApproachOffset = Forward * FMath::Lerp(388.f, 184.f, LadderView) + Side * FMath::Lerp(390.f, 285.f, LadderView)
+			+ FVector::UpVector * FMath::Lerp(245.f, 108.f, LadderView);
+		Aim = Ground + FMath::Lerp(ApproachAim, Forward * 17.f + FVector::UpVector * 156.f, CloseIn);
+		Offset = FMath::Lerp(ApproachOffset, Forward * 290.f + Side * 245.f + FVector::UpVector * 165.f, CloseIn);
+		FieldOfView = FMath::Lerp(FMath::Lerp(54.f, 48.f, LadderView), 50.f, CloseIn);
 	}
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(HopperCameraClearance), false, Hopper);
 	Params.AddIgnoredActor(GetPawn());
