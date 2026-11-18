@@ -21,9 +21,10 @@
 
 ## 외곽 절벽과 식재
 
-- `Environment/Forest/Cliffs/Escarpment_ForestShelf`는 랜드스케이프에서 바깥으로 이어지는 암반이다. 완만한 윗면에는 식생을 칠할 수 있고, 측면과 돌출부는 한 지형으로 이어진다. 같은 폴더의 `Escarpment_OuterLimit`은 절벽 끝선을 따라 플레이어의 이동을 막는다.
+- `Environment/Forest/Cliffs`에서 외곽을 편집한다. `Escarpment_ForestShelf`는 숲 바닥에서 절벽 기슭까지 이어지는 식재대다. `Escarpment_RisingCliffs`는 숲 안쪽을 향해 솟은 암벽으로, 길에서 보이는 암벽 윗선은 월드 높이 약 13~27m를 오간다. 남쪽은 카메라가 뒤로 물러날 공간을 두고 완만한 기슭에서 암벽으로 이어진다. `Escarpment_OuterLimit`은 숲 가장자리를 따라 이동을 막는다.
+- 그 뒤의 능선은 `Environment/Forest/Cliffs/OuterTerrain`의 랜드스케이프 네 조각이다. **Landscape** 모드에서 방향별 `TS_Forest_OuterTerrain_*`를 선택해 조각하거나 기존 숲의 풀·흙·바위 레이어를 칠할 수 있다. 능선의 최고점은 월드 높이 약 50m다. 외곽 전체의 높이 원본은 `TunaSweeper/SourceArt/Environment/ForestScatter/RaidForest_OuterRidge.r16`, 암벽과 하구 연장부의 편집 원본은 같은 폴더의 `ForestRisingCliffs.blend`다.
 - 윗면의 풀과 덤불은 에디터 **Foliage** 모드에서 수정한다. **Static Meshes** 표면 필터를 켜고 `/Game/Environment/ForestScatter/Foliage`에서 잔디는 `FT_ForestShelfGrass`, 키 큰 풀 포기는 `FT_ForestShelfTussock`, 덤불은 `FT_ForestShelfShrub`를 선택한 뒤 **Paint** 또는 **Erase**를 쓴다.
-- 숲맵의 `Environment/Forest/Forest_Background_Black`은 배경 깊이의 픽셀에 검은색을 적용한다. 숲 조명은 기존 태양·하늘광·대기 액터에서 편집한다.
+- 숲의 하늘과 조명은 레벨의 태양·하늘광·대기 액터에서 편집한다. 플레이 화면에서 보이는 외곽선은 암벽과 능선의 실제 형상을 따른다.
 
 ## 녹지와 건물
 
