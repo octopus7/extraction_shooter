@@ -11,9 +11,12 @@ class USkeletalMeshComponent;
 class UAnimSequence;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
+class UMaterialBillboardComponent;
 class UProceduralMeshComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
+class UHopperOilImpactReceiver;
+struct FStreamableHandle;
 
 /** Presentation only: authoritative health/phase/attacks remain on the enemy. */
 UCLASS(ClassGroup=(Hopper), meta=(BlueprintSpawnableComponent))
@@ -39,7 +42,7 @@ public:
  UBoxComponent* CreateMechHitBox(UStaticMeshComponent* Part);
  void DisableMechHitBoxes();
  void StartSeatEjection();
- float StartDestructionEffects(UNiagaraSystem* MechEffect);
+ float StartDestructionEffects(UNiagaraSystem* MechEffect, const FVector& ImpactTravel=FVector::ZeroVector);
  bool IsWaitingForShieldBreak() const;
  float GetHatchOpenAlpha() const { return HatchOpen; }
  float GetEjectionHatchDuration() const;
@@ -73,8 +76,15 @@ protected:
 private:
  enum class EShieldStage : uint8 { Off, Deploying, Stable, Failing, Fragments };
  void InitializeCockpitShield();
+ void InitializeBlastFlash();
+ void FadeBlastFlash(float DeltaSeconds);
  void TickCockpitShield(float Dt);
- void EmitDestructionEffect(UNiagaraSystem* Effect) const;
+ void EmitDestructionEffect(UNiagaraSystem* Effect);
+ void EmitWreckEffects();
+ void PreloadWreckEffects();
+ void PrepareWreckMaterials();
+ void ApplyHullScorch(const FTransform& Chassis);
+ void UpdateWreckBurn(float FlightTime);
  void TickMech(float Dt);
  void TickTransfer(float Dt);
  void BeginTransfer(float Duration, bool bIsBoarding);
@@ -90,7 +100,7 @@ private:
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
- void TickSeatEjection(float Dt);
+ void TickSeatEjection(float LaunchTime);
  void CreateEjectionExhaust();
  void ClearEjectionExhaust();
  FVector EjectionPosition(float FlightTime) const;
@@ -101,7 +111,17 @@ private:
  UPROPERTY(Transient) TObjectPtr<USceneComponent> LeftSocket;
  UPROPERTY(Transient) TObjectPtr<USceneComponent> RightSocket;
  UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> CockpitShield;
+ UPROPERTY(Transient) TObjectPtr<UMaterialBillboardComponent> BlastFlash;
+ UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> BlastCoreMaterial;
+ float BlastFlashRemaining = 0.f;
  UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> PendingDestructionEffect;
+ UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> ScorchedHullMaterials;
+ UPROPERTY(Transient) TArray<TObjectPtr<UHopperOilImpactReceiver>> OilReceivers;
+ TSharedPtr<FStreamableHandle> WreckAssetHandle;
+ FVector WreckSprayDirection = FVector::ZeroVector;
+ bool bWreckBurstPlayed = false;
+ bool bWreckFireStarted = false;
+ bool bSeatFlightFinished = false;
  EShieldStage ShieldStage = EShieldStage::Off;
  float ShieldAge = 0, ShieldCoverage = 0, EjectionShieldDelay = 0;
  UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> Pilot;

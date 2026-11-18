@@ -61,13 +61,11 @@ float UHopperPresentationComponent::GetEjectionLaunchTime() const
  return GetEjectionHatchDuration()+LiftDuration+FMath::Max(.05f,EjectionSlideSeconds);
 }
 
-void UHopperPresentationComponent::TickSeatEjection(float Dt)
+void UHopperPresentationComponent::TickSeatEjection(float LaunchTime)
 {
  if (!Seat || !Pilot) return;
- EjectionTime+=Dt;
  const float HatchDuration=GetEjectionHatchDuration();
  const float SlideDuration=FMath::Max(.05f,EjectionSlideSeconds);
- const float LaunchTime=GetEjectionLaunchTime();
  const float SlideStart=LaunchTime-SlideDuration;
  const float FlightDuration=FMath::Max(.1f,EjectionFlightSeconds);
  const float OpeningDuration=HatchDuration-EjectionShieldDelay;
@@ -113,7 +111,7 @@ void UHopperPresentationComponent::TickSeatEjection(float Dt)
     Jet->Deactivate(); // Stop emitting. Existing embers and smoke finish in world space.
    }
    Seat->SetHiddenInGame(true,true);
-   SetComponentTickEnabled(false);
+   bSeatFlightFinished=true;
   }
   return;
  }
@@ -158,7 +156,7 @@ void UHopperPresentationComponent::TickSeatEjection(float Dt)
  if (FlightTime>=FlightDuration+SmokeLifetime)
  {
   ClearEjectionExhaust();
-  SetComponentTickEnabled(false);
+  bSeatFlightFinished=true;
  }
 }
 

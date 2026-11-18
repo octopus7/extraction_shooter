@@ -1,4 +1,5 @@
 #include "AI/Hopper/HopperEnemyCharacter.h"
+#include "Engine/DamageEvents.h"
 #include "Combat/TunaSweeperCombatValue.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "AI/Hopper/HopperArmModule.h"
@@ -211,7 +212,10 @@ float ATunaSweeperHopperEnemyCharacter::TakeDamage(float Amount, const FDamageEv
     }
     if (MechHealth <= 0)
     {
-        BeginMechDestruction();
+        const FVector ImpactTravel = Event.IsOfType(FPointDamageEvent::ClassID)
+            ? static_cast<const FPointDamageEvent&>(Event).ShotDirection
+            : (Source ? GetActorLocation() - Source->GetActorLocation() : FVector::ZeroVector);
+        BeginMechDestruction(ImpactTravel);
         if (bEndCombatOnMechDestruction)
         {
             Phase = EHopperCombatPhase::Dead;
@@ -360,7 +364,7 @@ bool ATunaSweeperHopperEnemyCharacter::SetArmModule(bool bLeft, TSubclassOf<AHop
     return true;
 }
 
-void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction()
+void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction(const FVector& ImpactTravel)
 {
     Phase = EHopperCombatPhase::Disembarking;
     Presentation->DisableMechHitBoxes();
@@ -372,7 +376,8 @@ void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction()
     GetCharacterMovement()->DisableMovement();
     if (AController* AI = GetController()) AI->StopMovement();
     Presentation->SetMechActive(false);
-    Presentation->StartDestructionEffects(HasActorBegunPlay() ? MechDestructionEffect.LoadSynchronous() : nullptr);
+    const bool bUseDefaultBurst = !LoadedVisualData || !LoadedVisualData->WreckEffects.IsConfigured();
+    Presentation->StartDestructionEffects(HasActorBegunPlay() && bUseDefaultBurst ? MechDestructionEffect.LoadSynchronous() : nullptr, ImpactTravel);
 }
 
 bool ATunaSweeperHopperEnemyCharacter::IsPilotExitClear(const FVector& Ground) const

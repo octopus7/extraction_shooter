@@ -51,14 +51,17 @@ bool UHopperPresentationComponent::IsWaitingForShieldBreak() const
  return ShieldStage==EShieldStage::Failing;
 }
 
-void UHopperPresentationComponent::EmitDestructionEffect(UNiagaraSystem* Effect) const
+void UHopperPresentationComponent::EmitDestructionEffect(UNiagaraSystem* Effect)
 {
- if (Effect)
+ if (VisualData && VisualData->WreckEffects.IsConfigured())
+  EmitWreckEffects();
+ else if (Effect)
   UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Effect,GetOwner()->GetActorLocation());
 }
 
-float UHopperPresentationComponent::StartDestructionEffects(UNiagaraSystem* MechEffect)
+float UHopperPresentationComponent::StartDestructionEffects(UNiagaraSystem* MechEffect,const FVector& ImpactTravel)
 {
+ if (!ImpactTravel.IsNearlyZero() && !bWreckBurstPlayed) WreckSprayDirection=ImpactTravel.GetSafeNormal2D();
  if (IsWaitingForShieldBreak()) return FMath::Max(0.f,WarningSeconds-ShieldAge);
  if ((ShieldStage==EShieldStage::Deploying || ShieldStage==EShieldStage::Stable) && ShieldCoverage>0.f)
  {

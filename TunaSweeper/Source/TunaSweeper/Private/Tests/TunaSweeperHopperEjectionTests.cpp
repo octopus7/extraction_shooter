@@ -9,6 +9,8 @@
 #include "AI/Hopper/HopperPresentationComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/MaterialBillboardComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 
@@ -176,10 +178,42 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
   TestTrue(TEXT("Intact field holds the guard closed during the warning"),P->IsWaitingForShieldBreak() && P->GetHatchOpenAlpha()==0.f && Shader(3)==0.f);
  }
  TestTrue(TEXT("Cracks spread before the intact field cuts out"),Shader(2)>.9f);
+ TestNull(TEXT("Guard paint stays clean throughout the shield warning"),Brow->GetOverlayMaterial());
+ auto* Flash=Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash"));
+ auto* FlashMaterial=Flash ? Cast<UMaterialInstanceDynamic>(Flash->GetMaterial(0)) : nullptr;
+ TestTrue(TEXT("The queued blast core is dark throughout the shield warning"),
+  FlashMaterial && FlashMaterial->K2_GetScalarParameterValue(TEXT("FlashGain"))==0.f);
  Tick(.05f); Elapsed+=.05f;
  TestTrue(TEXT("Shards and sparks start on the same update that removes field light"),
   !P->IsWaitingForShieldBreak() && Shader(1)==0.f && Shader(3)>=1.f && !Shield->bHiddenInGame);
+ auto* Scorch=Cast<UMaterialInstanceDynamic>(Brow->GetOverlayMaterial());
+ TestNotNull(TEXT("Dry blast soot appears on the shatter frame"),Scorch);
+ TestTrue(TEXT("The blast core lights up on the same update as the soot and shards"),
+  FlashMaterial && FlashMaterial->K2_GetScalarParameterValue(TEXT("FlashGain"))==1.f);
+ auto AttachedFires=[Hopper,P]()
+ {
+  TArray<UNiagaraComponent*> Systems;
+  Hopper->GetComponents(Systems);
+  return Systems.FilterByPredicate([P](const UNiagaraComponent* System)
+  {
+   return System->GetAttachParent()==P->GetBodyRoot() && System->GetAsset() && System->GetAsset()->GetFName()==TEXT("NS_HopperMk2HullFire");
+  }).Num();
+ };
+ float PaintFade=-1.f;
+ if (Scorch)
+ {
+  TestTrue(TEXT("Blast deposits soot with the original pigments still visible"),
+   Scorch->GetScalarParameterValue(FMaterialParameterInfo(TEXT("PaintFade")),PaintFade) && PaintFade==0.f);
+ }
+ TestNull(TEXT("The escaping seat interior is clean"),Cabin->GetOverlayMaterial());
+ P->StartDestructionEffects(nullptr);
+ for (const TCHAR* Effect:{TEXT("NS_HopperMk2RadialBlast"),TEXT("NS_HopperMk2MetalDebris"),TEXT("NS_HopperMk2OilSpray")})
+  TestEqual(FString::Printf(TEXT("%s starts once on the shield break"),Effect),BurstCount(Effect),1);
+ TestEqual(TEXT("Sustained fire waits for the pilot to escape"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
+ TestEqual(TEXT("The Mk2 replaces the common rubble explosion"),BurstCount(TEXT("NS_Explosion_SmokeRobot")),0);
  Tick(HatchDuration-Elapsed);
+ TestNull(TEXT("The impulse is over before the seat starts to move"),
+  Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash")));
  TestTrue(TEXT("Guard is fully back before the seat moves"),Brow->GetRelativeTransform().Equals(OpenGuard,.01f));
  TestTrue(TEXT("Pilot is still seated at the end of opening"),Pilot->GetComponentLocation().Equals(Seated,.01f));
  Tick(.15f);
@@ -188,9 +222,13 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  Tick(.15f+P->EjectionSlideSeconds*.5f);
  const FVector Outward=Seat->GetRelativeLocation();
  TestTrue(TEXT("Ejection rail advances at the raised height"),Outward.X>Locked.X+10 && FMath::IsNearlyEqual(Outward.Z,Outer.Z,.05));
- Tick(P->EjectionSlideSeconds*.5f+.25f);
+ if (Scorch) TestEqual(TEXT("Paint stays at first-stage soot during the rail slide"),Scorch->K2_GetScalarParameterValue(TEXT("PaintFade")),0.f);
+ Tick(P->EjectionSlideSeconds*.5f+.055f);
  TestEqual(TEXT("Both rail mouths flash with the stronger ejection effect"),BurstCount(TEXT("NS_HopperMk2SeatEjectSparks")),2);
  TestNull(TEXT("Mk2 seat launches free of the mech"),Pilot->GetAttachParent()->GetAttachParent());
+ TestEqual(TEXT("The seat visibly clears the wreck before it ignites"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
+ Tick(.195f);
+ TestEqual(TEXT("Only the empty chassis catches fire"),AttachedFires(),1);
  TestTrue(TEXT("No lingering shield or burst on the wreck"),Shield->bHiddenInGame);
  TArray<UNiagaraComponent*> Jets;
  Hopper->GetComponents(Jets);
@@ -202,6 +240,15 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
   TestTrue(TEXT("Nozzles sit below the carriage on opposite sides"),Left.Z<0 && FMath::IsNearlyEqual(Left.Z,Right.Z,.05) && Left.Y*Right.Y<0);
   Tick(P->EjectionFlightSeconds);
   TestTrue(TEXT("The seat disappears at burnout"),Seat->bHiddenInGame);
+  if (Scorch)
+  {
+   const float DuringFire=Scorch->K2_GetScalarParameterValue(TEXT("PaintFade"));
+   TestTrue(TEXT("The paint keeps bleaching after the seat exhaust ends"),DuringFire>0.f && DuringFire<1.f && P->IsComponentTickEnabled());
+   Tick(6.f);
+   TestTrue(TEXT("Fully bleached paint remains on the cold guard"),Brow->GetOverlayMaterial()==Scorch &&
+    Scorch->K2_GetScalarParameterValue(TEXT("PaintFade"))==1.f);
+   TestFalse(TEXT("The settled wreck needs no presentation tick"),P->IsComponentTickEnabled());
+  }
   for (const auto* Jet:Jets)
    TestTrue(TEXT("The detached exhaust can dissipate after the seat disappears"),!IsValid(Jet) || (!Jet->GetAttachParent() && !Jet->bHiddenInGame));
  }

@@ -31,6 +31,8 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
 {
  if (!Data || (VisualData==Data && IsValid(BodyRoot))) return;
  ClearEjectionExhaust(); EjectionTime=-1.f; EjectionInitialHatch=0.f; bSeatLaunched=false;
+ bWreckBurstPlayed=false; bWreckFireStarted=false; bSeatFlightFinished=false;
+ WreckSprayDirection=FVector::ZeroVector; ScorchedHullMaterials.Reset(); OilReceivers.Reset();
  // This component owns every generated component. Reconstruct only when its data changes.
  TArray<USceneComponent*> Old;
  TArray<USceneComponent*> Owned;
@@ -85,6 +87,8 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  PlayClip(Data->PilotSeated.LoadSynchronous(),true);
  HatchOpen=0; bWreck=false; bBoarding=false; bTransferring=false; bSeated=true; bMechActive=false;
  InitializeCockpitShield();
+ InitializeBlastFlash();
+ if (HasBegunPlay()) PreloadWreckEffects();
 }
 USceneComponent* UHopperPresentationComponent::GetArmSocket(bool bLeft) const { return bLeft?LeftSocket:RightSocket; }
 void UHopperPresentationComponent::PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction)
@@ -324,8 +328,19 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
 {
  Super::TickComponent(Dt,TickType,TickFunction);
  if (!VisualData || !BodyRoot || !FMath::IsFinite(Dt) || Dt<=0) return;
+ if (BlastFlashRemaining>0.f) FadeBlastFlash(Dt);
  ActionRemaining=FMath::Max(0.f,ActionRemaining-Dt);
- if (EjectionTime>=0.f) { TickCockpitShield(Dt); TickSeatEjection(Dt); return; }
+ if (EjectionTime>=0.f)
+ {
+  TickCockpitShield(Dt);
+  EjectionTime+=Dt;
+  const float LaunchTime=GetEjectionLaunchTime();
+  if (!bSeatFlightFinished) TickSeatEjection(LaunchTime);
+  if (bSeatLaunched && bWreckBurstPlayed) UpdateWreckBurn(EjectionTime-LaunchTime);
+  if (bSeatFlightFinished && ScorchedHullMaterials.IsEmpty() && (!bWreckBurstPlayed || bWreckFireStarted))
+   SetComponentTickEnabled(false);
+  return;
+ }
  if (bTransferring)
  {
   TickTransfer(Dt);
@@ -413,6 +428,7 @@ void UHopperPresentationComponent::ApplyLeg(int32 Side,const FTransform& BodyWor
 void UHopperPresentationComponent::BeginPlay()
 {
  Super::BeginPlay();
+ PreloadWreckEffects();
  // Runtime components must survive editor property reconstruction during PIE.
  TArray<USceneComponent*> Owned; GetOwner()->GetComponents(Owned);
  for (USceneComponent* Component:Owned)
@@ -422,6 +438,7 @@ void UHopperPresentationComponent::BeginPlay()
 }
 void UHopperPresentationComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+ WreckAssetHandle.Reset();
  ClearEjectionExhaust();
  // Detached components remain owned by the enemy, so actor destruction cleans the wreck too.
  Super::EndPlay(Reason);

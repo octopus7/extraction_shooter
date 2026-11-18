@@ -6,6 +6,7 @@ class UStaticMesh;
 class USkeletalMesh;
 class UAnimSequence;
 class UNiagaraSystem;
+class UMaterialInterface;
 USTRUCT(BlueprintType)
 struct FHopperMeshPart
 {
@@ -19,6 +20,23 @@ struct FHopperPartMotion
  GENERATED_BODY()
  UPROPERTY(EditAnywhere) FName PartName;
  UPROPERTY(EditAnywhere) TArray<FTransform> Frames;
+};
+USTRUCT(BlueprintType)
+struct FHopperWreckEffects
+{
+ GENERATED_BODY()
+ UPROPERTY(EditAnywhere, meta=(Units="cm")) FVector Origin = FVector(22,0,107);
+ /** A short burst at the moment the shield breaks. */
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UNiagaraSystem> RadialBlast;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UMaterialInterface> BlastFlashMaterial;
+ /** Sustained flames on the empty chassis after seat separation. */
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UNiagaraSystem> Fire;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UNiagaraSystem> MetalDebris;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UNiagaraSystem> OilSpray;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UMaterialInterface> Scorch;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UMaterialInterface> OilPool;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UMaterialInterface> OilSplash;
+ bool IsConfigured() const { return !RadialBlast.IsNull() || !Fire.IsNull(); }
 };
 /** Rest geometry is centimeters, +X forward, +Z up, at ground origin. */
 UCLASS(BlueprintType)
@@ -65,6 +83,7 @@ public:
  UPROPERTY(EditAnywhere, Category="Seat", meta=(ClampMin="0", Units="cm")) float RailReleaseTravel = 0.f;
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatLockSparks;
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatEjectSparks;
+ UPROPERTY(EditAnywhere, Category="Destruction") FHopperWreckEffects WreckEffects;
  UPROPERTY(EditAnywhere) FVector LeftArmMount = FVector(-5.8716,56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector RightArmMount = FVector(-5.8716,-56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector LeftHip = FVector(-4.5166,39.0687,85.8);

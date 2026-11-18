@@ -87,7 +87,7 @@ private:
     friend class FHopperTransitionClearanceTest;
     void InitializePresentation();
     void TryStartEncounterBoarding();
-    void BeginMechDestruction();
+    void BeginMechDestruction(const FVector& ImpactTravel);
     void UpdateDisembark(float DeltaSeconds);
     bool FindPilotExit(FVector& OutGroundDestination) const;
     bool IsPilotExitClear(const FVector& GroundDestination) const;
