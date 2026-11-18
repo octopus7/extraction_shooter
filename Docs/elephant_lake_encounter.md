@@ -2,7 +2,7 @@
 
 - 레벨: `/Game/MainRaid/RaidForest`.
 - 호수 중심: `(-4580.562, 6200, 0)` cm. 사용자 지정 코끼리 위치 `(-5630.562, 6200, 0)`에 맞춰 세 요소를 X축으로 `-9980.562` cm 평행 이동했다. 기존 62개 액터의 위치는 유지했다.
-- `Forest_ElephantLake_Decal`: 15×10m 투영 범위의 이미지 데칼. `/Game/Environment/ElephantLake/M_LakeDecal`이 생성 이미지의 RGB/알파를 사용한다. 수영·수심·물리 수면은 없다.
+- 숲맵의 호수는 `Water_06_ElephantLake`가 표시한다. 수면 아래 지형까지의 깊이가 색과 투과율을 결정하며 물가 메시가 흰 물결을 그린다. 기존 15×10m 이미지 데칼 `Forest_ElephantLake_Decal`은 이 레벨에서 숨겼다. 편집 방법은 [숲맵 수역](forest_water.md)에 정리했다.
 - `Forest_LakeElephant`: `/Game/Environment/ElephantLake/BP_LakeElephant`. StaticMeshActor 기반 BP의 StaticMeshComponent에서 메시와 머터리얼을 교체할 수 있다. 달성 판정은 외형과 분리돼 있다.
 - `Forest_ElephantLake_Achievement13`: 기존 `TunaSweeperAchievementLocationTrigger`. 중심 `(-4580.562, 6200, 200)`, 반크기 `(1300, 850, 300)` cm의 호숫가 영역. `LocationId=location.forest.elephant_lake`.
 
@@ -15,7 +15,7 @@
 ## 검증
 
 - 새 Blender 프로세스에서 blend와 FBX의 격자, 크기, UV 면적, 유한한 노멀/탄젠트, 단일 머터리얼을 검사한다.
-- 새 UE 에디터에서 저장된 BP·메시·머터리얼 연결, 데칼 하향 투영, 트리거 ID/크기와 기존 액터 보존을 검사하고 렌더 결과를 확인한다.
+- 새 UE 에디터에서 호수 BP의 수면·물가·바닥 소품, 기존 데칼의 표시 상태, 트리거 ID와 크기, 기존 액터 위치를 검사하고 렌더 결과를 확인한다.
 - `TunaSweeper.ElephantLake.PlayerEntry`는 실제 RaidForest PIE에서 시작/영역 밖/비플레이어 overlap 미달성, 플레이어 진입 달성을 검사한다. 반드시 매번 비어 있는 `ElephantLakeAutomation` 포함 `-UserDir`로 실행한다.
 - `TunaSweeper.Achievement.ElephantLakeDefinition`은 실제 JSON을 읽어 숲 진입과 호수 진입을 구분한다. 기존 PersistenceRoundTrip/별도 프로세스 AchievementRestart.Read는 13번 해금과 위치 기록의 보존을 포함한다.
 - Steam 서버 등록은 별도 플랫폼 매핑 설정이 필요하며 로컬 PIE 성공이 Steam 서버 달성 성공을 뜻하지 않는다.
