@@ -115,11 +115,19 @@ bool FHopperPlayStep::Update()
   Test->TestNotNull(TEXT("Left weapon attached"),Hopper->GetArmModule(true));
   Test->TestNotNull(TEXT("Right weapon attached"),Hopper->GetArmModule(false));
   Test->TestNotNull(TEXT("Pilot mesh imported"),P->GetPilotMesh()->GetSkeletalMeshAsset());
+  Test->TestEqual(TEXT("Combat test map places the Mk2 blueprint"),Hopper->GetClass()->GetPathName(),
+   FString(TEXT("/Game/Characters/Hopper/BP_HopperEnemyMk2.BP_HopperEnemyMk2_C")));
+  const UHopperVisualData* Visual=Hopper->VisualData.Get();
+  if (!Test->TestNotNull(TEXT("Placed Mk2 visual data"),Visual)) return true;
+  TMap<FSoftObjectPath,int32> ExpectedMeshes,PlacedMeshes;
+  for (const FHopperMeshPart& Part:Visual->Parts) ++ExpectedMeshes.FindOrAdd(Part.Mesh.ToSoftObjectPath());
+  ++ExpectedMeshes.FindOrAdd(Visual->PilotGun.ToSoftObjectPath());
+  ++ExpectedMeshes.FindOrAdd(Visual->CockpitShieldMesh.ToSoftObjectPath());
   TArray<UStaticMeshComponent*> MeshParts; Hopper->GetComponents(MeshParts);
-  int32 HopperParts=0;
-  for(UStaticMeshComponent* Part:MeshParts)
-   if(Part->GetStaticMesh() && Part->GetStaticMesh()->GetPathName().StartsWith(TEXT("/Game/Characters/Hopper/"))) ++HopperParts;
-  Test->TestEqual(TEXT("Exactly one generated assembly after map load and PIE duplication"),HopperParts,62);
+  for (const UStaticMeshComponent* Part:MeshParts)
+   if (Part->ComponentHasTag(TEXT("HopperGenerated")) && Part->GetStaticMesh())
+    ++PlacedMeshes.FindOrAdd(FSoftObjectPath(Part->GetStaticMesh()));
+  Test->TestTrue(TEXT("PIE contains exactly one complete Mk2 assembly"),ExpectedMeshes.OrderIndependentCompareEqual(PlacedMeshes));
   TArray<USkeletalMeshComponent*> Pilots; Hopper->GetComponents(Pilots);
   int32 PilotCount=0;
   for(USkeletalMeshComponent* Pilot:Pilots) if(Pilot->GetSkeletalMeshAsset()==P->GetPilotMesh()->GetSkeletalMeshAsset()) ++PilotCount;
@@ -226,14 +234,22 @@ bool FHopperEjectionStage::Update()
  auto* P=Hopper->GetPresentation();
  if (Stage==0)
  {
-  Hopper->bEndCombatOnMechDestruction=true;
+  const auto* Shield=Hopper->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperCockpitShield"));
+  if (!Test->TestNotNull(TEXT("Placed Mk2 cockpit shield"),Shield)) return true;
+  const auto& Field=Shield->GetCustomPrimitiveData().Data;
+  const bool bDeployed=!Shield->bHiddenInGame && Field.Num()>=4 && Field[0]>=1.f;
+  if (!bDeployed && FPlatformTime::Seconds()-StartTime<8.f) return false;
+  Test->TestTrue(TEXT("Boarding deploys the shield on the placed Mk2"),bDeployed);
+  Test->TestTrue(TEXT("Placed Mk2 ejects its pilot by default"),Hopper->bEndCombatOnMechDestruction);
   Hopper->TakeDamage(10000.f,FDamageEvent(),nullptr,nullptr);
+  Test->TestTrue(TEXT("Escape starts with a shield warning"),P->IsWaitingForShieldBreak());
   // Freeze only the presentation timeline to capture exact phases after rendering settles.
   P->SetComponentTickEnabled(false);
  }
  else
  {
-  const float Steps[]={0.f,.7f,.35f,.55f,.6f,10.f};
+  const float HalfSlide=P->EjectionSlideSeconds*.5f;
+  const float Steps[]={0.f,P->GetEjectionHatchDuration(),HalfSlide,HalfSlide+.2f,.6f,10.f};
   P->TickComponent(Steps[Stage],LEVELTICK_All,nullptr);
  }
  APlayerController* PC=World->GetFirstPlayerController();

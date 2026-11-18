@@ -3,13 +3,15 @@
 ## 사용 위치
 
 - 구형 호퍼 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemy`
-- 마을 호퍼 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemyMk2`
+- 마을·전투 테스트맵용 블루프린트: `/Game/Characters/Hopper/BP_HopperEnemyMk2`
 - 전투·경사면 확인 맵: `/Game/Maps/HopperCombatTestMap`
 - 모델·애니메이션은 구형의 `DA_HopperVisual`과 Mk2의 `/Game/Characters/Hopper/Mk2/DA_HopperVisualMk2`에서 설정한다.
 - 메카 조립 원본은 `TunaSweeper/SourceArt/Characters/Hopper/Hopper.blend`, 토끼대장 편집·재수출 원본은 같은 폴더의 `Captain/CaptainPilot_UE.blend`다.
 - 원본 메시 출처: 로컬 `HOPPER_03_ArmModules_v5/preview/FitCheck.glb`. 원본 파일은 수정하지 않는다.
 
-테스트맵은 `BP_HopperTestGameMode`로 테스트 장비 세션을 시작한다.
+테스트맵은 `BP_HopperTestGameMode`로 테스트 장비 세션을 시작한다. 아웃라이너의 `Hopper_Mk2`가 실제 배치된 적이다. 플레이를 시작하면 토끼대장이 지상에서 탑승하고, 기체 격파 시 좌석이 사출된다.
+
+`HopperCombatTestMap`의 바닥·완경사로·낮은 단차는 `/Game/Environment/HopperTestHangar/Materials/M_HangarLabFloor`를 사용한다. 월드 좌표 기준으로 타일 한 장은 2.4m 정사각형이고, 4.8m마다 매립 점검구와 황색 정비 표식이 반복된다.
 
 ### 마을 호퍼 Mk2
 
