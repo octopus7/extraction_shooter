@@ -18,15 +18,15 @@
 | 시간 | 고정 카메라에 보이는 장면 |
 | --- | --- |
 | 0–2.45초 | 좌현 아래에서 양쪽 난간이 발판 위로 접히고 계단 끝이 지면을 떠나는 순간을 본다. |
-| 2.45–5.4초 | 출입구 반대 각도로 컷을 바꾼다. 계단은 객실 바닥 아래에 수납되어 있고, 위쪽 해치가 내려와 문틀에 밀착된다. |
+| 2.45–5.4초 | 출입구 반대 각도에서 위쪽 해치가 내려오는 동안 마지막 발판 몇 개가 문턱 아래로 미끄러져 들어간다. 계단이 완전히 들어간 3.72초부터 하부 덮개가 경첩을 중심으로 68도 돌아간다. 4.82초에 해치와 덮개가 자리를 잡는다. |
 | 5.4–8.75초 | 컷이 열리는 순간부터 기체가 수평 자세로 떠오른다. 기수와 후방 하부의 네 분사구에 짧은 불꽃이 보인다. 지면을 때린 바람이 흙먼지를 사방으로 밀어내는 동안 착륙발이 접힌다. |
 | 8.75–14.2초 | 상승을 이어가며 기수를 세운다. 11.5초에 수직 자세가 되면 꼬리 쌍발 엔진으로 점차 속도를 높인다. 기체가 올라가는 도중 화면이 어두워진다. |
 | 14.02–14.42초 | 화면이 완전히 검은 동안 지상에서 구름 위로 시간을 건너뛴다. |
-| 14.2–18.45초 | 보라색 구름바다가 밝아지면서 기체가 화면 아래로부터 올라온다. 중앙을 지나 위쪽 프레임을 빠져나갈 때 궤도 원경으로 전환한다. |
+| 14.2–18.45초 | 보라색 구름바다가 밝아지면서 기체가 화면 아래로부터 올라온다. 꼬리 쌍발 분사구에서 불꽃 입자가 뿜어져 나오고 흰 연기 입자는 아래로 흐르며 부풀어 흩어진다. 기체가 중앙을 지나 위쪽 프레임을 빠져나갈 때 궤도 원경으로 전환한다. |
 | 18.45–22.7초 | 행성 가장자리의 노을 위로 작은 기체와 희미한 꼬리가 보인다. |
 | 22.7초 이후 | 1.7초에 걸쳐 암전한 뒤 1.1초간 검은 화면을 유지한다. 중앙 독백이 0.8초 동안 나타나고 5초 동안 머문다. |
 
-재생 시간은 첫 번째 고정 컷을 기준으로 한다. [초기 스토리보드](../chatgpt/SSTOEnding/ssto_ending_storyboard.png) · [현재 게임의 여섯 컷](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_Launch_Cuts.jpg) · [평원 단말기에서 촬영한 진 엔딩 영상](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_TrueEnding.mp4)
+재생 시간은 첫 번째 고정 컷을 기준으로 한다. [사다리 수납과 구름 위 배기 발췌 영상](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_Hatch_and_Exhaust.mp4) · [평원 단말기에서 촬영한 진 엔딩 전체 영상](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_TrueEnding.mp4) · [현재 게임의 여섯 컷](../TunaSweeper/SourceArt/Environment/SSTO_TrueEnding/Previews/SSTO_Launch_Cuts.jpg) · [초기 스토리보드](../chatgpt/SSTOEnding/ssto_ending_storyboard.png)
 
 연출이 끝나면 현재 슬롯에 저장하고 `/Game/Maps/IntroMap`으로 돌아간다. 저장에 실패하면 화면의 안내에 따라 같은 슬롯에 재시도한다.
 
@@ -43,12 +43,14 @@
 
 실제 문구는 `Content/Data/UITextStrings.csv`의 `ui.freeplay_ending.normal.*` / `ui.freeplay_ending.true.*`에서 6개 언어로 관리한다. 평원 진 엔딩의 마지막 문장은 `DA_Ending_True.CinematicMonologueStringKey`가 선택한다. 독백의 서체·색·중앙 배치는 `/Game/UI/Story/Astra/WBP_EndingMonologue_GPT62Astra`의 디자이너에서 편집한다. 고고도 구름과 궤도 지평선의 배경 원화 및 편집용 해치는 `SourceArt/Environment/SSTO_TrueEnding`에 있다.
 
+구름 위 중경의 흰 연기는 ImageGen으로 만든 4×4 투명 연속 이미지 `T_SSTOExhaustSmoke_4x4`를 사용한다. `/Game/Effects/SSTOEnding/PS_SSTOCloudExhaust`에서 불꽃과 연기의 크기, 속도, 수명과 색을 편집할 수 있다. 두 분사구가 발사한 입자는 월드 공간에 남으며, 레이드가 일시정지된 동안에도 시네마틱 시간으로 움직인다.
+
 완료 기록은 기존 시나리오 플래그 배열의 `ending.freeplay.normal_seen`, `ending.freeplay.true_seen`이다. 별도 저장 버전 변경과 도전과제 추가는 없다.
 
 ## 검증
 
 `TunaSweeper.FreePlayEnding` 자동화는 native 클래스·실제 BP/스토리 애셋·참치 조건·세이브 거부와 재시도·경험치 중복 방지·슬롯 재로드·반복 엔딩을 확인한다. 디스크 시험은 `-UserDir=<project>/Saved/RaidStorageAutomation/`에서만 수행한다. `RenderStories`는 렌더링 가능한 실행에서 실제 대사 UI 이미지를 생성하고 문장 진행을 검증한다.
 
-`Tools/SSTOLander/verify_ending.ps1`은 저장된 평원맵에서 승하차, 보관함과 단말기 접근, 일반·진 엔딩, 같은 슬롯 이어하기를 실행한다. 진 엔딩에서는 여섯 고정 컷과 계단 수납, 네 분사구의 불꽃 부착 위치, 양옆으로 퍼지는 먼지, 기립 중 꼬리의 지면 여유와 수직 가속을 검사한다. 고도 전환의 암전과 구름 위 중경의 하단 진입·중앙 통과·상단 이탈, 마지막 검은 화면과 중앙 독백도 확인한다. `-RecordFilm`을 주면 실제 뷰포트 프레임을 경과 밀리초 이름으로 테스트 폴더의 `SSTOEnding/Film`에 기록한다. 테스트 세이브는 `Saved/SSTOEndingAutomation/` 아래에 격리한다. 실행 전 `Docs/unreal_editor_coordination.md`에 따라 에디터를 조율하고 최신 에디터 모듈을 빌드한다.
+`Tools/SSTOLander/verify_ending.ps1`은 저장된 평원맵에서 승하차, 보관함과 단말기 접근, 일반·진 엔딩, 같은 슬롯 이어하기를 실행한다. 진 엔딩에서는 여섯 고정 컷, 계단의 마지막 수납 동작과 하부 덮개의 순차 회전, 네 분사구의 불꽃 부착 위치, 양옆으로 퍼지는 먼지, 기립 중 꼬리의 지면 여유와 수직 가속을 검사한다. 고도 전환의 암전, 구름 위 중경에서 양쪽 엔진의 실제 입자와 연기 프레임 진행, 기체의 하단 진입·중앙 통과·상단 이탈, 마지막 검은 화면과 중앙 독백도 확인한다. `-RecordFilm`을 주면 실제 뷰포트 프레임을 경과 밀리초 이름으로 테스트 폴더의 `SSTOEnding/Film`에 기록한다. 테스트 세이브는 `Saved/SSTOEndingAutomation/` 아래에 격리한다. 실행 전 `Docs/unreal_editor_coordination.md`에 따라 에디터를 조율하고 최신 에디터 모듈을 빌드한다.
 
 PIE 테스트는 레이드에 도달한 슬롯을 재현하기 위해 테스트 슬롯에만 오프닝 완료 기록을 넣는다. 기존 `IntroMap`의 `BP_Morph` Construction Script 오류는 [기존 점검 기록](demo_build_implementation_audit_2026-09-02.md)의 알려진 문제로 한정해 허용한다. 이 테스트가 해당 표정 제어 문제까지 수정하거나 무오류를 보증하는 것은 아니다. 나머지 테스트 오류는 실패 처리한다.

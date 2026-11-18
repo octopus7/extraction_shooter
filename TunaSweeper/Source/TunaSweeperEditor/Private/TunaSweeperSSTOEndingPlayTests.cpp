@@ -24,6 +24,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "ParticleEmitterInstances.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Input/Events.h"
 #include "ImageUtils.h"
@@ -92,8 +94,12 @@ struct FRun
     FTransform ParkedShip;
     TWeakObjectPtr<UStaticMeshComponent> BoardingStair;
     TWeakObjectPtr<UStaticMeshComponent> PressureDoor;
+    TWeakObjectPtr<UStaticMeshComponent> BayCover;
     bool bSawStairLift = false;
     bool bDoorSwungShut = false;
+    bool bSawStairFinish = false;
+    bool bCoverSwung = false;
+    bool bSawCloudParticles = false;
     bool bSawIntermediatePitch = false;
     bool bReachedUpright = false;
     float FlightSampleTime = -1.f;
@@ -148,7 +154,7 @@ struct FRun
     }
     bool InspectHatch(ASSTOLaunchCinematic* Launch, int32 Shot)
     {
-        if (!BoardingStair.IsValid() || !PressureDoor.IsValid())
+        if (!BoardingStair.IsValid() || !PressureDoor.IsValid() || !BayCover.IsValid())
         {
             TInlineComponentArray<UStaticMeshComponent*> Parts(Launch);
             for (auto* Part : Parts)
@@ -156,8 +162,10 @@ struct FRun
                 const FName Mesh = GetFNameSafe(Part->GetStaticMesh());
                 if (Mesh == TEXT("SM_SSTO_StairTray") || Mesh == TEXT("SM_SSTO_Ladder")) BoardingStair = Part;
                 else if (Mesh == TEXT("SM_SSTO_CinematicHatch")) PressureDoor = Part;
+                else if (Mesh == TEXT("SM_SSTO_StairBayCover")) BayCover = Part;
             }
-            if (!Check(BoardingStair.IsValid() && PressureDoor.IsValid(), TEXT("Both moving boarding parts are present"))) return false;
+            if (!Check(BoardingStair.IsValid() && PressureDoor.IsValid() && BayCover.IsValid(),
+                TEXT("The boarding stair, pressure hatch and separate rotating lower closeout are modeled"))) return false;
         }
         if (!Check(BoardingStair->IsVisible() && !BoardingStair->bHiddenInGame,
             TEXT("The physical stair stays rendered across the mechanical cut"))) return false;
@@ -173,7 +181,17 @@ struct FRun
         }
         else
         {
-            if (!Check(bSawStairLift && Foot.Y > -300. && Foot.Z < 165., TEXT("After the cut the actual stair is inside the belly below the cabin deck"))) return false;
+            if (!Check(bSawStairLift && Foot.Z < 165. && BayCover->IsVisible(), TEXT("The final stroke stays below the cabin floor"))) return false;
+            const double CoverAngle = FMath::RadiansToDegrees(BayCover->GetRelativeRotation().Quaternion().GetAngle());
+            if (Now > 2.65f && Foot.Y < -337. && PreviousHatchSample >= 2.45f && Foot.Y > PreviousStairFoot.Y + .1 &&
+                Foot.Z > PreviousStairFoot.Z &&
+                !PressureDoor->GetRelativeRotation().Equals(FRotator::ZeroRotator, 2.)) bSawStairFinish = true;
+            if (Foot.Y < -227. && !Check(CoverAngle > 63., TEXT("The bay cover waits until the stair is completely inside"))) return false;
+            if (CoverAngle > 9. && CoverAngle < 57.) bCoverSwung = true;
+            if (Now > 4.85f && !Check(bSawStairFinish && bCoverSwung && Foot.Y > -227. && CoverAngle < 1.,
+                TEXT("The last rungs withdraw in view before the lower cover rotates and seats"))) return false;
+            PreviousStairFoot = Foot;
+            PreviousHatchSample = Now;
             if (PressureDoor->GetRelativeTransform().Equals(FTransform::Identity, .01f)) bDoorSwungShut = true;
         }
         return true;
@@ -186,7 +204,8 @@ struct FRun
         TArray<FVector, TInlineAllocator<32>> Dust;
         for (const auto* Part : Parts)
         {
-            if (GetFNameSafe(Part->GetStaticMesh()) == TEXT("SM_SSTO_LowHull")) Hull = Part;
+            if (GetFNameSafe(Part->GetStaticMesh()) == TEXT("SM_SSTO_LowHull") ||
+                GetFNameSafe(Part->GetStaticMesh()) == TEXT("SM_SSTO_CinematicLowHull")) Hull = Part;
             if (!Part->IsVisible()) continue;
             if (Part->ComponentHasTag(TEXT("SSTO_MainLiftCore")) || Part->ComponentHasTag(TEXT("SSTO_NoseLiftCore"))) LiftCores.Add(Part);
             if (Part->ComponentHasTag(TEXT("SSTO_OutwashPuff")))
@@ -264,6 +283,30 @@ struct FRun
         }
         if (Shot == 4)
         {
+            if (Now > 15.45f && !bSawCloudParticles)
+            {
+                TInlineComponentArray<UParticleSystemComponent*> Engines(Launch);
+                int32 BurningBells = 0;
+                for (const UParticleSystemComponent* Engine : Engines)
+                {
+                    if (!Engine->IsVisible() || Engine->EmitterInstances.Num() != 2) continue;
+                    auto* Flame = Engine->EmitterInstances[0];
+                    auto* Smoke = Engine->EmitterInstances[1];
+                    if (!Flame || !Smoke || Flame->ActiveParticles < 3 || Smoke->ActiveParticles < 4 || Smoke->SubUVDataOffset <= 0) continue;
+                    if (Flame->GetParticle(0)->Velocity.Z >= -500.) continue;
+                    for (int32 Index = 0; Index < Smoke->ActiveParticles; ++Index)
+                    {
+                        const FBaseParticle* Particle = Smoke->GetParticle(Index);
+                        const auto* Frame = reinterpret_cast<const FFullSubUVPayload*>(reinterpret_cast<const uint8*>(Particle) + Smoke->SubUVDataOffset);
+                        if (Particle->Velocity.Z < -100. && Particle->RelativeTime > .12f && Frame->ImageIndex > 1.f)
+                        {
+                            ++BurningBells;
+                            break;
+                        }
+                    }
+                }
+                bSawCloudParticles = BurningBells == 2;
+            }
             FMinimalViewInfo View;
             Launch->CalcCamera(0.f, View);
             const FVector Up = View.Rotation.RotateVector(FVector::UpVector);
@@ -284,7 +327,7 @@ struct FRun
                     TEXT("The passing upright craft reads at medium distance against the sky"));
         }
         if (Shot == 5 && ObservedShot != Shot)
-            return Check(bEnteredFromBelow && bCrossedCenter && bLeavingAtTop && bFadingOut && bCloudCutBlack && bFadingIn,
+            return Check(bSawCloudParticles && bEnteredFromBelow && bCrossedCenter && bLeavingAtTop && bFadingOut && bCloudCutBlack && bFadingIn,
                 TEXT("A complete fade bridges the altitude jump and the cloud pass runs bottom to top before orbit"));
         return true;
     }
@@ -318,6 +361,8 @@ struct FRun
             const FTransform Camera(View.Rotation, View.Location);
             if (Shot != ObservedShot)
             {
+                if (bRecordFilm) Test->AddInfo(FString::Printf(TEXT("SSTO recorded cut %d at %.3f seconds"), Shot,
+                    FPlatformTime::Seconds() - Changed));
                 if (!Check(Shot == ObservedShot + 1, TEXT("Locked shots play in storyboard order"))) return false;
                 if (Shot == 2 && !Check(bDoorSwungShut, TEXT("The fixed hatch shot holds until the door is seated"))) return false;
                 if (ObservedShot != INDEX_NONE && !Check(!FixedCamera.Equals(Camera, 1.f), TEXT("The ellipsis and subsequent cuts change camera position"))) return false;

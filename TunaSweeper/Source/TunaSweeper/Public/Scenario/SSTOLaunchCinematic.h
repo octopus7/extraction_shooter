@@ -12,6 +12,8 @@ class UExponentialHeightFogComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UPointLightComponent;
+class UParticleSystem;
+class UParticleSystemComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
 class UTexture2D;
@@ -62,6 +64,7 @@ private:
         float Seed;
         FEffectCard Core;
         TArray<FEffectCard> Dust;
+        TWeakObjectPtr<UParticleSystemComponent> CloudParticles;
     };
     struct FScreenWidget
     {
@@ -79,7 +82,8 @@ private:
     void SetFlightPose(float Time);
     void DrawNozzles(float Time);
     void DrawGroundDust(FNozzle& Jet, float Time);
-    void DrawVapor(float ShotFraction);
+    void AdvanceCloudExhaust(float Time);
+    void DrawOrbitalVapor(float ShotFraction);
     FVector StagePosition(const FVector& LevelLocal) const;
 
     UPROPERTY() TObjectPtr<USceneComponent> Airframe;
@@ -88,6 +92,7 @@ private:
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Stair;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> AftRail;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> ForeRail;
+    UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> BayCover;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Hatch;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Backdrop;
     UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> BackdropMaterial;
@@ -105,6 +110,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> VaporAsset;
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> FlameAsset;
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> DustAsset;
+    UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UParticleSystem> CloudExhaustAsset;
 
     TWeakObjectPtr<ATunaSweeperPlayerController> Controller;
     TWeakObjectPtr<AActor> PreviousView;
@@ -114,7 +120,7 @@ private:
     TArray<TWeakObjectPtr<UExponentialHeightFogComponent>> GroundFog;
     TArray<FScreenWidget> HiddenWidgets;
     TArray<FGear> Gear;
-    TArray<FEffectCard> Plume;
+    TArray<FEffectCard> OrbitalVapor;
     TArray<FNozzle> Nozzles;
     FTransform ParkedPose;
     FTransform LevelFrame;
@@ -124,6 +130,7 @@ private:
     double StartedAt = 0.0;
     float Elapsed = 0.0f;
     int32 ShotIndex = INDEX_NONE;
+    int32 LastExhaustStep = INDEX_NONE;
     bool bCameraOwned = false;
     bool bPreviousFullTick = false;
     bool bPreviousControllerPauseTick = false;

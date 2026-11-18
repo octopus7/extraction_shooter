@@ -41,7 +41,7 @@
       ]
     },
     "SM_SSTO_LiftHardware": {
-      "triangles": 3148,
+      "triangles": 3664,
       "min_cm": [
         -884.42,
         -330.5,
@@ -51,6 +51,32 @@
         793.48,
         278.42,
         166.0
+      ]
+    },
+    "SM_SSTO_StairBayCover": {
+      "triangles": 600,
+      "min_cm": [
+        304.0,
+        -335.546,
+        105.35
+      ],
+      "max_cm": [
+        486.0,
+        -298.35,
+        163.0
+      ]
+    },
+    "SM_SSTO_CinematicLowHull": {
+      "triangles": 14204,
+      "min_cm": [
+        -1115.0,
+        -532.26,
+        99.33
+      ],
+      "max_cm": [
+        1271.8,
+        532.26,
+        419.543
       ]
     }
   },
@@ -120,5 +146,26 @@
     "lowest_vertex_z_cm": 117.46,
     "highest_vertex_z_cm": 149.56,
     "clearance_below_cabin_deck_cm": 15.44
+  },
+  "stair_bay_cover": {
+    "hinge_cm": [
+      395,
+      -302.5,
+      109.5
+    ],
+    "open_degrees": 68,
+    "closed_degrees": 0,
+    "stair_slot_cm": {
+      "x": [
+        307.5,
+        482.5
+      ],
+      "z": [
+        113.5,
+        155.5
+      ]
+    },
+    "final_stair_stroke_ends_s": 3.72,
+    "cover_seated_s": 4.82
   }
 }
