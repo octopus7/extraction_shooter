@@ -38,6 +38,7 @@
 #include "Scenario/SSTOLaunchCinematic.h"
 #include "UI/Astra/EndingMonologueGPT62Astra.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "UI/TunaSweeperScreenFadeWidget.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -49,7 +50,7 @@ template<class T> T* Find(UWorld* World, const TCHAR* Label = nullptr)
         if (!Label || It->GetActorLabel() == Label) return *It;
     return nullptr;
 }
-void Capture(FAutomationTestBase* Test, const FString& Name)
+void Capture(FAutomationTestBase* Test, const FString& Name, bool bCheckBlackScreen = false)
 {
     auto* View = GEditor->PlayWorld ? GEditor->PlayWorld->GetGameViewport() : nullptr;
     if (!Test->TestNotNull(TEXT("Rendered PIE viewport"), View)) return;
@@ -58,6 +59,20 @@ void Capture(FAutomationTestBase* Test, const FString& Name)
     TArray<FColor> Pixels;
     FIntVector Size;
     if (!Test->TestTrue(TEXT("Read rendered world and Slate UI"), FSlateApplication::Get().TakeScreenshot(Window.ToSharedRef(), Pixels, Size))) return;
+    if (bCheckBlackScreen)
+    {
+        // Leave out the PIE window chrome and sample the rendered game surface.
+        for (int32 Y = Size.Y / 10; Y < 9 * Size.Y / 10; Y += 4)
+            for (int32 X = Size.X / 10; X < 9 * Size.X / 10; X += 4)
+            {
+                const FColor& Pixel = Pixels[Y * Size.X + X];
+                if (FMath::Max3(Pixel.R, Pixel.G, Pixel.B) > 2)
+                {
+                    Test->AddError(TEXT("The altitude cut exposed scenery during its full-black interval"));
+                    return;
+                }
+            }
+    }
     TArray64<uint8> Png;
     FImageUtils::PNGCompressImageArray(Size.X, Size.Y, TArrayView64<const FColor>(Pixels.GetData(), Pixels.Num()), Png);
     const FString Dir = FPaths::ProjectSavedDir() / TEXT("SSTOEnding");
@@ -81,6 +96,20 @@ struct FRun
     bool bDoorSwungShut = false;
     bool bSawIntermediatePitch = false;
     bool bReachedUpright = false;
+    float FlightSampleTime = -1.f;
+    double PreviousHeight = 0.;
+    double FirstUprightSpeed = 0.;
+    bool bAcceleratedUpright = false;
+    bool bFadingOut = false;
+    bool bCloudCutBlack = false;
+    bool bFadingIn = false;
+    bool bEnteredFromBelow = false;
+    bool bCrossedCenter = false;
+    bool bLeavingAtTop = false;
+    TWeakObjectPtr<const UStaticMeshComponent> TrackedDust;
+    FVector DustSample = FVector::ZeroVector;
+    float DustSampleTime = 0.f;
+    bool bDustTraveled = false;
     float PreviousHatchSample = -1.f;
     FVector PreviousStairFoot = FVector::ZeroVector;
     const bool bRecordFilm = FParse::Param(FCommandLine::Get(), TEXT("RecordSSTOEnding"));
@@ -154,19 +183,45 @@ struct FRun
         TInlineComponentArray<UStaticMeshComponent*> Parts(Launch);
         const UStaticMeshComponent* Hull = nullptr;
         TArray<const UStaticMeshComponent*, TInlineAllocator<4>> LiftCores;
-        int32 WashCount = 0;
+        TArray<FVector, TInlineAllocator<32>> Dust;
         for (const auto* Part : Parts)
         {
             if (GetFNameSafe(Part->GetStaticMesh()) == TEXT("SM_SSTO_LowHull")) Hull = Part;
             if (!Part->IsVisible()) continue;
             if (Part->ComponentHasTag(TEXT("SSTO_MainLiftCore")) || Part->ComponentHasTag(TEXT("SSTO_NoseLiftCore"))) LiftCores.Add(Part);
-            if (Part->ComponentHasTag(TEXT("SSTO_GroundWash"))) ++WashCount;
+            if (Part->ComponentHasTag(TEXT("SSTO_OutwashPuff")))
+            {
+                Dust.Add(Part->GetComponentLocation());
+                if (!bDustTraveled && Shot == 2 && (!TrackedDust.IsValid() || !TrackedDust->IsVisible()))
+                {
+                    TrackedDust = Part;
+                    DustSample = Part->GetComponentLocation();
+                    DustSampleTime = Launch->GetElapsedSeconds();
+                }
+            }
         }
         if (!Check(Hull != nullptr, TEXT("Flight uses the modeled hull"))) return false;
         const double NoseUp = Hull->GetForwardVector().Z;
-        if (Shot == 2 && Launch->GetElapsedSeconds() > 7.3f)
+        const float Now = Launch->GetElapsedSeconds();
+        const double Height = Hull->GetComponentTransform().TransformPosition(FVector(0,0,270)).Z;
+        if (Shot != ObservedShot || FlightSampleTime < 0.f || Now - FlightSampleTime >= .08f)
         {
-            if (!Check(LiftCores.Num() == 4 && WashCount == 4 && FMath::Abs(NoseUp) < .12,
+            if (Shot == ObservedShot && FlightSampleTime >= 0.f && Shot <= 4)
+            {
+                const double Speed = (Height - PreviousHeight) / (Now - FlightSampleTime);
+                if (!Check(Speed > (Shot == 4 ? 1100. : 45.), TEXT("The craft gains altitude throughout each fixed flight shot"))) return false;
+                if (Shot == 3 && NoseUp > .9999)
+                {
+                    if (FirstUprightSpeed == 0.) FirstUprightSpeed = Speed;
+                    bAcceleratedUpright |= Speed > FirstUprightSpeed + 180.;
+                }
+            }
+            FlightSampleTime = Now;
+            PreviousHeight = Height;
+        }
+        if (Shot == 2 && Now > 6.15f)
+        {
+            if (!Check(LiftCores.Num() == 4 && Dust.Num() >= 12 && FMath::Abs(NoseUp) < .12,
                 TEXT("Both main and forward pairs fire together and disturb the ground during level lift"))) return false;
             const FVector Outlets[] = {{-810,-204,94},{-810,204,94},{752,-146,90},{752,146,90}};
             for (const FVector& Outlet : Outlets)
@@ -176,12 +231,32 @@ struct FRun
                 if (!Check(LiftCores.ContainsByPredicate([&](const UStaticMeshComponent* Core)
                 {
                     const FVector Center = Core->GetComponentLocation();
-                    return Core->ComponentHasTag(Type) && FVector::Dist2D(Lip, Center) < 1. && Center.Z < Lip.Z;
-                }), TEXT("A live jet points straight down from each modeled outlet"))) return false;
+                    const double FlameLength = Core->GetComponentScale().Y * 100.;
+                    return Core->ComponentHasTag(Type) && FVector::Dist2D(Lip, Center) < 1. && Center.Z < Lip.Z &&
+                        FlameLength < (Outlet.X < 0 ? 240. : 145.) && FMath::Abs(Lip.Z - Center.Z - FlameLength * .5) < 5.;
+                }), TEXT("Each compact flame starts at its actual nozzle lip"))) return false;
+            }
+            const FVector Right = Hull->GetRightVector();
+            const FVector Center = ParkedShip.GetLocation();
+            bool bLeft = false, bRight = false;
+            for (const FVector& Puff : Dust)
+            {
+                const double Side = FVector::DotProduct(Puff - Center, Right);
+                bLeft |= Side < -310.;
+                bRight |= Side > 310.;
+            }
+            if (!Check(bLeft && bRight, TEXT("Dust is carried outward on both sides of the hull"))) return false;
+            if (TrackedDust.IsValid() && TrackedDust->IsVisible() && Now - DustSampleTime > .10f)
+            {
+                const FVector CurrentDust = TrackedDust->GetComponentLocation();
+                bDustTraveled |= FVector::Dist2D(CurrentDust, DustSample) > 25. && FMath::Abs(CurrentDust.Z - DustSample.Z) < 22.;
+                DustSample = CurrentDust;
+                DustSampleTime = Now;
             }
         }
         if (Shot == 3)
         {
+            if (ObservedShot != Shot && !Check(bDustTraveled, TEXT("Individual dust parcels actually travel along the terrain"))) return false;
             bSawIntermediatePitch |= NoseUp > .25 && NoseUp < .85;
             bReachedUpright |= NoseUp > .995;
             if (!Check(Hull->GetComponentTransform().TransformPosition(FVector(-1145,0,300)).Z > ParkedShip.GetLocation().Z + 80.,
@@ -199,11 +274,18 @@ struct FRun
                 return FVector::DotProduct(Ray, Up) / (FVector::DotProduct(Ray, View.Rotation.Vector()) * VerticalTangent);
             };
             const double Nose = ScreenY(FVector(1260,0,300)), Tail = ScreenY(FVector(-1145,0,300));
-            return Check(bSawIntermediatePitch && bReachedUpright && NoseUp > .995,
+            const double Middle = (Nose + Tail) * .5;
+            bEnteredFromBelow |= Nose < -.76;
+            bCrossedCenter |= FMath::Abs(Middle) < .18;
+            bLeavingAtTop |= Tail > .78;
+            return Check(bSawIntermediatePitch && bReachedUpright && bAcceleratedUpright && NoseUp > .995,
                 TEXT("The sky shot inherits the completed nose-up rotation")) &&
-                Check(Nose < .98 && Tail > -.98 && (Nose-Tail)*.5 > .30 && (Nose-Tail)*.5 < .68,
-                    TEXT("The entire upright craft reads at medium distance against the sky"));
+                Check((Nose-Tail)*.5 > .30 && (Nose-Tail)*.5 < .68,
+                    TEXT("The passing upright craft reads at medium distance against the sky"));
         }
+        if (Shot == 5 && ObservedShot != Shot)
+            return Check(bEnteredFromBelow && bCrossedCenter && bLeavingAtTop && bFadingOut && bCloudCutBlack && bFadingIn,
+                TEXT("A complete fade bridges the altitude jump and the cloud pass runs bottom to top before orbit"));
         return true;
     }
     bool InspectDeparture(UWorld* World, APlayerController* PC, UTunaSweeperGameInstance* Game)
@@ -214,6 +296,23 @@ struct FRun
             FMinimalViewInfo View;
             Launch->CalcCamera(0.f, View);
             const int32 Shot = Launch->GetShotIndex();
+            if (Shot == 3 || Shot == 4)
+            {
+                TArray<UUserWidget*> Fades;
+                UWidgetBlueprintLibrary::GetAllWidgetsOfClass(World, Fades, UTunaSweeperScreenFadeWidget::StaticClass(), true);
+                for (const UUserWidget* Fade : Fades)
+                {
+                    const float Opacity = Fade->GetRenderOpacity();
+                    const bool bPartial = Opacity > .10f && Opacity < .90f;
+                    bFadingOut |= Shot == 3 && bPartial;
+                    bFadingIn |= Shot == 4 && bPartial;
+                    if (!bCloudCutBlack && Shot == 4 && Opacity > .999f && bFadingOut)
+                    {
+                        Capture(Test, TEXT("True_02_TimeBlack"), true);
+                        bCloudCutBlack = true;
+                    }
+                }
+            }
             if (Shot <= 1 && !InspectHatch(Launch, Shot)) return false;
             if (Shot >= 2 && !InspectFlight(Launch, Shot)) return false;
             const FTransform Camera(View.Rotation, View.Location);
@@ -226,7 +325,7 @@ struct FRun
                 FixedCamera = Camera;
             }
             if (!Check(Camera.Equals(FixedCamera, .01), TEXT("Camera stays fixed during each shot"))) return false;
-            const float CaptureTimes[] = {1.97f, 3.68f, 8.65f, 13.35f, 18.55f, 23.5f};
+            const float CaptureTimes[] = {1.97f, 3.68f, 7.32f, 10.54f, 16.38f, 20.5f};
             const TCHAR* Names[] = {TEXT("True_00_Stair"), TEXT("True_01_Hatch"), TEXT("True_02_Hover"), TEXT("True_02_Pitch"),
                 TEXT("True_03_Clouds"), TEXT("True_04_Orbit")};
             if (Shot == CapturedShots && Launch->GetElapsedSeconds() >= CaptureTimes[Shot])

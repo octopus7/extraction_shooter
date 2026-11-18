@@ -15,10 +15,11 @@ class UPointLightComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
 class UTexture2D;
+class UTunaSweeperScreenFadeWidget;
 class UUserWidget;
 enum class ESlateVisibility : uint8;
 
-/** Local, real-time presentation of the placed spacecraft. The caller owns pause, HUD, input and fades. */
+/** Local, real-time presentation of the placed spacecraft. The caller owns pause, HUD, input and the entry/exit fades. */
 UCLASS(Transient, NotPlaceable)
 class TUNASWEEPER_API ASSTOLaunchCinematic : public AActor
 {
@@ -46,7 +47,7 @@ private:
         FTransform Rest;
         FVector Mount;
     };
-    struct FVaporCard
+    struct FEffectCard
     {
         TWeakObjectPtr<UStaticMeshComponent> Component;
         TWeakObjectPtr<UMaterialInstanceDynamic> Material;
@@ -55,13 +56,12 @@ private:
     {
         FVector Socket;
         double Radius;
-        double GroundZ;
+        FVector GroundPoint;
+        FVector GroundNormal;
         bool bAxial;
         float Seed;
-        FVaporCard Core;
-        FVaporCard Exhaust;
-        FVaporCard Dust;
-        FVaporCard DriftingDust;
+        FEffectCard Core;
+        TArray<FEffectCard> Dust;
     };
     struct FScreenWidget
     {
@@ -70,7 +70,7 @@ private:
     };
 
     UStaticMeshComponent* MakeMesh(UStaticMesh* Mesh, USceneComponent* Parent, bool bCastsShadow);
-    FVaporCard MakeVaporCard(UStaticMesh* Plane, UMaterialInterface* Master, const FLinearColor& Tint, float Seed, int32 Priority);
+    FEffectCard MakeEffectCard(UStaticMesh* Plane, UMaterialInterface* Master, float Seed, int32 Priority);
     bool BuildStage(AActor* Lander);
     void HideGameplay(AActor* Lander);
     void SetUpLighting();
@@ -78,6 +78,7 @@ private:
     void SetBoardingPose(float Time);
     void SetFlightPose(float Time);
     void DrawNozzles(float Time);
+    void DrawGroundDust(FNozzle& Jet, float Time);
     void DrawVapor(float ShotFraction);
     FVector StagePosition(const FVector& LevelLocal) const;
 
@@ -95,12 +96,15 @@ private:
     UPROPERTY(Transient) TObjectPtr<UPointLightComponent> CabinLight;
     UPROPERTY(Transient) TObjectPtr<UTexture2D> CloudPlate;
     UPROPERTY(Transient) TObjectPtr<UTexture2D> OrbitPlate;
+    UPROPERTY(Transient) TObjectPtr<UTunaSweeperScreenFadeWidget> AltitudeFade;
 
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UStaticMesh> HatchAsset;
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UTexture2D> CloudAsset;
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UTexture2D> OrbitAsset;
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> BackdropAsset;
     UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> VaporAsset;
+    UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> FlameAsset;
+    UPROPERTY(EditDefaultsOnly, Category="Ending|Art") TSoftObjectPtr<UMaterialInterface> DustAsset;
 
     TWeakObjectPtr<ATunaSweeperPlayerController> Controller;
     TWeakObjectPtr<AActor> PreviousView;
@@ -110,7 +114,7 @@ private:
     TArray<TWeakObjectPtr<UExponentialHeightFogComponent>> GroundFog;
     TArray<FScreenWidget> HiddenWidgets;
     TArray<FGear> Gear;
-    TArray<FVaporCard> Plume;
+    TArray<FEffectCard> Plume;
     TArray<FNozzle> Nozzles;
     FTransform ParkedPose;
     FTransform LevelFrame;

@@ -27,6 +27,7 @@
 #include "Math/RotationMatrix.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Scenario/TunaSweeperEndingActor.h"
+#include "UI/TunaSweeperScreenFadeWidget.h"
 
 namespace SSTOLaunch
 {
@@ -36,15 +37,17 @@ namespace SSTOLaunch
     constexpr float HatchUpright = 4.33f;
     constexpr float HatchSeated = 4.82f;
     constexpr float HoverCut = 5.4f;
-    constexpr float PitchCut = 10.4f;
-    constexpr float CloudCut = 16.0f;
-    constexpr float OrbitCut = 21.6f;
-    constexpr float End = 25.85f;
+    constexpr float PitchCut = 8.75f;
+    constexpr float UprightAt = 11.50f;
+    constexpr float CloudCut = 14.2f;
+    constexpr float OrbitCut = 18.45f;
+    constexpr float End = 22.7f;
     constexpr double CloudAltitude = 210000.0;
     constexpr double OrbitAltitude = 1400000.0;
     constexpr double Aspect = 16.0 / 9.0;
     constexpr int32 PlumeCount = 18;
     constexpr int32 OrbitalVaporCount = 9;
+    constexpr int32 DustDirections = 6;
     constexpr float CabinLumens = 215.f;
     const FVector StairHinge(395, -353, 181);
     const FVector DoorHinge(395, -312, 410);
@@ -55,11 +58,24 @@ namespace SSTOLaunch
     const FName TintParameter(TEXT("Tint"));
     const FName DensityParameter(TEXT("Density"));
     const FName SeedParameter(TEXT("Seed"));
+    const FName PhaseParameter(TEXT("Phase"));
     const FName NormalCamera(TEXT("Default"));
 
     float Ease(float Time, float From, float To)
     {
         return FMath::SmoothStep(0.0f, 1.0f, FMath::Clamp((Time - From) / (To - From), 0.0f, 1.0f));
+    }
+
+    // Integrate each acceleration from the previous shot's exit velocity (centimeters and seconds).
+    double LowFlightHeight(float Time)
+    {
+        const double Lift = FMath::Clamp(Time - HoverCut, 0.f, PitchCut - HoverCut);
+        const double Turn = FMath::Clamp(Time - PitchCut, 0.f, UprightAt - PitchCut);
+        const double Vertical = FMath::Max(Time - UprightAt, 0.f);
+        constexpr double SpeedAtTurn = 85. + 34. * (PitchCut - HoverCut);
+        constexpr double SpeedAtVertical = SpeedAtTurn + 90. * (UprightAt - PitchCut);
+        return Lift * (85. + 17. * Lift) + Turn * (SpeedAtTurn + 45. * Turn) +
+            Vertical * (SpeedAtVertical + 125. * Vertical);
     }
 
     // Source vertices share the hull origin. Keep the authored hinge fixed while moving the mesh.
@@ -130,6 +146,8 @@ ASSTOLaunchCinematic::ASSTOLaunchCinematic()
     OrbitAsset = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/Game/Effects/SSTOEnding/T_SSTOOrbitalLimb.T_SSTOOrbitalLimb")));
     BackdropAsset = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Effects/SSTOEnding/M_SSTOEndingBackdrop.M_SSTOEndingBackdrop")));
     VaporAsset = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Effects/SSTOEnding/M_SSTOEndingVapor.M_SSTOEndingVapor")));
+    FlameAsset = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Effects/SSTOEnding/M_SSTOEndingFlame.M_SSTOEndingFlame")));
+    DustAsset = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Effects/SSTOEnding/M_SSTOEndingDust.M_SSTOEndingDust")));
 }
 
 UStaticMeshComponent* ASSTOLaunchCinematic::MakeMesh(UStaticMesh* Mesh, USceneComponent* Parent, bool bCastsShadow)
@@ -155,12 +173,11 @@ UStaticMeshComponent* ASSTOLaunchCinematic::MakeMesh(UStaticMesh* Mesh, USceneCo
     return Part;
 }
 
-ASSTOLaunchCinematic::FVaporCard ASSTOLaunchCinematic::MakeVaporCard(UStaticMesh* Plane, UMaterialInterface* Master,
-    const FLinearColor& Tint, float Seed, int32 Priority)
+ASSTOLaunchCinematic::FEffectCard ASSTOLaunchCinematic::MakeEffectCard(UStaticMesh* Plane, UMaterialInterface* Master,
+    float Seed, int32 Priority)
 {
     auto* Card = MakeMesh(Plane, GetRootComponent(), false);
     auto* Material = UMaterialInstanceDynamic::Create(Master, this);
-    Material->SetVectorParameterValue(SSTOLaunch::TintParameter, Tint);
     Material->SetScalarParameterValue(SSTOLaunch::SeedParameter, Seed);
     Material->SetScalarParameterValue(SSTOLaunch::DensityParameter, 0.f);
     Card->SetMaterial(0, Material);
@@ -180,10 +197,12 @@ bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
     UStaticMesh* Plane = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
     UMaterialInterface* PlateMaster = BackdropAsset.LoadSynchronous();
     UMaterialInterface* VaporMaster = VaporAsset.LoadSynchronous();
+    UMaterialInterface* FlameMaster = FlameAsset.LoadSynchronous();
+    UMaterialInterface* DustMaster = DustAsset.LoadSynchronous();
     CloudPlate = CloudAsset.LoadSynchronous();
     OrbitPlate = OrbitAsset.LoadSynchronous();
     if (!DoorMesh || !TrayMesh || !AftRailMesh || !ForeRailMesh || !HardwareMesh ||
-        !Plane || !PlateMaster || !VaporMaster || !CloudPlate || !OrbitPlate)
+        !Plane || !PlateMaster || !VaporMaster || !FlameMaster || !DustMaster || !CloudPlate || !OrbitPlate)
     {
         return false;
     }
@@ -266,8 +285,9 @@ bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
     for (int32 Index = 0; Index < SSTOLaunch::PlumeCount; ++Index)
     {
         const float Depth = static_cast<float>(Index) / (SSTOLaunch::PlumeCount - 1);
-        Plume.Add(MakeVaporCard(Plane, VaporMaster, FMath::Lerp(FLinearColor(1.95f,1.48f,.97f),
-            FLinearColor(1.08f,.72f,.59f), Depth), .37f + Index * 1.793f, 1 + PlumeCount - Index));
+        auto& Card = Plume.Add_GetRef(MakeEffectCard(Plane, VaporMaster, .37f + Index * 1.793f, 1 + PlumeCount - Index));
+        Card.Material->SetVectorParameterValue(TintParameter,
+            FMath::Lerp(FLinearColor(1.95f,1.48f,.97f), FLinearColor(1.08f,.72f,.59f), Depth));
     }
 
     // Centers are the open lips of the four ventral nozzles and the two existing tail bells.
@@ -288,20 +308,25 @@ bool ASSTOLaunchCinematic::BuildStage(AActor* Lander)
         const float Seed = .81f + Nozzles.Num() * 1.71f;
         const bool bAxial = Outlet.Tag == TEXT("SSTO_AxialCore");
         const FVector Start = ParkedPose.TransformPosition(Outlet.Center);
-        FNozzle Jet{Outlet.Center, Outlet.Radius, ParkedPose.GetLocation().Z, bAxial, Seed, {}, {}, {}, {}};
-        Jet.Core = MakeVaporCard(Plane, VaporMaster, FLinearColor(4.6f,2.70f,1.22f), Seed, 31);
-        Jet.Exhaust = MakeVaporCard(Plane, VaporMaster, FLinearColor(1.80f,1.41f,1.35f), Seed+.71f, 27);
+        FNozzle& Jet = Nozzles.Add_GetRef({Outlet.Center, Outlet.Radius, FVector(Start.X, Start.Y, ParkedPose.GetLocation().Z),
+            FVector::UpVector, bAxial, Seed, {}, {}});
+        Jet.Core = MakeEffectCard(Plane, FlameMaster, Seed, 31);
         Jet.Core.Component->ComponentTags.Add(Outlet.Tag);
         if (!bAxial)
         {
             FHitResult Hit;
             if (GetWorld()->LineTraceSingleByChannel(Hit, Start + FVector::UpVector * 80.,
-                Start - FVector::UpVector * 4000., ECC_Visibility, Trace)) Jet.GroundZ = Hit.ImpactPoint.Z;
-            Jet.Dust = MakeVaporCard(Plane, VaporMaster, FLinearColor(.87f,.62f,.40f), Seed+2.21f, 19);
-            Jet.DriftingDust = MakeVaporCard(Plane, VaporMaster, FLinearColor(.78f,.57f,.44f), Seed+4.71f, 18);
-            Jet.Dust.Component->ComponentTags.Add(TEXT("SSTO_GroundWash"));
+                Start - FVector::UpVector * 4000., ECC_Visibility, Trace))
+            {
+                Jet.GroundPoint = Hit.ImpactPoint;
+                Jet.GroundNormal = Hit.ImpactNormal;
+            }
+            for (int32 Puff = 0; Puff < DustDirections * 2; ++Puff)
+            {
+                auto& Card = Jet.Dust.Add_GetRef(MakeEffectCard(Plane, DustMaster, Seed+Puff*1.37f, 0));
+                Card.Component->ComponentTags.Add(TEXT("SSTO_OutwashPuff"));
+            }
         }
-        Nozzles.Add(Jet);
     }
     return true;
 }
@@ -317,7 +342,8 @@ bool ASSTOLaunchCinematic::Start(ATunaSweeperPlayerController* Player, AActor* L
     SetActorTransform(LevelFrame);
     Controller = Player;
     SetOwner(Player);
-    if (!BuildStage(Lander))
+    AltitudeFade = CreateWidget<UTunaSweeperScreenFadeWidget>(Player);
+    if (!AltitudeFade || !BuildStage(Lander))
     {
         Stop();
         return false;
@@ -341,6 +367,9 @@ bool ASSTOLaunchCinematic::Start(ATunaSweeperPlayerController* Player, AActor* L
     const UGameInstance* Instance = GetWorld()->GetGameInstance();
     bSingleLocalWorld = GetNetMode() == NM_Standalone && Instance && Instance->GetNumLocalPlayers() == 1;
     HideGameplay(Lander);
+    AltitudeFade->SetVisibility(ESlateVisibility::Collapsed);
+    AltitudeFade->SetRenderOpacity(0.f);
+    AltitudeFade->AddToPlayerScreen(1000);
     SetUpLighting();
     Elapsed = 0;
     bOrbitReported = false;
@@ -476,9 +505,9 @@ void ASSTOLaunchCinematic::CutTo(int32 NewShot)
         Fov = 43.f;
         break;
     case PitchUp:
-        Position = StagePosition(FVector(1560,-7940,925));
-        Target = StagePosition(FVector(0,0,1925));
-        Fov = 49.f;
+        Position = StagePosition(FVector(1740,-8660,1040));
+        Target = StagePosition(FVector(0,0,1540));
+        Fov = 53.f;
         break;
     case CloudMedium:
         Position = StagePosition(FVector(-8650,-12100,CloudAltitude + 650));
@@ -529,6 +558,8 @@ void ASSTOLaunchCinematic::CutTo(int32 NewShot)
         // These distant plates already include atmospheric haze.
         for (const auto& Weak : GroundFog)
             if (auto* Fog = Weak.Get()) Fog->SetVisibility(false);
+        for (const FNozzle& Jet : Nozzles)
+            for (const auto& Puff : Jet.Dust) Puff.Component->SetVisibility(false);
     }
     for (int32 Index = 0; Index < Plume.Num(); ++Index)
     {
@@ -588,21 +619,25 @@ void ASSTOLaunchCinematic::SetFlightPose(float Time)
     FTransform ShipPose = ParkedPose;
     if (ShotIndex >= GroundLift)
     {
-        const float Lift = Ease(Time, HoverCut + .83f, PitchCut - .55f);
-        const float Rotation = Ease(Time, PitchCut + .64f, CloudCut - .83f);
+        const float Lift = Ease(Time, HoverCut, PitchCut);
+        const float Rotation = Ease(Time, PitchCut, UprightAt);
         FQuat Attitude = FQuat::Slerp(ParkedPose.GetRotation(), LevelFrame.GetRotation(), Lift);
         if (ShotIndex >= PitchUp) Attitude = LevelFrame.GetRotation() * FRotator(90.0 * Rotation, 0, 0).Quaternion();
         ShipPose.SetRotation(Attitude);
-        double Height = 470.0 * Lift + 1820.0 * Ease(Time, PitchCut, CloudCut - .43f);
-        if (ShotIndex == CloudMedium) Height = CloudAltitude + 805.0 * Ease(Time, CloudCut, OrbitCut);
+        double Height = LowFlightHeight(Time);
+        if (ShotIndex == CloudMedium)
+        {
+            const double Pass = (Time - CloudCut) / (OrbitCut - CloudCut);
+            Height = CloudAltitude - 5500. + 9410. * Pass * (.90 + .10 * Pass);
+        }
         if (ShotIndex == Orbit)
         {
-            Height = OrbitAltitude + 225.0 * Ease(Time, OrbitCut, End);
+            Height = OrbitAltitude + 100.0 * (Time - OrbitCut);
             ShipPose.SetScale3D(ParkedPose.GetScale3D() * .12);
         }
         const FVector Center = ParkedPose.TransformPosition(FlightCenter) + FVector::UpVector * Height;
         ShipPose.SetLocation(Center - ShipPose.TransformVector(FlightCenter));
-        const float Retract = Ease(Time, HoverCut + 1.4f, HoverCut + 3.94f);
+        const float Retract = Ease(Time, HoverCut + .35f, PitchCut);
         for (const FGear& Leg : Gear)
         {
             if (auto* Mesh = Leg.Component.Get())
@@ -622,53 +657,62 @@ void ASSTOLaunchCinematic::SetFlightPose(float Time)
 void ASSTOLaunchCinematic::DrawNozzles(float Time)
 {
     using namespace SSTOLaunch;
-    const float LiftBurn = Ease(Time, HoverCut+.18f, HoverCut+.78f) * (1.f - Ease(Time, PitchCut+1.05f, PitchCut+3.05f));
-    const float AxialBurn = ShotIndex == Orbit ? 0.f : Ease(Time, PitchCut+1.12f, PitchCut+3.15f);
+    const float LiftBurn = Ease(Time, HoverCut-.20f, HoverCut+.12f) * (1.f - Ease(Time, PitchCut+.20f, UprightAt-.35f));
+    const float AxialBurn = ShotIndex == Orbit ? 0.f : Ease(Time, PitchCut+.16f, UprightAt-.50f);
     const FVector TowardCamera = -Lens->GetForwardVector();
-    const FVector Wind = LevelFrame.TransformVectorNoScale(FVector(-.94,.34,0));
     for (FNozzle& Jet : Nozzles)
     {
+        if (!Jet.bAxial && ShotIndex >= GroundLift && ShotIndex <= PitchUp) DrawGroundDust(Jet, Time);
         const float Power = Jet.bAxial ? AxialBurn : LiftBurn;
         const bool bLit = Power > .005f;
         Jet.Core.Component->SetVisibility(bLit);
-        Jet.Exhaust.Component->SetVisibility(bLit);
-        if (Jet.Dust.Component.IsValid() && !bLit)
-        {
-            Jet.Dust.Component->SetVisibility(false);
-            Jet.DriftingDust.Component->SetVisibility(false);
-        }
         if (!bLit) continue;
 
         const FVector Mouth = Airframe->GetComponentTransform().TransformPosition(Jet.Socket);
         const FVector Axis = Jet.bAxial ? -Airframe->GetForwardVector() : FVector::DownVector;
         FVector Across = FVector::CrossProduct(TowardCamera, Axis).GetSafeNormal();
         if (Across.IsNearlyZero()) Across = Lens->GetRightVector();
-        const FQuat BeamFacing = FRotationMatrix::MakeFromXY(Across, FVector::CrossProduct(Across, TowardCamera)).ToQuat();
-        const double GroundGap = FMath::Max(18., Mouth.Z - Jet.GroundZ);
-        const double Length = (Jet.bAxial ? Jet.Radius * (3.0 + 3.4 * Power) : FMath::Min(GroundGap, 850.)) * (.38 + .62 * Power);
-        const double Width = Jet.Radius * (.85 + .49 * Power);
-        SetCard(Jet.Core.Component.Get(), Mouth + Axis * (.15 * Length), BeamFacing, Width, Length * .43);
-        SetCard(Jet.Exhaust.Component.Get(), Mouth + Axis * (.53 * Length), BeamFacing, Width * 1.40 + Length * .095, Length * 1.13);
-        Jet.Core.Material->SetScalarParameterValue(DensityParameter, Power * .8f);
-        Jet.Exhaust.Material->SetScalarParameterValue(DensityParameter, Power * .42f);
-        Jet.Exhaust.Material->SetScalarParameterValue(SeedParameter, Jet.Seed + .71f + .52f * Time);
-        if (Jet.Dust.Component.IsValid())
-        {
-            const float Wash = Power * (1.f - FMath::SmoothStep(560., 1220., GroundGap));
-            const double Diameter = Jet.Radius * (3.3 + 3.9 * Wash) + FMath::Min(GroundGap,650.) * .29;
-            const double Depth = Diameter * .21;
-            const FVector Ground(Mouth.X, Mouth.Y, Jet.GroundZ);
-            SetCard(Jet.Dust.Component.Get(), Ground + FVector::UpVector * Depth * .27, CardRotation, Diameter, Depth);
-            Jet.Dust.Material->SetScalarParameterValue(DensityParameter, Wash * .50f);
-            Jet.Dust.Material->SetScalarParameterValue(SeedParameter, Jet.Seed + 2.21f + Time * .28f);
-            Jet.Dust.Component->SetVisibility(Wash > .005f);
-            const float Age = FMath::Frac((Time - HoverCut) * .66f + .23f * Jet.Seed);
-            const float Envelope = FMath::Square(FMath::Sin(PI * Age));
-            const FVector Drift = Wind * Diameter * (.15 + .72 * Age) + FVector::UpVector * Depth * (.24 + .37 * Age);
-            SetCard(Jet.DriftingDust.Component.Get(), Ground + Drift, CardRotation, Diameter * (.72 + .54 * Age), Depth * (1.1 + .56 * Age));
-            Jet.DriftingDust.Material->SetScalarParameterValue(DensityParameter, Wash * Envelope * .36f);
-            Jet.DriftingDust.Component->SetVisibility(Wash > .005f);
-        }
+        const FQuat Facing = FRotationMatrix::MakeFromYX(Axis, Across).ToQuat();
+        const double Flicker = 1. + .045 * FMath::Sin(17.5 * Time + Jet.Seed);
+        const double FreeLength = Jet.Radius * (Jet.bAxial ? 5.2 : 3.35) * (.40 + .60 * Power) * Flicker;
+        const double Length = Jet.bAxial ? FreeLength : FMath::Min(FreeLength, FMath::Max(8., Mouth.Z - Jet.GroundPoint.Z));
+        SetCard(Jet.Core.Component.Get(), Mouth + Axis * (.5 * Length), Facing, Jet.Radius * (1.18 + .98 * Power), Length);
+        Jet.Core.Material->SetScalarParameterValue(DensityParameter, Power);
+        Jet.Core.Material->SetScalarParameterValue(PhaseParameter, Time);
+    }
+}
+
+void ASSTOLaunchCinematic::DrawGroundDust(FNozzle& Jet, float Time)
+{
+    using namespace SSTOLaunch;
+    const double RestGap = ParkedPose.TransformPosition(Jet.Socket).Z - Jet.GroundPoint.Z;
+    for (int32 Index = 0; Index < Jet.Dust.Num(); ++Index)
+    {
+        const int32 Lane = Index % DustDirections;
+        const float Lifetime = 1.48f + .19f * FMath::Sin(Jet.Seed + Lane * 1.7f);
+        const float Offset = FMath::Frac(.19f * Jet.Seed + .381966f * Lane + .5f * (Index / DustDirections));
+        const float Cycle = (Time - HoverCut + .30f) / Lifetime + Offset;
+        const float Age = FMath::Frac(Cycle);
+        const float Born = Time - Age * Lifetime;
+        const double GapAtEmission = RestGap + LowFlightHeight(Born);
+        const float Emission = Ease(Born, HoverCut-.30f, HoverCut+.06f) * (1.f - Ease(Born, PitchCut, PitchCut+1.05f))
+            * (1. - FMath::SmoothStep(400., 850., GapAtEmission));
+        const float Density = Emission * Ease(Age, 0.f, .14f) * (1.f - Ease(Age, .51f, 1.f));
+        auto& Puff = Jet.Dust[Index];
+        Puff.Component->SetVisibility(Density > .012f);
+        if (Density <= .012f) continue;
+
+        const double Angle = 2. * PI * Lane / DustDirections + .20 * Jet.Seed + .13 * FMath::Sin(FMath::FloorToDouble(Cycle) + Lane);
+        const FVector Radial = LevelFrame.TransformVectorNoScale(FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0));
+        const double Reach = (Jet.Radius * 9. + 160.) * Age * (1.46 - .46 * Age);
+        FVector OffsetOnGround = Radial * (Jet.Radius * .4 + Reach);
+        OffsetOnGround.Z = -FVector::DotProduct(Jet.GroundNormal, OffsetOnGround) / FMath::Max(.25, Jet.GroundNormal.Z);
+        const double Width = (2.0 + 6.6 * Age) * Jet.Radius + 81.;
+        const double Height = (32. + Jet.Radius * .30 + 109. * Age) * (1. + .17 * FMath::Sin(Lane + Jet.Seed));
+        SetCard(Puff.Component.Get(), Jet.GroundPoint + OffsetOnGround + FVector::UpVector * (Height * .39),
+            CardRotation, Width, Height);
+        Puff.Material->SetScalarParameterValue(PhaseParameter, Time * .65f);
+        Puff.Material->SetScalarParameterValue(DensityParameter, Density * .82f);
     }
 }
 
@@ -706,12 +750,12 @@ void ASSTOLaunchCinematic::DrawVapor(float ShotFraction)
         else
         {
             const double Spread = FMath::Pow(S, 1.45);
-            Center = Origin + FVector::DownVector * (45.0 + S * (3800.0 + 1340.0 * ShotFraction));
+            Center = Origin + FVector::DownVector * (510.0 + S * (3800.0 + 1340.0 * ShotFraction));
             Center += Right * ((FMath::Sin(Phase) * 205.0 + FMath::Cos(Index * .67) * 109.0) * Spread);
             Center += TowardCamera * (24.0 + 89.0 * FMath::Cos(Phase));
             Width = (265.0 + Spread * 1700.0) * (1.0 + .12 * FMath::Sin(Phase));
             Height = 465.0 + 1290.0 * Spread;
-            Density = (.57f - .26f * S) * (1.f - Ease(S, .65f, 1.0f));
+            Density = (.24f + .28f * Ease(S, 0.f, .21f) - .20f * S) * (1.f - Ease(S, .65f, 1.0f));
         }
         SetCard(Plume[Index].Component.Get(), Center, CardRotation, Width, Height);
         Plume[Index].Material->SetScalarParameterValue(DensityParameter, Density);
@@ -734,6 +778,9 @@ void ASSTOLaunchCinematic::Tick(float DeltaSeconds)
         Elapsed < PitchCut ? GroundLift : Elapsed < CloudCut ? PitchUp : Elapsed < OrbitCut ? CloudMedium : Orbit;
     if (CurrentShot != ShotIndex) CutTo(CurrentShot);
     SetFlightPose(Elapsed);
+    const float Black = Ease(Elapsed, CloudCut-1.03f, CloudCut-.18f) * (1.f - Ease(Elapsed, CloudCut+.22f, CloudCut+.82f));
+    AltitudeFade->SetVisibility(Black > 0.f ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+    AltitudeFade->SetRenderOpacity(Black);
     if (Elapsed >= End && !bOrbitReported)
     {
         bOrbitReported = true;
@@ -751,6 +798,11 @@ void ASSTOLaunchCinematic::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResu
 void ASSTOLaunchCinematic::Stop()
 {
     SetActorTickEnabled(false);
+    if (AltitudeFade)
+    {
+        AltitudeFade->RemoveFromParent();
+        AltitudeFade = nullptr;
+    }
     ATunaSweeperPlayerController* Player = Controller.Get();
     if (Player && bCameraOwned)
     {
