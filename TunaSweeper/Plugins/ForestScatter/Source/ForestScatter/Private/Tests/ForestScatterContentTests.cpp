@@ -99,13 +99,23 @@ bool FForestScatterContentTest::RunTest(const FString&)
 
 	const AForestScatterRegion* Defaults = GetDefault<AForestScatterRegion>();
 	TestNull(TEXT("Saved tree settings have no PCG input"), Defaults->GetClass()->FindPropertyByName(TEXT("Trees")));
-	TestTrue(TEXT("Grass covers the ground more densely than the original 30 clumps per 100 square metres"),
-		Defaults->Grass.InstancesPer100SquareMeters >= 90.0f);
+	TestNull(TEXT("Hand-planted hydrangeas have no regional density setting"), Defaults->GetClass()->FindPropertyByName(TEXT("Hydrangeas")));
+	TestEqual(TEXT("New regions use the reduced grass density per 100 square metres"), Defaults->Grass.InstancesPer100SquareMeters, 35.0f);
 	TestTrue(TEXT("Large stones are sparser than gravel"), Defaults->Boulders.InstancesPer100SquareMeters > 0.0f &&
 		Defaults->Boulders.InstancesPer100SquareMeters < Defaults->Gravel.InstancesPer100SquareMeters * 0.1f);
 	TSet<FName> Meshes;
-	for (const FForestScatterLayer* Layer : Defaults->GetGroundCoverLayers())
+	const auto SeedSlots = Defaults->GetGroundCoverLayers();
+	TestTrue(TEXT("Existing regions retain their shrub, flower and grass seeds"),
+		SeedSlots[0] == &Defaults->Shrubs && SeedSlots[1] == &Defaults->Flowers && SeedSlots[2] == &Defaults->Grass);
+	TestNull(TEXT("The former hydrangea seed is retired"), SeedSlots[3]);
+	TestTrue(TEXT("Existing regions retain their gravel and boulder seeds"),
+		SeedSlots[4] == &Defaults->Gravel && SeedSlots[5] == &Defaults->Boulders);
+	for (const FForestScatterLayer* Layer : SeedSlots)
 	{
+		if (!Layer)
+		{
+			continue;
+		}
 		const UStaticMesh* Mesh = Layer->Mesh.LoadSynchronous();
 		if (!TestNotNull(TEXT("Default ground cover mesh"), Mesh))
 		{
@@ -125,11 +135,12 @@ bool FForestScatterContentTest::RunTest(const FString&)
 			}
 		}
 	}
-	for (const TCHAR* Name : {TEXT("SM_ForestShrub"), TEXT("SM_ForestFlower"), TEXT("SM_ForestGrass"), TEXT("SM_ForestHydrangea"), TEXT("SM_ForestGravel"), TEXT("SM_ForestBoulder")})
+	for (const TCHAR* Name : {TEXT("SM_ForestShrub"), TEXT("SM_ForestFlower"), TEXT("SM_ForestLawnGrass"), TEXT("SM_ForestGravel"), TEXT("SM_ForestBoulder")})
 	{
 		TestTrue(Name, Meshes.Contains(FName(Name)));
 	}
-	TestEqual(TEXT("Only the six ground cover meshes enter PCG"), Meshes.Num(), 6);
+	TestFalse(TEXT("The shared graph never seeds the hand-planted hydrangea mesh"), Meshes.Contains(TEXT("SM_ForestHydrangea")));
+	TestEqual(TEXT("Only the five ground cover meshes enter PCG"), Meshes.Num(), 5);
 	const UStaticMesh* Flower = Defaults->Flowers.Mesh.Get();
 	if (TestNotNull(TEXT("Shared flower mesh"), Flower))
 	{

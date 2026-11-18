@@ -37,10 +37,8 @@ AForestScatterRegion::AForestScatterRegion()
 	Shrubs.InstancesPer100SquareMeters = 4.0f;
 	Flowers.Mesh = FSoftObjectPath(TEXT("/Game/Environment/ForestScatter/Meshes/SM_ForestFlower.SM_ForestFlower"));
 	Flowers.InstancesPer100SquareMeters = 18.0f;
-	Grass.Mesh = FSoftObjectPath(TEXT("/Game/Environment/ForestScatter/Meshes/SM_ForestGrass.SM_ForestGrass"));
-	Grass.InstancesPer100SquareMeters = 120.0f;
-	Hydrangeas.Mesh = FSoftObjectPath(TEXT("/Game/Environment/ForestScatter/Meshes/SM_ForestHydrangea.SM_ForestHydrangea"));
-	Hydrangeas.InstancesPer100SquareMeters = 2.0f;
+	Grass.Mesh = FSoftObjectPath(TEXT("/Game/Environment/ForestScatter/Meshes/SM_ForestLawnGrass.SM_ForestLawnGrass"));
+	Grass.InstancesPer100SquareMeters = 35.0f;
 	Gravel.Mesh = FSoftObjectPath(TEXT("/Game/Environment/ForestScatter/Meshes/SM_ForestGravel.SM_ForestGravel"));
 	Gravel.InstancesPer100SquareMeters = 14.0f;
 	Boulders.Mesh = FSoftObjectPath(TEXT("/Game/Environment/ForestScatter/Meshes/SM_ForestBoulder.SM_ForestBoulder"));
@@ -53,7 +51,8 @@ AForestScatterRegion::AForestScatterRegion()
 
 TStaticArray<const FForestScatterLayer*, 6> AForestScatterRegion::GetGroundCoverLayers() const
 {
-	return {&Shrubs, &Flowers, &Grass, &Hydrangeas, &Gravel, &Boulders};
+	// Slot four previously generated hydrangeas. Gravel and boulders still use offsets five and six.
+	return {&Shrubs, &Flowers, &Grass, nullptr, &Gravel, &Boulders};
 }
 
 void AForestScatterRegion::PostRegisterAllComponents()

@@ -162,26 +162,26 @@ namespace
 				return true;
 			}
 
-			const TStaticArray<const FForestScatterLayer*, 6> GroundLayers = Region->GetGroundCoverLayers();
-			for (int32 Index = 0; Index < GroundLayers.Num(); ++Index)
+			const auto SeedSlots = Region->GetGroundCoverLayers();
+			for (int32 Index = 0; Index < SeedSlots.Num(); ++Index)
 			{
-				const FForestScatterLayer& Settings = *GroundLayers[Index];
-				if (Settings.Mesh.IsNull() || Settings.InstancesPer100SquareMeters <= 0.0f)
+				const FForestScatterLayer* Settings = SeedSlots[Index];
+				if (!Settings || Settings->Mesh.IsNull() || Settings->InstancesPer100SquareMeters <= 0.0f)
 				{
 					continue;
 				}
 				FForestScatterLayerWork Layer;
-				if (!Layer.Grid.Build(Context->Boundary.Bounds, Settings.InstancesPer100SquareMeters))
+				if (!Layer.Grid.Build(Context->Boundary.Bounds, Settings->InstancesPer100SquareMeters))
 				{
 					PCGE_LOG(Warning, GraphAndLog, ForestScatterEditorText::Get(TEXT("Warning.GridTooLarge")));
 					continue;
 				}
-				// Preserve the shrub, flower and grass seeds on regions saved with the former tree layer.
+				// Offset zero belonged to trees in the first version of the graph.
 				Layer.Seed = PCGHelpers::ComputeSeed(Context->GetSeed(), Index + 1);
-				Layer.Mesh = Settings.Mesh.ToSoftObjectPath();
-				if (&Settings == &Region->Flowers && !Region->FlowerPetalMaterials.IsEmpty())
+				Layer.Mesh = Settings->Mesh.ToSoftObjectPath();
+				if (Settings == &Region->Flowers && !Region->FlowerPetalMaterials.IsEmpty())
 				{
-					const UStaticMesh* Flower = Settings.Mesh.LoadSynchronous();
+					const UStaticMesh* Flower = Settings->Mesh.LoadSynchronous();
 					if (Flower && Flower->GetStaticMaterials().IsValidIndex(1))
 					{
 						for (const TSoftObjectPtr<UMaterialInterface>& Material : Region->FlowerPetalMaterials)

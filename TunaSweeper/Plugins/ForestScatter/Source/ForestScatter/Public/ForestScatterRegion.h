@@ -52,9 +52,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Forest Scatter|Vegetation")
 	FForestScatterLayer Grass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Forest Scatter|Vegetation")
-	FForestScatterLayer Hydrangeas;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Forest Scatter|Stones")
 	FForestScatterLayer Gravel;
 
@@ -69,7 +66,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Forest Scatter|Flowers", meta = (ClampMin = "1", Units = "cm"))
 	float FlowerColorPatchSize = 600.0f;
 
-	/** Ground cover in stable seed order for PCG generation. */
+	/** PCG seed offsets start at one. Retired slots are null to keep the remaining layers in place. */
 	TStaticArray<const FForestScatterLayer*, 6> GetGroundCoverLayers() const;
 
 	/** Leave empty to discover loaded map guide decals automatically. */
