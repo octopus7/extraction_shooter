@@ -6,6 +6,8 @@
 #include "Misc/AutomationTest.h"
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "HAL/FileManager.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
@@ -16,12 +18,15 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Camera/CameraTypes.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Input/Events.h"
 #include "ImageUtils.h"
+#include "ImageCore.h"
 #include "UnrealClient.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
@@ -29,6 +34,8 @@
 #include "Interaction/TunaSweeperLadderTransferActor.h"
 #include "Interaction/TunaSweeperRaidStorageActor.h"
 #include "Scenario/TunaSweeperEndingActor.h"
+#include "Scenario/SSTOLaunchCinematic.h"
+#include "UI/Astra/EndingMonologueGPT62Astra.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -62,6 +69,14 @@ struct FRun
     int32 Stage = 0;
     bool bTrue = false;
     bool bCapturedStory = false;
+    bool bSawBlack = false;
+    int32 CapturedShots = 0;
+    int32 ObservedShot = INDEX_NONE;
+    FTransform FixedCamera;
+    FTransform ParkedShip;
+    const bool bRecordFilm = FParse::Param(FCommandLine::Get(), TEXT("RecordSSTOEnding"));
+    double LastFilmFrame = -1.0;
+    FString FilmDirectory;
     double Changed = FPlatformTime::Seconds();
     double LastKey = 0;
     FGuid Carried;
@@ -71,6 +86,82 @@ struct FRun
         Test->AddInfo(FString::Printf(TEXT("SSTO stage=%d true=%d"),Stage,bTrue));
     }
     bool Check(bool Value, const TCHAR* Message) { return Test->TestTrue(Message, Value); }
+    bool RecordFilmFrame(UWorld* World)
+    {
+        const double Seconds = FPlatformTime::Seconds() - Changed;
+        if (!bRecordFilm || Seconds - LastFilmFrame < 1.0 / 15.0) return true;
+        LastFilmFrame = Seconds;
+        if (FilmDirectory.IsEmpty())
+        {
+            FilmDirectory = FPaths::ProjectSavedDir() / TEXT("SSTOEnding/Film") / FDateTime::UtcNow().ToString(TEXT("%Y%m%d-%H%M%S"));
+            if (!IFileManager::Get().MakeDirectory(*FilmDirectory, true)) return false;
+        }
+        auto* Viewport = World->GetGameViewport();
+        if (!Viewport) return false;
+        const auto Window = Viewport->GetWindow();
+        TArray<FColor> Pixels;
+        FIntVector Size(0, 0, 0);
+        TArray64<uint8> Frame;
+        if (!Window.IsValid() || !FSlateApplication::Get().TakeScreenshot(Window.ToSharedRef(), Pixels, Size)
+            || Size.X <= 0 || Size.Y <= 0 || Pixels.Num() != Size.X * Size.Y) return false;
+        const FString File = FilmDirectory / FString::Printf(TEXT("%08d.jpg"), FMath::RoundToInt(Seconds * 1000.0));
+        return FImageUtils::CompressImage(Frame, TEXT("jpg"), FImageView(Pixels.GetData(), Size.X, Size.Y), 92)
+            && FFileHelper::SaveArrayToFile(Frame, *File);
+    }
+    bool InspectDeparture(UWorld* World, APlayerController* PC, UTunaSweeperGameInstance* Game)
+    {
+        if (!Check(RecordFilmFrame(World), TEXT("Save optional real-time review frame"))) return false;
+        if (auto* Launch = Find<ASSTOLaunchCinematic>(World))
+        {
+            FMinimalViewInfo View;
+            Launch->CalcCamera(0.f, View);
+            const int32 Shot = Launch->GetShotIndex();
+            const FTransform Camera(View.Rotation, View.Location);
+            if (Shot != ObservedShot)
+            {
+                if (!Check(Shot == ObservedShot + 1, TEXT("Locked shots play in storyboard order"))) return false;
+                ObservedShot = Shot;
+                FixedCamera = Camera;
+            }
+            if (!Check(Camera.Equals(FixedCamera, .01), TEXT("Camera stays fixed during each shot"))) return false;
+            const float CaptureTimes[] = {2.05f, 9.85f, 14.5f, 18.5f};
+            const TCHAR* Names[] = {TEXT("True_01_Hatch"), TEXT("True_02_Hover"), TEXT("True_03_Clouds"), TEXT("True_04_Orbit")};
+            if (Shot == CapturedShots && Launch->GetElapsedSeconds() >= CaptureTimes[Shot])
+            {
+                if (!Check(PC->GetViewTarget() == Launch, TEXT("Game camera sees the real-time launch")) ||
+                    !Check(UGameplayStatics::IsGamePaused(World), TEXT("Raid stays paused during the launch"))) return false;
+                const auto* Ship = Find<AActor>(World,TEXT("TS_Plains_SSTOLander"));
+                if (!Check(Ship && Ship->GetActorTransform().Equals(ParkedShip), TEXT("Gameplay ship stays on its landing site"))) return false;
+                Capture(Test, Names[Shot]);
+                ++CapturedShots;
+            }
+            return true;
+        }
+        TArray<UUserWidget*> Cards;
+        UWidgetBlueprintLibrary::GetAllWidgetsOfClass(World,Cards,UEndingMonologueGPT62Astra::StaticClass(),true);
+        if (Cards.IsEmpty()) return true;
+        auto* Text = Cast<UTextBlock>(Cards[0]->GetWidgetFromName(TEXT("MonologueText")));
+        if (!Check(Text != nullptr,TEXT("Monologue has an editable text block"))) return false;
+        if (!bSawBlack && Text->GetRenderOpacity() == 0.f)
+        {
+            Capture(Test, TEXT("True_05_Black"));
+            bSawBlack = true;
+        }
+        if (!bCapturedStory && Text->GetRenderOpacity() >= .99f)
+        {
+            const FText Expected = Game->ResolveLocalizedText(TEXT("ui.freeplay_ending.true.monologue"), FText::GetEmpty());
+            const auto& CardGeometry = Cards[0]->GetCachedGeometry();
+            const auto& TextGeometry = Text->GetCachedGeometry();
+            const FVector2D CardCenter = CardGeometry.LocalToAbsolute(CardGeometry.GetLocalSize() * .5f);
+            const FVector2D TextCenter = TextGeometry.LocalToAbsolute(TextGeometry.GetLocalSize() * .5f);
+            if (!Check(bSawBlack && CapturedShots == 4, TEXT("Clean black beat precedes the monologue")) ||
+                !Check(!Expected.IsEmpty() && Expected.EqualTo(Text->GetText()), TEXT("Localized storyboard line is displayed")) ||
+                !Check(FVector2D::Distance(CardCenter,TextCenter) < 4.0, TEXT("Monologue is centered in both axes"))) return false;
+            Capture(Test, TEXT("True_06_Monologue"));
+            bCapturedStory = true;
+        }
+        return true;
+    }
     bool WalkToDevice(ACharacter* Pawn, AActor* Ship, AActor* Device)
     {
         UWorld* World = Pawn->GetWorld();
@@ -213,20 +304,25 @@ struct FRun
             Player->ToggleInventoryOnlyPanel();
             auto* Ship = Find<AActor>(World, TEXT("TS_Plains_SSTOLander"));
             if (!Check(Pawn && Ship && Ending, TEXT("Terminal and player present after closing storage")) ||
+                !Check(Ending->LaunchLander == Ship, TEXT("Placed terminal references its SSTO")) ||
                 !WalkToDevice(Pawn, Ship, Ending) ||
                 !Check(Ending->IsWithinInteractionDistance(Pawn), TEXT("Ending reachable from aisle")) ||
                 !Check(Ending->RequestInteraction(Pawn), TEXT("Actual ending interaction starts"))) return true;
+            ParkedShip = Ship->GetActorTransform();
             Next(3); return false;
         }
         if (Stage == 3)
         {
             if (World->GetName().Contains(TEXT("IntroMap")))
             {
+                if (bTrue) Check(bCapturedStory && bSawBlack && CapturedShots == 4, TEXT("True ending completed all six storyboard frames"));
                 Check(Game->IsScenarioProgressFlagSet(bTrue ? TEXT("ending.freeplay.true_seen") : TEXT("ending.freeplay.normal_seen")), TEXT("Ending completion persisted"));
                 Check(!Game->IsScenarioProgressFlagSet(TEXT("demo.ending.farewell_seen")), TEXT("Slot not retired"));
                 Check(Game->GetSaveSlotSummary(1).bHasData,TEXT("Same save slot still exists"));
                 Next(4); return false;
             }
+            if (bTrue) return !InspectDeparture(World, PC, Game);
+            if (!Check(!Find<ASSTOLaunchCinematic>(World), TEXT("Normal ending keeps its original presentation"))) return true;
             TArray<UUserWidget*> Widgets;
             UWidgetBlueprintLibrary::GetAllWidgetsOfClass(World,Widgets,UTunaSweeperDialogueWidget::StaticClass(),true);
             if (Widgets.IsEmpty() || FPlatformTime::Seconds()-Changed < 2) return false;

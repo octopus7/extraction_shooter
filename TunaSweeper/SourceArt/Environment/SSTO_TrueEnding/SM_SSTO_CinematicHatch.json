@@ -1,0 +1,177 @@
+{
+  "name": "SM_SSTO_CinematicHatch",
+  "part_purpose": "Cinematic-only movable pressure hatch for the existing port pressure frame.",
+  "source_blend": "SM_SSTO_CinematicHatch.blend",
+  "fbx": "SM_SSTO_CinematicHatch.fbx",
+  "axis": "UE 5.7 local cm, +X nose, -Y port, +Z up; Blender metres (X,-Y,Z).",
+  "common_hull_origin": true,
+  "field_open_ship_unchanged": true,
+  "material_slots": [
+    "M_SSTO_Rubber",
+    "M_SSTO_Structure",
+    "M_SSTO_WarmGray",
+    "M_SSTO_Rust",
+    "M_SSTO_Interior",
+    "M_SSTO_Floor",
+    "M_SSTO_Amber"
+  ],
+  "vertices": 3238,
+  "triangles": 5680,
+  "uv_channels": 2,
+  "bounds_cm": [
+    300.7489,
+    -340.4319,
+    182.85,
+    489.3076,
+    -308.0,
+    424.6158
+  ],
+  "measured_aperture_seal_ue_cm": [
+    [
+      298.82532,
+      -332.84613,
+      205.50262
+    ],
+    [
+      302.5238,
+      -329.95587,
+      196.13795
+    ],
+    [
+      308.9913,
+      -327.96078,
+      180.55
+    ],
+    [
+      481.04614,
+      -320.34079,
+      178.87941
+    ],
+    [
+      487.52121,
+      -321.6752,
+      193.07188
+    ],
+    [
+      491.22162,
+      -324.11584,
+      201.96672
+    ],
+    [
+      491.23245,
+      -316.23026,
+      393.4162
+    ],
+    [
+      484.75961,
+      -313.10471,
+      404.59189
+    ],
+    [
+      474.58743,
+      -308.95477,
+      416.77383
+    ],
+    [
+      315.478,
+      -315.76779,
+      427.11816
+    ],
+    [
+      305.30197,
+      -320.87927,
+      415.67307
+    ],
+    [
+      298.82675,
+      -324.68686,
+      404.71045
+    ]
+  ],
+  "fit_check": {
+    "exterior_footprint_test_rays": 306,
+    "exterior_offset_from_mirrored_skin_cm": [
+      -0.19,
+      0.776
+    ],
+    "swept_poses": 211,
+    "ship_meshes_tested": 13,
+    "slide_sample_step_cm": 1,
+    "hinge_sweep_step_degrees": 0.5,
+    "overlapping_ship_meshes": 0,
+    "open_lowest_height_above_deck_cm": 205.253
+  },
+  "motion": {
+    "mode": "Top hinge on an inboard plug carriage. To close, swing down at Y+26 cm, then translate the upright door outboard to seal. Local X is constant throughout.",
+    "closed_pivot_ue_cm": [
+      395.0,
+      -312.0,
+      410.0
+    ],
+    "inboard_plug_offset_cm": [
+      0,
+      26,
+      0
+    ],
+    "axis_ue": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "closed_angle_degrees": 0,
+    "open_angle_degrees": 92,
+    "closed_relative_location_cm": [
+      0,
+      0,
+      0
+    ],
+    "closed_relative_rotation_quat_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "open_relative_location_cm": [
+      0.0,
+      112.86169,
+      736.11865
+    ],
+    "open_relative_rotation_quat_xyzw": [
+      0.71934,
+      0.0,
+      0.0,
+      0.69466
+    ],
+    "relative_translation_for_any_angle": "Slide + Pivot - Q.RotateVector(Pivot); Q = FQuat(FVector::ForwardVector, FMath::DegreesToRadians(Angle))."
+  },
+  "round_trip": {
+    "native_meshes": 1,
+    "imported_fbx_meshes": 1,
+    "identity_common_origin": true,
+    "native_editable_vertex_groups": 13,
+    "matched_unique_vertex_coordinates": 3054,
+    "matched_triangle_topology_and_materials": true,
+    "compare_tolerance_cm": 0.01,
+    "triangles_by_material": {
+      "M_SSTO_Rubber": 686,
+      "M_SSTO_Structure": 1684,
+      "M_SSTO_WarmGray": 1088,
+      "M_SSTO_Rust": 234,
+      "M_SSTO_Interior": 1970,
+      "M_SSTO_Floor": 12,
+      "M_SSTO_Amber": 6
+    },
+    "degenerate_triangles": 0,
+    "degenerate_lightmap_uv_triangles": 0,
+    "lightmap_uv_bounds": [
+      0,
+      1
+    ],
+    "external_file_dependencies": 0
+  },
+  "previews": {
+    "close_three_quarter": "SSTO_CinematicHatch_Closed.png",
+    "inside_leaf": "SSTO_CinematicHatch_Interior.png",
+    "closed_aircraft": "SSTO_CinematicHatch_Exterior.png"
+  }
+}

@@ -14,5 +14,8 @@ public:
     FName TitleStringKey;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Ending")
     TArray<FName> LineStringKeys;
+    /** Localized intertitle after the SSTO reaches orbit. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Ending")
+    FName CinematicMonologueStringKey;
     bool ResolveDialogue(class UTunaSweeperGameInstance* Game, TArray<FTunaSweeperDialogueLine>& OutLines) const;
 };

@@ -756,6 +756,7 @@ ui.wave_defense.action_failed,요청을 처리하지 못했습니다.,The action
 ui.freeplay_ending.normal_prompt,엔딩?!,Ending?!,エンディング?!,结局？！,結局？！,Концовка?!
 ui.freeplay_ending.true_prompt,엔딩!?,Ending!?,エンディング!?,结局！？,結局！？,Концовка!?
 ui.freeplay_ending.save_failed,저장하지 못했습니다. 아무 키나 눌러 다시 시도하세요.,Could not save. Press any key to retry.,保存できませんでした。何かキーを押すと再試行します。,保存失败。按任意键重试。,儲存失敗。按任意鍵重試。,Не удалось сохранить. Нажмите любую клавишу для повтора.
+ui.freeplay_ending.true.monologue,노을은 여기까지 따라왔다.,The sunset followed me all the way here.,夕焼けはここまでついてきた。,晚霞一路跟我到了这里。,晚霞一路跟我到了這裡。,Закат последовал за мной даже сюда.
 ui.freeplay_ending.normal.title,잠깐의 평온,A Moment of Peace,ひとときの安らぎ,片刻安宁,片刻安寧,Мгновение покоя
 ui.freeplay_ending.normal.1,"도시의 소음이 멀어지고, 기지에는 오랜만에 조용한 밤이 찾아왔다.",The noise of the city faded. A quiet night settled over the base at last.,街の騒音が遠のき、基地には久しぶりに静かな夜が訪れた。,城市的喧嚣渐渐远去。基地迎来了久违的宁静夜晚。,城市的喧囂漸漸遠去。基地迎來了久違的寧靜夜晚。,Шум города стих. На базе наконец наступила тихая ночь.
 ui.freeplay_ending.normal.2,루나는 남은 통조림을 세다가 웃었다. 오늘은 무사히 돌아왔으니까.,Luna smiled as she counted the remaining cans. Today she had made it home safely.,ルナは残った缶詰を数えながら笑った。今日は無事に帰ってこられたのだから。,露娜数着剩下的罐头笑了起来。至少今天她平安回来了。,露娜數著剩下的罐頭笑了起來。至少今天她平安回來了。,Луна улыбнулась за подсчётом консервов. Сегодня она вернулась домой невредимой.

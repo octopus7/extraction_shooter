@@ -1,4 +1,5 @@
 # Close the project editor according to Docs/unreal_editor_coordination.md first.
+param([switch]$RecordFilm)
 $ErrorActionPreference = 'Stop'
 $sstoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $sstoOutput = Join-Path $sstoRoot 'TunaSweeper/Saved/SSTOEndingAutomation'
@@ -16,6 +17,7 @@ $sstoArguments = @(
     ('-abslog=' + $sstoLog)
 )
 $sstoStarted = Get-Date
+if ($RecordFilm) { $sstoArguments += '-RecordSSTOEnding' }
 $sstoProcess = Start-Process 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' `
     -ArgumentList ($sstoArguments | ForEach-Object { '"' + $_ + '"' }) -WindowStyle Hidden -PassThru
 # Retain the process handle before it exits, so ExitCode is available on Windows.

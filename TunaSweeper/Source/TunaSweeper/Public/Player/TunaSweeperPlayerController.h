@@ -184,6 +184,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Dialogue")
 	bool IsDialogueSequenceActive() const { return bDialogueSequenceActive; }
 	void SetEndingInputLock(bool bLocked);
+	/** Swap the paused camera tick mode for the duration of a local cinematic. */
+	bool SetLaunchCameraFullTickWhenPaused(bool bEnabled)
+	{
+		const bool bPrevious = bShouldPerformFullTickWhenPaused;
+		bShouldPerformFullTickWhenPaused = bEnabled;
+		return bPrevious;
+	}
 
 	bool TryGetCursorWorldPointOnPlane(float PlaneZ, FVector& OutWorldPoint) const;
 
