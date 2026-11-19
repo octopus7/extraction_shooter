@@ -37,6 +37,12 @@
 namespace HopperPlayTest
 {
  FVector WalkStart;
+ constexpr float ReactionStart=.22f;
+ constexpr float FullPull=ReactionStart+39.f/50.f;
+ constexpr float ShieldBreak=FullPull+.96f;
+ constexpr float SeatLaunch=ShieldBreak+.10f;
+ constexpr float EjectionSamples[]={0.f,ReactionStart-.01f,ReactionStart+28.f/50.f,FullPull+.001f,ShieldBreak-.02f,ShieldBreak+.002f,
+                                    SeatLaunch+.16f,SeatLaunch+.60f,SeatLaunch+10.f};
  bool OpenNavigationFixture()
  {
   if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir()/TEXT("Maps/HopperCombatTestMap.umap"),false,true)) return false;
@@ -153,6 +159,7 @@ bool FHopperPlayStep::Update()
   for (const FHopperMeshPart& Part:Visual->Parts) ++ExpectedMeshes.FindOrAdd(Part.Mesh.ToSoftObjectPath());
   ++ExpectedMeshes.FindOrAdd(Visual->PilotGun.ToSoftObjectPath());
   ++ExpectedMeshes.FindOrAdd(Visual->CockpitShieldMesh.ToSoftObjectPath());
+  if (!Visual->EjectionPull.HandleMesh.IsNull()) ++ExpectedMeshes.FindOrAdd(Visual->EjectionPull.HandleMesh.ToSoftObjectPath());
   TArray<UStaticMeshComponent*> MeshParts; Hopper->GetComponents(MeshParts);
   for (const UStaticMeshComponent* Part:MeshParts)
    if (Part->ComponentHasTag(TEXT("HopperGenerated")) && Part->GetStaticMesh())
@@ -264,33 +271,44 @@ bool FHopperEjectionStage::Update()
  auto* Hopper=HopperPlayTest::Find(World);
  if (!Test->TestNotNull(TEXT("Ejection fixture mech"),Hopper)) return true;
  auto* P=Hopper->GetPresentation();
+ const auto* Shield=Hopper->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperCockpitShield"));
+ if (!Test->TestNotNull(TEXT("Placed Mk2 cockpit shield"),Shield)) return true;
+ const auto& Field=Shield->GetCustomPrimitiveData().Data;
  if (Stage==0)
  {
-  const auto* Shield=Hopper->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperCockpitShield"));
-  if (!Test->TestNotNull(TEXT("Placed Mk2 cockpit shield"),Shield)) return true;
-  const auto& Field=Shield->GetCustomPrimitiveData().Data;
   const bool bDeployed=!Shield->bHiddenInGame && Field.Num()>=4 && Field[0]>=1.f;
   if (!bDeployed && FPlatformTime::Seconds()-StartTime<8.f) return false;
   Test->TestTrue(TEXT("Boarding deploys the shield on the placed Mk2"),bDeployed);
   Test->TestTrue(TEXT("Placed Mk2 ejects its pilot by default"),Hopper->bEndCombatOnMechDestruction);
   Hopper->TakeDamage(10000.f,FDamageEvent(),nullptr,nullptr);
-  Test->TestTrue(TEXT("Escape starts with a shield warning"),P->IsWaitingForShieldBreak());
+  Test->TestFalse(TEXT("Lethal damage leaves the shield intact while the captain reacts"),P->IsWaitingForShieldBreak());
   // Freeze only the presentation timeline to capture exact phases after rendering settles.
   P->SetComponentTickEnabled(false);
  }
  else
  {
-  const float Launch=P->GetEjectionLaunchTime();
-  const float Samples[]={0.f,FMath::Max(0.f,Launch-.18f),FMath::Max(0.f,Launch-.04f),Launch+.16f,Launch+.60f,Launch+10.f};
-  P->TickComponent(Samples[Stage]-Samples[Stage-1],LEVELTICK_All,nullptr);
+  P->TickComponent(HopperPlayTest::EjectionSamples[Stage]-HopperPlayTest::EjectionSamples[Stage-1],LEVELTICK_All,nullptr);
+  if (Stage==1)
+   Test->TestTrue(TEXT("The real captain holds the first pose through the cockpit camera blend"),
+    FMath::IsNearlyZero(P->GetPilotMesh()->GetPosition(),.001f) && !P->IsWaitingForShieldBreak());
+  if (Stage==2)
+   Test->TestTrue(TEXT("The captain reaches the lever while the field is steady"),
+    !P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[2]==0.f && Field[3]==0.f);
+  if (Stage==3 || Stage==4)
+   Test->TestTrue(TEXT("The deployed field warns from full pull through the last intact frame"),
+    P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[3]==0.f);
+  if (Stage==5)
+   Test->TestTrue(TEXT("The field bursts before the seat leaves its socket"),
+    !P->IsWaitingForShieldBreak() && Field.Num()>=4 && Field[3]>=1.f &&
+    P->GetPilotMesh()->GetAttachParent()->GetAttachParent()==P->GetBodyRoot());
  }
  APlayerController* PC=World->GetFirstPlayerController();
  if (PC)
  {
   ACameraActor* Camera=Cast<ACameraActor>(PC->GetViewTarget());
   if (!Camera) Camera=World->SpawnActor<ACameraActor>();
-  const FVector Look=Hopper->GetActorLocation()+FVector(0,0,Stage>=4?400:Stage==3?140:35);
-  const float Distance=Stage>=4?1250:Stage==3?700:420;
+  const FVector Look=Hopper->GetActorLocation()+FVector(0,0,Stage>=7?400:Stage==6?140:35);
+  const float Distance=Stage>=7?1250:Stage==6?700:420;
   const FVector Location=Look+Hopper->GetActorForwardVector()*Distance-Hopper->GetActorRightVector()*Distance*.8f+FVector(0,0,Distance*.45f);
   Camera->SetActorLocation(Location); Camera->SetActorRotation((Look-Location).Rotation()); PC->SetViewTarget(Camera);
  }
@@ -357,7 +375,7 @@ bool FHopperEjectionPresentationTest::RunTest(const FString& Parameters)
  Play.EditorPlaySettings->NewWindowWidth=1280; Play.EditorPlaySettings->NewWindowHeight=800;
  GEditor->RequestPlaySession(Play);
  ADD_LATENT_AUTOMATION_COMMAND(FHopperWaitForReady(this));
- for (int32 Stage=0;Stage<6;++Stage)
+ for (int32 Stage=0;Stage<UE_ARRAY_COUNT(HopperPlayTest::EjectionSamples);++Stage)
  {
   ADD_LATENT_AUTOMATION_COMMAND(FHopperEjectionStage(this,Stage));
   ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(.5f));

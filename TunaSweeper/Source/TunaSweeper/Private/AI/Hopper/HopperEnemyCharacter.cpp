@@ -377,7 +377,11 @@ void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction(const FVector& Impac
     if (AController* AI = GetController()) AI->StopMovement();
     Presentation->SetMechActive(false);
     const bool bUseDefaultBurst = !LoadedVisualData || !LoadedVisualData->WreckEffects.IsConfigured();
-    Presentation->StartDestructionEffects(HasActorBegunPlay() && bUseDefaultBurst ? MechDestructionEffect.LoadSynchronous() : nullptr, ImpactTravel);
+    UNiagaraSystem* Burst = HasActorBegunPlay() && bUseDefaultBurst ? MechDestructionEffect.LoadSynchronous() : nullptr;
+    if (ShouldKeepDefeatedBody())
+        Presentation->StartSeatEjection(Burst, ImpactTravel);
+    else
+        Presentation->StartDestructionEffects(Burst, ImpactTravel);
 }
 
 bool ATunaSweeperHopperEnemyCharacter::IsPilotExitClear(const FVector& Ground) const
@@ -525,7 +529,6 @@ void ATunaSweeperHopperEnemyCharacter::OnDeathPresentationStarted()
     Presentation->SetPilotLocomotion(false);
     if (ShouldKeepDefeatedBody())
     {
-        Presentation->StartSeatEjection();
         if (LoadedVisualData && LoadedVisualData->bUseEncounterCamera && GetWorld())
             if (auto* Viewer = Cast<ATunaSweeperPlayerController>(GetWorld()->GetFirstPlayerController()))
             {

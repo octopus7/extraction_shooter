@@ -6,12 +6,14 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Editor.h"
 #include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "FileHelpers.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/WorldSettings.h"
 #include "InputKeyEventArgs.h"
 #include "Misc/AutomationTest.h"
 #include "Player/TunaSweeperPlayerController.h"
@@ -151,11 +153,19 @@ namespace HopperEncounterTest
 				Test->TestTrue(TEXT("A fresh trigger press fires again"), GI->GetWeaponLoadedAmmoCount(1) < Magazine);
 				Magazine = GI->GetWeaponLoadedAmmoCount(1);
 				{
+					Grip = Hopper->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperEjectionHandle"));
+					if (!Test->TestNotNull(TEXT("The encounter camera has an authored Mk2 grip to frame"), Grip.Get())) return true;
+					// Give the latent PIE observer several frames inside the 80 ms before the first head-turn peak.
+					OriginalTimeDilation = World->GetWorldSettings()->TimeDilation;
+					World->GetWorldSettings()->SetTimeDilation(OriginalTimeDilation * .25f);
+					bSamplingCameraLead = true;
 					const FVector PreviousPOV = PC->PlayerCameraManager->GetCameraLocation();
 					Hopper->TakeDamage(10000.f, FDamageEvent(), PC, Pawn);
 					Test->TestTrue(TEXT("Ejection blends from the actual gameplay camera"),
 						PC->PlayerCameraManager->PendingViewTarget.Target && PC->PlayerCameraManager->ViewTarget.Target == OriginalView.Get()
 						&& PC->PlayerCameraManager->GetCameraLocation().Equals(PreviousPOV, .1f));
+					if (const AActor* OpeningCamera = PC->PlayerCameraManager->PendingViewTarget.Target)
+						OpeningGripDistance = FVector::Distance(OpeningCamera->GetActorLocation(), Grip->GetComponentLocation());
 				}
 				Test->TestTrue(TEXT("Ejection immediately neutralizes held actions"), PC->IsMoveInputIgnored() && !Pawn->IsAiming());
 				Still = Pawn->GetActorLocation();
@@ -164,10 +174,41 @@ namespace HopperEncounterTest
 				Key(EKeys::RightMouseButton, IE_Released);
 				break;
 			case EStep::Ejection:
-				if (Elapsed < 1.f) return false;
+			{
+				const float Trip = Hopper->GetPresentation()->GetEjectionPullTriggerTime();
+				const float Lead = Hopper->GetPresentation()->GetEjectionPullStartTime();
+				const FVector Eye = PC->PlayerCameraManager->GetCameraLocation();
+				const FVector ToGrip = Grip->GetComponentLocation() - Eye;
+				if (bSamplingCameraLead && Elapsed >= Lead && Elapsed < Lead + .08f && !PC->PlayerCameraManager->PendingViewTarget.Target)
+				{
+					const FVector ToFace = Hopper->GetPresentation()->GetPilotMesh()->GetSocketLocation(TEXT("head")) - Eye;
+					bSawSettledFace |= PC->IsViewingHopper(Hopper) && PC->GetViewTarget()->IsA<ACameraActor>() &&
+						FMath::Abs(ToGrip.Size() - OpeningGripDistance) < 7. &&
+						FVector::DotProduct(PC->PlayerCameraManager->GetCameraRotation().Vector(), ToFace.GetSafeNormal()) > .95;
+				}
+				if (bSamplingCameraLead && Elapsed >= Lead + .08f)
+				{
+					World->GetWorldSettings()->SetTimeDilation(OriginalTimeDilation);
+					bSamplingCameraLead = false;
+					Test->TestTrue(TEXT("The face is framed at the settled opening distance before the first head-turn peak"), bSawSettledFace);
+				}
+				if (Elapsed >= Lead + .56f && Elapsed < Trip && !PC->PlayerCameraManager->PendingViewTarget.Target && CloseGripDistance == 0.)
+				{
+					CloseGripDistance = ToGrip.Size();
+					CloseFOV = PC->PlayerCameraManager->GetFOVAngle();
+					const double SeatSide = FVector::DotProduct(-ToGrip.GetSafeNormal(), Grip->GetAttachParent()->GetRightVector());
+					const double FacingGrip = FVector::DotProduct(PC->PlayerCameraManager->GetCameraRotation().Vector(), ToGrip.GetSafeNormal());
+					Test->TestTrue(TEXT("The glove-side camera pushes in and frames the grip before it trips"),
+						SeatSide < -.4 && FacingGrip > .95 && CloseGripDistance < 165. && OpeningGripDistance > CloseGripDistance + 20.);
+				}
+				if (Elapsed < Trip + .55f) return false;
 				Test->TestTrue(TEXT("Ejection has blended into its own camera"),
 					PC->IsViewingHopper(Hopper) && PC->GetViewTarget()->IsA<ACameraActor>() && !PC->PlayerCameraManager->PendingViewTarget.Target);
+				Test->TestTrue(TEXT("The warning pulls back from the tight hand shot while the shield is still intact"),
+					CloseGripDistance > 0. && Hopper->GetPresentation()->IsWaitingForShieldBreak() &&
+					ToGrip.Size() > CloseGripDistance + 65. && PC->PlayerCameraManager->GetFOVAngle() > CloseFOV + 2.f);
 				break;
+			}
 			case EStep::HeldAfterEjection:
 				if (PC->IsHopperShotActive()) return false;
 				Test->TestTrue(TEXT("Newly held eject key remains neutral at handback"), FVector::Dist2D(Still, Pawn->GetActorLocation()) < 2.f && !PC->IsInputKeyDown(EKeys::D));
@@ -207,7 +248,12 @@ namespace HopperEncounterTest
 		float Since = 0.f;
 		int32 Magazine = 0;
 		bool bSawLockedReturn = false;
+		bool bSamplingCameraLead = false, bSawSettledFace = false;
+		float OriginalTimeDilation = 1.f;
+		double OpeningGripDistance = 0., CloseGripDistance = 0.;
+		float CloseFOV = 0.f;
 		FVector Still = FVector::ZeroVector;
+		TWeakObjectPtr<UStaticMeshComponent> Grip;
 		TWeakObjectPtr<ATunaSweeperHopperEnemyCharacter> Subject;
 		TWeakObjectPtr<AActor> OriginalView, Wall, OffscreenCamera, Replacement;
 	};

@@ -22,6 +22,17 @@ struct FHopperPartMotion
  UPROPERTY(EditAnywhere) TArray<FTransform> Frames;
 };
 USTRUCT(BlueprintType)
+struct FHopperEjectionPull
+{
+ GENERATED_BODY()
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UAnimSequence> PilotAnimation;
+ UPROPERTY(EditAnywhere) TSoftObjectPtr<UStaticMesh> HandleMesh;
+ /** Seat-local grip poses sampled uniformly across PilotAnimation, starting at the ready position. */
+ UPROPERTY(EditAnywhere) TArray<FTransform> HandlePoses;
+ /** Normalized time when the pilot finishes the downstroke and trips the shield warning. */
+ UPROPERTY(EditAnywhere, meta=(ClampMin="0", ClampMax="1")) float TripPhase = .78f;
+};
+USTRUCT(BlueprintType)
 struct FHopperWreckEffects
 {
  GENERATED_BODY()
@@ -83,6 +94,7 @@ public:
  UPROPERTY(EditAnywhere, Category="Seat", meta=(ClampMin="0", Units="cm")) float RailReleaseTravel = 0.f;
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatLockSparks;
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatEjectSparks;
+ UPROPERTY(EditAnywhere, Category="Seat") FHopperEjectionPull EjectionPull;
  /** Rigid guard parts released together for vertical ejection. The first part carries the others. */
  UPROPERTY(EditAnywhere, Category="Destruction") TArray<FName> EjectionGuardParts;
  UPROPERTY(EditAnywhere, Category="Destruction") FHopperWreckEffects WreckEffects;

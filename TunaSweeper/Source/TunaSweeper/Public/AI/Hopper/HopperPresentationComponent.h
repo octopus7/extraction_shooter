@@ -41,12 +41,14 @@ public:
  void SetMechActive(bool bActive);
  UBoxComponent* CreateMechHitBox(UStaticMeshComponent* Part);
  void DisableMechHitBoxes();
- void StartSeatEjection();
+ void StartSeatEjection(UNiagaraSystem* MechEffect=nullptr, const FVector& ImpactTravel=FVector::ZeroVector);
  float StartDestructionEffects(UNiagaraSystem* MechEffect, const FVector& ImpactTravel=FVector::ZeroVector);
  bool IsWaitingForShieldBreak() const;
  float GetHatchOpenAlpha() const { return HatchOpen; }
  float GetEjectionHatchDuration() const;
  float GetEjectionLaunchTime() const;
+ float GetEjectionPullStartTime() const;
+ float GetEjectionPullTriggerTime() const;
  float GetSeatDockDuration() const;
  float GetBoardingClimbEndTime(float ClimbSeconds) const;
  bool IsBoardingInProgress() const { return bBoarding && bTransferring; }
@@ -79,6 +81,8 @@ private:
  void InitializeBlastFlash();
  void FadeBlastFlash(float DeltaSeconds);
  void TickCockpitShield(float Dt);
+ float GetShieldWarningDuration() const;
+ void TickEjectionShield(float Dt);
  void EmitDestructionEffect(UNiagaraSystem* Effect);
  void EmitWreckEffects();
  void PreloadWreckEffects();
@@ -100,6 +104,8 @@ private:
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
+ void InitializeEjectionHandle();
+ void TickEjectionPull();
  void ReleaseEjectionGuard();
  void UpdateEjectionHatch();
  void TickSeatEjection(float LaunchTime);
@@ -134,6 +140,8 @@ private:
  UPROPERTY(Transient) TArray<TObjectPtr<UNiagaraComponent>> SeatJets;
  UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedSeatExhaust;
  UPROPERTY(Transient) TObjectPtr<UAnimSequence> LadderBoardingClip;
+ UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> EjectionHandle;
+ UPROPERTY(Transient) TObjectPtr<UAnimSequence> EjectionPullClip;
  UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedLockSparks;
  UPROPERTY(Transient) TObjectPtr<UNiagaraSystem> LoadedEjectSparks;
  UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> EjectionSmoke;
@@ -147,6 +155,8 @@ private:
  float EjectionTime = -1.f, EjectionInitialHatch = 0.f, NextSmokeTime = 0.f;
  int32 NextSmokeIndex = 0;
  bool bSeatLaunched = false;
+ bool bEjectionPullFinished = false;
+ bool bAwaitingEjectionPull = false;
  bool bRailReleaseFlashed = false;
  TunaSweeperHopper::FBipedGait Gait;
  FVector TransferStart = FVector::ZeroVector;

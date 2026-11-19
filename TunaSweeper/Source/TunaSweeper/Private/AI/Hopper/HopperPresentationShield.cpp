@@ -59,11 +59,34 @@ void UHopperPresentationComponent::EmitDestructionEffect(UNiagaraSystem* Effect)
   UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),Effect,GetOwner()->GetActorLocation());
 }
 
+float UHopperPresentationComponent::GetShieldWarningDuration() const
+{
+ if (IsWaitingForShieldBreak()) return FMath::Max(0.f,WarningSeconds-ShieldAge);
+ return (ShieldStage==EShieldStage::Deploying || ShieldStage==EShieldStage::Stable) && ShieldCoverage>0.f ? WarningSeconds : 0.f;
+}
+
+void UHopperPresentationComponent::TickEjectionShield(float Dt)
+{
+ if (bAwaitingEjectionPull)
+ {
+  const float TimeSinceTrip=EjectionTime-GetEjectionPullTriggerTime();
+  if (TimeSinceTrip<0.f) return;
+  bAwaitingEjectionPull=false;
+  UNiagaraSystem* Burst=PendingDestructionEffect;
+  PendingDestructionEffect=nullptr;
+  StartDestructionEffects(Burst);
+  Dt=TimeSinceTrip;
+ }
+ TickCockpitShield(Dt);
+}
+
 float UHopperPresentationComponent::StartDestructionEffects(UNiagaraSystem* MechEffect,const FVector& ImpactTravel)
 {
  if (!ImpactTravel.IsNearlyZero() && !bWreckBurstPlayed) WreckSprayDirection=ImpactTravel.GetSafeNormal2D();
- if (IsWaitingForShieldBreak()) return FMath::Max(0.f,WarningSeconds-ShieldAge);
- if ((ShieldStage==EShieldStage::Deploying || ShieldStage==EShieldStage::Stable) && ShieldCoverage>0.f)
+ if (bAwaitingEjectionPull) return FMath::Max(0.f,EjectionShieldDelay-EjectionTime);
+ const float Warning=GetShieldWarningDuration();
+ if (IsWaitingForShieldBreak()) return Warning;
+ if (Warning>0.f)
  {
   ShieldStage=EShieldStage::Failing;
   ShieldAge=0.f;

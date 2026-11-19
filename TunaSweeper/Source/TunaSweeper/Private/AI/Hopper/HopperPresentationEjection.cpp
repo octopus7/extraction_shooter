@@ -1,5 +1,6 @@
 #include "AI/Hopper/HopperPresentationComponent.h"
 #include "AI/Hopper/HopperVisualData.h"
+#include "Animation/AnimSequence.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -20,10 +21,78 @@ namespace
  float Smooth(float Alpha) { Alpha=FMath::Clamp(Alpha,0.f,1.f); return Alpha*Alpha*(3.f-2.f*Alpha); }
 }
 
-void UHopperPresentationComponent::StartSeatEjection()
+void UHopperPresentationComponent::InitializeEjectionHandle()
+{
+ EjectionHandle=nullptr;
+ EjectionPullClip=nullptr;
+ bEjectionPullFinished=false;
+ bAwaitingEjectionPull=false;
+ const FHopperEjectionPull& Pull=VisualData->EjectionPull;
+ if (Pull.HandlePoses.Num()<2 || Pull.HandleMesh.IsNull() || Pull.PilotAnimation.IsNull()) return;
+ UStaticMesh* Mesh=Pull.HandleMesh.LoadSynchronous();
+ EjectionPullClip=Pull.PilotAnimation.LoadSynchronous();
+ if (!Mesh || !EjectionPullClip || EjectionPullClip->GetPlayLength()<=UE_SMALL_NUMBER) return;
+
+ AActor* Owner=GetOwner();
+ const FName Name=MakeUniqueObjectName(Owner,UStaticMeshComponent::StaticClass(),TEXT("EjectionHandle"));
+ EjectionHandle=NewObject<UStaticMeshComponent>(Owner,Name,RF_Transient);
+ EjectionHandle->CreationMethod=HasBegunPlay()?EComponentCreationMethod::Instance:EComponentCreationMethod::UserConstructionScript;
+ EjectionHandle->ComponentTags.Append({TEXT("HopperGenerated"),TEXT("HopperEjectionHandle")});
+ EjectionHandle->SetMobility(EComponentMobility::Movable);
+ EjectionHandle->SetCanEverAffectNavigation(false);
+ EjectionHandle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+ EjectionHandle->SetGenerateOverlapEvents(false);
+ EjectionHandle->SetStaticMesh(Mesh);
+ EjectionHandle->SetupAttachment(Seat);
+ EjectionHandle->SetRelativeTransform(Pull.HandlePoses[0]);
+ EjectionHandle->RegisterComponent();
+ // The glove must be evaluated after its matching grip sample on this same frame.
+ Pilot->AddTickPrerequisiteComponent(this);
+}
+
+float UHopperPresentationComponent::GetEjectionPullStartTime() const
+{
+ // Let the player's view reach the cockpit before the first head turn.
+ return EjectionHandle ? .22f : 0.f;
+}
+
+float UHopperPresentationComponent::GetEjectionPullTriggerTime() const
+{
+ return EjectionHandle ? GetEjectionPullStartTime()+EjectionPullClip->GetPlayLength()*FMath::Clamp(VisualData->EjectionPull.TripPhase,0.f,1.f) : 0.f;
+}
+
+void UHopperPresentationComponent::TickEjectionPull()
+{
+ if (!EjectionHandle || bEjectionPullFinished) return;
+ const float ClipLength=EjectionPullClip->GetPlayLength();
+ const float Phase=FMath::Clamp((EjectionTime-GetEjectionPullStartTime())/ClipLength,0.f,1.f);
+ if (CurrentClip!=EjectionPullClip)
+ {
+  PlayClip(EjectionPullClip,false,true);
+  Pilot->SetPlayRate(0.f);
+ }
+ Pilot->SetPosition(Phase*ClipLength,false);
+ const TArray<FTransform>& Poses=VisualData->EjectionPull.HandlePoses;
+ const float Frame=Phase*(Poses.Num()-1);
+ const int32 A=FMath::FloorToInt(Frame), B=FMath::Min(A+1,Poses.Num()-1);
+ FTransform Pose;
+ Pose.Blend(Poses[A],Poses[B],Frame-A);
+ EjectionHandle->SetRelativeTransform(Pose);
+ bEjectionPullFinished=Phase>=1.f;
+}
+
+void UHopperPresentationComponent::StartSeatEjection(UNiagaraSystem* MechEffect,const FVector& ImpactTravel)
 {
  if (EjectionTime>=0.f || !Seat || !Pilot) return;
- EjectionShieldDelay=StartDestructionEffects(nullptr);
+ const float TripTime=GetEjectionPullTriggerTime();
+ bAwaitingEjectionPull=TripTime>0.f;
+ if (bAwaitingEjectionPull)
+ {
+  WreckSprayDirection=ImpactTravel.GetSafeNormal2D();
+  PendingDestructionEffect=MechEffect;
+  EjectionShieldDelay=TripTime+GetShieldWarningDuration();
+ }
+ else EjectionShieldDelay=StartDestructionEffects(MechEffect,ImpactTravel);
  // Defeat can interrupt boarding. Re-seat the pilot before moving the entire cabin assembly.
  SeatPilot();
  bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
@@ -116,6 +185,7 @@ float UHopperPresentationComponent::GetEjectionLaunchTime() const
 
 void UHopperPresentationComponent::UpdateEjectionHatch()
 {
+ if (bAwaitingEjectionPull) return;
  if (GuardReleaseTime<0.f && !VisualData->EjectionGuardParts.IsEmpty() && !IsWaitingForShieldBreak()) ReleaseEjectionGuard();
  if (HatchOpen>=1.f) return;
  const float OpeningDuration=GetEjectionHatchDuration()-EjectionShieldDelay;

@@ -15,8 +15,12 @@
 namespace
 {
 	constexpr float StickNeutral = .12f;
-	constexpr float EjectionBlendIn = .48f;
 	constexpr float ReturnBlend = .45f;
+	float EjectionBlendIn(const UHopperPresentationComponent* Presentation)
+	{
+		const float ReadyTime = Presentation->GetEjectionPullStartTime();
+		return ReadyTime > 0.f ? ReadyTime : .48f;
+	}
 }
 
 bool ATunaSweeperPlayerController::InputKey(const FInputKeyEventArgs& Params)
@@ -116,7 +120,7 @@ bool ATunaSweeperPlayerController::StartHopperShot(ATunaSweeperHopperEnemyCharac
 	// Measure the flight hold from actual launch, including a late physics release on a long frame.
 	HopperShotDuration = bEjection ? Duration - Hopper->GetPresentation()->GetEjectionLaunchTime() : Duration;
 	FrameHopperShot();
-	SetViewTargetWithBlend(HopperCamera, bEjection ? EjectionBlendIn : 0.f, VTBlend_Cubic, 0.f, true);
+	SetViewTargetWithBlend(HopperCamera, bEjection ? EjectionBlendIn(Hopper->GetPresentation()) : 0.f, VTBlend_Cubic, 0.f, true);
 	return true;
 }
 
@@ -133,11 +137,28 @@ void ATunaSweeperPlayerController::FrameHopperShot()
 	float FieldOfView;
 	if (bHopperEjection)
 	{
+		const float TripTime = Stage->GetEjectionPullTriggerTime();
+		const FVector Right = Stage->GetBodyRoot()->GetRightVector().GetSafeNormal2D();
+		const FVector EjectionSide = TripTime > 0.f ? -Right : Side;
 		const float FlightTime = HopperShotTime - Stage->GetEjectionLaunchTime();
 		const float Follow = FMath::SmoothStep(0.f, .22f, FlightTime);
 		Aim = FMath::Lerp(Ground + Forward * 23.f + FVector::UpVector * 158.f, Pilot + FVector::UpVector * 32.f, Follow);
-		Offset = Forward * 302.f + Side * 239.f + FVector::UpVector * FMath::Lerp(159.f, 125.f, Follow);
+		Offset = Forward * 302.f + EjectionSide * 239.f + FVector::UpVector * FMath::Lerp(159.f, 125.f, Follow);
 		FieldOfView = FMath::Lerp(52.f, 56.f, Follow);
+		if (TripTime > 0.f)
+		{
+			// See the head turn first, then hold on the glove side of the seat through contact.
+			const float ReactionStart = Stage->GetEjectionPullStartTime();
+			const float TimeToTrip = TripTime - ReactionStart;
+			const float Reach = FMath::SmoothStep(TimeToTrip * .26f, TimeToTrip * .64f, HopperShotTime - ReactionStart);
+			const float Reveal = FMath::SmoothStep(TripTime, TripTime + .74f, HopperShotTime);
+			const FVector CloseAim = Pilot + Forward - Right * 5.f + FVector::UpVector * FMath::Lerp(39.f, 33.f, Reach);
+			const FVector CloseEye = Pilot + Forward * FMath::Lerp(96.f, 60.f, Reach)
+				- Right * FMath::Lerp(155.f, 102.f, Reach) + FVector::UpVector * FMath::Lerp(94.f, 70.f, Reach);
+			Aim = FMath::Lerp(CloseAim, Aim, Reveal);
+			Offset = FMath::Lerp(CloseEye - CloseAim, Offset, Reveal);
+			FieldOfView = FMath::Lerp(FMath::Lerp(48.f, 44.f, Reach), FieldOfView, Reveal);
+		}
 	}
 	else
 	{
@@ -164,7 +185,7 @@ void ATunaSweeperPlayerController::FrameHopperShot()
 	FTransform Pose((Aim - Eye).Rotation(), Eye);
 	if (InterruptedBoardingView.IsSet())
 	{
-		const float Alpha = FMath::SmoothStep(0.f, EjectionBlendIn, HopperShotTime);
+		const float Alpha = FMath::SmoothStep(0.f, EjectionBlendIn(Stage), HopperShotTime);
 		FTransform Blended;
 		Blended.Blend(InterruptedBoardingView.GetValue(), Pose, Alpha);
 		Pose = Blended;

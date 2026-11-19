@@ -7,6 +7,13 @@
 #include "GameFramework/WorldSettings.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/Hopper/HopperPresentationComponent.h"
+#include "Animation/AnimSequence.h"
+#if WITH_EDITOR
+#include "AI/Hopper/HopperVisualData.h"
+#include "Engine/SkeletalMesh.h"
+#include "SkinnedAssetCompiler.h"
+#endif
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/MaterialBillboardComponent.h"
@@ -167,9 +174,17 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestTrue(TEXT("Closed guard ignites a bright expanding field"),!Shield->bHiddenInGame && Shader(0)>0.f && IgnitionGain>1.f);
  Tick(1.f);
  TestTrue(TEXT("The deployed shield settles to a faint steady glow"),Shader(0)==1.f && Shader(1)<IgnitionGain*.5f && Shader(1)>0.f);
+ const float SteadyGain=Shader(1);
  P->StartSeatEjection();
  const FVector Seated=Pilot->GetComponentLocation();
  const float HatchDuration=P->GetEjectionHatchDuration();
+ const float Pull=P->GetEjectionPullTriggerTime();
+ Tick(Pull-.002f);
+ TestTrue(TEXT("The pilot can look and reach with the shield steady and the guard bolted"),
+  !P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Shader(0)==1.f && Shader(1)==SteadyGain &&
+  Shader(2)==0.f && Shader(3)==0.f && Brow->GetAttachParent()==P->GetBodyRoot());
+ Tick(.0021f);
+ TestTrue(TEXT("Full downstroke trips the intact shield"),P->IsWaitingForShieldBreak() && Shader(3)==0.f);
  const float Samples[]={.144f,.295f,.442f,.60f,.758f,.918f};
  float Elapsed=0.f;
  for (int32 Index=0;Index<UE_ARRAY_COUNT(Samples);++Index)
@@ -186,7 +201,10 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  auto* FlashMaterial=Flash ? Cast<UMaterialInstanceDynamic>(Flash->GetMaterial(0)) : nullptr;
  TestTrue(TEXT("The queued blast core is dark throughout the shield warning"),
   FlashMaterial && FlashMaterial->K2_GetScalarParameterValue(TEXT("FlashGain"))==0.f);
- Tick(.05f); Elapsed+=.05f;
+ Tick(.959f-Elapsed);
+ TestTrue(TEXT("The shield remains intact up to the end of the 0.96 second warning"),
+  P->IsWaitingForShieldBreak() && Shader(3)==0.f && Brow->GetAttachParent()==P->GetBodyRoot());
+ Tick(.002f); Elapsed=.961f;
  TestTrue(TEXT("Shards and sparks start on the same update that removes field light"),
   !P->IsWaitingForShieldBreak() && Shader(1)==0.f && Shader(3)>=1.f && !Shield->bHiddenInGame);
  auto* Scorch=Cast<UMaterialInstanceDynamic>(Door->GetOverlayMaterial());
@@ -229,7 +247,10 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
   TestEqual(FString::Printf(TEXT("%s starts once on the shield break"),Effect),BurstCount(Effect),1);
  TestEqual(TEXT("Sustained fire waits for the pilot to escape"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
  TestEqual(TEXT("The Mk2 replaces the common rubble explosion"),BurstCount(TEXT("NS_Explosion_SmokeRobot")),0);
- Tick(.135f);
+ Tick(.09f);
+ TestTrue(TEXT("The seat stays docked for the frame's clearance interval"),
+  Seat->GetAttachParent()==P->GetBodyRoot() && Pilot->GetComponentLocation().Equals(Seated,.05));
+ Tick(.045f);
  const FVector Rising=Pilot->GetComponentLocation()-Seated;
  TestTrue(TEXT("Mk2 launches straight up within a few frames of the blast while the front hatch is opening"),
   !Seat->GetAttachParent() && Rising.Size2D()<.1 && Rising.Z>2 && P->GetHatchOpenAlpha()>0 && P->GetHatchOpenAlpha()<1);
@@ -239,7 +260,7 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestEqual(TEXT("The seat visibly clears the wreck before it ignites"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
  Tick(.205f);
  TestEqual(TEXT("Only the empty chassis catches fire"),AttachedFires(),1);
- Tick(HatchDuration-Elapsed-.34f+.002f);
+ Tick(HatchDuration-Pull-Elapsed-.34f+.002f);
  TestTrue(TEXT("The front door and telescoping ladder finish their authored opening stroke independently"),
   Door->GetRelativeTransform().Equals(OpenDoor,.05) && Step->GetRelativeTransform().Equals(OpenStep,.05));
  TestTrue(TEXT("The pilot continues ascending on the original world-vertical line"),
@@ -282,8 +303,13 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  const FVector MidRail=InterruptedSeat->GetRelativeLocation();
  Interrupted->StartSeatEjection();
  TestTrue(TEXT("Interrupting docking preserves the occupied carriage position"),InterruptedSeat->GetRelativeLocation().Equals(MidRail,.05));
+ Interrupted->TickComponent(Pull-.002f,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("Interrupted boarding holds the carriage for the entire emergency pull"),
+  InterruptedSeat->GetAttachParent()==Interrupted->GetBodyRoot() && InterruptedSeat->GetRelativeLocation().Equals(MidRail,.05) &&
+  !Interrupted->IsWaitingForShieldBreak());
+ Interrupted->TickComponent(.003f,LEVELTICK_All,nullptr);
  Interrupted->TickComponent(.23f,LEVELTICK_All,nullptr);
- TestNull(TEXT("Interrupted boarding releases the seat immediately after the frame"),InterruptedSeat->GetAttachParent());
+ TestNull(TEXT("Interrupted boarding releases the seat after pulling and clearing the frame"),InterruptedSeat->GetAttachParent());
  const FVector Launch=Interrupted->GetBodyRoot()->GetComponentTransform().InverseTransformPosition(InterruptedSeat->GetComponentLocation());
  TestTrue(TEXT("The seat launches from its actual partway-in position"),FVector::Dist2D(Launch,MidRail)<.1 && Launch.Z>MidRail.Z+15);
  auto* Low=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(0,600,0),FRotator(0,70,0))->GetPresentation();
@@ -294,6 +320,7 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  Low->GetBodyRoot()->SetWorldRotation(FRotator(12,70,9));
  const FVector InclinedPickup=LowSeat->GetComponentLocation();
  Low->StartSeatEjection();
+ Low->TickComponent(Pull+.001f,LEVELTICK_All,nullptr);
  Low->TickComponent(.24f,LEVELTICK_All,nullptr);
  TestTrue(TEXT("An interrupted low pickup on an inclined mech ejects along world up"),
   !LowSeat->GetAttachParent() && FVector::Dist2D(LowSeat->GetComponentLocation(),InclinedPickup)<.1
@@ -303,11 +330,167 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  SlowFrame->TickComponent(1.f,LEVELTICK_All,nullptr);
  SlowFrame->StartSeatEjection();
  auto* SlowSeat=SlowFrame->GetPilotMesh()->GetAttachParent();
- SlowFrame->TickComponent(1.5f,LEVELTICK_All,nullptr);
+ const float LongFrame=Pull+1.5f;
+ SlowFrame->TickComponent(LongFrame,LEVELTICK_All,nullptr);
  TestTrue(TEXT("A long shield-break frame preserves clearance time before the launch and camera follow"),
-  SlowSeat->GetAttachParent()==SlowFrame->GetBodyRoot() && SlowFrame->GetEjectionLaunchTime()>1.5f);
+  !SlowFrame->IsWaitingForShieldBreak() && SlowSeat->GetAttachParent()==SlowFrame->GetBodyRoot() &&
+  FMath::IsNearlyEqual(SlowFrame->GetEjectionLaunchTime(),LongFrame+.10f,.002f));
  SlowFrame->TickComponent(.14f,LEVELTICK_All,nullptr);
  TestNull(TEXT("The seat launches on the next update once the frame is clear"),SlowSeat->GetAttachParent());
+ return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHopperEmergencyHandleTest,"TunaSweeper.Hopper.Combat.EmergencyHandle",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
+{
+ auto Values=UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(true)
+  .CreateNavigation(false).CreateAISystem(false).ShouldSimulatePhysics(false);
+ UWorld* World=UWorld::CreateWorld(EWorldType::Game,false,
+  MakeUniqueObjectName(GetTransientPackage(),UWorld::StaticClass(),TEXT("HopperHandleTest")),GetTransientPackage(),true,ERHIFeatureLevel::Num,&Values);
+ GEngine->CreateNewWorldContext(EWorldType::Game).SetCurrentWorld(World);
+ ON_SCOPE_EXIT { World->DestroyWorld(false); GEngine->DestroyWorldContext(World); World->RemoveFromRoot(); };
+ UClass* Mk2=LoadClass<ATunaSweeperHopperEnemyCharacter>(nullptr,TEXT("/Game/Characters/Hopper/BP_HopperEnemyMk2.BP_HopperEnemyMk2_C"));
+ if (!TestNotNull(TEXT("Mk2 class loads"),Mk2)) return false;
+#if WITH_EDITOR
+ // This synchronous fixture evaluates fifty gameplay samples in one engine frame, including on a cold import.
+ auto* Visual=Mk2->GetDefaultObject<ATunaSweeperHopperEnemyCharacter>()->VisualData.LoadSynchronous();
+ if (!TestNotNull(TEXT("Mk2 presentation data loads"),Visual)) return false;
+ auto* Captain=Visual->PilotMesh.LoadSynchronous();
+ if (!TestNotNull(TEXT("The seated captain's mesh loads"),Captain)) return false;
+ FSkinnedAssetCompilingManager::Get().FinishCompilation({Captain});
+ for (auto* Clip:{Visual->PilotSeated.LoadSynchronous(),Visual->EjectionPull.PilotAnimation.LoadSynchronous()})
+ {
+  if (!TestNotNull(TEXT("The seated and ejection sequences load"),Clip)) return false;
+  Clip->WaitOnExistingCompression();
+ }
+#endif
+ auto* Original=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>();
+ TestNull(TEXT("Original Hopper has its original seat"),Original->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperEjectionHandle")));
+ TestEqual(TEXT("Original Hopper adds no handle delay"),Original->GetPresentation()->GetEjectionPullTriggerTime(),0.f);
+ TestEqual(TEXT("Original Hopper has no reaction-camera lead"),Original->GetPresentation()->GetEjectionPullStartTime(),0.f);
+ for (bool bShielded:{true,false})
+ {
+  auto* Mech=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Mk2,FVector(bShielded ? 500 : -500,0,0),FRotator(0,76,0));
+  auto* Stage=Mech->GetPresentation();
+  auto* Pilot=Stage->GetPilotMesh();
+  auto* Seat=Pilot->GetAttachParent();
+  auto* Handle=Mech->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperEjectionHandle"));
+  if (!TestNotNull(TEXT("The Mk2 seat carries a movable emergency handle"),Handle)) return false;
+  TestTrue(TEXT("The stowed grip belongs to the seat"),Handle->GetAttachParent()==Seat && Handle->GetStaticMesh());
+  const FVector Ready(-2.14,-14.40,33.74), Pulled(7.04,-14.40,23.17);
+  const FTransform Parked=Handle->GetRelativeTransform();
+  TestTrue(TEXT("The handle is already parked beside the right glove in normal play"),Parked.GetLocation().Equals(Ready,.05));
+  const float Lead=Stage->GetEjectionPullStartTime();
+  TestTrue(TEXT("The medium shot gets 0.22 seconds before the clip starts"),FMath::IsNearlyEqual(Lead,.22f,.001f));
+  TestTrue(TEXT("The loaded Mk2 trips the warning at one second, on animation frame 39"),
+   FMath::IsNearlyEqual(Stage->GetEjectionPullTriggerTime(),1.f,.001f));
+  if (bShielded)
+  {
+   Stage->SeatPilot(); Stage->SetMechActive(true);
+   Stage->TickComponent(1.2f,LEVELTICK_All,nullptr);
+  }
+  else Stage->StartBoarding(2.f);
+  Stage->StartSeatEjection();
+  const float Deadline=1.f+(bShielded ? .96f : 0.f)+.10f;
+  TestTrue(TEXT("Predicted launch includes the pull, active shield warning and guard clearance"),
+   FMath::IsNearlyEqual(Stage->GetEjectionLaunchTime(),Deadline,.002f));
+  // Surface point on the seated captain's right glove, expressed in the imported hand bone's frame.
+  auto Palm=[Pilot,Seat]() { return Seat->GetComponentTransform().InverseTransformPosition(
+   Pilot->GetSocketTransform(TEXT("hand_r")).TransformPosition(FVector(-2.0542,.8093,3.3000))); };
+  Stage->TickComponent(.02f,LEVELTICK_All,nullptr);
+  Pilot->TickAnimation(0.f,false); Pilot->RefreshBoneTransforms();
+  const FQuat NeutralHead=Pilot->GetSocketQuaternion(TEXT("head"));
+  const FVector RestPalm=Palm();
+  Stage->TickComponent(Lead-.02f,LEVELTICK_All,nullptr);
+  Pilot->TickAnimation(0.f,false); Pilot->RefreshBoneTransforms();
+  TestTrue(TEXT("The ready pose and parked lever hold while the gameplay view blends to the cockpit"),
+   FMath::IsNearlyZero(Pilot->GetPosition(),.001f) && NeutralHead.Equals(Pilot->GetSocketQuaternion(TEXT("head")),.002) &&
+   RestPalm.Equals(Palm(),.1) && Handle->GetRelativeTransform().Equals(Parked,.04) && !Stage->IsWaitingForShieldBreak());
+  const FVector Forward=Seat->GetForwardVector(), Right=Seat->GetRightVector();
+  double MinYaw=0., MaxYaw=0., MaxRestDrift=0., MaxContactGap=-1.;
+  int32 MaxGapFrame=0;
+  FVector WorstPalm=FVector::ZeroVector, WorstLever=FVector::ZeroVector, WorstComponentPalm=FVector::ZeroVector;
+  FString WorstClip;
+  float WorstClipTime=0.f;
+  bool bLeverParked=true, bLeverLatched=true, bPawWaited=true, bNoEarlyWarning=true;
+  FTransform Down;
+  float PreviousTime=Lead;
+  for (int32 Frame=1;Frame<=50;++Frame)
+  {
+   const float Now=Lead+Frame/50.f;
+   Stage->TickComponent(Now-PreviousTime,LEVELTICK_All,nullptr);
+   PreviousTime=Now;
+   Pilot->TickAnimation(0.f,false); Pilot->RefreshBoneTransforms();
+   const FTransform Lever=Handle->GetRelativeTransform();
+   const FVector SeatPalm=Palm();
+   const double Gap=FVector::Distance(SeatPalm,Lever.GetLocation());
+   if (Frame==1)
+   {
+    auto* Instance=Pilot->GetSingleNodeInstance();
+    auto* Clip=Instance ? Cast<UAnimSequence>(Instance->GetCurrentAsset()) : nullptr;
+    if (!TestNotNull(TEXT("Defeat immediately starts the authored pull"),Clip)) return false;
+    TestEqual(TEXT("The ejection uses the captain's Mk2 pull"),Clip->GetFName(),FName(TEXT("A_Captain_Mk2EjectionPull")));
+    TestTrue(TEXT("The clip spans one second at 50 fps"),FMath::IsNearlyEqual(Clip->GetPlayLength(),1.f,.001f) &&
+     FMath::IsNearlyEqual(Clip->GetSamplingFrameRate().AsDecimal(),50.,.001));
+   }
+   if (Frame<=19)
+   {
+    const FVector Look=(Pilot->GetSocketQuaternion(TEXT("head"))*NeutralHead.Inverse()).RotateVector(Forward);
+    const double Yaw=FMath::RadiansToDegrees(FMath::Atan2(FVector::DotProduct(Look,Right),FVector::DotProduct(Look,Forward)));
+    MinYaw=FMath::Min(MinYaw,Yaw); MaxYaw=FMath::Max(MaxYaw,Yaw);
+    MaxRestDrift=FMath::Max(MaxRestDrift,FVector::Dist(SeatPalm,RestPalm));
+    bPawWaited &= SeatPalm.Equals(RestPalm,.4);
+   }
+   if (Frame<=30) bLeverParked &= Lever.Equals(Parked,.04);
+   if (Frame<39) bNoEarlyWarning &= !Stage->IsWaitingForShieldBreak() && Seat->GetAttachParent()==Stage->GetBodyRoot();
+   if (Frame==27) TestTrue(TEXT("The reaching glove has not made contact one frame early"),Gap>.45);
+   if (Frame>=28 && Frame<=42 && Gap>MaxContactGap)
+   {
+    MaxContactGap=Gap; MaxGapFrame=Frame;
+    WorstPalm=SeatPalm; WorstLever=Lever.GetLocation();
+    WorstComponentPalm=Pilot->GetSocketTransform(TEXT("hand_r"),RTS_Component).TransformPosition(FVector(-2.0542,.8093,3.3000));
+    auto* Instance=Pilot->GetSingleNodeInstance();
+    WorstClip=Instance ? GetNameSafe(Instance->GetCurrentAsset()) : TEXT("None");
+    WorstClipTime=Pilot->GetPosition();
+   }
+   if (Frame==31) TestTrue(TEXT("The lever leaves the ready stop on the first downstroke frame"),
+    FVector::Distance(Lever.GetLocation(),Ready)>.25);
+   if (Frame==35) TestTrue(TEXT("The handle moves progressively after contact"),
+    Lever.GetLocation().Z<Ready.Z-2 && Lever.GetLocation().Z>Pulled.Z+2);
+   if (Frame==38) TestTrue(TEXT("The handle has not hit the down stop one frame early"),
+    Lever.GetLocation().Z>Pulled.Z+.25);
+   if (Frame==39)
+   {
+    Down=Lever;
+    TestTrue(TEXT("The lever reaches its down stop on the trigger frame"),Lever.GetLocation().Equals(Pulled,.08));
+    TestEqual(TEXT("Only a deployed shield begins a warning at full pull"),Stage->IsWaitingForShieldBreak(),bShielded);
+   }
+   if (Frame>39) bLeverLatched &= Lever.Equals(Down,.04);
+   if (!bShielded) bNoEarlyWarning &= !Stage->IsWaitingForShieldBreak();
+  }
+  AddInfo(FString::Printf(TEXT("Emergency pull shielded=%d yaw=[%.3f,%.3f] restPalm=%s earlyDrift=%.4f cm maxGap=%.4f cm frame=%d clip=%s t=%.4f"),
+   bShielded,MinYaw,MaxYaw,*RestPalm.ToString(),MaxRestDrift,MaxContactGap,MaxGapFrame,*WorstClip,WorstClipTime));
+  if (MaxContactGap>=.35 || !bPawWaited || MinYaw>=-12. || MaxYaw<=12.)
+   AddInfo(FString::Printf(TEXT("Contact pose seatPalm=%s seatGrip=%s componentPalm=%s pilotParent=%s testSeat=%s pilotRelative=%s postProcess=%s"),
+    *WorstPalm.ToString(),*WorstLever.ToString(),*WorstComponentPalm.ToString(),*GetNameSafe(Pilot->GetAttachParent()),
+    *GetNameSafe(Seat),*Pilot->GetRelativeTransform().ToString(),*GetNameSafe(Pilot->GetPostProcessInstance())));
+  TestTrue(FString::Printf(TEXT("The captain looks both ways before reaching (shielded=%d, yaw %.2f to %.2f)"),bShielded,MinYaw,MaxYaw),
+   MinYaw<-12. && MaxYaw>12.);
+  TestTrue(FString::Printf(TEXT("The right paw waits for the head turns (shielded=%d, maximum drift %.3f cm)"),bShielded,MaxRestDrift),bPawWaited);
+  TestTrue(TEXT("The lever remains parked through frame 30"),bLeverParked);
+  TestTrue(FString::Printf(TEXT("Glove contact from frame 28 through 42 (shielded=%d, maximum %.4f cm at frame %d)"),
+   bShielded,MaxContactGap,MaxGapFrame),MaxContactGap<.35);
+  TestTrue(TEXT("The handle stays latched down as the glove returns to its brace"),bLeverLatched && FVector::Dist(Palm(),Pulled)>4.);
+  TestTrue(TEXT("The pull never starts an early warning or releases an unready seat"),bNoEarlyWarning);
+  if (bShielded)
+  {
+   Stage->TickComponent(.75f,LEVELTICK_All,nullptr);
+   Stage->TickComponent(.12f,LEVELTICK_All,nullptr);
+  }
+  TestTrue(TEXT("The grip leaves with the occupied seat on schedule"),!Seat->GetAttachParent() &&
+   Pilot->GetAttachParent()==Seat && Handle->GetAttachParent()==Seat);
+ }
  return true;
 }
 #endif

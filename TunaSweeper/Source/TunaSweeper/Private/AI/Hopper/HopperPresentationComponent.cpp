@@ -81,6 +81,7 @@ void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
  Pilot->CreationMethod=Creation; Pilot->ComponentTags.Add(TEXT("HopperGenerated")); Pilot->SetupAttachment(Seat); Pilot->SetSkeletalMeshAsset(Data->PilotMesh.LoadSynchronous());
  Pilot->VisibilityBasedAnimTickOption=EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
  Pilot->RegisterComponent();
+ InitializeEjectionHandle();
  Gun=NewObject<UStaticMeshComponent>(Owner,MakeUniqueObjectName(Owner,UStaticMeshComponent::StaticClass(),TEXT("PilotGun")),RF_Transient);
  Gun->SetCanEverAffectNavigation(false); Gun->SetCollisionEnabled(ECollisionEnabled::NoCollision);
  Gun->CreationMethod=Creation; Gun->ComponentTags.Add(TEXT("HopperGenerated")); Gun->SetupAttachment(Pilot,TEXT("hand_r"));
@@ -336,8 +337,9 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  ActionRemaining=FMath::Max(0.f,ActionRemaining-Dt);
  if (EjectionTime>=0.f)
  {
-  TickCockpitShield(Dt);
   EjectionTime+=Dt;
+  TickEjectionPull();
+  TickEjectionShield(Dt);
   UpdateEjectionHatch();
   const float LaunchTime=GetEjectionLaunchTime();
   if (!bSeatFlightFinished) TickSeatEjection(LaunchTime);
