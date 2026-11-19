@@ -1,0 +1,11 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Coastal Fish",
+	"Category": "Gameplay",
+	"EnabledByDefault": true,
+	"Modules": [
+		{ "Name": "CoastalFish", "Type": "Runtime", "LoadingPhase": "Default" }
+	]
+}
