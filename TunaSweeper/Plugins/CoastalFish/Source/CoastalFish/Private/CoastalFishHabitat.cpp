@@ -70,6 +70,13 @@ ACoastalFishHabitat::ACoastalFishHabitat()
 
 void ACoastalFishHabitat::ResetSchool()
 {
+	if (!bEnableFry)
+	{
+		FryTransforms.Empty();
+		FryShaderData.Empty();
+		if (School->GetInstanceCount()) School->ClearInstances();
+		return;
+	}
 	const int32 Count = FMath::Clamp(FryCount,20,40);
 	School->SetNumCustomDataFloats(2);
 	FryTransforms.Init(FTransform::Identity, Count);
@@ -102,12 +109,23 @@ void ACoastalFishHabitat::InitializePose()
 			Joints.Add({ Index, Skeleton.GetRefBonePose()[Index].GetRotation(), ParentOrientation.UnrotateVector(FVector::UpVector) });
 		}
 	};
-	CacheChain(MediumFish, MediumJoints);
-	CacheChain(LargeFish, LargeJoints);
+	MediumTime = LargeTime = FryTime = InitialPhaseSeconds;
+	MediumFish->SetVisibility(bEnableMedium);
+	LargeFish->SetVisibility(bEnableLarge);
+	School->SetVisibility(bEnableFry);
+	bMediumActive = bLargeActive = bFryActive = false;
+	if (bEnableMedium)
+	{
+		CacheChain(MediumFish, MediumJoints);
+		UpdateAdult(false);
+	}
+	if (bEnableLarge)
+	{
+		CacheChain(LargeFish, LargeJoints);
+		UpdateAdult(true);
+	}
 	ResetSchool();
-	UpdateAdult(false);
-	UpdateAdult(true);
-	UpdateFry();
+	if (bEnableFry) UpdateFry();
 }
 
 void ACoastalFishHabitat::OnConstruction(const FTransform& Transform)
@@ -151,9 +169,9 @@ void ACoastalFishHabitat::ApplyPlayerLocations(const TArray<FVector>& Players)
 			return FVector::DistSquared(Player, Position) <= ProximitySquared;
 		});
 	};
-	bMediumActive = InRange(MediumFish->GetComponentLocation());
-	bLargeActive = InRange(LargeFish->GetComponentLocation());
-	bFryActive = !Players.IsEmpty() && FryTransforms.ContainsByPredicate([&](const FTransform& Fry)
+	bMediumActive = bEnableMedium && InRange(MediumFish->GetComponentLocation());
+	bLargeActive = bEnableLarge && InRange(LargeFish->GetComponentLocation());
+	bFryActive = bEnableFry && !Players.IsEmpty() && FryTransforms.ContainsByPredicate([&](const FTransform& Fry)
 	{
 		return InRange(School->GetComponentTransform().TransformPosition(Fry.GetLocation()));
 	});

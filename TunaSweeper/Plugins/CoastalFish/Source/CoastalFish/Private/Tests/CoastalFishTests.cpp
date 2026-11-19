@@ -76,6 +76,15 @@ bool FCoastalFishTest::RunTest(const FString& Parameters)
 	AtDistance(Paused, 0.);
 	Habitat->Tick(0.3f);
 	TestTrue(TEXT("Dormant fry shader phase frozen"), ShaderPose == Habitat->School->PerInstanceSMCustomData);
+	Habitat->bEnableFry = false;
+	Habitat->bEnableMedium = false;
+	Habitat->InitialPhaseSeconds = 2.5f;
+	Habitat->InitializePose();
+	AtDistance(Habitat->MediumFish->GetComponentLocation(), 0.);
+	TestFalse(TEXT("Excluded medium never activates"), Habitat->bMediumActive);
+	TestFalse(TEXT("Editor preview hides excluded groups"), Habitat->MediumFish->IsVisible() || Habitat->School->IsVisible());
+	TestEqual(TEXT("Excluded school has no instances"), Habitat->School->GetInstanceCount(), 0);
+	TestEqual(TEXT("Authored phase applies to included groups"), Habitat->LargeTime, 2.5);
 	World->DestroyWorld(false);
 	return true;
 }

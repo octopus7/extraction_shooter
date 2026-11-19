@@ -20,6 +20,10 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 
+	UPROPERTY(EditAnywhere, Category="Fish") float InitialPhaseSeconds = 0.f;
+	UPROPERTY(EditAnywhere, Category="Fish|Medium") bool bEnableMedium = true;
+	UPROPERTY(EditAnywhere, Category="Fish|Large") bool bEnableLarge = true;
+	UPROPERTY(EditAnywhere, Category="Fish|Fry") bool bEnableFry = true;
 	/** In local centimeters, +X points offshore, +Y follows the shore, Z=0 is water level. */
 	UPROPERTY(EditAnywhere, Category="Fish|Medium") FVector MediumCenter = FVector(500,0,-85);
 	UPROPERTY(EditAnywhere, Category="Fish|Medium") FVector MediumExtent = FVector(100,225,12);
