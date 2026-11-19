@@ -135,6 +135,7 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestTrue(TEXT("Third hop lands facing mech forward on the stationary low seat"),Pilot->GetAttachParent()==Seat && Seat->GetRelativeLocation().Equals(Pickup,.05) &&
   FVector::DotProduct(Pilot->GetForwardVector(),P->GetBodyRoot()->GetForwardVector())>.99f);
  BoardTo(SeatedTime);
+ const FTransform OpenDoor=Door->GetRelativeTransform(), OpenStep=Step->GetRelativeTransform();
  Tick(.24f);
  const FVector LoadedLift=Seat->GetRelativeLocation();
  TestTrue(TEXT("Occupied chair first climbs the vertical guide"),FMath::IsNearlyEqual(LoadedLift.X,Pickup.X,.05) && LoadedLift.Z>Pickup.Z+10 && LoadedLift.Z<Locked.Z+4);
@@ -178,6 +179,8 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
   TestTrue(TEXT("Intact field holds the guard closed during the warning"),P->IsWaitingForShieldBreak() && P->GetHatchOpenAlpha()==0.f && Shader(3)==0.f);
  }
  TestTrue(TEXT("Cracks spread before the intact field cuts out"),Shader(2)>.9f);
+ TestTrue(TEXT("The frame remains bolted to the chassis and the seat stays docked during the warning"),
+  Brow->GetAttachParent()==P->GetBodyRoot() && Seat->GetRelativeLocation().Equals(Locked,.01));
  TestNull(TEXT("Guard paint stays clean throughout the shield warning"),Brow->GetOverlayMaterial());
  auto* Flash=Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash"));
  auto* FlashMaterial=Flash ? Cast<UMaterialInstanceDynamic>(Flash->GetMaterial(0)) : nullptr;
@@ -186,8 +189,23 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  Tick(.05f); Elapsed+=.05f;
  TestTrue(TEXT("Shards and sparks start on the same update that removes field light"),
   !P->IsWaitingForShieldBreak() && Shader(1)==0.f && Shader(3)>=1.f && !Shield->bHiddenInGame);
- auto* Scorch=Cast<UMaterialInstanceDynamic>(Brow->GetOverlayMaterial());
+ auto* Scorch=Cast<UMaterialInstanceDynamic>(Door->GetOverlayMaterial());
+ auto* GuardSoot=Cast<UMaterialInstanceDynamic>(Brow->GetOverlayMaterial());
  TestNotNull(TEXT("Dry blast soot appears on the shatter frame"),Scorch);
+ TestNotNull(TEXT("The breakaway frame receives the same initial blast soot"),GuardSoot);
+ auto* LeftArm=Part(TEXT("GuardArm_L"));
+ auto* RightArm=Part(TEXT("GuardArm_R"));
+ auto* Mount=Part(TEXT("GuardMount_L"));
+ auto* ReleasedBody=Cast<UPrimitiveComponent>(Brow->GetAttachmentRoot());
+ TestTrue(TEXT("The brow and both side arms leave as one rigid frame on shield breakup"),
+  ReleasedBody && ReleasedBody->GetOwner()!=Hopper && !Brow->IsAttachedTo(P->GetBodyRoot())
+  && LeftArm && LeftArm->GetAttachmentRoot()==ReleasedBody && RightArm && RightArm->GetAttachmentRoot()==ReleasedBody
+  && Mount && Mount->GetAttachParent()==P->GetBodyRoot());
+ TestTrue(TEXT("The discarded frame collides with the environment independently of the defeated enemy"),
+  ReleasedBody && ReleasedBody->GetCollisionEnabled()==ECollisionEnabled::PhysicsOnly &&
+  ReleasedBody->GetCollisionResponseToChannel(ECC_WorldStatic)==ECR_Block && ReleasedBody->GetCollisionResponseToChannel(ECC_Pawn)==ECR_Ignore);
+ TestTrue(TEXT("The seat remains in its socket as the frame is blown clear"),
+  Seat->GetAttachParent()==P->GetBodyRoot() && Pilot->GetComponentLocation().Equals(Seated,.05));
  TestTrue(TEXT("The blast core lights up on the same update as the soot and shards"),
   FlashMaterial && FlashMaterial->K2_GetScalarParameterValue(TEXT("FlashGain"))==1.f);
  auto AttachedFires=[Hopper,P]()
@@ -211,24 +229,22 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
   TestEqual(FString::Printf(TEXT("%s starts once on the shield break"),Effect),BurstCount(Effect),1);
  TestEqual(TEXT("Sustained fire waits for the pilot to escape"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
  TestEqual(TEXT("The Mk2 replaces the common rubble explosion"),BurstCount(TEXT("NS_Explosion_SmokeRobot")),0);
- Tick(HatchDuration-Elapsed);
- TestNull(TEXT("The impulse is over before the seat starts to move"),
-  Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash")));
- TestTrue(TEXT("Guard is fully back before the seat moves"),Brow->GetRelativeTransform().Equals(OpenGuard,.01f));
- TestTrue(TEXT("Pilot is still seated at the end of opening"),Pilot->GetComponentLocation().Equals(Seated,.01f));
- Tick(.15f);
- const FVector Rising=Seat->GetRelativeLocation();
- TestTrue(TEXT("Emergency release lifts vertically with the door clear"),FMath::IsNearlyEqual(Rising.X,Locked.X,.05) && Rising.Z>Locked.Z+1 && Rising.Z<Outer.Z-1);
- Tick(.15f+P->EjectionSlideSeconds*.5f);
- const FVector Outward=Seat->GetRelativeLocation();
- TestTrue(TEXT("Ejection rail advances at the raised height"),Outward.X>Locked.X+10 && FMath::IsNearlyEqual(Outward.Z,Outer.Z,.05));
- if (Scorch) TestEqual(TEXT("Paint stays at first-stage soot during the rail slide"),Scorch->K2_GetScalarParameterValue(TEXT("PaintFade")),0.f);
- Tick(P->EjectionSlideSeconds*.5f+.055f);
- TestEqual(TEXT("Both rail mouths flash with the stronger ejection effect"),BurstCount(TEXT("NS_HopperMk2SeatEjectSparks")),2);
- TestNull(TEXT("Mk2 seat launches free of the mech"),Pilot->GetAttachParent()->GetAttachParent());
+ Tick(.135f);
+ const FVector Rising=Pilot->GetComponentLocation()-Seated;
+ TestTrue(TEXT("Mk2 launches straight up within a few frames of the blast while the front hatch is opening"),
+  !Seat->GetAttachParent() && Rising.Size2D()<.1 && Rising.Z>2 && P->GetHatchOpenAlpha()>0 && P->GetHatchOpenAlpha()<1);
+ TestTrue(TEXT("The occupied cabin ejects with the pilot"),Cabin->GetAttachParent()==Seat && Pilot->GetAttachParent()==Seat);
+ if (Scorch) TestEqual(TEXT("The escape starts with first-stage soot"),Scorch->K2_GetScalarParameterValue(TEXT("PaintFade")),0.f);
+ TestEqual(TEXT("Both seat locks flash on vertical release"),BurstCount(TEXT("NS_HopperMk2SeatEjectSparks")),2);
  TestEqual(TEXT("The seat visibly clears the wreck before it ignites"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
- Tick(.195f);
+ Tick(.205f);
  TestEqual(TEXT("Only the empty chassis catches fire"),AttachedFires(),1);
+ Tick(HatchDuration-Elapsed-.34f+.002f);
+ TestTrue(TEXT("The front door and telescoping ladder finish their authored opening stroke independently"),
+  Door->GetRelativeTransform().Equals(OpenDoor,.05) && Step->GetRelativeTransform().Equals(OpenStep,.05));
+ TestTrue(TEXT("The pilot continues ascending on the original world-vertical line"),
+  FVector::Dist2D(Seated,Pilot->GetComponentLocation())<.1 && Pilot->GetComponentLocation().Z>Seated.Z+100);
+ TestNull(TEXT("The blast core has expired"),Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash")));
  TestTrue(TEXT("No lingering shield or burst on the wreck"),Shield->bHiddenInGame);
  TArray<UNiagaraComponent*> Jets;
  Hopper->GetComponents(Jets);
@@ -245,8 +261,10 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
    const float DuringFire=Scorch->K2_GetScalarParameterValue(TEXT("PaintFade"));
    TestTrue(TEXT("The paint keeps bleaching after the seat exhaust ends"),DuringFire>0.f && DuringFire<1.f && P->IsComponentTickEnabled());
    Tick(6.f);
-   TestTrue(TEXT("Fully bleached paint remains on the cold guard"),Brow->GetOverlayMaterial()==Scorch &&
+   TestTrue(TEXT("Fully bleached paint remains on the cold front hatch"),Door->GetOverlayMaterial()==Scorch &&
     Scorch->K2_GetScalarParameterValue(TEXT("PaintFade"))==1.f);
+   if (GuardSoot) TestEqual(TEXT("The discarded frame keeps its blast soot outside the hull fire"),
+    GuardSoot->K2_GetScalarParameterValue(TEXT("PaintFade")),0.f);
    TestFalse(TEXT("The settled wreck needs no presentation tick"),P->IsComponentTickEnabled());
   }
   for (const auto* Jet:Jets)
@@ -264,23 +282,32 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  const FVector MidRail=InterruptedSeat->GetRelativeLocation();
  Interrupted->StartSeatEjection();
  TestTrue(TEXT("Interrupting docking preserves the occupied carriage position"),InterruptedSeat->GetRelativeLocation().Equals(MidRail,.05));
- Interrupted->TickComponent(.1f,LEVELTICK_All,nullptr);
- TestTrue(TEXT("An already raised carriage reverses outward without replaying the hatch or lift"),
-  InterruptedSeat->GetRelativeLocation().X>MidRail.X && FMath::IsNearlyEqual(InterruptedSeat->GetRelativeLocation().Z,MidRail.Z,.05));
- Interrupted->TickComponent(Interrupted->GetEjectionLaunchTime()-.1f,LEVELTICK_All,nullptr);
- TestNull(TEXT("Interrupted boarding launches from the same rail end"),InterruptedSeat->GetAttachParent());
+ Interrupted->TickComponent(.23f,LEVELTICK_All,nullptr);
+ TestNull(TEXT("Interrupted boarding releases the seat immediately after the frame"),InterruptedSeat->GetAttachParent());
  const FVector Launch=Interrupted->GetBodyRoot()->GetComponentTransform().InverseTransformPosition(InterruptedSeat->GetComponentLocation());
- TestTrue(TEXT("Interrupted ejection never adds the remaining boarding offset to the rail length"),
-  Launch.Equals(FVector(Locked.X+Interrupted->EjectionSlideDistance,Locked.Y,Outer.Z),.05));
+ TestTrue(TEXT("The seat launches from its actual partway-in position"),FVector::Dist2D(Launch,MidRail)<.1 && Launch.Z>MidRail.Z+15);
  auto* Low=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(0,600,0),FRotator(0,70,0))->GetPresentation();
  auto* LowSeat=Low->GetPilotMesh()->GetAttachParent();
  Low->StartBoarding(2.f);
  Low->TickComponent(ClimbStart+1.9f,LEVELTICK_All,nullptr);
  TestTrue(TEXT("Rotated mech receives the pilot in its lowered chair"),Low->GetPilotMesh()->GetAttachParent()==LowSeat && LowSeat->GetRelativeLocation().Equals(Pickup,.05));
+ Low->GetBodyRoot()->SetWorldRotation(FRotator(12,70,9));
+ const FVector InclinedPickup=LowSeat->GetComponentLocation();
  Low->StartSeatEjection();
  Low->TickComponent(.24f,LEVELTICK_All,nullptr);
- TestTrue(TEXT("Interrupting pickup lifts vertically from its actual height before release"),
-  FMath::IsNearlyEqual(LowSeat->GetRelativeLocation().X,Pickup.X,.05) && LowSeat->GetRelativeLocation().Z>Pickup.Z+10 && LowSeat->GetRelativeLocation().Z<Outer.Z-10);
+ TestTrue(TEXT("An interrupted low pickup on an inclined mech ejects along world up"),
+  !LowSeat->GetAttachParent() && FVector::Dist2D(LowSeat->GetComponentLocation(),InclinedPickup)<.1
+  && LowSeat->GetComponentLocation().Z>InclinedPickup.Z+20);
+ auto* SlowFrame=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(0,-600,0),FRotator::ZeroRotator)->GetPresentation();
+ SlowFrame->SeatPilot(); SlowFrame->SetMechActive(true);
+ SlowFrame->TickComponent(1.f,LEVELTICK_All,nullptr);
+ SlowFrame->StartSeatEjection();
+ auto* SlowSeat=SlowFrame->GetPilotMesh()->GetAttachParent();
+ SlowFrame->TickComponent(1.5f,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("A long shield-break frame preserves clearance time before the launch and camera follow"),
+  SlowSeat->GetAttachParent()==SlowFrame->GetBodyRoot() && SlowFrame->GetEjectionLaunchTime()>1.5f);
+ SlowFrame->TickComponent(.14f,LEVELTICK_All,nullptr);
+ TestNull(TEXT("The seat launches on the next update once the frame is clear"),SlowSeat->GetAttachParent());
  return true;
 }
 #endif

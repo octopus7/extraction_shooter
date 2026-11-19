@@ -100,6 +100,8 @@ private:
  void ApplyLeg(int32 Side,const FTransform& BodyWorld);
  void PlayClip(UAnimSequence* Clip,bool bLoop,bool bOverrideAction=false);
  void SetHatchOpen(float Alpha);
+ void ReleaseEjectionGuard();
+ void UpdateEjectionHatch();
  void TickSeatEjection(float LaunchTime);
  void CreateEjectionExhaust();
  void ClearEjectionExhaust();
@@ -139,6 +141,8 @@ private:
  TArray<float> SmokeBirthTimes;
  TArray<FVector> SmokeOrigins;
  FTransform EjectionLaunchTransform;
+ TWeakObjectPtr<AActor> ReleasedGuard;
+ float GuardReleaseTime = -1.f;
  FVector EjectionSeatStart = FVector::ZeroVector;
  float EjectionTime = -1.f, EjectionInitialHatch = 0.f, NextSmokeTime = 0.f;
  int32 NextSmokeIndex = 0;

@@ -102,8 +102,10 @@ void UHopperPresentationComponent::EmitRailSparks(bool bEjection)
  const FTransform& Chassis=BodyRoot->GetComponentTransform();
  for (const float Side:{-1.f,1.f})
  {
-  FVector Contact=bEjection?VisualData->RailExitContact:VisualData->RailLockContact;
+  const bool bVerticalRelease=bEjection && !VisualData->EjectionGuardParts.IsEmpty();
+  FVector Contact=bEjection && !bVerticalRelease ? VisualData->RailExitContact : VisualData->RailLockContact;
   Contact.Y*=Side;
+  if (bVerticalRelease) Contact+=EjectionSeatStart-VisualData->SeatLocation;
   FVector StrikeDirection=Chassis.GetUnitAxis(EAxis::Y)*Side;
   if (!bEjection) StrikeDirection+=Chassis.GetUnitAxis(EAxis::X)*1.25f;
   const FRotator Direction=FRotationMatrix::MakeFromXZ(StrikeDirection,Chassis.GetUnitAxis(EAxis::Z)).Rotator();

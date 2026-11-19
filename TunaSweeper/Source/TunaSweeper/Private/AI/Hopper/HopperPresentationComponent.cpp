@@ -30,6 +30,8 @@ float UHopperPresentationComponent::CapsuleHalfHeight() const
 void UHopperPresentationComponent::Initialize(UHopperVisualData* Data)
 {
  if (!Data || (VisualData==Data && IsValid(BodyRoot))) return;
+ if (ReleasedGuard.IsValid()) ReleasedGuard->Destroy();
+ ReleasedGuard.Reset(); GuardReleaseTime=-1.f;
  ClearEjectionExhaust(); EjectionTime=-1.f; EjectionInitialHatch=0.f; bSeatLaunched=false;
  bWreckBurstPlayed=false; bWreckFireStarted=false; bSeatFlightFinished=false;
  WreckSprayDirection=FVector::ZeroVector; ScorchedHullMaterials.Reset(); OilReceivers.Reset();
@@ -247,6 +249,8 @@ void UHopperPresentationComponent::SetHatchOpen(float Alpha)
   for (const FHopperPartMotion& Track:VisualData->HatchMotion)
   {
    const auto* Part=Parts.Find(Track.PartName); if (!Part || Track.Frames.IsEmpty()) continue;
+   // The released hoop follows Chaos; the disconnected latches and rams stay on the chassis.
+   if (GuardReleaseTime>=0.f && ((*Part)->GetAttachParent()!=BodyRoot || Track.PartName.ToString().StartsWith(TEXT("Guard")))) continue;
    const float Frame=HatchOpen*(Track.Frames.Num()-1);
    const int32 A=FMath::FloorToInt(Frame), B=FMath::Min(A+1,Track.Frames.Num()-1);
    FTransform Pose; Pose.Blend(Track.Frames[A],Track.Frames[B],Frame-A);
@@ -334,10 +338,11 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  {
   TickCockpitShield(Dt);
   EjectionTime+=Dt;
+  UpdateEjectionHatch();
   const float LaunchTime=GetEjectionLaunchTime();
   if (!bSeatFlightFinished) TickSeatEjection(LaunchTime);
   if (bSeatLaunched && bWreckBurstPlayed) UpdateWreckBurn(EjectionTime-LaunchTime);
-  if (bSeatFlightFinished && ScorchedHullMaterials.IsEmpty() && (!bWreckBurstPlayed || bWreckFireStarted))
+  if (bSeatFlightFinished && HatchOpen>=1.f && ScorchedHullMaterials.IsEmpty() && (!bWreckBurstPlayed || bWreckFireStarted))
    SetComponentTickEnabled(false);
   return;
  }
@@ -438,6 +443,7 @@ void UHopperPresentationComponent::BeginPlay()
 }
 void UHopperPresentationComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+ if (ReleasedGuard.IsValid()) ReleasedGuard->Destroy();
  WreckAssetHandle.Reset();
  ClearEjectionExhaust();
  // Detached components remain owned by the enemy, so actor destruction cleans the wreck too.

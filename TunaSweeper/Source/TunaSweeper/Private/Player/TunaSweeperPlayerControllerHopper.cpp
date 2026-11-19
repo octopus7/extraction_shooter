@@ -113,7 +113,8 @@ bool ATunaSweeperPlayerController::StartHopperShot(ATunaSweeperHopperEnemyCharac
 	bHopperEjection = bEjection;
 	bHopperReturning = false;
 	HopperShotTime = 0.f;
-	HopperShotDuration = Duration;
+	// Measure the flight hold from actual launch, including a late physics release on a long frame.
+	HopperShotDuration = bEjection ? Duration - Hopper->GetPresentation()->GetEjectionLaunchTime() : Duration;
 	FrameHopperShot();
 	SetViewTargetWithBlend(HopperCamera, bEjection ? EjectionBlendIn : 0.f, VTBlend_Cubic, 0.f, true);
 	return true;
@@ -195,7 +196,8 @@ void ATunaSweeperPlayerController::UpdateHopperShot(float DeltaSeconds)
 		return;
 	}
 	HopperShotTime += DeltaSeconds;
-	if (HopperSubject.IsValid() && HopperShotTime < HopperShotDuration)
+	const float LaunchTime = bHopperEjection && HopperSubject.IsValid() ? HopperSubject->GetPresentation()->GetEjectionLaunchTime() : 0.f;
+	if (HopperSubject.IsValid() && HopperShotTime < LaunchTime + HopperShotDuration)
 	{
 		FrameHopperShot();
 		return;

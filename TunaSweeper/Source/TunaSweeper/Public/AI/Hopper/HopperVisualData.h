@@ -83,6 +83,8 @@ public:
  UPROPERTY(EditAnywhere, Category="Seat", meta=(ClampMin="0", Units="cm")) float RailReleaseTravel = 0.f;
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatLockSparks;
  UPROPERTY(EditAnywhere, Category="Seat") TSoftObjectPtr<UNiagaraSystem> SeatEjectSparks;
+ /** Rigid guard parts released together for vertical ejection. The first part carries the others. */
+ UPROPERTY(EditAnywhere, Category="Destruction") TArray<FName> EjectionGuardParts;
  UPROPERTY(EditAnywhere, Category="Destruction") FHopperWreckEffects WreckEffects;
  UPROPERTY(EditAnywhere) FVector LeftArmMount = FVector(-5.8716,56.7287,157.1782);
  UPROPERTY(EditAnywhere) FVector RightArmMount = FVector(-5.8716,-56.7287,157.1782);

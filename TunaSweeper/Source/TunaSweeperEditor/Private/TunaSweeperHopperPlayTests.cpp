@@ -280,10 +280,9 @@ bool FHopperEjectionStage::Update()
  }
  else
  {
-  const float HalfSlide=P->EjectionSlideSeconds*.5f;
-  const float FullyRaised=P->GetEjectionLaunchTime()-P->EjectionSlideSeconds;
-  const float Steps[]={0.f,P->GetEjectionHatchDuration(),FullyRaised-P->GetEjectionHatchDuration()+HalfSlide,HalfSlide+.2f,.6f,10.f};
-  P->TickComponent(Steps[Stage],LEVELTICK_All,nullptr);
+  const float Launch=P->GetEjectionLaunchTime();
+  const float Samples[]={0.f,FMath::Max(0.f,Launch-.18f),FMath::Max(0.f,Launch-.04f),Launch+.16f,Launch+.60f,Launch+10.f};
+  P->TickComponent(Samples[Stage]-Samples[Stage-1],LEVELTICK_All,nullptr);
  }
  APlayerController* PC=World->GetFirstPlayerController();
  if (PC)
@@ -325,6 +324,21 @@ bool FHopperEjectionRealtime::Update()
     if (It->GetGameTimeSinceCreation()<FlightSample && FPlatformTime::Seconds()-StartTime<12.f) return false;
     Test->TestTrue(TEXT("Dead mech presentation keeps ticking in real gameplay"),It->GetPresentation()->GetPilotMesh()->GetComponentLocation().Z>400.f);
     Test->TestNull(TEXT("Real-time ejection detaches the complete seat"),It->GetPresentation()->GetPilotMesh()->GetAttachParent()->GetAttachParent());
+    TInlineComponentArray<UStaticMeshComponent*> Meshes(*It);
+    UStaticMeshComponent* const* Guard=Meshes.FindByPredicate([](const UStaticMeshComponent* Part)
+    {
+     return Part->GetName().StartsWith(TEXT("GuardBrow"));
+    });
+    const USceneComponent* Body=It->GetPresentation()->GetBodyRoot();
+    const auto* FlyingFrame=Guard ? Cast<UPrimitiveComponent>((*Guard)->GetAttachmentRoot()) : nullptr;
+    if (Test->TestNotNull(TEXT("The ejected frame has a physical root"),FlyingFrame))
+    {
+     const FVector Offset=(*Guard)->Bounds.Origin-Body->GetComponentLocation();
+     Test->TestTrue(TEXT("Chaos carries the spinning frame upward and behind the wreck during the vertical launch"),
+      FlyingFrame->IsSimulatingPhysics() && FlyingFrame->IsGravityEnabled() &&
+      FVector::DotProduct(Offset,Body->GetForwardVector())<-90.f && Offset.Z>255.f &&
+      FlyingFrame->GetPhysicsAngularVelocityInDegrees().Size()>80.f);
+    }
     return true;
    }
   Test->AddError(TEXT("Real-time ejection fixture missing"));

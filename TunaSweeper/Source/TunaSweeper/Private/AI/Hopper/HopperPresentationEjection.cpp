@@ -16,6 +16,7 @@ namespace
  constexpr float SmokeInterval=.025f;
  constexpr float SmokeLifetime=1.6f;
  constexpr int32 SmokePoolSize=72;
+ constexpr float GuardClearanceSeconds=.10f;
  float Smooth(float Alpha) { Alpha=FMath::Clamp(Alpha,0.f,1.f); return Alpha*Alpha*(3.f-2.f*Alpha); }
 }
 
@@ -31,14 +32,64 @@ void UHopperPresentationComponent::StartSeatEjection()
  EjectionSeatStart=Seat->GetRelativeLocation();
  if (auto* Cabin=Parts.Find(TEXT("Cabin_Interior")))
   (*Cabin)->AttachToComponent(Seat,FAttachmentTransformRules::KeepWorldTransform);
+ if (EjectionShieldDelay<=0.f && !VisualData->EjectionGuardParts.IsEmpty()) ReleaseEjectionGuard();
  SetComponentTickEnabled(true);
+}
+
+void UHopperPresentationComponent::ReleaseEjectionGuard()
+{
+ GuardReleaseTime=EjectionTime;
+ if (GetNetMode()==NM_DedicatedServer) return;
+ // Defeating the enemy disables collision actor-wide. The discarded frame needs its own physics owner.
+ FActorSpawnParameters Spawn;
+ Spawn.Owner=GetOwner();
+ Spawn.ObjectFlags=RF_Transient;
+ Spawn.SpawnCollisionHandlingOverride=ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+ AActor* Debris=GetWorld()->SpawnActor<AActor>(AActor::StaticClass(),BodyRoot->GetComponentTransform(),Spawn);
+ if (!Debris) return;
+ ReleasedGuard=Debris;
+ UStaticMeshComponent* RigidBody=nullptr;
+ for (FName Name:VisualData->EjectionGuardParts)
+ {
+  UStaticMeshComponent* Panel=Parts.FindRef(Name);
+  if (!Panel || !Panel->GetStaticMesh()) continue;
+  // Use each panel's cooked convex hull. Keeping the original render components preserves their live soot and visibility.
+  auto* Shape=NewObject<UStaticMeshComponent>(Debris,Name,RF_Transient);
+  Shape->SetMobility(EComponentMobility::Movable);
+  Shape->SetCanEverAffectNavigation(false);
+  Shape->SetVisibility(false);
+  Shape->SetGenerateOverlapEvents(false);
+  Shape->SetCollisionObjectType(ECC_PhysicsBody);
+  Shape->SetCollisionResponseToAllChannels(ECR_Ignore);
+  Shape->SetCollisionResponseToChannel(ECC_WorldStatic,ECR_Block);
+  Shape->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+  Shape->SetStaticMesh(Panel->GetStaticMesh());
+  Shape->SetWorldTransform(Panel->GetComponentTransform());
+  if (!RigidBody) Debris->SetRootComponent(Shape);
+  Shape->RegisterComponent();
+  if (RigidBody)
+   Shape->AttachToComponent(RigidBody,FAttachmentTransformRules(EAttachmentRule::KeepWorld,true));
+  else
+  {
+   RigidBody=Shape;
+   RigidBody->SetUseCCD(true);
+   RigidBody->SetSimulatePhysics(true);
+  }
+  Panel->AttachToComponent(RigidBody,FAttachmentTransformRules::KeepWorldTransform);
+  ScorchedHullMaterials.RemoveSingleSwap(Cast<UMaterialInstanceDynamic>(Panel->GetOverlayMaterial()));
+ }
+ if (!RigidBody) { Debris->Destroy(); return; }
+ const FVector Forward=BodyRoot->GetForwardVector().GetSafeNormal2D();
+ const FVector Right=FVector::CrossProduct(FVector::UpVector,Forward);
+ RigidBody->AddImpulse(FVector::UpVector*570.f-Forward*690.f,NAME_None,true);
+ RigidBody->AddAngularImpulseInDegrees(-Right*235.f+Forward*45.f,NAME_None,true);
 }
 
 FVector UHopperPresentationComponent::EjectionPosition(float FlightTime) const
 {
- // World-up ascent keeps the escape clear even when the wreck is leaning on uneven ground.
- return EjectionLaunchTransform.GetLocation()+EjectionLaunchTransform.GetUnitAxis(EAxis::X)*EjectionForwardSpeed*FlightTime+
-  FVector::UpVector*(EjectionUpSpeed*FlightTime+.5f*EjectionUpAcceleration*FlightTime*FlightTime);
+ FVector Position=EjectionLaunchTransform.GetLocation()+FVector::UpVector*(EjectionUpSpeed*FlightTime+.5f*EjectionUpAcceleration*FlightTime*FlightTime);
+ if (VisualData->EjectionGuardParts.IsEmpty()) Position+=EjectionLaunchTransform.GetUnitAxis(EAxis::X)*EjectionForwardSpeed*FlightTime;
+ return Position;
 }
 
 float UHopperPresentationComponent::GetEjectionHatchDuration() const
@@ -49,6 +100,8 @@ float UHopperPresentationComponent::GetEjectionHatchDuration() const
 }
 float UHopperPresentationComponent::GetEjectionLaunchTime() const
 {
+ if (VisualData && !VisualData->EjectionGuardParts.IsEmpty())
+  return (GuardReleaseTime>=0.f ? GuardReleaseTime : EjectionShieldDelay)+GuardClearanceSeconds;
  float LiftDuration=0.f;
  if (VisualData && VisualData->SeatLockDrop>0.f)
  {
@@ -61,19 +114,26 @@ float UHopperPresentationComponent::GetEjectionLaunchTime() const
  return GetEjectionHatchDuration()+LiftDuration+FMath::Max(.05f,EjectionSlideSeconds);
 }
 
+void UHopperPresentationComponent::UpdateEjectionHatch()
+{
+ if (GuardReleaseTime<0.f && !VisualData->EjectionGuardParts.IsEmpty() && !IsWaitingForShieldBreak()) ReleaseEjectionGuard();
+ if (HatchOpen>=1.f) return;
+ const float OpeningDuration=GetEjectionHatchDuration()-EjectionShieldDelay;
+ const float OpeningAlpha=OpeningDuration>UE_SMALL_NUMBER ? (EjectionTime-EjectionShieldDelay)/OpeningDuration : 1.f;
+ SetHatchOpen(FMath::Lerp(EjectionInitialHatch,1.f,Smooth(OpeningAlpha)));
+}
+
 void UHopperPresentationComponent::TickSeatEjection(float LaunchTime)
 {
  if (!Seat || !Pilot) return;
- const float HatchDuration=GetEjectionHatchDuration();
- const float SlideDuration=FMath::Max(.05f,EjectionSlideSeconds);
- const float SlideStart=LaunchTime-SlideDuration;
  const float FlightDuration=FMath::Max(.1f,EjectionFlightSeconds);
- const float OpeningDuration=HatchDuration-EjectionShieldDelay;
- const float OpeningAlpha=OpeningDuration>UE_SMALL_NUMBER ? (EjectionTime-EjectionShieldDelay)/OpeningDuration : 1.f;
- SetHatchOpen(FMath::Lerp(EjectionInitialHatch,1.f,Smooth(OpeningAlpha)));
- if (EjectionTime<HatchDuration) return;
- if (!bSeatLaunched)
+ const bool bVertical=!VisualData->EjectionGuardParts.IsEmpty();
+ if (!bSeatLaunched && !bVertical)
  {
+  const float HatchDuration=GetEjectionHatchDuration();
+  if (EjectionTime<HatchDuration) return;
+  const float SlideDuration=FMath::Max(.05f,EjectionSlideSeconds);
+  const float SlideStart=LaunchTime-SlideDuration;
   FVector Position=EjectionSeatStart;
   const float LiftDuration=SlideStart-HatchDuration;
   if (LiftDuration>UE_SMALL_NUMBER)
@@ -91,7 +151,11 @@ void UHopperPresentationComponent::TickSeatEjection(float LaunchTime)
    EmitRailSparks(true);
    bRailReleaseFlashed=true;
   }
-  if (EjectionTime<LaunchTime) return;
+ }
+ if (!bSeatLaunched)
+ {
+  if (EjectionTime<LaunchTime || (bVertical && GuardReleaseTime<0.f)) return;
+  if (bVertical) EmitRailSparks(true);
   EjectionLaunchTransform=Seat->GetComponentTransform();
   Seat->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
   bSeatLaunched=true;
