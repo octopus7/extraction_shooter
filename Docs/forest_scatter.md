@@ -24,11 +24,15 @@
 - `Environment/Forest/Cliffs`에서 외곽을 편집한다. `Escarpment_ForestShelf`는 숲 바닥에서 절벽 기슭까지 이어지는 식재대다. `Escarpment_RisingCliffs`는 숲 안쪽을 향해 솟은 암벽으로, 길에서 보이는 암벽 윗선은 월드 높이 약 13~27m를 오간다. 남쪽은 카메라가 뒤로 물러날 공간을 두고 완만한 기슭에서 암벽으로 이어진다. `Escarpment_OuterLimit`은 숲 가장자리를 따라 이동을 막는다.
 - 그 뒤의 능선은 `Environment/Forest/Cliffs/OuterTerrain`의 랜드스케이프 네 조각이다. **Landscape** 모드에서 방향별 `TS_Forest_OuterTerrain_*`를 선택해 조각하거나 기존 숲의 풀·흙·바위 레이어를 칠할 수 있다. 능선의 최고점은 월드 높이 약 50m다. 외곽 전체의 높이 원본은 `TunaSweeper/SourceArt/Environment/ForestScatter/RaidForest_OuterRidge.r16`, 암벽과 하구 연장부의 편집 원본은 같은 폴더의 `ForestRisingCliffs.blend`다.
 - 윗면의 풀과 덤불은 에디터 **Foliage** 모드에서 수정한다. **Static Meshes** 표면 필터를 켜고 `/Game/Environment/ForestScatter/Foliage`에서 잔디는 `FT_ForestShelfGrass`, 키 큰 풀 포기는 `FT_ForestShelfTussock`, 덤불은 `FT_ForestShelfShrub`를 선택한 뒤 **Paint** 또는 **Erase**를 쓴다.
+- 하구가 중앙 랜드스케이프를 벗어나는 구간의 흙은 `Escarpment_ForestShelf` 액터에 칠한 버텍스 색이다. 양쪽 물가의 흙을 따라 수정하려면 이 액터를 선택하고 **Mesh Paint**를 사용한다.
 - 숲의 하늘과 조명은 레벨의 태양·하늘광·대기 액터에서 편집한다. 플레이 화면에서 보이는 외곽선은 암벽과 능선의 실제 형상을 따른다.
 
 ## 녹지와 건물
 
 - 랜드스케이프의 북서쪽 고지는 배치도 10시 방향의 넓은 회색 절벽을 따른다. 강바닥은 파란 수계를 따라 북동쪽 암반 출구까지 이어지고, 노란 길이 강을 가로지르는 두 곳은 얕은 여울이다. 에디터의 Landscape 모드에서 높이를 편집할 수 있다. 원본 505×505 높이맵은 `TunaSweeper/SourceArt/Environment/ForestScatter/RaidForest_Relief.r16`에 있다.
+- **Landscape → Paint**에서 `TS_Forest_Landscape`의 **Dirt**를 칠하면 강·호수·작은 연못의 흙 물가를 고칠 수 있다. 물가에서 멀어지면서 흙을 풀과 섞고, 드러난 비탈과 큰 바위 기슭에는 **Rock**, 나무 아래에는 **GrassDark**를 사용했다. 길 위 장식용 웅덩이 아래의 흙도 같은 **Dirt** 레이어다.
+- 중앙 지형의 `M_ForestLandscapeGround`는 **Dirt** 비중이 60%를 넘는 부분부터 **Loam Tint**를 섞어 물가와 젖은 길에 짙은 흙색을 낸다.
+- 숲의 다섯 구역은 **Vegetation Paint Layers**에 **Grass**와 **GrassDark**를 사용한다. 두 레이어의 합이 **Minimum Vegetation Paint Weight**(0.16)보다 작은 곳에서는 풀·들꽃·덤불을 비운다. 물가를 다시 칠한 뒤 해당 구역의 **Regenerate Forest**를 누르면 새 페인트를 따른다. 자갈과 큰돌은 배치도와 구역 설정으로 조절한다.
 - `RaidForest`는 배치도 데칼의 머터리얼에서 `PreviewTexture`를 읽는다. 데칼의 이동·회전·크기를 반영하고 실제 랜드스케이프 높이에 뿌린다. 녹지에 둘러싸인 작은 원형 회색 표식도 녹지로 취급한다. 노란 길·불모지, 파란 물, 넓은 회색 절벽은 비워 둔다.
 - **Projection Decals**가 비어 있으면 레벨의 배치도 데칼을 자동으로 찾는다. 데칼을 지정하면 해당 목록을 사용한다. 배치도가 덮지 않는 지면은 비워 둔다.
 - 건물이 지면을 차지할 때는 그 건물을 **Grounded Buildings**에 추가한다. 기본은 정적 메시의 충돌 형상이 지면에 닿는 부분을 비운다. 건물 메시의 충돌이 단순해서 안뜰이나 기둥 사이까지 막는 경우, 바닥을 차지하는 부분마다 박스 컴포넌트를 두고 **Component Tags**에 `ForestScatterFootprint`를 넣는다. 태그가 있는 건물은 표시한 컴포넌트만 사용한다. 공중에 띄운 구조물 아래에는 식생이 자랄 수 있다.

@@ -8,6 +8,7 @@
 #include "ForestScatterRegion.generated.h"
 
 class ADecalActor;
+class ULandscapeLayerInfoObject;
 class UMaterialInterface;
 class UPCGComponent;
 class UPCGGraph;
@@ -51,6 +52,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Forest Scatter|Vegetation")
 	FForestScatterLayer Grass;
+
+#if WITH_EDITORONLY_DATA
+	/** Optional Landscape paint layers that support grass, shrubs and flowers when regenerating this region. */
+	UPROPERTY(EditInstanceOnly, Category = "Forest Scatter|Vegetation")
+	TArray<TObjectPtr<ULandscapeLayerInfoObject>> VegetationPaintLayers;
+
+	/** Minimum combined weight of the selected paint layers at a planting point. */
+	UPROPERTY(EditInstanceOnly, Category = "Forest Scatter|Vegetation", meta = (ClampMin = "0", ClampMax = "1"))
+	float MinimumVegetationPaintWeight = 0.30f;
+#endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Forest Scatter|Stones")
 	FForestScatterLayer Gravel;

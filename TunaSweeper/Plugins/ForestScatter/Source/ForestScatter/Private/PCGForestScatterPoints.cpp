@@ -12,7 +12,9 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Helpers/PCGHelpers.h"
+#include "LandscapeComponent.h"
 #include "LandscapeHeightfieldCollisionComponent.h"
+#include "LandscapeLayerInfoObject.h"
 #include "LandscapeProxy.h"
 #include "Materials/MaterialInterface.h"
 #include "Metadata/PCGMetadata.h"
@@ -29,7 +31,33 @@ namespace
 		FSoftObjectPath Mesh;
 		int32 Seed;
 		bool bUsePetalColors = false;
+		bool bUseVegetationPaint = false;
 	};
+
+#if WITH_EDITOR
+	struct FForestPaintLayer
+	{
+		TWeakObjectPtr<ULandscapeLayerInfoObject> Layer;
+		TMap<TWeakObjectPtr<ULandscapeComponent>, TArray<uint8>> Texels;
+
+		float Sample(ULandscapeComponent& Component, const FVector& Position)
+		{
+			ULandscapeLayerInfoObject* Info = Layer.Get();
+			if (!Info)
+			{
+				return 0;
+			}
+			TArray<uint8>* Cached = Texels.Find(&Component);
+			if (!Cached)
+			{
+				Cached = &Texels.Add(&Component);
+				return Component.GetLayerWeightAtLocation(Position, Info, Cached);
+			}
+			// The first lookup leaves an empty cache when the component has no allocation for this layer.
+			return Cached->IsEmpty() ? 0.0f : Component.GetLayerWeightAtLocation(Position, Info, Cached);
+		}
+	};
+#endif
 
 	struct FForestScatterPlacement
 	{
@@ -55,6 +83,10 @@ namespace
 		double BuildingTolerance = 0.0;
 		int32 CurrentLayer = 0;
 		int32 NextCell = 0;
+#if WITH_EDITOR
+		TArray<FForestPaintLayer> VegetationPaint;
+		float MinimumVegetationPaintWeight = 0;
+#endif
 	};
 
 	void SampleCell(FForestScatterContext& Context, const FForestScatterLayerWork& Layer, int32 CellIndex)
@@ -86,6 +118,26 @@ namespace
 			return;
 		}
 		const FVector Ground = LandscapeHit->ImpactPoint;
+#if WITH_EDITOR
+		if (Layer.bUseVegetationPaint && !Context.VegetationPaint.IsEmpty())
+		{
+			const auto* Collision = CastChecked<ULandscapeHeightfieldCollisionComponent>(LandscapeHit->GetComponent());
+			ULandscapeComponent* Terrain = Collision->GetRenderComponent();
+			if (!Terrain)
+			{
+				return;
+			}
+			float Weight = 0;
+			for (FForestPaintLayer& Paint : Context.VegetationPaint)
+			{
+				Weight += Paint.Sample(*Terrain, Ground);
+			}
+			if (Weight < Context.MinimumVegetationPaintWeight)
+			{
+				return;
+			}
+		}
+#endif
 		if (Context.Mask.IsGreen(Ground) && !Context.Buildings.TouchesGround(Ground, Context.BuildingTolerance))
 		{
 			Context.Placements.Add({Ground, Sample.Yaw, Sample.Scale, Sample.Seed});
@@ -163,6 +215,21 @@ namespace
 			}
 
 			const auto SeedSlots = Region->GetGroundCoverLayers();
+#if WITH_EDITOR
+			Context->MinimumVegetationPaintWeight = Region->MinimumVegetationPaintWeight;
+			if (Context->MinimumVegetationPaintWeight > 0)
+			{
+				TSet<ULandscapeLayerInfoObject*> SelectedLayers;
+				for (ULandscapeLayerInfoObject* Info : Region->VegetationPaintLayers)
+				{
+					if (IsValid(Info) && !SelectedLayers.Contains(Info))
+					{
+						Context->VegetationPaint.AddDefaulted_GetRef().Layer = Info;
+						SelectedLayers.Add(Info);
+					}
+				}
+			}
+#endif
 			for (int32 Index = 0; Index < SeedSlots.Num(); ++Index)
 			{
 				const FForestScatterLayer* Settings = SeedSlots[Index];
@@ -179,6 +246,7 @@ namespace
 				// Offset zero belonged to trees in the first version of the graph.
 				Layer.Seed = PCGHelpers::ComputeSeed(Context->GetSeed(), Index + 1);
 				Layer.Mesh = Settings->Mesh.ToSoftObjectPath();
+				Layer.bUseVegetationPaint = Settings == &Region->Grass || Settings == &Region->Flowers || Settings == &Region->Shrubs;
 				if (Settings == &Region->Flowers && !Region->FlowerPetalMaterials.IsEmpty())
 				{
 					const UStaticMesh* Flower = Settings->Mesh.LoadSynchronous();

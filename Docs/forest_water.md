@@ -32,8 +32,16 @@
 
 코끼리 호수는 수면 높이 −15cm, 면적 약 98.5㎡다. 코끼리가 서 있는 쪽에는 약 30cm 깊이의 얕은 턱이 있고 맞은편 바닥은 최대 약 3.06m까지 내려간다. 수면·하상·물가 메시와 같은 윤곽으로 식생 배치도 `TunaSweeper/SourceArt/Environment/ForestScatter/T_Layout_Forest_Draft.png`에 물을 표시한다. 호수 크기를 바꿀 때는 이 원본을 수정한 뒤 같은 이름의 UE 텍스처를 재임포트한다.
 
-`Riverbed`는 실제 강바닥의 굴곡을 따르며 수심 약 2–8cm 사이에서 마른 지면과 섞인다. 하상과 수중 소품은 배치도 데칼을 받지 않는다. 숲의 `MI_Layout_Forest`는 외곽 5.6m에서 배치도를 서서히 흐리게 표시하고, 식생 분류에는 원래의 `T_Layout_Forest_Draft`를 사용한다.
+`Riverbed`는 실제 강바닥의 굴곡을 따르며 수심 약 2–8cm 사이에서 마른 지면과 섞인다. 하상과 수중 소품은 배치도 데칼을 받지 않는다. 숲의 `MI_Layout_Forest`는 외곽 5.6m에서 배치도를 서서히 흐리게 표시한다. 이 인스턴스에서 **Reveal painted shores**를 켜면 파란 수계 주변의 배치도 색이 옅어져 칠해 둔 흙이 드러난다. 노란 길은 원래 투영 농도로 표시하며, 식생 분류는 원본 `T_Layout_Forest_Draft`를 읽는다.
 
 `M_ForestShoreFoam`은 물가 리본을 따라 긴 물결, 짧은 포말, 옅게 풀어지는 물자국 텍스처를 겹친다. 리본의 UV0은 강둑을 따라 누적한 거리(U)와 물가에서 물 안쪽으로 들어가는 비율(V)이다. 닫힌 호수의 UV1 U에는 전체 둘레가 들어가서 시작점과 끝점의 무늬가 이어진다. **Foam Opacity**, **Repeat Metres**, **Motion Speed**로 강도와 무늬의 길이, 속도를 조절한다. 하구 본체와 연장 수면이 만나는 단면은 그대로 이어져 물가 리본을 생략한다.
 
 원래의 `Forest_ShallowPuddle_TestWater`는 웅덩이 발소리와 발걸음 파문을 처리한다. 수면과 물가의 표시는 `Water_07_ShallowPuddle`에서 편집한다. 코끼리 호수의 도전과제는 기존 `Forest_ElephantLake_Achievement13` 트리거가 담당한다.
+
+## 길 위에 고인 빗물
+
+아웃라이너의 `Environment/Forest/Water/RainPuddles`에 길목 일곱 곳의 빗물이 있다. 여울로 내려가는 길에서는 `Puddle_FordApproach_01`을 선택해 확인할 수 있다. 각각 지면에 직접 투영하는 **Decal Actor**다. 옮기거나 복제할 때 투영 화살표를 바닥 쪽으로 향하게 하고 **Decal Size**의 Y와 Z로 너비와 길이를 정한다. X는 투영 깊이로, 숲길에서는 반깊이 9cm를 사용한다. 랜드스케이프나 **Receives Decals**를 켠 평평한 메시 위에 쓸 수 있다. 경사진 바닥에는 화살표를 그 면에 수직으로 맞춘다.
+
+`/Game/Environment/ForestWater/Materials`의 `MI_ForestGroundPuddle_Pool`은 넓게 고인 모양, `MI_ForestGroundPuddle_Runoff`는 길을 따라 가늘게 이어진 모양이다. 인스턴스를 복제한 뒤 **FootprintMask**에 선형 흑백 마스크를 지정하면 윤곽을 바꿀 수 있다. 흰색은 고인 물, 회색은 젖은 흙으로 이어지는 가장자리, 검은색은 마른 지면이다. **WetOpacity**와 **WetGroundTint**로 바닥의 비침과 색을 조절한다.
+
+작은 물결의 노멀과 카메라 방향으로 반사된 하늘 무늬가 움직이면서 밝은 부분에 블룸이 맺힌다. **RippleSlope**는 수면 결의 세기, **WaterRoughness**는 광택의 거칠기, **HighlightIntensity**는 밝은 반사의 세기다. 이 빗물은 장식용이며, 발소리와 파문이 필요한 물은 위의 수역 액터에서 편집한다.
