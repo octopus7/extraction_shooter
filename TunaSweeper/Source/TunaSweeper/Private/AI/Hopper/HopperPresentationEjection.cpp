@@ -90,7 +90,12 @@ void UHopperPresentationComponent::StartSeatEjection(UNiagaraSystem* MechEffect,
  {
   WreckSprayDirection=ImpactTravel.GetSafeNormal2D();
   PendingDestructionEffect=MechEffect;
-  EjectionShieldDelay=TripTime+GetShieldWarningDuration();
+  EjectionShieldDelay=TripTime;
+  if (GetShieldWarningDuration()>0.f)
+  {
+   ShieldStage=EShieldStage::Failing;
+   ShieldAge=0.f;
+  }
  }
  else EjectionShieldDelay=StartDestructionEffects(MechEffect,ImpactTravel);
  // Defeat can interrupt boarding. Re-seat the pilot before moving the entire cabin assembly.
@@ -98,6 +103,7 @@ void UHopperPresentationComponent::StartSeatEjection(UNiagaraSystem* MechEffect,
  bWreck=true; bMechActive=false; bTransferring=false; bBoarding=false;
  SetGunVisible(false);
  EjectionTime=0.f; EjectionInitialHatch=HatchOpen; bSeatLaunched=false; bRailReleaseFlashed=false;
+ if (bAwaitingEjectionPull) TickCockpitShield(0.f);
  EjectionSeatStart=Seat->GetRelativeLocation();
  if (auto* Cabin=Parts.Find(TEXT("Cabin_Interior")))
   (*Cabin)->AttachToComponent(Seat,FAttachmentTransformRules::KeepWorldTransform);
@@ -170,7 +176,10 @@ float UHopperPresentationComponent::GetEjectionHatchDuration() const
 float UHopperPresentationComponent::GetEjectionLaunchTime() const
 {
  if (VisualData && !VisualData->EjectionGuardParts.IsEmpty())
+ {
+  if (EjectionHandle) return EjectionShieldDelay;
   return (GuardReleaseTime>=0.f ? GuardReleaseTime : EjectionShieldDelay)+GuardClearanceSeconds;
+ }
  float LiftDuration=0.f;
  if (VisualData && VisualData->SeatLockDrop>0.f)
  {

@@ -65,25 +65,10 @@ float UHopperPresentationComponent::GetShieldWarningDuration() const
  return (ShieldStage==EShieldStage::Deploying || ShieldStage==EShieldStage::Stable) && ShieldCoverage>0.f ? WarningSeconds : 0.f;
 }
 
-void UHopperPresentationComponent::TickEjectionShield(float Dt)
-{
- if (bAwaitingEjectionPull)
- {
-  const float TimeSinceTrip=EjectionTime-GetEjectionPullTriggerTime();
-  if (TimeSinceTrip<0.f) return;
-  bAwaitingEjectionPull=false;
-  UNiagaraSystem* Burst=PendingDestructionEffect;
-  PendingDestructionEffect=nullptr;
-  StartDestructionEffects(Burst);
-  Dt=TimeSinceTrip;
- }
- TickCockpitShield(Dt);
-}
-
 float UHopperPresentationComponent::StartDestructionEffects(UNiagaraSystem* MechEffect,const FVector& ImpactTravel)
 {
  if (!ImpactTravel.IsNearlyZero() && !bWreckBurstPlayed) WreckSprayDirection=ImpactTravel.GetSafeNormal2D();
- if (bAwaitingEjectionPull) return FMath::Max(0.f,EjectionShieldDelay-EjectionTime);
+ if (EjectionTime>=0.f) return FMath::Max(0.f,EjectionShieldDelay-EjectionTime);
  const float Warning=GetShieldWarningDuration();
  if (IsWaitingForShieldBreak()) return Warning;
  if (Warning>0.f)
@@ -99,20 +84,35 @@ float UHopperPresentationComponent::StartDestructionEffects(UNiagaraSystem* Mech
 
 void UHopperPresentationComponent::TickCockpitShield(float Dt)
 {
+ // The pull, shield break and seat detach use the same clock, including frames that cross the trip point.
+ const bool bLeverTimed=bAwaitingEjectionPull;
+ if (bLeverTimed && EjectionTime>=EjectionShieldDelay)
+ {
+  bAwaitingEjectionPull=false;
+  if (!IsWaitingForShieldBreak())
+  {
+   // Boarding can be interrupted before a shield has deployed.
+   EmitDestructionEffect(PendingDestructionEffect);
+   PendingDestructionEffect=nullptr;
+  }
+ }
  if (!CockpitShield) return;
  // Both material slots consume one update: swept coverage, field gain, crack spread, burst clock.
  // The burst uses 1+age so zero denotes an intact field. Shards and sparks share the same onset.
  if (ShieldStage==EShieldStage::Failing)
  {
-  ShieldAge+=Dt;
-  if (ShieldAge<WarningSeconds)
+  const float Duration=bLeverTimed ? EjectionShieldDelay : WarningSeconds;
+  ShieldAge=bLeverTimed ? EjectionTime : ShieldAge+Dt;
+  if (ShieldAge<Duration)
   {
-   const float T=ShieldAge/WarningSeconds;
+   const float T=ShieldAge/Duration;
    const float Flicker=FMath::Max3(Flash(T,.15f,.12f),Flash(T,.46f,.115f),Flash(T,.79f,.14f));
-   CockpitShield->SetCustomPrimitiveDataVector4(0,FVector4(ShieldCoverage,.10f+1.30f*Flicker,FMath::SmoothStep(.16f,.93f,T),0.f));
+   const float Cracks=bLeverTimed ? FMath::Lerp(.22f,1.f,FMath::SmoothStep(0.f,.96f,T)) : FMath::SmoothStep(.16f,.93f,T);
+   const float Gain=bLeverTimed ? .30f+1.05f*Flicker : .10f+1.30f*Flicker;
+   CockpitShield->SetCustomPrimitiveDataVector4(0,FVector4(ShieldCoverage,Gain,Cracks,0.f));
    return;
   }
-  ShieldAge-=WarningSeconds;
+  ShieldAge-=Duration;
   ShieldStage=EShieldStage::Fragments;
   CockpitShield->SetBoundsScale(3.f);
   EmitDestructionEffect(PendingDestructionEffect);

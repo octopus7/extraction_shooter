@@ -29,7 +29,7 @@ struct FHopperEjectionPull
  UPROPERTY(EditAnywhere) TSoftObjectPtr<UStaticMesh> HandleMesh;
  /** Seat-local grip poses sampled uniformly across PilotAnimation, starting at the ready position. */
  UPROPERTY(EditAnywhere) TArray<FTransform> HandlePoses;
- /** Normalized time when the pilot finishes the downstroke and trips the shield warning. */
+ /** Normalized time when the pilot finishes the downstroke, shatters the failing shield and fires the seat. */
  UPROPERTY(EditAnywhere, meta=(ClampMin="0", ClampMax="1")) float TripPhase = .78f;
 };
 USTRUCT(BlueprintType)

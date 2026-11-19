@@ -39,10 +39,8 @@ namespace HopperPlayTest
  FVector WalkStart;
  constexpr float ReactionStart=.22f;
  constexpr float FullPull=ReactionStart+39.f/50.f;
- constexpr float ShieldBreak=FullPull+.96f;
- constexpr float SeatLaunch=ShieldBreak+.10f;
- constexpr float EjectionSamples[]={0.f,ReactionStart-.01f,ReactionStart+28.f/50.f,FullPull+.001f,ShieldBreak-.02f,ShieldBreak+.002f,
-                                    SeatLaunch+.16f,SeatLaunch+.60f,SeatLaunch+10.f};
+ constexpr float EjectionSamples[]={0.f,ReactionStart-.01f,ReactionStart+28.f/50.f,FullPull-.001f,FullPull,FullPull+.04f,
+                                    FullPull+.22f,FullPull+.60f,FullPull+10.f};
  bool OpenNavigationFixture()
  {
   if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir()/TEXT("Maps/HopperCombatTestMap.umap"),false,true)) return false;
@@ -281,26 +279,34 @@ bool FHopperEjectionStage::Update()
   Test->TestTrue(TEXT("Boarding deploys the shield on the placed Mk2"),bDeployed);
   Test->TestTrue(TEXT("Placed Mk2 ejects its pilot by default"),Hopper->bEndCombatOnMechDestruction);
   Hopper->TakeDamage(10000.f,FDamageEvent(),nullptr,nullptr);
-  Test->TestFalse(TEXT("Lethal damage leaves the shield intact while the captain reacts"),P->IsWaitingForShieldBreak());
+  Test->TestTrue(TEXT("Lethal damage visibly cracks the deployed shield before the first presentation tick"),
+   P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[2]>0.f && Field[3]==0.f);
   // Freeze only the presentation timeline to capture exact phases after rendering settles.
   P->SetComponentTickEnabled(false);
  }
  else
  {
   P->TickComponent(HopperPlayTest::EjectionSamples[Stage]-HopperPlayTest::EjectionSamples[Stage-1],LEVELTICK_All,nullptr);
+  const USceneComponent* Seat=P->GetPilotMesh()->GetAttachParent();
+  if (!Test->TestNotNull(TEXT("Pilot and seat travel together"),Seat)) return true;
   if (Stage==1)
-   Test->TestTrue(TEXT("The real captain holds the first pose through the cockpit camera blend"),
-    FMath::IsNearlyZero(P->GetPilotMesh()->GetPosition(),.001f) && !P->IsWaitingForShieldBreak());
-  if (Stage==2)
-   Test->TestTrue(TEXT("The captain reaches the lever while the field is steady"),
-    !P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[2]==0.f && Field[3]==0.f);
-  if (Stage==3 || Stage==4)
-   Test->TestTrue(TEXT("The deployed field warns from full pull through the last intact frame"),
-    P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[3]==0.f);
+   Test->TestTrue(TEXT("The real captain holds the first pose through the cockpit camera blend"),FMath::IsNearlyZero(P->GetPilotMesh()->GetPosition(),.001f));
+  if (Stage<=3)
+   Test->TestTrue(TEXT("The cracked shield warns while the captain reaches, with the seat and hatch still latched"),
+    P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[2]>0.f && Field[3]==0.f &&
+    Seat->GetAttachParent()==P->GetBodyRoot() && P->GetHatchOpenAlpha()==0.f);
+  if (Stage==4)
+  {
+   TInlineComponentArray<UStaticMeshComponent*> Parts(Hopper);
+   auto* Guard=Parts.FindByPredicate([](const UStaticMeshComponent* Part){ return Part->GetName().StartsWith(TEXT("GuardBrow")); });
+   const auto* Released=Guard ? Cast<UPrimitiveComponent>((*Guard)->GetAttachmentRoot()) : nullptr;
+   Test->TestTrue(TEXT("Full pull releases shield fragments, the soot-covered physical guard and the occupied seat together in PIE"),
+    !P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Field.Num()>=4 && Field[1]==0.f && Field[3]>=1.f &&
+    !Seat->GetAttachParent() && Released && Released->IsSimulatingPhysics() && (*Guard)->GetOverlayMaterial());
+  }
   if (Stage==5)
-   Test->TestTrue(TEXT("The field bursts before the seat leaves its socket"),
-    !P->IsWaitingForShieldBreak() && Field.Num()>=4 && Field[3]>=1.f &&
-    P->GetPilotMesh()->GetAttachParent()->GetAttachParent()==P->GetBodyRoot());
+   Test->TestTrue(TEXT("The hatch begins its independent opening stroke as the seat leaves"),
+    !Seat->GetAttachParent() && P->GetHatchOpenAlpha()>0.f && P->GetHatchOpenAlpha()<1.f);
  }
  APlayerController* PC=World->GetFirstPlayerController();
  if (PC)

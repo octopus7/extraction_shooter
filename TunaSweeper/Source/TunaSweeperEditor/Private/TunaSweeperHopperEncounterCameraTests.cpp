@@ -34,6 +34,8 @@ namespace HopperEncounterTest
 		{
 			if (FPlatformTime::Seconds() - Started > 65.)
 			{
+				if (bSlowedForEjection && GEditor->PlayWorld)
+					GEditor->PlayWorld->GetWorldSettings()->SetTimeDilation(OriginalTimeDilation);
 				Test->AddError(FString::Printf(TEXT("Hopper encounter timed out at step %d"), int32(Step)));
 				return true;
 			}
@@ -155,12 +157,14 @@ namespace HopperEncounterTest
 				{
 					Grip = Hopper->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperEjectionHandle"));
 					if (!Test->TestNotNull(TEXT("The encounter camera has an authored Mk2 grip to frame"), Grip.Get())) return true;
-					// Give the latent PIE observer several frames inside the 80 ms before the first head-turn peak.
+					// Sample both the first head-turn peak and the first frames of the pull-to-flight transition.
 					OriginalTimeDilation = World->GetWorldSettings()->TimeDilation;
 					World->GetWorldSettings()->SetTimeDilation(OriginalTimeDilation * .25f);
-					bSamplingCameraLead = true;
+					bSlowedForEjection = true;
 					const FVector PreviousPOV = PC->PlayerCameraManager->GetCameraLocation();
 					Hopper->TakeDamage(10000.f, FDamageEvent(), PC, Pawn);
+					Test->TestTrue(TEXT("The deployed shield begins warning as the gameplay camera starts to approach"),
+						Hopper->GetPresentation()->IsWaitingForShieldBreak());
 					Test->TestTrue(TEXT("Ejection blends from the actual gameplay camera"),
 						PC->PlayerCameraManager->PendingViewTarget.Target && PC->PlayerCameraManager->ViewTarget.Target == OriginalView.Get()
 						&& PC->PlayerCameraManager->GetCameraLocation().Equals(PreviousPOV, .1f));
@@ -175,38 +179,59 @@ namespace HopperEncounterTest
 				break;
 			case EStep::Ejection:
 			{
-				const float Trip = Hopper->GetPresentation()->GetEjectionPullTriggerTime();
-				const float Lead = Hopper->GetPresentation()->GetEjectionPullStartTime();
+				const auto* Presentation = Hopper->GetPresentation();
+				const float Trip = Presentation->GetEjectionPullTriggerTime();
+				const float Lead = Presentation->GetEjectionPullStartTime();
 				const FVector Eye = PC->PlayerCameraManager->GetCameraLocation();
 				const FVector ToGrip = Grip->GetComponentLocation() - Eye;
-				if (bSamplingCameraLead && Elapsed >= Lead && Elapsed < Lead + .08f && !PC->PlayerCameraManager->PendingViewTarget.Target)
+				const auto* Seat = Grip->GetAttachParent();
+				const float FOV = PC->PlayerCameraManager->GetFOVAngle();
+				if (Elapsed >= Lead && Elapsed < Lead + .08f && !PC->PlayerCameraManager->PendingViewTarget.Target)
 				{
 					const FVector ToFace = Hopper->GetPresentation()->GetPilotMesh()->GetSocketLocation(TEXT("head")) - Eye;
 					bSawSettledFace |= PC->IsViewingHopper(Hopper) && PC->GetViewTarget()->IsA<ACameraActor>() &&
 						FMath::Abs(ToGrip.Size() - OpeningGripDistance) < 7. &&
 						FVector::DotProduct(PC->PlayerCameraManager->GetCameraRotation().Vector(), ToFace.GetSafeNormal()) > .95;
 				}
-				if (bSamplingCameraLead && Elapsed >= Lead + .08f)
-				{
-					World->GetWorldSettings()->SetTimeDilation(OriginalTimeDilation);
-					bSamplingCameraLead = false;
-					Test->TestTrue(TEXT("The face is framed at the settled opening distance before the first head-turn peak"), bSawSettledFace);
-				}
 				if (Elapsed >= Lead + .56f && Elapsed < Trip && !PC->PlayerCameraManager->PendingViewTarget.Target && CloseGripDistance == 0.)
 				{
 					CloseGripDistance = ToGrip.Size();
-					CloseFOV = PC->PlayerCameraManager->GetFOVAngle();
-					const double SeatSide = FVector::DotProduct(-ToGrip.GetSafeNormal(), Grip->GetAttachParent()->GetRightVector());
+					CloseFOV = FOV;
+					CloseEyeZ = Eye.Z;
+					DockedSeatZ = Seat->GetComponentLocation().Z;
+					const double SeatSide = FVector::DotProduct(-ToGrip.GetSafeNormal(), Seat->GetRightVector());
 					const double FacingGrip = FVector::DotProduct(PC->PlayerCameraManager->GetCameraRotation().Vector(), ToGrip.GetSafeNormal());
 					Test->TestTrue(TEXT("The glove-side camera pushes in and frames the grip before it trips"),
 						SeatSide < -.4 && FacingGrip > .95 && CloseGripDistance < 165. && OpeningGripDistance > CloseGripDistance + 20.);
 				}
-				if (Elapsed < Trip + .55f) return false;
+				if (Elapsed >= Trip - .10f && Elapsed < Trip - .005f)
+				{
+					bSawFinalApproach = true;
+					bHeldClose &= CloseGripDistance > 0. && ToGrip.Size() <= CloseGripDistance + 8. && FOV <= CloseFOV + .75f &&
+						Presentation->IsWaitingForShieldBreak() && Seat->GetAttachParent() == Presentation->GetBodyRoot();
+				}
+				if (Elapsed >= Trip && Elapsed <= Trip + .19f)
+				{
+					bSawRapidReveal |= CloseGripDistance > 0. && !Seat->GetAttachParent() && Seat->GetComponentLocation().Z > DockedSeatZ + 10. &&
+						ToGrip.Size() > CloseGripDistance + 35. && FOV > CloseFOV + 2.5f &&
+						!Presentation->IsWaitingForShieldBreak() && PC->IsMoveInputIgnored();
+				}
+				if (Elapsed < Trip + .20f) return false;
+				if (bSlowedForEjection)
+				{
+					World->GetWorldSettings()->SetTimeDilation(OriginalTimeDilation);
+					bSlowedForEjection = false;
+					Test->TestTrue(TEXT("The face is framed at the settled opening distance before the first head-turn peak"), bSawSettledFace);
+					Test->TestTrue(TEXT("The glove shot holds through the last downstroke frames before release"), bSawFinalApproach && bHeldClose);
+					Test->TestTrue(TEXT("The shot rapidly widens with the rising seat in the first 190 ms of flight"), bSawRapidReveal);
+				}
+				if (Elapsed < Trip + .45f) return false;
 				Test->TestTrue(TEXT("Ejection has blended into its own camera"),
 					PC->IsViewingHopper(Hopper) && PC->GetViewTarget()->IsA<ACameraActor>() && !PC->PlayerCameraManager->PendingViewTarget.Target);
-				Test->TestTrue(TEXT("The warning pulls back from the tight hand shot while the shield is still intact"),
-					CloseGripDistance > 0. && Hopper->GetPresentation()->IsWaitingForShieldBreak() &&
-					ToGrip.Size() > CloseGripDistance + 65. && PC->PlayerCameraManager->GetFOVAngle() > CloseFOV + 2.f);
+				Test->TestTrue(TEXT("The wider camera climbs with the escaping seat while movement remains locked"),
+					!Seat->GetAttachParent() && Eye.Z > CloseEyeZ + 45. && ToGrip.Size() > CloseGripDistance + 65. &&
+					FVector::DotProduct(PC->PlayerCameraManager->GetCameraRotation().Vector(), ToGrip.GetSafeNormal()) > .9 &&
+					PC->IsMoveInputIgnored() && FVector::Dist2D(Still, Pawn->GetActorLocation()) < 2.f);
 				break;
 			}
 			case EStep::HeldAfterEjection:
@@ -248,9 +273,10 @@ namespace HopperEncounterTest
 		float Since = 0.f;
 		int32 Magazine = 0;
 		bool bSawLockedReturn = false;
-		bool bSamplingCameraLead = false, bSawSettledFace = false;
+		bool bSlowedForEjection = false, bSawSettledFace = false;
+		bool bSawFinalApproach = false, bHeldClose = true, bSawRapidReveal = false;
 		float OriginalTimeDilation = 1.f;
-		double OpeningGripDistance = 0., CloseGripDistance = 0.;
+		double OpeningGripDistance = 0., CloseGripDistance = 0., CloseEyeZ = 0., DockedSeatZ = 0.;
 		float CloseFOV = 0.f;
 		FVector Still = FVector::ZeroVector;
 		TWeakObjectPtr<UStaticMeshComponent> Grip;

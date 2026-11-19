@@ -141,7 +141,7 @@ void ATunaSweeperPlayerController::FrameHopperShot()
 		const FVector Right = Stage->GetBodyRoot()->GetRightVector().GetSafeNormal2D();
 		const FVector EjectionSide = TripTime > 0.f ? -Right : Side;
 		const float FlightTime = HopperShotTime - Stage->GetEjectionLaunchTime();
-		const float Follow = FMath::SmoothStep(0.f, .22f, FlightTime);
+		const float Follow = FMath::SmoothStep(0.f, TripTime > 0.f ? .42f : .22f, FlightTime);
 		Aim = FMath::Lerp(Ground + Forward * 23.f + FVector::UpVector * 158.f, Pilot + FVector::UpVector * 32.f, Follow);
 		Offset = Forward * 302.f + EjectionSide * 239.f + FVector::UpVector * FMath::Lerp(159.f, 125.f, Follow);
 		FieldOfView = FMath::Lerp(52.f, 56.f, Follow);
@@ -151,7 +151,7 @@ void ATunaSweeperPlayerController::FrameHopperShot()
 			const float ReactionStart = Stage->GetEjectionPullStartTime();
 			const float TimeToTrip = TripTime - ReactionStart;
 			const float Reach = FMath::SmoothStep(TimeToTrip * .26f, TimeToTrip * .64f, HopperShotTime - ReactionStart);
-			const float Reveal = FMath::SmoothStep(TripTime, TripTime + .74f, HopperShotTime);
+			const float Reveal = FMath::InterpEaseOut(0.f, 1.f, FMath::Clamp((HopperShotTime - TripTime) / .30f, 0.f, 1.f), 2.f);
 			const FVector CloseAim = Pilot + Forward - Right * 5.f + FVector::UpVector * FMath::Lerp(39.f, 33.f, Reach);
 			const FVector CloseEye = Pilot + Forward * FMath::Lerp(96.f, 60.f, Reach)
 				- Right * FMath::Lerp(155.f, 102.f, Reach) + FVector::UpVector * FMath::Lerp(94.f, 70.f, Reach);

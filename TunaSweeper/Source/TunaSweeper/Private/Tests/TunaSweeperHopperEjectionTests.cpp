@@ -7,9 +7,9 @@
 #include "GameFramework/WorldSettings.h"
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/Hopper/HopperPresentationComponent.h"
+#include "AI/Hopper/HopperVisualData.h"
 #include "Animation/AnimSequence.h"
 #if WITH_EDITOR
-#include "AI/Hopper/HopperVisualData.h"
 #include "Engine/SkeletalMesh.h"
 #include "SkinnedAssetCompiler.h"
 #endif
@@ -174,38 +174,58 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestTrue(TEXT("Closed guard ignites a bright expanding field"),!Shield->bHiddenInGame && Shader(0)>0.f && IgnitionGain>1.f);
  Tick(1.f);
  TestTrue(TEXT("The deployed shield settles to a faint steady glow"),Shader(0)==1.f && Shader(1)<IgnitionGain*.5f && Shader(1)>0.f);
- const float SteadyGain=Shader(1);
  P->StartSeatEjection();
  const FVector Seated=Pilot->GetComponentLocation();
  const float HatchDuration=P->GetEjectionHatchDuration();
- const float Pull=P->GetEjectionPullTriggerTime();
- Tick(Pull-.002f);
- TestTrue(TEXT("The pilot can look and reach with the shield steady and the guard bolted"),
-  !P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Shader(0)==1.f && Shader(1)==SteadyGain &&
-  Shader(2)==0.f && Shader(3)==0.f && Brow->GetAttachParent()==P->GetBodyRoot());
- Tick(.0021f);
- TestTrue(TEXT("Full downstroke trips the intact shield"),P->IsWaitingForShieldBreak() && Shader(3)==0.f);
- const float Samples[]={.144f,.295f,.442f,.60f,.758f,.918f};
+ constexpr float Pull=1.f;
+ const float InitialCracks=Shader(2);
+ TestTrue(TEXT("Defeat immediately cracks the deployed field as the approach begins"),
+  P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Shader(0)==1.f && InitialCracks>0.f && Shader(3)==0.f);
  float Elapsed=0.f;
- for (int32 Index=0;Index<UE_ARRAY_COUNT(Samples);++Index)
+ auto EjectTo=[&](float Time) { Tick(Time-Elapsed); Elapsed=Time; };
+ bool bBright=false, bIntact=true;
+ int32 Peaks=0, Troughs=0;
+ float FirstPeak=-1.f, LastPeak=-1.f;
+ float MinGain=Shader(1), MaxGain=Shader(1);
+ for (int32 Frame=1;Frame<50;++Frame)
  {
-  Tick(Samples[Index]-Elapsed); Elapsed=Samples[Index];
-  TestTrue(TEXT("Three pre-escape flashes alternate with dark troughs"),Index%2==0 ? Shader(1)>1.f : Shader(1)<.25f);
-  TestTrue(TEXT("Intact field holds the guard closed during the warning"),P->IsWaitingForShieldBreak() && P->GetHatchOpenAlpha()==0.f && Shader(3)==0.f);
+  EjectTo(Frame/50.f);
+  const float Gain=Shader(1);
+  MinGain=FMath::Min(MinGain,Gain);
+  MaxGain=FMath::Max(MaxGain,Gain);
+  if (!bBright && Gain>1.f)
+  {
+   if (Peaks++==0) FirstPeak=Elapsed;
+   LastPeak=Elapsed;
+   bBright=true;
+  }
+  else if (bBright && Gain<.45f) { ++Troughs; bBright=false; }
+  bIntact &= P->IsWaitingForShieldBreak() && !Shield->bHiddenInGame && Shader(2)>0.f && Shader(3)==0.f &&
+   P->GetHatchOpenAlpha()==0.f && Brow->GetAttachParent()==P->GetBodyRoot() && Seat->GetAttachParent()==P->GetBodyRoot();
  }
- TestTrue(TEXT("Cracks spread before the intact field cuts out"),Shader(2)>.9f);
- TestTrue(TEXT("The frame remains bolted to the chassis and the seat stays docked during the warning"),
-  Brow->GetAttachParent()==P->GetBodyRoot() && Seat->GetRelativeLocation().Equals(Locked,.01));
+ TestTrue(FString::Printf(TEXT("The approach flashes repeatedly (peaks %d, troughs %d, first %.2f, last %.2f, gain %.2f to %.2f)"),
+  Peaks,Troughs,FirstPeak,LastPeak,MinGain,MaxGain),Peaks>=2 && Troughs>=2 && FirstPeak<.35f && LastPeak>.65f && MaxGain-MinGain>.8f);
+ TestTrue(TEXT("The cracked field, occupied seat and guard stay in place throughout the warning"),bIntact);
+ TestTrue(TEXT("Cracking spreads across the intact field by the last pull frames"),Shader(2)>.9f && Shader(2)>InitialCracks);
  TestNull(TEXT("Guard paint stays clean throughout the shield warning"),Brow->GetOverlayMaterial());
  auto* Flash=Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash"));
  auto* FlashMaterial=Flash ? Cast<UMaterialInstanceDynamic>(Flash->GetMaterial(0)) : nullptr;
  TestTrue(TEXT("The queued blast core is dark throughout the shield warning"),
   FlashMaterial && FlashMaterial->K2_GetScalarParameterValue(TEXT("FlashGain"))==0.f);
- Tick(.959f-Elapsed);
- TestTrue(TEXT("The shield remains intact up to the end of the 0.96 second warning"),
-  P->IsWaitingForShieldBreak() && Shader(3)==0.f && Brow->GetAttachParent()==P->GetBodyRoot());
- Tick(.002f); Elapsed=.961f;
- TestTrue(TEXT("Shards and sparks start on the same update that removes field light"),
+ EjectTo(Pull-.001f);
+ auto SeatJets=[](const USceneComponent* Carriage)
+ {
+  TArray<UNiagaraComponent*> Jets;
+  Carriage->GetOwner()->GetComponents(Jets);
+  Jets.RemoveAll([Carriage](const UNiagaraComponent* Jet){ return Jet->GetAttachParent()!=Carriage; });
+  return Jets;
+ };
+ TestTrue(TEXT("Immediately before full pull the shield is intact, the guard is bolted and the seat has no exhaust"),
+  P->IsWaitingForShieldBreak() && Shader(3)==0.f && Brow->GetAttachParent()==P->GetBodyRoot() &&
+  Seat->GetAttachParent()==P->GetBodyRoot() && Seat->GetRelativeLocation().Equals(Locked,.01) && SeatJets(Seat).IsEmpty() &&
+  BurstCount(TEXT("NS_HopperMk2SeatEjectSparks"))==0 && BurstCount(TEXT("NS_HopperMk2RadialBlast"))==0);
+ EjectTo(Pull);
+ TestTrue(TEXT("The full-pull update extinguishes the field and begins its fragments"),
   !P->IsWaitingForShieldBreak() && Shader(1)==0.f && Shader(3)>=1.f && !Shield->bHiddenInGame);
  auto* Scorch=Cast<UMaterialInstanceDynamic>(Door->GetOverlayMaterial());
  auto* GuardSoot=Cast<UMaterialInstanceDynamic>(Brow->GetOverlayMaterial());
@@ -222,8 +242,11 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestTrue(TEXT("The discarded frame collides with the environment independently of the defeated enemy"),
   ReleasedBody && ReleasedBody->GetCollisionEnabled()==ECollisionEnabled::PhysicsOnly &&
   ReleasedBody->GetCollisionResponseToChannel(ECC_WorldStatic)==ECR_Block && ReleasedBody->GetCollisionResponseToChannel(ECC_Pawn)==ECR_Ignore);
- TestTrue(TEXT("The seat remains in its socket as the frame is blown clear"),
-  Seat->GetAttachParent()==P->GetBodyRoot() && Pilot->GetComponentLocation().Equals(Seated,.05));
+ TestTrue(TEXT("The occupied seat detaches at its socket on the same update as the guard and shards"),
+  !Seat->GetAttachParent() && Pilot->GetAttachParent()==Seat && Pilot->GetComponentLocation().Equals(Seated,.05));
+ const TArray<UNiagaraComponent*> Jets=SeatJets(Seat);
+ TestEqual(TEXT("Both nozzle-mounted exhausts ignite on the full-pull update"),Jets.Num(),2);
+ TestEqual(TEXT("Both seat locks flash on the full-pull update"),BurstCount(TEXT("NS_HopperMk2SeatEjectSparks")),2);
  TestTrue(TEXT("The blast core lights up on the same update as the soot and shards"),
   FlashMaterial && FlashMaterial->K2_GetScalarParameterValue(TEXT("FlashGain"))==1.f);
  auto AttachedFires=[Hopper,P]()
@@ -242,35 +265,30 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
    Scorch->GetScalarParameterValue(FMaterialParameterInfo(TEXT("PaintFade")),PaintFade) && PaintFade==0.f);
  }
  TestNull(TEXT("The escaping seat interior is clean"),Cabin->GetOverlayMaterial());
- P->StartDestructionEffects(nullptr);
  for (const TCHAR* Effect:{TEXT("NS_HopperMk2RadialBlast"),TEXT("NS_HopperMk2MetalDebris"),TEXT("NS_HopperMk2OilSpray")})
   TestEqual(FString::Printf(TEXT("%s starts once on the shield break"),Effect),BurstCount(Effect),1);
  TestEqual(TEXT("Sustained fire waits for the pilot to escape"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
  TestEqual(TEXT("The Mk2 replaces the common rubble explosion"),BurstCount(TEXT("NS_Explosion_SmokeRobot")),0);
- Tick(.09f);
- TestTrue(TEXT("The seat stays docked for the frame's clearance interval"),
-  Seat->GetAttachParent()==P->GetBodyRoot() && Pilot->GetComponentLocation().Equals(Seated,.05));
- Tick(.045f);
+ P->StartDestructionEffects(nullptr);
+ EjectTo(Pull+.04f);
  const FVector Rising=Pilot->GetComponentLocation()-Seated;
- TestTrue(TEXT("Mk2 launches straight up within a few frames of the blast while the front hatch is opening"),
+ TestTrue(TEXT("The seat is already rising straight up and the front hatch is opening 40 ms after the blast"),
   !Seat->GetAttachParent() && Rising.Size2D()<.1 && Rising.Z>2 && P->GetHatchOpenAlpha()>0 && P->GetHatchOpenAlpha()<1);
+ TestEqual(TEXT("A repeated destruction signal cannot replay the blast"),BurstCount(TEXT("NS_HopperMk2RadialBlast")),1);
  TestTrue(TEXT("The occupied cabin ejects with the pilot"),Cabin->GetAttachParent()==Seat && Pilot->GetAttachParent()==Seat);
  if (Scorch) TestEqual(TEXT("The escape starts with first-stage soot"),Scorch->K2_GetScalarParameterValue(TEXT("PaintFade")),0.f);
- TestEqual(TEXT("Both seat locks flash on vertical release"),BurstCount(TEXT("NS_HopperMk2SeatEjectSparks")),2);
  TestEqual(TEXT("The seat visibly clears the wreck before it ignites"),AttachedFires()+BurstCount(TEXT("NS_HopperMk2HullFire")),0);
- Tick(.205f);
+ EjectTo(Pull+.34f);
  TestEqual(TEXT("Only the empty chassis catches fire"),AttachedFires(),1);
- Tick(HatchDuration-Pull-Elapsed-.34f+.002f);
+ EjectTo(HatchDuration+.002f);
  TestTrue(TEXT("The front door and telescoping ladder finish their authored opening stroke independently"),
   Door->GetRelativeTransform().Equals(OpenDoor,.05) && Step->GetRelativeTransform().Equals(OpenStep,.05));
  TestTrue(TEXT("The pilot continues ascending on the original world-vertical line"),
   FVector::Dist2D(Seated,Pilot->GetComponentLocation())<.1 && Pilot->GetComponentLocation().Z>Seated.Z+100);
+ EjectTo(FMath::Max(Elapsed,Pull+.8f));
  TestNull(TEXT("The blast core has expired"),Hopper->FindComponentByTag<UMaterialBillboardComponent>(TEXT("HopperBlastFlash")));
  TestTrue(TEXT("No lingering shield or burst on the wreck"),Shield->bHiddenInGame);
- TArray<UNiagaraComponent*> Jets;
- Hopper->GetComponents(Jets);
- Jets.RemoveAll([Seat](UNiagaraComponent* Jet){ return Jet->GetAttachParent()!=Seat; });
- if (TestEqual(TEXT("Two nozzle-mounted Niagara systems ignite at launch"),Jets.Num(),2))
+ if (Jets.Num()==2)
  {
   TestTrue(TEXT("Both nozzles use the layered Mk2 effect"),Jets[0]->GetAsset() && Jets[0]->GetAsset()==Jets[1]->GetAsset() && Jets[0]->GetAsset()->GetNumEmitters()>=4);
   const FVector Left=Jets[0]->GetRelativeLocation(), Right=Jets[1]->GetRelativeLocation();
@@ -298,6 +316,13 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  TestFalse(TEXT("An interrupted boarding sequence cannot flash a shield that never deployed"),Early->IsWaitingForShieldBreak());
  auto* Interrupted=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(-600,0,0),FRotator::ZeroRotator)->GetPresentation();
  auto* InterruptedSeat=Interrupted->GetPilotMesh()->GetAttachParent();
+ const auto* InactiveField=Interrupted->GetOwner()->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperCockpitShield"));
+ if (!TestNotNull(TEXT("Interrupted Mk2 has the unpowered field mesh"),InactiveField)) return false;
+ auto FieldIsOff=[InactiveField]()
+ {
+  const auto& Channels=InactiveField->GetCustomPrimitiveData().Data;
+  return InactiveField->bHiddenInGame && Channels.Num()>=4 && Channels[2]==0.f && Channels[3]==0.f;
+ };
  Interrupted->StartBoarding(2.f);
  Interrupted->TickComponent(SeatedTime+.58f+.26f,LEVELTICK_All,nullptr);
  const FVector MidRail=InterruptedSeat->GetRelativeLocation();
@@ -306,10 +331,11 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  Interrupted->TickComponent(Pull-.002f,LEVELTICK_All,nullptr);
  TestTrue(TEXT("Interrupted boarding holds the carriage for the entire emergency pull"),
   InterruptedSeat->GetAttachParent()==Interrupted->GetBodyRoot() && InterruptedSeat->GetRelativeLocation().Equals(MidRail,.05) &&
-  !Interrupted->IsWaitingForShieldBreak());
- Interrupted->TickComponent(.003f,LEVELTICK_All,nullptr);
+  !Interrupted->IsWaitingForShieldBreak() && FieldIsOff());
+ Interrupted->TickComponent(.002f,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("Interrupted boarding launches with exhaust at full pull without illuminating or fragmenting the unpowered shield"),
+  !InterruptedSeat->GetAttachParent() && SeatJets(InterruptedSeat).Num()==2 && !Interrupted->IsWaitingForShieldBreak() && FieldIsOff());
  Interrupted->TickComponent(.23f,LEVELTICK_All,nullptr);
- TestNull(TEXT("Interrupted boarding releases the seat after pulling and clearing the frame"),InterruptedSeat->GetAttachParent());
  const FVector Launch=Interrupted->GetBodyRoot()->GetComponentTransform().InverseTransformPosition(InterruptedSeat->GetComponentLocation());
  TestTrue(TEXT("The seat launches from its actual partway-in position"),FVector::Dist2D(Launch,MidRail)<.1 && Launch.Z>MidRail.Z+15);
  auto* Low=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(0,600,0),FRotator(0,70,0))->GetPresentation();
@@ -330,13 +356,61 @@ bool FHopperMk2HatchTest::RunTest(const FString& Parameters)
  SlowFrame->TickComponent(1.f,LEVELTICK_All,nullptr);
  SlowFrame->StartSeatEjection();
  auto* SlowSeat=SlowFrame->GetPilotMesh()->GetAttachParent();
- const float LongFrame=Pull+1.5f;
- SlowFrame->TickComponent(LongFrame,LEVELTICK_All,nullptr);
- TestTrue(TEXT("A long shield-break frame preserves clearance time before the launch and camera follow"),
-  !SlowFrame->IsWaitingForShieldBreak() && SlowSeat->GetAttachParent()==SlowFrame->GetBodyRoot() &&
-  FMath::IsNearlyEqual(SlowFrame->GetEjectionLaunchTime(),LongFrame+.10f,.002f));
+ const FVector SlowStart=SlowSeat->GetComponentLocation();
+ const int32 BlastsBefore=BurstCount(TEXT("NS_HopperMk2RadialBlast")), StrikesBefore=BurstCount(TEXT("NS_HopperMk2SeatEjectSparks"));
+ constexpr float Overshoot=.24f;
+ SlowFrame->TickComponent(Pull+Overshoot,LEVELTICK_All,nullptr);
+ const double FlightHeight=SlowFrame->EjectionUpSpeed*Overshoot+.5*SlowFrame->EjectionUpAcceleration*Overshoot*Overshoot;
+ TestTrue(TEXT("A long update crossing full pull places the detached seat at its scheduled ballistic height"),
+  !SlowFrame->IsWaitingForShieldBreak() && !SlowSeat->GetAttachParent() && FMath::IsNearlyEqual(SlowFrame->GetEjectionLaunchTime(),Pull,.001f) &&
+  SlowSeat->GetComponentLocation().Equals(SlowStart+FVector::UpVector*FlightHeight,.1));
+ TestTrue(TEXT("The crossing update emits one blast, one strike per latch, and both exhausts"),
+  BurstCount(TEXT("NS_HopperMk2RadialBlast"))==BlastsBefore+1 && BurstCount(TEXT("NS_HopperMk2SeatEjectSparks"))==StrikesBefore+2 &&
+  SeatJets(SlowSeat).Num()==2);
  SlowFrame->TickComponent(.14f,LEVELTICK_All,nullptr);
- TestNull(TEXT("The seat launches on the next update once the frame is clear"),SlowSeat->GetAttachParent());
+ TestTrue(TEXT("The following flight update cannot repeat the blast, latch strikes, or exhaust ignition"),
+  BurstCount(TEXT("NS_HopperMk2RadialBlast"))==BlastsBefore+1 && BurstCount(TEXT("NS_HopperMk2SeatEjectSparks"))==StrikesBefore+2 &&
+  SeatJets(SlowSeat).Num()==2);
+
+ auto* SixtyHzMech=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(-600,-600,0),FRotator::ZeroRotator);
+ auto* SixtyHz=SixtyHzMech->GetPresentation();
+ auto* TestSeat=SixtyHz->GetPilotMesh()->GetAttachParent();
+ const auto* Grip=SixtyHzMech->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperEjectionHandle"));
+ const auto* Field=SixtyHzMech->FindComponentByTag<UStaticMeshComponent>(TEXT("HopperCockpitShield"));
+ TInlineComponentArray<UStaticMeshComponent*> Panels(SixtyHzMech);
+ auto* Guard=Panels.FindByPredicate([](const UStaticMeshComponent* Panel){ return Panel->GetName().StartsWith(TEXT("GuardBrow")); });
+ if (!TestTrue(TEXT("The 60 Hz fixture has its grip, shield and guard"),Grip && Field && Guard && Field->GetCustomPrimitiveData().Data.Num()>=4)) return false;
+ SixtyHz->SeatPilot(); SixtyHz->SetMechActive(true);
+ SixtyHz->TickComponent(1.f,LEVELTICK_All,nullptr);
+ SixtyHz->StartSeatEjection();
+ const FVector DownStop(7.04,-14.40,23.17);
+ const int32 DebrisBefore=BurstCount(TEXT("NS_HopperMk2MetalDebris"));
+ // Repeated float deltas reproduce the game clock rounding below 1.0 on the sixtieth update.
+ constexpr float FrameTime=1.f/60.f;
+ for (int32 Frame=1;Frame<=59;++Frame) SixtyHz->TickComponent(FrameTime,LEVELTICK_All,nullptr);
+ const double RemainingPull=FVector::Dist(Grip->GetRelativeLocation(),DownStop);
+ TestTrue(FString::Printf(TEXT("60 Hz frame 59 still has a small pull left (%.3f cm) and all parts attached"),RemainingPull),
+  RemainingPull>.1 && RemainingPull<.8 && SixtyHz->IsWaitingForShieldBreak() && Field->GetCustomPrimitiveData().Data[3]==0.f &&
+  TestSeat->GetAttachParent()==SixtyHz->GetBodyRoot() && (*Guard)->GetAttachParent()==SixtyHz->GetBodyRoot() &&
+  BurstCount(TEXT("NS_HopperMk2MetalDebris"))==DebrisBefore);
+ SixtyHz->TickComponent(FrameTime,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("60 Hz frame 60 bottoms the grip, shatters the shield, emits debris and releases the guard and occupied rocket seat"),
+  Grip->GetRelativeLocation().Equals(DownStop,.02) && !SixtyHz->IsWaitingForShieldBreak() && Field->GetCustomPrimitiveData().Data[3]>=1.f &&
+  (*Guard)->GetAttachParent() && (*Guard)->GetAttachParent()->GetOwner()!=SixtyHzMech && !TestSeat->GetAttachParent() &&
+  SixtyHz->GetPilotMesh()->GetAttachParent()==TestSeat && SeatJets(TestSeat).Num()==2 && BurstCount(TEXT("NS_HopperMk2MetalDebris"))==DebrisBefore+1);
+
+ auto* Fallback=World->SpawnActor<ATunaSweeperHopperEnemyCharacter>(Class,FVector(600,600,0),FRotator::ZeroRotator)->GetPresentation();
+ auto* GuardWithoutHandle=DuplicateObject<UHopperVisualData>(Hopper->VisualData.LoadSynchronous(),GetTransientPackage());
+ GuardWithoutHandle->EjectionPull=FHopperEjectionPull();
+ Fallback->Initialize(GuardWithoutHandle);
+ auto* FallbackSeat=Fallback->GetPilotMesh()->GetAttachParent();
+ Fallback->StartSeatEjection();
+ TestTrue(TEXT("A guard-equipped seat without a handle retains its original 100 ms clearance"),
+  Fallback->GetEjectionPullTriggerTime()==0.f && FMath::IsNearlyEqual(Fallback->GetEjectionLaunchTime(),.10f,.001f));
+ Fallback->TickComponent(.09f,LEVELTICK_All,nullptr);
+ TestEqual(TEXT("The fallback carriage remains docked during its guard clearance"),FallbackSeat->GetAttachParent(),Fallback->GetBodyRoot());
+ Fallback->TickComponent(.02f,LEVELTICK_All,nullptr);
+ TestNull(TEXT("The fallback carriage then detaches"),FallbackSeat->GetAttachParent());
  return true;
 }
 
@@ -383,7 +457,7 @@ bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
   TestTrue(TEXT("The handle is already parked beside the right glove in normal play"),Parked.GetLocation().Equals(Ready,.05));
   const float Lead=Stage->GetEjectionPullStartTime();
   TestTrue(TEXT("The medium shot gets 0.22 seconds before the clip starts"),FMath::IsNearlyEqual(Lead,.22f,.001f));
-  TestTrue(TEXT("The loaded Mk2 trips the warning at one second, on animation frame 39"),
+  TestTrue(TEXT("The loaded Mk2 trips the ejection at one second, on animation frame 39"),
    FMath::IsNearlyEqual(Stage->GetEjectionPullTriggerTime(),1.f,.001f));
   if (bShielded)
   {
@@ -392,9 +466,9 @@ bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
   }
   else Stage->StartBoarding(2.f);
   Stage->StartSeatEjection();
-  const float Deadline=1.f+(bShielded ? .96f : 0.f)+.10f;
-  TestTrue(TEXT("Predicted launch includes the pull, active shield warning and guard clearance"),
-   FMath::IsNearlyEqual(Stage->GetEjectionLaunchTime(),Deadline,.002f));
+  TestTrue(TEXT("The launch is scheduled for full pull with either shield state"),
+   FMath::IsNearlyEqual(Stage->GetEjectionLaunchTime(),1.f,.001f));
+  TestEqual(TEXT("Only an already deployed shield begins warning on defeat"),Stage->IsWaitingForShieldBreak(),bShielded);
   // Surface point on the seated captain's right glove, expressed in the imported hand bone's frame.
   auto Palm=[Pilot,Seat]() { return Seat->GetComponentTransform().InverseTransformPosition(
    Pilot->GetSocketTransform(TEXT("hand_r")).TransformPosition(FVector(-2.0542,.8093,3.3000))); };
@@ -406,14 +480,14 @@ bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
   Pilot->TickAnimation(0.f,false); Pilot->RefreshBoneTransforms();
   TestTrue(TEXT("The ready pose and parked lever hold while the gameplay view blends to the cockpit"),
    FMath::IsNearlyZero(Pilot->GetPosition(),.001f) && NeutralHead.Equals(Pilot->GetSocketQuaternion(TEXT("head")),.002) &&
-   RestPalm.Equals(Palm(),.1) && Handle->GetRelativeTransform().Equals(Parked,.04) && !Stage->IsWaitingForShieldBreak());
+   RestPalm.Equals(Palm(),.1) && Handle->GetRelativeTransform().Equals(Parked,.04) && Stage->IsWaitingForShieldBreak()==bShielded);
   const FVector Forward=Seat->GetForwardVector(), Right=Seat->GetRightVector();
   double MinYaw=0., MaxYaw=0., MaxRestDrift=0., MaxContactGap=-1.;
   int32 MaxGapFrame=0;
   FVector WorstPalm=FVector::ZeroVector, WorstLever=FVector::ZeroVector, WorstComponentPalm=FVector::ZeroVector;
   FString WorstClip;
   float WorstClipTime=0.f;
-  bool bLeverParked=true, bLeverLatched=true, bPawWaited=true, bNoEarlyWarning=true;
+  bool bLeverParked=true, bLeverLatched=true, bPawWaited=true, bCorrectWarning=true, bDockedUntilPull=true;
   FTransform Down;
   float PreviousTime=Lead;
   for (int32 Frame=1;Frame<=50;++Frame)
@@ -443,7 +517,8 @@ bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
     bPawWaited &= SeatPalm.Equals(RestPalm,.4);
    }
    if (Frame<=30) bLeverParked &= Lever.Equals(Parked,.04);
-   if (Frame<39) bNoEarlyWarning &= !Stage->IsWaitingForShieldBreak() && Seat->GetAttachParent()==Stage->GetBodyRoot();
+   bCorrectWarning &= Stage->IsWaitingForShieldBreak()==(bShielded && Frame<39);
+   if (Frame<39) bDockedUntilPull &= Seat->GetAttachParent()==Stage->GetBodyRoot();
    if (Frame==27) TestTrue(TEXT("The reaching glove has not made contact one frame early"),Gap>.45);
    if (Frame>=28 && Frame<=42 && Gap>MaxContactGap)
    {
@@ -464,10 +539,9 @@ bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
    {
     Down=Lever;
     TestTrue(TEXT("The lever reaches its down stop on the trigger frame"),Lever.GetLocation().Equals(Pulled,.08));
-    TestEqual(TEXT("Only a deployed shield begins a warning at full pull"),Stage->IsWaitingForShieldBreak(),bShielded);
+    TestNull(TEXT("The rising assembly detaches on the same animation frame that the lever bottoms out"),Seat->GetAttachParent());
    }
    if (Frame>39) bLeverLatched &= Lever.Equals(Down,.04);
-   if (!bShielded) bNoEarlyWarning &= !Stage->IsWaitingForShieldBreak();
   }
   AddInfo(FString::Printf(TEXT("Emergency pull shielded=%d yaw=[%.3f,%.3f] restPalm=%s earlyDrift=%.4f cm maxGap=%.4f cm frame=%d clip=%s t=%.4f"),
    bShielded,MinYaw,MaxYaw,*RestPalm.ToString(),MaxRestDrift,MaxContactGap,MaxGapFrame,*WorstClip,WorstClipTime));
@@ -482,12 +556,8 @@ bool FHopperEmergencyHandleTest::RunTest(const FString& Parameters)
   TestTrue(FString::Printf(TEXT("Glove contact from frame 28 through 42 (shielded=%d, maximum %.4f cm at frame %d)"),
    bShielded,MaxContactGap,MaxGapFrame),MaxContactGap<.35);
   TestTrue(TEXT("The handle stays latched down as the glove returns to its brace"),bLeverLatched && FVector::Dist(Palm(),Pulled)>4.);
-  TestTrue(TEXT("The pull never starts an early warning or releases an unready seat"),bNoEarlyWarning);
-  if (bShielded)
-  {
-   Stage->TickComponent(.75f,LEVELTICK_All,nullptr);
-   Stage->TickComponent(.12f,LEVELTICK_All,nullptr);
-  }
+  TestTrue(TEXT("The seat remains docked through every animation frame before full pull"),bDockedUntilPull);
+  TestTrue(TEXT("Only the deployed shield warns, from defeat through the frame before full pull"),bCorrectWarning);
   TestTrue(TEXT("The grip leaves with the occupied seat on schedule"),!Seat->GetAttachParent() &&
    Pilot->GetAttachParent()==Seat && Handle->GetAttachParent()==Seat);
  }

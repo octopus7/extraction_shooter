@@ -82,7 +82,6 @@ private:
  void FadeBlastFlash(float DeltaSeconds);
  void TickCockpitShield(float Dt);
  float GetShieldWarningDuration() const;
- void TickEjectionShield(float Dt);
  void EmitDestructionEffect(UNiagaraSystem* Effect);
  void EmitWreckEffects();
  void PreloadWreckEffects();

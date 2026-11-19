@@ -338,8 +338,11 @@ void UHopperPresentationComponent::TickComponent(float Dt,ELevelTick TickType,FA
  if (EjectionTime>=0.f)
  {
   EjectionTime+=Dt;
+  // Repeated 60 Hz float steps can finish just shy of the authored key. Use one timestamp for the pose and releases.
+  if (bAwaitingEjectionPull && EjectionTime<EjectionShieldDelay && FMath::IsNearlyEqual(EjectionTime,EjectionShieldDelay,UE_KINDA_SMALL_NUMBER))
+   EjectionTime=EjectionShieldDelay;
   TickEjectionPull();
-  TickEjectionShield(Dt);
+  TickCockpitShield(Dt);
   UpdateEjectionHatch();
   const float LaunchTime=GetEjectionLaunchTime();
   if (!bSeatFlightFinished) TickSeatEjection(LaunchTime);
