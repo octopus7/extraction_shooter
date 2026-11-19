@@ -201,6 +201,10 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		SettingsInterfaceTabButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked);
 		SettingsInterfaceTabButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked);
 	}
+	if (DailyCombatIntroButton)
+	{
+		DailyCombatIntroButton->OnClicked.AddUniqueDynamic(this, &ThisClass::HandleDailyCombatIntroClicked);
+	}
 
 	if (SettingsDevelopmentTabButton)
 	{
@@ -400,6 +404,10 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 
 void UTunaSweeperIntroMenuWidget::NativeDestruct()
 {
+	if (DailyCombatIntroButton)
+	{
+		DailyCombatIntroButton->OnClicked.RemoveDynamic(this, &ThisClass::HandleDailyCombatIntroClicked);
+	}
 	if (OnlineCoopPanel) { OnlineCoopPanel->RemoveFromParent(); OnlineCoopPanel = nullptr; }
 	if (OnlineCoopButton) OnlineCoopButton->OnClicked.RemoveDynamic(this, &ThisClass::HandleOnlineCoopClicked);
 	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))

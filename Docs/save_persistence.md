@@ -127,6 +127,10 @@ The `extraction_return` objective advances only when the destination game world 
 
 Confirmed objective progress and `RewardAvailable` state use the existing numeric quest progress save fields and are saved after arrival. Claiming rewards remains a separate NPC action. No save version changes. Existing `level_travel` objectives retain their request-time behavior.
 
+### Village Hopper boarding
+
+`UTunaSweeperGameUserSettings` stores the default-on `bDailyCombatIntroEnabled` preference and `LastVillageCombatIntroDate` in GameUserSettings.ini, shared across save slots. Completing village boarding with the limit enabled records the local calendar date in the same YYYY-MM-DD format as the developer logo. Disabling the limit always plays boarding. Test-map encounters and ejections do not consult or update this history.
+
 ### Developer startup logo (Main only)
 
 The Main startup logo is attempted once per `UTunaSweeperGameInstance` session; returning to the title does not replay it. This guard is transient and independent of gameplay save slots. Demo builds retain their existing direct title entry.

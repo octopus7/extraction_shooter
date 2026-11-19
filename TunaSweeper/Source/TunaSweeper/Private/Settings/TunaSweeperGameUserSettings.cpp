@@ -60,6 +60,7 @@ UTunaSweeperGameUserSettings* UTunaSweeperGameUserSettings::Get()
 void UTunaSweeperGameUserSettings::SetToDefaults()
 {
 	Super::SetToDefaults();
+	bDailyCombatIntroEnabled = true;
 	GraphicsSettingsSchemaVersion = TunaSweeperGraphicsSettings::CurrentSchemaVersion;
 	SelectedGraphicsPreset = ETunaSweeperGraphicsPreset::Auto;
 	ResolvedAutoGraphicsPreset = ETunaSweeperGraphicsPreset::Low;
@@ -67,6 +68,32 @@ void UTunaSweeperGameUserSettings::SetToDefaults()
 	LastDetectedDedicatedVideoMemoryMB = 0;
 	bMotionBlurEnabled = true;
 	bHardwareRayTracingEnabled = true;
+}
+
+void UTunaSweeperGameUserSettings::SetDailyCombatIntroEnabled(bool bEnabled)
+{
+	bDailyCombatIntroEnabled = bEnabled;
+	if (GConfig)
+	{
+		GConfig->SetBool(*GetClass()->GetPathName(), TEXT("bDailyCombatIntroEnabled"), bEnabled, GGameUserSettingsIni);
+		GConfig->Flush(false, GGameUserSettingsIni);
+	}
+}
+
+bool UTunaSweeperGameUserSettings::ShouldShowVillageCombatIntro(const FString& LocalDate) const
+{
+	return !bDailyCombatIntroEnabled || LastVillageCombatIntroDate != LocalDate;
+}
+
+void UTunaSweeperGameUserSettings::MarkVillageCombatIntroShown(const FString& LocalDate)
+{
+	if (!bDailyCombatIntroEnabled || LastVillageCombatIntroDate == LocalDate) return;
+	LastVillageCombatIntroDate = LocalDate;
+	if (GConfig)
+	{
+		GConfig->SetString(*GetClass()->GetPathName(), TEXT("LastVillageCombatIntroDate"), *LocalDate, GGameUserSettingsIni);
+		GConfig->Flush(false, GGameUserSettingsIni);
+	}
 }
 
 void UTunaSweeperGameUserSettings::LoadSettings(bool bForceReload)

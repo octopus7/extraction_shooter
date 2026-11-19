@@ -1,6 +1,7 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Settings/TunaSweeperGameUserSettings.h"
 #include "UI/TunaSweeperDebugDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
@@ -240,6 +241,14 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 		InterfaceLanguageOptionRow->SetStepEnabled(
 			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::English,
 			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::Russian);
+	}
+	if (DailyCombatIntroButton)
+	{
+		const UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get();
+		DailyCombatIntroButton->SetIsEnabled(Settings != nullptr);
+		SetNamedText(TEXT("DailyCombatIntroValueText"), Settings
+			? ResolveUiText(Settings->IsDailyCombatIntroEnabled() ? TEXT("ui.common.on") : TEXT("ui.common.off"), FText::GetEmpty())
+			: FText::GetEmpty());
 	}
 
 	if (LanguageEnglishButton)
@@ -653,6 +662,11 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 	SetNamedText(
 		FName(TEXT("LanguageLabelText")),
 		ResolveUiText(FName(TEXT("ui.settings.language")), FText::FromString(TEXT("\uC5B8\uC5B4"))));
+	SetNamedText(TEXT("DailyCombatIntroLabel"), ResolveUiText(TEXT("ui.settings.daily_combat_intro"), FText::GetEmpty()));
+	if (DailyCombatIntroButton)
+	{
+		DailyCombatIntroButton->SetToolTipText(ResolveUiText(TEXT("ui.settings.daily_combat_intro.description"), FText::GetEmpty()));
+	}
 	SetNamedText(
 		FName(TEXT("ConfirmInterfaceSettingsButtonText")),
 		ResolveUiText(FName(TEXT("ui.common.confirm")), FText::FromString(TEXT("\uACB0\uC815"))));

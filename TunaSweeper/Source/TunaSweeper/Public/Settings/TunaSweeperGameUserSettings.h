@@ -26,6 +26,10 @@ class TUNASWEEPER_API UTunaSweeperGameUserSettings : public UGameUserSettings
 
 public:
 	static UTunaSweeperGameUserSettings* Get();
+	bool IsDailyCombatIntroEnabled() const { return bDailyCombatIntroEnabled; }
+	void SetDailyCombatIntroEnabled(bool bEnabled);
+	bool ShouldShowVillageCombatIntro(const FString& LocalDate) const;
+	void MarkVillageCombatIntroShown(const FString& LocalDate);
 
 	virtual void SetToDefaults() override;
 	virtual void LoadSettings(bool bForceReload = false) override;
@@ -59,6 +63,12 @@ public:
 	static ETunaSweeperGraphicsPreset MatchNamedPreset(const Scalability::FQualityLevels& QualityLevels);
 
 private:
+	UPROPERTY(Config)
+	bool bDailyCombatIntroEnabled = true;
+
+	UPROPERTY(Config)
+	FString LastVillageCombatIntroDate;
+
 	void MigrateLegacyGraphicsSettings(bool bHadPersistedUserSettings);
 	int64 QueryDedicatedVideoMemoryBytes() const;
 	void ApplyQualityPreset(ETunaSweeperGraphicsPreset Preset);

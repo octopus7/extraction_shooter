@@ -2,6 +2,15 @@
 #include "Settings/TunaSweeperGameUserSettings.h"
 #include "Title/TunaSweeperDisplaySettings.h"
 
+void UTunaSweeperIntroMenuWidget::HandleDailyCombatIntroClicked()
+{
+	if (UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get())
+	{
+		Settings->SetDailyCombatIntroEnabled(!Settings->IsDailyCombatIntroEnabled());
+		RefreshInterfaceSettingsPanel();
+	}
+}
+
 void UTunaSweeperIntroMenuWidget::LoadTitleGraphicsSettings()
 {
 	if (const UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get())

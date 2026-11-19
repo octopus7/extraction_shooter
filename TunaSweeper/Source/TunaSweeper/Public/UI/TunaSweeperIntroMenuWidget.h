@@ -212,6 +212,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InterfaceSettingsPanel;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> DailyCombatIntroButton;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> DevelopmentSettingsPanel;
 
@@ -415,6 +418,9 @@ private:
 
 	UFUNCTION()
 	void HandleSettingsInterfaceTabClicked();
+
+	UFUNCTION()
+	void HandleDailyCombatIntroClicked();
 
 	UFUNCTION()
 	void HandleSettingsDevelopmentTabClicked();

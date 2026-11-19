@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
+#include "HttpModule.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 #include "Misc/ConfigCacheIni.h"
@@ -23,6 +24,7 @@
 #include "Internationalization/Internationalization.h"
 #include "Internationalization/Culture.h"
 #include "Settings/TunaSweeperLanguage.h"
+#include "Settings/TunaSweeperGameUserSettings.h"
 #include "Settings/TunaSweeperBuildTargetSettings.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperScenarioSubsystem.h"
@@ -69,6 +71,72 @@ namespace TunaSweeperLocalizationRefreshTests
 			}
 		});
 		return Result;
+	}
+
+	bool CheckDailyCombatIntroControls(FAutomationTestBase& Test, APlayerController* Controller,
+		UTunaSweeperGameInstance& Instance, UClass* IntroClass)
+	{
+		UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get();
+		if (!Test.TestNotNull(TEXT("Game user settings exist"), Settings)) return false;
+		const bool bOriginal = Settings->IsDailyCombatIntroEnabled();
+		const FString TestIni = FConfigCacheIni::NormalizeConfigIniPath(
+			FPaths::CreateTempFilename(*FPaths::ProjectSavedDir(), TEXT("DailyCombatIntroUI"), TEXT(".ini")));
+		GConfig->Add(TestIni, FConfigFile());
+		TGuardValue<FString> IniGuard(GGameUserSettingsIni, TestIni);
+		ON_SCOPE_EXIT
+		{
+			Settings->SetDailyCombatIntroEnabled(bOriginal);
+			GConfig->UnloadFile(TestIni);
+			IFileManager::Get().Delete(*TestIni);
+		};
+		Settings->SetDailyCombatIntroEnabled(true);
+		// The normal title menu checks its version when constructed. Keep the test offline.
+		FHttpModule& Http = FHttpModule::Get();
+		const bool bOriginalNullHttp = Http.IsNullHttpEnabled();
+		Http.ToggleNullHttp(true);
+		ON_SCOPE_EXIT { Http.ToggleNullHttp(bOriginalNullHttp); };
+
+		for (const bool bPause : {false, true})
+		{
+			TStrongObjectPtr<UTunaSweeperIntroMenuWidget> Menu(CreateWidget<UTunaSweeperIntroMenuWidget>(Controller, IntroClass));
+			if (!Test.TestNotNull(TEXT("A fresh settings menu exists"), Menu.Get())) return false;
+			if (bPause) Menu->PrepareForPauseSettings();
+			TSharedRef<SWidget> Slate = Menu->TakeWidget();
+			auto ClickAndTick = [&](FName Name)
+			{
+				UButton* Button = Cast<UButton>(FindNestedWidget(Menu.Get(), Name));
+				if (!Test.TestNotNull(Name.ToString(), Button)) return false;
+				Button->OnClicked.Broadcast();
+				Slate->Tick(Menu->GetCachedGeometry(), FPlatformTime::Seconds(), 1.0f);
+				return true;
+			};
+			if (!bPause && !ClickAndTick(TEXT("SettingsButton"))) return false;
+			if (!ClickAndTick(TEXT("SettingsInterfaceTabButton"))) return false;
+			UButton* Toggle = Cast<UButton>(FindNestedWidget(Menu.Get(), TEXT("DailyCombatIntroButton")));
+			UTextBlock* Label = Cast<UTextBlock>(FindNestedWidget(Menu.Get(), TEXT("DailyCombatIntroLabel")));
+			UTextBlock* Value = Cast<UTextBlock>(FindNestedWidget(Menu.Get(), TEXT("DailyCombatIntroValueText")));
+			if (!Test.TestNotNull(TEXT("Daily intro is clickable"), Toggle) || !Test.TestNotNull(TEXT("Daily intro has a label"), Label)
+				|| !Test.TestNotNull(TEXT("Daily intro has a value"), Value)) return false;
+			auto Text = [&](FName Key) { return Instance.ResolveLocalizedText(Key, FText::GetEmpty()).ToString(); };
+			Test.TestTrue(TEXT("The authored setting has a localized title"), !Label->GetText().IsEmpty());
+			Test.TestEqual(TEXT("Opening the interface displays the persisted state"), Value->GetText().ToString(), Text(bPause ? TEXT("ui.common.off") : TEXT("ui.common.on")));
+			Toggle->OnClicked.Broadcast();
+			Test.TestEqual(TEXT("Click changes the real preference immediately"), Settings->IsDailyCombatIntroEnabled(), bPause);
+			FConfigFile Disk;
+			Disk.Read(TestIni);
+			bool bSaved = !bPause;
+			Test.TestTrue(TEXT("The click alone writes the preference to disk"), Disk.GetBool(*Settings->GetClass()->GetPathName(), TEXT("bDailyCombatIntroEnabled"), bSaved));
+			Test.TestEqual(TEXT("Stored preference matches the click"), bSaved, bPause);
+			const FName ValueKey = bPause ? TEXT("ui.common.on") : TEXT("ui.common.off");
+			Test.TestEqual(TEXT("Click refreshes displayed state"), Value->GetText().ToString(), Text(ValueKey));
+			const FString BeforeLanguage = Value->GetText().ToString();
+			Instance.SetCurrentTextLanguage(bPause ? ETunaSweeperItemTextLanguage::Japanese : ETunaSweeperItemTextLanguage::Korean, false);
+			Test.TestNotEqual(TEXT("An open toggle switches language"), Value->GetText().ToString(), BeforeLanguage);
+			Test.TestEqual(TEXT("Caption follows language changes"), Label->GetText().ToString(), Text(TEXT("ui.settings.daily_combat_intro")));
+			Test.TestEqual(TEXT("State follows language changes"), Value->GetText().ToString(), Text(ValueKey));
+			Test.TestEqual(TEXT("Tooltip follows language changes"), Toggle->GetToolTipText().ToString(), Text(TEXT("ui.settings.daily_combat_intro.description")));
+		}
+		return true;
 	}
 }
 
@@ -173,7 +241,7 @@ bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 
 	GraphicsSlate.Reset();
 	IntroSlate.Reset();
-	return true;
+	return CheckDailyCombatIntroControls(*this, Controller, *Instance, IntroClass);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(

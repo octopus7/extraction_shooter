@@ -108,6 +108,8 @@ ui.common.ok,OK,OK,OK,确定,確定,ОК
 ui.common.cancel,취소,Cancel,キャンセル,取消,取消,Отмена
 ui.common.confirm,결정,Confirm,決定,确认,確認,Подтвердить
 ui.common.back,돌아가기,Back,戻る,返回,返回,Назад
+ui.common.on,켬,On,オン,开启,開啟,Вкл.
+ui.common.off,끔,Off,オフ,关闭,關閉,Выкл.
 ui.common.delete,삭제하기,Delete,削除,删除,刪除,Удалить
 ui.common.continue,계속,Continue,続行,继续,繼續,Продолжить
 ui.common.no_item,아이템 없음,No Item,アイテムなし,没有物品,沒有物品,Нет предмета
@@ -154,6 +156,8 @@ ui.settings.dlss.balanced,균형,Balanced,バランス,平衡,平衡,Сбала�
 ui.settings.dlss.performance,성능,Performance,パフォーマンス,性能,性能,Производительность
 ui.settings.dlss.unavailable,사용 불가,Unavailable,使用不可,不可用,不可用,Недоступно
 ui.settings.language,언어,Language,言語,语言,語言,Язык
+ui.settings.daily_combat_intro,전투 진입 연출 하루 한 번 보기,Show combat intro once per day,戦闘開始演出を1日1回だけ再生,每天仅播放一次战斗开场动画,每天僅播放一次戰鬥開場動畫,Показывать вступление к бою раз в день
+ui.settings.daily_combat_intro.description,켜면 마을에서 그날 처음 만난 호퍼의 탑승 연출만 재생합니다. 끄면 매번 재생합니다.,"When on, the boarding sequence plays only for the first Hopper you encounter in the village each day. When off, it plays at every encounter.",オンにすると、村でその日最初に遭遇したホッパーの搭乗演出だけが再生されます。オフにすると、遭遇するたびに再生されます。,开启后，每天只在村庄第一次遇到跳跃者时播放登上机甲的动画。关闭后，每次遇到跳跃者都会播放。,開啟後，每天只在村莊第一次遇到跳躍者時播放登上機甲的動畫。關閉後，每次遇到跳躍者都會播放。,"Если настройка включена, сцена посадки в кабину показывается только при первой за день встрече с Прыгуном в деревне. Если её выключить, сцена будет показываться при каждой встрече."
 ui.settings.development.save_data_title,세이브 데이터 관리,Save Data Management,セーブデータ管理,存档管理,存檔管理,Управление сохранениями
 ui.settings.development.save_data_exists,현재 슬롯 {0}: 저장 데이터 있음,Current Slot {0}: Save data exists,現在のスロット {0}: セーブデータあり,当前栏位 {0}：已有存档,當前欄位 {0}：已有存檔,Текущая ячейка {0}: сохранение есть
 ui.settings.development.no_save_data,현재 슬롯 {0}: 저장 데이터 없음,Current Slot {0}: No save data,現在のスロット {0}: セーブデータなし,当前栏位 {0}：没有存档,當前欄位 {0}：沒有存檔,Текущая ячейка {0}: сохранения нет

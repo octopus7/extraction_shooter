@@ -87,6 +87,7 @@ private:
     friend class FHopperTransitionClearanceTest;
     void InitializePresentation();
     void TryStartEncounterBoarding();
+    void EnterMountedCombat();
     void BeginMechDestruction(const FVector& ImpactTravel);
     void UpdateDisembark(float DeltaSeconds);
     bool FindPilotExit(FVector& OutGroundDestination) const;
@@ -108,6 +109,7 @@ private:
     bool bExitInProgress = false;
     bool bNextArmLeft = true;
     bool bInitializingBase = true;
+    bool bRecordVillageBoarding = false;
     FVector ExitGroundDestination = FVector::ZeroVector;
     FVector ExitStartFeet = FVector::ZeroVector;
     float PreviousGaitYaw = 0.f;

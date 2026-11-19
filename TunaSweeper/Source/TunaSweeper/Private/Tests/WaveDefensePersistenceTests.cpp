@@ -3,6 +3,7 @@
 #include "Misc/ScopeExit.h"
 #include "Misc/Paths.h"
 #include "Engine/Engine.h"
+#include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Settings/TunaSweeperBuildFlavor.h"

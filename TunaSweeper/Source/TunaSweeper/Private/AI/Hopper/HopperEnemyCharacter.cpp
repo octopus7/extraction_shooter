@@ -17,11 +17,27 @@
 #include "NavigationData.h"
 #include "NavigationSystem.h"
 #include "NiagaraSystem.h"
+#include "Misc/DateTime.h"
+#include "Settings/TunaSweeperGameUserSettings.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHopperCombat, Log, All);
+
+namespace
+{
+    UTunaSweeperGameUserSettings* GetVillageIntroSettings(const UWorld& World)
+    {
+        return UWorld::RemovePIEPrefix(World.GetOutermost()->GetName()) == TEXT("/Game/MainRaid/RaidVillage")
+            ? UTunaSweeperGameUserSettings::Get() : nullptr;
+    }
+
+    FString LocalEncounterDate()
+    {
+        return FDateTime::Now().ToString(TEXT("%Y-%m-%d"));
+    }
+}
 
 ATunaSweeperHopperEnemyCharacter::ATunaSweeperHopperEnemyCharacter()
 {
@@ -107,7 +123,10 @@ void ATunaSweeperHopperEnemyCharacter::BeginPlay()
         if (LoadedVisualData && LoadedVisualData->bUseEncounterCamera)
         {
             Phase = EHopperCombatPhase::WaitingForSight;
-            Presentation->WaitBesideMech();
+            // On repeat visits the pilot is already in the cockpit as it comes into view.
+            const auto* Settings = GetVillageIntroSettings(*GetWorld());
+            if (!Settings || Settings->ShouldShowVillageCombatIntro(LocalEncounterDate()))
+                Presentation->WaitBesideMech();
         }
         else
         {
@@ -131,12 +150,28 @@ void ATunaSweeperHopperEnemyCharacter::TryStartEncounterBoarding()
     const FVector Cockpit = Presentation->GetBodyRoot()->GetComponentTransform().TransformPosition(LoadedVisualData->SeatLocation);
     if (Width <= 0 || Height <= 0 || !Viewer->ProjectWorldLocationToScreen(Cockpit, Screen)
         || Screen.X < 0 || Screen.X >= Width || Screen.Y < 0 || Screen.Y >= Height) return;
+    const auto* Settings = GetVillageIntroSettings(*GetWorld());
+    if (Settings && !Settings->ShouldShowVillageCombatIntro(LocalEncounterDate()))
+    {
+        EnterMountedCombat();
+        return;
+    }
     const float ShotDuration = Presentation->GetBoardingClimbEndTime(BoardingSeconds) + Presentation->GetSeatDockDuration() + LoadedVisualData->HatchTravelSeconds + .6f;
     if (!Viewer->StartHopperShot(this, false, ShotDuration)) return;
     BoardingViewer = Viewer;
+    bRecordVillageBoarding = Settings && Settings->IsDailyCombatIntroEnabled();
     Phase = EHopperCombatPhase::Boarding;
     PhaseSeconds = 0.f;
     Presentation->StartBoarding(BoardingSeconds);
+}
+
+void ATunaSweeperHopperEnemyCharacter::EnterMountedCombat()
+{
+    Phase = EHopperCombatPhase::Mech;
+    ApplyPhaseMovementSpeed();
+    Presentation->SeatPilot();
+    Presentation->SetMechActive(true);
+    GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
 void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
@@ -154,11 +189,13 @@ void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
         if (PhaseSeconds >= FMath::Max(0.f, BoardingSeconds) &&
             (Presentation->GetSeatDockDuration() == 0.f || !Presentation->IsBoardingInProgress()))
         {
-            Phase = EHopperCombatPhase::Mech;
-            ApplyPhaseMovementSpeed();
-            Presentation->SeatPilot();
-            Presentation->SetMechActive(true);
-            GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+            EnterMountedCombat();
+            if (bRecordVillageBoarding)
+            {
+                if (auto* Settings = UTunaSweeperGameUserSettings::Get())
+                    Settings->MarkVillageCombatIntroShown(LocalEncounterDate());
+                bRecordVillageBoarding = false;
+            }
         }
     }
     else if (Phase == EHopperCombatPhase::Disembarking) UpdateDisembark(DeltaSeconds);
