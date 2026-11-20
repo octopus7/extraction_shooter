@@ -17,7 +17,7 @@ $railArgs=@(
     "-ExecutePythonScript=$PSScriptRoot/verify_village_rail.py",
     "-abslog=$railLog"
 )
-if($Runtime){$railArgs+='-VillageRailRuntime'}
+if($Runtime){$railArgs+=@('-VillageRailRuntime',"-UserDir=$railOutput/PlayProfile/")}
 $railQuoted=$railArgs|ForEach-Object{'"'+$_+'"'}
 $railProcess=Start-Process 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' -ArgumentList $railQuoted -WindowStyle Hidden -Wait -PassThru
 if(!(Test-Path -LiteralPath $railReport)){throw 'Village rail report missing'}

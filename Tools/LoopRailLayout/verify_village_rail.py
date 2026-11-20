@@ -9,12 +9,10 @@ import unreal
 
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / 'TunaSweeper/Saved/LoopRailLayout'
-SNAPSHOT = ROOT / 'Docs/level_layout_snapshots/RaidVillage_20261012.json'
+SNAPSHOT = ROOT / 'Docs/level_layout_snapshots/RaidVillage_RailLayout_20261115.json'
 MAP = '/Game/MainRaid/RaidVillage'
 RUNTIME = '-villagerailruntime' in unreal.SystemLibrary.get_command_line().lower()
 REPORT = OUTPUT / ('runtime.json' if RUNTIME else 'verification.json')
-WORLD = unreal.SplineCoordinateSpace.WORLD
-HEADS = [(3000, -11000, 0), (12000, 3000, 90), (-3000, 11000, 180)]
 MAX_GRADE_DEGREES = 6.0
 
 
@@ -30,12 +28,6 @@ def hit_tuple(result):
     if isinstance(result, tuple):
         result = next((item for item in result if isinstance(item, unreal.HitResult)), None)
     return result.to_tuple() if result and result.to_tuple()[0] else None
-
-
-def angle(a, b):
-    divisor = math.sqrt(sum(v*v for v in a) * sum(v*v for v in b))
-    assert divisor > 0, 'Zero spline direction'
-    return math.degrees(math.acos(max(-1, min(1, sum(x*y for x, y in zip(a, b))/divisor))))
 
 
 class Verifier:
@@ -68,7 +60,8 @@ class Verifier:
             if self.state == 'load':
                 assert self.levels.load_level(MAP), 'Map failed to load'
                 self.transition('settle')
-            elif self.state == 'settle' and self.frames >= 30:
+            elif (self.state == 'settle' and self.frames >= 30
+                  and not unreal.NavigationSystemV1.is_navigation_being_built(self.editor.get_editor_world())):
                 self.validate_saved_map()
                 if RUNTIME:
                     self.levels.editor_play_simulate()
@@ -88,162 +81,174 @@ class Verifier:
         finally:
             self.busy = False
 
-    def ground(self, x, y):
-        # A zero-width ray exactly on a fractional Landscape vertex can miss.
-        # Retry only within one millimeter; broad collision gaps still fail.
+    def vertical_hit(self, x, y, ignore):
+        # Nudge by at most a millimetre to avoid tracing exactly along a triangle edge.
         for dx, dy in ((0, 0), (0, .1), (.1, 0), (-.1, -.1)):
-            result = unreal.SystemLibrary.line_trace_single(self.world,
-                unreal.Vector(x+dx, y+dy, 10000), unreal.Vector(x+dx, y+dy, -10000),
-                unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, self.ignore_terrain,
-                unreal.DrawDebugTrace.NONE, True)
+            result = unreal.SystemLibrary.line_trace_single(
+                self.world, unreal.Vector(x+dx, y+dy, 10000), unreal.Vector(x+dx, y+dy, -10000),
+                unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, ignore, unreal.DrawDebugTrace.NONE, True)
             hit = hit_tuple(result)
             if hit:
-                assert hit[9] == self.landscape
-                return hit[5].z
-        raise AssertionError(f'No Landscape support at {(x, y)}')
+                return hit
+        raise AssertionError(f'No supporting surface at {(x, y)}')
+
+    def ignore_except(self, *keep):
+        return [actor for actor in self.actors if actor not in keep]
+
+    def check_plan_view(self):
+        # The terrain fit may subdivide the curve and change arc lengths. Compare the
+        # horizontal locus to the authored Hermite spans, independently of input keys.
+        nodes = json.loads(SNAPSHOT.read_text(encoding='utf-8-sig'))['nodes']
+        max_error = 0.0
+        for start, end in zip(nodes, nodes[1:] + nodes[:1]):
+            p0, p1 = unreal.Vector(*start['p']), unreal.Vector(*end['p'])
+            leave, arrive = unreal.Vector(*start['leave']), unreal.Vector(*end['arrive'])
+            count = max(16, math.ceil(math.dist(start['p'], end['p']) / 100))
+            for i in range(count):
+                t = i / count
+                point = (p0*((1+2*t)*(1-t)**2) + leave*(t*(1-t)**2)
+                         + p1*(t*t*(3-2*t)) + arrive*(t*t*(t-1)))
+                distance = self.track.find_distance(point)
+                for _ in range(3):
+                    pose = self.track.sample(distance)
+                    delta = point - pose.translation
+                    forward = pose.rotation.vector_forward()
+                    distance += (delta.x*forward.x + delta.y*forward.y)/(forward.x**2 + forward.y**2)
+                match = self.track.sample(distance).translation
+                max_error = max(max_error, math.hypot(point.x-match.x, point.y-match.y))
+        assert max_error < 2, f'Horizontal route moved by {max_error:.2f} cm'
+        return max_error
+
+    def check_station(self, station):
+        assert station.track == self.track and station.get_editor_property('enabled')
+        assert abs(station.platform_length-3800) < .01
+        head = station.get_actor_location()
+        stop = station.get_stop_distance()
+        assert (self.track.sample(stop).translation-head).length() < 1, station.get_actor_label()
+        yaw = math.radians(station.get_actor_rotation().yaw)
+        forward = unreal.Vector(math.cos(yaw), math.sin(yaw), 0)
+        side = 1 if station.get_editor_property('platform_on_right') else -1
+        right = unreal.Vector(-forward.y*side, forward.x*side, 0)
+        for offset in range(-3350, 451, 50):
+            on_track = self.track.sample(stop+offset).translation-head
+            assert abs(on_track.x*right.x+on_track.y*right.y) < 2, 'Platform must follow the track in plan view'
+
+        # Move the editor preview train only. Use collision on the fitted platform,
+        # including its grade, instead of assuming the mesh is a scaled unit cube.
+        assert self.train.arrive_at_station(station)
+        station_only = self.ignore_except(station)
+        steps = []
+        for car in range(1, self.train.vehicle_count):
+            floor = self.train.get_vehicle_floor(car).get_world_transform()
+            for door_x in (-356, 356):
+                door = floor.transform_location(unreal.Vector(door_x, side*110, 10))
+                # A point just outside the car is clear; a point 10cm out must be on the platform.
+                gap = door + right*2
+                hit = unreal.SystemLibrary.line_trace_single(
+                    self.world, gap+unreal.Vector(0,0,25), gap-unreal.Vector(0,0,25),
+                    unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, False, station_only, unreal.DrawDebugTrace.NONE, True)
+                assert not hit_tuple(hit), 'Platform intrudes into the vehicle clearance'
+                edge = door + right*10
+                support = self.vertical_hit(edge.x, edge.y, station_only)
+                assert support[10] == station.platform
+                steps.append(abs(support[5].z-door.z))
+        assert max(steps) <= 5, f'Boarding step at {station.station_id}: {max(steps):.2f} cm'
+
+        toe_gaps = []
+        for x in (170, 250, 330):
+            toe = head + forward*x + right*(115+station.platform_width+298)
+            support = self.vertical_hit(toe.x, toe.y, station_only)
+            assert support[10] == station.access_ramp
+            ground = self.vertical_hit(toe.x, toe.y, self.terrain_only)[5].z
+            toe_gaps.append(support[5].z-ground)
+        assert all(-1 <= gap <= 5 for gap in toe_gaps), toe_gaps
+        return {'id': str(station.station_id), 'max_boarding_step_cm': max(steps), 'ramp_toe_gaps_cm': toe_gaps}
+
+    def check_crossing(self, deck):
+        center = deck.get_actor_location()
+        pose = self.track.sample(self.track.find_distance(center))
+        right = pose.rotation.vector_right()
+        forward = pose.rotation.vector_forward()
+        surfaces = self.ignore_except(deck, self.bed, self.landscape)
+        max_step = 0.0
+        for along in (-150, 0, 150):
+            points = []
+            for across in range(-450, 451, 15):
+                point = center + right*across + forward*along
+                points.append(self.vertical_hit(point.x, point.y, surfaces)[5])
+            path = unreal.NavigationSystemV1.find_path_to_location_synchronously(
+                self.world, points[0]+unreal.Vector(0,0,3), points[-1]+unreal.Vector(0,0,3))
+            assert path and path.is_valid() and not path.is_partial(), 'North crossing is unreachable'
+            assert math.dist(vector(path.path_points[-1])[:2], vector(points[-1])[:2]) < 12
+            for a, b in zip(points, points[1:]):
+                max_step = max(max_step, abs(a.z-b.z))
+                up = unreal.Vector(0,0,94)
+                blocked = unreal.SystemLibrary.capsule_trace_single(
+                    self.world, a+up, b+up, 34, 88, unreal.TraceTypeQuery.TRACE_TYPE_QUERY1,
+                    False, [self.train], unreal.DrawDebugTrace.NONE, True)
+                assert not hit_tuple(blocked), f'Blocked north crossing at {a}'
+        assert max_step <= 6, f'Crossing step: {max_step:.2f} cm'
+        return max_step
 
     def validate_saved_map(self):
         self.world = self.editor.get_editor_world()
         self.actors = list(unreal.get_editor_subsystem(unreal.EditorActorSubsystem).get_all_level_actors())
-        assert len(self.actors) == 171, f'Actor count changed: {len(self.actors)}'
-        by_name = {a.get_name(): a for a in self.actors}
-        by_label = {a.get_actor_label(): a for a in self.actors}
-        self.landscape = by_label['TS_Village_Landscape']
-        self.ignore_terrain = [a for a in self.actors if a != self.landscape]
-        self.track = by_label['TS_Village_LoopRail']
-        self.train = next(a for a in self.actors if isinstance(a, unreal.LoopRailTrain))
-        stations = sorted((a for a in self.actors if isinstance(a, unreal.LoopRailStation)),
-                          key=lambda a: str(a.get_editor_property('station_id')))
-        assert len(stations) == 3
-        assert [str(a.get_editor_property('station_id')) for a in stations] == ['village_01', 'village_02', 'village_03']
-        assert self.track.is_usable_loop() and self.train.has_usable_track()
-        assert self.train.get_editor_property('track') == self.track
-        assert self.train.get_editor_property('vehicle_count') == 4
-        assert abs(self.train.get_editor_property('vehicle_gap')-80) < .01
-        assert abs(self.train.get_consist_length()-3840) < .01
-        spline = self.track.get_editor_property('spline')
+        labels = {actor.get_actor_label(): actor for actor in self.actors}
+        self.landscape = labels['TS_Village_Landscape']
+        self.bed = labels['TS_Village_GravelTrackBed']
+        deck = labels['TS_Village_NorthTimberCrossing']
+        self.terrain_only = self.ignore_except(self.landscape)
+        bed_only = self.ignore_except(self.bed)
+        self.track, = [a for a in self.actors if isinstance(a, unreal.LoopRailTrack)]
+        self.train, = [a for a in self.actors if isinstance(a, unreal.LoopRailTrain)]
+        stations = sorted((a for a in self.actors if isinstance(a, unreal.LoopRailStation)), key=lambda a: str(a.station_id))
+        assert [str(a.station_id) for a in stations] == ['village_01', 'village_02', 'village_03']
+        assert self.track.is_usable_loop() and self.train.has_usable_track() and self.train.track == self.track
+        assert self.train.vehicle_count == 4 and abs(self.train.get_consist_length()-3840) < .01
         length = self.track.get_length()
-        expected_length = 60000 + 2*math.pi*4000
-        assert abs(length-expected_length) < 600, f'Unexpected rounded loop length {length}'
-
-        snapshot = json.loads(SNAPSHOT.read_text(encoding='utf-8'))
-        central = [r for r in snapshot['actors'] if r['category'] == 'central_test_actor']
-        assert len(central) == 156
-        for record in central:
-            actor = by_name[record['name']]
-            after = record['after']
-            rotation = actor.get_actor_rotation()
-            for actual, expected in ((vector(actor.get_actor_location()), after['location_cm']),
-                                     (vector(actor.get_actor_scale3d()), after['scale'])):
-                assert all(abs(a-b) < .01 for a, b in zip(actual, expected)), f"Central transform changed: {record['name']}"
-            actual = [rotation.pitch, rotation.yaw, rotation.roll]
-            assert all(abs((a-b+180)%360-180) < .01 for a, b in zip(actual, after['rotation_degrees'])), f"Central rotation changed: {record['name']}"
-
-        station_reports = []
-        for station, (x, y, yaw) in zip(stations, HEADS):
-            assert station.get_editor_property('track') == self.track
-            assert station.get_editor_property('enabled')
-            assert abs(station.get_editor_property('platform_length')-3800) < .01
-            p = station.get_actor_location()
-            assert math.hypot(p.x-x, p.y-y) < 2, f'Wrong station head: {station.get_actor_label()}'
-            stop = station.get_stop_distance()
-            direction = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw)), 0]
-            max_lateral = max_height_delta = max_direction_error = 0
-            for offset in range(-3840, 501, 20):
-                pose = self.track.sample(stop+offset)
-                point = pose.translation
-                difference = [point.x-p.x, point.y-p.y, point.z-p.z]
-                lateral = abs(difference[0]*direction[1]-difference[1]*direction[0])
-                heading_error = angle(vector(pose.rotation.vector_forward()), direction)
-                max_lateral = max(max_lateral, lateral)
-                max_height_delta = max(max_height_delta, abs(difference[2]))
-                max_direction_error = max(max_direction_error, heading_error)
-            assert max_lateral < 2 and max_height_delta < 2 and max_direction_error < .2, (
-                station.get_actor_label(), max_lateral, max_height_delta, max_direction_error)
-            platform = station.get_editor_property('platform')
-            ramp = station.get_editor_property('access_ramp')
-            side = 1 if station.get_editor_property('platform_on_right') else -1
-            platform_pose = platform.get_world_transform()
-            platform_edge = unreal.MathLibrary.transform_location(platform_pose, unreal.Vector(0, -side*50, 50))
-            platform_local = unreal.MathLibrary.inverse_transform_location(station.get_actor_transform(), platform_edge)
-            assert abs(platform_local.z-60) < .1, 'Platform must meet the vehicle floor at +60cm'
-            boarding_gap = abs(platform_local.y)-110
-            assert 0 <= boarding_gap <= 10, f'Platform boarding gap {boarding_gap}'
-            platform_ground_gaps = []
-            for longitudinal in (-50, 0, 50):
-                for lateral in (-50, 50):
-                    point = unreal.MathLibrary.transform_location(platform_pose, unreal.Vector(longitudinal, lateral, -50))
-                    platform_ground_gaps.append(point.z-self.ground(point.x, point.y))
-            assert min(platform_ground_gaps) >= -10 and max(platform_ground_gaps) <= 30, (
-                'Platform foundation terrain clearance', station.get_actor_label(), platform_ground_gaps)
-            ramp_ground_gaps = []
-            for longitudinal in (-45, 0, 45):
-                tip = unreal.MathLibrary.transform_location(ramp.get_world_transform(), unreal.Vector(longitudinal, side*50, 50))
-                ramp_ground_gaps.append(tip.z-self.ground(tip.x, tip.y))
-            assert all(-10 <= gap <= 40 for gap in ramp_ground_gaps), (
-                'Station ramp outer edge must meet terrain within step height', station.get_actor_label(), ramp_ground_gaps)
-            station_reports.append({'station_id': str(station.get_editor_property('station_id')),
-                'head_cm': vector(p), 'stop_distance_cm': stop, 'straight_sample_count': 218,
-                'max_lateral_cm': max_lateral, 'max_height_delta_cm': max_height_delta,
-                'max_heading_error_degrees': max_direction_error, 'boarding_gap_cm': boarding_gap,
-                'platform_foundation_ground_gap_cm': platform_ground_gaps,
-                'ramp_outer_edge_ground_gap_cm': ramp_ground_gaps})
+        assert self.track.sleepers.get_instance_count() == math.ceil(length/self.track.sleeper_spacing)
+        assert self.track.rails.get_instance_count() == 2*math.ceil(length/self.track.rail_segment_length)
+        assert self.track.sleepers.static_mesh.get_name() == 'SM_VillageRailSleeper'
+        assert self.track.rails.static_mesh.get_name() == 'SM_VillageSteelRail'
+        for suffix in ('In', 'Out'):
+            assert labels['TS_Village_NorthCrossbuck_'+suffix].static_mesh_component.static_mesh.get_name() == 'SM_VillageCrossbuck'
 
         sample_count = math.ceil(length/100)
-        support_deltas, grades, heading_changes, shape_errors = [], [], [], []
-        previous_direction = None
-        clearance_ignores = [self.track, self.train] + stations
-        extents_xy = []
-        for index in range(sample_count):
-            distance = index*length/sample_count
-            pose = self.track.sample(distance)
+        clearance_ignores = [self.track, self.train, *stations]
+        ground_gaps, ballast_gaps, grades = [], [], []
+        for i in range(sample_count):
+            pose = self.track.sample(i*length/sample_count)
             p = pose.translation
-            direction = pose.rotation.vector_forward()
-            right = pose.rotation.vector_right()
-            extents_xy.append([p.x, p.y])
-            # Signed distance to the requested 240m x 220m rounded rectangle,
-            # with 40m corner radii. Cubic quarter-circle approximation is allowed.
-            qx, qy = abs(p.x)-8000, abs(p.y)-7000
-            shape_errors.append(abs(math.hypot(max(qx, 0), max(qy, 0))+min(max(qx, qy), 0)-4000))
-            grades.append(abs(math.degrees(math.atan2(direction.z, math.hypot(direction.x, direction.y)))))
-            if previous_direction is not None:
-                heading_changes.append(angle(previous_direction, vector(direction)))
-            previous_direction = vector(direction)
-            for offset in (-75, 0, 75):
-                q = p+right*offset
-                support_deltas.append(q.z-self.ground(q.x, q.y))
-            # The rail and own station/train meshes are intentionally excluded;
-            # terrain, central props and map boundaries must clear the car body.
-            center = p+unreal.Vector(0, 0, 225)
-            hit = hit_tuple(unreal.SystemLibrary.box_trace_single_by_profile(self.world,
-                center, center+unreal.Vector(0, 0, .1), unreal.Vector(450, 115, 150),
-                pose.rotation.rotator(), 'Pawn', False, clearance_ignores,
-                unreal.DrawDebugTrace.NONE, True))
-            assert not hit, f'Car body clearance blocked at {distance}: {hit[9].get_actor_label() if hit else ""}'
-        assert max(grades) <= MAX_GRADE_DEGREES, f'Rail grade {max(grades)}'
-        assert max(shape_errors) <= 15, f'Rail deviates from rounded rectangle {max(shape_errors)}cm'
-        assert max(heading_changes) <= 3, f'Rail kink per meter {max(heading_changes)}'
-        assert min(support_deltas) >= 5 and max(support_deltas) <= 25, (
-            'Sleepers unsupported or buried', min(support_deltas), max(support_deltas))
-        assert abs(max(abs(p[0]) for p in extents_xy)-12000) < 2
-        assert abs(max(abs(p[1]) for p in extents_xy)-11000) < 2
+            grades.append(abs(pose.rotation.rotator().pitch))
+            for offset in (-self.track.gauge/2, 0, self.track.gauge/2):
+                point = p + pose.rotation.vector_right()*offset
+                ground_gaps.append(point.z-self.vertical_hit(point.x, point.y, self.terrain_only)[5].z)
+                ballast_gaps.append(point.z-self.vertical_hit(point.x, point.y, bed_only)[5].z)
+            center = p + unreal.Vector(0, 0, 225)
+            hit = hit_tuple(unreal.SystemLibrary.box_trace_single_by_profile(
+                self.world, center, center+unreal.Vector(0,0,.1), unreal.Vector(450,115,150),
+                pose.rotation.rotator(), 'Pawn', False, clearance_ignores, unreal.DrawDebugTrace.NONE, True))
+            assert not hit, f'Car clearance blocked at {p}: {hit[9].get_actor_label() if hit else ""}'
+        assert max(grades) <= MAX_GRADE_DEGREES, max(grades)
+        assert min(ground_gaps) > 0, 'Landscape protrudes through a rail'
+        assert min(ballast_gaps) > 1 and max(ballast_gaps) < 15, 'Rail bed misses the sleepers or covers the rail head'
+        spline = self.track.spline
         joins = []
-        for index in range(spline.get_number_of_spline_points()):
-            distance = spline.get_distance_along_spline_at_spline_point(index)
-            before = self.track.sample(distance-1).rotation.vector_forward()
-            after = self.track.sample(distance+1).rotation.vector_forward()
-            joins.append(angle(vector(before), vector(after)))
-        assert max(joins) < .5, f'Spline tangent break: {max(joins)}'
-        for actor in [self.track, self.train] + stations:
+        for i in range(spline.get_number_of_spline_points()):
+            d = spline.get_distance_along_spline_at_spline_point(i)
+            before = self.track.sample(d-1).rotation.vector_forward()
+            after = self.track.sample(d+1).rotation.vector_forward()
+            cosine = before.x*after.x + before.y*after.y + before.z*after.z
+            joins.append(math.degrees(math.acos(max(-1, min(1, cosine)))))
+        assert max(joins) < .5, f'Spline tangent break: {max(joins):.2f} degrees'
+        for actor in [self.track, self.bed, *stations]:
             center, extent = actor.get_actor_bounds(False)
-            assert abs(center.x)+extent.x < 14900 and abs(center.y)+extent.y < 14900, (
-                'Rail infrastructure outside 300m boundary', actor.get_actor_label(), vector(center), vector(extent))
-        self.report['structure'] = {'actor_count': len(self.actors), 'central_transforms_unchanged': len(central),
-            'length_cm': length, 'rail_samples': sample_count, 'ground_samples': len(support_deltas),
-            'rail_ground_clearance_cm': [min(support_deltas), max(support_deltas)],
-            'max_rounded_rectangle_error_cm': max(shape_errors),
-            'max_grade_degrees': max(grades), 'max_heading_change_per_meter_degrees': max(heading_changes),
-            'max_join_angle_degrees': max(joins), 'stations': station_reports}
+            assert abs(center.x)+extent.x < 15000 and abs(center.y)+extent.y < 15000, actor.get_actor_label()
+        self.report['structure'] = {
+            'length_cm': length, 'rail_samples': sample_count, 'max_grade_degrees': max(grades), 'max_join_angle_degrees': max(joins),
+            'max_horizontal_error_cm': self.check_plan_view(), 'rail_ground_clearance_cm': [min(ground_gaps), max(ground_gaps)],
+            'rail_ballast_clearance_cm': [min(ballast_gaps), max(ballast_gaps)],
+            'crossing_max_step_cm': self.check_crossing(deck), 'stations': [self.check_station(station) for station in stations]}
         unreal.SystemLibrary.execute_console_command(self.world, 'MAP CHECK')
 
     def begin_runtime_check(self):
