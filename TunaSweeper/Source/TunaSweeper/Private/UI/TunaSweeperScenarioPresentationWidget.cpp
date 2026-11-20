@@ -23,7 +23,6 @@ namespace TunaSweeperScenarioPresentation
 	const FName OpeningScenarioFlag(TEXT("scenario.opening.awakening"));
 	const FName BunkerLevelName(TEXT("BunkerMap"));
 	const TCHAR* OpeningBackgroundTexturePath = TEXT("/Game/UI/Story/T_Story_OpeningLightParticles.T_Story_OpeningLightParticles");
-	const TCHAR* IntroVideoMaskTexturePath = TEXT("/Game/UI/Story/IntroVedeoMask.IntroVedeoMask");
 	const TCHAR* IntroVideoFilePath = TEXT("./Movies/intro.mp4");
 	constexpr float FadeInSeconds = 1.2f;
 	constexpr float MinimumLineSeconds = 2.2f;
@@ -313,9 +312,6 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	IntroVideoImage = WidgetTree->ConstructWidget<UImage>(
 		UImage::StaticClass(),
 		TEXT("ScenarioIntroVideoImage"));
-	IntroVideoMaskImage = WidgetTree->ConstructWidget<UImage>(
-		UImage::StaticClass(),
-		TEXT("ScenarioIntroVideoMaskImage"));
 	VignetteOverlay = WidgetTree->ConstructWidget<UBorder>(
 		UBorder::StaticClass(),
 		TEXT("ScenarioVignetteOverlay"));
@@ -335,7 +331,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		UBorder::StaticClass(),
 		TEXT("ScenarioFadeOverlay"));
 
-	if (!RootCanvas || !BackgroundImage || !IntroVideoImage || !IntroVideoMaskImage || !VignetteOverlay || !TitleText || !StatusText || !MonologueText || !PromptText || !FadeOverlay)
+	if (!RootCanvas || !BackgroundImage || !IntroVideoImage || !VignetteOverlay || !TitleText || !StatusText || !MonologueText || !PromptText || !FadeOverlay)
 	{
 		return;
 	}
@@ -360,18 +356,6 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	IntroVideoImage->SetBrush(IntroVideoBrush);
 	IntroVideoImage->SetVisibility(ESlateVisibility::Collapsed);
 	AddFullScreenChild(RootCanvas, IntroVideoImage, 2);
-
-	FSlateBrush IntroVideoMaskBrush;
-	IntroVideoMaskBrush.DrawAs = ESlateBrushDrawType::Image;
-	IntroVideoMaskBrush.TintColor = FSlateColor(FLinearColor::White);
-	IntroVideoMaskBrush.ImageSize = FVector2D(1920.0f, 1080.0f);
-	if (UTexture2D* IntroVideoMaskTexture = LoadObject<UTexture2D>(nullptr, TunaSweeperScenarioPresentation::IntroVideoMaskTexturePath))
-	{
-		IntroVideoMaskBrush.SetResourceObject(IntroVideoMaskTexture);
-	}
-	IntroVideoMaskImage->SetBrush(IntroVideoMaskBrush);
-	IntroVideoMaskImage->SetVisibility(ESlateVisibility::Collapsed);
-	AddFullScreenChild(RootCanvas, IntroVideoMaskImage, 3);
 
 	VignetteOverlay->SetBrushColor(FLinearColor::Black);
 	VignetteOverlay->SetRenderOpacity(0.38f);
@@ -747,12 +731,6 @@ void UTunaSweeperScenarioPresentationWidget::SetIntroVideoVisible(bool bVisible)
 	if (IntroVideoImage)
 	{
 		IntroVideoImage->SetVisibility(bVisible
-			? ESlateVisibility::SelfHitTestInvisible
-			: ESlateVisibility::Collapsed);
-	}
-	if (IntroVideoMaskImage)
-	{
-		IntroVideoMaskImage->SetVisibility(bVisible
 			? ESlateVisibility::SelfHitTestInvisible
 			: ESlateVisibility::Collapsed);
 	}

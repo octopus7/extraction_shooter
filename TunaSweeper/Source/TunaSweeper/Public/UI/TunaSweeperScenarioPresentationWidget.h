@@ -77,9 +77,6 @@ private:
 	TObjectPtr<UImage> IntroVideoImage;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UImage> IntroVideoMaskImage;
-
-	UPROPERTY(Transient)
 	TObjectPtr<UBorder> VignetteOverlay;
 
 	UPROPERTY(Transient)

@@ -6,6 +6,7 @@
 #include "WaveDefense/WaveDefenseParticipantComponent.h"
 #include "WaveDefense/WaveDefenseFacility.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "GameFramework/DefaultPawn.h"
