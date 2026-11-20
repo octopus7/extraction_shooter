@@ -1,3 +1,3 @@
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_MODULE(FDefaultModuleImpl, ForestQuadbot)
+IMPLEMENT_GAME_MODULE(FDefaultGameModuleImpl, ForestQuadbot)

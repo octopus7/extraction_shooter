@@ -18,6 +18,16 @@ namespace
 	constexpr int32 FirstPanelDataIndex = 1;
 	constexpr int32 MaxEjectedPanels = 3;
 	const FName ShellSlot(TEXT("Shell"));
+	const FName LightSmokeTag(TEXT("Quadbot.LightSmoke"));
+	const FName CriticalExhaustTag(TEXT("Quadbot.CriticalExhaust"));
+
+	void SetExhaustActive(AActor& Robot, FName Tag, bool bActive)
+	{
+		for (UActorComponent* Effect : Robot.GetComponentsByTag(UActorComponent::StaticClass(), Tag))
+		{
+			Effect->SetActive(bActive);
+		}
+	}
 }
 
 AForestQuadbotEnemy::AForestQuadbotEnemy()
@@ -62,6 +72,21 @@ float AForestQuadbotEnemy::TakeDamage(float DamageAmount, const FDamageEvent& Da
 	if (Applied > 0.f && !IsDead())
 	{
 		SetScorchAmount(ScorchAmount + Applied / FMath::Max(MaxHealth, 1.f));
+		if (GetNetMode() != NM_DedicatedServer)
+		{
+			const float Health = GetHealth();
+			const float PreviousHealth = Health + Applied;
+			const float CriticalThreshold = MaxHealth / 3.f;
+			const float SmokeThreshold = 2.f * CriticalThreshold;
+			if (PreviousHealth > SmokeThreshold && Health <= SmokeThreshold)
+			{
+				SetExhaustActive(*this, LightSmokeTag, true);
+			}
+			if (PreviousHealth > CriticalThreshold && Health <= CriticalThreshold)
+			{
+				SetExhaustActive(*this, CriticalExhaustTag, true);
+			}
+		}
 	}
 	return Applied;
 }
@@ -70,7 +95,10 @@ void AForestQuadbotEnemy::OnDeathPresentationStarted()
 {
 	Super::OnDeathPresentationStarted();
 	SetScorchAmount(1.f);
-	if (!BreakawayPanels.Num() || GetNetMode() == NM_DedicatedServer) return;
+	if (GetNetMode() == NM_DedicatedServer) return;
+	SetExhaustActive(*this, LightSmokeTag, false);
+	SetExhaustActive(*this, CriticalExhaustTag, false);
+	if (!BreakawayPanels.Num()) return;
 	TArray<int32, TInlineAllocator<24>> Pool;
 	for (int32 I = 0; I < BreakawayPanels.Num(); ++I) Pool.Add(I);
 	const int32 Count = FMath::Min(Pool.Num(), FMath::RandRange(2, MaxEjectedPanels));

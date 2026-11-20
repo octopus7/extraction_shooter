@@ -21,6 +21,13 @@
     "condition_id": "always"
   },
   {
+    "placement_id": 4,
+    "profile_id": "enemy.forest_xhigh_quadbot",
+    "spawn_chance": 10000,
+    "level_name": "RaidForest",
+    "condition_id": "always"
+  },
+  {
     "placement_id": 1,
     "profile_id": "enemy.marine_delivery",
     "spawn_chance": 10000,
