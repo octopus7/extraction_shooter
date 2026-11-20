@@ -5,6 +5,7 @@
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
 #include "Rendering/DrawElements.h"
 #include "Styling/SlateBrush.h"
+#include "Styling/CoreStyle.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
@@ -41,7 +42,7 @@ namespace TunaSweeperDeliveryIndicator
     }
 
     void DrawMarker(const FPlacement& Placement, UTexture2D* Icon, const FGeometry& Geometry,
-        FSlateWindowElementList& Elements, int32& Layer)
+        FSlateWindowElementList& Elements, int32& Layer, bool bSupplyDrop)
     {
         const FLinearColor Gold(1.f, .76f, .22f, 1.f);
         auto BoxGeometry = [&](const FVector2D& Position, const FVector2D& Size)
@@ -56,7 +57,24 @@ namespace TunaSweeperDeliveryIndicator
         FSlateDrawElement::MakeBox(Elements, Layer + 1,
             BoxGeometry(Placement.Position - FVector2D(25,25), FVector2D(50,50)),
             &Badge, ESlateDrawEffect::None, FLinearColor(.018f,.025f,.03f,.92f));
-        if (Icon)
+        if (bSupplyDrop)
+        {
+            const FVector2D C = Placement.Position;
+            auto Stroke = [&](TArray<FVector2D> Points, FLinearColor Color, float Width)
+            {
+                for (auto& Point : Points) Point += C;
+                FSlateDrawElement::MakeLines(Elements, Layer + 2, Geometry.ToPaintGeometry(),
+                    Points, ESlateDrawEffect::None, Color, true, Width);
+            };
+            const FLinearColor Canvas(.68f, .79f, .41f);
+            Stroke({{-15,-4},{-12,-10},{-7,-14},{0,-16},{7,-14},{12,-10},{15,-4},{-15,-4}}, Canvas, 2.5f);
+            Stroke({{-6,-4},{-4,-11},{0,-16},{4,-11},{6,-4}}, Canvas, 1.5f);
+            Stroke({{-14,-3},{-5,7},{5,7},{14,-3}}, FLinearColor::White, 1.5f);
+            FSlateDrawElement::MakeBox(Elements, Layer + 2, BoxGeometry(C + FVector2D(-8,7), FVector2D(16,10)),
+                FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, FLinearColor(.8f,.11f,.075f));
+            Stroke({{-7,9},{7,9}}, FLinearColor(1.f,.64f,.38f), 1.5f);
+        }
+        else if (Icon)
         {
             FSlateBrush Image;
             Image.DrawAs = ESlateBrushDrawType::Image;
@@ -80,8 +98,10 @@ namespace TunaSweeperDeliveryIndicator
         {
             const FVector2D D = Placement.Direction;
             const FVector2D Side(-D.Y, D.X);
-            const FVector2D Tip = Placement.Position + D * 40;
-            const TArray<FVector2D> Arrow = {Tip - D * 10 + Side * 8, Tip, Tip - D * 10 - Side * 8};
+            const FVector2D Base = Placement.Position + D * 30;
+            const FVector2D Tip = Base + D * (bSupplyDrop ? 23 : 10);
+            TArray<FVector2D> Arrow = {Base + Side * 8, Tip, Base - Side * 8};
+            if (bSupplyDrop) Arrow.Add(Base + Side * 8);
             FSlateDrawElement::MakeLines(Elements, Layer + 2, Geometry.ToPaintGeometry(), Arrow,
                 ESlateDrawEffect::None, FLinearColor(0,0,0,.9f), true, 7.f);
             FSlateDrawElement::MakeLines(Elements, Layer + 3, Geometry.ToPaintGeometry(), Arrow,

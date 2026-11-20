@@ -252,6 +252,12 @@ void UTunaSweeperSupplyDropSubsystem::OnWorldEndPlay(UWorld& InWorld)
 	Super::OnWorldEndPlay(InWorld);
 }
 
+const ATunaSweeperSupplyDropActor* UTunaSweeperSupplyDropSubsystem::GetDescendingDrop() const
+{
+	const auto* Drop = ActiveDrop.Get();
+	return Drop && Drop->IsDescending() ? Drop : nullptr;
+}
+
 void UTunaSweeperSupplyDropSubsystem::TrySpawnDrop()
 {
 	UWorld& World = GetWorldRef();
@@ -293,6 +299,7 @@ void UTunaSweeperSupplyDropSubsystem::TrySpawnDrop()
 		{
 			Drop->ConfigureDrop(*Assets, ContainerDefinitionId, ContentsId, LandingLocation);
 			Drop->FinishSpawning(ReleaseTransform);
+			ActiveDrop = Drop;
 			UE_LOG(LogTunaSweeperSupplyDrop, Log, TEXT("Released supply drop with preset %d in %s at %s."),
 				ContentsId, *World.GetMapName(), *LandingLocation.ToCompactString());
 			World.GetTimerManager().ClearTimer(SpawnTimer);

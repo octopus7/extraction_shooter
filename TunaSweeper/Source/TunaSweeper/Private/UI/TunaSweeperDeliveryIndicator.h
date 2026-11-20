@@ -21,6 +21,6 @@ namespace TunaSweeperDeliveryIndicator
         bool bInFront, float Seconds, FPlacement& Out, float Inset = 80.0f,
         float BounceHeight = 14.0f, float BouncePeriod = 1.2f);
     void DrawMarker(const FPlacement& Placement, UTexture2D* Icon, const FGeometry& Geometry,
-        FSlateWindowElementList& Elements, int32& Layer);
+        FSlateWindowElementList& Elements, int32& Layer, bool bSupplyDrop = false);
     bool TryGetItemId(const ATunaSweeperDeliveryDestinationActor* Destination, int32& OutItemId);
 }

@@ -14,6 +14,9 @@ class TUNASWEEPER_API ATunaSweeperSupplyDropActor : public ATunaSweeperLootConta
 public:
 	ATunaSweeperSupplyDropActor();
 
+	bool IsDescending() const { return !bLanded; }
+	float GetDescentElapsed() const { return Elapsed; }
+
 	void ConfigureDrop(const UTunaSweeperSupplyDropDataAsset& Assets, int32 DefinitionId, int32 InContentsId,
 		const FVector& InLandingLocation);
 	virtual bool OpenRuntimeContainer(UTunaSweeperGameInstance* Game, FTunaSweeperLootContainerInstance& OutInstance) override;

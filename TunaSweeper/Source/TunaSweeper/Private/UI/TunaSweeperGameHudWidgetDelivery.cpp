@@ -3,8 +3,44 @@
 
 #include "Camera/PlayerCameraManager.h"
 #include "EngineUtils.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/GameViewportClient.h"
+#include "SceneView.h"
 #include "Interaction/TunaSweeperDeliveryDestinationActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Fonts/FontMeasure.h"
+#include "Raid/TunaSweeperSupplyDropActor.h"
+#include "Subsystem/TunaSweeperSupplyDropSubsystem.h"
+
+namespace
+{
+    void DrawSupplyTicker(const FGeometry& Geometry, FSlateWindowElementList& Elements,
+        int32& Layer, float Seconds, const FText& Message)
+    {
+        if (Message.IsEmpty()) return;
+        const float Width = FMath::Min(520.f, Geometry.GetLocalSize().X - 48.f);
+        const FVector2f Origin((Geometry.GetLocalSize().X - Width) * .5f, 10.f);
+        const auto Strip = Geometry.ToPaintGeometry(FVector2f(Width, 34.f), FSlateLayoutTransform(Origin));
+        FSlateDrawElement::MakeBox(Elements, ++Layer, Strip, FCoreStyle::Get().GetBrush("WhiteBrush"),
+            ESlateDrawEffect::None, FLinearColor(.024f,.033f,.035f,.90f));
+
+        const FSlateFontInfo Font = TunaSweeperUIFont::MakeFont(nullptr, 16, ETunaSweeperUIFontWeight::Bold);
+        const FVector2D TextSize = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Message, Font);
+        const float Pitch = TextSize.X + 80.f;
+        const float Offset = FMath::Fmod(Seconds * 64.f, Pitch);
+        const float Alpha = .72f + .28f * FMath::Cos(Seconds * UE_TWO_PI / 2.2f);
+        Elements.PushClip(FSlateClippingZone(Strip));
+        ++Layer;
+        for (float X = 12.f - Offset; X < Width; X += Pitch)
+        {
+            const FVector2f Position = Origin + FVector2f(X, (34.f - TextSize.Y) * .5f);
+            FSlateDrawElement::MakeText(Elements, Layer,
+                Geometry.ToPaintGeometry(FVector2f(TextSize), FSlateLayoutTransform(Position)),
+                Message, Font, ESlateDrawEffect::None, FLinearColor(1.f,.86f,.53f,Alpha));
+        }
+        Elements.PopClip();
+    }
+}
 
 void UTunaSweeperGameHudWidget::RefreshDeliveryIndicators(float DeltaTime)
 {
@@ -61,22 +97,22 @@ void UTunaSweeperGameHudWidget::DrawDeliveryIndicators(
     if (const auto* Character = Cast<ATunaSweeperTopDownCharacter>(Pawn); Character && Character->IsDead()) return;
     const FVector2D Size = Geometry.GetLocalSize();
     if (Size.X < 128 || Size.Y < 128) return;
-    const FGeometry PlayerGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(Controller);
+    const ULocalPlayer* Player = Controller->GetLocalPlayer();
+    FSceneViewProjectionData Projection;
+    if (!Player || !Player->ViewportClient || !Player->ViewportClient->Viewport ||
+        !Player->GetProjectionData(Player->ViewportClient->Viewport, Projection)) return;
+    const FIntRect Rect = Projection.GetConstrainedViewRect();
+    if (Rect.Width() <= 0 || Rect.Height() <= 0) return;
+    const FMatrix ViewProjection = Projection.ComputeViewProjectionMatrix();
     const APlayerCameraManager* Camera = Controller->PlayerCameraManager;
     const FRotationMatrix CameraBasis(Camera->GetCameraRotation());
-    TArray<FVector2D> DrawnCenters;
-    for (const auto& Target : DeliveryIndicatorTargets)
+    auto ProjectMarker = [&](const FVector& Location, TunaSweeperDeliveryIndicator::FPlacement& Placement)
     {
-        const auto* Destination = Target.Destination.Get();
-        int32 ItemId = 0;
-        // Recheck at paint time too: submission or losing the parcel immediately removes the marker.
-        if (!TunaSweeperDeliveryIndicator::TryGetItemId(Destination, ItemId)) continue;
-        const FVector Location = Destination->Interactable ? Destination->Interactable->GetInteractionLocation() : Destination->GetActorLocation();
         FVector2D Projected;
-        const bool bProjected = UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(Controller, Location, Projected, true);
+        const bool bProjected = FSceneView::ProjectWorldToScreen(Location, Rect, ViewProjection, Projected);
         if (bProjected)
         {
-            Projected = Geometry.AbsoluteToLocal(PlayerGeometry.LocalToAbsolute(Projected));
+            Projected = (Projected - FVector2D(Rect.Min)) * Size / FVector2D(Rect.Size());
         }
         else
         {
@@ -88,9 +124,32 @@ void UTunaSweeperGameHudWidget::DrawDeliveryIndicators(
             if (Direction.IsNearlyZero()) Direction = FVector2D(0,-1);
             Projected = Size * .5 + Direction * FMath::Max(Size.X, Size.Y) * 2;
         }
+        return TunaSweeperDeliveryIndicator::ComputePlacement(Size, Projected, bProjected,
+            GetWorld()->GetTimeSeconds(), Placement);
+    };
+
+    TArray<FVector2D> DrawnCenters;
+    const auto* Drops = GetWorld()->GetSubsystem<UTunaSweeperSupplyDropSubsystem>();
+    if (const auto* Drop = Drops ? Drops->GetDescendingDrop() : nullptr)
+    {
         TunaSweeperDeliveryIndicator::FPlacement Placement;
-        if (!TunaSweeperDeliveryIndicator::ComputePlacement(Size, Projected, bProjected,
-            GetWorld()->GetTimeSeconds(), Placement)) continue;
+        if (ProjectMarker(Drop->GetActorLocation(), Placement))
+        {
+            TunaSweeperDeliveryIndicator::DrawMarker(Placement, nullptr, Geometry, Elements, Layer, true);
+            DrawnCenters.Add(Placement.Position);
+        }
+        DrawSupplyTicker(Geometry, Elements, Layer, Drop->GetDescentElapsed(),
+            ResolveUiText(GetGameInstance<UTunaSweeperGameInstance>(), TEXT("ui.hud.supply_drop_descending"), TEXT("")));
+    }
+
+    for (const auto& Target : DeliveryIndicatorTargets)
+    {
+        const auto* Destination = Target.Destination.Get();
+        int32 ItemId = 0;
+        if (!TunaSweeperDeliveryIndicator::TryGetItemId(Destination, ItemId)) continue;
+        const FVector Location = Destination->Interactable ? Destination->Interactable->GetInteractionLocation() : Destination->GetActorLocation();
+        TunaSweeperDeliveryIndicator::FPlacement Placement;
+        if (!ProjectMarker(Location, Placement)) continue;
         // If parcels share a bearing, use separate inward lanes without rotating their arrows.
         for (int32 Attempt = 0; Attempt < DrawnCenters.Num(); ++Attempt)
         {

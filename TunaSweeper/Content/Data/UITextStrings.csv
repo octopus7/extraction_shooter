@@ -919,3 +919,4 @@ ui.helper_item_grant.unsupported,아이템 지급 인터페이스에 접근할 �
 ui.helper_item_grant.working,아이템 지급 및 저장 응답을 기다리는 중입니다…,Waiting for item grant and save confirmation…,付与と保存の応答を待っています…,正在等待发放和保存确认…,正在等待發放和儲存確認…,Ожидание подтверждения выдачи и сохранения…
 ui.helper_item_grant.stale,맵 또는 슬롯이 바뀌었거나 요청이 만료되었습니다. 현재 대상을 확인하세요.,"The map or slot changed, or the request expired. Check the current target.",マップまたはスロットが変更されたか、要求が期限切れです。対象を確認してください。,地图或存档已更改，或请求已过期。请检查当前目标。,地圖或存檔已變更，或請求已過期。請檢查目前目標。,Карта или ячейка изменилась либо запрос истёк. Проверьте цель.
 ui.helper_item_grant.timeout,응답 시간이 초과됐습니다. 중복 지급 방지를 위해 게임 소지품을 확인한 뒤 다시 시도하세요.,Response timed out. Check the inventory before retrying to avoid duplicate grants.,応答がタイムアウトしました。重複付与を避けるため、所持品を確認してください。,响应超时。请先检查背包，避免重复发放。,回應逾時。請先檢查背包，避免重複發放。,Время ожидания истекло. Проверьте инвентарь перед повторной выдачей.
+ui.hud.supply_drop_descending,보급 상자가 낙하중입니다,Supply crate descending,補給箱が降下中です,补给箱正在空降,補給箱正在空降,Сброс припасов
