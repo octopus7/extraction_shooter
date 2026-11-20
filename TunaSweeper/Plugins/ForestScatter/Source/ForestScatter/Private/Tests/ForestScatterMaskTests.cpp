@@ -88,6 +88,12 @@ bool FForestScatterProjectedMaskTest::RunTest(const FString& Parameters)
 	ForestInstance->SetScalarParameterValue(TEXT("PreviewOpacity"), 0.0f);
 	TestTrue(TEXT("A hidden selected overlay leaves the forest mask available"), Mask.Build(World, Explicit));
 	TestTrue(TEXT("Hidden overlay does not cover the forest mask"), Mask.IsGreen(FVector(840, -332, 70)));
+	Overlay->GetDecal()->ComponentTags.Add(TEXT("PCGPlantingGuide"));
+	OverlayInstance->SetScalarParameterValue(TEXT("PreviewOpacity"), 0.0f);
+	TestTrue(TEXT("Discover a tagged planting guide with the preview disabled"), Mask.Build(World, {}));
+	TestFalse(TEXT("The tagged guide keeps the overlaid road clear"), Mask.IsGreen(FVector(840, -332, 70)));
+	TestTrue(TEXT("An explicitly selected hidden guide works on its own"), Mask.Build(World, {Overlay}));
+	TestFalse(TEXT("The selected road remains clear"), Mask.IsGreen(FVector(840, -332, 70)));
 	TestFalse(TEXT("A missing world clears the cache"), Mask.Build(nullptr, {}));
 	TestFalse(TEXT("Previous samples are no longer present"), Mask.IsGreen(FVector(840, -332, 70)));
 	return true;

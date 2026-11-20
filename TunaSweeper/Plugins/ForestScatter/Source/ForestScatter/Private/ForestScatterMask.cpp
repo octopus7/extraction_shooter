@@ -12,20 +12,21 @@ namespace
 {
 	constexpr TCHAR LayoutMaterialPath[] = TEXT("/Game/MainRaid/EditorPreviews/VillageLayout/M_LocalLayoutPreview.M_LocalLayoutPreview");
 	constexpr TCHAR ForestGuidePath[] = TEXT("/Game/MainRaid/EditorPreviews/VillageLayout/MI_Layout_Forest.MI_Layout_Forest");
+	const FName PlantingGuideTag(TEXT("PCGPlantingGuide"));
 	const FName PreviewTextureName(TEXT("PreviewTexture"));
 	const FName PreviewOpacityName(TEXT("PreviewOpacity"));
 
 	bool IsPlantingGuide(const UDecalComponent& Decal, bool bExplicitSelection)
 	{
 		UMaterialInterface* GuideMaterial = Decal.GetDecalMaterial();
-		bool bIsForestGuide = false;
+		bool bIsPlantingGuide = Decal.ComponentHasTag(PlantingGuideTag);
 		for (UMaterialInterface* Material = GuideMaterial; Material;)
 		{
 			const FString Path = Material->GetPathName();
 			if (Path == LayoutMaterialPath)
 			{
-				// RaidForest hides its sketch in the viewport but still uses the texture for planting.
-				if (bIsForestGuide)
+				// A dedicated planting guide supplies data even when its viewport preview is hidden.
+				if (bIsPlantingGuide)
 				{
 					return true;
 				}
@@ -33,7 +34,7 @@ namespace
 				return bExplicitSelection && Decal.GetVisibleFlag()
 					&& GuideMaterial->GetScalarParameterValue(PreviewOpacityName, Opacity) && Opacity > 0;
 			}
-			bIsForestGuide |= Path == ForestGuidePath;
+			bIsPlantingGuide |= Path == ForestGuidePath;
 			const UMaterialInstance* Instance = Cast<UMaterialInstance>(Material);
 			Material = Instance ? Instance->Parent.Get() : nullptr;
 		}

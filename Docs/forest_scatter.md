@@ -41,3 +41,9 @@
 - 건물이 지면을 차지할 때는 그 건물을 **Grounded Buildings**에 추가한다. 기본은 정적 메시의 충돌 형상이 지면에 닿는 부분을 비운다. 건물 메시의 충돌이 단순해서 안뜰이나 기둥 사이까지 막는 경우, 바닥을 차지하는 부분마다 박스 컴포넌트를 두고 **Component Tags**에 `ForestScatterFootprint`를 넣는다. 태그가 있는 건물은 표시한 컴포넌트만 사용한다. 공중에 띄운 구조물 아래에는 식생이 자랄 수 있다.
 - 스플라인, 밀도, 메시, 배치도, 건물 위치를 편집한 뒤 다시 **Regenerate Forest**를 누르면 현재 설정을 반영한다.
 - 구역은 각각 독립적으로 심는다. 두 구역을 맞붙여 사용할 때는 외곽이 겹치지 않게 그리고, 의도적으로 겹쳐 심을 때는 한쪽 PCG 컴포넌트의 **Seed**를 바꾸면 같은 위치에 같은 메시가 포개지는 것을 피할 수 있다.
+
+## 마을 잔디
+
+`/Game/MainRaid/RaidVillage`의 `Environment/Village/Grass` 폴더에는 해안 풀밭(`CoastalVerge`), 서쪽 주택가(`WestGardens`), 동쪽 주택가(`EastGardens`), 북쪽 초지(`NorthMeadow`)가 있다. 각 구역의 **Grass → Instances per 100 Square Metres** 기본값은 각각 45, 55, 52, 61이다. 경계 스플라인이나 밀도를 바꾼 뒤 **Regenerate Forest**를 누르면 해당 구역의 잔디 인스턴스를 다시 심는다. 잔디 메시와 잎끝 바람은 숲과 공유한다.
+
+`VillageGrass_PlantingGuide`는 포장도로·현관길·건물·선로 자갈·승강장·모래사장과 물을 비우는 에디터 전용 가이드다. 식재 가능 지면에서 랜드스케이프 **Grass**와 **GrassDark**의 합이 0.44 이상인 곳에만 풀을 심는다. 길을 옮길 때는 `TunaSweeper/SourceArt/Environment/VillageYards/T_VillageMeadowPlanting.png`의 녹색 식재 범위와 황색 제외 범위를 수정하고 같은 이름의 텍스처를 재임포트한다. 이미지의 위쪽이 북쪽이고 오른쪽이 동쪽이다. 가이드 데칼의 **Component Tags**에 있는 `PCGPlantingGuide`가 화면 표시와 독립적으로 이 배치도를 활성화한다.
