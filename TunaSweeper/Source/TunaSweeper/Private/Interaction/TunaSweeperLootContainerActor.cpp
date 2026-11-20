@@ -47,7 +47,7 @@ ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
 	InteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 90.0f));
 	InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
 		ETunaSweeperInteractionType::LootContainerOpen,
-		FText::FromString(TEXT("\uC5F4\uAE30")),
+		FText::GetEmpty(),
 		FName(TEXT("ui.interaction.open")));
 
 	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
@@ -275,17 +275,21 @@ void ATunaSweeperLootContainerActor::SetLidOpen(bool bInOpen, bool bInstant)
 	StartLidAnimation(bInOpen);
 }
 
+void ATunaSweeperLootContainerActor::RefreshInteractionPrompt()
+{
+	InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
+		ETunaSweeperInteractionType::LootContainerOpen,
+		FText::FromString(TEXT("\uC5F4\uAE30")),
+		FName(TEXT("ui.interaction.open")));
+}
+
 void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 {
 	if (InteractableComponent)
 	{
-		InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
-			ETunaSweeperInteractionType::LootContainerOpen,
-			FText::FromString(TEXT("\uC5F4\uAE30")),
-			FName(TEXT("ui.interaction.open")));
+		RefreshInteractionPrompt();
 		ApplyOpenedMarkerState();
 	}
-
 	if (!VisualMesh)
 	{
 		return;

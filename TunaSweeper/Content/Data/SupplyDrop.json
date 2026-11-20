@@ -1,0 +1,6 @@
+{
+  "spawn_chance_percent": 100,
+  "arrival_delay_seconds": 6,
+  "container_definition_id": 7011,
+  "loot_preset_ids": [8027, 8028, 8029]
+}

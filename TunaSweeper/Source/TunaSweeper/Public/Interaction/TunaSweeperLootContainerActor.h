@@ -80,6 +80,8 @@ public:
 	void ConfigureLootContainerDefaults(int32 InContainerDefinitionId, int32 InContentsId);
 
 protected:
+	virtual void RefreshInteractionPrompt();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
 

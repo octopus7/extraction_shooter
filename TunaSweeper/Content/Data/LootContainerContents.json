@@ -337,5 +337,35 @@
     "items": [
       { "item_id": 3007, "quantity_min": 1, "quantity_max": 3, "drop_chance": 10000 }
     ]
+  },
+  {
+    "id": 8027,
+    "memo_ko": "투하 보급품: 식량과 식수",
+    "items": [
+      { "item_id": 3001, "quantity": 3 },
+      { "item_id": 3002, "quantity": 3 },
+      { "item_id": 3003, "quantity": 2 },
+      { "item_id": 3004, "quantity": 2 }
+    ]
+  },
+  {
+    "id": 8028,
+    "memo_ko": "투하 보급품: 의료",
+    "items": [
+      { "item_id": 4001, "quantity": 5 },
+      { "item_id": 4002, "quantity": 1 },
+      { "item_id": 4003, "quantity": 2 },
+      { "item_id": 4004, "quantity": 1 }
+    ]
+  },
+  {
+    "id": 8029,
+    "memo_ko": "투하 보급품: 탄약과 붕대",
+    "items": [
+      { "item_id": 2001, "quantity": 48 },
+      { "item_id": 2002, "quantity": 48 },
+      { "item_id": 2003, "quantity": 16 },
+      { "item_id": 4001, "quantity": 2 }
+    ]
   }
 ]

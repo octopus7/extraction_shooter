@@ -17,6 +17,7 @@ class ATunaSweeperPetCompanionCharacter;
 class UTunaSweeperFootstepPresentationDataAsset;
 class UTunaSweeperOutfitCatalog;
 class UTunaSweeperOcclusionRevealSettingsDataAsset;
+class UTunaSweeperSupplyDropDataAsset;
 class UTunaSweeperVitalsComponent;
 class UTunaSweeperWeaponPresentationDataAsset;
 class UTunaWarpTransitionProfile;
@@ -385,6 +386,9 @@ public:
 	/** Central video/presentation mapping for the directly placed level-travel actors. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Level Travel")
 	TSoftObjectPtr<UTunaSweeperLevelTravelPresentationDataAsset> LevelTravelPresentationDataAsset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Supply Drop")
+	TSoftObjectPtr<UTunaSweeperSupplyDropDataAsset> SupplyDropDataAsset;
 
 	/** Resolves a logical Bunker/Raid destination into the current build's map and transition presentation. */
 	bool TryResolveLevelTravel(

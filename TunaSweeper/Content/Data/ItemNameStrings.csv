@@ -40,6 +40,7 @@ item.valuables_crate,귀중품 상자,Valuables Crate,貴重品箱,贵重物品�
 container.wooden_crate,나무 상자,Wooden Crate,木箱,木箱,木箱,Деревянный ящик
 container.metal_case,금속 상자,Metal Case,金属ケース,金属箱,金屬箱,Металлический ящик
 container.supply_cache,보급 상자,Supply Cache,補給箱,补给箱,補給箱,Ящик с припасами
+container.supply_drop,보급품,Supplies,補給物資,补给物资,補給物資,Припасы
 container.cardboard_box,종이 상자,Cardboard Box,段ボール箱,纸箱,紙箱,Картонная коробка
 container.pistol_ammo_box,권총 탄약 상자,Pistol Ammo Box,ピストル弾薬箱,手枪弹药箱,手槍彈藥箱,Ящик патронов для пистолета
 container.rifle_ammo_box,소총 탄약 상자,Rifle Ammo Box,ライフル弾薬箱,步枪弹药箱,步槍彈藥箱,Ящик патронов для винтовки

@@ -3,6 +3,7 @@
 #include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
+#include "Raid/TunaSweeperSupplyDropDataAsset.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Settings/TunaSweeperGameUserSettings.h"
 #include "Title/TunaSweeperDisplaySettings.h"
@@ -16,6 +17,8 @@ UTunaSweeperGameInstance::UTunaSweeperGameInstance()
 		FSoftObjectPath(TEXT("/TunaWarpTransition/Profiles/DA_WarpTransition_Default.DA_WarpTransition_Default")));
 	LevelTravelPresentationDataAsset = TSoftObjectPtr<UTunaSweeperLevelTravelPresentationDataAsset>(
 		FSoftObjectPath(TEXT("/Game/Movies/DA_LevelTravelPresentation.DA_LevelTravelPresentation")));
+	SupplyDropDataAsset = TSoftObjectPtr<UTunaSweeperSupplyDropDataAsset>(
+		FSoftObjectPath(TEXT("/Game/Interaction/SupplyDrop/DA_SupplyDrop.DA_SupplyDrop")));
 }
 
 UTunaWarpTransitionProfile* UTunaSweeperGameInstance::GetWarpTransitionProfile_Implementation() const

@@ -259,6 +259,7 @@ ui.interaction.default,상호작용,Interact,インタラクト,互动,互動,В
 ui.interaction.inspect,조사하기,Inspect,調べる,调查,調查,Осмотреть
 ui.interaction.research,연구하기,Research,研究する,研究,研究,Исследование
 ui.interaction.open,열기,Open,開く,打开,打開,Открыть
+ui.interaction.supply_drop,보급품,Supplies,補給物資,补给物资,補給物資,Припасы
 ui.interaction.repair,수리하기,Repair,修理する,修理,修理,Починить
 ui.interaction.door,문,Door,扉,门,門,Дверь
 ui.interaction.broken_bridge,부서진 다리,Broken Bridge,壊れた橋,断桥,斷橋,Разрушенный мост
