@@ -3,12 +3,15 @@
 #include "ForestScatterRegion.h"
 #include "PCGForestScatterPoints.h"
 
+#include "Data/PCGPointArrayData.h"
 #include "Elements/PCGStaticMeshSpawner.h"
 #include "Engine/StaticMesh.h"
 #include "Internationalization/StringTableCore.h"
 #include "Internationalization/StringTableRegistry.h"
 #include "Materials/MaterialInterface.h"
 #include "MeshSelectors/PCGMeshSelectorByAttribute.h"
+#include "Metadata/PCGMetadata.h"
+#include "Metadata/PCGObjectPropertyOverride.h"
 #include "Misc/AutomationTest.h"
 #include "PCGEdge.h"
 #include "PCGGraph.h"
@@ -74,7 +77,8 @@ bool FForestScatterContentTest::RunTest(const FString&)
 	TSet<FName> SpawnedOutputs;
 	for (const UPCGNode* Spawner : Spawners)
 	{
-		const UPCGMeshSelectorByAttribute* Selector = Cast<UPCGMeshSelectorByAttribute>(CastChecked<UPCGStaticMeshSpawnerSettings>(Spawner->GetSettings())->MeshSelectorParameters);
+		const UPCGStaticMeshSpawnerSettings* Settings = CastChecked<UPCGStaticMeshSpawnerSettings>(Spawner->GetSettings());
+		const UPCGMeshSelectorByAttribute* Selector = Cast<UPCGMeshSelectorByAttribute>(Settings->MeshSelectorParameters);
 		const UPCGPin* MeshInput = Spawner->GetInputPin(PCGPinConstants::DefaultInputLabel);
 		if (!TestNotNull(TEXT("Spawner selects the regional mesh"), Selector) || !TestNotNull(TEXT("Spawner point input"), MeshInput))
 		{
@@ -89,10 +93,30 @@ bool FForestScatterContentTest::RunTest(const FString&)
 		{
 			return Edge && Edge->GetOtherPin(MeshInput) == Points->GetOutputPin(SourceLabel);
 		}));
+		const FPCGObjectPropertyOverrideDescription* Shadow = Settings->StaticMeshComponentPropertyOverrides.FindByPredicate([](const FPCGObjectPropertyOverrideDescription& Override)
+		{
+			return Override.PropertyTarget == GET_MEMBER_NAME_STRING_CHECKED(FPCGSoftISMComponentDescriptor, bCastShadow);
+		});
 		if (Selector->bUseAttributeMaterialOverrides)
 		{
 			TestTrue(TEXT("Only the second flower slot takes the petal color"),
 				Selector->MaterialOverrideAttributes == TArray<FName>{TEXT("FoliageMaterial"), TEXT("PetalMaterial")});
+			TestNull(TEXT("Flowers keep their descriptor's shadow setting"), Shadow);
+		}
+		else if (TestNotNull(TEXT("Ground cover reads its layer's shadow setting"), Shadow))
+		{
+			for (bool bCastShadow : {false, true})
+			{
+				UPCGPointArrayData* Data = NewObject<UPCGPointArrayData>();
+				Data->SetNumPoints(1);
+				Data->MutableMetadata()->CreateAttribute<bool>(TEXT("CastFoliageShadow"), bCastShadow, false, false);
+				FPCGSoftISMComponentDescriptor Descriptor = Selector->TemplateDescriptor;
+				Descriptor.bCastShadow = !bCastShadow;
+				FPCGObjectOverrides Overrides(&Descriptor);
+				Overrides.Initialize({*Shadow}, &Descriptor, Data, nullptr);
+				TestTrue(TEXT("The layer's boolean applies to the instanced mesh descriptor"),
+					Overrides.IsValid() && Overrides.Apply(0) && Descriptor.bCastShadow == bCastShadow);
+			}
 		}
 	}
 	TestEqual(TEXT("Both output types are connected"), SpawnedOutputs.Num(), 2);

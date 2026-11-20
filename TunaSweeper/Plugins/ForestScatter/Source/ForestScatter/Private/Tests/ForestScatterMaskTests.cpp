@@ -78,6 +78,16 @@ bool FForestScatterProjectedMaskTest::RunTest(const FString& Parameters)
 	OverlayInstance->SetScalarParameterValue(TEXT("PreviewOpacity"), 0.0f);
 	TestTrue(TEXT("Rebuild after changing an instance parameter"), Mask.Build(World, Explicit));
 	TestTrue(TEXT("A zero-opacity overlay exposes the lower grass guide"), Mask.IsGreen(FVector(840, -332, 70)));
+	Forest->GetDecal()->SetVisibility(false);
+	Forest->SetActorHiddenInGame(true);
+	Overlay->GetDecal()->SetVisibility(false);
+	OverlayInstance->SetScalarParameterValue(TEXT("PreviewOpacity"), 1.0f);
+	TestTrue(TEXT("The hidden forest layout still supplies the planting mask"), Mask.Build(World, {}));
+	TestTrue(TEXT("Grass remains plantable with the forest preview hidden"), Mask.IsGreen(FVector(840, -332, 70)));
+	TestFalse(TEXT("Water remains clear with the forest preview hidden"), Mask.IsGreen(FVector(920, -332, 70)));
+	ForestInstance->SetScalarParameterValue(TEXT("PreviewOpacity"), 0.0f);
+	TestTrue(TEXT("A hidden selected overlay leaves the forest mask available"), Mask.Build(World, Explicit));
+	TestTrue(TEXT("Hidden overlay does not cover the forest mask"), Mask.IsGreen(FVector(840, -332, 70)));
 	TestFalse(TEXT("A missing world clears the cache"), Mask.Build(nullptr, {}));
 	TestFalse(TEXT("Previous samples are no longer present"), Mask.IsGreen(FVector(840, -332, 70)));
 	return true;

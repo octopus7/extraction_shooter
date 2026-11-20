@@ -15,19 +15,25 @@ namespace
 	const FName PreviewTextureName(TEXT("PreviewTexture"));
 	const FName PreviewOpacityName(TEXT("PreviewOpacity"));
 
-	bool IsLayoutGuide(UMaterialInterface* Material, bool bExplicitSelection)
+	bool IsPlantingGuide(const UDecalComponent& Decal, bool bExplicitSelection)
 	{
-		// The layout master samples PreviewTexture directly at the default deferred decal coordinates.
-		// Farm/workshop/depot illustration decals share this master and require explicit selection.
-		bool bSelected = bExplicitSelection;
-		while (Material)
+		UMaterialInterface* GuideMaterial = Decal.GetDecalMaterial();
+		bool bIsForestGuide = false;
+		for (UMaterialInterface* Material = GuideMaterial; Material;)
 		{
 			const FString Path = Material->GetPathName();
 			if (Path == LayoutMaterialPath)
 			{
-				return bSelected;
+				// RaidForest hides its sketch in the viewport but still uses the texture for planting.
+				if (bIsForestGuide)
+				{
+					return true;
+				}
+				float Opacity = 0;
+				return bExplicitSelection && Decal.GetVisibleFlag()
+					&& GuideMaterial->GetScalarParameterValue(PreviewOpacityName, Opacity) && Opacity > 0;
 			}
-			bSelected |= Path == ForestGuidePath;
+			bIsForestGuide |= Path == ForestGuidePath;
 			const UMaterialInstance* Instance = Cast<UMaterialInstance>(Material);
 			Material = Instance ? Instance->Parent.Get() : nullptr;
 		}
@@ -232,7 +238,7 @@ bool FForestScatterMask::Build(UWorld* World, const TArray<TObjectPtr<ADecalActo
 		if (IsValid(Actor) && Actor->GetWorld() == World)
 		{
 			const UDecalComponent* Decal = Actor->GetDecal();
-			if (Decal && Decal->GetVisibleFlag() && IsLayoutGuide(Decal->GetDecalMaterial(), bExplicitSelection))
+			if (Decal && IsPlantingGuide(*Decal, bExplicitSelection))
 			{
 				Candidates.AddUnique(Actor);
 			}
@@ -270,11 +276,6 @@ bool FForestScatterMask::Build(UWorld* World, const TArray<TObjectPtr<ADecalActo
 			continue;
 		}
 		UMaterialInterface* Material = Decal->GetDecalMaterial();
-		float Opacity = 0.0f;
-		if (!Material->GetScalarParameterValue(PreviewOpacityName, Opacity) || Opacity <= 0.0f)
-		{
-			continue;
-		}
 		UTexture* TextureValue = nullptr;
 		Material->GetTextureParameterValue(PreviewTextureName, TextureValue);
 		UTexture2D* Texture = Cast<UTexture2D>(TextureValue);

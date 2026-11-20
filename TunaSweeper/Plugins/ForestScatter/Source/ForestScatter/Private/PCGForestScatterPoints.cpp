@@ -30,6 +30,7 @@ namespace
 		FForestScatterGrid Grid;
 		FSoftObjectPath Mesh;
 		int32 Seed;
+		bool bCastFoliageShadow = true;
 		bool bUsePetalColors = false;
 		bool bUseVegetationPaint = false;
 	};
@@ -184,8 +185,10 @@ namespace
 			Transforms[Index] = FTransform(FRotator(0, Placement.Yaw, 0), Placement.Location, FVector(Placement.Scale));
 			Seeds[Index] = Placement.Seed;
 		}
-		// Every point in this data item uses the same mesh. The attribute default covers all its point entries.
-		Points->MutableMetadata()->CreateAttribute<FSoftObjectPath>(TEXT("Mesh"), Layer.Mesh, false, false);
+		// One data item represents one layer, so the attribute defaults cover every point.
+		UPCGMetadata* Metadata = Points->MutableMetadata();
+		Metadata->CreateAttribute<FSoftObjectPath>(TEXT("Mesh"), Layer.Mesh, false, false);
+		Metadata->CreateAttribute<bool>(TEXT("CastFoliageShadow"), Layer.bCastFoliageShadow, false, false);
 		if (Layer.bUsePetalColors)
 		{
 			AssignPetalMaterials(Context, Layer.Seed, *Points);
@@ -246,6 +249,7 @@ namespace
 				// Offset zero belonged to trees in the first version of the graph.
 				Layer.Seed = PCGHelpers::ComputeSeed(Context->GetSeed(), Index + 1);
 				Layer.Mesh = Settings->Mesh.ToSoftObjectPath();
+				Layer.bCastFoliageShadow = Settings != &Region->Grass;
 				Layer.bUseVegetationPaint = Settings == &Region->Grass || Settings == &Region->Flowers || Settings == &Region->Shrubs;
 				if (Settings == &Region->Flowers && !Region->FlowerPetalMaterials.IsEmpty())
 				{
