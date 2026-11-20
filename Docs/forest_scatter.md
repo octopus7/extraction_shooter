@@ -17,9 +17,9 @@
 
 꽃의 줄기와 잎은 `SM_ForestFlower`의 재질 슬롯 0, 꽃잎은 슬롯 1을 쓴다. **Flower Petal Materials**에서 흰색·노란색·장미색·라일락색 재질을 바꾸고, **Flower Color Patch Size**에서 같은 색이 모여 피는 범위(cm)를 조절한다. 수국은 보라색 꽃송이가 여러 개 뭉친 별도 메시다.
 
-잔디 인스턴스 하나는 가까운 거리에서 넓은 잎 31장이 여섯 무리로 모여 보인다. 잎 밑동 폭은 약 5.5~8.3cm다. `SM_ForestLawnGrass`의 세 LOD 모두 노멀을 위로 맞추고 그림자 생성을 껐다. PCG의 **Grass** 레이어는 메시를 교체하고 다시 생성해도 이 설정을 적용한다. 나무와 바위가 드리우는 그늘은 잔디에 그대로 보인다.
+잔디 인스턴스 하나는 가까운 거리에서 넓은 잎 31장이 여섯 무리로 모여 보인다. 잎 밑동 폭은 약 5.5~8.3cm다. 가장 가까운 LOD의 원본 메시에서 잎 높이의 중앙값은 약 34cm, 뿌리부터 잎끝까지의 수평 거리는 약 6cm다. `SM_ForestLawnGrass`의 세 LOD 모두 노멀을 위로 맞추고 그림자 생성을 껐다. PCG의 **Grass** 레이어는 메시를 교체하고 다시 생성해도 이 설정을 적용한다. 나무와 바위가 드리우는 그늘은 잔디에 그대로 보인다.
 
-숲 지면과 잔디 재질은 `MF_ForestMeadowField`에서 같은 월드 좌표의 녹색을 읽는다. `Meadow Open Green`과 `Meadow Rich Green`은 열린 초지와 풀이 짙은 곳의 색이고, `Meadow Patch Size cm`은 색이 달라지는 공간의 크기다. 군락 안쪽은 부드러운 색면으로 이어지고 경계의 일부에서 풀잎이 길게 올라온다. `M_ForestLawnGrass`의 `Quiet Tuft Height`는 낮은 풀의 높이 비율이며 기본값은 0.56이다. `Blade Tip Color Multiplier`는 잎 윗부분의 색을 조절한다. 뿌리는 지면색에 고정되고, 밝고 선명한 연두색 잎끝이 포기 단위로 바람을 따른다.
+숲 지면과 잔디 재질은 `MF_ForestMeadowField`에서 같은 월드 좌표의 녹색을 읽는다. `Meadow Open Green`과 `Meadow Rich Green`은 열린 초지와 풀이 짙은 곳의 색이고, `Meadow Patch Size cm`은 색이 달라지는 공간의 크기다. 군락 안쪽은 부드러운 색면으로 이어지고 경계의 일부에서 풀잎이 길게 올라온다. `M_ForestLawnGrass`의 `Quiet Tuft Height`는 낮은 풀의 높이 비율이며 기본값은 0.72다. `Blade Tip Color Multiplier`는 잎 윗부분의 색을 조절한다. 바람의 편측 진폭은 **Forest Wind → WindDisplacementCm** 벡터의 길이로 정한다. 현재 X 13.76cm, Y 5.98cm로, 완전히 휘는 잎끝은 중심에서 한쪽으로 최대 15cm 움직인다. 뿌리는 고정되고 포기마다 바람의 위상이 조금씩 다르다.
 
 ## 외곽 절벽과 하구
 
