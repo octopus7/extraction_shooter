@@ -12,14 +12,14 @@
 
 1. 새 구역을 그릴 때는 기존 액터 선택을 해제한다. 레벨 에디터의 모드를 **PCG**로 바꾸고 **Draw Spline Surface**에서 `PCG_ForestScatter` 프리셋을 선택한다. 기존 구역을 선택하고 그리면 첫 클릭부터 그 구역의 외곽을 다시 그린다.
 2. 지면을 클릭해 식생을 심을 외곽을 그리고 도구의 **Accept**로 확정한다. 액터 배치 패널에서 **Forest Scatter Region**을 끌어온 뒤 `Boundary` 스플라인의 점을 편집해도 된다.
-3. 구역 액터의 디테일에서 **Grass**, **Shrubs**, **Flowers**, **Gravel**, **Boulders**의 메시와 **Instances per 100 Square Metres**를 조절한다. 수치는 배치 가능한 수평 면적 100㎡당 평균 개수다. 풀은 서쪽 숲 37, 중앙 초지 30, 남쪽 공터 33, 동쪽 강둑 39, 동쪽 호숫가 42로 설정했다. 밀도 0 또는 빈 메시는 해당 종류를 생략한다.
+3. 구역 액터의 디테일에서 **Grass**, **Shrubs**, **Flowers**, **Gravel**, **Boulders**의 메시와 **Instances per 100 Square Metres**를 조절한다. 수치는 배치 가능한 수평 면적 100㎡당 평균 개수다. 풀은 서쪽 숲 65, 중앙 초지 54, 남쪽 공터 59, 동쪽 강둑 69, 동쪽 호숫가 75로 설정했다. 밀도 0 또는 빈 메시는 해당 종류를 생략한다.
 4. **Regenerate Forest**를 누른다. 결과는 구역 액터에 인스턴스로 모인다. 확정할 배치는 생성한 상태에서 레벨을 저장하면 플레이할 때 그대로 보인다. 작업 중 결과를 걷어낼 때는 해당 PCG 컴포넌트의 **Cleanup**을 사용한다. 스플라인과 구역 설정은 다시 생성할 때도 쓸 수 있다.
 
 꽃의 줄기와 잎은 `SM_ForestFlower`의 재질 슬롯 0, 꽃잎은 슬롯 1을 쓴다. **Flower Petal Materials**에서 흰색·노란색·장미색·라일락색 재질을 바꾸고, **Flower Color Patch Size**에서 같은 색이 모여 피는 범위(cm)를 조절한다. 수국은 보라색 꽃송이가 여러 개 뭉친 별도 메시다.
 
 잔디 인스턴스 하나는 가까운 거리에서 넓은 잎 31장이 여섯 무리로 모여 보인다. 잎 밑동 폭은 약 5.5~8.3cm다. `SM_ForestLawnGrass`의 세 LOD 모두 노멀을 위로 맞추고 그림자 생성을 껐다. PCG의 **Grass** 레이어는 메시를 교체하고 다시 생성해도 이 설정을 적용한다. 외곽 식재대의 키 큰 풀도 그림자 생성을 끈다. 나무와 바위가 드리우는 그늘은 잔디에 그대로 보인다.
 
-숲 지면과 외곽 식재대, 잔디 재질은 `MF_ForestMeadowField`에서 같은 월드 좌표의 녹색을 읽는다. `Meadow Open Green`과 `Meadow Rich Green`은 열린 초지와 풀이 짙은 곳의 색이고, `Meadow Patch Size cm`은 색이 달라지는 공간의 크기다. 군락 안쪽은 부드러운 색면으로 이어지고 경계의 일부에서 풀잎이 길게 올라온다. `M_ForestLawnGrass`에서 `Quiet Tuft Height`를 조절하면 조용한 구간의 잎 높이가 달라진다. 뿌리는 고정되고 더 밝은 잎끝만 같은 포기의 바람결을 따른다.
+숲 지면과 외곽 식재대, 잔디 재질은 `MF_ForestMeadowField`에서 같은 월드 좌표의 녹색을 읽는다. `Meadow Open Green`과 `Meadow Rich Green`은 열린 초지와 풀이 짙은 곳의 색이고, `Meadow Patch Size cm`은 색이 달라지는 공간의 크기다. 군락 안쪽은 부드러운 색면으로 이어지고 경계의 일부에서 풀잎이 길게 올라온다. `M_ForestLawnGrass`의 `Quiet Tuft Height`는 낮은 풀의 높이 비율이며 기본값은 0.56이다. `Blade Tip Color Multiplier`는 잎 윗부분의 색을 조절한다. 뿌리는 지면색에 고정되고, 밝고 선명한 연두색 잎끝이 포기 단위로 바람을 따른다.
 
 ## 외곽 절벽과 식재
 
