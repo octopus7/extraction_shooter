@@ -24,24 +24,39 @@ bool FDirectionalLocomotionTest::RunTest(const FString&)
     if (!TestNotNull(TEXT("Player animation blueprint"), Blueprint) || !TestNotNull(TEXT("Unarmed blend space"), Blend))
         return false;
 
-    const TCHAR* Directions[] = { TEXT("Back"), TEXT("BackLeft"), TEXT("Left"), TEXT("ForwardLeft"),
-        TEXT("Forward"), TEXT("ForwardRight"), TEXT("Right"), TEXT("BackRight"), TEXT("Back") };
-    for (int32 Axis = 0; Axis < UE_ARRAY_COUNT(Directions); ++Axis)
+    // Odd columns are exactly halfway between the neighbouring cardinal clips.
+    const TCHAR* Cardinal[] = { TEXT("Bwd"), TEXT("Left"), TEXT("Fwd"), TEXT("Right"), TEXT("Bwd") };
+    for (int32 Axis = 0; Axis <= 8; ++Axis)
     {
         for (int32 Gait = 0; Gait <= 2; ++Gait)
         {
-            const FString Expected = Gait == 0 ? TEXT("AS_Luna_Unarmed_Idle") :
-                FString(Gait == 1 ? TEXT("AS_Luna_Unarmed_Walk_") : TEXT("AS_Luna_Unarmed_Run_")) + Directions[Axis];
             TArray<FBlendSampleData> Samples;
             int32 Cache = INDEX_NONE;
             Blend->GetSamplesFromBlendInput(FVector(-180 + Axis * 45, Gait, 0), Samples, Cache, true);
-            float Weight = 0.f;
+            TMap<FString, float> Weights;
             for (const auto& Sample : Samples)
-                if (GetNameSafe(Blend->GetBlendSamples()[Sample.SampleDataIndex].Animation) == Expected)
-                    Weight += Sample.TotalWeight;
-            TestTrue(Expected, Weight > .99f);
+            {
+                const auto* Clip = Blend->GetBlendSamples()[Sample.SampleDataIndex].Animation.Get();
+                Weights.FindOrAdd(GetNameSafe(Clip)) += Sample.TotalWeight;
+            }
+            if (Gait == 0)
+            {
+                TestTrue(TEXT("Quinn ready idle at every angle"), Weights.FindRef(TEXT("AS_Luna_Quinn_Idle_Ready")) > .99f);
+                continue;
+            }
+            const FString Prefix = Gait == 1 ? TEXT("AS_Luna_Quinn_Walk_") : TEXT("AS_Luna_Quinn_Jog_");
+            const float ExpectedWeight = (Axis % 2) ? .5f : 1.f;
+            for (int32 Index = Axis / 2; Index <= (Axis + 1) / 2; ++Index)
+            {
+                const FString ClipName = Prefix + Cardinal[Index];
+                TestTrue(FString::Printf(TEXT("%s weight at %d degrees"), *ClipName, Axis * 45 - 180),
+                    FMath::IsNearlyEqual(Weights.FindRef(ClipName), ExpectedWeight, .01f));
+            }
         }
     }
+    const TArray<FName>* Markers = Blend->GetUniqueMarkerNames();
+    TestTrue(TEXT("Quinn moving samples synchronize on both feet"),
+        Markers && Markers->Contains(TEXT("L")) && Markers->Contains(TEXT("R")));
 
     // Both locomotion paths must feed the same downstream montage slot.
     TArray<UEdGraph*> Graphs;

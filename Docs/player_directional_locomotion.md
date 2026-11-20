@@ -1,14 +1,14 @@
 # 플레이어 방향별 이동 모션
 
-## 2026-11-21 Lyra Quinn 검토용 모션
+## 2026-11-21 Lyra Quinn 비무장 이동
 
 Lyra의 여성형 Quinn 비무장 세트 `MF_Unarmed_*`에서 대기 2개와 전후좌우 걷기·조깅 각 4개를 루나 Mk2로 리타겟했다. UE 에셋은 [LyraQuinn 폴더](../TunaSweeper/Content/Characters/Player/LunaMk2/Animations/LyraQuinn)에 있다. 이동 8개에는 원본의 루트 모션과 발 동기화 마커를 보존했고 Lyra 전용 발 효과 노티파이는 제외했다. 대기 2개는 루나의 손과 허벅지 사이에 간격을 두도록 양쪽 상완을 7도씩 바깥으로 보정했다.
 
-[비교 영상](../TunaSweeper/SourceArt/Characters/LunaMk2/DirectionalMotions/LunaMk2_LyraQuinn_Comparison.mp4)은 기존 루나와 Quinn 모션의 대기, 오른쪽 걷기, 오른쪽 앞 조깅을 차례로 보여준다. 영상 속 Quinn 대각선은 발 디딤 위상을 맞춘 전방과 오른쪽 조깅을 절반씩 섞은 미리보기다. 게임 적용 여부는 검토 후 결정한다.
+[비교 영상](../TunaSweeper/SourceArt/Characters/LunaMk2/DirectionalMotions/LunaMk2_LyraQuinn_Comparison.mp4)은 기존 루나와 Quinn 모션의 대기, 오른쪽 걷기, 오른쪽 앞 조깅을 차례로 보여준다. 영상 속 Quinn 대각선은 발 디딤 위상을 맞춘 전방과 오른쪽 조깅을 절반씩 섞은 미리보기다. 게임의 기본 비무장 대기는 `AS_Luna_Quinn_Idle_Ready`다. 걷기와 뛰기는 Quinn의 전후좌우 클립을 사용하며, 45도 대각선에서는 인접한 방향을 50%씩 혼합한다.
 
 ## 2026-11-21 게임 적용
 
-플레이어의 양손이 비어 있으면 `ABP_LunaMk2`가 `Unarmed/BS_Luna_Unarmed`를 사용한다. 무기를 장착하면 기존 무장 이동 상태로 전환한다. 두 경로는 같은 구르기 몽타주 슬롯을 거친다.
+플레이어의 양손이 비어 있으면 `ABP_LunaMk2`가 `Unarmed/BS_Luna_Unarmed`를 사용한다. 무기를 장착하면 기존 무장 이동 상태로 전환한다. 두 경로는 같은 구르기 몽타주 슬롯을 거친다. 캡슐이 이동을 담당하며, Quinn 클립에 기록된 루트 이동 속도를 기준으로 샘플 재생률을 걷기 300cm/s, 질주 800cm/s에 맞췄다. 모든 이동 샘플은 L/R 발 디딤 마커로 동기화한다. 후진 걷기는 루프 경계에서 누락된 R 마커를 첫 1/30초에 보완했다.
 
 이동 각도는 캐릭터가 바라보는 방향을 기준으로 계산한다. 정면은 0도, 오른쪽은 +90도, 왼쪽은 −90도이며 후진은 ±180도에서 이어진다. 블렌드 스페이스의 세 행은 비무장 대기, 걷기, 뛰기다. 실제 수평 이동 속도와 현재 허용 속도, 질주 상태로 행 사이를 보간한다.
 
