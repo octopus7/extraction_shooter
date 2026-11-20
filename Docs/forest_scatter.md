@@ -17,17 +17,14 @@
 
 꽃의 줄기와 잎은 `SM_ForestFlower`의 재질 슬롯 0, 꽃잎은 슬롯 1을 쓴다. **Flower Petal Materials**에서 흰색·노란색·장미색·라일락색 재질을 바꾸고, **Flower Color Patch Size**에서 같은 색이 모여 피는 범위(cm)를 조절한다. 수국은 보라색 꽃송이가 여러 개 뭉친 별도 메시다.
 
-잔디 인스턴스 하나는 가까운 거리에서 넓은 잎 31장이 여섯 무리로 모여 보인다. 잎 밑동 폭은 약 5.5~8.3cm다. `SM_ForestLawnGrass`의 세 LOD 모두 노멀을 위로 맞추고 그림자 생성을 껐다. PCG의 **Grass** 레이어는 메시를 교체하고 다시 생성해도 이 설정을 적용한다. 외곽 식재대의 키 큰 풀도 그림자 생성을 끈다. 나무와 바위가 드리우는 그늘은 잔디에 그대로 보인다.
+잔디 인스턴스 하나는 가까운 거리에서 넓은 잎 31장이 여섯 무리로 모여 보인다. 잎 밑동 폭은 약 5.5~8.3cm다. `SM_ForestLawnGrass`의 세 LOD 모두 노멀을 위로 맞추고 그림자 생성을 껐다. PCG의 **Grass** 레이어는 메시를 교체하고 다시 생성해도 이 설정을 적용한다. 나무와 바위가 드리우는 그늘은 잔디에 그대로 보인다.
 
-숲 지면과 외곽 식재대, 잔디 재질은 `MF_ForestMeadowField`에서 같은 월드 좌표의 녹색을 읽는다. `Meadow Open Green`과 `Meadow Rich Green`은 열린 초지와 풀이 짙은 곳의 색이고, `Meadow Patch Size cm`은 색이 달라지는 공간의 크기다. 군락 안쪽은 부드러운 색면으로 이어지고 경계의 일부에서 풀잎이 길게 올라온다. `M_ForestLawnGrass`의 `Quiet Tuft Height`는 낮은 풀의 높이 비율이며 기본값은 0.56이다. `Blade Tip Color Multiplier`는 잎 윗부분의 색을 조절한다. 뿌리는 지면색에 고정되고, 밝고 선명한 연두색 잎끝이 포기 단위로 바람을 따른다.
+숲 지면과 잔디 재질은 `MF_ForestMeadowField`에서 같은 월드 좌표의 녹색을 읽는다. `Meadow Open Green`과 `Meadow Rich Green`은 열린 초지와 풀이 짙은 곳의 색이고, `Meadow Patch Size cm`은 색이 달라지는 공간의 크기다. 군락 안쪽은 부드러운 색면으로 이어지고 경계의 일부에서 풀잎이 길게 올라온다. `M_ForestLawnGrass`의 `Quiet Tuft Height`는 낮은 풀의 높이 비율이며 기본값은 0.56이다. `Blade Tip Color Multiplier`는 잎 윗부분의 색을 조절한다. 뿌리는 지면색에 고정되고, 밝고 선명한 연두색 잎끝이 포기 단위로 바람을 따른다.
 
-## 외곽 절벽과 식재
+## 외곽 절벽과 하구
 
-- `Environment/Forest/Cliffs`에서 외곽을 편집한다. `Escarpment_ForestShelf`는 숲 바닥에서 절벽 기슭까지 이어지는 식재대다. `Escarpment_RisingCliffs`는 숲 안쪽을 향해 솟은 암벽으로, 길에서 보이는 암벽 윗선은 월드 높이 약 13~27m를 오간다. 남쪽은 카메라가 뒤로 물러날 공간을 두고 완만한 기슭에서 암벽으로 이어진다. `Escarpment_OuterLimit`은 숲 가장자리를 따라 이동을 막는다.
-- 그 뒤의 능선은 `Environment/Forest/Cliffs/OuterTerrain`의 랜드스케이프 네 조각이다. **Landscape** 모드에서 방향별 `TS_Forest_OuterTerrain_*`를 선택해 조각하거나 기존 숲의 풀·흙·바위 레이어를 칠할 수 있다. 능선의 최고점은 월드 높이 약 50m다. 외곽 전체의 높이 원본은 `TunaSweeper/SourceArt/Environment/ForestScatter/RaidForest_OuterRidge.r16`, 암벽과 하구 연장부의 편집 원본은 같은 폴더의 `ForestRisingCliffs.blend`다.
-- 윗면의 풀과 덤불은 에디터 **Foliage** 모드에서 수정한다. **Static Meshes** 표면 필터를 켜고 `/Game/Environment/ForestScatter/Foliage`에서 잔디는 `FT_ForestShelfGrass`, 키 큰 풀 포기는 `FT_ForestShelfTussock`, 덤불은 `FT_ForestShelfShrub`를 선택한 뒤 **Paint** 또는 **Erase**를 쓴다.
-- 하구가 중앙 랜드스케이프를 벗어나는 구간의 흙은 `Escarpment_ForestShelf` 액터에 칠한 버텍스 색이다. 양쪽 물가의 흙을 따라 수정하려면 이 액터를 선택하고 **Mesh Paint**를 사용한다.
-- 숲의 하늘과 조명은 레벨의 태양·하늘광·대기 액터에서 편집한다. 플레이 화면에서 보이는 외곽선은 암벽과 능선의 실제 형상을 따른다.
+- 아웃라이너의 `Environment/Forest/Cliffs`에서 `Escarpment_RisingCliffs_01`부터 `Escarpment_RisingCliffs_20`까지 개별 선택해 이동하거나 회전할 수 있다. 각 조각의 기슭은 중앙 랜드스케이프 안쪽에 걸쳐 있고, 암벽의 실제 표면이 충돌을 담당한다. 편집 원본은 `TunaSweeper/SourceArt/Environment/ForestScatter/CliffSections/ForestCliffSections.blend`다.
+- 하구 양쪽에서 암벽이 끝난다. 그 사이로 강물이 외곽 랜드스케이프 끝까지 이어진다. 수로와 양안을 조각할 때는 **Landscape** 모드에서 `Environment/Forest/Cliffs/OuterTerrain`의 해당 `TS_Forest_OuterTerrain_*`를 선택한다. 네 구역의 높이 원본은 `TunaSweeper/SourceArt/Environment/ForestScatter/RaidForest_OuterRidge.r16`이다.
 
 ## 녹지와 건물
 

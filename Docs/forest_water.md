@@ -1,6 +1,6 @@
 # RaidForest 수역 편집
 
-`/Game/MainRaid/RaidForest`의 아웃라이너에서 `Environment/Forest/Water/River`를 열면 강이 흐르는 순서대로 다섯 액터가 있다. 오른쪽으로 넓어지는 `Water_04_EastFan`과 절벽 끝에 닿는 `Water_05_RiverMouth`는 각각 독립된 BP다. `Environment/Forest/Water/Ponds`에는 코끼리 호수와 얕은 웅덩이가 있다.
+`/Game/MainRaid/RaidForest`의 아웃라이너에서 `Environment/Forest/Water/River`를 열면 강물 BP 다섯 개와 하구 바깥 수면이 있다. 오른쪽으로 넓어지는 `Water_04_EastFan`과 하구로 이어지는 `Water_05_RiverMouth`는 각각 독립된 BP다. `Environment/Forest/Water/Ponds`에는 코끼리 호수와 얕은 웅덩이가 있다.
 
 | 아웃라이너 액터 | 위치 | 바닥 소품 인스턴스 |
 | --- | --- | ---: |
@@ -8,7 +8,7 @@
 | `Water_02_WestFord` | 서쪽 여울 | 11 |
 | `Water_03_MiddleBend` | 가운데 굽이 | 36 |
 | `Water_04_EastFan` | 동쪽 여울부터 넓어지는 구간 | 30 |
-| `Water_05_RiverMouth` | 외곽 암벽 사이로 굽어 들어가는 하구 | 60 |
+| `Water_05_RiverMouth` | 숲에서 열린 하구로 이어지는 구간 | 60 |
 | `Water_06_ElephantLake` | 코끼리 앞 호수 | 12 |
 | `Water_07_ShallowPuddle` | 얕은 웅덩이 | 1 |
 
@@ -16,7 +16,7 @@
 
 액터에서 **Edit Blueprint**를 열거나 콘텐츠 브라우저의 `/Game/Environment/ForestWater/Blueprints`에서 해당 BP를 열 수 있다. `WaterSurface`는 수면, `ShoreFoam`은 물가, `Riverbed`는 퇴적물이 깔린 바닥이다. `Bed_*` 컴포넌트에는 종류별로 납작한 자갈 무더기, 이끼 낀 돌, 갈라진 유목, 수초, 붉은 잔자갈이 들어 있다. 컴포넌트의 **Instances**에서 개별 위치·회전·크기를 수정한다. 변환은 해당 수역 액터 기준이다.
 
-하구 BP의 `GorgeWaterSurface`가 기존 수면 끝에서 바위 사이로 물을 이어 준다. 접합선의 위치·수면 UV·수심 UV를 두 메시가 공유한다. 이 연장부의 바닥과 양안은 `Escarpment_RisingCliffs`에 들어 있다.
+하구 BP의 `GorgeWaterSurface` 끝에서 `Water_08_OpenRiverOutlet`이 외곽 랜드스케이프 끝까지 이어진다. 접합선의 정점 위치와 수면·수심 UV가 일치한다. 하류의 바닥과 양안은 외곽 랜드스케이프에서 편집한다.
 
 `M_ForestWaterDepth`의 **Shallow Tint**, **Deep Tint**, **Deep Depth Metres**는 얕은 물과 깊은 물의 색, 두 색 사이의 전환 수심을 조절한다. 얕은 강에서도 수십 cm의 깊이 차이로 물색이 변한다. 코끼리 호수는 수심 1.18m부터 **Lake Basin Tint**로 설정한 남색이 점차 짙어진다. **Shallow Opacity**와 **Deep Opacity**로 바닥이 보이는 정도를 바꿀 수 있다. 한 구역만 조정할 때는 머터리얼 인스턴스를 만들어 그 BP의 `WaterSurface` 슬롯에 지정한다.
 
