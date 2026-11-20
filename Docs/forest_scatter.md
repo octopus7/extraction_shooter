@@ -5,6 +5,8 @@
 ## 심어 둔 나무와 외곽 바위 찾기
 
 - 아웃라이너의 `Environment/Forest/Trees`를 열면 북서·북동·남서·남동 구역별로 심어 둔 나무가 있다. 이름은 `Tree_Planted_구역_번호_수종_X좌표_Y좌표` 형식이다. `P`와 `N`은 월드 원점 기준 양수와 음수, 숫자는 미터 단위의 최초 식재 위치다. 나무를 선택해 위치·회전·크기를 바로 편집할 수 있다.
+- 벚나무는 `Environment/Forest/Trees/CherryBlossom` 아래에 군락별로 모았다. `ElephantLake`는 코끼리 호숫가 5그루, `WestPool`은 상류 물가 3그루, `MiddleBend`는 중류 굽이 3그루다. 줄기 중심은 물가에서 2.7~6.7m 떨어진 녹지에 있다.
+- 플레이어나 커서가 나무의 수평 경계에서 3.5m 이내로 들어오면 수관이 사라져 시야가 열린다. `/Game/Effects/DA_OcclusionRevealSettings`의 **Vertical Reveal Proximity Radius Cm**, **Vertical Reveal Start Above Player Cm**, **Vertical Reveal Fade Height Cm**에서 접근 거리, 캐릭터 기준 시작 높이(60cm), 전환 폭(30cm)을 조절한다. 숲의 참나무·느릅나무·벚나무와 마을의 벚나무·안뜰 나무가 이 설정을 공유한다.
 - `Environment/Forest/Hydrangeas` 아래의 `Hills`, `Buildings`, `Passages`에서 수국을 찾을 수 있다. 마을 통로 양쪽 바위 기슭, 창고·차고·전력 시설 주변, 서쪽 벽과 철망문 옆에 심었다. 이름은 `Hydrangea_Planted_장소_번호_X좌표_Y좌표` 형식이다. 위치를 옮기거나 새로 심을 때는 해당 장소 폴더에서 개별 액터를 편집한다.
 - `Environment/Forest/GroundCover`에서 서쪽 숲, 중앙 초지, 남쪽 공터, 동쪽 강둑, 동쪽 호숫가 구역을 찾을 수 있다. 작은 연못과 코끼리 호숫가에서는 식재 스플라인이 물가를 따라간다.
 
@@ -38,6 +40,10 @@
 - 건물이 지면을 차지할 때는 그 건물을 **Grounded Buildings**에 추가한다. 기본은 정적 메시의 충돌 형상이 지면에 닿는 부분을 비운다. 건물 메시의 충돌이 단순해서 안뜰이나 기둥 사이까지 막는 경우, 바닥을 차지하는 부분마다 박스 컴포넌트를 두고 **Component Tags**에 `ForestScatterFootprint`를 넣는다. 태그가 있는 건물은 표시한 컴포넌트만 사용한다. 공중에 띄운 구조물 아래에는 식생이 자랄 수 있다.
 - 스플라인, 밀도, 메시, 배치도, 건물 위치를 편집한 뒤 다시 **Regenerate Forest**를 누르면 현재 설정을 반영한다.
 - 구역은 각각 독립적으로 심는다. 두 구역을 맞붙여 사용할 때는 외곽이 겹치지 않게 그리고, 의도적으로 겹쳐 심을 때는 한쪽 PCG 컴포넌트의 **Seed**를 바꾸면 같은 위치에 같은 메시가 포개지는 것을 피할 수 있다.
+
+## 마을 벚나무
+
+마을의 벚나무 6그루는 `Environment/Village/Trees/CherryBlossom` 아래의 `WellGreen`, `OrchardLane`, `EastGardens`, `MarketEdge`에서 편집한다. 두 맵은 `/Game/Environment/CherryBlossom/SM_CherryBlossom`을 공유한다. Blender 편집 원본은 `TunaSweeper/SourceArt/Environment/CherryBlossom/CherryBlossom_XHigh.blend`다. UV0은 줄기 방향과 꽃무리 형태를 따라 펼친 2048×2048 채색용 아틀라스, UV1은 라이트맵용이다.
 
 ## 마을 잔디
 

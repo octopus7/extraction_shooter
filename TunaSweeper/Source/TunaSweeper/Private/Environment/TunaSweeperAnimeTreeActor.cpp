@@ -133,17 +133,32 @@ void ATunaSweeperAnimeTreeActor::RefreshTree()
 	}
 	GradientGuide->TransformUpdated.RemoveAll(this);
 	GradientGuide->TransformUpdated.AddUObject(this, &ThisClass::OnTreeComponentTransformUpdated);
-	UpdateGradientData();
+	Trunk->TransformUpdated.RemoveAll(this);
+	Trunk->TransformUpdated.AddUObject(this, &ThisClass::OnTreeComponentTransformUpdated);
+	UpdateTreePrimitiveData();
 	UpdateRimMask();
 }
 
 void ATunaSweeperAnimeTreeActor::OnTreeComponentTransformUpdated(USceneComponent*, EUpdateTransformFlags, ETeleportType)
 {
-	if (!bRefreshingTree) UpdateGradientData();
+	if (!bRefreshingTree) UpdateTreePrimitiveData();
 }
 
-void ATunaSweeperAnimeTreeActor::UpdateGradientData()
+void ATunaSweeperAnimeTreeActor::UpdateTreePrimitiveData()
 {
+	// Slots 4–7 give the trunk and all visible clumps the same reveal footprint.
+	// Store the center relative to the actor pivot so world-origin shifts remain valid.
+	FVector4 RevealBounds(0, 0, 0, 0);
+	if (Trunk->GetStaticMesh() && (ActorHasTag(TEXT("VillageYardPlant")) ||
+		ActorHasTag(TEXT("VillageHandPlantedTree")) || ActorHasTag(TEXT("ForestHandPlantedTree"))))
+	{
+		FVector Origin, Extent;
+		GetActorBounds(false, Origin, Extent);
+		const FVector Offset = Origin - GetActorLocation();
+		RevealBounds = FVector4(Offset.X, Offset.Y, Extent.X, Extent.Y);
+	}
+	Trunk->SetCustomPrimitiveDataVector4(4, RevealBounds);
+
 	// Use the actual render transforms: relative matrix chains introduce shear that
 	// UE's FTransform hierarchy does not retain under rotated, nonuniform scales.
 	const FMatrix Guide = GradientGuide->GetComponentTransform().ToMatrixWithScale();
@@ -157,6 +172,7 @@ void ATunaSweeperAnimeTreeActor::UpdateGradientData()
 		const FVector4 Coefficients = bValid ? FVector4(Mapping.M[0][0]/Width, Mapping.M[1][0]/Width,
 			Mapping.M[2][0]/Width, Mapping.M[3][0]/Width) : FVector4(0,0,0,0);
 		Clump->SetCustomPrimitiveDataVector4(0, Coefficients);
+		Clump->SetCustomPrimitiveDataVector4(4, RevealBounds);
 	}
 }
 

@@ -70,7 +70,7 @@ public:
 	TArray<UStaticMeshComponent*> GetLeafClumps() const;
 
 private:
-	void UpdateGradientData();
+	void UpdateTreePrimitiveData();
 	void UpdateRimMask();
 	void OnTreeComponentTransformUpdated(USceneComponent* Component, EUpdateTransformFlags Flags, ETeleportType Teleport);
 	bool bRefreshingTree = false;

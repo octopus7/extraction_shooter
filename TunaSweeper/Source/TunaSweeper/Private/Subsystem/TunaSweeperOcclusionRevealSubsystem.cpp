@@ -20,6 +20,10 @@ namespace TunaSweeperOcclusionReveal
 	const FName CursorInnerRadiusName(TEXT("CursorInnerRadiusScreen"));
 	const FName CursorOuterRadiusName(TEXT("CursorOuterRadiusScreen"));
 	const FName ViewportHeightOverWidthName(TEXT("ViewportHeightOverWidth"));
+	const FName TreeRevealPlayer(TEXT("TreeRevealPlayer"));
+	const FName TreeRevealCursor(TEXT("TreeRevealCursor"));
+	const FName TreeRevealRadiusCm(TEXT("TreeRevealRadiusCm"));
+	const FName TreeRevealFadeHeightCm(TEXT("TreeRevealFadeHeightCm"));
 }
 
 void UTunaSweeperOcclusionRevealSubsystem::Tick(float DeltaTime)
@@ -141,7 +145,7 @@ void UTunaSweeperOcclusionRevealSubsystem::UpdateRevealParameters()
 	UMaterialParameterCollection* Collection = LoadObject<UMaterialParameterCollection>(nullptr, TunaSweeperOcclusionReveal::CollectionPath);
 	APlayerController* PlayerController = World->GetFirstPlayerController();
 	APawn* Pawn = PlayerController ? PlayerController->GetPawn() : nullptr;
-	if (!Collection || !Pawn)
+	if (!Collection)
 	{
 		return;
 	}
@@ -150,14 +154,23 @@ void UTunaSweeperOcclusionRevealSubsystem::UpdateRevealParameters()
 	const UTunaSweeperOcclusionRevealSettingsDataAsset* Settings = GameInstance
 		? GameInstance->GetOcclusionRevealSettingsDataAsset()
 		: nullptr;
-	if (!Settings)
+	if (!Pawn || !Settings)
 	{
+		UKismetMaterialLibrary::SetVectorParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealPlayer, FLinearColor::Transparent);
+		UKismetMaterialLibrary::SetVectorParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealCursor, FLinearColor::Transparent);
 		return;
 	}
 
 	const FVector CharacterLocation = Pawn->GetActorLocation();
 	FVector CursorLocation = CharacterLocation;
 	const bool bHasCursor = ResolveCursorWorldPoint(PlayerController, CharacterLocation.Z, CursorLocation);
+	// All planted trees share this sample. Each material tests its own world-space footprint.
+	UKismetMaterialLibrary::SetVectorParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealPlayer,
+		FLinearColor(CharacterLocation.X, CharacterLocation.Y, CharacterLocation.Z + Settings->VerticalRevealStartAbovePlayerCm, 1.0f));
+	UKismetMaterialLibrary::SetVectorParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealCursor,
+		FLinearColor(CursorLocation.X, CursorLocation.Y, 0.0f, bHasCursor ? 1.0f : 0.0f));
+	UKismetMaterialLibrary::SetScalarParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealRadiusCm, Settings->VerticalRevealProximityRadiusCm);
+	UKismetMaterialLibrary::SetScalarParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealFadeHeightCm, Settings->VerticalRevealFadeHeightCm);
 	FScreenRevealCircle CharacterCircle;
 	FScreenRevealCircle CursorCircle;
 	const bool bHasCharacterCircle = ProjectWorldRevealCircle(
