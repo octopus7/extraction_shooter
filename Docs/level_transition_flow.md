@@ -128,11 +128,13 @@ flowchart TD
 | `FadeOutBeforeVideo` | 독백 종료 후 검은 화면으로 페이드 아웃한다. |
 | `OpeningVideo` | `./Movies/intro.mp4`를 `UFileMediaSource`로 연다. |
 | `VideoFadeIn` | 영상이 열리면 영상 표시 상태로 페이드 인한다. |
-| `PlayingVideo` | 영상을 재생한다. 종료 1초 전부터 fade out 준비를 한다. |
-| `VideoFadeToBlack` | 영상 종료 직전에 검은 화면으로 페이드한다. |
-| `WaitingForVideoEnd` | 영상 종료 이벤트 또는 끝 근처 시간이 감지되면 벙커 이동을 마무리한다. |
+| `PlayingVideo` | 영상을 재생한다. 종료 0.5초 전부터 독백 배경으로 전환한다. |
+| `VideoFadeToMonologue` | 영상의 불투명도를 낮춰 뒤에 있는 독백 배경을 드러낸다. |
+| `WaitingForVideoEnd` | 영상 종료 이벤트 또는 끝 근처 시간이 감지될 때까지 기다린다. |
+| `DisplayPostVideoLine` | 영상 종료 또는 재생 실패 후 루나의 마지막 독백을 표시한다. |
+| `FadeOutBeforeTravel` | 독백을 마치고 화면이 검게 페이드되면 `BunkerMap`으로 이동한다. |
 
-키 입력/마우스 클릭은 `AdvanceOrFillLine()`으로 독백 줄을 채우거나 다음 줄로 넘기는 용도다. 비디오가 정상적으로 열리지 않거나 필요한 위젯/미디어 객체 생성이 실패하면 `FinishIntroVideoAndTravel()`로 fallback되어 벙커 이동은 계속 진행된다.
+키 입력이나 마우스 클릭으로 `AdvanceOrFillLine()`을 호출해 영상 전후의 독백을 채우거나 넘길 수 있다. 영상을 열 수 없는 경우에도 마지막 독백을 표시한 뒤 벙커로 이동한다.
 
 ### 오프닝 완료 플래그 처리
 

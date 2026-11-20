@@ -187,6 +187,7 @@ sequenceDiagram
 
     PC->>Scenario: OpeningScenarioMap에서 위젯 생성
     Scenario->>Scenario: 독백 표시 후 intro.mp4 재생
+    Scenario->>Scenario: 마지막 독백 표시 후 암전
     Scenario->>GI: BeginScenarioBunkerEntry(scenario.opening.awakening)
     Scenario->>PC: OpenLevel(BunkerMap)
     PC->>GI: CompletePendingScenarioBunkerEntryIfNeeded()
@@ -197,7 +198,7 @@ sequenceDiagram
     PC->>QS: 퀘스트 패널 수락/보상 시 PlayQuestPresentation()
 ```
 
-`UTunaSweeperScenarioPresentationWidget`은 `OpeningScenarioMap`에서 생성된다. 독백 라인을 표시한 뒤 `./Movies/intro.mp4`를 재생하고, 종료 또는 실패 시 `TravelToBunker()`를 호출한다. 이때 바로 완료 플래그를 저장하지 않고 `UTunaSweeperGameInstance::BeginScenarioBunkerEntry(scenario.opening.awakening)`로 pending flag만 설정한 뒤 `BunkerMap`을 연다.
+`UTunaSweeperScenarioPresentationWidget`은 `OpeningScenarioMap`에서 생성된다. 독백을 표시한 뒤 `./Movies/intro.mp4`를 재생한다. 영상이 끝나거나 재생에 실패하면 마지막 독백을 표시하고, 암전이 끝나면 `TravelToBunker()`를 호출한다. `UTunaSweeperGameInstance::BeginScenarioBunkerEntry(scenario.opening.awakening)`로 pending flag를 설정한 뒤 `BunkerMap`을 연다.
 
 `BunkerMap` 로드 후 `TunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()`가 `CompletePendingScenarioBunkerEntryIfNeeded()`를 호출한다. pending flag가 있으면 이를 `CompletedScenarioFlags`에 저장하고 검은 화면 페이드 인을 재생한다. 이어서 `level_entered` 트리거를 `UTunaSweeperScenarioSubsystem`에 전달한다. 서브시스템은 활성 플레이버의 `ScenarioDefinitions.json`에서 레벨, 필수/차단 플래그, 선택적 퀘스트 상태와 완료 여부를 평가하고 `ScenarioTextStrings.csv`의 현지화된 대사를 반환한다.
 
@@ -211,7 +212,7 @@ sequenceDiagram
 
 1. 초기 레벨 결정은 `UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()`이 담당한다. 난이도 선택 전이면 `IntroMap`, 오프닝 완료 플래그가 있으면 `BunkerMap`, 없으면 `OpeningScenarioMap`을 반환한다.
 2. `OpeningScenarioMap`에서 `UTunaSweeperScenarioPresentationWidget`이 독백과 영상 재생을 처리한다.
-3. 영상 완료 후 `BeginScenarioBunkerEntry(scenario.opening.awakening)`가 pending flag를 설정하고 `BunkerMap`으로 이동한다.
+3. 영상 뒤 마지막 독백과 암전이 끝나면 `BeginScenarioBunkerEntry(scenario.opening.awakening)`가 pending flag를 설정하고 `BunkerMap`으로 이동한다.
 4. `BunkerMap`의 플레이어 컨트롤러가 pending flag를 완료 처리하고 `scenario.opening.awakening`을 저장한다.
 5. Demo는 오프닝 없이 벙커로 직접 진입하고 Demo JSON의 `level_entered` 정의를 선택한다. Main은 오프닝을 거친 뒤 저장된 `scenario.opening.awakening` 조건을 만족할 때 Main JSON의 첫 벙커 대화를 선택한다.
 6. Demo 대화 완료 시 `dialogue.demo.toilet_intro`, Main 대화 완료 시 `dialogue.main.bunker_intro`가 저장된다. 이후 자동 재생은 각 completion flag 때문에 생략된다.

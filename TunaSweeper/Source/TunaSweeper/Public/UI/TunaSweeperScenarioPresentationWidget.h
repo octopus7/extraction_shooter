@@ -19,8 +19,10 @@ enum class ETunaSweeperScenarioPresentationPhase : uint8
 	OpeningVideo,
 	VideoFadeIn,
 	PlayingVideo,
-	VideoFadeToBlack,
-	WaitingForVideoEnd
+	VideoFadeToMonologue,
+	WaitingForVideoEnd,
+	DisplayPostVideoLine,
+	FadeOutBeforeTravel
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -39,7 +41,7 @@ protected:
 private:
 	void BuildPresentationWidget();
 	void InitializeMonologueLines();
-	void BeginCurrentLine();
+	void BeginMonologueLine(const FText& Line);
 	void UpdateMonologueTextPlacement();
 	void UpdateMonologueTypewriter(float DeltaTime);
 	void UpdateVisibleMonologueText();
@@ -48,10 +50,10 @@ private:
 	void AdvanceOrFillLine();
 	void AdvanceLine();
 	void StartOpeningScenarioBgm();
-	void StartFadeOut();
+	void StartFadeOut(ETunaSweeperScenarioPresentationPhase FadePhase);
 	void StartIntroVideo();
 	void BeginIntroVideoFadeOut();
-	void FinishIntroVideoAndTravel();
+	void FinishIntroVideo();
 	void ClearIntroVideo();
 	void SetIntroVideoVisible(bool bVisible);
 	void SetPresentationTextVisible(bool bVisible);
@@ -59,6 +61,7 @@ private:
 	void TravelToBunker();
 	void SetFadeOverlayOpacity(float Opacity);
 	float GetCurrentLineAutoAdvanceSeconds() const;
+	bool IsDisplayingMonologue() const;
 	bool IsCurrentLineFullyVisible() const;
 
 	UFUNCTION()

@@ -247,14 +247,12 @@ ui.memo.list_title,메모 목록,Memo List,メモ一覧,备忘录列表,備忘�
 ui.memo.none,획득한 메모가 없습니다.,No memos collected.,取得したメモがありません。,还没有获得备忘录。,還沒有獲得備忘錄。,Записок пока нет.
 ui.dialogue.continue,계속,Continue,続行,继续,繼續,Продолжить
 ui.scenario.title,재기동 기록,Reboot Log,再起動記録,重启日志,重啓日誌,Журнал перезагрузки
-ui.scenario.status,B-07 기지 / 비상 기상,B-07 Base / Emergency Awakening,B-07 基地 / 緊急覚醒,B-07 基地／紧急唤醒,B-07 基地／緊急喚醒,База B-07 / аварийное пробуждение
+ui.scenario.status,비상 전력 가동 중,Emergency Power Active,非常電源作動中,应急电源运行中,緊急電源運作中,Аварийное питание включено
 ui.scenario.prompt,클릭해서 계속,Click to Continue,クリックして続行,点击继续,點擊繼續,"Нажмите, чтобы продолжить"
-ui.scenario.monologue1,기억 데이터 손상.,Memory data damaged.,記憶データ損傷。,记忆数据损坏。,記憶數據損壞。,Данные памяти повреждены.
-ui.scenario.monologue2,위치 확인... B-07 기지.,Location confirmed... B-07 base.,位置確認... B-07 基地。,位置已确认……B-07 基地。,位置已確認……B-07 基地。,Местоположение подтверждено... база B-07.
-ui.scenario.monologue3,생존 기능 재시동.,Survival functions rebooted.,生存機能再起動。,生存系统已重启。,生存系統已重啓。,Системы жизнеобеспечения перезапущены.
-ui.scenario.monologue4,전력 부족. 내부 시스템 불안정.,Power shortage. Internal systems unstable.,電力不足。内部システム不安定。,电力不足。内部系统不稳定。,電力不足。內部系統不穩定。,Нехватка энергии. Внутренние системы нестабильны.
-ui.scenario.monologue5,그래도 움직일 수 있다.,Still able to move.,それでも動ける。,还能移动。,還能移動。,Двигаться всё ещё могу.
-ui.scenario.monologue6,먼저 이 장소를 확인해야 한다.,First I need to check this place.,まずこの場所を確認しなければならない。,得先查看这里。,得先查看這裏。,Сначала нужно осмотреться.
+ui.scenario.monologue1,…춥다.,…It's cold.,……寒い。,……好冷。,……好冷。,…Холодно.
+ui.scenario.monologue2,여긴 어디지? 아무것도 기억이 안 나.,Where am I? I can't remember a thing.,ここはどこ？ 何も思い出せない。,这是哪儿？我什么都想不起来。,這是哪裡？我什麼都想不起來。,Где я? Ничего не помню.
+ui.scenario.monologue3,눈부터… 떠 보자.,First… I need to open my eyes.,まずは……目を開けよう。,先……睁开眼睛吧。,先……睜開眼睛吧。,Надо… открыть глаза.
+ui.scenario.post_video_monologue,으음… 또 의식이 흐려져…,Mmh… I'm fading out again…,うぅ……また意識が薄れていく……,唔……意识又模糊了……,唔……意識又模糊了……,М-м… Я снова теряю сознание…
 ui.interaction.default,상호작용,Interact,インタラクト,互动,互動,Взаимодействовать
 ui.interaction.inspect,조사하기,Inspect,調べる,调查,調查,Осмотреть
 ui.interaction.research,연구하기,Research,研究する,研究,研究,Исследование
