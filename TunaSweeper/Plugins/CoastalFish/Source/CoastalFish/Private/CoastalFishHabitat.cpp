@@ -14,7 +14,6 @@ namespace
 {
 	constexpr double ProximitySquared = 10000. * 10000.;
 	constexpr double TwoPi = 2. * UE_DOUBLE_PI;
-	const FName JointNames[] = { TEXT("body_01"), TEXT("body_02"), TEXT("body_03"), TEXT("body_04"), TEXT("body_05"), TEXT("tail") };
 
 	double MediumBurst(double Time)
 	{
@@ -96,7 +95,8 @@ void ACoastalFishHabitat::InitializePose()
 		const USkinnedAsset* Asset = Mesh->GetSkinnedAsset();
 		if (!Asset) return;
 		const FReferenceSkeleton& Skeleton = Asset->GetRefSkeleton();
-		for (FName Name : JointNames)
+		static const FName FishJointNames[] = { TEXT("body_01"), TEXT("body_02"), TEXT("body_03"), TEXT("body_04"), TEXT("body_05"), TEXT("tail") };
+		for (FName Name : FishJointNames)
 		{
 			const int32 Index = Skeleton.FindBoneIndex(Name);
 			if (Index == INDEX_NONE)
