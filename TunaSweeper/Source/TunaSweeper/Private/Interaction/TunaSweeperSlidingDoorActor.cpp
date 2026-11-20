@@ -101,6 +101,17 @@ ATunaSweeperSlidingDoorActor::ATunaSweeperSlidingDoorActor()
 	ApplyDoorPose();
 }
 
+void ATunaSweeperSlidingDoorActor::PostRegisterAllComponents()
+{
+	Super::PostRegisterAllComponents();
+
+	// A saved placement can load in the editor without running construction again.
+	if (!HasActorBegunPlay())
+	{
+		ApplyDoorSignal(bStartsOpen);
+	}
+}
+
 void ATunaSweeperSlidingDoorActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -195,40 +206,29 @@ void ATunaSweeperSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 	{
 		DoorAudioComponent->Stop();
 		OpenAlpha = bInOpen ? 1.0f : 0.0f;
+	}
+
+	ApplyDoorSignal(bInOpen);
+	const bool bAtTarget = bInOpen ? OpenAlpha >= 1.0f : OpenAlpha <= 0.0f;
+	if (bAtTarget)
+	{
 		DoorState = bInOpen
 			? ETunaSweeperSlidingDoorState::Open
 			: ETunaSweeperSlidingDoorState::Closed;
-		ApplyDoorPose();
+		if (bInstant)
+		{
+			ApplyDoorPose();
+		}
+		else
+		{
+			StopDoorMovementSound();
+		}
 		SetActorTickEnabled(false);
 		return;
 	}
 
 	const ETunaSweeperSlidingDoorState PreviousState = DoorState;
-	if (bInOpen)
-	{
-		if (OpenAlpha >= 1.0f)
-		{
-			DoorState = ETunaSweeperSlidingDoorState::Open;
-			StopDoorMovementSound();
-			SetActorTickEnabled(false);
-			return;
-		}
-
-		DoorState = ETunaSweeperSlidingDoorState::Opening;
-	}
-	else
-	{
-		if (OpenAlpha <= 0.0f)
-		{
-			DoorState = ETunaSweeperSlidingDoorState::Closed;
-			StopDoorMovementSound();
-			SetActorTickEnabled(false);
-			return;
-		}
-
-		DoorState = ETunaSweeperSlidingDoorState::Closing;
-	}
-
+	DoorState = bInOpen ? ETunaSweeperSlidingDoorState::Opening : ETunaSweeperSlidingDoorState::Closing;
 	SetActorTickEnabled(true);
 	if (DoorState != PreviousState)
 	{
@@ -266,6 +266,16 @@ void ATunaSweeperSlidingDoorActor::StopDoorMovementSound()
 	if (DoorAudioComponent->IsPlaying())
 	{
 		DoorAudioComponent->FadeOut(0.04f, 0.0f);
+	}
+}
+
+void ATunaSweeperSlidingDoorActor::ApplyDoorSignal(bool bOpen) const
+{
+	static const FName SignalParameter(TEXT("DoorSignalOpen"));
+	for (UStaticMeshComponent* Mesh : { DoorFrameMeshComponent.Get(), LeftDoorMeshComponent.Get(), RightDoorMeshComponent.Get() })
+	{
+		// Only materials declaring this per-primitive scalar use the door signal.
+		Mesh->SetScalarParameterForCustomPrimitiveData(SignalParameter, bOpen ? 1.0f : 0.0f);
 	}
 }
 
@@ -328,6 +338,7 @@ void ATunaSweeperSlidingDoorActor::ApplyConfiguration()
 	LeftDoorMeshComponent->SetStaticMesh(LeftDoorMesh);
 	RightDoorMeshComponent->SetStaticMesh(RightDoorMesh);
 	DoorFrameMeshComponent->SetStaticMesh(DoorFrameMesh);
+	ApplyDoorSignal(bStartsOpen);
 	LeftDoorMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RightDoorMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DoorFrameMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);

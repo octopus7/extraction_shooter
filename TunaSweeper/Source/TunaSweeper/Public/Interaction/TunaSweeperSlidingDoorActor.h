@@ -34,6 +34,7 @@ class TUNASWEEPER_API ATunaSweeperSlidingDoorActor : public AActor
 public:
 	ATunaSweeperSlidingDoorActor();
 
+	virtual void PostRegisterAllComponents() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -190,6 +191,7 @@ protected:
 private:
 	void PlayDoorMovementSound(bool bOpening);
 	void StopDoorMovementSound();
+	void ApplyDoorSignal(bool bOpen) const;
 	void ApplyConfiguration();
 	void ApplyDoorPose();
 	void ApplyMeshDimensions(UStaticMeshComponent* MeshComponent, const FVector& TargetDimensions) const;

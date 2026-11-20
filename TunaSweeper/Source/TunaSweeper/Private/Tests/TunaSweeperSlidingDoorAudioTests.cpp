@@ -2,11 +2,15 @@
 
 #include "Interaction/TunaSweeperSlidingDoorActor.h"
 #include "Components/AudioComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Materials/Material.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 #include "Sound/SoundBase.h"
+#include "UObject/UnrealType.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperSlidingDoorAudioTest,
 	"TunaSweeper.Interaction.SlidingDoor.AudioAndMotion",
@@ -71,19 +75,120 @@ bool FTunaSweeperSlidingDoorAudioTest::RunTest(const FString& Parameters)
 	UClass* BlueprintClass = LoadClass<ATunaSweeperSlidingDoorActor>(nullptr,
 		TEXT("/Game/Environment/Bunker/Agit/Door/BP_SlidingDoor.BP_SlidingDoor_C"));
 	if (!TestNotNull(TEXT("Existing door Blueprint loads"), BlueprintClass)) { return false; }
-	ATunaSweeperSlidingDoorActor* BlueprintDoor = World->SpawnActor<ATunaSweeperSlidingDoorActor>(BlueprintClass);
+	const FVector BlueprintLocation(1000.0, 0.0, 0.0);
+	ATunaSweeperSlidingDoorActor* BlueprintDoor = World->SpawnActor<ATunaSweeperSlidingDoorActor>(
+		BlueprintClass, FTransform(BlueprintLocation));
 	if (!TestNotNull(TEXT("Existing Blueprint spawns"), BlueprintDoor)) { return false; }
 	UAudioComponent* BlueprintAudio = BlueprintDoor->FindComponentByClass<UAudioComponent>();
 	if (!TestNotNull(TEXT("Existing Blueprint inherits audio component"), BlueprintAudio)) { return false; }
 	TestEqual(TEXT("Existing Blueprint inherits 35 percent volume"), BlueprintDoor->GetDoorSoundVolume(), 0.35f);
 	TestTrue(TEXT("Existing Blueprint preserves top-down audibility"),
 		BlueprintAudio->AttenuationOverrides.Evaluate(FTransform::Identity, FVector(0.0f, 0.0f, 1500.0f)) > 0.99f);
-	BlueprintDoor->SetDoorOpen(false, true);
+
+	auto CheckSignal = [this](ATunaSweeperSlidingDoorActor* Instance, const TCHAR* Phase, float Expected)
+	{
+		for (const TCHAR* Name : { TEXT("DoorFrameMesh"), TEXT("LeftDoorMesh"), TEXT("RightDoorMesh") })
+		{
+			const FString Label = FString::Printf(TEXT("%s / %s"), Phase, Name);
+			const auto* Mesh = Cast<UStaticMeshComponent>(Instance->GetDefaultSubobjectByName(Name));
+			if (!TestNotNull(Label, Mesh)) { continue; }
+			const auto& Data = Mesh->GetCustomPrimitiveData().Data;
+			if (TestTrue(Label + TEXT(" provides its material signal"), Data.IsValidIndex(0)))
+			{
+				TestEqual(Label + TEXT(" open signal"), Data[0], Expected);
+			}
+		}
+	};
+
+	const auto* Frame = Cast<UStaticMeshComponent>(BlueprintDoor->GetDefaultSubobjectByName(TEXT("DoorFrameMesh")));
+	const auto* Left = Cast<UStaticMeshComponent>(BlueprintDoor->GetDefaultSubobjectByName(TEXT("LeftDoorMesh")));
+	const auto* Right = Cast<UStaticMeshComponent>(BlueprintDoor->GetDefaultSubobjectByName(TEXT("RightDoorMesh")));
+	const auto* LeftBox = Cast<UBoxComponent>(BlueprintDoor->GetDefaultSubobjectByName(TEXT("LeftPanelCollision")));
+	const auto* RightBox = Cast<UBoxComponent>(BlueprintDoor->GetDefaultSubobjectByName(TEXT("RightPanelCollision")));
+	const auto* Trigger = Cast<UBoxComponent>(BlueprintDoor->GetDefaultSubobjectByName(TEXT("ProximityTrigger")));
+	if (!TestTrue(TEXT("Blueprint has a frame, panels, panel blockers and proximity trigger"),
+		Frame && Left && Right && LeftBox && RightBox && Trigger)) { return false; }
+	for (const auto* Part : { Frame, Left, Right })
+	{
+		TestEqual(Part->GetName() + TEXT(" material reads DoorSignalOpen at index 0"),
+			Part->GetCustomPrimitiveDataIndexForScalarParameter(TEXT("DoorSignalOpen")), 0);
+	}
+	TestTrue(TEXT("Player proximity is sensed from both sides"), Trigger->GetGenerateOverlapEvents()
+		&& Trigger->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Overlap
+		&& Trigger->GetUnscaledBoxExtent().Equals(FVector(116.0, 180.0, 137.5)));
+	const FTransform FrameAtRest = Frame->GetComponentTransform();
+	auto CheckPose = [&](const FString& Phase, double PanelOffset, bool bPassageBlocked)
+	{
+		const FVector Center = BlueprintLocation + FVector(0.0, 0.0, 97.5);
+		const FVector Side(PanelOffset, 0.0, 0.0);
+		TestTrue(Phase + TEXT(" left panel and blocker"), Left->Bounds.Origin.Equals(Center - Side, 0.1)
+			&& LeftBox->GetComponentLocation().Equals(Center - Side, 0.1));
+		TestTrue(Phase + TEXT(" right panel and blocker"), Right->Bounds.Origin.Equals(Center + Side, 0.1)
+			&& RightBox->GetComponentLocation().Equals(Center + Side, 0.1));
+		TestTrue(Phase + TEXT(" stationary frame"), Frame->GetComponentTransform().Equals(FrameAtRest));
+		const FVector Approach(0.0, 100.0, 0.0);
+		TestEqual(Phase + TEXT(" blocks a player capsule through the center"), World->SweepTestByChannel(
+			Center - Approach, Center + Approach, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(34.f, 88.f)),
+			bPassageBlocked);
+	};
+
+	CheckSignal(BlueprintDoor, TEXT("Initially closed"), 0.f);
+	BlueprintDoor->DispatchBeginPlay();
+	CheckPose(TEXT("Closed"), 33.0, true);
 	BlueprintDoor->OpenDoor();
 	TestEqual(TEXT("Existing Blueprint inherits opening sound"), BlueprintAudio->Sound.Get(), OpeningSound);
-	BlueprintDoor->SetDoorOpen(true, true);
+	CheckSignal(BlueprintDoor, TEXT("Opening before first tick"), 1.f);
+	BlueprintDoor->Tick(0.3f);
+	CheckPose(TEXT("Halfway open"), 69.0, false);
+	CheckSignal(BlueprintDoor, TEXT("Halfway open"), 1.f);
 	BlueprintDoor->CloseDoor();
 	TestNotNull(TEXT("Existing Blueprint inherits closing sound"), BlueprintAudio->Sound.Get());
+	CheckSignal(BlueprintDoor, TEXT("Reversed to closing"), 0.f);
+	BlueprintDoor->Tick(0.1875f);
+	CheckPose(TEXT("Partly closed after reversal"), 44.25, true);
+	CheckSignal(BlueprintDoor, TEXT("Partly closed after reversal"), 0.f);
+	BlueprintDoor->ToggleDoor();
+	CheckSignal(BlueprintDoor, TEXT("Reversed to opening"), 1.f);
+	BlueprintDoor->Tick(0.6f);
+	CheckPose(TEXT("Fully open"), 105.0, false);
+	CheckSignal(BlueprintDoor, TEXT("Open at rest"), 1.f);
+	BlueprintDoor->CloseDoor();
+	BlueprintDoor->OpenDoor();
+	CheckSignal(BlueprintDoor, TEXT("Reopened at the open endpoint"), 1.f);
+	BlueprintDoor->CloseDoor();
+	BlueprintDoor->Tick(0.75f);
+	CheckPose(TEXT("Returned to closed"), 33.0, true);
+	CheckSignal(BlueprintDoor, TEXT("Closed at rest"), 0.f);
+	BlueprintDoor->OpenDoor();
+	BlueprintDoor->CloseDoor();
+	CheckSignal(BlueprintDoor, TEXT("Reclosed at the closed endpoint"), 0.f);
+	BlueprintDoor->SetDoorOpen(true, true);
+	CheckSignal(BlueprintDoor, TEXT("Instantly opened"), 1.f);
+	BlueprintDoor->SetDoorOpen(false, true);
+	CheckSignal(BlueprintDoor, TEXT("Instantly closed"), 0.f);
+
+	const FTransform OpenPlacement(FVector(2000.0, 0.0, 0.0));
+	auto* StartsOpenDoor = World->SpawnActorDeferred<ATunaSweeperSlidingDoorActor>(BlueprintClass, OpenPlacement);
+	auto* StartsOpen = FindFProperty<FBoolProperty>(BlueprintClass, TEXT("bStartsOpen"));
+	if (!TestTrue(TEXT("Start-open placement available"), StartsOpenDoor && StartsOpen)) { return false; }
+	StartsOpen->SetPropertyValue_InContainer(StartsOpenDoor, true);
+	StartsOpenDoor->FinishSpawning(OpenPlacement);
+	CheckSignal(StartsOpenDoor, TEXT("Placed starting open"), 1.f);
+	StartsOpenDoor->SetDoorOpen(false, true);
+	StartsOpenDoor->DispatchBeginPlay();
+	CheckSignal(StartsOpenDoor, TEXT("Starts open in play"), 1.f);
+	CheckSignal(BlueprintDoor, TEXT("Other instance stays closed"), 0.f);
+
+	auto* AlternatePanel = Cast<UStaticMeshComponent>(StartsOpenDoor->GetDefaultSubobjectByName(TEXT("LeftDoorMesh")));
+	if (!TestNotNull(TEXT("Replaceable panel"), AlternatePanel)) { return false; }
+	for (int32 Slot = 0; Slot < AlternatePanel->GetNumMaterials(); ++Slot)
+	{
+		AlternatePanel->SetMaterial(Slot, UMaterial::GetDefaultMaterial(MD_Surface));
+	}
+	AlternatePanel->SetCustomPrimitiveDataFloat(0, 0.375f);
+	StartsOpenDoor->CloseDoor();
+	TestEqual(TEXT("An alternate panel material retains its own primitive data"),
+		AlternatePanel->GetCustomPrimitiveData().Data[0], 0.375f);
 	return true;
 }
 
