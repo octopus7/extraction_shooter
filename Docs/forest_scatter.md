@@ -12,7 +12,7 @@
 
 1. 새 구역을 그릴 때는 기존 액터 선택을 해제한다. 레벨 에디터의 모드를 **PCG**로 바꾸고 **Draw Spline Surface**에서 `PCG_ForestScatter` 프리셋을 선택한다. 기존 구역을 선택하고 그리면 첫 클릭부터 그 구역의 외곽을 다시 그린다.
 2. 지면을 클릭해 식생을 심을 외곽을 그리고 도구의 **Accept**로 확정한다. 액터 배치 패널에서 **Forest Scatter Region**을 끌어온 뒤 `Boundary` 스플라인의 점을 편집해도 된다.
-3. 구역 액터의 디테일에서 **Grass**, **Shrubs**, **Flowers**, **Gravel**, **Boulders**의 메시와 **Instances per 100 Square Metres**를 조절한다. 수치는 배치 가능한 수평 면적 100㎡당 평균 개수다. 풀은 서쪽 숲 65, 중앙 초지 54, 남쪽 공터 59, 동쪽 강둑 69, 동쪽 호숫가 75로 설정했다. 밀도 0 또는 빈 메시는 해당 종류를 생략한다.
+3. 구역 액터의 디테일에서 **Grass**, **Shrubs**, **Flowers**, **Gravel**, **Boulders**의 메시와 **Instances per 100 Square Metres**를 조절한다. 수치는 배치 가능한 수평 면적 100㎡당 평균 개수다. 숲의 다섯 구역은 모두 잔디 밀도가 200이다. 밀도 0 또는 빈 메시는 해당 종류를 생략한다.
 4. **Regenerate Forest**를 누른다. 결과는 구역 액터에 인스턴스로 모인다. 확정할 배치는 생성한 상태에서 레벨을 저장하면 플레이할 때 그대로 보인다. 작업 중 결과를 걷어낼 때는 해당 PCG 컴포넌트의 **Cleanup**을 사용한다. 스플라인과 구역 설정은 다시 생성할 때도 쓸 수 있다.
 
 꽃의 줄기와 잎은 `SM_ForestFlower`의 재질 슬롯 0, 꽃잎은 슬롯 1을 쓴다. **Flower Petal Materials**에서 흰색·노란색·장미색·라일락색 재질을 바꾸고, **Flower Color Patch Size**에서 같은 색이 모여 피는 범위(cm)를 조절한다. 수국은 보라색 꽃송이가 여러 개 뭉친 별도 메시다.
@@ -41,6 +41,6 @@
 
 ## 마을 잔디
 
-`/Game/MainRaid/RaidVillage`의 `Environment/Village/Grass` 폴더에는 해안 풀밭(`CoastalVerge`), 서쪽 주택가(`WestGardens`), 동쪽 주택가(`EastGardens`), 북쪽 초지(`NorthMeadow`)가 있다. 각 구역의 **Grass → Instances per 100 Square Metres** 기본값은 각각 45, 55, 52, 61이다. 경계 스플라인이나 밀도를 바꾼 뒤 **Regenerate Forest**를 누르면 해당 구역의 잔디 인스턴스를 다시 심는다. 잔디 메시와 잎끝 바람은 숲과 공유한다.
+`/Game/MainRaid/RaidVillage`의 `Environment/Village/Grass` 폴더에는 해안 풀밭(`CoastalVerge`), 서쪽 주택가(`WestGardens`), 동쪽 주택가(`EastGardens`), 북쪽 초지(`NorthMeadow`)가 있다. 각 구역의 **Grass → Instances per 100 Square Metres** 값은 네 구역 모두 200이다. 경계 스플라인이나 밀도를 바꾼 뒤 **Regenerate Forest**를 누르면 해당 구역의 잔디 인스턴스를 다시 심는다. 잔디 메시와 잎끝 바람은 숲과 공유한다.
 
 `VillageGrass_PlantingGuide`는 포장도로·현관길·건물·선로 자갈·승강장·모래사장과 물을 비우는 에디터 전용 가이드다. 식재 가능 지면에서 랜드스케이프 **Grass**와 **GrassDark**의 합이 0.44 이상인 곳에만 풀을 심는다. 길을 옮길 때는 `TunaSweeper/SourceArt/Environment/VillageYards/T_VillageMeadowPlanting.png`의 녹색 식재 범위와 황색 제외 범위를 수정하고 같은 이름의 텍스처를 재임포트한다. 이미지의 위쪽이 북쪽이고 오른쪽이 동쪽이다. 가이드 데칼의 **Component Tags**에 있는 `PCGPlantingGuide`가 화면 표시와 독립적으로 이 배치도를 활성화한다.
