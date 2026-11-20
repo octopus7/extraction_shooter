@@ -67,3 +67,5 @@ Blender/Exports/LunaMk2FaceMorphs.zip
 # Python bytecode caches
 __pycache__/
 *.pyc
+
+/Videos/intro_omni/
