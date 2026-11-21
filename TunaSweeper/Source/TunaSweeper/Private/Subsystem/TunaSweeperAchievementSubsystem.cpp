@@ -464,6 +464,12 @@ void UTunaSweeperAchievementSubsystem::TryStartPlatformSync()
 	}
 
 	CurrentPlatformName = Publisher->GetPlatformName();
+	if (CurrentPlatformName == FName(TEXT("Steam")))
+	{
+		bool bEnableSteamSync = false;
+		GConfig->GetBool(AchievementConfigSection, TEXT("bEnableSteamSync"), bEnableSteamSync, GEngineIni);
+		if (!bEnableSteamSync) return;
+	}
 	if (!HasPlatformMappings(CurrentPlatformName) || !ValidatePlatformConfiguration(CurrentPlatformName))
 	{
 		return;

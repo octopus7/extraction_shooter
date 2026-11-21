@@ -1,5 +1,9 @@
 # Save/Load Persistence Contract
 
+## Steam achievement mapping
+
+Full Steam builds map internal achievement IDs 01–20 to `ACH_01`–`ACH_20`. Existing local unlocks are retained and queued for publication after the Steam query; successful publication uses the existing platform confirmation keys. Disabled 05 remains excluded from merging and publishing. `bEnableSteamSync` defaults to false and is enabled only by the Full config. No save fields or version changes are required.
+
 ## Single-use rocket
 
 Item 6019 is consumed once by the existing inventory mutation/save workflow after its projectile is successfully created. The existing WeaponFired fact for target `6019` unlocks achievement 20 in the independent achievement save. Aiming, lock progress, the in-flight actor and guidance decal are transient. Cancellation and failed launch preserve inventory and achievement state. Existing saves retain their item UID and quantity with no new fields or version change.

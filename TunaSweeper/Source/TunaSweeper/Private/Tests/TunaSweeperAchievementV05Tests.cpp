@@ -126,7 +126,7 @@ bool FTunaAchievementCatalog::RunTest(const FString& Parameters)
 	const TCHAR* Names[][3] = {
 		{TEXT("첫 외출"), TEXT("First Outing"), TEXT("初めてのお出かけ")},
 		{TEXT("붉은 신고식"), TEXT("First Blood"), TEXT("紅の洗礼")},
-		{TEXT("새로운 가족"), TEXT("New Family"), TEXT("新しい家族")},
+		{TEXT("새로운 가족"), TEXT("A New Family Member"), TEXT("新しい家族")},
 		{TEXT("발사"), TEXT("Blast Off!"), TEXT("発射！")},
 		{TEXT("아늑한 집"), TEXT("Home Sweet Home"), TEXT("居心地のいい我が家")},
 		{TEXT("골목대장"), TEXT("King of the Block"), TEXT("路地裏の番長")},
