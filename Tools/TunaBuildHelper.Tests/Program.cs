@@ -62,6 +62,22 @@ internal static class Program
                     !Equals(launcherFolder.ToolTip, launcherDirectory))
                     throw new Exception("The folder buttons must target the respective launcher and App ID directories");
             }
+            var commands = (Button?)window.FindName("OpenSteamAchievementCommandsButton")
+                ?? throw new Exception("Expected an achievement commands file button");
+            var console = (Button?)window.FindName("OpenSteamConsoleButton")
+                ?? throw new Exception("Expected a Steam console button");
+            if (Equals(commands.Parent, console.Parent) is false ||
+                Grid.GetColumn(commands) >= Grid.GetColumn(console) ||
+                !Equals(console.ToolTip, "steam://open/console"))
+                throw new Exception("Expected separate actions for the commands file and the Steam console");
+            if (launcherFolder.ToolTip is string launcherPath && Path.IsPathFullyQualified(launcherPath))
+            {
+                string projectDirectory = Path.GetFullPath(Path.Combine(launcherPath, "..", "..", "..", ".."));
+                string guide = Path.Combine(projectDirectory, "External", "MainPayload", "Tools", "Steam",
+                    "Achievements", "5137900-achievements-reset-commands.ko.txt");
+                if (!Equals(commands.ToolTip, guide))
+                    throw new Exception("The commands button must use the local Full payload document");
+            }
         }
         finally
         {

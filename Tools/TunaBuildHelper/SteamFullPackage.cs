@@ -7,12 +7,15 @@ namespace TunaBuildHelper;
 internal sealed class SteamFullPackage(string projectDirectory)
 {
     internal const string AppIdFileName = "steam_appid.txt";
+    internal const string ConsoleUri = "steam://open/console";
     private string GameExecutablePath => Path.Combine(AppIdDirectory, "TunaSweeper-Win64-Shipping.exe");
 
     internal string LauncherDirectory => Path.Combine(projectDirectory, "Builds", "Steam", "Full", "Windows");
     internal string LauncherPath => Path.Combine(LauncherDirectory, "TunaSweeper.exe");
     internal string AppIdDirectory => Path.Combine(LauncherDirectory, "TunaSweeper", "Binaries", "Win64");
     internal string AppIdPath => Path.Combine(AppIdDirectory, AppIdFileName);
+    internal string AchievementResetCommandsPath => Path.Combine(projectDirectory, "External", "MainPayload",
+        "Tools", "Steam", "Achievements", "5137900-achievements-reset-commands.ko.txt");
     internal bool HasAppIdFile => File.Exists(AppIdPath);
     internal bool CanCreateAppIdFile => File.Exists(GameExecutablePath);
 

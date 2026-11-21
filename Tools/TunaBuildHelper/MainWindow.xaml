@@ -228,6 +228,16 @@
                                 <Button x:Name="SteamAppIdActionButton" Grid.Row="1" Grid.Column="3" Margin="8,0,0,0"
                                         Click="SteamAppIdActionButton_Click" />
                             </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="OpenSteamAchievementCommandsButton" Margin="0,0,4,0"
+                                        Click="OpenSteamAchievementCommandsButton_Click" />
+                                <Button x:Name="OpenSteamConsoleButton" Grid.Column="1" Margin="4,0,0,0"
+                                        Click="OpenSteamConsoleButton_Click" />
+                            </Grid>
                             <Button Margin="0,0,0,10"
                                     Background="#5A2630"
                                     BorderBrush="#82414D"

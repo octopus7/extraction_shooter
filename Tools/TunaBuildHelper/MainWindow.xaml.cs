@@ -123,6 +123,10 @@ public partial class MainWindow : Window
         SteamAppIdFileName.Text = SteamFullPackage.AppIdFileName;
         OpenSteamAppIdFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.folder_open");
         OpenSteamAppIdFolderButton.ToolTip = steamFullPackage?.AppIdDirectory;
+        OpenSteamAchievementCommandsButton.Content = ItemGrantCatalog.Text("ui.helper_steam.achievement_commands");
+        OpenSteamAchievementCommandsButton.ToolTip = steamFullPackage?.AchievementResetCommandsPath;
+        OpenSteamConsoleButton.Content = ItemGrantCatalog.Text("ui.helper_steam.console");
+        OpenSteamConsoleButton.ToolTip = SteamFullPackage.ConsoleUri;
         SteamAppIdIndicator.ToolTip = steamFullPackage?.AppIdPath ?? ItemGrantCatalog.Text("ui.helper_steam.app_id_file");
         System.Windows.Automation.AutomationProperties.SetName(SteamAppIdIndicator, ItemGrantCatalog.Text("ui.helper_steam.app_id_file"));
         RefreshSteamAppIdStatus();
@@ -478,6 +482,22 @@ public partial class MainWindow : Window
     {
         if (steamFullPackage is { } package)
             OpenPath(package.AppIdDirectory, ItemGrantCatalog.Text("ui.helper_steam.app_id_folder_opening"));
+    }
+
+    private void OpenSteamAchievementCommandsButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage?.AchievementResetCommandsPath is not { } commandsPath || !File.Exists(commandsPath))
+        {
+            StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.achievement_commands_missing");
+            return;
+        }
+
+        OpenPath(commandsPath, ItemGrantCatalog.Text("ui.helper_steam.achievement_commands_opening"));
+    }
+
+    private void OpenSteamConsoleButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenPath(SteamFullPackage.ConsoleUri, ItemGrantCatalog.Text("ui.helper_steam.console_opening"));
     }
 
     private void RefreshSteamAppIdStatus()

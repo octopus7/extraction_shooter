@@ -933,3 +933,8 @@ ui.helper_steam.app_id_delete,삭제,Delete,削除,删除,刪除,Удалить
 ui.helper_steam.app_id_created,Steam 앱 ID 파일을 생성했습니다.,Created the Steam App ID file.,SteamアプリIDファイルを作成しました。,已创建 Steam 应用 ID 文件。,已建立 Steam 應用程式 ID 檔案。,Файл Steam App ID создан.
 ui.helper_steam.app_id_deleted,Steam 앱 ID 파일을 삭제했습니다.,Deleted the Steam App ID file.,SteamアプリIDファイルを削除しました。,已删除 Steam 应用 ID 文件。,已刪除 Steam 應用程式 ID 檔案。,Файл Steam App ID удалён.
 ui.helper_steam.app_id_failed,Steam 앱 ID 파일을 변경하지 못했습니다.,Could not change the Steam App ID file.,SteamアプリIDファイルを変更できませんでした。,无法更改 Steam 应用 ID 文件。,無法變更 Steam 應用程式 ID 檔案。,Не удалось изменить файл Steam App ID.
+ui.helper_steam.achievement_commands,도전과제 초기화 명령 파일,Achievement reset commands,実績リセットコマンド,成就重置命令,成就重設指令,Команды сброса достижений
+ui.helper_steam.achievement_commands_missing,도전과제 초기화 명령 파일을 찾을 수 없습니다.,Achievement reset command file not found.,実績リセットコマンドのファイルが見つかりません。,找不到成就重置命令文件。,找不到成就重設指令檔案。,Файл команд сброса достижений не найден.
+ui.helper_steam.achievement_commands_opening,도전과제 초기화 명령 파일을 여는 중입니다.,Opening the achievement reset command file.,実績リセットコマンドのファイルを開いています。,正在打开成就重置命令文件。,正在開啟成就重設指令檔案。,Открывается файл команд сброса достижений.
+ui.helper_steam.console,Steam 콘솔 열기,Open Steam console,Steamコンソールを開く,打开 Steam 控制台,開啟 Steam 主控台,Открыть консоль Steam
+ui.helper_steam.console_opening,Steam 콘솔을 여는 중입니다.,Opening the Steam console.,Steamコンソールを開いています。,正在打开 Steam 控制台。,正在開啟 Steam 主控台。,Открывается консоль Steam.
