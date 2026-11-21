@@ -20,6 +20,8 @@
 
 namespace
 {
+	const FLinearColor PaperColor = FLinearColor::FromSRGBColor(FColor(253, 251, 249));
+
 	class SStartupVideoEdge : public SLeafWidget
 	{
 	public:
@@ -41,7 +43,7 @@ namespace
 			{
 				const float T = float(Ring) / Rings;
 				const float Inset = Feather * T;
-				FLinearColor Color = Style.GetColorAndOpacityTint();
+				FLinearColor Color = PaperColor * Style.GetColorAndOpacityTint();
 				Color.A *= 1.0f - T * T * (3.0f - 2.0f * T);
 				const FVector2f Points[] = {
 					{Inset, Inset}, {float(Size.X) - Inset, Inset},
@@ -96,35 +98,27 @@ TSharedRef<SWidget> UTunaSweeperStartupLogoWidget::RebuildWidget()
 		UOverlay* Root = WidgetTree->ConstructWidget<UOverlay>();
 		WidgetTree->RootWidget = Root;
 		UImage* Background = WidgetTree->ConstructWidget<UImage>();
-		Background->SetColorAndOpacity(FLinearColor::White);
+		Background->SetColorAndOpacity(PaperColor);
 		Fill(Root->AddChildToOverlay(Background));
 		UScaleBox* Scale = WidgetTree->ConstructWidget<UScaleBox>();
-		Scale->SetStretch(EStretch::ScaleToFit);
+		Scale->SetStretch(EStretch::ScaleToFitY);
 		Fill(Root->AddChildToOverlay(Scale));
 		USizeBox* Frame = WidgetTree->ConstructWidget<USizeBox>();
-		Frame->SetWidthOverride(1920.0f);
-		Frame->SetHeightOverride(1080.0f);
+		Frame->SetWidthOverride(1672.0f);
+		Frame->SetHeightOverride(941.0f);
 		Scale->AddChild(Frame);
 		UOverlay* Layers = WidgetTree->ConstructWidget<UOverlay>();
 		Frame->AddChild(Layers);
 		StillImage = WidgetTree->ConstructWidget<UImage>();
 		SetTexture(StillImage, LoadObject<UTexture2D>(nullptr,
 			TEXT("/Game/UI/Title/T_DevTunaLogoWhite.T_DevTunaLogoWhite")));
+		StillImage->SetColorAndOpacity(PaperColor);
 		StillImage->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
 		StillImage->SetRenderScale(FVector2D(0.5f, 0.5f));
 		Fill(Layers->AddChildToOverlay(StillImage));
-		// The still and white background stay fully opaque underneath the video.
-		USizeBox* VideoFrame = WidgetTree->ConstructWidget<USizeBox>();
-		VideoFrame->SetWidthOverride(960.0f);
-		VideoFrame->SetHeightOverride(540.0f);
-		UOverlaySlot* VideoSlot = Layers->AddChildToOverlay(VideoFrame);
-		VideoSlot->SetHorizontalAlignment(HAlign_Center);
-		VideoSlot->SetVerticalAlignment(VAlign_Center);
-		UOverlay* VideoComposite = WidgetTree->ConstructWidget<UOverlay>();
-		VideoFrame->AddChild(VideoComposite);
 		VideoImage = WidgetTree->ConstructWidget<UImage>();
-		Fill(VideoComposite->AddChildToOverlay(VideoImage));
-		Fill(VideoComposite->AddChildToOverlay(WidgetTree->ConstructWidget<UTunaSweeperStartupVideoEdge>()));
+		Fill(Layers->AddChildToOverlay(VideoImage));
+		Fill(Layers->AddChildToOverlay(WidgetTree->ConstructWidget<UTunaSweeperStartupVideoEdge>()));
 		BlackImage = WidgetTree->ConstructWidget<UImage>();
 		BlackImage->SetColorAndOpacity(FLinearColor::Black);
 		Fill(Root->AddChildToOverlay(BlackImage));
