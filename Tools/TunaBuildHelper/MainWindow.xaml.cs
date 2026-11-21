@@ -115,13 +115,19 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Resources["ui.item_grant.title"] = ItemGrantCatalog.Text("ui.item_grant.title");
+        foreach (string key in new[]
+        {
+            "ui.helper_packaging.tab", "ui.helper_packaging.stop_build", "ui.helper_packaging.stop_build_tooltip",
+            "ui.helper_packaging.stop_package", "ui.helper_packaging.stop_package_tooltip"
+        })
+            Resources[key] = ItemGrantCatalog.Text(key);
         if (FindUnrealProjectFile() is { } projectFile)
             steamFullPackage = new SteamFullPackage(Path.GetDirectoryName(projectFile)!);
         RunSteamFullButton.Content = ItemGrantCatalog.Text("ui.helper_steam.run");
-        OpenSteamLauncherFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.folder_open");
+        OpenSteamLauncherFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.launcher_folder_open");
         OpenSteamLauncherFolderButton.ToolTip = steamFullPackage?.LauncherDirectory;
         SteamAppIdFileName.Text = SteamFullPackage.AppIdFileName;
-        OpenSteamAppIdFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.folder_open");
+        OpenSteamAppIdFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.app_id_folder_open");
         OpenSteamAppIdFolderButton.ToolTip = steamFullPackage?.AppIdDirectory;
         OpenSteamAchievementCommandsButton.Content = ItemGrantCatalog.Text("ui.helper_steam.achievement_commands");
         OpenSteamAchievementCommandsButton.ToolTip = steamFullPackage?.AchievementResetCommandsPath;
@@ -434,7 +440,14 @@ public partial class MainWindow : Window
 
     private void KillBuildButton_Click(object sender, RoutedEventArgs e)
     {
-        RunBatchScript("KillTunaSweeperBuild.bat", closeAlways: true, statusResourceKey: "KillBuildStartedStatus");
+        RunBatchScript("KillTunaSweeperBuild.bat", closeAlways: true,
+            statusResourceKey: "ui.helper_packaging.stop_build_requested", scriptArgument: "Build");
+    }
+
+    private void KillPackagingButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("KillTunaSweeperBuild.bat", closeAlways: true,
+            statusResourceKey: "ui.helper_packaging.stop_package_requested", scriptArgument: "Packaging");
     }
 
     private void BuildSteamFullButton_Click(object sender, RoutedEventArgs e)
@@ -671,7 +684,8 @@ public partial class MainWindow : Window
         string scriptName,
         bool closeOnSuccess = false,
         bool closeAlways = false,
-        string? statusResourceKey = null)
+        string? statusResourceKey = null,
+        string? scriptArgument = null)
     {
         string? scriptPath = FindBatchScript(scriptName);
         if (scriptPath is null)
@@ -685,11 +699,12 @@ public partial class MainWindow : Window
         }
 
         // cmd /s removes the outer quotes; CALL needs one remaining pair around the path.
+        string command = scriptArgument is null ? $"\"{scriptPath}\"" : $"\"{scriptPath}\" {scriptArgument}";
         string arguments = closeAlways
-            ? $"/d /s /c \"call \"{scriptPath}\"\""
+            ? $"/d /s /c \"call {command}\""
             : closeOnSuccess
-                ? $"/d /s /c \"call \"{scriptPath}\" & if errorlevel 1 pause\""
-                : $"/d /s /k \"\"{scriptPath}\"\"";
+                ? $"/d /s /c \"call {command} & if errorlevel 1 pause\""
+                : $"/d /s /k \"{command}\"";
 
         try
         {
@@ -701,7 +716,7 @@ public partial class MainWindow : Window
                 UseShellExecute = true
             });
             StatusTextBlock.Text = statusResourceKey is not null
-                ? (string)FindResource(statusResourceKey)
+                ? TryFindResource(statusResourceKey) as string ?? ItemGrantCatalog.Text(statusResourceKey)
                 : closeAlways
                     ? "Unreal Editor 종료를 요청했습니다."
                     : "프로젝트 빌드 및 실행을 시작했습니다.";

@@ -925,7 +925,8 @@ ui.helper_steam.run_failed,Steam 빌드를 실행하지 못했습니다.,Could n
 ui.helper_steam.app_id_file,Steam 앱 ID 파일,Steam App ID file,SteamアプリIDファイル,Steam 应用 ID 文件,Steam 應用程式 ID 檔案,Файл Steam App ID
 ui.helper_steam.app_id_y,Y,Y,Y,Y,Y,Y
 ui.helper_steam.app_id_n,N,N,N,N,N,N
-ui.helper_steam.folder_open,폴더 열기,Open folder,フォルダーを開く,打开文件夹,開啟資料夾,Открыть папку
+ui.helper_steam.launcher_folder_open,Steam 빌드 런처 폴더 열기,Open Steam build launcher folder,Steamビルドのランチャーフォルダーを開く,打开 Steam 构建启动器文件夹,開啟 Steam 組建啟動器資料夾,Открыть папку лаунчера сборки Steam
+ui.helper_steam.app_id_folder_open,steam_appid.txt 폴더 열기,Open steam_appid.txt folder,steam_appid.txt のフォルダーを開く,打开 steam_appid.txt 文件夹,開啟 steam_appid.txt 資料夾,Открыть папку с steam_appid.txt
 ui.helper_steam.launcher_folder_opening,Steam 빌드 실행 폴더를 여는 중입니다.,Opening the Steam launcher folder.,Steamランチャーのフォルダーを開いています。,正在打开 Steam 启动器文件夹。,正在開啟 Steam 啟動器資料夾。,Открывается папка лаунчера Steam.
 ui.helper_steam.app_id_folder_opening,Steam 앱 ID 폴더를 여는 중입니다.,Opening the Steam App ID folder.,SteamアプリIDのフォルダーを開いています。,正在打开 Steam 应用 ID 文件夹。,正在開啟 Steam 應用程式 ID 資料夾。,Открывается папка Steam App ID.
 ui.helper_steam.app_id_create,생성,Create,作成,创建,建立,Создать
@@ -938,3 +939,10 @@ ui.helper_steam.achievement_commands_missing,도전과제 초기화 명령 파�
 ui.helper_steam.achievement_commands_opening,도전과제 초기화 명령 파일을 여는 중입니다.,Opening the achievement reset command file.,実績リセットコマンドのファイルを開いています。,正在打开成就重置命令文件。,正在開啟成就重設指令檔案。,Открывается файл команд сброса достижений.
 ui.helper_steam.console,Steam 콘솔 열기,Open Steam console,Steamコンソールを開く,打开 Steam 控制台,開啟 Steam 主控台,Открыть консоль Steam
 ui.helper_steam.console_opening,Steam 콘솔을 여는 중입니다.,Opening the Steam console.,Steamコンソールを開いています。,正在打开 Steam 控制台。,正在開啟 Steam 主控台。,Открывается консоль Steam.
+ui.helper_packaging.tab,Packaging,Packaging,Packaging,Packaging,Packaging,Packaging
+ui.helper_packaging.stop_build,빌드 강제 종료,Force stop build,ビルドを強制終了,强制停止构建,強制停止建置,Принудительно остановить сборку
+ui.helper_packaging.stop_build_tooltip,대기 중이거나 실행 중인 TunaSweeper 빌드를 강제 종료합니다.,Force stop queued or active TunaSweeper builds.,待機中または実行中のTunaSweeperのビルドを強制終了します。,强制停止排队或运行中的 TunaSweeper 构建。,強制停止等待或執行中的 TunaSweeper 建置。,Принудительно останавливает ожидающие и активные сборки TunaSweeper.
+ui.helper_packaging.stop_build_requested,빌드 종료를 요청했습니다.,Requested build termination.,ビルドの終了を要求しました。,已请求停止构建。,已要求停止建置。,Отправлен запрос на остановку сборки.
+ui.helper_packaging.stop_package,패키징 강제 종료,Force stop packaging,パッケージングを強制終了,强制停止打包,強制停止封裝,Принудительно остановить упаковку
+ui.helper_packaging.stop_package_tooltip,대기 중이거나 실행 중인 TunaSweeper 패키징을 강제 종료합니다.,Force stop queued or active TunaSweeper packaging.,待機中または実行中のTunaSweeperのパッケージングを強制終了します。,强制停止排队或运行中的 TunaSweeper 打包。,強制停止等待或執行中的 TunaSweeper 封裝。,Принудительно останавливает ожидающую и активную упаковку TunaSweeper.
+ui.helper_packaging.stop_package_requested,패키징 종료를 요청했습니다.,Requested packaging termination.,パッケージングの終了を要求しました。,已请求停止打包。,已要求停止封裝。,Отправлен запрос на остановку упаковки.

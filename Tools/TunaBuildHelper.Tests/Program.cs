@@ -35,6 +35,32 @@ internal static class Program
         var window = new MainWindow();
         try
         {
+            static TabItem? FindTab(DependencyObject element)
+            {
+                for (DependencyObject? parent = element; parent is not null; parent = LogicalTreeHelper.GetParent(parent))
+                    if (parent is TabItem tab)
+                        return tab;
+                return null;
+            }
+
+            var packagingTab = (TabItem?)window.FindName("PackagingTab")
+                ?? throw new Exception("Expected a Packaging tab");
+            var mainTab = (TabItem)window.FindName("MainTab");
+            if (!Equals(packagingTab.Header, "Packaging"))
+                throw new Exception("Expected the English Packaging tab title");
+            foreach (string controlName in new[] { "BuildSteamFullButton", "BuildStoveFullButton", "RunSteamFullButton",
+                "SteamAppIdFileName", "SteamAppIdIndicator",
+                "SteamAppIdActionButton", "OpenSteamAchievementCommandsButton", "OpenSteamConsoleButton", "KillPackagingButton" })
+            {
+                if (window.FindName(controlName) is not DependencyObject control || FindTab(control) != packagingTab)
+                    throw new Exception($"{controlName} must be in the Packaging tab");
+            }
+            var killBuild = (Button)window.FindName("KillBuildButton");
+            var killPackaging = (Button)window.FindName("KillPackagingButton");
+            if (FindTab(killBuild) != mainTab || !Equals(killBuild.Content, "빌드 강제 종료") ||
+                !Equals(killPackaging.Content, "패키징 강제 종료"))
+                throw new Exception("Expected separate build and packaging cancellation buttons");
+
             var launch = (Button)window.FindName("RunSteamFullButton");
             var launcherFolder = (Button?)window.FindName("OpenSteamLauncherFolderButton")
                 ?? throw new Exception("Expected a button to open the Steam launcher folder");
@@ -43,14 +69,17 @@ internal static class Program
             var indicator = (TextBlock)window.FindName("SteamAppIdIndicator");
             var action = (Button)window.FindName("SteamAppIdActionButton");
             var indicatorArea = (Border)indicator.Parent;
-            if (Grid.GetRow(launch) != Grid.GetRow(launcherFolder) ||
-                Grid.GetColumn(launcherFolder) <= Grid.GetColumn(launch))
-                throw new Exception("The first row must contain the launcher and its folder button");
-            var appIdRow = new UIElement[] { appIdFileName, appIdFolder, indicatorArea, action };
+            var folderTab = (TabItem?)window.FindName("FolderTab")
+                ?? throw new Exception("Expected a Folder tab");
+            if (FindTab(launcherFolder) != folderTab || FindTab(appIdFolder) != folderTab ||
+                !Equals(launcherFolder.Content, "Steam 빌드 런처 폴더 열기") ||
+                !Equals(appIdFolder.Content, "steam_appid.txt 폴더 열기"))
+                throw new Exception("The Folder tab must identify the Steam launcher and App ID folder destinations");
+            var appIdRow = new UIElement[] { appIdFileName, indicatorArea, action };
             if (appIdFileName.Text != "steam_appid.txt" ||
                 appIdRow.Any(element => Grid.GetRow(element) <= Grid.GetRow(launch)) ||
-                !appIdRow.Select(Grid.GetColumn).SequenceEqual(new[] { 0, 1, 2, 3 }))
-                throw new Exception("The second row must contain the filename, folder button, indicator, and action");
+                !appIdRow.Select(Grid.GetColumn).SequenceEqual(new[] { 0, 1, 2 }))
+                throw new Exception("The second row must contain the filename, indicator, and action");
             string expectedAction = indicator.Text == "Y" ? "삭제" : "생성";
             if (!Equals(action.Content, expectedAction))
                 throw new Exception("The visible App ID action must be labeled Create or Delete");
