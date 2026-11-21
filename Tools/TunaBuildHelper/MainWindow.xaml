@@ -201,6 +201,33 @@
                                         Content="{DynamicResource BuildStoveFullLabel}"
                                         ToolTip="{DynamicResource PackageBuildTooltip}" />
                             </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="RunSteamFullButton" Grid.ColumnSpan="3" Margin="0,0,0,8"
+                                        Click="RunSteamFullButton_Click" />
+                                <Button x:Name="OpenSteamLauncherFolderButton" Grid.Column="3" Margin="8,0,0,8" MinWidth="88"
+                                        Click="OpenSteamLauncherFolderButton_Click" />
+                                <TextBlock x:Name="SteamAppIdFileName" Grid.Row="1" Margin="8,0,0,0"
+                                           Foreground="#F4F7FB" FontSize="15" VerticalAlignment="Center" />
+                                <Button x:Name="OpenSteamAppIdFolderButton" Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" MinWidth="88"
+                                        Click="OpenSteamAppIdFolderButton_Click" />
+                                <Border Grid.Row="1" Grid.Column="2" Margin="8,0,0,0" MinWidth="42"
+                                        Background="#202833" BorderBrush="#3C4C61" BorderThickness="1" CornerRadius="4">
+                                    <TextBlock x:Name="SteamAppIdIndicator" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" FontSize="19" FontWeight="Bold" />
+                                </Border>
+                                <Button x:Name="SteamAppIdActionButton" Grid.Row="1" Grid.Column="3" Margin="8,0,0,0"
+                                        Click="SteamAppIdActionButton_Click" />
+                            </Grid>
                             <Button Margin="0,0,0,10"
                                     Background="#5A2630"
                                     BorderBrush="#82414D"

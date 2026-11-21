@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using TunaBuildHelper;
@@ -24,6 +25,92 @@ internal static class Program
         Check(window.Title == ItemGrantCatalog.Text("ui.item_grant.title"), "Localized window title");
         window.Close();
         Console.WriteLine("Item grant helper tests passed (catalog, layout, selection, defaults, context guard, localization).");
+        CheckSteamFullPackage();
+        CheckSteamButtonLayout();
         return 0;
+    }
+
+    private static void CheckSteamButtonLayout()
+    {
+        var window = new MainWindow();
+        try
+        {
+            var launch = (Button)window.FindName("RunSteamFullButton");
+            var launcherFolder = (Button?)window.FindName("OpenSteamLauncherFolderButton")
+                ?? throw new Exception("Expected a button to open the Steam launcher folder");
+            var appIdFileName = (TextBlock)window.FindName("SteamAppIdFileName");
+            var appIdFolder = (Button)window.FindName("OpenSteamAppIdFolderButton");
+            var indicator = (TextBlock)window.FindName("SteamAppIdIndicator");
+            var action = (Button)window.FindName("SteamAppIdActionButton");
+            var indicatorArea = (Border)indicator.Parent;
+            if (Grid.GetRow(launch) != Grid.GetRow(launcherFolder) ||
+                Grid.GetColumn(launcherFolder) <= Grid.GetColumn(launch))
+                throw new Exception("The first row must contain the launcher and its folder button");
+            var appIdRow = new UIElement[] { appIdFileName, appIdFolder, indicatorArea, action };
+            if (appIdFileName.Text != "steam_appid.txt" ||
+                appIdRow.Any(element => Grid.GetRow(element) <= Grid.GetRow(launch)) ||
+                !appIdRow.Select(Grid.GetColumn).SequenceEqual(new[] { 0, 1, 2, 3 }))
+                throw new Exception("The second row must contain the filename, folder button, indicator, and action");
+            string expectedAction = indicator.Text == "Y" ? "삭제" : "생성";
+            if (!Equals(action.Content, expectedAction))
+                throw new Exception("The visible App ID action must be labeled Create or Delete");
+            if (indicator.ToolTip is string filePath && Path.IsPathFullyQualified(filePath))
+            {
+                string appIdDirectory = Path.GetDirectoryName(filePath)!;
+                string launcherDirectory = Path.GetFullPath(Path.Combine(appIdDirectory, "..", "..", ".."));
+                if (!Equals(appIdFolder.ToolTip, appIdDirectory) ||
+                    !Equals(launcherFolder.ToolTip, launcherDirectory))
+                    throw new Exception("The folder buttons must target the respective launcher and App ID directories");
+            }
+        }
+        finally
+        {
+            window.Close();
+        }
+        Console.WriteLine("Steam launcher and App ID button layout test passed.");
+    }
+
+    private static void CheckSteamFullPackage()
+    {
+        void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
+        using var fixture = new SteamPackageFixture();
+        string launcher = Path.Combine(fixture.WindowsDirectory, "TunaSweeper.exe");
+        string rootAppId = Path.Combine(fixture.WindowsDirectory, "steam_appid.txt");
+        string binaries = Path.Combine(fixture.WindowsDirectory, "TunaSweeper", "Binaries", "Win64");
+        string innerAppId = Path.Combine(binaries, "steam_appid.txt");
+        Directory.CreateDirectory(binaries);
+        File.WriteAllText(launcher, "");
+        File.WriteAllText(Path.Combine(binaries, "TunaSweeper-Win64-Shipping.exe"), "");
+        File.WriteAllText(rootAppId, "42");
+        Directory.CreateDirectory(Path.Combine(fixture.ProjectDirectory, "Config"));
+        File.WriteAllText(Path.Combine(fixture.ProjectDirectory, "Config", "DefaultGame.ini"), "SteamFullGameAppId=1234567\n");
+
+        var package = new SteamFullPackage(fixture.ProjectDirectory);
+        Check(package.LauncherPath == launcher, "Launches the outer package executable");
+        Check(package.AppIdDirectory == binaries, "The folder button targets the inner executable directory");
+        Check(!package.HasAppIdFile, "Root App ID does not count");
+        package.CreateAppIdFile();
+        Check(package.HasAppIdFile && File.ReadAllText(innerAppId).Trim() == "1234567", "Creates the App ID beside the internal executable using the Full ID");
+        File.WriteAllText(innerAppId, "7654321");
+        try
+        {
+            package.CreateAppIdFile();
+            throw new Exception("Expected creation to reject an existing App ID file");
+        }
+        catch (IOException)
+        {
+            Check(File.ReadAllText(innerAppId) == "7654321", "Creation leaves the existing App ID file intact");
+        }
+        package.DeleteAppIdFile();
+        Check(!package.HasAppIdFile && !File.Exists(innerAppId) && File.ReadAllText(rootAppId) == "42", "Removes only the internal App ID");
+        Console.WriteLine("Steam Full package tests passed (launcher path, App ID detection, creation, deletion).");
+    }
+
+    private sealed class SteamPackageFixture : IDisposable
+    {
+        private readonly DirectoryInfo root = Directory.CreateTempSubdirectory("TunaHelperSteamTest-");
+        public string ProjectDirectory => root.FullName;
+        public string WindowsDirectory => Path.Combine(ProjectDirectory, "Builds", "Steam", "Full", "Windows");
+        public void Dispose() => root.Delete(recursive: true);
     }
 }

@@ -918,3 +918,18 @@ ui.helper_item_grant.working,아이템 지급 및 저장 응답을 기다리는 
 ui.helper_item_grant.stale,맵 또는 슬롯이 바뀌었거나 요청이 만료되었습니다. 현재 대상을 확인하세요.,"The map or slot changed, or the request expired. Check the current target.",マップまたはスロットが変更されたか、要求が期限切れです。対象を確認してください。,地图或存档已更改，或请求已过期。请检查当前目标。,地圖或存檔已變更，或請求已過期。請檢查目前目標。,Карта или ячейка изменилась либо запрос истёк. Проверьте цель.
 ui.helper_item_grant.timeout,응답 시간이 초과됐습니다. 중복 지급 방지를 위해 게임 소지품을 확인한 뒤 다시 시도하세요.,Response timed out. Check the inventory before retrying to avoid duplicate grants.,応答がタイムアウトしました。重複付与を避けるため、所持品を確認してください。,响应超时。请先检查背包，避免重复发放。,回應逾時。請先檢查背包，避免重複發放。,Время ожидания истекло. Проверьте инвентарь перед повторной выдачей.
 ui.hud.supply_drop_descending,보급 상자가 낙하중입니다,Supply crate descending,補給箱が降下中です,补给箱正在空降,補給箱正在空降,Сброс припасов
+ui.helper_steam.run,Steam 빌드 실행,Run Steam build,Steamビルドを起動,运行 Steam 构建,執行 Steam 組建,Запустить сборку Steam
+ui.helper_steam.build_missing,Steam 빌드 실행 파일을 찾을 수 없습니다.,Steam build executable not found.,Steamビルドの実行ファイルが見つかりません。,找不到 Steam 构建的可执行文件。,找不到 Steam 組建的執行檔。,Исполняемый файл сборки Steam не найден.
+ui.helper_steam.started,Steam 빌드 실행을 요청했습니다.,Requested Steam build launch.,Steamビルドの起動を要求しました。,已请求运行 Steam 构建。,已要求執行 Steam 組建。,Отправлен запрос на запуск сборки Steam.
+ui.helper_steam.run_failed,Steam 빌드를 실행하지 못했습니다.,Could not launch the Steam build.,Steamビルドを起動できませんでした。,无法运行 Steam 构建。,無法執行 Steam 組建。,Не удалось запустить сборку Steam.
+ui.helper_steam.app_id_file,Steam 앱 ID 파일,Steam App ID file,SteamアプリIDファイル,Steam 应用 ID 文件,Steam 應用程式 ID 檔案,Файл Steam App ID
+ui.helper_steam.app_id_y,Y,Y,Y,Y,Y,Y
+ui.helper_steam.app_id_n,N,N,N,N,N,N
+ui.helper_steam.folder_open,폴더 열기,Open folder,フォルダーを開く,打开文件夹,開啟資料夾,Открыть папку
+ui.helper_steam.launcher_folder_opening,Steam 빌드 실행 폴더를 여는 중입니다.,Opening the Steam launcher folder.,Steamランチャーのフォルダーを開いています。,正在打开 Steam 启动器文件夹。,正在開啟 Steam 啟動器資料夾。,Открывается папка лаунчера Steam.
+ui.helper_steam.app_id_folder_opening,Steam 앱 ID 폴더를 여는 중입니다.,Opening the Steam App ID folder.,SteamアプリIDのフォルダーを開いています。,正在打开 Steam 应用 ID 文件夹。,正在開啟 Steam 應用程式 ID 資料夾。,Открывается папка Steam App ID.
+ui.helper_steam.app_id_create,생성,Create,作成,创建,建立,Создать
+ui.helper_steam.app_id_delete,삭제,Delete,削除,删除,刪除,Удалить
+ui.helper_steam.app_id_created,Steam 앱 ID 파일을 생성했습니다.,Created the Steam App ID file.,SteamアプリIDファイルを作成しました。,已创建 Steam 应用 ID 文件。,已建立 Steam 應用程式 ID 檔案。,Файл Steam App ID создан.
+ui.helper_steam.app_id_deleted,Steam 앱 ID 파일을 삭제했습니다.,Deleted the Steam App ID file.,SteamアプリIDファイルを削除しました。,已删除 Steam 应用 ID 文件。,已刪除 Steam 應用程式 ID 檔案。,Файл Steam App ID удалён.
+ui.helper_steam.app_id_failed,Steam 앱 ID 파일을 변경하지 못했습니다.,Could not change the Steam App ID file.,SteamアプリIDファイルを変更できませんでした。,无法更改 Steam 应用 ID 文件。,無法變更 Steam 應用程式 ID 檔案。,Не удалось изменить файл Steam App ID.

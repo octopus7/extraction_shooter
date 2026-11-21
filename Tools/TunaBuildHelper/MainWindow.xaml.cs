@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace TunaBuildHelper;
@@ -14,6 +15,9 @@ public partial class MainWindow : Window
     private const string StartupRegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string StartMenuShortcutFileName = "Tuna Helper.lnk";
     private const string FfmpegFolderPath = @"D:\github\ffmpeg";
+    private readonly SteamFullPackage? steamFullPackage;
+    private readonly DispatcherTimer steamAppIdTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private bool steamAppIdShownAsPresent;
     private readonly DispatcherTimer movementCheatStateTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private bool movementCheatStateReadInProgress;
     private int movementCheatStateRevision;
@@ -111,6 +115,24 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Resources["ui.item_grant.title"] = ItemGrantCatalog.Text("ui.item_grant.title");
+        if (FindUnrealProjectFile() is { } projectFile)
+            steamFullPackage = new SteamFullPackage(Path.GetDirectoryName(projectFile)!);
+        RunSteamFullButton.Content = ItemGrantCatalog.Text("ui.helper_steam.run");
+        OpenSteamLauncherFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.folder_open");
+        OpenSteamLauncherFolderButton.ToolTip = steamFullPackage?.LauncherDirectory;
+        SteamAppIdFileName.Text = SteamFullPackage.AppIdFileName;
+        OpenSteamAppIdFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.folder_open");
+        OpenSteamAppIdFolderButton.ToolTip = steamFullPackage?.AppIdDirectory;
+        SteamAppIdIndicator.ToolTip = steamFullPackage?.AppIdPath ?? ItemGrantCatalog.Text("ui.helper_steam.app_id_file");
+        System.Windows.Automation.AutomationProperties.SetName(SteamAppIdIndicator, ItemGrantCatalog.Text("ui.helper_steam.app_id_file"));
+        RefreshSteamAppIdStatus();
+        steamAppIdTimer.Tick += (_, _) => RefreshSteamAppIdStatus();
+        Activated += (_, _) =>
+        {
+            RefreshSteamAppIdStatus();
+            steamAppIdTimer.Start();
+        };
+        Deactivated += (_, _) => steamAppIdTimer.Stop();
         RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
         RegisterStartMenuMenuItem.IsChecked = IsStartMenuShortcutRegistered();
         movementCheatStateTimer.Tick += async (_, _) => await RefreshMovementCheatStateAsync();
@@ -211,6 +233,7 @@ public partial class MainWindow : Window
         movementCheatSearchRevision++;
         movementCheatStateRevision++;
         movementCheatStateTimer.Stop();
+        steamAppIdTimer.Stop();
         movementCheatAutoCancellation?.Cancel();
         movementCheatAutoTargetCancellation?.Cancel();
         movementCheatManualCancellation?.Cancel();
@@ -418,6 +441,86 @@ public partial class MainWindow : Window
     private void BuildStoveFullButton_Click(object sender, RoutedEventArgs e)
     {
         RunBatchScript("PackageTunaSweeperStoveFullWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
+    }
+
+    private void RunSteamFullButton_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshSteamAppIdStatus();
+        if (steamFullPackage is null || !File.Exists(steamFullPackage.LauncherPath))
+        {
+            StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.build_missing");
+            return;
+        }
+
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = steamFullPackage.LauncherPath,
+                WorkingDirectory = steamFullPackage.LauncherDirectory,
+                UseShellExecute = true
+            });
+            StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.started");
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.run_failed");
+        }
+    }
+
+    private void OpenSteamLauncherFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage is { } package)
+            OpenPath(package.LauncherDirectory, ItemGrantCatalog.Text("ui.helper_steam.launcher_folder_opening"));
+    }
+
+    private void OpenSteamAppIdFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage is { } package)
+            OpenPath(package.AppIdDirectory, ItemGrantCatalog.Text("ui.helper_steam.app_id_folder_opening"));
+    }
+
+    private void RefreshSteamAppIdStatus()
+    {
+        steamAppIdShownAsPresent = steamFullPackage?.HasAppIdFile == true;
+        SteamAppIdIndicator.Text = ItemGrantCatalog.Text(steamAppIdShownAsPresent ? "ui.helper_steam.app_id_y" : "ui.helper_steam.app_id_n");
+        SteamAppIdIndicator.Foreground = steamAppIdShownAsPresent ? Brushes.Lime : Brushes.Red;
+        OpenSteamLauncherFolderButton.IsEnabled = Directory.Exists(steamFullPackage?.LauncherDirectory);
+        OpenSteamAppIdFolderButton.IsEnabled = Directory.Exists(steamFullPackage?.AppIdDirectory);
+        SteamAppIdActionButton.Content = ItemGrantCatalog.Text(steamAppIdShownAsPresent ? "ui.helper_steam.app_id_delete" : "ui.helper_steam.app_id_create");
+        SteamAppIdActionButton.IsEnabled = steamAppIdShownAsPresent || steamFullPackage?.CanCreateAppIdFile == true;
+    }
+
+    private void SteamAppIdActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage is null)
+            return;
+
+        try
+        {
+            // If packaging or another process changed the file, refresh the displayed action first.
+            if (steamAppIdShownAsPresent != steamFullPackage.HasAppIdFile)
+                return;
+
+            if (steamAppIdShownAsPresent)
+            {
+                steamFullPackage.DeleteAppIdFile();
+                StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.app_id_deleted");
+            }
+            else
+            {
+                steamFullPackage.CreateAppIdFile();
+                StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.app_id_created");
+            }
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.app_id_failed");
+        }
+        finally
+        {
+            RefreshSteamAppIdStatus();
+        }
     }
 
     private void KillEditorButton_Click(object sender, RoutedEventArgs e)
