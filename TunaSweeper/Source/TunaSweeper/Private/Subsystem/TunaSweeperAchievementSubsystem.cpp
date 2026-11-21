@@ -39,6 +39,7 @@ namespace
 	bool ParseConditionType(const FString& RawType, ETunaSweeperAchievementConditionType& OutType)
 	{
 		const FString Type = RawType.TrimStartAndEnd().ToLower();
+		if (Type == TEXT("all_quest_rewards_claimed")) { OutType = ETunaSweeperAchievementConditionType::AllQuestRewardsClaimed; return true; }
 		if (Type == TEXT("reserved")) { OutType = ETunaSweeperAchievementConditionType::Reserved; return true; }
 		if (Type == TEXT("gameplay_event")) { OutType = ETunaSweeperAchievementConditionType::GameplayEvent; return true; }
 		if (Type == TEXT("all_facilities_restored")) { OutType = ETunaSweeperAchievementConditionType::AllFacilitiesRestored; return true; }
@@ -213,7 +214,14 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 			Definition.EventType = static_cast<ETunaSweeperAchievementEvent>(Value);
 		}
 
-		if (Definition.ConditionType == ETunaSweeperAchievementConditionType::QuestRewardClaimed)
+		if (Definition.ConditionType == ETunaSweeperAchievementConditionType::AllQuestRewardsClaimed)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* RequiredQuests = nullptr;
+			if (!AchievementObject->TryGetArrayField(TEXT("required_quest_ids"), RequiredQuests)) return false;
+			for (const auto& Value : *RequiredQuests)
+				Definition.RequiredQuestIds.Add(TunaSweeperQuestId::FromJson(Value));
+		}
+		else if (Definition.ConditionType == ETunaSweeperAchievementConditionType::QuestRewardClaimed)
 			Definition.TargetQuestId = TunaSweeperQuestId::Read(AchievementObject, TEXT("target_id"));
 		else
 			Definition.TargetId = ReadNameField(AchievementObject, TEXT("target_id"));

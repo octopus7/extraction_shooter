@@ -39,7 +39,7 @@ bool FTunaSteamAchievementConfigTest::RunTest(const FString& Parameters)
     FString Error;
     TestTrue(TEXT("Configured IDs exactly match enabled mappings"),
         TunaSweeperAchievementModel::ValidateConfiguredPlatformIds(Definitions, TEXT("Steam"), ConfiguredIds, Error));
-    TestEqual(TEXT("Full config has 19 active achievements"), ConfiguredIds.Num(), 19);
+    TestEqual(TEXT("Full config has 20 active achievements"), ConfiguredIds.Num(), 20);
     FTunaSweeperAchievementProgressState State;
     for (const auto& Definition : Definitions)
     {
@@ -53,10 +53,10 @@ bool FTunaSteamAchievementConfigTest::RunTest(const FString& Parameters)
     while (TunaSweeperAchievementModel::FindNextPendingUnlock(Definitions, State, TEXT("Steam"), Attempted, InternalId, PlatformId))
     {
         TestTrue(TEXT("Pending upload uses a configured API name"), ConfiguredIds.Contains(PlatformId));
-        TestNotEqual(TEXT("Disabled 05 never publishes even with a stale local unlock"), InternalId, FName(TEXT("05")));
         Attempted.Add(InternalId);
     }
-    TestEqual(TEXT("Existing local unlocks can publish through new mappings"), Attempted.Num(), 19);
+    TestEqual(TEXT("Existing local unlocks can publish through new mappings"), Attempted.Num(), 20);
+    TestTrue(TEXT("Completed home achievement can publish"), Attempted.Contains(FName(TEXT("05"))));
     return true;
 }
 #endif

@@ -28,6 +28,39 @@ namespace TunaAchievementV05Tests
 	FString FixturePath() { return FPaths::ProjectSavedDir() / TEXT("Automation/AchievementsV05Restart.sav"); }
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaAchievementHomeRewards, "TunaSweeper.Achievement.HomeQuestRewards", TunaAchievementV05Tests::Flags)
+bool FTunaAchievementHomeRewards::RunTest(const FString& Parameters)
+{
+    TStrongObjectPtr<UGameInstance> Owner(NewObject<UGameInstance>());
+    TStrongObjectPtr<UTunaSweeperAchievementSubsystem> Subject(NewObject<UTunaSweeperAchievementSubsystem>(Owner.Get()));
+    if (!TestTrue(TEXT("Catalog loads"), Subject->LoadAchievementDefinitions())) return false;
+    const auto Definitions = Subject->GetAchievementDefinitions();
+    const auto* Home = Definitions.FindByPredicate([](const auto& D) { return D.AchievementId == FName(TEXT("05")); });
+    if (!TestNotNull(TEXT("Home definition exists"), Home)) return false;
+    TestTrue(TEXT("Home enabled"), Home->bEnabled);
+    TestTrue(TEXT("Approved four quest IDs"), Home->RequiredQuestIds == TArray<int32>({11,12,13,14}));
+    for (int32 Mask=0; Mask<16; ++Mask)
+    {
+        FTunaSweeperAchievementProgressState State;
+        // Earlier repairs and unrelated rewards cannot substitute for a missing target.
+        for (int32 Id : {6,10,15,16,18}) State.ClaimedQuestIds.Add(Id);
+        for (int32 Bit=0; Bit<4; ++Bit) if (Mask & (1<<Bit)) State.ClaimedQuestIds.Add(11+Bit);
+        TArray<FName> Unlocked;
+        TunaSweeperAchievementModel::EvaluateDefinitions({*Home},State,Unlocked);
+        TestEqual(*FString::Printf(TEXT("Reward combination %d"),Mask),Unlocked.Contains(FName(TEXT("05"))),Mask==15);
+        TunaSweeperAchievementModel::EvaluateDefinitions({*Home},State,Unlocked);
+        TestTrue(TEXT("Re-evaluation never duplicates unlock"),Unlocked.IsEmpty());
+    }
+    FString Error;
+    auto Invalid=*Home;Invalid.RequiredQuestIds.Reset();
+    TestFalse(TEXT("Empty list rejected"),TunaSweeperAchievementModel::ValidateDefinitions({Invalid},Error));
+    Invalid.RequiredQuestIds={11,12,13,0};
+    TestFalse(TEXT("Invalid quest rejected"),TunaSweeperAchievementModel::ValidateDefinitions({Invalid},Error));
+    Invalid.RequiredQuestIds={11,12,13,13};
+    TestFalse(TEXT("Duplicate quest rejected"),TunaSweeperAchievementModel::ValidateDefinitions({Invalid},Error));
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaAchievementExtractionBoundaries, "TunaSweeper.Achievement.ExtractionBoundaries", TunaAchievementV05Tests::Flags)
 bool FTunaAchievementExtractionBoundaries::RunTest(const FString& Parameters)
 {

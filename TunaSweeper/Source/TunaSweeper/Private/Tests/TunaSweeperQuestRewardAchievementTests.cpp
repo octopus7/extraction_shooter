@@ -34,7 +34,7 @@ bool FTunaQuestRewardAchievementsTest::RunTest(const FString& Parameters)
     auto* Quests=Game->GetSubsystem<UTunaSweeperQuestSubsystem>();
     auto* Achievements=Game->GetSubsystem<UTunaSweeperAchievementSubsystem>();
     Quests->QuestDefinitions.Reset();Quests->QuestProgressById.Reset();Quests->bQuestDataLoaded=true;
-    for (int32 Id : {4,24,900777})
+    for (int32 Id : {4,11,12,13,14,24,900777})
     {
         FTunaSweeperQuestDefinition D;D.QuestId=Id;D.bCompleteOnAccept=true;D.Rewards.Coins=3;
         Quests->QuestDefinitions.Add(Id,D);
@@ -66,6 +66,23 @@ bool FTunaQuestRewardAchievementsTest::RunTest(const FString& Parameters)
     Quests->LoadQuestProgressFromSave(Saved,0,Coins);
     TestTrue(TEXT("Repeated load preserves unlock"),Achievements->IsAchievementUnlocked(TEXT("08")));
     TestEqual(TEXT("Legacy unlock does not grant the quest reward again"),Quests->GetCoinBalance(),Coins);
+    Saved.Reset();
+    for (int32 Id : {11,12,13})
+    {
+        FTunaSweeperNumericQuestProgressSaveData Completed;
+        Completed.QuestId=Id;Completed.State=ETunaSweeperQuestState::RewardCompleted;
+        Saved.Add(Completed);
+    }
+    FTunaSweeperNumericQuestProgressSaveData Storage;
+    Storage.QuestId=14;Storage.State=ETunaSweeperQuestState::RewardAvailable;Saved.Add(Storage);
+    Quests->LoadQuestProgressFromSave(Saved,0,Coins);
+    TestFalse(TEXT("Home requires storage reward, not just objectives"),Achievements->IsAchievementUnlocked(TEXT("05")));
+    Game->bSuppressSaveWritesForTests=true;
+    TestTrue(TEXT("Storage reward claimed in memory"),Quests->ClaimQuestReward(14));
+    TestFalse(TEXT("Home remains locked until save commits"),Achievements->IsAchievementUnlocked(TEXT("05")));
+    Game->bSuppressSaveWritesForTests=false;
+    TestTrue(TEXT("Save all four completed rewards"),Game->SaveGameStateInternal());
+    TestTrue(TEXT("All four committed rewards unlock home"),Achievements->IsAchievementUnlocked(TEXT("05")));
     return true;
 }
 #endif

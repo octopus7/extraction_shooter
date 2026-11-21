@@ -21,6 +21,11 @@ namespace TunaSweeperAchievementModel
 				return State.ReachedLocationIds.Contains(Definition.TargetId);
 			case ETunaSweeperAchievementConditionType::QuestRewardClaimed:
 				return State.ClaimedQuestIds.Contains(Definition.TargetQuestId);
+			case ETunaSweeperAchievementConditionType::AllQuestRewardsClaimed:
+				if (Definition.RequiredQuestIds.IsEmpty()) return false;
+				for (int32 Id : Definition.RequiredQuestIds)
+					if (Id <= 0 || !State.ClaimedQuestIds.Contains(Id)) return false;
+				return true;
 			case ETunaSweeperAchievementConditionType::GameplayEvent:
 				return State.GameplayFacts.Contains(MakeGameplayFactKey(Definition.EventType, Definition.TargetId));
 			case ETunaSweeperAchievementConditionType::AllFacilitiesRestored:
@@ -125,7 +130,17 @@ namespace TunaSweeperAchievementModel
 			AchievementIds.Add(Definition.AchievementId);
 			if (!CanUnlock(Definition)) continue;
 
-			if (Definition.ConditionType == ETunaSweeperAchievementConditionType::CurrentItemQuantity)
+			if (Definition.ConditionType == ETunaSweeperAchievementConditionType::AllQuestRewardsClaimed)
+			{
+				TSet<int32> Ids;
+				for (int32 Id : Definition.RequiredQuestIds)
+				{
+					if (Id <= 0 || Ids.Contains(Id)) { OutError = TEXT("invalid required quest list"); return false; }
+					Ids.Add(Id);
+				}
+				if (Ids.IsEmpty()) { OutError = TEXT("all quest rewards requires a nonempty quest list"); return false; }
+			}
+			else if (Definition.ConditionType == ETunaSweeperAchievementConditionType::CurrentItemQuantity)
 			{
 				if (Definition.TargetItemId <= 0 || Definition.RequiredCount <= 0) { OutError = TEXT("item quantity requires a positive item id and count"); return false; }
 			}

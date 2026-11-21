@@ -5,7 +5,7 @@
     { "achievement_id": "02", "name_string_key": "achievement.02.name", "condition_type": "total_enemy_kills", "required_count": 1, "platform_ids": { "Steam": "ACH_02" } },
     { "achievement_id": "03", "name_string_key": "achievement.03.name", "condition_type": "quest_reward_claimed", "enabled": true, "target_id": 4, "platform_ids": { "Steam": "ACH_03" } },
     { "achievement_id": "04", "name_string_key": "achievement.04.name", "condition_type": "gameplay_event", "event_type": "FacilityUsed", "enabled": true, "target_id": "facility.raid_lift", "platform_ids": { "Steam": "ACH_04" } },
-    { "achievement_id": "05", "name_string_key": "achievement.05.name", "condition_type": "all_facilities_restored", "enabled": false, "required_facility_ids": [], "platform_ids": { "Steam": "ACH_05" }, "todo": "Author the complete approved region 1 repair-object ID list before enabling." },
+    { "achievement_id": "05", "name_string_key": "achievement.05.name", "condition_type": "all_quest_rewards_claimed", "enabled": true, "required_quest_ids": [11, 12, 13, 14], "platform_ids": { "Steam": "ACH_05" } },
     { "achievement_id": "06", "name_string_key": "achievement.06.name", "condition_type": "specific_enemy_first_kill", "enabled": true, "target_id": "enemy.region1.boss", "platform_ids": { "Steam": "ACH_06" } },
     { "achievement_id": "07", "name_string_key": "achievement.07.name", "condition_type": "location_reached", "enabled": true, "target_id": "region.village", "map_paths": ["/Game/MainRaid/RaidVillage"], "platform_ids": { "Steam": "ACH_07" } },
     { "achievement_id": "08", "name_string_key": "achievement.08.name", "condition_type": "quest_reward_claimed", "enabled": true, "target_id": 24, "platform_ids": { "Steam": "ACH_08" } },

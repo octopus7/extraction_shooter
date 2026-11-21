@@ -16,7 +16,8 @@ enum class ETunaSweeperAchievementConditionType : uint8
 	AllFacilitiesRestored,
 	ExtractionHealth,
 	TimedExtraction,
-	CurrentItemQuantity
+	CurrentItemQuantity,
+	AllQuestRewardsClaimed
 };
 
 // These are confirmed gameplay facts, never interaction requests or quest rewards.
@@ -71,6 +72,9 @@ struct TUNASWEEPER_API FTunaSweeperAchievementDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement")
 	int32 TargetQuestId = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement")
+	TArray<int32> RequiredQuestIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Achievement", meta = (ClampMin = "1", UIMin = "1"))
 	int64 RequiredCount = 1;
