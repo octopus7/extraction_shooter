@@ -164,7 +164,7 @@ void UTunaSweeperOcclusionRevealSubsystem::UpdateRevealParameters()
 	const FVector CharacterLocation = Pawn->GetActorLocation();
 	FVector CursorLocation = CharacterLocation;
 	const bool bHasCursor = ResolveCursorWorldPoint(PlayerController, CharacterLocation.Z, CursorLocation);
-	// All planted trees share this sample. Each material tests its own world-space footprint.
+	// Planted tree materials combine the shared height cutoff in Z with the projected circles below.
 	UKismetMaterialLibrary::SetVectorParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealPlayer,
 		FLinearColor(CharacterLocation.X, CharacterLocation.Y, CharacterLocation.Z + Settings->VerticalRevealStartAbovePlayerCm, 1.0f));
 	UKismetMaterialLibrary::SetVectorParameterValue(this, Collection, TunaSweeperOcclusionReveal::TreeRevealCursor,

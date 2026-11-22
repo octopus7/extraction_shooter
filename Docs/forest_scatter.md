@@ -6,7 +6,7 @@
 
 - 아웃라이너의 `Environment/Forest/Trees`를 열면 북서·북동·남서·남동 구역별로 심어 둔 나무가 있다. 이름은 `Tree_Planted_구역_번호_수종_X좌표_Y좌표` 형식이다. `P`와 `N`은 월드 원점 기준 양수와 음수, 숫자는 미터 단위의 최초 식재 위치다. 나무를 선택해 위치·회전·크기를 바로 편집할 수 있다.
 - 벚나무는 `Environment/Forest/Trees/CherryBlossom` 아래에 군락별로 모았다. `ElephantLake`는 코끼리 호숫가 5그루, `WestPool`은 상류 물가 3그루, `MiddleBend`는 중류 굽이 3그루다. 줄기 중심은 물가에서 2.7~6.7m 떨어진 녹지에 있다.
-- 플레이어나 커서가 나무의 수평 경계에서 3.5m 이내로 들어오면 수관이 사라져 시야가 열린다. `/Game/Effects/DA_OcclusionRevealSettings`의 **Vertical Reveal Proximity Radius Cm**, **Vertical Reveal Start Above Player Cm**, **Vertical Reveal Fade Height Cm**에서 접근 거리, 캐릭터 기준 시작 높이(60cm), 전환 폭(30cm)을 조절한다. 숲의 참나무·느릅나무·벚나무와 마을의 벚나무·안뜰 나무가 이 설정을 공유한다.
+- 숲과 마을에 심은 나무는 화면에서 플레이어와 커서를 중심으로 원형 구멍이 열린다. `/Game/Effects/DA_OcclusionRevealSettings`의 **Inner Diameter Cm**(400cm)와 **Outer Diameter Cm**(600cm)로 크기를 조절한다. 기본값에서 높은 수관은 각 중심의 반경 2m 안쪽에서 완전히 사라지고 2~3m 구간에서는 바깥쪽일수록 잎이 더 많이 남는다. 두 원이 겹치면 각 픽셀에서 더 강한 제거량을 한 번만 적용한다. **Vertical Reveal Start Above Player Cm**(60cm)와 **Vertical Reveal Fade Height Cm**(30cm)는 높이를 조절한다. 플레이어 액터 중심보다 60cm 높은 곳까지는 줄기가 보이고, 그 위 30cm 동안 원형 효과가 점차 강해진다.
 - `Environment/Forest/Hydrangeas` 아래의 `Hills`, `Buildings`, `Passages`에서 수국을 찾을 수 있다. 마을 통로 양쪽 바위 기슭, 창고·차고·전력 시설 주변, 서쪽 벽과 철망문 옆에 심었다. 이름은 `Hydrangea_Planted_장소_번호_X좌표_Y좌표` 형식이다. 위치를 옮기거나 새로 심을 때는 해당 장소 폴더에서 개별 액터를 편집한다.
 - `Environment/Forest/GroundCover`에서 서쪽 숲, 중앙 초지, 남쪽 공터, 동쪽 강둑, 동쪽 호숫가 구역을 찾을 수 있다. 작은 연못과 코끼리 호숫가에서는 식재 스플라인이 물가를 따라간다.
 
