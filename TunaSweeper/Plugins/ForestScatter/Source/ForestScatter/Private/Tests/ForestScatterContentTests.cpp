@@ -70,7 +70,7 @@ bool FForestScatterContentTest::RunTest(const FString&)
 			}
 		}
 	}
-	if (!TestNotNull(TEXT("Planting points"), Points) || !TestEqual(TEXT("Ground cover and flowers have native spawners"), Spawners.Num(), 2))
+	if (!TestNotNull(TEXT("Planting points"), Points) || !TestEqual(TEXT("Ground cover and flowers have native spawners"), Spawners.Num(), 3))
 	{
 		return false;
 	}
@@ -85,6 +85,16 @@ bool FForestScatterContentTest::RunTest(const FString&)
 			return false;
 		}
 		TestEqual(TEXT("Point mesh attribute"), Selector->AttributeName, FName(TEXT("Mesh")));
+		if (MeshInput->Edges.ContainsByPredicate([Points, MeshInput](const UPCGEdge* Edge)
+		{
+			return Edge && Edge->GetOtherPin(MeshInput) == Points->GetOutputPin(TEXT("Boulders"));
+		}))
+		{
+			SpawnedOutputs.Add(TEXT("Boulders"));
+			TestTrue(TEXT("Boulders block queries and physics"), !Selector->TemplateDescriptor.bUseDefaultCollision &&
+				Selector->TemplateDescriptor.BodyInstance.GetCollisionProfileName() == FName(TEXT("BlockAll")));
+			continue;
+		}
 		TestTrue(TEXT("Ground cover does not intercept players"), !Selector->TemplateDescriptor.bUseDefaultCollision &&
 			Selector->TemplateDescriptor.BodyInstance.GetCollisionEnabled(false) == ECollisionEnabled::NoCollision);
 		const FName SourceLabel = Selector->bUseAttributeMaterialOverrides ? FName(TEXT("Flowers")) : PCGPinConstants::DefaultOutputLabel;
@@ -119,7 +129,7 @@ bool FForestScatterContentTest::RunTest(const FString&)
 			}
 		}
 	}
-	TestEqual(TEXT("Both output types are connected"), SpawnedOutputs.Num(), 2);
+	TestEqual(TEXT("All output types are connected"), SpawnedOutputs.Num(), 3);
 
 	const AForestScatterRegion* Defaults = GetDefault<AForestScatterRegion>();
 	TestNull(TEXT("Saved tree settings have no PCG input"), Defaults->GetClass()->FindPropertyByName(TEXT("Trees")));

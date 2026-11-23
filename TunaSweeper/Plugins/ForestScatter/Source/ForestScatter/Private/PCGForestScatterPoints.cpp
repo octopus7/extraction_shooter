@@ -23,6 +23,7 @@
 
 namespace
 {
+	const FName BouldersPin(TEXT("Boulders"));
 	const FName FlowersPin(TEXT("Flowers"));
 
 	struct FForestScatterLayerWork
@@ -32,6 +33,7 @@ namespace
 		int32 Seed;
 		bool bCastFoliageShadow = true;
 		bool bUsePetalColors = false;
+		bool bIsBoulder = false;
 		bool bUseVegetationPaint = false;
 	};
 
@@ -194,7 +196,7 @@ namespace
 			AssignPetalMaterials(Context, Layer.Seed, *Points);
 		}
 		FPCGTaggedData& Output = Context.OutputData.TaggedData.Emplace_GetRef();
-		Output.Pin = Layer.bUsePetalColors ? FlowersPin : PCGPinConstants::DefaultOutputLabel;
+		Output.Pin = Layer.bIsBoulder ? BouldersPin : (Layer.bUsePetalColors ? FlowersPin : PCGPinConstants::DefaultOutputLabel);
 		Output.Data = Points;
 		Context.Placements.Reset();
 	}
@@ -248,6 +250,7 @@ namespace
 				}
 				// Offset zero belonged to trees in the first version of the graph.
 				Layer.Seed = PCGHelpers::ComputeSeed(Context->GetSeed(), Index + 1);
+				Layer.bIsBoulder = Settings == &Region->Boulders;
 				Layer.Mesh = Settings->Mesh.ToSoftObjectPath();
 				Layer.bCastFoliageShadow = Settings != &Region->Grass;
 				Layer.bUseVegetationPaint = Settings == &Region->Grass || Settings == &Region->Flowers || Settings == &Region->Shrubs;
@@ -339,6 +342,7 @@ namespace
 TArray<FPCGPinProperties> UPCGForestScatterPointsSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> Pins = DefaultPointOutputPinProperties();
+	Pins.Emplace(BouldersPin, EPCGDataType::Point);
 	Pins.Emplace(FlowersPin, EPCGDataType::Point);
 	return Pins;
 }
