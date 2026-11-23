@@ -51,7 +51,7 @@ void UTunaSweeperIntroMenuWidget::BeginStartTravel()
 	BeginTravelToLevel(TargetLevelName);
 }
 
-void UTunaSweeperIntroMenuWidget::BeginTravelToLevel(FName TargetLevelName)
+void UTunaSweeperIntroMenuWidget::BeginTravelToLevel(FName TargetLevelName, const FString& Options)
 {
 	if (bStartTravelPending || TargetLevelName.IsNone())
 	{
@@ -60,6 +60,7 @@ void UTunaSweeperIntroMenuWidget::BeginTravelToLevel(FName TargetLevelName)
 
 	bStartTravelPending = true;
 	PendingStartTargetLevelName = TargetLevelName;
+	PendingTravelOptions = Options;
 	SetStartTravelControlsEnabled(false);
 
 	const float FadeDuration = FMath::Max(0.01f, StartTransitionFadeSeconds);
@@ -121,7 +122,7 @@ void UTunaSweeperIntroMenuWidget::OpenPendingStartTargetLevel()
 	const FName TargetLevelName = PendingStartTargetLevelName;
 	bStartTravelPending = false;
 	PendingStartTargetLevelName = NAME_None;
-	UGameplayStatics::OpenLevel(this, TargetLevelName);
+	UGameplayStatics::OpenLevel(this, TargetLevelName, true, PendingTravelOptions);
 }
 
 void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)

@@ -37,6 +37,7 @@
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "Scenario/TrailerGameMode.h"
 #include "UI/TunaSweeperStartupLogoWidget.h"
 #include "UI/TunaSweeperStartupLogoFlow.h"
 #include "UI/TunaSweeperPauseMenuWidget.h"
@@ -469,6 +470,12 @@ void ATunaSweeperPlayerController::BeginPlay()
 	bShowMouseCursor = true;
 
 	ApplyDefaultGameInputMode();
+	if (GetWorld()->GetAuthGameMode<ATrailerGameMode>())
+	{
+		bShowMouseCursor = false;
+		ApplyLevelBgmState();
+		return;
+	}
 	BindHousingStateChanged();
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{

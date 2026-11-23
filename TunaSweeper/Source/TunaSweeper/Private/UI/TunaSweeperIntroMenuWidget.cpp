@@ -4,6 +4,12 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Scenario/TrailerGameMode.h"
+
+void UTunaSweeperIntroMenuWidget::HandleTrailerClicked()
+{
+	BeginTravelToLevel(TEXT("/Game/MainRaid/RaidForest"), ATrailerGameMode::TravelOptions);
+}
 
 // 연구실과 온라인 협동 버튼은 쓰지 않는다.
 
@@ -86,6 +92,11 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	{
 		QuitButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
 		QuitButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
+	}
+	if (auto* Trailer = Cast<UButton>(FindIntroWidget(TEXT("TrailerModeButton"))))
+	{
+		Trailer->SetIsEnabled(true);
+		Trailer->OnClicked.AddUniqueDynamic(this, &ThisClass::HandleTrailerClicked);
 	}
 
 	RefreshDistributionPresentation();

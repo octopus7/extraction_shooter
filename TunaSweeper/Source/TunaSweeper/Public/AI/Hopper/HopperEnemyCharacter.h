@@ -37,6 +37,7 @@ public:
     EHopperCombatPhase GetCombatPhase() const { return IsDead() ? EHopperCombatPhase::Dead : Phase; }
     UFUNCTION(BlueprintPure, Category="Hopper")
     float GetMechHealth() const { return MechHealth; }
+    void BeginEncounterBoarding(ATunaSweeperPlayerController* Viewer);
     UFUNCTION(BlueprintPure, Category="Hopper")
     int32 GetPilotAmmo() const { return PilotAmmo; }
     UFUNCTION(BlueprintCallable, Category="Hopper|Arms")

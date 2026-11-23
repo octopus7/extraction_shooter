@@ -1,0 +1,409 @@
+#include "Scenario/TrailerGameMode.h"
+
+#include "AI/Hopper/HopperEnemyCharacter.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
+#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "ContentStreaming.h"
+#include "EngineUtils.h"
+#include "FoldingCanopyGarageDoorActor.h"
+#include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
+#include "Interaction/TunaSweeperExplosiveBarrelActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "LoopRailStation.h"
+#include "LoopRailTrain.h"
+#include "Player/TunaSweeperPlayerController.h"
+#include "UI/TunaSweeperGameHudWidget.h"
+#include "UObject/ConstructorHelpers.h"
+#include "TunaSweeperCollisionChannels.h"
+
+namespace
+{
+	constexpr float FadeSeconds = .45f;
+
+	AActor* FindPlaced(UWorld* World, const TCHAR* ClassPath, FVector Near)
+	{
+		UClass* Class = LoadClass<AActor>(nullptr, ClassPath);
+		if (!Class) return nullptr;
+		AActor* Best = nullptr;
+		for (TActorIterator<AActor> It(World, Class); It; ++It)
+			if (!Best || FVector::DistSquared(It->GetActorLocation(), Near) < FVector::DistSquared(Best->GetActorLocation(), Near))
+				Best = *It;
+		return Best;
+	}
+}
+
+ATrailerGameMode::ATrailerGameMode()
+{
+	PrimaryActorTick.bCanEverTick = true;
+	static ConstructorHelpers::FClassFinder<APawn> PawnBP(TEXT("/Game/Characters/Player/BP_TunaSweeperPlayerCharacter"));
+	if (PawnBP.Succeeded()) DefaultPawnClass = PawnBP.Class;
+}
+
+void ATrailerGameMode::InitGame(const FString& Map, const FString& Options, FString& Error)
+{
+	Super::InitGame(Map, Options, Error);
+	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->BeginCombatTestSession();
+	if (Map.EndsWith(TEXT("RaidVillage"))) Shot = EShot::Shop;
+}
+
+void ATrailerGameMode::EndPlay(EEndPlayReason::Type Reason)
+{
+	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->EndCombatTestSession();
+	Super::EndPlay(Reason);
+}
+
+void ATrailerGameMode::ReturnToTitle()
+{
+	bLeaving = true;
+	UGameplayStatics::OpenLevel(this, TEXT("/Game/Maps/IntroMap"));
+}
+
+FVector ATrailerGameMode::GroundAt(FVector Point) const
+{
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(TrailerFloor), false, Player.Get());
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Point + FVector(0,0,160), Point - FVector(0,0,600),
+		ECC_Visibility, Params) && Hit.ImpactNormal.Z > .5f) return Hit.ImpactPoint;
+	return Point;
+}
+
+void ATrailerGameMode::PlacePlayer(FVector Feet)
+{
+	Player->GetCharacterMovement()->StopMovementImmediately();
+	Player->SetActorLocation(GroundAt(Feet) + FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 2),
+		false, nullptr, ETeleportType::TeleportPhysics);
+}
+
+void ATrailerGameMode::WalkTo(FVector Destination)
+{
+	FVector Offset = Destination - Player->GetActorLocation();
+	if (Offset.SizeSquared2D() < FMath::Square(20.f)) return;
+	Player->AddMovementInput(Offset.GetSafeNormal2D(), 1.f, true);
+	Player->SetAimWorldPoint(Destination);
+}
+
+void ATrailerGameMode::Shoot(AActor* Actor)
+{
+	if (!IsValid(Actor) || Player->IsGameplayActionInputLocked()) return;
+	FVector Aim = Actor->GetActorLocation();
+	UPrimitiveComponent* HitComponent = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
+	if (Actor->IsA<ATunaSweeperExplosiveBarrelActor>() || Actor->IsA<ATunaSweeperBreakableAppleCrateActor>())
+		HitComponent = Actor->FindComponentByClass<UBoxComponent>();
+	if (auto* Boss = Cast<ATunaSweeperHopperEnemyCharacter>(Actor))
+	{
+		for (UActorComponent* Part : Boss->GetComponentsByTag(UPrimitiveComponent::StaticClass(), TEXT("HopperMechHitBox")))
+			if (auto* HitBox = Cast<UPrimitiveComponent>(Part)) { HitComponent = HitBox; break; }
+	}
+	if (HitComponent) Aim = HitComponent->Bounds.Origin;
+	if (!HitComponent || HitComponent->Bounds.SphereRadius <= 1.f)
+	{
+		FVector Extent;
+		Actor->GetActorBounds(true, Aim, Extent);
+	}
+	const FVector Direction = (Aim - Player->GetActorLocation()).GetSafeNormal();
+	Player->SetAimWorldHit(Aim, FHitResult(Actor, HitComponent, Aim, -Direction));
+	if (Elapsed >= NextShot)
+	{
+		Player->FireWeapon();
+		NextShot = Elapsed + .27f;
+	}
+}
+
+bool ATrailerGameMode::SetUpShot()
+{
+	UWorld* World = GetWorld();
+	Target.Reset();
+	Elapsed = NextShot = HoldTime = 0;
+	Player->SetCanBeDamaged(false);
+	Player->bExternalAimControl = true;
+	Player->GetCharacterMovement()->MaxWalkSpeed = 240.f;
+	const auto PlaceNear = [&](AActor* Subject, FVector LocalStart, FVector LocalEnd)
+	{
+		if (!Subject) return false;
+		const FTransform Frame(Subject->GetActorRotation(), Subject->GetActorLocation());
+		PlacePlayer(Frame.TransformPosition(LocalStart));
+		Goal = Frame.TransformPosition(LocalEnd);
+		Player->SetAimWorldPoint(Goal);
+		Target = Subject;
+		return true;
+	};
+	switch (Shot)
+	{
+	case EShot::ExitGarage:
+	case EShot::EnterGarage:
+	{
+		const bool bExit = Shot == EShot::ExitGarage;
+		auto* Door = Cast<AFoldingCanopyGarageDoor>(UGameplayStatics::GetActorOfClass(this, AFoldingCanopyGarageDoor::StaticClass()));
+		if (!Door) return false;
+		Target = Door;
+		const FVector Through = Door->GetActorRightVector().GetSafeNormal2D();
+		if (bExit)
+		{
+			Player->SetActorLocation(Door->GetActorLocation() + Through*165 + FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+2));
+			// The raid entrance transitions beneath the landscape on its interior side.
+			Player->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+			Player->SetActorEnableCollision(false);
+			Door->SetDoorEnabled(true);
+			Door->OpenDoor();
+		}
+		Goal = Door->GetActorLocation() + Through*(bExit ? -340 : 165);
+		Player->SetAimWorldPoint(Goal);
+		return true;
+	}
+	case EShot::GrayRobot:
+	case EShot::BlueRobot:
+	case EShot::Captain:
+	{
+		const bool bBoss = Shot == EShot::Captain;
+		Player->SetActorEnableCollision(true);
+		Player->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		const TCHAR* Path = bBoss ? TEXT("/Game/Characters/Hopper/BP_HopperEnemyMk2.BP_HopperEnemyMk2_C")
+			: Shot == EShot::GrayRobot ? TEXT("/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_DarkGray.BP_QuadrupedGunEnemy_DarkGray_C")
+			: TEXT("/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Blue.BP_QuadrupedGunEnemy_Blue_C");
+		UClass* Class = LoadClass<ACharacter>(nullptr, Path);
+		if (!Class) return false;
+		const FVector Feet = GroundAt(bBoss ? FVector(8380,-350,300) : Shot == EShot::GrayRobot ? FVector(-1200,-6100,0) : FVector(380,-6650,0));
+		PlacePlayer(Feet + FVector(bBoss ? -490 : -580, bBoss ? 0 : -150, 0));
+		Goal = Feet;
+		Player->SetAimWorldPoint(Feet);
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		ACharacter* Enemy = World->SpawnActor<ACharacter>(Class, Feet + FVector(0,0,105), FRotator(0,180,0), Params);
+		if (!Enemy) return false;
+		Enemy->SpawnDefaultController();
+		Target = Enemy;
+		break;
+	}
+	case EShot::Barrel:
+	case EShot::Apples:
+	{
+		const bool bBarrel = Shot == EShot::Barrel;
+		AActor* Prop = UGameplayStatics::GetActorOfClass(this, bBarrel ? ATunaSweeperExplosiveBarrelActor::StaticClass() : ATunaSweeperBreakableAppleCrateActor::StaticClass());
+		if (!Prop) return false;
+		const auto* Collision = Prop->FindComponentByClass<UBoxComponent>();
+		if (!Collision) return false;
+		const FVector Center = Collision->Bounds.Origin;
+		bool bFoundLane = false;
+		for (int32 Angle = 0; Angle < 360; Angle += 30)
+		{
+			const FVector Offset = FVector(-360,0,0).RotateAngleAxis(Angle, FVector::UpVector);
+			const FVector Ground = GroundAt(Prop->GetActorLocation() + Offset);
+			FHitResult Hit;
+			FCollisionQueryParams Params(SCENE_QUERY_STAT(TrailerFiringLane), false, Player.Get());
+			if (!World->LineTraceSingleByChannel(Hit, Ground + FVector(0,0,95), Center, TunaSweeperCollisionChannels::Projectile, Params) || Hit.GetActor() != Prop) continue;
+			PlacePlayer(Ground);
+			Player->SetAimWorldPoint(Center);
+			Target = Prop;
+			bFoundLane = true;
+			break;
+		}
+		if (!bFoundLane) return false;
+		break;
+	}
+	case EShot::Shop:
+		return PlaceNear(FindPlaced(World, TEXT("/Game/Environment/Buildings/VillageGukbap/BP_GrandfatherGukbap.BP_GrandfatherGukbap_C"), FVector(3761,2062,152)),
+			FVector(-440,470,0), FVector(440,470,0));
+	case EShot::Platform:
+		for (TActorIterator<ALoopRailStation> It(World); It; ++It)
+			if (It->StationId == TEXT("village_02")) Station = *It;
+		Train = Cast<ALoopRailTrain>(UGameplayStatics::GetActorOfClass(this, ALoopRailTrain::StaticClass()));
+		if (!Station.IsValid() || !Train.IsValid() || !Train->HasUsableTrack()) return false;
+		Train->StartDistance = Station->GetStopDistance() - 2200;
+		Train->ResetTrain();
+		PlacePlayer(Station->Platform->GetComponentLocation());
+		Player->SetAimWorldPoint(Station->GetActorLocation());
+		return true;
+	case EShot::Carriage:
+	{
+		UBoxComponent* Floor = Train.IsValid() ? Train->GetVehicleFloor(2) : nullptr;
+		if (!Floor) return false;
+		Train->StartDistance = Station->GetStopDistance() + 600;
+		Train->ResetTrain();
+		Player->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		Player->SetActorEnableCollision(false);
+		return true;
+	}
+	case EShot::Beach:
+		Player->SetActorEnableCollision(true);
+		Player->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		return PlaceNear(FindPlaced(World, TEXT("/Game/Environment/CoastalWildlife/BP_CoastalGull.BP_CoastalGull_C"), FVector(-10298,9941,121)),
+			FVector(-860,50,0), FVector(-140,50,0));
+	default: return false;
+	}
+	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->ResetCombatTestLoadout();
+	Player->SelectWeaponSlot(1);
+	return true;
+}
+
+bool ATrailerGameMode::PlayShot(float Dt)
+{
+	switch (Shot)
+	{
+	case EShot::ExitGarage:
+	case EShot::EnterGarage:
+	{
+		const FVector Through = Target->GetActorRightVector().GetSafeNormal2D();
+		const float Alpha = FMath::Clamp((Elapsed - (Shot == EShot::ExitGarage ? 1.6f : .6f)) / 3.1f, 0.f, 1.f);
+		const float Distance = Shot == EShot::ExitGarage ? FMath::Lerp(165.f,-340.f,Alpha) : FMath::Lerp(-340.f,165.f,Alpha);
+		Player->SetActorLocation(Target->GetActorLocation() + Through*Distance +
+			FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+2));
+		if (Alpha > 0 && Alpha < 1) WalkTo(Goal);
+		return Elapsed > 5.f;
+	}
+	case EShot::Shop:
+	case EShot::Beach:
+		if (Elapsed > .8f) WalkTo(Goal);
+		return Elapsed > (Shot == EShot::Beach ? 6.5f : 5.5f);
+	case EShot::Platform:
+		if (Train->IsDwelling())
+		{
+			if (auto* Floor = Train->GetVehicleFloor(1)) WalkTo(Floor->GetComponentLocation());
+			const auto* Base = Player->GetMovementBase();
+			if (Base && Base->GetOwner() == Train.Get()) HoldTime += Dt;
+			return HoldTime > .6f;
+		}
+		return false;
+	case EShot::Carriage:
+	{
+		const auto* Rear = Train->GetVehicleFloor(2);
+		const auto* Front = Train->GetVehicleFloor(1);
+		if (!Rear || !Front) return false;
+		// Follow the moving aisle, including the connector as the coaches turn independently.
+		const FVector Points[] = { Rear->GetComponentLocation(), Rear->GetComponentLocation() + Rear->GetForwardVector()*420,
+			Front->GetComponentLocation() - Front->GetForwardVector()*420, Front->GetComponentLocation() };
+		float Distance = FMath::Max(0.f, Elapsed - .6f) * 180.f;
+		for (int32 Index = 0; Index < 3; ++Index)
+		{
+			const FVector Segment = Points[Index+1] - Points[Index];
+			const float Length = Segment.Size();
+			if (Distance > Length && Index < 2) { Distance -= Length; continue; }
+			const FVector Feet = Points[Index] + Segment.GetSafeNormal()*FMath::Min(Length, Distance);
+			Player->SetActorLocation(Feet + FVector(0,0,10 + Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+			Player->SetAimWorldPoint(Feet + Segment);
+			Player->AddMovementInput(Segment.GetSafeNormal2D(), .7f, true);
+			break;
+		}
+		return Elapsed > 6.4f;
+	}
+	case EShot::GrayRobot:
+	case EShot::BlueRobot:
+		if (Elapsed > .6f && Target.IsValid())
+		{
+			Player->AddMovementInput(Shot == EShot::BlueRobot ? FVector::RightVector : -FVector::RightVector, .35f, true);
+			Shoot(Target.Get());
+		}
+		return Elapsed > 3.3f;
+	case EShot::Barrel:
+	case EShot::Apples:
+	{
+		auto* Barrel = Cast<ATunaSweeperExplosiveBarrelActor>(Target.Get());
+		auto* Apples = Cast<ATunaSweeperBreakableAppleCrateActor>(Target.Get());
+		const bool bDestroyed = !Target.IsValid() || (Barrel && Barrel->IsBarrelDestroyed()) || (Apples && Apples->IsCrateBroken());
+		if (bDestroyed) HoldTime += Dt;
+		else if (Elapsed > .75f) Shoot(Target.Get());
+		return HoldTime > 2.2f;
+	}
+	case EShot::Captain:
+	{
+		auto* Boss = Cast<ATunaSweeperHopperEnemyCharacter>(Target.Get());
+		if (!Boss || Boss->IsDead() || Boss->GetMechHealth() <= 0)
+		{
+			HoldTime += Dt;
+			const auto* PC = Cast<ATunaSweeperPlayerController>(Player->GetController());
+			return HoldTime > 5.f && PC && !PC->IsHopperShotActive();
+		}
+		const auto Phase = Boss->GetCombatPhase();
+		if (Phase == EHopperCombatPhase::WaitingForSight)
+		{
+			Player->GetCharacterMovement()->MaxWalkSpeed = 500.f;
+			if (Boss->GetDistanceTo(Player.Get()) > 250.f) WalkTo(Boss->GetActorLocation());
+			if (Elapsed >= 2.f) Boss->BeginEncounterBoarding(Cast<ATunaSweeperPlayerController>(Player->GetController()));
+		}
+		if (Phase == EHopperCombatPhase::Mech) Shoot(Boss);
+		return false;
+	}
+	default: return true;
+	}
+}
+
+void ATrailerGameMode::Tick(float Dt)
+{
+	Super::Tick(Dt);
+	auto* PC = Cast<ATunaSweeperPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (bLeaving || !PC || !PC->PlayerCameraManager) return;
+	Player = Cast<ATunaSweeperTopDownCharacter>(PC->GetPawn());
+	if (!Player.IsValid()) return;
+	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { ReturnToTitle(); return; }
+	if (auto* Hud = PC->GetGameHudWidget()) Hud->SetVisibility(ESlateVisibility::Collapsed);
+	PC->bShowMouseCursor = false;
+	if (FadeRemaining > 0)
+	{
+		FadeRemaining -= Dt;
+		if (FadeRemaining > 0) return;
+		if ((Shot == EShot::GrayRobot || Shot == EShot::BlueRobot) && Target.IsValid()) Target->Destroy();
+		if (Shot == EShot::Apples)
+		{
+			bLeaving = true;
+			UGameplayStatics::OpenLevel(this, TEXT("/Game/MainRaid/RaidVillage"), true, TravelOptions);
+			return;
+		}
+		if (Shot == EShot::Captain) { ReturnToTitle(); return; }
+		Shot = static_cast<EShot>(static_cast<uint8>(Shot) + 1);
+		bReady = false;
+	}
+	if (!bReady)
+	{
+		PC->PlayerCameraManager->SetManualCameraFade(1, FLinearColor::Black, false);
+		if (!SetUpShot())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Trailer: missing subject for shot %d"), int32(Shot));
+			ReturnToTitle();
+			return;
+		}
+		const bool bScenic = Shot == EShot::ExitGarage || Shot == EShot::EnterGarage || Shot == EShot::Shop || Shot == EShot::Beach || Shot == EShot::Platform || Shot == EShot::GrayRobot || Shot == EShot::BlueRobot || Shot == EShot::Captain;
+		if (bScenic)
+		{
+			if (!Camera.IsValid()) Camera = GetWorld()->SpawnActor<ACameraActor>();
+			if (Camera.IsValid())
+			{
+				const AActor* Subject = Target.IsValid() ? Target.Get() : static_cast<AActor*>(Station.Get());
+				FVector Focus = (Subject->GetActorLocation() + Player->GetActorLocation()) * .5 + FVector(0,0,85);
+				FVector Offset(-650,380,520);
+				if (Shot == EShot::Shop) Offset = Subject->GetActorTransform().TransformVectorNoScale(FVector(0,930,520));
+				if (Shot == EShot::ExitGarage || Shot == EShot::EnterGarage) { Focus = Subject->GetActorLocation() + FVector(0,0,110); Offset = FVector(-460,-160,220); }
+				if (Shot == EShot::Platform) { Focus = Player->GetActorLocation(); Offset = FVector(-650,420,550); }
+				if (Shot == EShot::GrayRobot || Shot == EShot::BlueRobot || Shot == EShot::Captain) Offset = FVector(-100,-690,460);
+				Camera->SetActorLocationAndRotation(Focus + Offset, (-Offset).Rotation());
+				Camera->GetCameraComponent()->SetFieldOfView(68);
+				PC->SetViewTarget(Camera.Get());
+			}
+		}
+		else PC->SetViewTarget(Player.Get());
+		GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
+		IStreamingManager::Get().AddViewLocation(Player->GetActorLocation(), 1.f, false, 1.f);
+		IStreamingManager::Get().StreamAllResources(1.f);
+		PC->PlayerCameraManager->StartCameraFade(1,0,FadeSeconds,FLinearColor::Black,false);
+		bReady = true;
+		UE_LOG(LogTemp, Display, TEXT("Trailer: begin shot %d"), int32(Shot));
+	}
+	Elapsed += Dt;
+	if (PlayShot(Dt))
+	{
+		UE_LOG(LogTemp, Display, TEXT("Trailer: completed shot %d, pawn %s, base %s"), int32(Shot), *Player->GetActorLocation().ToString(), *GetNameSafe(Player->GetMovementBase()));
+		FadeRemaining = FadeSeconds;
+		PC->PlayerCameraManager->StartCameraFade(0,1,FadeSeconds,FLinearColor::Black,false,true);
+	}
+	else if (Elapsed > 40.f)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Trailer: shot %d timed out"), int32(Shot));
+		if (auto* Boss = Cast<ATunaSweeperHopperEnemyCharacter>(Target.Get()))
+			UE_LOG(LogTemp, Error, TEXT("Trailer: phase %d, mech HP %.0f, distance %.0f, rounds %d"), int32(Boss->GetCombatPhase()), Boss->GetMechHealth(), Boss->GetDistanceTo(Player.Get()), GetGameInstance<UTunaSweeperGameInstance>()->GetWeaponLoadedAmmoCount(1));
+		ReturnToTitle();
+	}
+}

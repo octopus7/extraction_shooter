@@ -369,6 +369,9 @@ private:
 	void HandleQuitClicked();
 
 	UFUNCTION()
+	void HandleTrailerClicked();
+
+	UFUNCTION()
 	void HandleDifficultyFarmingClicked();
 
 	UFUNCTION()
@@ -586,7 +589,7 @@ private:
 		UButton* ToggleButton,
 		FName LabelWidgetName,
 		FName IndicatorWidgetName);
-	void BeginTravelToLevel(FName TargetLevelName);
+	void BeginTravelToLevel(FName TargetLevelName, const FString& Options = FString());
 	void BeginStartTravel();
 	void ReloadIntroLevel();
 	void OpenPendingStartTargetLevel();
@@ -614,6 +617,7 @@ private:
 	ETunaSweeperTitleDLSSMode PreferredDLSSMode = ETunaSweeperTitleDLSSMode::Performance;
 	ETunaSweeperItemTextLanguage PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;
 	FName PendingStartTargetLevelName = NAME_None;
+	FString PendingTravelOptions;
 	FTimerHandle StartTravelTimerHandle;
 
 	UPROPERTY(Transient)

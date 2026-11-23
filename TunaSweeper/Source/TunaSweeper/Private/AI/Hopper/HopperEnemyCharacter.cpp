@@ -22,6 +22,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Weapon/TunaSweeperProjectile.h"
+#include "Scenario/TrailerGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHopperCombat, Log, All);
 
@@ -29,7 +30,7 @@ namespace
 {
     UTunaSweeperGameUserSettings* GetVillageIntroSettings(const UWorld& World)
     {
-        return UWorld::RemovePIEPrefix(World.GetOutermost()->GetName()) == TEXT("/Game/MainRaid/RaidVillage")
+        return !World.GetAuthGameMode<ATrailerGameMode>() && UWorld::RemovePIEPrefix(World.GetOutermost()->GetName()) == TEXT("/Game/MainRaid/RaidVillage")
             ? UTunaSweeperGameUserSettings::Get() : nullptr;
     }
 
@@ -139,6 +140,7 @@ void ATunaSweeperHopperEnemyCharacter::BeginPlay()
 
 void ATunaSweeperHopperEnemyCharacter::TryStartEncounterBoarding()
 {
+    if (GetWorld()->GetAuthGameMode<ATrailerGameMode>()) return;
     auto* Viewer = Cast<ATunaSweeperPlayerController>(GetWorld()->GetFirstPlayerController());
     APawn* Pawn = Viewer ? Viewer->GetPawn() : nullptr;
     const auto* Vision = Pawn ? Pawn->FindComponentByClass<UTunaSweeperPlayerVisionComponent>() : nullptr;
@@ -150,6 +152,12 @@ void ATunaSweeperHopperEnemyCharacter::TryStartEncounterBoarding()
     const FVector Cockpit = Presentation->GetBodyRoot()->GetComponentTransform().TransformPosition(LoadedVisualData->SeatLocation);
     if (Width <= 0 || Height <= 0 || !Viewer->ProjectWorldLocationToScreen(Cockpit, Screen)
         || Screen.X < 0 || Screen.X >= Width || Screen.Y < 0 || Screen.Y >= Height) return;
+    BeginEncounterBoarding(Viewer);
+}
+
+void ATunaSweeperHopperEnemyCharacter::BeginEncounterBoarding(ATunaSweeperPlayerController* Viewer)
+{
+    if (!Viewer || Phase != EHopperCombatPhase::WaitingForSight || !LoadedVisualData) return;
     const auto* Settings = GetVillageIntroSettings(*GetWorld());
     if (Settings && !Settings->ShouldShowVillageCombatIntro(LocalEncounterDate()))
     {

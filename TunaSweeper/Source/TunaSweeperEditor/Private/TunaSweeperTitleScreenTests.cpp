@@ -38,6 +38,8 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->AddToRoot();
 	TSharedRef<SWidget> Slate = Menu->TakeWidget();
 	Menu->BindScreenWidgets();
+	UButton* Trailer = Cast<UButton>(Menu->FindIntroWidget(TEXT("TrailerModeButton")));
+	TestTrue(TEXT("Title trailer button is enabled and handles clicks"), Trailer && Trailer->GetIsEnabled() && Trailer->OnClicked.IsBound());
 	for (const TCHAR* Name : { TEXT("LaboratoryButton"), TEXT("LaboratoryButtonBox"),
 		TEXT("OnlineCoopButton"), TEXT("OnlineCoopButtonBox") })
 		TestNull(FString::Printf(TEXT("Unused title entry is absent: %s"), Name), Menu->FindIntroWidget(Name));

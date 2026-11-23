@@ -1,6 +1,7 @@
 #include "TunaSweeperGameHudWidgetShared.h"
 #include "UI/TunaSweeperHeadshotBurstWidget.h"
 #include "UI/TunaSweeperHeadshotFeedback.h"
+#include "Scenario/TrailerGameMode.h"
 
 void UTunaSweeperGameHudWidget::AddHeadphoneNoiseRipple(const FVector& DirectionFromListener, float Strength)
 {
@@ -357,7 +358,7 @@ void UTunaSweeperGameHudWidget::ShowDamageNumber(
 	FVector WorldLocation,
 	ETunaSweeperDamageNumberType DamageNumberType)
 {
-	if (DamageAmount <= 0.0f || !WidgetTree)
+	if (DamageAmount <= 0.0f || !WidgetTree || (GetWorld() && GetWorld()->GetAuthGameMode<ATrailerGameMode>()))
 	{
 		return;
 	}

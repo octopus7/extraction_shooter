@@ -540,6 +540,7 @@ protected:
 
 private:
 	friend class UTunaSweeperCombatLabAutopilotComponent;
+	friend class ATrailerGameMode;
 	#if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperDemoStaminaTuningTest;
 	friend class FTunaSweeperEquipmentDataTest;
