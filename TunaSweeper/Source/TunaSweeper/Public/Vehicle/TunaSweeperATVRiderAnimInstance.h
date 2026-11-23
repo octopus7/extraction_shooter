@@ -12,3 +12,10 @@ protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* Proxy) override;
 };
+
+/** Uses the seated limb solver with a cushion and armrests in the chair's frame. */
+UCLASS(Transient)
+class TUNASWEEPER_API UTunaSweeperLiftChairAnimInstance : public UTunaSweeperATVRiderAnimInstance
+{
+	GENERATED_BODY()
+};

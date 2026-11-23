@@ -12,12 +12,26 @@ namespace
 	{
 		using FAnimInstanceProxy::FAnimInstanceProxy;
 		bool bValid = false;
+		bool bChair = false;
 		FVector Pelvis, Hands[2], Forward, Right, Up;
 		virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
 		{
 			FAnimInstanceProxy::PreUpdate(Instance, DeltaSeconds);
 			bValid = false;
 			const auto* Character = Cast<ATunaSweeperTopDownCharacter>(Instance->GetOwningActor());
+			bChair = Instance->IsA<UTunaSweeperLiftChairAnimInstance>();
+			if (bChair && Character)
+			{
+				const FTransform& MeshToSeat = Instance->GetSkelMeshComponent()->GetRelativeTransform();
+				Forward = MeshToSeat.InverseTransformVectorNoScale(FVector::ForwardVector);
+				Right = MeshToSeat.InverseTransformVectorNoScale(FVector::RightVector);
+				Up = MeshToSeat.InverseTransformVectorNoScale(FVector::UpVector);
+				Pelvis = MeshToSeat.InverseTransformPosition(FVector::ZeroVector);
+				Hands[0] = MeshToSeat.InverseTransformPosition(FVector(15, -18, 10));
+				Hands[1] = MeshToSeat.InverseTransformPosition(FVector(15, 18, 10));
+				bValid = true;
+				return;
+			}
 			const auto* Mount = Character ? Character->GetVehicleMount() : nullptr;
 			const auto* ATV = Mount ? Cast<ATunaSweeperATVActor>(Mount->GetOwner()) : nullptr;
 			if (!ATV) return;
@@ -89,10 +103,10 @@ namespace
 			{
 				// Luna's mesh faces +Y. Convert that reference direction to the steering frame.
 				const FQuat Heading = FQuat::FindBetweenNormals(FVector::RightVector, Forward);
-				const FQuat Lean(Right, FMath::DegreesToRadians(12.0f));
+				const FQuat Lean(Right, FMath::DegreesToRadians(bChair ? 2.f : 12.f));
 				Move(Spine, Pose[Spine].GetLocation(), Lean * Heading * Pose[Spine].GetRotation());
 				const int32 Head = Find(TEXT("head"));
-				if (Head >= 0) Move(Head, Pose[Head].GetLocation(), FQuat(Right, FMath::DegreesToRadians(-8.f)) * Pose[Head].GetRotation());
+				if (Head >= 0) Move(Head, Pose[Head].GetLocation(), FQuat(Right, FMath::DegreesToRadians(bChair ? -2.f : -8.f)) * Pose[Head].GetRotation());
 			}
 			auto Limb = [&](int32 A, int32 B, int32 C, FVector Target, const FVector& Pole, const FQuat& EndRotation)
 			{
@@ -128,7 +142,8 @@ namespace
 					const float ShinLength = FVector::Distance(Rest[Calf].GetLocation(), Rest[Foot].GetLocation());
 					// Thighs reach forward with a modest straddle; shins hang almost
 					// vertically. Bone proportions determine the feet, not the ATV.
-					const FVector ThighDirection = (Forward*.84f + Right*Sign*.18f - Up*.51f).GetSafeNormal();
+					const FVector ThighDirection = bChair ? (Forward + Right*Sign*.08f - Up*.12f).GetSafeNormal()
+						: (Forward*.84f + Right*Sign*.18f - Up*.51f).GetSafeNormal();
 					const FVector ShinDirection = (-Forward*.15f + Right*Sign*.04f - Up*.99f).GetSafeNormal();
 					const FVector Ankle = Pose[Thigh].GetLocation() + ThighDirection*ThighLength + ShinDirection*ShinLength;
 					const FQuat FootHeading = FQuat::FindBetweenNormals(FVector::RightVector, Forward);
@@ -139,7 +154,8 @@ namespace
 					for (int32 Joint=1; Joint<=3; ++Joint)
 					{
 						const int32 Bone = Find(FName(*FString::Printf(TEXT("%s_0%d%s"), FingerName, Joint, *Suffix)));
-						if (Bone >= 0) Move(Bone, Pose[Bone].GetLocation(), FQuat(Right, FMath::DegreesToRadians(Joint==1 ? 10.f : 45.f)) * Pose[Bone].GetRotation());
+						const float Curl = bChair ? 8.f : (Joint==1 ? 10.f : 45.f);
+						if (Bone >= 0) Move(Bone, Pose[Bone].GetLocation(), FQuat(Right, FMath::DegreesToRadians(Curl)) * Pose[Bone].GetRotation());
 					}
 				}
 			}

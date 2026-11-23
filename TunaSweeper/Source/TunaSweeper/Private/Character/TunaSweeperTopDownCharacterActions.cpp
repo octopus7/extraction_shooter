@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Interaction/TunaSweeperRaidLiftActor.h"
 #include "Weapon/TunaSweeperTopAttackRocket.h"
 
 float ATunaSweeperTopDownCharacter::GetReloadProgress() const
@@ -360,7 +361,7 @@ void ATunaSweeperTopDownCharacter::MoveAmmoSelectionFocus(int32 FocusDelta)
 
 bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 {
-	if (IsMountedInVehicle()) return true;
+	if (IsMountedInVehicle() || Cast<ATunaSweeperRaidLiftActor>(GetAttachParentActor())) return true;
 	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
 	return TunaPlayerController &&
 		(TunaPlayerController->IsHopperShotActive() || TunaPlayerController->IsInventoryUiOpen() ||
