@@ -1,6 +1,7 @@
 #include "Scenario/TrailerGameMode.h"
 
 #include "AI/Hopper/HopperEnemyCharacter.h"
+#include "AI/TunaSweeperWheeledEnemyCharacter.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/BoxComponent.h"
@@ -123,6 +124,83 @@ void ATrailerGameMode::Shoot(AActor* Actor)
 		Player->FireWeapon();
 		NextShot = Elapsed + .27f;
 	}
+}
+
+bool ATrailerGameMode::SetUpTrikes()
+{
+	AActor* Shop = FindPlaced(GetWorld(), TEXT("/Game/Environment/Buildings/VillageGukbap/BP_GrandfatherGukbap.BP_GrandfatherGukbap_C"), FVector(3761,2062,152));
+	UClass* Class = LoadClass<ATunaSweeperWheeledEnemyCharacter>(nullptr, TEXT("/Game/Characters/Region2Robots/BP_RabbitTrike.BP_RabbitTrike_C"));
+	if (!Shop || !Class) return false;
+	const FTransform Street(Shop->GetActorRotation(), Shop->GetActorLocation());
+	PlacePlayer(Street.TransformPosition(FVector(0,730,0)));
+	for (int32 Index = 0; Index < 2; ++Index)
+	{
+		const float Sign = Index == 0 ? 1.f : -1.f;
+		// Mirror the complete pass and the outward U-turn across the centre of the street.
+		const auto Lane = [&](float Along, float Across)
+		{
+			return Street.TransformPosition(FVector(Sign * Along, 730.f - Sign * Across, 0));
+		};
+		FTrikeRoute& Route = Trikes[Index];
+		Route.Waypoints = {Lane(530,155), Lane(625,195), Lane(635,255), Lane(525,285), Lane(225,245)};
+		const FVector Start = GroundAt(Lane(-900,155)) + FVector(0,0,82);
+		const FRotator Facing = (Route.Waypoints[0] - Start).GetSafeNormal2D().Rotation();
+		auto* Bike = GetWorld()->SpawnActor<ATunaSweeperWheeledEnemyCharacter>(Class, Start, Facing);
+		if (!Bike) return false;
+		Bike->DetachFromControllerPendingDestroy();
+		Bike->GetCharacterMovement()->bRunPhysicsWithNoController = true;
+		Route.Bike = Bike;
+	}
+	Player->SetAimWorldPoint(Trikes[0].Bike->GetActorLocation());
+	return true;
+}
+
+bool ATrailerGameMode::PlayTrikes(float Dt)
+{
+	if (Trikes[0].Bike.IsValid() && Trikes[1].Bike.IsValid())
+	{
+		const FVector First = Trikes[0].Bike->GetActorLocation();
+		const FVector Second = Trikes[1].Bike->GetActorLocation();
+		TrikeClosestPass = FMath::Min(TrikeClosestPass, float(FVector::Dist2D(First, Second)));
+		if (HoldTime == 0.f)
+			Player->SetAimWorldPoint(Trikes[0].Next == 0 ? First : Second);
+	}
+	bool bBothFired = true;
+	for (FTrikeRoute& Route : Trikes)
+	{
+		auto* Bike = Route.Bike.Get();
+		if (!Bike || Bike->IsDead()) continue;
+		if (Route.Waypoints.IsValidIndex(Route.Next))
+		{
+			const FVector Delta = Route.Waypoints[Route.Next] - Bike->GetActorLocation();
+			Bike->GetCharacterMovement()->MaxWalkSpeed = Route.Next == 0 ? 850.f : 390.f;
+			if (Delta.SizeSquared2D() < FMath::Square(65.f))
+				++Route.Next;
+			else
+				Bike->AddMovementInput(Delta.GetSafeNormal2D(), 1.f, true);
+		}
+		else
+		{
+			const FRotator Aim = (Player->GetActorLocation() - Bike->GetActorLocation()).GetSafeNormal2D().Rotation();
+			Bike->SetActorRotation(FMath::RInterpConstantTo(Bike->GetActorRotation(), Aim, Dt, 240.f));
+			if (Bike->TryFireProjectileAt(Player.Get()) == ETunaSweeperEnemyFireResult::Fired && !Route.bFired)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Trailer: returning trike fired at %s"), *Bike->GetActorLocation().ToString());
+				Route.bFired = true;
+			}
+		}
+		bBothFired &= Route.bFired;
+	}
+
+	if (!bBothFired) return false;
+	if (HoldTime == 0.f) UE_LOG(LogTemp, Display, TEXT("Trailer: closest trike pass %.1f cm"), TrikeClosestPass);
+	HoldTime += Dt;
+	if (HoldTime > .55f)
+	{
+		auto* TargetBike = Trikes[HoldTime < 1.6f ? 0 : 1].Bike.Get();
+		if (TargetBike && !TargetBike->IsDead()) Shoot(TargetBike);
+	}
+	return HoldTime >= 3.f;
 }
 
 bool ATrailerGameMode::SetUpShot()
@@ -282,6 +360,9 @@ bool ATrailerGameMode::SetUpShot()
 	case EShot::Shop:
 		return PlaceNear(FindPlaced(World, TEXT("/Game/Environment/Buildings/VillageGukbap/BP_GrandfatherGukbap.BP_GrandfatherGukbap_C"), FVector(3761,2062,152)),
 			FVector(-440,470,0), FVector(440,470,0));
+	case EShot::Trikes:
+		if (!SetUpTrikes()) return false;
+		break;
 	case EShot::Platform:
 		for (TActorIterator<ALoopRailStation> It(World); It; ++It)
 			if (It->StationId == TEXT("village_02")) Station = *It;
@@ -306,11 +387,37 @@ bool ATrailerGameMode::SetUpShot()
 		Player->SetActorLocation(Floor->GetComponentLocation() + FVector(0, 0, 10 + Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
 		return true;
 	}
-	case EShot::Beach:
+	case EShot::Breakwater:
+	{
+		AActor* Beacon = FindPlaced(World, TEXT("/Game/Environment/FactionHarbor/Beacon/BP_HarborLighthouse.BP_HarborLighthouse_C"), FVector(-13322,-756,142));
+		if (!Beacon) return false;
+		const FVector Entrance(-11236,-1162,142);
+		const FVector AlongPier = (Beacon->GetActorLocation() - Entrance).GetSafeNormal2D();
+		Goal = Beacon->GetActorLocation() - AlongPier * 305.f;
+		// Detach before enabling walking: the preceding shot ends on a moving coach.
+		Player->SetBase(nullptr);
+		PlacePlayer(Entrance);
+		auto* Movement = Player->GetCharacterMovement();
+		Movement->SetPlaneConstraintOrigin(Entrance);
+		Movement->SetPlaneConstraintNormal(FVector::CrossProduct(AlongPier, FVector::UpVector));
+		Movement->SetPlaneConstraintEnabled(true);
 		Player->SetActorEnableCollision(true);
-		Player->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-		return PlaceNear(FindPlaced(World, TEXT("/Game/Environment/CoastalWildlife/BP_CoastalGull.BP_CoastalGull_C"), FVector(-10298,9941,121)),
-			FVector(-860,50,0), FVector(-140,50,0));
+		Movement->SetMovementMode(MOVE_Walking);
+		Player->SetAimWorldPoint(Goal);
+		return true;
+	}
+	case EShot::Beach:
+	{
+		Player->GetCharacterMovement()->SetPlaneConstraintEnabled(false);
+		// This straight stretch of the eastern strand follows the animated swash line.
+		PlacePlayer(FVector(-10655, 9170, 95));
+		Goal = FVector(-10655, 10430, 95);
+		Player->SetAimWorldPoint(Goal);
+		UClass* GullClass = LoadClass<AActor>(nullptr, TEXT("/Game/Environment/CoastalWildlife/BP_CoastalGull.BP_CoastalGull_C"));
+		if (!GullClass) return false;
+		Target = World->SpawnActor<AActor>(GullClass, GroundAt(FVector(-10595, 9950, 95)), FRotator(0,180,0));
+		return Target.IsValid();
+	}
 	default: return false;
 	}
 	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->ResetCombatTestLoadout();
@@ -337,9 +444,24 @@ bool ATrailerGameMode::PlayShot(float Dt)
 		return Elapsed > 5.f;
 	}
 	case EShot::Shop:
-	case EShot::Beach:
 		if (Elapsed > .8f) WalkTo(Goal);
-		return Elapsed > (Shot == EShot::Beach ? 6.5f : 5.5f);
+		return Elapsed > 5.5f;
+	case EShot::Breakwater:
+	case EShot::Beach:
+	{
+		if (Elapsed <= .5f) return false;
+		const bool bArrived = FVector::DistSquared2D(Player->GetActorLocation(), Goal) < FMath::Square(35.f);
+		if (Shot == EShot::Breakwater)
+		{
+			Player->bSprintInputHeld = !bArrived;
+			Player->CurrentMoveInput = bArrived ? FVector2D::ZeroVector : FVector2D(0,-1);
+		}
+		WalkTo(Goal);
+		if (bArrived) HoldTime += Dt;
+		return HoldTime > .8f;
+	}
+	case EShot::Trikes:
+		return PlayTrikes(Dt);
 	case EShot::Platform:
 		if (Elapsed >= 1.f && Elapsed - Dt < 1.f)
 			UE_LOG(LogTemp, Display, TEXT("Trailer: boarding wait base %s"), *GetNameSafe(Player->GetMovementBase()));
@@ -473,6 +595,9 @@ void ATrailerGameMode::Tick(float Dt)
 	{
 		FadeRemaining -= Dt;
 		if (FadeRemaining > 0) return;
+		if (Shot == EShot::Trikes)
+			for (auto& Route : Trikes)
+				if (Route.Bike.IsValid()) Route.Bike->Destroy();
 		for (auto Robot : Robots)
 			if (Robot.IsValid()) Robot->Destroy();
 		Robots.Reset();
@@ -543,7 +668,10 @@ void ATrailerGameMode::Tick(float Dt)
 	}
 	else if (Elapsed > 40.f)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Trailer: shot %d timed out"), int32(Shot));
+		UE_LOG(LogTemp, Error, TEXT("Trailer: shot %d timed out at %s, goal %s"), int32(Shot), *Player->GetActorLocation().ToString(), *Goal.ToString());
+		if (Shot == EShot::Trikes)
+			for (const auto& Route : Trikes)
+				if (Route.Bike.IsValid()) UE_LOG(LogTemp, Display, TEXT("Trailer: trike waypoint %d at %s"), Route.Next, *Route.Bike->GetActorLocation().ToString());
 		if (auto* Boss = Cast<ATunaSweeperHopperEnemyCharacter>(Target.Get()))
 			UE_LOG(LogTemp, Error, TEXT("Trailer: phase %d, mech HP %.0f, distance %.0f, rounds %d"), int32(Boss->GetCombatPhase()), Boss->GetMechHealth(), Boss->GetDistanceTo(Player.Get()), GetGameInstance<UTunaSweeperGameInstance>()->GetWeaponLoadedAmmoCount(1));
 		ReturnToTitle();

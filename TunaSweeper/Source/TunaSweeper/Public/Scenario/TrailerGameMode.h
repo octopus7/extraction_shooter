@@ -5,6 +5,7 @@
 
 class ATunaSweeperTopDownCharacter;
 class ALoopRailStation;
+class ATunaSweeperWheeledEnemyCharacter;
 class ALoopRailTrain;
 class ATunaSweeperBreakableAppleCrateActor;
 class ATunaSweeperExplosiveBarrelActor;
@@ -22,9 +23,21 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-	enum class EShot : uint8 { ExitGarage, EnterGarage, GrayRobot, BlueRobot, Barrel, Apples, Shop, Platform, Carriage, Beach, Captain, End };
+	enum class EShot : uint8 { ExitGarage, EnterGarage, GrayRobot, BlueRobot, Barrel, Apples, Shop, Trikes, Platform, Carriage, Breakwater, Beach, Captain, End };
 	bool SetUpShot();
 	bool PlayShot(float DeltaSeconds);
+	bool SetUpTrikes();
+	bool PlayTrikes(float DeltaSeconds);
+
+	struct FTrikeRoute
+	{
+		TWeakObjectPtr<ATunaSweeperWheeledEnemyCharacter> Bike;
+		TArray<FVector> Waypoints;
+		int32 Next = 0;
+		bool bFired = false;
+	};
+	FTrikeRoute Trikes[2];
+	float TrikeClosestPass = MAX_flt;
 	void WalkTo(FVector Goal);
 	void Shoot(AActor* Actor);
 	FVector GroundAt(FVector Point) const;
