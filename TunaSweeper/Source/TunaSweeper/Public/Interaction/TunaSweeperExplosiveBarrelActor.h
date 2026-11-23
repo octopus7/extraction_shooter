@@ -96,6 +96,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Explosive Barrel")
 	bool IsBarrelDestroyed() const { return bBarrelDestroyed; }
 
+	float GetExplosionRadius() const { return ExplosionVisualRadiusCm; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Explosive Barrel")
 	int32 GetDamageStage() const { return CurrentDamageStage; }
 

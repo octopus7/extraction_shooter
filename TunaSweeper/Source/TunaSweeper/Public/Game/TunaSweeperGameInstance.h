@@ -427,10 +427,12 @@ public:
 	float GetDialogueCharactersPerSecond() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interface")
-	ETunaSweeperItemTextLanguage GetCurrentTextLanguage() const { return CurrentTextLanguage; }
+	ETunaSweeperItemTextLanguage GetCurrentTextLanguage() const { return TextLanguageOverride.Get(CurrentTextLanguage); }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interface")
 	void SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately = true);
+
+	void SetTextLanguageOverride(TOptional<ETunaSweeperItemTextLanguage> Language);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interface")
 	FText ResolveLocalizedText(FName StringKey, const FText& FallbackText) const;
@@ -1364,6 +1366,8 @@ private:
 
 	UPROPERTY(Transient)
 	ETunaSweeperItemTextLanguage CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;
+
+	TOptional<ETunaSweeperItemTextLanguage> TextLanguageOverride;
 
 	UPROPERTY(Transient)
 	float LoadedSlotTotalPlaySeconds = 0.0f;

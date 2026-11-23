@@ -4,7 +4,7 @@
 
 void UTunaSweeperGameInstance::SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately)
 {
-	const bool bLanguageChanged = CurrentTextLanguage != Language;
+	const auto PreviousLanguage = GetCurrentTextLanguage();
 	CurrentTextLanguage = Language;
 	ApplyCurrentLanguageCulture();
 
@@ -13,8 +13,19 @@ void UTunaSweeperGameInstance::SetCurrentTextLanguage(ETunaSweeperItemTextLangua
 		SaveGlobalLanguageSetting();
 	}
 
-	if (bLanguageChanged)
+	if (PreviousLanguage != GetCurrentTextLanguage())
 	{
+		OnLanguageChanged.Broadcast();
+	}
+}
+
+void UTunaSweeperGameInstance::SetTextLanguageOverride(TOptional<ETunaSweeperItemTextLanguage> Language)
+{
+	const auto PreviousLanguage = GetCurrentTextLanguage();
+	TextLanguageOverride = Language;
+	if (PreviousLanguage != GetCurrentTextLanguage())
+	{
+		ApplyCurrentLanguageCulture();
 		OnLanguageChanged.Broadcast();
 	}
 }
@@ -28,7 +39,7 @@ FText UTunaSweeperGameInstance::ResolveLocalizedText(FName StringKey, const FTex
 
 	if (const UTunaSweeperTextSubsystem* TextSubsystem = GetSubsystem<UTunaSweeperTextSubsystem>())
 	{
-		return TextSubsystem->ResolveText(StringKey, CurrentTextLanguage, FallbackText);
+		return TextSubsystem->ResolveText(StringKey, GetCurrentTextLanguage(), FallbackText);
 	}
 
 	return FallbackText;
@@ -128,6 +139,6 @@ void UTunaSweeperGameInstance::ApplyCurrentLanguageCulture() const
 	}
 #endif
 
-	FInternationalization::Get().SetCurrentCulture(TunaSweeperLanguage::ToLanguageCode(CurrentTextLanguage));
+	FInternationalization::Get().SetCurrentCulture(TunaSweeperLanguage::ToLanguageCode(GetCurrentTextLanguage()));
 }
 

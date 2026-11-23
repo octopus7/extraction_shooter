@@ -46,13 +46,21 @@ ATrailerGameMode::ATrailerGameMode()
 void ATrailerGameMode::InitGame(const FString& Map, const FString& Options, FString& Error)
 {
 	Super::InitGame(Map, Options, Error);
-	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->BeginCombatTestSession();
+	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		GI->SetTextLanguageOverride(ETunaSweeperItemTextLanguage::English);
+		GI->BeginCombatTestSession();
+	}
 	if (Map.EndsWith(TEXT("RaidVillage"))) Shot = EShot::Shop;
 }
 
 void ATrailerGameMode::EndPlay(EEndPlayReason::Type Reason)
 {
-	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->EndCombatTestSession();
+	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		GI->SetTextLanguageOverride({});
+		GI->EndCombatTestSession();
+	}
 	Super::EndPlay(Reason);
 }
 
@@ -145,14 +153,14 @@ bool ATrailerGameMode::SetUpShot()
 		if (!Door) return false;
 		Target = Door;
 		const FVector Through = Door->GetActorRightVector().GetSafeNormal2D();
+		Door->SetDoorEnabled(true);
+		Door->SetOpenAlpha(bExit ? 1.f : 0.f);
 		if (bExit)
 		{
 			Player->SetActorLocation(Door->GetActorLocation() + Through*165 + FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+2));
 			// The raid entrance transitions beneath the landscape on its interior side.
 			Player->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 			Player->SetActorEnableCollision(false);
-			Door->SetDoorEnabled(true);
-			Door->OpenDoor();
 		}
 		Goal = Door->GetActorLocation() + Through*(bExit ? -340 : 165);
 		Player->SetAimWorldPoint(Goal);
@@ -170,23 +178,63 @@ bool ATrailerGameMode::SetUpShot()
 			: TEXT("/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Blue.BP_QuadrupedGunEnemy_Blue_C");
 		UClass* Class = LoadClass<ACharacter>(nullptr, Path);
 		if (!Class) return false;
-		const FVector Feet = GroundAt(bBoss ? FVector(8680,-350,300) : Shot == EShot::GrayRobot ? FVector(-1200,-6100,0) : FVector(380,-6650,0));
-		PlacePlayer(Feet + FVector(bBoss ? -960 : -580, bBoss ? 0 : -150, 0));
+		const FVector Feet = GroundAt(bBoss ? FVector(8680,-350,300) : Shot == EShot::GrayRobot ? FVector(-1650,-6350,0) : FVector(380,-6650,0));
+		PlacePlayer(Feet + FVector(bBoss ? -960 : -300, bBoss ? 0 : -50, 0));
 		Goal = Feet;
 		Player->SetAimWorldPoint(Feet);
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		ACharacter* Enemy = World->SpawnActor<ACharacter>(Class, Feet + FVector(0,0,105), FRotator(0,180,0), Params);
-		if (!Enemy) return false;
-		Enemy->SpawnDefaultController();
-		Target = Enemy;
+		const FVector Offsets[] = { FVector::ZeroVector, FVector(-85, -220, 0), FVector(65, 215, 0) };
+		for (int32 Index = 0; Index < (bBoss ? 1 : 3); ++Index)
+		{
+			FVector Offset = Offsets[Index];
+			if (Shot == EShot::BlueRobot) Offset.Y *= -1;
+			const FVector Location = GroundAt(Feet + Offset) + FVector(0,0,105);
+			const FRotator Facing = (Player->GetActorLocation() - Location).GetSafeNormal2D().Rotation();
+			ACharacter* Enemy = World->SpawnActor<ACharacter>(Class, Location, Facing, Params);
+			if (!Enemy) return false;
+			Enemy->SpawnDefaultController();
+			if (!bBoss) Robots.Add(Enemy);
+			if (Index == 0) Target = Enemy;
+		}
 		break;
 	}
 	case EShot::Barrel:
 	case EShot::Apples:
 	{
 		const bool bBarrel = Shot == EShot::Barrel;
-		AActor* Prop = UGameplayStatics::GetActorOfClass(this, bBarrel ? ATunaSweeperExplosiveBarrelActor::StaticClass() : ATunaSweeperBreakableAppleCrateActor::StaticClass());
+		AActor* Prop = nullptr;
+		if (bBarrel)
+		{
+			UClass* Class = LoadClass<ATunaSweeperExplosiveBarrelActor>(nullptr, TEXT("/Game/Interaction/BP_ExplosiveBarrel.BP_ExplosiveBarrel_C"));
+			if (!Class) return false;
+			const float Spacing = Class->GetDefaultObject<ATunaSweeperExplosiveBarrelActor>()->GetExplosionRadius() * .72f;
+			const FVector Origin(-1650, -6350, 0);
+			for (int32 Angle = 0; Angle < 360 && Barrels.IsEmpty(); Angle += 30)
+			{
+				const FVector Step = FVector::RightVector.RotateAngleAxis(Angle, FVector::UpVector) * Spacing;
+				for (int32 Index = 0; Index < 3; ++Index)
+				{
+					const FVector Feet = GroundAt(Origin + Step * (Index - 1));
+					FActorSpawnParameters Params;
+					Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+					auto* Barrel = World->SpawnActor<ATunaSweeperExplosiveBarrelActor>(Class, Feet + FVector(0,0,2), FRotator::ZeroRotator, Params);
+					if (!Barrel) break;
+					Barrels.Add(Barrel);
+				}
+				if (Barrels.Num() != 3)
+				{
+					for (auto Barrel : Barrels) Barrel->Destroy();
+					Barrels.Reset();
+				}
+			}
+			if (Barrels.IsEmpty()) return false;
+			Prop = Barrels[0].Get();
+		}
+		else
+		{
+			Prop = UGameplayStatics::GetActorOfClass(this, ATunaSweeperBreakableAppleCrateActor::StaticClass());
+		}
 		if (!Prop) return false;
 		const auto* Collision = Prop->FindComponentByClass<UBoxComponent>();
 		if (!Collision) return false;
@@ -194,8 +242,9 @@ bool ATrailerGameMode::SetUpShot()
 		bool bFoundLane = false;
 		for (int32 Angle = 0; Angle < 360; Angle += 30)
 		{
-			const FVector Offset = FVector(-360,0,0).RotateAngleAxis(Angle, FVector::UpVector);
-			const FVector Ground = GroundAt(Prop->GetActorLocation() + Offset);
+			const FVector Offset = FVector(bBarrel ? -280.f : -360.f,0,0).RotateAngleAxis(Angle, FVector::UpVector);
+			const FVector GroupCenter = bBarrel ? Barrels[1]->GetActorLocation() : Prop->GetActorLocation();
+			const FVector Ground = GroundAt(GroupCenter + Offset);
 			FHitResult Hit;
 			FCollisionQueryParams Params(SCENE_QUERY_STAT(TrailerFiringLane), false, Player.Get());
 			if (!World->LineTraceSingleByChannel(Hit, Ground + FVector(0,0,95), Center, TunaSweeperCollisionChannels::Projectile, Params) || Hit.GetActor() != Prop) continue;
@@ -277,7 +326,10 @@ bool ATrailerGameMode::PlayShot(float Dt)
 	case EShot::EnterGarage:
 	{
 		const FVector Through = Target->GetActorRightVector().GetSafeNormal2D();
-		const float Alpha = FMath::Clamp((Elapsed - (Shot == EShot::ExitGarage ? 1.6f : .6f)) / 3.1f, 0.f, 1.f);
+		const bool bExit = Shot == EShot::ExitGarage;
+		const float Alpha = FMath::Clamp((Elapsed - (bExit ? .45f : .9f)) / 3.1f, 0.f, 1.f);
+		const float DoorMotion = FMath::SmoothStep(0.f, 1.f, (Elapsed - (bExit ? 1.95f : .55f)) / 2.25f);
+		CastChecked<AFoldingCanopyGarageDoor>(Target.Get())->SetOpenAlpha(bExit ? 1.f - DoorMotion : DoorMotion);
 		const float Distance = Shot == EShot::ExitGarage ? FMath::Lerp(165.f,-340.f,Alpha) : FMath::Lerp(-340.f,165.f,Alpha);
 		Player->SetActorLocation(Target->GetActorLocation() + Through*Distance +
 			FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+2));
@@ -323,18 +375,33 @@ bool ATrailerGameMode::PlayShot(float Dt)
 	}
 	case EShot::GrayRobot:
 	case EShot::BlueRobot:
+		if (Elapsed > .6f && !Robots.IsEmpty())
+		{
+			const int32 First = FMath::FloorToInt((Elapsed - .6f) / 1.05f) % Robots.Num();
+			Target.Reset();
+			for (int32 I = 0; I < Robots.Num(); ++I)
+			{
+				auto* Robot = Robots[(First + I) % Robots.Num()].Get();
+				if (Robot && Robot->GetActorEnableCollision()) { Target = Robot; break; }
+			}
+		}
 		if (Elapsed > .6f && Target.IsValid())
 		{
 			Player->AddMovementInput(Shot == EShot::BlueRobot ? FVector::RightVector : -FVector::RightVector, .35f, true);
 			Shoot(Target.Get());
 		}
-		return Elapsed > 3.3f;
+		return Elapsed > 4.8f;
 	case EShot::Barrel:
 	case EShot::Apples:
 	{
 		auto* Barrel = Cast<ATunaSweeperExplosiveBarrelActor>(Target.Get());
 		auto* Apples = Cast<ATunaSweeperBreakableAppleCrateActor>(Target.Get());
 		const bool bDestroyed = !Target.IsValid() || (Barrel && Barrel->IsBarrelDestroyed()) || (Apples && Apples->IsCrateBroken());
+		if (Barrel && bDestroyed)
+		{
+			for (auto Other : Barrels)
+				if (Other.IsValid() && !Other->IsBarrelDestroyed()) return false;
+		}
 		if (bDestroyed)
 		{
 			if (Shot == EShot::Apples && HoldTime == 0)
@@ -406,7 +473,12 @@ void ATrailerGameMode::Tick(float Dt)
 	{
 		FadeRemaining -= Dt;
 		if (FadeRemaining > 0) return;
-		if ((Shot == EShot::GrayRobot || Shot == EShot::BlueRobot) && Target.IsValid()) Target->Destroy();
+		for (auto Robot : Robots)
+			if (Robot.IsValid()) Robot->Destroy();
+		Robots.Reset();
+		for (auto Barrel : Barrels)
+			if (Barrel.IsValid()) Barrel->Destroy();
+		Barrels.Reset();
 		if (Shot == EShot::Apples)
 		{
 			bLeaving = true;

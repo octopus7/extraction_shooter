@@ -7,6 +7,7 @@ class ATunaSweeperTopDownCharacter;
 class ALoopRailStation;
 class ALoopRailTrain;
 class ATunaSweeperBreakableAppleCrateActor;
+class ATunaSweeperExplosiveBarrelActor;
 
 /** Runs the title-menu trailer in disposable copies of the two raid worlds. */
 UCLASS()
@@ -36,6 +37,8 @@ private:
 	TWeakObjectPtr<ALoopRailStation> Station;
 	TWeakObjectPtr<ALoopRailTrain> Train;
 	TArray<TWeakObjectPtr<ATunaSweeperBreakableAppleCrateActor>> ExtraCrates;
+	TArray<TWeakObjectPtr<ACharacter>> Robots;
+	TArray<TWeakObjectPtr<ATunaSweeperExplosiveBarrelActor>> Barrels;
 	FVector Goal;
 	float Elapsed = 0;
 	float NextShot = 0;

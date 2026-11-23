@@ -320,6 +320,16 @@ bool FTunaSweeperLanguageCodesTest::RunTest(const FString& Parameters)
 		TestTrue(TEXT("Saved language can be restored"), TryParseLanguageCode(SavedCode, Restored));
 		TestTrue(TEXT("Restored language matches selection"), Restored == Language);
 	}
+	Instance->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::Korean, true);
+	Instance->SetTextLanguageOverride(ETunaSweeperItemTextLanguage::English);
+	TestTrue(TEXT("Trailer resolves English"), Instance->GetCurrentTextLanguage() == ETunaSweeperItemTextLanguage::English);
+	FConfigFile DuringTrailer;
+	DuringTrailer.Read(TestIni);
+	FString StoredLanguage;
+	TestTrue(TEXT("Preference remains present"), DuringTrailer.GetString(SectionName, LanguageKey, StoredLanguage));
+	TestEqual(TEXT("Trailer preserves the saved preference"), StoredLanguage, FString(TEXT("ko")));
+	Instance->SetTextLanguageOverride({});
+	TestTrue(TEXT("Leaving the trailer restores Korean"), Instance->GetCurrentTextLanguage() == ETunaSweeperItemTextLanguage::Korean);
 	FTunaSweeperLocalizedTextString MissingTranslation;
 	MissingTranslation.English = FText::FromString(TEXT("English fallback"));
 	for (const auto Language : SupportedLanguages)
