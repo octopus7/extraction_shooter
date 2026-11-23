@@ -22,6 +22,7 @@ ACoastalGull::ACoastalGull()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+	SetCanBeDamaged(false);
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
 
 	auto AddPart = [this](FName Name, USceneComponent* Parent, const FVector& Hinge, UStaticMesh* Mesh)
@@ -106,9 +107,64 @@ void ACoastalGull::EndPlay(const EEndPlayReason::Type Reason)
 	Super::EndPlay(Reason);
 }
 
+void ACoastalGull::UpdateDisturbance(const TArray<FVector>& Players)
+{
+	const bool bEscaping = bPerchOccupied || EscapeBlend > 0.f;
+	const FVector Origin = bEscaping ? EscapeOrigin : GetActorLocation();
+	const FVector* Nearest = nullptr;
+	double NearestSquared = FMath::Square(bEscaping ? 850.0 : 600.0);
+	for (const FVector& Player : Players)
+	{
+		const double Distance = FVector::DistSquared(Origin, Player);
+		if (Distance <= NearestSquared)
+		{
+			Nearest = &Player;
+			NearestSquared = Distance;
+		}
+	}
+	bPerchOccupied = Nearest != nullptr;
+	if (Nearest && !bEscaping)
+	{
+		EscapeOrigin = Origin;
+		EscapeDirection = (Origin - *Nearest).GetSafeNormal2D();
+		if (EscapeDirection.IsNearlyZero()) EscapeDirection = ShoreFrame.GetUnitAxis(EAxis::X);
+		EscapeTime = 0.f;
+	}
+}
+
 void ACoastalGull::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (bPerchOccupied || EscapeBlend > 0.f)
+	{
+		EscapeTime += DeltaSeconds;
+		const bool bStayAloft = bPerchOccupied || EscapeTime < 3.f;
+		EscapeBlend = FMath::FInterpConstantTo(EscapeBlend, bStayAloft ? 1.f : 0.f, DeltaSeconds, bStayAloft ? 0.58f : 0.35f);
+		const FVector Previous = GetActorLocation();
+		const FRotator PreviousRotation = GetActorRotation();
+		ApplyMotion();
+		const float Weight = Ramp(0.f, 1.f, EscapeBlend);
+		const FVector Side(-EscapeDirection.Y, EscapeDirection.X, 0);
+		const float Angle = EscapeTime * 1.15f;
+		const FVector Away = EscapeDirection * (740.f - 210.f * FMath::Cos(Angle))
+			+ Side * (210.f * FMath::Sin(Angle)) + FVector::UpVector * (270.f + 20.f * FMath::Sin(Angle));
+		const FVector Position = EscapeOrigin + Weight * Away;
+		const FVector Travel = (Position - Previous).GetSafeNormal2D();
+		const FRotator FlightYaw = Travel.IsNearlyZero() ? PreviousRotation : Travel.Rotation();
+		const float Spread = Ramp(0.f, 0.35f, EscapeBlend);
+		const FRotator Target = FMath::Lerp(GetActorRotation(), FlightYaw, Spread);
+		SetActorLocationAndRotation(Position, FMath::RInterpTo(PreviousRotation, Target, DeltaSeconds, 9.f));
+		const float Roll = 36.f * FMath::Sin(EscapeTime * 15.f);
+		for (UStaticMeshComponent* Wing : {WingL.Get(), WingR.Get()})
+		{
+			const float Sign = Wing == WingL.Get() ? 1.f : -1.f;
+			Wing->SetRelativeRotation(FMath::Lerp(Wing->GetRelativeRotation(), FRotator(0, 0, Sign * Roll), Spread));
+			Wing->SetRelativeScale3D(FMath::Lerp(Wing->GetRelativeScale3D(), FVector::OneVector, Spread));
+		}
+		for (UStaticMeshComponent* Leg : {LegL.Get(), LegR.Get()})
+			Leg->SetRelativeRotation(FMath::Lerp(Leg->GetRelativeRotation(), FRotator(-65,0,0), Weight));
+		return;
+	}
 	CycleTime = FMath::Fmod(CycleTime + DeltaSeconds, CycleSeconds);
 	ApplyMotion();
 }

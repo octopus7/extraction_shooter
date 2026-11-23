@@ -13,6 +13,7 @@ class COASTALWILDLIFE_API ACoastalGull : public AActor
 public:
 	ACoastalGull();
 	virtual void Tick(float DeltaSeconds) override;
+	void UpdateDisturbance(const TArray<FVector>& Players);
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -48,4 +49,9 @@ private:
 	FTransform ShoreFrame;
 	float TakeoffGroundOffset = 0.f;
 	float CycleTime = 0.f;
+	FVector EscapeDirection = FVector::ForwardVector;
+	FVector EscapeOrigin = FVector::ZeroVector;
+	float EscapeTime = 0.f;
+	float EscapeBlend = 0.f;
+	bool bPerchOccupied = false;
 };

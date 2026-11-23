@@ -58,6 +58,21 @@ bool FCoastalGullMotionTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Approach descends with feet extended"), Gull->GetActorLocation().Z < Origin.Z + 60 && FMath::Abs(Gull->LegL->GetRelativeRotation().Pitch) < 30);
 	Gull->Tick(1.f);
 	TestTrue(TEXT("Landing returns to dry starting point"), Origin.Equals(Gull->GetActorLocation(), 0.1));
+	const TArray<FVector> Visitor{Origin + FVector(350,0,75)};
+	Scheduler->ApplyPlayerLocations(Visitor);
+	TestTrue(TEXT("Startle starts from current feet"), Gull->GetActorLocation().Equals(Origin, 0.1));
+	for (int32 Frame = 0; Frame < 300; ++Frame)
+	{
+		if (Frame % 15 == 0) Scheduler->ApplyPlayerLocations(Visitor);
+		Gull->Tick(1.f / 60.f);
+	}
+	TestTrue(TEXT("Flies away and stays above occupied perch"),
+		Gull->GetActorLocation().X < Origin.X - 400 && Gull->GetActorLocation().Z > Origin.Z + 200);
+	TestFalse(TEXT("Ambient gull ignores damage"), Gull->CanBeDamaged());
+	TestTrue(TEXT("Body is not a hit target"), Gull->Body->GetCollisionEnabled() == ECollisionEnabled::NoCollision);
+	Scheduler->ApplyPlayerLocations({Origin + FVector(2000,0,0)});
+	for (int32 Frame = 0; Frame < 172; ++Frame) Gull->Tick(1.f / 60.f);
+	TestTrue(TEXT("Returns to perch after visitor leaves"), Gull->GetActorLocation().Equals(Origin, 1.));
 	Scheduler->UnregisterGull(Gull);
 	World->DestroyWorld(false);
 	return true;

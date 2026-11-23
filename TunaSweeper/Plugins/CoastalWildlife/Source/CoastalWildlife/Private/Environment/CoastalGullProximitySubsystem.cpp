@@ -52,6 +52,7 @@ void UCoastalGullProximitySubsystem::ApplyPlayerLocations(const TArray<FVector>&
 				return FVector::DistSquared(Position, Player) <= RangeSquared;
 			});
 			Gull->SetActorTickEnabled(bActive);
+			if (bActive) Gull->UpdateDisturbance(Locations);
 		}
 	}
 }
