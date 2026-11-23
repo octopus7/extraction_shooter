@@ -12,6 +12,8 @@ internal sealed class SteamFullPackage(string projectDirectory)
 
     internal string LauncherDirectory => Path.Combine(projectDirectory, "Builds", "Steam", "Full", "Windows");
     internal string LauncherPath => Path.Combine(LauncherDirectory, "TunaSweeper.exe");
+    internal string UploadScriptsDirectory => Path.Combine(projectDirectory, "Builds");
+    internal string UploadScriptPath => Path.Combine(UploadScriptsDirectory, "UploadSteamFull.bat");
     internal string AppIdDirectory => Path.Combine(LauncherDirectory, "TunaSweeper", "Binaries", "Win64");
     internal string AppIdPath => Path.Combine(AppIdDirectory, AppIdFileName);
     internal string AchievementResetCommandsPath => Path.Combine(projectDirectory, "External", "MainPayload",

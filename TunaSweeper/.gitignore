@@ -28,6 +28,7 @@ Plugins/*/Intermediate/
 # Packaged builds
 Builds/*
 !Builds/UploadSteamDemo.bat
+!Builds/UploadSteamFull.bat
 Windows/
 WindowsNoEditor/
 Linux/

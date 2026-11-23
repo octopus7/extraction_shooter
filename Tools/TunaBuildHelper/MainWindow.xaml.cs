@@ -133,6 +133,10 @@ public partial class MainWindow : Window
         OpenSteamAchievementCommandsButton.ToolTip = steamFullPackage?.AchievementResetCommandsPath;
         OpenSteamConsoleButton.Content = ItemGrantCatalog.Text("ui.helper_steam.console");
         OpenSteamConsoleButton.ToolTip = SteamFullPackage.ConsoleUri;
+        OpenSteamUploadScriptsFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.upload_scripts_folder");
+        OpenSteamUploadScriptsFolderButton.ToolTip = steamFullPackage?.UploadScriptsDirectory;
+        RunSteamUploadButton.Content = ItemGrantCatalog.Text("ui.helper_steam.run_upload");
+        RunSteamUploadButton.ToolTip = steamFullPackage?.UploadScriptPath;
         SteamAppIdIndicator.ToolTip = steamFullPackage?.AppIdPath ?? ItemGrantCatalog.Text("ui.helper_steam.app_id_file");
         System.Windows.Automation.AutomationProperties.SetName(SteamAppIdIndicator, ItemGrantCatalog.Text("ui.helper_steam.app_id_file"));
         RefreshSteamAppIdStatus();
@@ -513,6 +517,18 @@ public partial class MainWindow : Window
         OpenPath(SteamFullPackage.ConsoleUri, ItemGrantCatalog.Text("ui.helper_steam.console_opening"));
     }
 
+    private void OpenSteamUploadScriptsFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage is { } package)
+            OpenPath(package.UploadScriptsDirectory, ItemGrantCatalog.Text("ui.helper_steam.upload_scripts_folder_opening"));
+    }
+
+    private void RunSteamUploadButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage is { } package)
+            RunBatchScript(package.UploadScriptPath, statusResourceKey: "ui.helper_steam.upload_started");
+    }
+
     private void RefreshSteamAppIdStatus()
     {
         steamAppIdShownAsPresent = steamFullPackage?.HasAppIdFile == true;
@@ -520,6 +536,8 @@ public partial class MainWindow : Window
         SteamAppIdIndicator.Foreground = steamAppIdShownAsPresent ? Brushes.Lime : Brushes.Red;
         OpenSteamLauncherFolderButton.IsEnabled = Directory.Exists(steamFullPackage?.LauncherDirectory);
         OpenSteamAppIdFolderButton.IsEnabled = Directory.Exists(steamFullPackage?.AppIdDirectory);
+        OpenSteamUploadScriptsFolderButton.IsEnabled = Directory.Exists(steamFullPackage?.UploadScriptsDirectory);
+        RunSteamUploadButton.IsEnabled = File.Exists(steamFullPackage?.UploadScriptPath);
         SteamAppIdActionButton.Content = ItemGrantCatalog.Text(steamAppIdShownAsPresent ? "ui.helper_steam.app_id_delete" : "ui.helper_steam.app_id_create");
         SteamAppIdActionButton.IsEnabled = steamAppIdShownAsPresent || steamFullPackage?.CanCreateAppIdFile == true;
     }
@@ -687,8 +705,8 @@ public partial class MainWindow : Window
         string? statusResourceKey = null,
         string? scriptArgument = null)
     {
-        string? scriptPath = FindBatchScript(scriptName);
-        if (scriptPath is null)
+        string? scriptPath = Path.IsPathFullyQualified(scriptName) ? scriptName : FindBatchScript(scriptName);
+        if (scriptPath is null || !File.Exists(scriptPath))
         {
             MessageBox.Show(
                 $"{scriptName}을(를) 찾을 수 없습니다.",

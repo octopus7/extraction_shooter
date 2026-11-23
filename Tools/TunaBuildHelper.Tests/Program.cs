@@ -50,7 +50,7 @@ internal static class Program
                 throw new Exception("Expected the English Packaging tab title");
             foreach (string controlName in new[] { "BuildSteamFullButton", "BuildStoveFullButton", "RunSteamFullButton",
                 "SteamAppIdFileName", "SteamAppIdIndicator",
-                "SteamAppIdActionButton", "OpenSteamAchievementCommandsButton", "OpenSteamConsoleButton", "KillPackagingButton" })
+                "SteamAppIdActionButton", "OpenSteamAchievementCommandsButton", "OpenSteamConsoleButton", "OpenSteamUploadScriptsFolderButton", "KillPackagingButton" })
             {
                 if (window.FindName(controlName) is not DependencyObject control || FindTab(control) != packagingTab)
                     throw new Exception($"{controlName} must be in the Packaging tab");
@@ -62,6 +62,13 @@ internal static class Program
                 throw new Exception("Expected separate build and packaging cancellation buttons");
 
             var launch = (Button)window.FindName("RunSteamFullButton");
+            var uploadFolder = (Button)window.FindName("OpenSteamUploadScriptsFolderButton");
+            var upload = (Button)window.FindName("RunSteamUploadButton");
+            if (upload.Parent != uploadFolder.Parent || Grid.GetColumn(upload) <= Grid.GetColumn(uploadFolder) ||
+                !Equals(upload.Content, ItemGrantCatalog.Text("ui.helper_steam.run_upload")))
+                throw new Exception("Expected the upload action beside its folder button");
+            if (!Equals(uploadFolder.Content, ItemGrantCatalog.Text("ui.helper_steam.upload_scripts_folder")))
+                throw new Exception("Upload scripts folder button must use localized text");
             var launcherFolder = (Button?)window.FindName("OpenSteamLauncherFolderButton")
                 ?? throw new Exception("Expected a button to open the Steam launcher folder");
             var appIdFileName = (TextBlock)window.FindName("SteamAppIdFileName");
@@ -102,6 +109,11 @@ internal static class Program
             if (launcherFolder.ToolTip is string launcherPath && Path.IsPathFullyQualified(launcherPath))
             {
                 string projectDirectory = Path.GetFullPath(Path.Combine(launcherPath, "..", "..", "..", ".."));
+                if (!Equals(uploadFolder.ToolTip, Path.Combine(projectDirectory, "Builds")))
+                    throw new Exception("Upload scripts folder must target Builds, not the packaged Windows folder");
+                string uploadPath = Path.Combine(projectDirectory, "Builds", "UploadSteamFull.bat");
+                if (!Equals(upload.ToolTip, uploadPath) || upload.IsEnabled != File.Exists(uploadPath))
+                    throw new Exception("Upload action must target the Steam Full batch");
                 string guide = Path.Combine(projectDirectory, "External", "MainPayload", "Tools", "Steam",
                     "Achievements", "5137900-achievements-reset-commands.ko.txt");
                 if (!Equals(commands.ToolTip, guide))

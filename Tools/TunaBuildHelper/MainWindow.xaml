@@ -248,6 +248,16 @@
                                 <Button x:Name="OpenSteamConsoleButton" Grid.Column="1" Margin="4,0,0,0"
                                         Click="OpenSteamConsoleButton_Click" />
                             </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*" />
+                                    <ColumnDefinition Width="2*" />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="OpenSteamUploadScriptsFolderButton" Margin="0,0,4,0"
+                                        Click="OpenSteamUploadScriptsFolderButton_Click" />
+                                <Button x:Name="RunSteamUploadButton" Grid.Column="1" Margin="4,0,0,0"
+                                        Click="RunSteamUploadButton_Click" />
+                            </Grid>
                             <Button x:Name="KillPackagingButton" Margin="0,0,0,10"
                                     Background="#5A2630"
                                     BorderBrush="#82414D"
