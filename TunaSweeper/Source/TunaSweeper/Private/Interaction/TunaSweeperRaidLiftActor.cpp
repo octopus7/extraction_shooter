@@ -1,10 +1,12 @@
 #include "Interaction/TunaSweeperRaidLiftActor.h"
 #include "UI/TunaSweeperRaidLiftWidget.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "GameFramework/Pawn.h"
+#include "Materials/MaterialInterface.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -37,12 +39,31 @@ ATunaSweeperRaidLiftActor::ATunaSweeperRaidLiftActor()
         DestinationImages.Add(TSoftObjectPtr<UTexture2D>(FSoftObjectPath(FString::Printf(TEXT("/Game/UI/RaidLift/T_Lift_%s.T_Lift_%s"), Name, Name))));
     }
 }
+void ATunaSweeperRaidLiftActor::ApplyPassagePresentation(bool bUnlocked)
+{
+    if (!ReadyRailStatusMaterial || !LeftRail || !LeftRail->GetStaticMesh()) return;
+
+    static const FName StatusLensSlot(TEXT("StatusLens"));
+    const int32 Index = LeftRail->GetMaterialIndex(StatusLensSlot);
+    if (Index != INDEX_NONE)
+    {
+        LeftRail->SetMaterial(Index, bUnlocked ? ReadyRailStatusMaterial.Get() : LeftRail->GetStaticMesh()->GetMaterial(Index));
+    }
+}
+
 bool ATunaSweeperRaidLiftActor::IsPawnOnPlatform(const APawn* Pawn) const
 {
     if (!IsValid(Pawn)) return false;
     if (const auto* Character = Cast<ATunaSweeperTopDownCharacter>(Pawn); Character && Character->IsDead()) return false;
     if (const auto* PC = Cast<ATunaSweeperPlayerController>(Pawn->GetController()); PC &&
         (PC->IsDialogueSequenceActive() || PC->IsPauseMenuOpen() || PC->IsInventoryUiOpen() || PC->IsHousingModeOpen())) return false;
+
+    if (bUseChairBoardingArea)
+    {
+        const FVector Local = TravelInterior->GetComponentTransform().InverseTransformPosition(Pawn->GetActorLocation());
+        const FVector Extent = TravelInterior->GetUnscaledBoxExtent();
+        return FMath::Abs(Local.X) <= Extent.X && FMath::Abs(Local.Y) <= Extent.Y && FMath::Abs(Local.Z) <= Extent.Z;
+    }
     const FVector Local = GetActorTransform().InverseTransformPosition(Pawn->GetActorLocation());
     return FMath::Abs(Local.X) <= 115 && FMath::Abs(Local.Y) <= 115 && Local.Z >= 20 && Local.Z <= 180;
 }

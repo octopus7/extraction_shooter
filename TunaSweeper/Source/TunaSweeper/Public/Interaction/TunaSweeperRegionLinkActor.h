@@ -44,6 +44,8 @@ public:
     UPROPERTY(EditAnywhere, Category="Lift|Preview") bool bPreviewDoorsOpen = false;
     UFUNCTION(BlueprintPure, Category="Lift") bool CanUseLiftInterior(const APawn* Pawn) const;
     UFUNCTION(BlueprintPure, Category="Lift") float GetDoorOpenAlpha() const { return DoorOpenAlpha; }
+protected:
+    virtual void ApplyPassagePresentation(bool bUnlocked) {}
 private:
     friend class FTunaSweeperLiftDoorsTest;
     void ApplyDoorPresentation();

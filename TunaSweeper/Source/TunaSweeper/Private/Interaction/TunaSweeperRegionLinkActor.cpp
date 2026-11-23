@@ -131,6 +131,7 @@ void ATunaSweeperRegionLinkActor::RefreshPassage()
 {
     if (!InteractableComponent) return;
     const bool bUnlocked = IsPassageUnlocked();
+    ApplyPassagePresentation(bUnlocked);
     bDoorTargetOpen = bUnlocked;
     bInteriorTravelAvailable = IsLocalPlayerInside();
     if (bUseSlidingDoors)

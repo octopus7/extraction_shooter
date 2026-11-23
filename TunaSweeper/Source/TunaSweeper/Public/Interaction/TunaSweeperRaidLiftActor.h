@@ -4,6 +4,7 @@
 #include "Game/TunaSweeperRaidPlayerStart.h"
 #include "TunaSweeperRaidLiftActor.generated.h"
 class UTunaSweeperRaidLiftWidget;
+class UMaterialInterface;
 class UTexture2D;
 
 /** Shared repaired lift; each instance can be placed without a destination-specific Blueprint. */
@@ -20,7 +21,12 @@ public:
     bool IsPawnOnPlatform(const APawn* Pawn) const;
     UTexture2D* GetDestinationImage(int32 Index) const;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lift|Cards") TArray<TSoftObjectPtr<UTexture2D>> DestinationImages;
+    /** Use TravelInterior as a boarding area on the floor in front of a wall-mounted chair. */
+    UPROPERTY(EditAnywhere, Category="Lift|Chair") bool bUseChairBoardingArea = false;
+    /** Replaces the rail's StatusLens material only while the lift is repaired. */
+    UPROPERTY(EditAnywhere, Category="Lift|Chair") TObjectPtr<UMaterialInterface> ReadyRailStatusMaterial;
 protected:
+    virtual void ApplyPassagePresentation(bool bUnlocked) override;
     virtual ETunaSweeperRaidArrivalGroup GetArrivalGroup() const override { return SelectedArrival; }
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Lift") TObjectPtr<UStaticMeshComponent> LeftRail;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Lift") TObjectPtr<UStaticMeshComponent> RightRail;

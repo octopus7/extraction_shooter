@@ -16,7 +16,7 @@
 | 마을 서쪽 | `/Game/MainRaid/RaidVillage` | VillageWest |
 | 평원 | `/Game/MainRaid/RaidPlains` | Plains |
 
-리프트 발판 위에서 상호작용하면 이미지 카드 4개가 열린다. 취소 또는 Escape로 닫는다. 선택 시에도 발판 위치를 다시 검사한다.
+기지에서는 노란 의자 앞 바닥의 탑승 구역에서 상호작용하면 이미지 카드 4개가 열린다. 취소 또는 Escape로 닫는다. 목적지를 고를 때도 탑승 구역 안에 있는지 다시 검사한다.
 
 각 목적지 맵에 전용 레이드 PlayerStart를 여러 개 배치하고 위 그룹을 지정한다. 마을 동·서는 같은 맵에서 서로 다른 그룹을 사용한다. 선택한 그룹 안에서 무작위로 하나를 고르며 다른 그룹의 시작 지점으로 대체하지 않는다. 그룹이 비어 있으면 정상 도착할 수 없으므로 레벨 저작 시 반드시 배치해야 한다.
 
@@ -30,5 +30,6 @@
 
 - 리프트 BP: `/Game/Interaction/RaidLift/BP_RaidLift`
 - 시작 지점 BP: `/Game/Interaction/RaidLift/BP_RaidPlayerStart`
-- 기지 배치: `BunkerMap`의 `Base_RaidLift`, 위치 `(-600, -200, 6.244)`, 균일 배율 `0.75`. 발판 180cm, 레일 높이 375cm.
+- 기지의 `Base_RaidLift`는 오른쪽 벽에 붙어 통로를 바라본다. 위치는 `(-607.2, -74.1, 6.244)`, yaw는 `-129.45°`다. 의자는 벽에서 약 53cm 돌출되고 레일은 벽 상단까지 약 194cm 올라간다.
+- 의자와 레일은 `/Game/Interaction/RaidLift/Chair`에 있다. 레일의 `StatusLens`가 수리 전에는 빨강, 사용 가능할 때는 파랑으로 발광한다. 의자 앞 탑승 범위는 `Base_RaidLift`의 `TravelInterior`에서 조절한다.
 - 숲 3개, 마을 동쪽 3개·서쪽 3개, 평원 3개의 시작 지점을 배치한다. 기존 일반 시작 지점과 숲의 별도 통로 리프트는 유지한다.
