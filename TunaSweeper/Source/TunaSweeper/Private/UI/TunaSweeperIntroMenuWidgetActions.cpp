@@ -260,13 +260,6 @@ void UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageStepRequested(int32 
 	RefreshDevelopmentSettingsPanel();
 }
 
-void UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked()
-{
-	const bool bEnabled = !ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
-	ATunaSweeperPlayerController::SetDeveloperPiggyBankPreference(bEnabled);
-	RefreshDevelopmentSettingsPanel();
-}
-
 void UTunaSweeperIntroMenuWidget::HandleAlwaysSlowPresentationToggleClicked()
 {
 	const bool bEnabled = !ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();

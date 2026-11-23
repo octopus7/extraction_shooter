@@ -52,16 +52,11 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 
 	EnsureDifficultySelectionPanel();
 	HideLegacyDeleteHoldGaugeWidgets();
-	EnsurePiggyBankToggleButton();
 	EnsureAlwaysSlowPresentationToggleButton();
 	EnsureDevelopmentToggleButtonContent(
 		EnemyCombatDebugToggleButton,
 		FName(TEXT("EnemyCombatDebugToggleButtonText")),
 		FName(TEXT("EnemyCombatDebugToggleIndicator")));
-	EnsureDevelopmentToggleButtonContent(
-		PiggyBankToggleButton,
-		FName(TEXT("PiggyBankToggleButtonText")),
-		FName(TEXT("PiggyBankToggleIndicator")));
 	EnsureDevelopmentToggleButtonContent(
 		AlwaysSlowPresentationToggleButton,
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
@@ -237,12 +232,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	{
 		DebugDisplayLanguageEnglishButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked);
 		DebugDisplayLanguageEnglishButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked);
-	}
-
-	if (PiggyBankToggleButton)
-	{
-		PiggyBankToggleButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked);
-		PiggyBankToggleButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked);
 	}
 
 	if (AlwaysSlowPresentationToggleButton)

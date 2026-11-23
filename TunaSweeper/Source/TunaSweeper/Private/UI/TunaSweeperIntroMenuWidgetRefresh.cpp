@@ -278,7 +278,6 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
-	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
 	const bool bAlwaysSlowPresentationEnabled =
 		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
 	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
@@ -340,21 +339,6 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	if (DebugDisplayLanguageEnglishButton)
 	{
 		DebugDisplayLanguageEnglishButton->SetIsEnabled(true);
-	}
-	SetNamedText(
-		FName(TEXT("PiggyBankToggleButtonText")),
-		ResolveUiText(
-			FName(TEXT("ui.settings.development.piggy_bank")),
-			FText::GetEmpty()));
-	TunaSweeperUIStyle::SetCheckButton(
-		WidgetTree,
-		PiggyBankToggleButton,
-		Cast<UTextBlock>(FindIntroWidget(TEXT("PiggyBankToggleButtonText"))),
-		bPiggyBankEnabled);
-
-	if (PiggyBankToggleButton)
-	{
-		PiggyBankToggleButton->SetIsEnabled(true);
 	}
 	SetNamedText(
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
@@ -491,7 +475,6 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSelectionStyles()
 void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
-	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
 	const bool bAlwaysSlowPresentationEnabled =
 		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
 	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
@@ -500,7 +483,6 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(214.0f, 50.0f), false);
 	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(214.0f, 50.0f), true);
 	(void)bEnemyCombatDebugEnabled;
-	(void)bPiggyBankEnabled;
 	(void)bAlwaysSlowPresentationEnabled;
 	(void)DebugDisplayLanguage;
 

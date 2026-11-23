@@ -267,9 +267,6 @@ ui.interaction.travel,이동,Travel,移動,前往,前往,Перейти
 ui.interaction.item_spawn,아이템스폰,Item Spawn,アイテムスポーン,生成物品,生成物品,Создать предмет
 ui.interaction.container_spawn,상자스폰,Container Spawn,箱スポーン,生成容器,生成容器,Создать контейнер
 ui.interaction.self_destruct,자폭,Self Destruct,自爆,自毁,自毀,Самоуничтожение
-ui.interaction.piggy_bank,돈내놔,Gimme money,金を出せ,给我钱,給我錢,Дай мне деньги
-ui.interaction.piggy_bank_deposit,저금,Deposit,預ける,存入,存入,Положить
-ui.interaction.piggy_bank_withdraw,빼기,Withdraw,引き出す,取出,取出,Снять
 ui.interaction.housing_management,시설관리,Facility Management,施設管理,设施管理,設施管理,Управление объектами
 ui.interaction.storage_open,창고 열기,Open Storage,倉庫を開く,打开仓库,打開倉庫,Открыть хранилище
 ui.interaction.shop_open,상점,Shop,ショップ,商店,商店,Магазин
@@ -297,8 +294,6 @@ ui.housing.placed_hold_to_store,배치됨 - 길게 눌러 보관,Placed - hold t
 ui.housing.need_materials,재료 부족,Need materials,素材不足,材料不足,材料不足,Нужны материалы
 ui.housing.facility.workbench,작업대,Workbench,作業台,工作台,工作臺,Верстак
 ui.housing.facility.workbench.desc,제작과 수리에 사용할 수 있는 작업대,A functional work surface for crafting and repairs,制作と修理に使える作業台,用于制作物品和修理的工作台。,用於製作物品和修理的工作臺。,Рабочая поверхность для создания предметов и ремонта.
-ui.housing.facility.piggy_bank,돼지저금통,Piggy Bank,豚の貯金箱,储蓄罐,儲蓄罐,Копилка
-ui.housing.facility.piggy_bank.desc,옛 문명의 동전과 지폐를 저금하는 돼지저금통,A piggy bank for storing ancient coins and banknotes,古代文明の硬貨と紙幣を預ける豚の貯金箱,可存放古文明硬币和纸币的猪形储蓄罐。,可存放古文明硬幣和紙幣的豬形儲蓄罐。,Копилка для хранения древних монет и банкнот.
 ui.housing.facility.signal_control,통신 관제 시설,Signal Control Facility,通信管制施設,通信控制设施,通信控制設施,Центр связи
 ui.housing.facility.signal_control.desc,맵과 워프포인트 관리를 위한 기지 통신 콘솔,A base console for maps and warp point management,マップとワープポイント管理用の基地通信コンソール,用于地图和传送点管理的基地通信控制台。,用於地圖和傳送點管理的基地通信控制台。,Консоль базы для работы с картой и точками телепортации.
 ui.housing.facility.supply,보급 시설,Supply Facility,補給施設,补给设施,補給設施,Пункт снабжения
@@ -397,7 +392,6 @@ ui.language.russian,Русский,Русский,Русский,Русский,
 ui.settings.development,개발,Development,開発,开发选项,開發選項,Настройки разработчика
 ui.settings.development.enemy_combat_debug,적 전투 디버그,Enemy Combat Debug,敵戦闘デバッグ,敌人战斗调试,敵人戰鬥調試,Отладка поведения врагов
 ui.settings.development.debug_display_language,디버그 표시 언어,Debug Display Language,デバッグ表示言語,调试显示语言,調試顯示語言,Язык отладочного интерфейса
-ui.settings.development.piggy_bank,돼지저금통,Piggy Bank,貯金箱,储蓄罐,儲蓄罐,Копилка
 ui.settings.development.always_slow_presentation,상시 슬로우 연출,Always-On Slow Motion,常時スロー演出,持续慢动作效果,持續慢動作效果,Постоянный эффект замедления
 ui.difficulty.select_title,난이도 선택,Choose Difficulty,難易度選択,选择难度,選擇難度,Выберите сложность
 ui.difficulty.adjust_title,난이도 변경,Change Difficulty,難易度変更,更改难度,更改難度,Изменить сложность

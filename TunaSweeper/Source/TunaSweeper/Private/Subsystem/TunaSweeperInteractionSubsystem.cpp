@@ -31,7 +31,6 @@
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperChainLinkGate.h"
 #include "Interaction/TunaSweeperGateLockControl.h"
-#include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Interaction/TunaSweeperWardrobeActor.h"
@@ -148,12 +147,6 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("workbench_dismantle"));
 		case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
 			return FName(TEXT("workbench_blueprint_register"));
-		case ETunaSweeperInteractionType::PiggyBank:
-			return FName(TEXT("piggy_bank"));
-		case ETunaSweeperInteractionType::PiggyBankDeposit:
-			return FName(TEXT("piggy_bank_deposit"));
-		case ETunaSweeperInteractionType::PiggyBankWithdraw:
-			return FName(TEXT("piggy_bank_withdraw"));
 		case ETunaSweeperInteractionType::MoleDialogue:
 			return FName(TEXT("mole_dialogue"));
 		case ETunaSweeperInteractionType::DifficultyAdjustment:
@@ -408,15 +401,6 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
 		bHandled = HandleWorkbenchBlueprintRegisterInteraction(Interactable, InstigatorPawn);
 		break;
-	case ETunaSweeperInteractionType::PiggyBank:
-		bHandled = HandlePiggyBankInteraction(Interactable, InstigatorPawn);
-		break;
-	case ETunaSweeperInteractionType::PiggyBankDeposit:
-		bHandled = HandlePiggyBankDepositInteraction(Interactable, InstigatorPawn);
-		break;
-	case ETunaSweeperInteractionType::PiggyBankWithdraw:
-		bHandled = HandlePiggyBankWithdrawInteraction(Interactable, InstigatorPawn);
-		break;
 	case ETunaSweeperInteractionType::DifficultyAdjustment:
 		bHandled = HandleDifficultyAdjustmentInteraction(Interactable, InstigatorPawn);
 		break;
@@ -538,13 +522,6 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchCraft ||
 		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchDismantle ||
 		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchBlueprintRegister)
-	{
-		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
-	}
-
-	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::PiggyBank ||
-		Interactable->GetInteractionType() == ETunaSweeperInteractionType::PiggyBankDeposit ||
-		Interactable->GetInteractionType() == ETunaSweeperInteractionType::PiggyBankWithdraw)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
@@ -1115,36 +1092,6 @@ bool UTunaSweeperInteractionSubsystem::HandleWorkbenchBlueprintRegisterInteracti
 
 	TunaPlayerController->OpenWorkbenchBlueprintRegisterPanel(WorkbenchActor->GetWorkbenchId());
 	return true;
-}
-
-bool UTunaSweeperInteractionSubsystem::HandlePiggyBankInteraction(
-	UTunaSweeperInteractableComponent* Interactable,
-	APawn* InstigatorPawn)
-{
-	ATunaSweeperPiggyBankActor* PiggyBankActor = Interactable
-		? Cast<ATunaSweeperPiggyBankActor>(Interactable->GetOwner())
-		: nullptr;
-	return PiggyBankActor && PiggyBankActor->GrantCurrency(InstigatorPawn);
-}
-
-bool UTunaSweeperInteractionSubsystem::HandlePiggyBankDepositInteraction(
-	UTunaSweeperInteractableComponent* Interactable,
-	APawn* InstigatorPawn)
-{
-	ATunaSweeperPiggyBankActor* PiggyBankActor = Interactable
-		? Cast<ATunaSweeperPiggyBankActor>(Interactable->GetOwner())
-		: nullptr;
-	return PiggyBankActor && PiggyBankActor->DepositAncientCurrencyItems(InstigatorPawn);
-}
-
-bool UTunaSweeperInteractionSubsystem::HandlePiggyBankWithdrawInteraction(
-	UTunaSweeperInteractableComponent* Interactable,
-	APawn* InstigatorPawn)
-{
-	ATunaSweeperPiggyBankActor* PiggyBankActor = Interactable
-		? Cast<ATunaSweeperPiggyBankActor>(Interactable->GetOwner())
-		: nullptr;
-	return PiggyBankActor && PiggyBankActor->ShowWithdrawNotImplemented(InstigatorPawn);
 }
 
 bool UTunaSweeperInteractionSubsystem::HandleDifficultyAdjustmentInteraction(

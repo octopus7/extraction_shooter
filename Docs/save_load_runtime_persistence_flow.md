@@ -105,7 +105,7 @@ flowchart TD
 3. `CollectPlayerOwnedItemUids()`로 플레이어 소유 UID를 수집한다. 기본 수집 대상은 `InventorySlots`, `EquipmentSlots`, `AuxiliaryBagSlots`, `StorageSlots`이고, `PersistRuntime`일 때만 `UsableQuickSlots`도 포함한다. 각 아이템의 `AttachmentSlots`에 있는 UID도 재귀적으로 포함한다.
 4. 수집한 UID를 `ItemInstancesByUid`에서 찾아 `MakeItemInstanceForSave()`로 정규화한 뒤 `SaveGame->ItemInstances`에 넣는다. 이때 `LoadedAmmoItemId`, `LoadedAmmoCount`, `SelectedAmmoItemId`가 `NormalizeLoadedAmmoPersistenceFields()`로 맞춰진다.
 5. 세이브 메타데이터를 기록한다. `SaveVersion=20`, `SaveSlotIndex`, `BuildFlavor`, 누적 플레이 시간, 난이도, 난이도 선택 여부, `LastSavedAtTicks`, `TotalExperiencePoints`가 여기서 들어간다.
-6. 시나리오 플래그, 메모, 획득 이력, 지도 마커, 월드 진행, 돼지저금통, 하우징, 하우징 해금, 제작대 레시피 해금을 배열로 내보내고 정렬한다.
+6. 시나리오 플래그, 메모, 획득 이력, 지도 마커, 월드 진행, 하우징, 하우징 해금, 제작대 레시피 해금을 배열로 내보내고 정렬한다.
 7. 퀘스트 서브시스템이 있으면 `ExportQuestProgressForSave()`로 `QuestProgressStates`, `TrackedQuestId`, `QuestCoinBalance`를 내보낸다.
 8. 슬롯 배열과 창고, 상점 재고 상태를 복사한다. `StorageSlotCapacity`는 정규화하고, `StorageSlots`는 그 용량까지 보장한다. `ShopStockStates`는 `ShopId`, `SlotIndex`, `ItemId` 순으로 정렬한다.
 9. 퀵슬롯 모드를 적용한다. `PreserveExisting`에서는 기존 저장 파일의 `UsableQuickSlots`를 가져오되, 기존 저장의 아이템 인스턴스에 없는 UID는 제거한다. 보존된 퀵슬롯 아이템과 부착물 UID는 새 `ItemInstances`에도 다시 추가한다.
@@ -125,7 +125,7 @@ flowchart TD
 3. 레이드 경험치 런타임 값은 저장에서 가져오지 않는다. `RaidStartExperiencePoints=TotalExperiencePoints`, pending 경험치와 pending 애니메이션은 초기화된다.
 4. `CompletedScenarioFlags`, `AcquiredMemoIds`, `EverAcquiredItemIds`, `MapMarkers`를 검증하며 복구한다. 마커는 중복/잘못된 `MarkerId`를 건너뛰고 `NextMapMarkerId`를 재계산한다.
 5. `WorldProgressStatesById`는 `ObjectId`가 없는 항목을 버리고 `ProgressQuantity`를 0 이상으로 보정한다.
-6. `PiggyBankStatesById`는 `PiggyBankId`가 없는 항목을 버리고 저장 코인 값을 0 이상으로 보정한다.
+6. 이전 세이브에 남아 있는 돼지저금통 저금 데이터는 로드 시 건너뛴다.
 7. `HousingFacilities`는 `IsValid()`와 중복 `InstanceId`를 검사하고, 회전값을 `0..3`으로 clamp한다.
 8. `UnlockedHousingFacilityIds`, `UnlockedWorkbenchRecipeIds`를 복구한다.
 9. 퀘스트 서브시스템이 있으면 `LoadQuestProgressFromSave()`를 호출한다. 이 함수는 현재 `QuestDefinitions`에 존재하는 퀘스트만 로드하고, 각 목표 진행 수를 현재 `RequiredCount` 범위로 clamp한다. 로드 후 완료된 퀘스트 보상의 하우징 해금과 제작대 레시피 해금을 다시 `Unlocked...` 세트에 backfill한다.
@@ -160,7 +160,6 @@ flowchart TD
 | 상점 재고 | `ShopStockStates` | `TryBuyActiveShopSlot()`, `DebugRestockActiveShop()` |
 | 퀘스트 | `QuestProgressStates`, `TrackedQuestId`, `QuestCoinBalance` | `UTunaSweeperQuestSubsystem::ExportQuestProgressForSave()` |
 | 월드 진행 | `WorldProgressStates` | `ATunaSweeperWorldProgressActor`, `ATunaSweeperPersistentDoorActor`, `ATunaSweeperBlockedIntakeScreenActor` |
-| 돼지저금통 | `PiggyBankStates` | `ATunaSweeperPiggyBankActor` 입금 |
 | 하우징 배치 | `HousingFacilities` | `UTunaSweeperHousingSubsystem::PersistSavedFacilitiesToGameInstance()` |
 | 하우징 기능 해금 | `UnlockedHousingFacilityIds` | 퀘스트 보상, 하우징 워크벤치 의존 해금 |
 | 제작대 레시피 해금 | `UnlockedWorkbenchRecipeIds` | 퀘스트 보상, 설계도 등록 |

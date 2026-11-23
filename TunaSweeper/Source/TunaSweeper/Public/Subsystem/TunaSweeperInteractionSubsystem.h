@@ -74,9 +74,6 @@ private:
 	bool HandleWorkbenchCraftInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorkbenchDismantleInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorkbenchBlueprintRegisterInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
-	bool HandlePiggyBankInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
-	bool HandlePiggyBankDepositInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
-	bool HandlePiggyBankWithdrawInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleDifficultyAdjustmentInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleResearchInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWardrobeOpenInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);

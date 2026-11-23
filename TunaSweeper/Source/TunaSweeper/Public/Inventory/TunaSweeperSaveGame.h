@@ -71,18 +71,6 @@ struct TUNASWEEPER_API FTunaSweeperShopStockSaveData
 	int32 StockQuantity = 0;
 };
 
-USTRUCT(BlueprintType)
-struct TUNASWEEPER_API FTunaSweeperPiggyBankSaveData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank")
-	FName PiggyBankId;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank", meta = (ClampMin = "0", UIMin = "0"))
-	int32 StoredAncientCoinValue = 0;
-};
-
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 {
@@ -173,9 +161,6 @@ public:
 	// Stable level-package/placement key -> remaining driving seconds.
 	UPROPERTY()
 	TMap<FString, float> VehicleFuelByPlacement;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank")
-	TArray<FTunaSweeperPiggyBankSaveData> PiggyBankStates;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
 	TArray<FTunaSweeperHousingPlacedFacilitySaveData> HousingFacilities;

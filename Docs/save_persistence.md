@@ -269,7 +269,7 @@ The directly placed `BP_MemoAnchor` / `ATunaSweeperMemoAnchor` uses only `MemoId
 
 Item ids that the player has acquired at least once are persisted per save slot through `UTunaSweeperSaveGame::EverAcquiredItemIds`.
 
-This history is separate from current item ownership. It is updated when items enter player inventory through pickups, rewards, purchases, crafting, and similar acquisition paths, and older saves are backfilled from currently saved item instances on load. Housing facility definitions can use this history for one-time unlock conditions, such as unlocking the piggy bank facility after the player has ever owned an ancient coin or ancient banknote.
+This history is separate from current item ownership. It is updated when items enter player inventory through pickups, rewards, purchases, crafting, and similar acquisition paths, and older saves are backfilled from currently saved item instances on load. Housing facility definitions can use this history for one-time unlock conditions.
 
 ### Map Markers
 
@@ -350,16 +350,9 @@ Each `FTunaSweeperShopStockSaveData` preserves:
 
 Shop definitions are static data in `Content/Data/ShopDefinitions.json`. New saves start from each entry's defined `stock_quantity`; purchases decrease the runtime stock and immediately save the remaining stock with the inventory/currency transaction. Shop access is bunker-only through `ShopOpen` interaction. Item sale does not affect shop stock; it removes the player-owned item and grants half of the item table `shop_sell_price`.
 
-### Piggy Bank Deposits
+### Retired Piggy Bank Deposits
 
-Piggy bank deposits are persisted per save slot through `UTunaSweeperSaveGame::PiggyBankStates`.
-
-Each `FTunaSweeperPiggyBankSaveData` preserves:
-
-- `PiggyBankId`: stable id from the gameplay interaction spawn id or housing placed facility instance id.
-- `StoredAncientCoinValue`: accumulated value from deposited ancient coin and ancient banknote items.
-
-Ancient coin and ancient banknote are item instances, not player currency. Depositing removes those item instances from carried inventory and adds to the piggy bank state; one ancient banknote contributes ten ancient-coin value. Withdraw interaction is currently exposed as a placeholder only and does not mutate save data.
+Older saves can contain a tagged `PiggyBankStates` property. The current game skips this obsolete property when reading older saves and omits it when writing new saves. The retired balance does not change carried inventory or player currency.
 
 ### Workbench Recipe Unlocks
 

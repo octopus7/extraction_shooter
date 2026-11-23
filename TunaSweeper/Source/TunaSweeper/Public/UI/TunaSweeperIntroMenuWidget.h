@@ -228,9 +228,6 @@ protected:
 	TObjectPtr<UButton> DebugDisplayLanguageEnglishButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UButton> PiggyBankToggleButton;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> AlwaysSlowPresentationToggleButton;
 
 	UPROPERTY(Transient)
@@ -441,9 +438,6 @@ private:
 	void HandleDebugDisplayLanguageStepRequested(int32 Delta);
 
 	UFUNCTION()
-	void HandlePiggyBankToggleClicked();
-
-	UFUNCTION()
 	void HandleAlwaysSlowPresentationToggleClicked();
 
 	UFUNCTION()
@@ -580,7 +574,6 @@ private:
 	void EnsureTitleWindParticleOverlay();
 	void RefreshDistributionPresentation();
 	FString GetDistributionChannel() const;
-	void EnsurePiggyBankToggleButton();
 	void EnsureAlwaysSlowPresentationToggleButton();
 	void EnsureSaveDataManagementSection();
 	void EnsureLanguageOptionRows();

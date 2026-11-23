@@ -67,12 +67,6 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.workbench_dismantle"));
 		case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
 			return FName(TEXT("ui.interaction.workbench_blueprint_register"));
-		case ETunaSweeperInteractionType::PiggyBank:
-			return FName(TEXT("ui.interaction.piggy_bank"));
-		case ETunaSweeperInteractionType::PiggyBankDeposit:
-			return FName(TEXT("ui.interaction.piggy_bank_deposit"));
-		case ETunaSweeperInteractionType::PiggyBankWithdraw:
-			return FName(TEXT("ui.interaction.piggy_bank_withdraw"));
 		case ETunaSweeperInteractionType::MoleDialogue:
 			return FName(TEXT("ui.interaction.mole_dialogue"));
 		case ETunaSweeperInteractionType::DifficultyAdjustment:

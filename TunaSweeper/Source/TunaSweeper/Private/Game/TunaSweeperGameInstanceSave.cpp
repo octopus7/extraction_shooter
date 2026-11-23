@@ -629,18 +629,6 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		LoadedWorldProgressState.ProgressQuantity = FMath::Max(0, LoadedWorldProgressState.ProgressQuantity);
 		WorldProgressStatesById.Add(LoadedWorldProgressState.ObjectId, LoadedWorldProgressState);
 	}
-	PiggyBankStatesById.Reset();
-	for (const FTunaSweeperPiggyBankSaveData& SavedPiggyBankState : SaveGame->PiggyBankStates)
-	{
-		if (SavedPiggyBankState.PiggyBankId.IsNone())
-		{
-			continue;
-		}
-
-		FTunaSweeperPiggyBankSaveData LoadedPiggyBankState = SavedPiggyBankState;
-		LoadedPiggyBankState.StoredAncientCoinValue = FMath::Max(0, LoadedPiggyBankState.StoredAncientCoinValue);
-		PiggyBankStatesById.Add(LoadedPiggyBankState.PiggyBankId, LoadedPiggyBankState);
-	}
 	HousingFacilities.Reset();
 	TSet<FGuid> LoadedHousingFacilityIds;
 	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedHousingFacility : SaveGame->HousingFacilities)
@@ -966,13 +954,6 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	{
 		return Left.ObjectId.LexicalLess(Right.ObjectId);
 	});
-	PiggyBankStatesById.GenerateValueArray(SaveGame->PiggyBankStates);
-	SaveGame->PiggyBankStates.Sort([](
-		const FTunaSweeperPiggyBankSaveData& Left,
-		const FTunaSweeperPiggyBankSaveData& Right)
-	{
-		return Left.PiggyBankId.LexicalLess(Right.PiggyBankId);
-	});
 	SaveGame->HousingFacilities = HousingFacilities;
 	SaveGame->HousingFacilities.Sort([](
 		const FTunaSweeperHousingPlacedFacilitySaveData& Left,
@@ -1205,7 +1186,6 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	NextMapMarkerId = 1;
 	bMapMarkersDirty = false;
 	WorldProgressStatesById.Reset();
-	PiggyBankStatesById.Reset();
 	HousingFacilities.Reset();
 	UnlockedHousingFacilityIds.Reset();
 	UnlockedWorkbenchRecipeIds.Reset();
@@ -1251,7 +1231,6 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	NextMapMarkerId = 1;
 	bMapMarkersDirty = false;
 	WorldProgressStatesById.Reset();
-	PiggyBankStatesById.Reset();
 	HousingFacilities.Reset();
 	UnlockedHousingFacilityIds.Reset();
 	UnlockedWorkbenchRecipeIds.Reset();

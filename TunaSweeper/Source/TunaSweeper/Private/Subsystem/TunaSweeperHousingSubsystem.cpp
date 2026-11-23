@@ -12,7 +12,6 @@
 #include "Housing/TunaSweeperHousingGridVisualActor.h"
 #include "Housing/TunaSweeperNpcFacilityActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
-#include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/FileHelper.h"
@@ -1457,10 +1456,6 @@ void UTunaSweeperHousingSubsystem::ConfigureFacilityActor(
 	{
 		const FName ActorId = BuildPlacedFacilityActorId(Placement);
 		Actor->Tags.AddUnique(ActorId);
-		if (ATunaSweeperPiggyBankActor* PiggyBankActor = Cast<ATunaSweeperPiggyBankActor>(Actor))
-		{
-			PiggyBankActor->SetPiggyBankId(ActorId);
-		}
 		if (ATunaSweeperWorkbenchActor* WorkbenchActor = Cast<ATunaSweeperWorkbenchActor>(Actor))
 		{
 			WorkbenchActor->ConfigureWorkbenchDefaults(1);

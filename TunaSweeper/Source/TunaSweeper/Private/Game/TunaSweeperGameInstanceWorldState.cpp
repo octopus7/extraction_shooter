@@ -172,39 +172,6 @@ bool UTunaSweeperGameInstance::UpdateWorldProgressState(
 	return true;
 }
 
-int32 UTunaSweeperGameInstance::GetPiggyBankStoredAncientCoinValue(FName PiggyBankId) const
-{
-	if (PiggyBankId.IsNone())
-	{
-		return 0;
-	}
-
-	const FTunaSweeperPiggyBankSaveData* FoundState = PiggyBankStatesById.Find(PiggyBankId);
-	return FoundState ? FMath::Max(0, FoundState->StoredAncientCoinValue) : 0;
-}
-
-bool UTunaSweeperGameInstance::AddPiggyBankStoredAncientCoinValue(
-	FName PiggyBankId,
-	int32 CoinValueDelta,
-	bool bSaveImmediately)
-{
-	EnsureInventoryStateInitialized();
-	if (PiggyBankId.IsNone() || CoinValueDelta <= 0)
-	{
-		return false;
-	}
-
-	FTunaSweeperPiggyBankSaveData& State = PiggyBankStatesById.FindOrAdd(PiggyBankId);
-	State.PiggyBankId = PiggyBankId;
-	State.StoredAncientCoinValue = FMath::Max(0, State.StoredAncientCoinValue) + CoinValueDelta;
-
-	if (bSaveImmediately)
-	{
-		SaveGameState();
-	}
-	return true;
-}
-
 void UTunaSweeperGameInstance::GetHousingFacilities(
 	TArray<FTunaSweeperHousingPlacedFacilitySaveData>& OutFacilities)
 {

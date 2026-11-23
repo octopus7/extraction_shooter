@@ -269,7 +269,6 @@ namespace TunaSweeperEnemyCombatDebugSettings
 {
 	const TCHAR* SectionName = TEXT("TunaSweeper.DevelopmentSettings");
 	const TCHAR* EnabledKey = TEXT("bEnemyCombatDebugEnabled");
-	const TCHAR* DeveloperPiggyBankEnabledKey = TEXT("bDeveloperPiggyBankEnabled");
 	const TCHAR* DeveloperAlwaysSlowPresentationEnabledKey = TEXT("bDeveloperAlwaysSlowPresentationEnabled");
 }
 
@@ -393,36 +392,6 @@ void ATunaSweeperPlayerController::SetEnemyCombatDebugPreference(bool bEnabled)
 	GConfig->SetBool(
 		TunaSweeperEnemyCombatDebugSettings::SectionName,
 		TunaSweeperEnemyCombatDebugSettings::EnabledKey,
-		bEnabled,
-		GGameUserSettingsIni);
-	GConfig->Flush(false, GGameUserSettingsIni);
-}
-
-bool ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference()
-{
-	bool bEnabled = false;
-	if (GConfig)
-	{
-		GConfig->GetBool(
-			TunaSweeperEnemyCombatDebugSettings::SectionName,
-			TunaSweeperEnemyCombatDebugSettings::DeveloperPiggyBankEnabledKey,
-			bEnabled,
-			GGameUserSettingsIni);
-	}
-
-	return bEnabled;
-}
-
-void ATunaSweeperPlayerController::SetDeveloperPiggyBankPreference(bool bEnabled)
-{
-	if (!GConfig)
-	{
-		return;
-	}
-
-	GConfig->SetBool(
-		TunaSweeperEnemyCombatDebugSettings::SectionName,
-		TunaSweeperEnemyCombatDebugSettings::DeveloperPiggyBankEnabledKey,
 		bEnabled,
 		GGameUserSettingsIni);
 	GConfig->Flush(false, GGameUserSettingsIni);

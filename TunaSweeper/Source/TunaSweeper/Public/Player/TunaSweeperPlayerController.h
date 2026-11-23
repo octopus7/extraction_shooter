@@ -72,10 +72,6 @@ public:
 	static bool GetEnemyCombatDebugPreference();
 	static void SetEnemyCombatDebugPreference(bool bEnabled);
 
-	/** Device-local development preference; it controls the optional debug piggy-bank spawn. */
-	static bool GetDeveloperPiggyBankPreference();
-	static void SetDeveloperPiggyBankPreference(bool bEnabled);
-
 	/** Device-local development preference; it keeps the scratch slow-motion presentation active. */
 	static bool GetDeveloperAlwaysSlowPresentationPreference();
 	static void SetDeveloperAlwaysSlowPresentationPreference(bool bEnabled);
