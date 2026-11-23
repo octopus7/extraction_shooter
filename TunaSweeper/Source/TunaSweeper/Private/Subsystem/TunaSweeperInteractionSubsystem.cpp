@@ -16,7 +16,7 @@
 #include "Interaction/TunaSweeperParcelContainerActor.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
 #include "Interaction/TunaSweeperCrowbarWallRackActor.h"
-#include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
+#include "Interaction/DifficultyCandlestickActor.h"
 #include "../../TunaSweeperDebugRifleSupplyActor.h"
 #include "Interaction/TunaSweeperDoorActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
@@ -535,7 +535,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DifficultyAdjustment)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
-			Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner());
+			Cast<ADifficultyCandlestickActor>(Interactable->GetOwner());
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::QuestRewardLockerOpen)
@@ -1098,10 +1098,10 @@ bool UTunaSweeperInteractionSubsystem::HandleDifficultyAdjustmentInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
-	const ATunaSweeperDifficultyAdjustmentActor* DifficultyAdjustmentActor = Interactable
-		? Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner())
+	const ADifficultyCandlestickActor* Candlestick = Interactable
+		? Cast<ADifficultyCandlestickActor>(Interactable->GetOwner())
 		: nullptr;
-	if (!DifficultyAdjustmentActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	if (!Candlestick || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
 	{
 		return false;
 	}

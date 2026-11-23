@@ -32,7 +32,7 @@ void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked()
 {
-	if (DifficultyFarmingButton)
+	if (DifficultyFarmingButton && GetOwningPlayer())
 	{
 		DifficultyFarmingButton->SetUserFocus(GetOwningPlayer());
 	}
@@ -41,7 +41,7 @@ void UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleDifficultyNormalClicked()
 {
-	if (DifficultyNormalButton)
+	if (DifficultyNormalButton && GetOwningPlayer())
 	{
 		DifficultyNormalButton->SetUserFocus(GetOwningPlayer());
 	}
@@ -50,7 +50,7 @@ void UTunaSweeperIntroMenuWidget::HandleDifficultyNormalClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleDifficultyHardClicked()
 {
-	if (DifficultyHardButton)
+	if (DifficultyHardButton && GetOwningPlayer())
 	{
 		DifficultyHardButton->SetUserFocus(GetOwningPlayer());
 	}

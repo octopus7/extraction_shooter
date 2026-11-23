@@ -34,6 +34,7 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 	Super::NativePreConstruct();
 	BindScreenWidgets();
 	ResetTitleViewportLayoutState();
+	if (bDifficultyAdjustmentMode) return;
 	ApplyDemoNoticeVisualStyle();
 	HideLegacyDeleteHoldGaugeWidgets();
 	ApplyUnifiedControlStyles();
@@ -46,6 +47,42 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	ResetTitleViewportLayoutState();
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	if (DifficultyFarmingButton)
+	{
+		DifficultyFarmingButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked);
+		DifficultyFarmingButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked);
+	}
+
+	if (DifficultyNormalButton)
+	{
+		DifficultyNormalButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyNormalClicked);
+		DifficultyNormalButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyNormalClicked);
+	}
+
+	if (DifficultyHardButton)
+	{
+		DifficultyHardButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyHardClicked);
+		DifficultyHardButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyHardClicked);
+	}
+
+	if (DifficultyStartButton)
+	{
+		DifficultyStartButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked);
+		DifficultyStartButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked);
+	}
+
+	if (DifficultyBackButton)
+	{
+		DifficultyBackButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
+		DifficultyBackButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
+	}
+
+	if (bDifficultyAdjustmentMode)
+	{
+		ShowDifficultySelection();
+		return;
+	}
+
 	ApplyDemoNoticeVisualStyle();
 	EnsureTitleWindParticleOverlay();
 	EnsureDeleteSaveSlotHoldProgressWidget();
@@ -96,36 +133,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 
 	RefreshDistributionPresentation();
 	ApplyUnifiedControlStyles();
-
-	if (DifficultyFarmingButton)
-	{
-		DifficultyFarmingButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked);
-		DifficultyFarmingButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked);
-	}
-
-	if (DifficultyNormalButton)
-	{
-		DifficultyNormalButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyNormalClicked);
-		DifficultyNormalButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyNormalClicked);
-	}
-
-	if (DifficultyHardButton)
-	{
-		DifficultyHardButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyHardClicked);
-		DifficultyHardButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyHardClicked);
-	}
-
-	if (DifficultyStartButton)
-	{
-		DifficultyStartButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked);
-		DifficultyStartButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked);
-	}
-
-	if (DifficultyBackButton)
-	{
-		DifficultyBackButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
-		DifficultyBackButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
-	}
 
 	if (DemoNoticeConfirmButton)
 	{

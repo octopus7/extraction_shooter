@@ -2192,7 +2192,8 @@ void ATunaSweeperPlayerController::OpenWorkbenchBlueprintRegisterPanel(int32 Wor
 
 bool ATunaSweeperPlayerController::OpenDifficultyAdjustmentPanel()
 {
-	if (!IsLocalController() || !IsBunkerMap() || IsIntroMap() || IsOpeningScenarioMap() || bDialogueSequenceActive || IsHousingModeOpen())
+	if (!IsLocalController() || !IsBunkerMap() || bDialogueSequenceActive || IsHousingModeOpen() ||
+		IsPauseMenuOpen() || EncyclopediaPanel || IconEditorPanel || WaveDefensePanel)
 	{
 		return false;
 	}
@@ -2205,14 +2206,7 @@ bool ATunaSweeperPlayerController::OpenDifficultyAdjustmentPanel()
 
 	if (DifficultyAdjustmentWidget && DifficultyAdjustmentWidget->IsInViewport())
 	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(DifficultyAdjustmentWidget->TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		SetInputMode(InputMode);
-		SetIgnoreMoveInput(true);
-		SetIgnoreLookInput(true);
-		bShowMouseCursor = true;
-		DifficultyAdjustmentWidget->SetKeyboardFocus();
+		ApplyDefaultGameInputModeInternal(false);
 		return true;
 	}
 
@@ -2232,21 +2226,14 @@ bool ATunaSweeperPlayerController::OpenDifficultyAdjustmentPanel()
 	DifficultyAdjustmentWidget->OnDifficultyAdjustmentClosed.AddUObject(
 		this,
 		&ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed);
-	DifficultyAdjustmentWidget->PrepareForInitialViewport();
+	DifficultyAdjustmentWidget->PrepareForDifficultyAdjustment();
 	DifficultyAdjustmentWidget->AddToViewport(80);
-	DifficultyAdjustmentWidget->OpenForDifficultyAdjustment();
 	DifficultyAdjustmentWidget->ForceLayoutPrepass();
 
 	CancelPawnGameplayActions();
 	SetIgnoreMoveInput(true);
 	SetIgnoreLookInput(true);
-	bShowMouseCursor = true;
-
-	FInputModeUIOnly InputMode;
-	InputMode.SetWidgetToFocus(DifficultyAdjustmentWidget->TakeWidget());
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	SetInputMode(InputMode);
-	DifficultyAdjustmentWidget->SetKeyboardFocus();
+	ApplyDefaultGameInputModeInternal(false);
 	return true;
 }
 
@@ -2258,7 +2245,9 @@ void ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed()
 		DifficultyAdjustmentWidget = nullptr;
 	}
 
-	ApplyDefaultGameInputMode();
+	SetIgnoreMoveInput(false);
+	SetIgnoreLookInput(false);
+	ApplyDefaultGameInputModeInternal(false);
 }
 
 void ATunaSweeperPlayerController::SetEndingInputLock(bool bLocked)
@@ -2425,6 +2414,15 @@ void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 
 void ATunaSweeperPlayerController::ApplyDefaultGameInputModeInternal(bool bReleaseGameplayInputLocks)
 {
+	if (DifficultyAdjustmentWidget && DifficultyAdjustmentWidget->IsInViewport())
+	{
+		FInputModeUIOnly Mode;
+		Mode.SetWidgetToFocus(DifficultyAdjustmentWidget->TakeWidget());
+		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(Mode);
+		bShowMouseCursor = true;
+		return;
+	}
 	if (EncyclopediaPanel)
 	{
 		FInputModeUIOnly Mode;

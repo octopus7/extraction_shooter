@@ -448,10 +448,18 @@ bool UTunaSweeperGameInstance::SetActiveSaveSlotDifficultyStage(int32 Difficulty
 	for (const auto& Pair : WaveDefenseProgress)
 		if (Pair.Value.RunId.IsValid() && Pair.Value.Outcome == EWaveDefenseOutcome::None) return false;
 
+	const int32 PreviousStage = ActiveSaveSlotDifficultyStage;
+	const bool bWasSelected = bActiveSaveSlotDifficultySelected;
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(DifficultyStage);
 	bActiveSaveSlotDifficultySelected = true;
 
-	return !bSaveImmediately || SaveGameStateInternal();
+	if (bSaveImmediately && !SaveGameStateInternal())
+	{
+		ActiveSaveSlotDifficultyStage = PreviousStage;
+		bActiveSaveSlotDifficultySelected = bWasSelected;
+		return false;
+	}
+	return true;
 }
 
 bool UTunaSweeperGameInstance::SetActiveSaveSlotIndex(int32 SaveSlotIndex)

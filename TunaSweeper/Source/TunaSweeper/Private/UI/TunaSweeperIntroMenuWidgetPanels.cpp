@@ -112,7 +112,7 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 	SelectedDifficultyStage = 2;
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
-		if (TunaGameInstance->IsActiveSaveSlotDifficultySelected())
+		if (bDifficultyAdjustmentMode || TunaGameInstance->IsActiveSaveSlotDifficultySelected())
 		{
 			SelectedDifficultyStage = FMath::Clamp(TunaGameInstance->GetActiveSaveSlotDifficultyStage(), 1, 3);
 		}
@@ -129,28 +129,6 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 	}
 
 	RefreshDifficultySelectionPanel();
-}
-
-void UTunaSweeperIntroMenuWidget::OpenForDifficultyAdjustment()
-{
-	bDifficultyAdjustmentMode = true;
-	bClosingDifficultyAdjustment = false;
-	ShowDifficultySelection();
-
-	if (SelectedDifficultyStage == INDEX_NONE)
-	{
-		SelectedDifficultyStage = 1;
-		if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
-		{
-			SelectedDifficultyStage = FMath::Clamp(TunaGameInstance->GetActiveSaveSlotDifficultyStage(), 1, 3);
-		}
-		RefreshDifficultySelectionPanel();
-	}
-
-	if (DifficultyStartButton)
-	{
-		DifficultyStartButton->SetUserFocus(GetOwningPlayer());
-	}
 }
 
 void UTunaSweeperIntroMenuWidget::CloseDifficultyAdjustment()

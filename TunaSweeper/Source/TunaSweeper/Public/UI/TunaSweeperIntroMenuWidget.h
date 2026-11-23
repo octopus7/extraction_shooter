@@ -40,7 +40,7 @@ public:
 	void PrepareForPauseSettings() { bPauseSettingsMode = true; }
 	void ClosePauseSettings();
 	FSimpleMulticastDelegate OnPauseSettingsClosed;
-	void OpenForDifficultyAdjustment();
+	void PrepareForDifficultyAdjustment() { bDifficultyAdjustmentMode = true; }
 	void CloseDifficultyAdjustment();
 
 	FSimpleMulticastDelegate OnDifficultyAdjustmentClosed;
@@ -314,6 +314,7 @@ protected:
 private:
 	friend class FTitleScreenAssetTest;
 	friend class FDifficultySelectionVisualTest;
+	friend class FDifficultyCandlestickAdjustmentTest;
 	friend class FSaveSlotPresentationTest;
 	friend class FTunaSweeperLaboratoryMenuTest;
 	void EnsureLaboratoryMenu();

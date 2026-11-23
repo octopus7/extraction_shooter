@@ -1,4 +1,5 @@
 Map	Kind	Key	Detail	X	Y	Z
+BunkerMap	event	None	difficulty_adjustment	560.66	-577.66	70.42
 BunkerMap	event	None	icon_editor	-103.00	-509.00	6.00
 BunkerMap	event	None	item_spawn	-544.99	-451.72	6.33
 BunkerMap	event	None	ladder_transfer	-3010.00	-2200.00	194.00
