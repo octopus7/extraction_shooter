@@ -2,8 +2,6 @@
 
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "Camera/PlayerCameraManager.h"
-#include "Camera/CameraActor.h"
-#include "Camera/CameraComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -168,8 +166,8 @@ bool ATrailerGameMode::SetUpShot()
 			: TEXT("/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Blue.BP_QuadrupedGunEnemy_Blue_C");
 		UClass* Class = LoadClass<ACharacter>(nullptr, Path);
 		if (!Class) return false;
-		const FVector Feet = GroundAt(bBoss ? FVector(8380,-350,300) : Shot == EShot::GrayRobot ? FVector(-1200,-6100,0) : FVector(380,-6650,0));
-		PlacePlayer(Feet + FVector(bBoss ? -490 : -580, bBoss ? 0 : -150, 0));
+		const FVector Feet = GroundAt(bBoss ? FVector(8680,-350,300) : Shot == EShot::GrayRobot ? FVector(-1200,-6100,0) : FVector(380,-6650,0));
+		PlacePlayer(Feet + FVector(bBoss ? -960 : -580, bBoss ? 0 : -150, 0));
 		Goal = Feet;
 		Player->SetAimWorldPoint(Feet);
 		FActorSpawnParameters Params;
@@ -204,6 +202,28 @@ bool ATrailerGameMode::SetUpShot()
 			break;
 		}
 		if (!bFoundLane) return false;
+		if (!bBarrel)
+		{
+			const FVector Forward = (Center - Player->GetActorLocation()).GetSafeNormal2D();
+			// Place the two extra targets where the player has an unobstructed shot at muzzle height.
+			const FVector Start = Player->GetActorLocation() + FVector(0, 0, 20);
+			FCollisionQueryParams Params(SCENE_QUERY_STAT(TrailerCrateLane), false, Player.Get());
+			for (const float Sign : { -1.f, 1.f })
+			{
+				ATunaSweeperBreakableAppleCrateActor* Extra = nullptr;
+				for (float Angle = 35.f; Angle <= 145.f && !Extra; Angle += 10.f)
+				{
+					const FVector Ray = Forward.RotateAngleAxis(Angle * Sign, FVector::UpVector);
+					const FVector End = Start + Ray * 290.f;
+					if (World->SweepTestByChannel(Start, End, FQuat::Identity, TunaSweeperCollisionChannels::Projectile, FCollisionShape::MakeSphere(30.f), Params)) continue;
+					FVector Location(End.X, End.Y, Prop->GetActorLocation().Z);
+					Extra = World->SpawnActor<ATunaSweeperBreakableAppleCrateActor>(Prop->GetClass(), Location, Prop->GetActorRotation());
+				}
+				if (!Extra) return false;
+				Extra->SetActorScale3D(Prop->GetActorScale3D());
+				ExtraCrates.Add(Extra);
+			}
+		}
 		break;
 	}
 	case EShot::Shop:
@@ -216,7 +236,8 @@ bool ATrailerGameMode::SetUpShot()
 		if (!Station.IsValid() || !Train.IsValid() || !Train->HasUsableTrack()) return false;
 		Train->StartDistance = Station->GetStopDistance() - 2200;
 		Train->ResetTrain();
-		PlacePlayer(Station->Platform->GetComponentLocation());
+		// Stand on the platform beside the first passenger car door.
+		PlacePlayer(Station->GetActorTransform().TransformPosition(FVector(-624, (Station->bPlatformOnRight ? 1 : -1) * 185, 60)));
 		Player->SetAimWorldPoint(Station->GetActorLocation());
 		return true;
 	case EShot::Carriage:
@@ -261,9 +282,11 @@ bool ATrailerGameMode::PlayShot(float Dt)
 		if (Elapsed > .8f) WalkTo(Goal);
 		return Elapsed > (Shot == EShot::Beach ? 6.5f : 5.5f);
 	case EShot::Platform:
+		if (Elapsed >= 1.f && Elapsed - Dt < 1.f)
+			UE_LOG(LogTemp, Display, TEXT("Trailer: boarding wait base %s"), *GetNameSafe(Player->GetMovementBase()));
 		if (Train->IsDwelling())
 		{
-			if (auto* Floor = Train->GetVehicleFloor(1)) WalkTo(Floor->GetComponentLocation());
+			if (auto* Floor = Train->GetVehicleFloor(1)) WalkTo(Floor->GetComponentTransform().TransformPositionNoScale(FVector(356, 0, 0)));
 			const auto* Base = Player->GetMovementBase();
 			if (Base && Base->GetOwner() == Train.Get()) HoldTime += Dt;
 			return HoldTime > .6f;
@@ -305,7 +328,17 @@ bool ATrailerGameMode::PlayShot(float Dt)
 		auto* Barrel = Cast<ATunaSweeperExplosiveBarrelActor>(Target.Get());
 		auto* Apples = Cast<ATunaSweeperBreakableAppleCrateActor>(Target.Get());
 		const bool bDestroyed = !Target.IsValid() || (Barrel && Barrel->IsBarrelDestroyed()) || (Apples && Apples->IsCrateBroken());
-		if (bDestroyed) HoldTime += Dt;
+		if (bDestroyed)
+		{
+			if (Shot == EShot::Apples && HoldTime == 0)
+				UE_LOG(LogTemp, Display, TEXT("Trailer: apple crate broken, %d remaining"), ExtraCrates.Num());
+			HoldTime += Dt;
+			if (Shot == EShot::Apples && !ExtraCrates.IsEmpty() && HoldTime >= .8f)
+			{
+				Target = ExtraCrates.Pop().Get();
+				HoldTime = 0;
+			}
+		}
 		else if (Elapsed > .75f) Shoot(Target.Get());
 		return HoldTime > 2.2f;
 	}
@@ -322,8 +355,9 @@ bool ATrailerGameMode::PlayShot(float Dt)
 		if (Phase == EHopperCombatPhase::WaitingForSight)
 		{
 			Player->GetCharacterMovement()->MaxWalkSpeed = 500.f;
-			if (Boss->GetDistanceTo(Player.Get()) > 250.f) WalkTo(Boss->GetActorLocation());
-			if (Elapsed >= 2.f) Boss->BeginEncounterBoarding(Cast<ATunaSweeperPlayerController>(Player->GetController()));
+			const float Range = FVector::Dist2D(Player->GetActorLocation(), Boss->GetActorLocation());
+			if (Range > 580.f) WalkTo(Boss->GetActorLocation());
+			if (Elapsed >= 2.f && Range <= 600.f) Boss->BeginEncounterBoarding(Cast<ATunaSweeperPlayerController>(Player->GetController()));
 		}
 		if (Phase == EHopperCombatPhase::Mech) Shoot(Boss);
 		return false;
@@ -366,25 +400,7 @@ void ATrailerGameMode::Tick(float Dt)
 			ReturnToTitle();
 			return;
 		}
-		const bool bScenic = Shot == EShot::ExitGarage || Shot == EShot::EnterGarage || Shot == EShot::Shop || Shot == EShot::Beach || Shot == EShot::Platform || Shot == EShot::GrayRobot || Shot == EShot::BlueRobot || Shot == EShot::Captain;
-		if (bScenic)
-		{
-			if (!Camera.IsValid()) Camera = GetWorld()->SpawnActor<ACameraActor>();
-			if (Camera.IsValid())
-			{
-				const AActor* Subject = Target.IsValid() ? Target.Get() : static_cast<AActor*>(Station.Get());
-				FVector Focus = (Subject->GetActorLocation() + Player->GetActorLocation()) * .5 + FVector(0,0,85);
-				FVector Offset(-650,380,520);
-				if (Shot == EShot::Shop) Offset = Subject->GetActorTransform().TransformVectorNoScale(FVector(0,930,520));
-				if (Shot == EShot::ExitGarage || Shot == EShot::EnterGarage) { Focus = Subject->GetActorLocation() + FVector(0,0,110); Offset = FVector(-460,-160,220); }
-				if (Shot == EShot::Platform) { Focus = Player->GetActorLocation(); Offset = FVector(-650,420,550); }
-				if (Shot == EShot::GrayRobot || Shot == EShot::BlueRobot || Shot == EShot::Captain) Offset = FVector(-100,-690,460);
-				Camera->SetActorLocationAndRotation(Focus + Offset, (-Offset).Rotation());
-				Camera->GetCameraComponent()->SetFieldOfView(68);
-				PC->SetViewTarget(Camera.Get());
-			}
-		}
-		else PC->SetViewTarget(Player.Get());
+		PC->SetViewTarget(Player.Get());
 		GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
 		IStreamingManager::Get().AddViewLocation(Player->GetActorLocation(), 1.f, false, 1.f);
 		IStreamingManager::Get().StreamAllResources(1.f);
