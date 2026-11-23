@@ -1,6 +1,8 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "UObject/UnrealType.h"
+#include "HAL/PlatformFileManager.h"
+#include "HAL/PlatformProcess.h"
 
 UWidget* UTunaSweeperIntroMenuWidget::FindIntroWidget(FName Name) const
 {
@@ -35,6 +37,12 @@ void UTunaSweeperIntroMenuWidget::BindScreenWidgets()
 			if (Widget->IsA(It->PropertyClass)) It->SetObjectPropertyValue_InContainer(this, Widget);
 	}
 	if (UWidget* View = FindIntroWidget(TEXT("MainMenuPanelView"))) MainMenuPanel = View;
+	if (UWidget* Row = FindIntroWidget(TEXT("TrailerModeButtonBox")))
+	{
+		const FString MarkerPath = FPaths::Combine(FPlatformProcess::BaseDir(), TEXT("trailer_mode.txt"));
+		const bool bHasMarker = FPlatformFileManager::Get().GetPlatformPhysical().FileExists(*MarkerPath);
+		Row->SetVisibility(bHasMarker ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+	}
 	if (UWidget* View = FindIntroWidget(TEXT("SaveSlotPanelView"))) SaveSlotPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("SettingsPanelView"))) SettingsPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("DemoNoticePanelView"))) DemoNoticePanel = View;

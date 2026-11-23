@@ -76,6 +76,16 @@ internal static class Program
             var indicator = (TextBlock)window.FindName("SteamAppIdIndicator");
             var action = (Button)window.FindName("SteamAppIdActionButton");
             var indicatorArea = (Border)indicator.Parent;
+            var trailerName = (TextBlock)window.FindName("TrailerModeFileName");
+            var trailerIndicator = (TextBlock)window.FindName("TrailerModeIndicator");
+            var trailerAction = (Button)window.FindName("TrailerModeActionButton");
+            if (FindTab(trailerAction) != packagingTab || trailerName.Text != "trailer_mode.txt" ||
+                trailerName.Parent != appIdFileName.Parent || Grid.GetRow(trailerName) <= Grid.GetRow(appIdFileName) ||
+                Grid.GetRow(trailerName) != Grid.GetRow((Border)trailerIndicator.Parent) ||
+                Grid.GetRow(trailerName) != Grid.GetRow(trailerAction) ||
+                !Equals(trailerAction.Content, ItemGrantCatalog.Text(File.Exists(trailerIndicator.ToolTip as string)
+                    ? "ui.helper_steam.app_id_delete" : "ui.helper_steam.app_id_create")))
+                throw new Exception("Expected the trailer marker state and action below Steam App ID");
             var folderTab = (TabItem?)window.FindName("FolderTab")
                 ?? throw new Exception("Expected a Folder tab");
             if (FindTab(launcherFolder) != folderTab || FindTab(appIdFolder) != folderTab ||
@@ -159,6 +169,12 @@ internal static class Program
             Check(File.ReadAllText(innerAppId) == "7654321", "Creation leaves the existing App ID file intact");
         }
         package.DeleteAppIdFile();
+        string marker = Path.Combine(binaries, "trailer_mode.txt");
+        Check(package.TrailerModePath == marker && !File.Exists(marker), "Trailer mode is initially off");
+        package.CreateTrailerModeFile();
+        Check(new FileInfo(marker).Length == 0 && !package.HasAppIdFile, "Empty trailer marker is independent from App ID");
+        package.DeleteTrailerModeFile();
+        Check(!File.Exists(marker), "Deleting the trailer marker disables trailer mode");
         Check(!package.HasAppIdFile && !File.Exists(innerAppId) && File.ReadAllText(rootAppId) == "42", "Removes only the internal App ID");
         Console.WriteLine("Steam Full package tests passed (launcher path, App ID detection, creation, deletion).");
     }

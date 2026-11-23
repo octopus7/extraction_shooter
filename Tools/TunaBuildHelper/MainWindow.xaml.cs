@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly SteamFullPackage? steamFullPackage;
     private readonly DispatcherTimer steamAppIdTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private bool steamAppIdShownAsPresent;
+    private bool trailerModeShownAsPresent;
     private readonly DispatcherTimer movementCheatStateTimer = new() { Interval = TimeSpan.FromSeconds(1) };
     private bool movementCheatStateReadInProgress;
     private int movementCheatStateRevision;
@@ -127,6 +128,8 @@ public partial class MainWindow : Window
         OpenSteamLauncherFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.launcher_folder_open");
         OpenSteamLauncherFolderButton.ToolTip = steamFullPackage?.LauncherDirectory;
         SteamAppIdFileName.Text = SteamFullPackage.AppIdFileName;
+        TrailerModeFileName.Text = SteamFullPackage.TrailerModeFileName;
+        TrailerModeIndicator.ToolTip = steamFullPackage?.TrailerModePath;
         OpenSteamAppIdFolderButton.Content = ItemGrantCatalog.Text("ui.helper_steam.app_id_folder_open");
         OpenSteamAppIdFolderButton.ToolTip = steamFullPackage?.AppIdDirectory;
         OpenSteamAchievementCommandsButton.Content = ItemGrantCatalog.Text("ui.helper_steam.achievement_commands");
@@ -539,7 +542,35 @@ public partial class MainWindow : Window
         OpenSteamUploadScriptsFolderButton.IsEnabled = Directory.Exists(steamFullPackage?.UploadScriptsDirectory);
         RunSteamUploadButton.IsEnabled = File.Exists(steamFullPackage?.UploadScriptPath);
         SteamAppIdActionButton.Content = ItemGrantCatalog.Text(steamAppIdShownAsPresent ? "ui.helper_steam.app_id_delete" : "ui.helper_steam.app_id_create");
-        SteamAppIdActionButton.IsEnabled = steamAppIdShownAsPresent || steamFullPackage?.CanCreateAppIdFile == true;
+        SteamAppIdActionButton.IsEnabled = steamAppIdShownAsPresent || steamFullPackage?.HasGameExecutable == true;
+        trailerModeShownAsPresent = File.Exists(steamFullPackage?.TrailerModePath);
+        TrailerModeIndicator.Text = ItemGrantCatalog.Text(trailerModeShownAsPresent ? "ui.helper_steam.app_id_y" : "ui.helper_steam.app_id_n");
+        TrailerModeIndicator.Foreground = trailerModeShownAsPresent ? Brushes.Lime : Brushes.Red;
+        TrailerModeActionButton.Content = ItemGrantCatalog.Text(trailerModeShownAsPresent ? "ui.helper_steam.app_id_delete" : "ui.helper_steam.app_id_create");
+        TrailerModeActionButton.IsEnabled = trailerModeShownAsPresent || steamFullPackage?.HasGameExecutable == true;
+    }
+
+    private void TrailerModeActionButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (steamFullPackage is null)
+            return;
+        try
+        {
+            if (trailerModeShownAsPresent != File.Exists(steamFullPackage.TrailerModePath))
+                return;
+            if (trailerModeShownAsPresent)
+                steamFullPackage.DeleteTrailerModeFile();
+            else
+                steamFullPackage.CreateTrailerModeFile();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.trailer_mode_failed");
+        }
+        finally
+        {
+            RefreshSteamAppIdStatus();
+        }
     }
 
     private void SteamAppIdActionButton_Click(object sender, RoutedEventArgs e)

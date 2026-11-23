@@ -590,6 +590,7 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 {
 	RefreshLaboratoryTexts();
+	SetNamedText(TEXT("TrailerModeButtonText"), ResolveUiText(TEXT("ui.title.trailer_mode"), FText::GetEmpty()));
 	SetNamedText(
 		FName(TEXT("SlotSelectButtonText")),
 		ResolveUiText(FName(TEXT("ui.title.slot_select")), FText::GetEmpty()));

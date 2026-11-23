@@ -220,6 +220,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -237,6 +238,15 @@
                                 </Border>
                                 <Button x:Name="SteamAppIdActionButton" Grid.Row="1" Grid.Column="2" Margin="8,0,0,0" MinWidth="80"
                                         Click="SteamAppIdActionButton_Click" />
+                                <TextBlock x:Name="TrailerModeFileName" Grid.Row="2" Margin="8,6,0,0"
+                                           Foreground="#F4F7FB" FontSize="15" VerticalAlignment="Center" />
+                                <Border Grid.Row="2" Grid.Column="1" Margin="8,6,0,0" MinWidth="42"
+                                        Background="#202833" BorderBrush="#3C4C61" BorderThickness="1" CornerRadius="4">
+                                    <TextBlock x:Name="TrailerModeIndicator" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" FontSize="19" FontWeight="Bold" />
+                                </Border>
+                                <Button x:Name="TrailerModeActionButton" Grid.Row="2" Grid.Column="2" Margin="8,6,0,0" MinWidth="80"
+                                        Click="TrailerModeActionButton_Click" />
                             </Grid>
                             <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>

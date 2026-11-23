@@ -947,6 +947,8 @@ ui.helper_packaging.stop_package,패키징 강제 종료,Force stop packaging,�
 ui.helper_packaging.stop_package_tooltip,대기 중이거나 실행 중인 TunaSweeper 패키징을 강제 종료합니다.,Force stop queued or active TunaSweeper packaging.,待機中または実行中のTunaSweeperのパッケージングを強制終了します。,强制停止排队或运行中的 TunaSweeper 打包。,強制停止等待或執行中的 TunaSweeper 封裝。,Принудительно останавливает ожидающую и активную упаковку TunaSweeper.
 ui.helper_packaging.stop_package_requested,패키징 종료를 요청했습니다.,Requested packaging termination.,パッケージングの終了を要求しました。,已请求停止打包。,已要求停止封裝。,Отправлен запрос на остановку упаковки.
 ui.helper_steam.upload_scripts_folder,Steam 업로드 배치 폴더 열기,Open Steam upload scripts folder,Steamアップロードスクリプトのフォルダーを開く,打开 Steam 上传脚本文件夹,開啟 Steam 上傳指令碼資料夾,Открыть папку скриптов загрузки Steam
+ui.title.trailer_mode,트레일러 모드,Trailer Mode,トレーラーモード,预告片模式,預告片模式,Режим трейлера
+ui.helper_steam.trailer_mode_failed,trailer_mode.txt를 변경하지 못했습니다.,Could not change trailer_mode.txt.,trailer_mode.txtを変更できませんでした。,无法更改 trailer_mode.txt。,無法變更 trailer_mode.txt。,Не удалось изменить trailer_mode.txt.
 ui.helper_steam.run_upload,본편 업로드 실행,Upload full game,製品版をアップロード,上传正式版,上傳正式版,Загрузить полную версию
 ui.helper_steam.upload_started,Steam 본편 업로드 배치를 실행했습니다.,Started the Steam full game upload script.,Steam製品版アップロードスクリプトを起動しました。,已启动 Steam 正式版上传脚本。,已啟動 Steam 正式版上傳指令碼。,Скрипт загрузки полной версии в Steam запущен.
 ui.helper_steam.upload_scripts_folder_opening,Steam 업로드 배치 폴더를 여는 중입니다.,Opening the Steam upload scripts folder.,Steamアップロードスクリプトのフォルダーを開いています。,正在打开 Steam 上传脚本文件夹。,正在開啟 Steam 上傳指令碼資料夾。,Открывается папка скриптов загрузки Steam.

@@ -7,6 +7,7 @@ namespace TunaBuildHelper;
 internal sealed class SteamFullPackage(string projectDirectory)
 {
     internal const string AppIdFileName = "steam_appid.txt";
+    internal const string TrailerModeFileName = "trailer_mode.txt";
     internal const string ConsoleUri = "steam://open/console";
     private string GameExecutablePath => Path.Combine(AppIdDirectory, "TunaSweeper-Win64-Shipping.exe");
 
@@ -16,14 +17,15 @@ internal sealed class SteamFullPackage(string projectDirectory)
     internal string UploadScriptPath => Path.Combine(UploadScriptsDirectory, "UploadSteamFull.bat");
     internal string AppIdDirectory => Path.Combine(LauncherDirectory, "TunaSweeper", "Binaries", "Win64");
     internal string AppIdPath => Path.Combine(AppIdDirectory, AppIdFileName);
+    internal string TrailerModePath => Path.Combine(AppIdDirectory, TrailerModeFileName);
     internal string AchievementResetCommandsPath => Path.Combine(projectDirectory, "External", "MainPayload",
         "Tools", "Steam", "Achievements", "5137900-achievements-reset-commands.ko.txt");
     internal bool HasAppIdFile => File.Exists(AppIdPath);
-    internal bool CanCreateAppIdFile => File.Exists(GameExecutablePath);
+    internal bool HasGameExecutable => File.Exists(GameExecutablePath);
 
     internal void CreateAppIdFile()
     {
-        if (!CanCreateAppIdFile)
+        if (!HasGameExecutable)
             throw new FileNotFoundException(null, GameExecutablePath);
 
         const string key = "SteamFullGameAppId";
@@ -48,4 +50,13 @@ internal sealed class SteamFullPackage(string projectDirectory)
     }
 
     internal void DeleteAppIdFile() => File.Delete(AppIdPath);
+
+    internal void CreateTrailerModeFile()
+    {
+        if (!HasGameExecutable)
+            throw new FileNotFoundException(null, GameExecutablePath);
+        using var marker = new FileStream(TrailerModePath, FileMode.CreateNew, FileAccess.Write);
+    }
+
+    internal void DeleteTrailerModeFile() => File.Delete(TrailerModePath);
 }
