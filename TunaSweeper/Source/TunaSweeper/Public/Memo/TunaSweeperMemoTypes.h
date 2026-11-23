@@ -3,6 +3,13 @@
 #include "CoreMinimal.h"
 #include "TunaSweeperMemoTypes.generated.h"
 
+namespace TunaSweeperMemo
+{
+    // Temporarily release only the first set of authored memos.
+    inline constexpr int32 LastAvailableId = 15;
+    constexpr bool IsAvailable(int32 Id) { return Id > 0 && Id <= LastAvailableId; }
+}
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperMemoDefinition
 {

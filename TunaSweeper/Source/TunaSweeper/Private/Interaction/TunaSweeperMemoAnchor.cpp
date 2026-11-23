@@ -24,8 +24,21 @@ ATunaSweeperMemoAnchor::ATunaSweeperMemoAnchor()
         ETunaSweeperInteractionType::Memo, FText::GetEmpty(), TEXT("ui.interaction.memo"));
 }
 
+bool ATunaSweeperMemoAnchor::IsEditorOnly() const
+{
+    return Super::IsEditorOnly() || MemoId > TunaSweeperMemo::LastAvailableId;
+}
+
 void ATunaSweeperMemoAnchor::BeginPlay()
 {
+    if (MemoId > TunaSweeperMemo::LastAvailableId)
+    {
+        SetActorHiddenInGame(true);
+        SetActorEnableCollision(false);
+        Super::BeginPlay();
+        Destroy();
+        return;
+    }
     Super::BeginPlay();
     if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
     {

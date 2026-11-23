@@ -85,8 +85,8 @@ bool FTunaSweeperMemoLifecycleTest::RunTest(const FString& Parameters)
         TestNull(TEXT("Definitions no longer expose per-memo title keys"),
             FindFProperty<FProperty>(FTunaSweeperMemoDefinition::StaticStruct(), TEXT("TitleStringKey")));
         Game->SetCurrentTextLanguage(ETunaSweeperItemTextLanguage::Korean, false);
-        const int32 Ids[] = {1, 10, 60};
-        const TCHAR* Titles[] = {TEXT("메모 001"), TEXT("메모 010"), TEXT("메모 060")};
+        const int32 Ids[] = {1, 10, 15};
+        const TCHAR* Titles[] = {TEXT("메모 001"), TEXT("메모 010"), TEXT("메모 015")};
         for (int32 Index = 0; Index < UE_ARRAY_COUNT(Ids); ++Index)
         {
             FTunaSweeperMemoDefinition Definition;
@@ -98,8 +98,15 @@ bool FTunaSweeperMemoLifecycleTest::RunTest(const FString& Parameters)
         Memos->TryGetMemoDefinition(10, Definition);
         TestEqual(TEXT("Title refreshes after language switch"), Definition.Title.ToString(), FString(TEXT("Memo 010")));
         TArray<FTunaSweeperMemoListEntry> Entries;
+        Game->AcquiredMemoIds.Add(60);
         Memos->GetMemoListEntries(Entries);
-        TestEqual(TEXT("All reserved memos remain listed"), Entries.Num(), 60);
+        TestFalse(TEXT("Previously acquired reserved memo stays out of the list"),
+            Entries.ContainsByPredicate([](const auto& Item) { return Item.MemoId == 60; }));
+        TestTrue(TEXT("Previously acquired reserved identity is preserved"), Game->AcquiredMemoIds.Contains(60));
+        Game->AcquiredMemoIds.Remove(60);
+        TestEqual(TEXT("Only available memos appear in the list"), Entries.Num(), 15);
+        TestFalse(TEXT("Reserved memo has no runtime definition"), Memos->TryGetMemoDefinition(16, Definition));
+        Memos->TryGetMemoDefinition(10, Definition);
         const auto* Entry = Entries.FindByPredicate([](const auto& Item) { return Item.MemoId == 10; });
         if (TestNotNull(TEXT("Unacquired memo 10 remains listed"), Entry))
         {
@@ -114,6 +121,10 @@ bool FTunaSweeperMemoLifecycleTest::RunTest(const FString& Parameters)
         Actor->DispatchBeginPlay();
         return Actor;
     };
+    auto* Reserved = Spawn(16);
+    TestTrue(TEXT("Reserved placement is excluded from cooking"), Reserved->IsEditorOnly());
+    TestTrue(TEXT("Reserved placement is removed during play"), !IsValid(Reserved) || Reserved->IsActorBeingDestroyed());
+    TestFalse(TEXT("Reserved memo cannot be acquired"), Game->MarkMemoAcquired(16, false));
     auto* First = Spawn(1);
     auto* Duplicate = Spawn(1);
     TestTrue(TEXT("Placed valid memo is collectible without JSON placement"), First->CanCollectMemo());

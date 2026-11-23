@@ -69,6 +69,8 @@ bool UTunaSweeperMemoSubsystem::LoadMemoDefinitions(bool bForceReload)
 			continue;
 		}
 
+		if (!TunaSweeperMemo::IsAvailable(Definition.MemoId)) continue;
+
 		MemoDefinitionsById.Add(Definition.MemoId, Definition);
 		bHasValidRows = true;
 	}

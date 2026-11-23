@@ -15,6 +15,7 @@ class TUNASWEEPER_API ATunaSweeperMemoAnchor : public AActor
     GENERATED_BODY()
 public:
     ATunaSweeperMemoAnchor();
+    virtual bool IsEditorOnly() const override;
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

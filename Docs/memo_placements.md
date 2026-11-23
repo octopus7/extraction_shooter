@@ -2,6 +2,8 @@
 
 메모 ID 1~60을 예약하고 아래 본편 맵에 전용 `/Game/Interaction/BP_MemoAnchor`를 직접 배치했다.
 
+현재 플레이에서 공개하는 메모는 숲의 1~15번이다. 마을과 평원의 16~60번은 배치 편집용으로 보존하며 수집 목록과 플레이 레벨에서 제외한다. 공개 상한은 `TunaSweeperMemo::LastAvailableId`에서 조정한다.
+
 | 지역 | 맵 | MemoId | 개수 |
 | --- | --- | --- | --- |
 | 숲 | `/Game/MainRaid/RaidForest` | 1~15 | 15 |

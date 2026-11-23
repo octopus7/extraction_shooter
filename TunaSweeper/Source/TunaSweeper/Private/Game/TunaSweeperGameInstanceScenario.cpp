@@ -1,4 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Memo/TunaSweeperMemoTypes.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 
 bool UTunaSweeperGameInstance::IsScenarioProgressFlagSet(FName ScenarioFlag) const
@@ -104,12 +105,12 @@ bool UTunaSweeperGameInstance::CompletePendingScenarioBunkerEntryIfNeeded()
 bool UTunaSweeperGameInstance::IsMemoAcquired(int32 MemoId)
 {
 	EnsureInventoryStateInitialized();
-	return MemoId > 0 && AcquiredMemoIds.Contains(MemoId);
+	return TunaSweeperMemo::IsAvailable(MemoId) && AcquiredMemoIds.Contains(MemoId);
 }
 
 bool UTunaSweeperGameInstance::MarkMemoAcquired(int32 MemoId, bool bSaveImmediately)
 {
-	if (MemoId <= 0)
+	if (!TunaSweeperMemo::IsAvailable(MemoId))
 	{
 		return false;
 	}
