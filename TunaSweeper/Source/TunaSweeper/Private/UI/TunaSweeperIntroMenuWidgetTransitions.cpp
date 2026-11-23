@@ -39,9 +39,13 @@ void UTunaSweeperIntroMenuWidget::BindScreenWidgets()
 	if (UWidget* View = FindIntroWidget(TEXT("MainMenuPanelView"))) MainMenuPanel = View;
 	if (UWidget* Row = FindIntroWidget(TEXT("TrailerModeButtonBox")))
 	{
+#if WITH_EDITOR
+		Row->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+#else
 		const FString MarkerPath = FPaths::Combine(FPlatformProcess::BaseDir(), TEXT("trailer_mode.txt"));
 		const bool bHasMarker = FPlatformFileManager::Get().GetPlatformPhysical().FileExists(*MarkerPath);
 		Row->SetVisibility(bHasMarker ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+#endif
 	}
 	if (UWidget* View = FindIntroWidget(TEXT("SaveSlotPanelView"))) SaveSlotPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("SettingsPanelView"))) SettingsPanel = View;
