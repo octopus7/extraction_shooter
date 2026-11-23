@@ -41,6 +41,8 @@ protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& CullingRect,
+		FSlateWindowElementList& Elements, int32 Layer, const FWidgetStyle& Style, bool bEnabled) const override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -176,6 +178,10 @@ private:
 	TObjectPtr<UButton> WhiteMarkerColorButton;
 
 	TArray<FTunaSweeperMapMarkerSaveData> CachedMapMarkers;
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> QuestGuidanceTexture;
+	TArray<FVector> QuestMarkerLocations;
+	float QuestGuidanceRefreshTime = 0.f;
 	TArray<FTunaSweeperMapOverlayDefinition> CachedMapOverlays;
 	FVector2D CachedPlayerMapPosition = FVector2D(0.5f, 0.5f);
 	FVector2D LastMapViewportSize = FVector2D::ZeroVector;

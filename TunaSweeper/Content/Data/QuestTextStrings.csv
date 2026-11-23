@@ -23,6 +23,7 @@ quest.ui.state.reward_completed,보상 완료,Reward Claimed,報酬受取済み,
 quest.ui.button.accept,수락,Accept,受注,接取,接取,Принять
 quest.ui.button.locked,잠김,Locked,ロック中,未解锁,未解鎖,Заблокировано
 quest.ui.button.in_progress,진행 중,In Progress,進行中,进行中,進行中,Выполняется
+quest.ui.button.track,추적,Track,追跡,追踪,追蹤,Отслеживать
 quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る,领取奖励,領取獎勵,Получить награду
 quest.ui.button.completed,완료,Completed,完了,已完成,已完成,Завершено
 quest.speaker.mole,두더지,Mole,モグラ,鼹鼠,鼴鼠,Крот

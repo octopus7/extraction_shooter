@@ -1,0 +1,229 @@
+Map	Kind	Key	Detail	X	Y	Z
+BunkerMap	event	None	icon_editor	-103.00	-509.00	6.00
+BunkerMap	event	None	item_spawn	-544.99	-451.72	6.33
+BunkerMap	event	None	ladder_transfer	-3010.00	-2200.00	194.00
+BunkerMap	event	None	ladder_transfer	17.00	-499.00	42.00
+BunkerMap	event	None	level_travel	-807.37	-295.49	27.36
+BunkerMap	event	None	level_travel	-90.00	615.00	12.00
+BunkerMap	event	None	mole_dialogue	140.00	-20.00	10.00
+BunkerMap	event	None	quest	125.00	-204.00	8.00
+BunkerMap	event	None	quest	140.00	-20.00	10.00
+BunkerMap	event	None	quest	50.00	-260.00	8.41
+BunkerMap	event	None	quest_reward_locker_open	235.44	331.81	0.00
+BunkerMap	event	None	shop_open	50.00	-260.00	8.41
+BunkerMap	event	None	workbench_blueprint_register	-162.00	-621.00	6.00
+BunkerMap	event	None	workbench_craft	-162.00	-621.00	6.00
+BunkerMap	event	None	workbench_dismantle	-162.00	-621.00	6.00
+BunkerMap	event	None	world_progress	-607.20	-74.10	6.24
+BunkerMap	event	demo.bunker_pipe.repair	world_progress	613.60	190.00	10.00
+BunkerMap	item	6003		-544.99	-451.72	6.33
+BunkerMap	progress	None		613.60	190.00	10.00
+BunkerMap	progress	world.passage.raid_lift		-607.20	-74.10	6.24
+BunkerMap	provider	provider.baby_boar		125.00	-204.00	8.00
+BunkerMap	provider	provider.mole		140.00	-20.00	10.00
+BunkerMap	provider	provider.vending_machine		50.00	-260.00	8.41
+BunkerMap	travel	L_Basement		-90.00	615.00	12.00
+BunkerMap	travel	RaidMap		-607.20	-74.10	6.24
+BunkerMap	travel	RaidMap		-807.37	-295.49	27.36
+BunkerMap	workbench	1		-162.00	-621.00	6.00
+DemoBoxRaidMap	anchor	1	ENEMY	1300.00	1200.00	90.00
+DemoBoxRaidMap	anchor	1000	LOOT_CONTAINER	1386.97	307.12	52.45
+DemoBoxRaidMap	event	None	item_spawn	-159.46	146.34	-0.50
+DemoBoxRaidMap	event	None	level_travel	400.00	-70.00	-30.00
+DemoBoxRaidMap	event	None	vehicle_mount	1059.72	407.15	0.00
+DemoBoxRaidMap	event	demo.water_intake.inspect	world_progress	550.00	1050.00	0.00
+DemoBoxRaidMap	event	demo.water_intake.screen_clear	world_progress	550.00	1050.00	0.00
+DemoBoxRaidMap	event	demo.water_intake.valve_repair	world_progress	550.00	1050.00	0.00
+DemoBoxRaidMap	event	vehicle.atv.refuel	world_progress	1059.72	407.15	0.00
+DemoBoxRaidMap	progress	demo.water_intake.blocked_screen		550.00	1050.00	0.00
+DemoBoxRaidMap	progress	demo.water_intake.valve		550.00	1050.00	0.00
+DemoBoxRaidMap	travel	BunkerMap		400.00	-70.00	-30.00
+DemoRaidMap	anchor	1	ENEMY	-1027.00	-1632.00	77.00
+DemoRaidMap	anchor	1	ENEMY	-1293.00	-1334.00	77.00
+DemoRaidMap	anchor	1	ENEMY	-1293.00	-3821.00	77.00
+DemoRaidMap	anchor	1	ENEMY	-1293.00	-4349.00	77.00
+DemoRaidMap	anchor	1	ENEMY	-1293.00	1552.00	77.00
+DemoRaidMap	anchor	1	ENEMY	-1848.00	1234.00	77.00
+DemoRaidMap	anchor	1	ENEMY	1876.00	-3821.00	77.00
+DemoRaidMap	anchor	1	ENEMY	1876.00	-4349.00	77.00
+DemoRaidMap	anchor	1	ENEMY	6097.00	-4150.00	77.00
+DemoRaidMap	anchor	1	ENEMY	6097.00	-4678.00	77.00
+DemoRaidMap	anchor	1	ENEMY	7477.00	-4150.00	77.00
+DemoRaidMap	anchor	1	ENEMY	7477.00	-4678.00	77.00
+DemoRaidMap	anchor	1000	LOOT_CONTAINER	1151.00	-1264.00	55.00
+DemoRaidMap	anchor	2	ENEMY	5200.00	1040.00	90.00
+DemoRaidMap	enemy	None	/Game/Blueprints/BP_QuadrupedGunEnemy.BP_QuadrupedGunEnemy_C	-734.34	6722.13	40.00
+DemoRaidMap	enemy	None	/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Blue.BP_QuadrupedGunEnemy_Blue_C	-852.17	7202.75	40.00
+DemoRaidMap	enemy	None	/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_BrightGray.BP_QuadrupedGunEnemy_BrightGray_C	-925.85	6782.58	40.00
+DemoRaidMap	enemy	None	/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_DarkGray.BP_QuadrupedGunEnemy_DarkGray_C	-90.00	-2483.00	87.00
+DemoRaidMap	enemy	None	/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_DarkGray.BP_QuadrupedGunEnemy_DarkGray_C	-96.00	-2831.00	79.00
+DemoRaidMap	enemy	None	/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Gold.BP_QuadrupedGunEnemy_Gold_C	-862.45	7815.87	31.58
+DemoRaidMap	enemy	None	/Game/Blueprints/Enemies/QuadrupedVariants/BP_QuadrupedGunEnemy_Red.BP_QuadrupedGunEnemy_Red_C	-606.03	8485.85	40.00
+DemoRaidMap	event	None	item_spawn	-117.00	508.00	-2.00
+DemoRaidMap	event	None	level_travel	941.95	260.46	-0.00
+DemoRaidMap	event	None	vehicle_mount	-1133.03	-2814.52	30.89
+DemoRaidMap	event	demo.water_intake.inspect	world_progress	-663.00	1772.00	0.00
+DemoRaidMap	event	demo.water_intake.screen_clear	world_progress	-663.00	1772.00	0.00
+DemoRaidMap	event	demo.water_intake.valve_repair	world_progress	-663.00	1772.00	0.00
+DemoRaidMap	event	vehicle.atv.refuel	world_progress	-1133.03	-2814.52	30.89
+DemoRaidMap	extract	BunkerMap		10886.00	-3974.00	0.00
+DemoRaidMap	progress	demo.water_intake.blocked_screen		-663.00	1772.00	0.00
+DemoRaidMap	progress	demo.water_intake.valve		-663.00	1772.00	0.00
+DemoRaidMap	travel	BunkerMap		941.95	260.46	-0.00
+L_Basement	event	None	debug_armory_open	1528.00	855.00	0.00
+L_Basement	event	None	item_spawn	99.00	-167.00	0.00
+L_Basement	event	None	level_travel	250.00	-210.00	0.00
+L_Basement	travel	BunkerMap		250.00	-210.00	0.00
+RaidForest	anchor	1	ENEMY	-3078.00	1051.00	62.00
+RaidForest	anchor	1	ENEMY	-3078.00	1430.00	62.00
+RaidForest	anchor	2	ENEMY	-3618.00	148.00	62.00
+RaidForest	anchor	3	ENEMY	-3818.00	-452.00	62.00
+RaidForest	anchor	4	ENEMY	-8462.16	-7401.13	66.00
+RaidForest	contents	8016		-5849.16	-1497.13	10.00
+RaidForest	contents	8017		-8130.16	-1534.13	2.00
+RaidForest	contents	8018		3762.84	-7443.13	39.19
+RaidForest	contents	8019		-866.16	3562.87	2.00
+RaidForest	contents	8020		-1016.16	3562.87	2.00
+RaidForest	contents	8021		-1166.16	3562.87	2.00
+RaidForest	contents	8022		-8130.16	-1384.13	2.00
+RaidForest	contents	8026		-3640.00	-2686.00	1.00
+RaidForest	event	None	chain_link_gate	-849.00	424.00	-2.00
+RaidForest	event	None	door_open	-1637.00	6000.00	-0.00
+RaidForest	event	None	door_open	-5487.00	-3500.00	0.00
+RaidForest	event	None	door_open	-6687.00	3400.00	-0.00
+RaidForest	event	None	door_open	313.00	6000.00	0.00
+RaidForest	event	None	door_open	4863.00	-3500.00	319.94
+RaidForest	event	None	door_open	5013.00	3150.00	-0.14
+RaidForest	event	None	gate_lock_control	-967.00	434.00	0.00
+RaidForest	event	None	level_travel	-8026.16	-8520.13	32.00
+RaidForest	event	None	loot_container_open	-1016.16	3562.87	2.00
+RaidForest	event	None	loot_container_open	-1166.16	3562.87	2.00
+RaidForest	event	None	loot_container_open	-3640.00	-2686.00	1.00
+RaidForest	event	None	loot_container_open	-5849.16	-1497.13	10.00
+RaidForest	event	None	loot_container_open	-8130.16	-1384.13	2.00
+RaidForest	event	None	loot_container_open	-8130.16	-1534.13	2.00
+RaidForest	event	None	loot_container_open	-866.16	3562.87	2.00
+RaidForest	event	None	loot_container_open	3762.84	-7443.13	39.19
+RaidForest	event	None	memo	-1560.82	3625.72	1.02
+RaidForest	event	None	memo	-1630.25	5047.08	1.01
+RaidForest	event	None	memo	-2403.60	515.09	1.00
+RaidForest	event	None	memo	-3201.34	5666.88	1.00
+RaidForest	event	None	memo	-6520.85	-3121.44	1.00
+RaidForest	event	None	memo	-7073.59	-1904.91	1.00
+RaidForest	event	None	memo	-7853.06	-4715.51	1.09
+RaidForest	event	None	memo	-856.63	-7637.84	1.00
+RaidForest	event	None	memo	4115.58	-6499.41	175.27
+RaidForest	event	None	memo	543.03	-7531.96	1.00
+RaidForest	event	None	memo	5785.59	-8025.10	320.94
+RaidForest	event	None	memo	6137.40	1656.48	1.00
+RaidForest	event	None	memo	6424.31	-2850.08	273.98
+RaidForest	event	None	memo	7650.55	3406.50	1.03
+RaidForest	event	None	memo	814.32	2722.10	1.00
+RaidForest	event	None	quest	-3640.00	-3061.00	0.00
+RaidForest	event	None	vehicle_mount	-8938.16	-7978.13	2.00
+RaidForest	event	None	world_progress	8635.86	6036.89	0.00
+RaidForest	event	power.primary.repair	world_progress	-7064.16	-8453.13	242.86
+RaidForest	extract	BunkerMap		3590.00	355.00	0.31
+RaidForest	progress	None		-8026.16	-8520.13	32.00
+RaidForest	progress	power.facility.primary		-7064.16	-8453.13	242.86
+RaidForest	progress	region.forest.village.obstacle		8635.86	6036.89	0.00
+RaidForest	progress	region.forest.village.obstacle		9259.86	6044.89	0.00
+RaidForest	provider	provider.baby_boar		-3640.00	-3061.00	0.00
+RaidForest	travel	BunkerMap		-8026.16	-8520.13	32.00
+RaidForest	travel	RaidVillage		9259.86	6044.89	0.00
+RaidMap	event	None	item_spawn	-843.00	874.00	0.00
+RaidMap	event	None	level_travel	92.00	1239.00	-4.00
+RaidMap	travel	BunkerMap		92.00	1239.00	-4.00
+RaidPlains	arrival	plains.signal.arrival		-1240.00	1940.00	200.00
+RaidPlains	contents	8001		158.72	-136.51	228.66
+RaidPlains	event	None	ending	28.90	221.81	269.26
+RaidPlains	event	None	ladder_transfer	402.84	107.27	241.84
+RaidPlains	event	None	ladder_transfer	709.73	-322.58	42.76
+RaidPlains	event	None	loot_container_open	158.72	-136.51	228.66
+RaidPlains	event	None	memo	-2213.98	-6756.19	115.38
+RaidPlains	event	None	memo	-2841.90	341.45	18.31
+RaidPlains	event	None	memo	-5098.07	-6119.74	114.09
+RaidPlains	event	None	memo	-6399.27	-533.85	46.42
+RaidPlains	event	None	memo	-7375.94	-6021.70	78.70
+RaidPlains	event	None	memo	-7390.28	1137.66	20.41
+RaidPlains	event	None	memo	-8082.27	5529.25	225.03
+RaidPlains	event	None	memo	-840.90	5443.97	77.19
+RaidPlains	event	None	memo	-909.10	6130.44	92.70
+RaidPlains	event	None	memo	4419.53	-5469.44	121.12
+RaidPlains	event	None	wave_defense	4400.00	0.00	82.19
+RaidPlains	extract	BunkerMap		992.06	1785.71	51.63
+RaidVillage	anchor	1	ENEMY	-9581.79	-7560.70	229.63
+RaidVillage	anchor	1002	LOOT_CONTAINER	1884.41	-5476.18	152.20
+RaidVillage	anchor	1003	LOOT_CONTAINER	-1484.41	5476.18	152.20
+RaidVillage	anchor	2	ENEMY	-9981.07	-7072.26	218.88
+RaidVillage	anchor	3	ENEMY	-8616.74	6602.24	213.63
+RaidVillage	anchor	4	ENEMY	-1985.62	-6541.01	182.23
+RaidVillage	anchor	5	ENEMY	2490.64	3300.00	227.02
+RaidVillage	anchor	6	ENEMY	1764.78	4200.00	228.34
+RaidVillage	anchor	7	ENEMY	8149.29	337.32	257.20
+RaidVillage	arrival	village.station.east		577.12	9674.79	415.00
+RaidVillage	arrival	village.station.north		6950.77	4593.83	415.00
+RaidVillage	arrival	village.station.west		377.89	-7398.58	415.00
+RaidVillage	contents	8024		-2580.00	-1080.00	152.20
+RaidVillage	delivery	30	deliver_parcel	-700.00	3200.00	188.20
+RaidVillage	delivery	41	deliver_parcel	-650.00	-2900.00	152.18
+RaidVillage	event	None	loot_container_open	-2580.00	-1080.00	152.20
+RaidVillage	event	None	memo	-1174.71	-567.19	151.27
+RaidVillage	event	None	memo	-1283.98	-858.95	151.20
+RaidVillage	event	None	memo	-1318.33	-547.02	151.23
+RaidVillage	event	None	memo	-1374.10	1570.42	151.22
+RaidVillage	event	None	memo	-1439.25	612.94	151.18
+RaidVillage	event	None	memo	-1587.16	-1929.51	151.20
+RaidVillage	event	None	memo	-1734.46	-1933.81	151.26
+RaidVillage	event	None	memo	-1843.20	-1322.32	151.21
+RaidVillage	event	None	memo	-1956.47	-1935.91	151.24
+RaidVillage	event	None	memo	-2332.04	-490.66	151.23
+RaidVillage	event	None	memo	-240.32	1801.38	151.25
+RaidVillage	event	None	memo	-258.38	-1589.85	151.25
+RaidVillage	event	None	memo	-678.95	1581.23	151.31
+RaidVillage	event	None	memo	-967.10	1588.41	151.20
+RaidVillage	event	None	memo	1080.78	766.87	151.20
+RaidVillage	event	None	memo	1082.68	1752.64	151.21
+RaidVillage	event	None	memo	1203.31	775.63	151.20
+RaidVillage	event	None	memo	1494.94	-967.69	151.20
+RaidVillage	event	None	memo	1520.05	702.72	151.20
+RaidVillage	event	None	memo	1548.63	863.37	151.21
+RaidVillage	event	None	memo	1761.67	905.52	151.24
+RaidVillage	event	None	memo	1833.73	1632.81	151.23
+RaidVillage	event	None	memo	270.11	-766.98	151.20
+RaidVillage	event	None	memo	316.14	1738.48	151.15
+RaidVillage	event	None	memo	444.17	-783.22	151.20
+RaidVillage	event	None	memo	539.71	1607.80	151.20
+RaidVillage	event	None	memo	540.84	-788.08	151.20
+RaidVillage	event	None	memo	550.16	-911.61	151.20
+RaidVillage	event	None	memo	574.18	-1029.73	151.11
+RaidVillage	event	None	memo	687.18	-774.50	151.20
+RaidVillage	event	None	memo	707.61	-926.44	151.23
+RaidVillage	event	None	memo	79.13	1683.41	151.29
+RaidVillage	event	None	memo	805.49	-944.69	151.20
+RaidVillage	event	None	memo	806.87	-815.48	151.20
+RaidVillage	event	None	memo	816.86	-1240.09	151.20
+RaidVillage	event	None	quest	-9402.81	9531.11	153.31
+RaidVillage	event	None	quest	-9411.59	-9479.40	141.16
+RaidVillage	event	None	quest	42.70	-9684.44	128.56
+RaidVillage	event	None	shop_open	42.70	-9684.44	128.56
+RaidVillage	event	None	world_progress	14149.29	1787.32	147.20
+RaidVillage	event	quest.atv_warehouse.repair	world_progress	-3638.49	2450.06	124.21
+RaidVillage	event	quest.ethanol.repair	world_progress	8534.13	13599.61	-457.90
+RaidVillage	event	vehicle.atv.repair	world_progress	-1480.00	-730.00	185.20
+RaidVillage	extract	BunkerMap		-973.00	-7188.00	158.37
+RaidVillage	extract	BunkerMap		5781.00	13549.00	-438.04
+RaidVillage	parcel	30	deliver_parcel	-2780.00	-530.00	152.20
+RaidVillage	parcel	41	deliver_parcel	-2780.00	-1630.00	152.20
+RaidVillage	progress	facility.village.atv_repair		-1480.00	-730.00	185.20
+RaidVillage	progress	facility.village.atv_warehouse		-3638.49	2450.06	124.21
+RaidVillage	progress	facility.village.ethanol		8534.13	13599.61	-457.90
+RaidVillage	progress	rail.lubrication.village_01		1727.16	-6859.58	165.00
+RaidVillage	progress	rail.lubrication.village_02		7015.88	6045.32	165.00
+RaidVillage	progress	rail.lubrication.village_03		-540.41	8746.25	165.00
+RaidVillage	progress	region.forest.plains.lift		14149.29	1787.32	147.20
+RaidVillage	provider	provider.marine_cat		-9402.81	9531.11	153.31
+RaidVillage	provider	provider.pirate_cat		-9411.59	-9479.40	141.16
+RaidVillage	provider	provider.vending_machine		42.70	-9684.44	128.56
+RaidVillage	travel	RaidPlains		14149.29	1787.32	147.20
+RaidVillage	vehicle_arrival	village.vehicle.north		5856.79	337.32	566.62

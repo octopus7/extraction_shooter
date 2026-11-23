@@ -508,6 +508,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool GetAllLootContainerContents(TArray<FTunaSweeperLootContainerContents>& OutContents);
 
+	void GetGuaranteedContentsForItem(int32 ItemId, TSet<int32>& OutContentsIds);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TryGetShopDefinition(int32 ShopId, FTunaSweeperShopDefinition& OutDefinition);
 

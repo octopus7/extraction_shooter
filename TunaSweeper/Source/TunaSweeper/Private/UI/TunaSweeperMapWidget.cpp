@@ -1,4 +1,6 @@
 #include "UI/TunaSweeperMapWidget.h"
+#include "Quest/QuestGuidanceLocations.h"
+#include "Rendering/DrawElements.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Debug/TunaSweeperMovementCheatSubsystem.h"
@@ -81,6 +83,11 @@ void UTunaSweeperMapWidget::RefreshMapView()
 {
 	BuildMapWidget();
 	EnsureMapTextures();
+	if (!QuestGuidanceTexture)
+	{
+		QuestGuidanceTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Quest/T_QuestGuidanceQ.T_QuestGuidanceQ"));
+	}
+	QuestGuidanceLocations::Get(GetWorld(), QuestMarkerLocations);
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -226,6 +233,28 @@ void UTunaSweeperMapWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
+int32 UTunaSweeperMapWidget::NativePaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& CullingRect,
+	FSlateWindowElementList& Elements, int32 Layer, const FWidgetStyle& Style, bool bEnabled) const
+{
+	Layer = Super::NativePaint(Args, Geometry, CullingRect, Elements, Layer, Style, bEnabled);
+	if (!MapCanvas || !QuestGuidanceTexture || QuestMarkerLocations.IsEmpty() || IsTeleportConfirmationOpen()) return Layer;
+
+	const FGeometry& CanvasGeometry = MapCanvas->GetCachedGeometry();
+	const FVector2f Size(30.f, 30.f);
+	FSlateBrush Brush;
+	Brush.SetResourceObject(QuestGuidanceTexture);
+	Elements.PushClip(FSlateClippingZone(CanvasGeometry));
+	for (const FVector& Location : QuestMarkerLocations)
+	{
+		const FVector2f Center(MapPositionToLocal(ProjectWorldLocationToMapPosition(Location)));
+		FSlateDrawElement::MakeBox(Elements, Layer + 1,
+			CanvasGeometry.ToPaintGeometry(Size, FSlateLayoutTransform(Center - Size * .5f)),
+			&Brush, ESlateDrawEffect::None, Style.GetColorAndOpacityTint());
+	}
+	Elements.PopClip();
+	return Layer + 1;
+}
+
 void UTunaSweeperMapWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -235,6 +264,18 @@ void UTunaSweeperMapWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 		return;
 	}
 
+	QuestGuidanceRefreshTime -= InDeltaTime;
+	if (QuestGuidanceRefreshTime <= 0.f)
+	{
+		TArray<FVector> Locations;
+		QuestGuidanceLocations::Get(GetWorld(), Locations);
+		if (Locations != QuestMarkerLocations)
+		{
+			QuestMarkerLocations = MoveTemp(Locations);
+			Invalidate(EInvalidateWidgetReason::Paint);
+		}
+		QuestGuidanceRefreshTime = .25f;
+	}
 	bool bNeedsCanvasRefresh = UpdatePlayerMapPosition();
 	if (MapCanvas)
 	{

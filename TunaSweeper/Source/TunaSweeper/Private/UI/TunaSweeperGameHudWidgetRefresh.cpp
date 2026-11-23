@@ -494,6 +494,13 @@ void UTunaSweeperGameHudWidget::CacheAmmoCancelableActionWidgets()
 
 void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 {
+	if (TrackedQuestPanel)
+	{
+		const auto* Instance = GetGameInstance<UTunaSweeperGameInstance>();
+		const bool bShow = bHasTrackedQuest && Instance && Instance->GetActiveSaveSlotDifficultyStage() == 1 &&
+			!IsGameplayBottomHudSuppressed();
+		TrackedQuestPanel->SetVisibility(bShow ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+	}
 	if (IsHousingModeActive())
 	{
 		ForceCollapseHudWidget(BottomStatusWidget);

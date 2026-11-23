@@ -598,10 +598,6 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(int32 QuestId)
 			SetQuestState(QuestId, ETunaSweeperQuestState::RewardAvailable);
 			ShowQuestCompletedToast(QuestId);
 		}
-		if (Definition->bAutoTrackOnAccept)
-		{
-			TrackedQuestId = QuestId;
-		}
 	}
 
 	ReconcileWorldProgressObjectives(true);
@@ -706,11 +702,6 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(int32 QuestId)
 	CoinBalance += FMath::Max(0, Definition->Rewards.Coins);
 	SetQuestState(QuestId, ETunaSweeperQuestState::RewardCompleted);
 	// Achievement reporting waits until the gameplay save commits this reward state.
-	if (TrackedQuestId == QuestId)
-	{
-		TrackedQuestId = 0;
-	}
-
 	bQuestRewardClaimInProgress = false;
     if (TunaGameInstance) TunaGameInstance->NotifyQuestItemMutation();
 	BroadcastQuestProgressChanged(true);
@@ -1196,13 +1187,11 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 		}
 	}
 
-	if (IsQuestTrackable(SavedTrackedQuestId))
-	{
-		TrackedQuestId = SavedTrackedQuestId;
-	}
+	TrackedQuestId = SavedTrackedQuestId;
 
 	// WorldProgressStates is restored before quest progress. Do not save or toast during loading.
 	ReconcileWorldProgressObjectives(false);
+	ReconcileTrackedQuest();
 	OnQuestProgressChanged.Broadcast();
 }
 
@@ -1684,9 +1673,17 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 
 void UTunaSweeperQuestSubsystem::SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState)
 {
-	if (FindQuestDefinition(QuestId))
+	if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
 	{
 		GetOrCreateQuestProgress(QuestId).State = NewState;
+		if (QuestId == TrackedQuestId)
+		{
+			ReconcileTrackedQuest();
+		}
+		else if (TrackedQuestId == 0 && NewState == ETunaSweeperQuestState::Accepted && Definition->bAutoTrackOnAccept)
+		{
+			TrackedQuestId = QuestId;
+		}
 	}
 }
 
@@ -1815,7 +1812,18 @@ void UTunaSweeperQuestSubsystem::RequestSaveGameState() const
 
 bool UTunaSweeperQuestSubsystem::IsQuestTrackable(int32 QuestId) const
 {
-	const ETunaSweeperQuestState State = GetQuestState(QuestId);
-	return FindQuestDefinition(QuestId) &&
-		(State == ETunaSweeperQuestState::Accepted || State == ETunaSweeperQuestState::RewardAvailable);
+	return QuestDefinitions.Contains(QuestId) && GetQuestState(QuestId) == ETunaSweeperQuestState::Accepted;
+}
+
+void UTunaSweeperQuestSubsystem::ReconcileTrackedQuest()
+{
+	if (IsQuestTrackable(TrackedQuestId)) return;
+	TrackedQuestId = 0;
+	for (const auto& Entry : QuestProgressById)
+	{
+		if (IsQuestTrackable(Entry.Key) && (TrackedQuestId == 0 || Entry.Key < TrackedQuestId))
+		{
+			TrackedQuestId = Entry.Key;
+		}
+	}
 }

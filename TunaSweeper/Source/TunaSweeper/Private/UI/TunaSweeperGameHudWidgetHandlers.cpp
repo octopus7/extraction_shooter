@@ -1,5 +1,43 @@
 #include "TunaSweeperGameHudWidgetShared.h"
 
+void UTunaSweeperGameHudWidget::RefreshTrackedQuest()
+{
+	if (!TrackedQuestPanel || !TrackedQuestTitle || !TrackedQuestObjective || !TrackedQuestMapKey) return;
+
+	TrackedQuestMapKey->SetText(EKeys::M.GetDisplayName());
+	const auto* Instance = GetGameInstance<UTunaSweeperGameInstance>();
+	const auto* Quests = Instance ? Instance->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
+	const int32 QuestId = Quests ? Quests->GetTrackedQuestId() : 0;
+	FTunaSweeperQuestDefinition Definition;
+	bHasTrackedQuest = QuestId > 0 &&
+		Quests->GetQuestState(QuestId) == ETunaSweeperQuestState::Accepted &&
+		Quests->TryGetQuestDefinition(QuestId, Definition);
+	if (!bHasTrackedQuest)
+	{
+		TrackedQuestPanel->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+
+	TrackedQuestTitle->SetText(Definition.Title);
+	TArray<FTunaSweeperObjectiveProgressView> Progress;
+	Quests->GetQuestObjectiveProgress(QuestId, Progress);
+	const auto* Next = Progress.FindByPredicate([](const FTunaSweeperObjectiveProgressView& Objective)
+	{
+		return !Objective.bCompleted;
+	});
+	TrackedQuestObjective->SetText(Next ? Next->Text : Definition.ObjectiveDisplayText);
+	TrackedQuestObjective->SetVisibility(TrackedQuestObjective->GetText().IsEmpty()
+		? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+}
+
+void UTunaSweeperGameHudWidget::HandleTrackedQuestMapClicked()
+{
+	if (auto* Controller = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+	{
+		Controller->ToggleMapPanel();
+	}
+}
+
 void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
@@ -34,6 +72,7 @@ void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 
 void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 {
+	RefreshTrackedQuest();
 	if (MenuQuestPanelWidget)
 	{
 		MenuQuestPanelWidget->RefreshQuestView();
@@ -58,6 +97,7 @@ void UTunaSweeperGameHudWidget::HandleHousingStateChanged()
 
 void UTunaSweeperGameHudWidget::HandleLanguageChanged()
 {
+	RefreshTrackedQuest();
 	RefreshLocalizedTexts();
 	ApplyHudModeVisibility();
 	RefreshBottomStatusFromGameInstance();

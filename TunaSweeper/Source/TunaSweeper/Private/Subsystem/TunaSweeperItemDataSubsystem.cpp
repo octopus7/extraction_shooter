@@ -1829,3 +1829,18 @@ FString UTunaSweeperItemDataSubsystem::GetWorkbenchDismantleRecipesJsonPath() co
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::WorkbenchDismantleRecipesJsonRelativePath);
 }
+
+void UTunaSweeperItemDataSubsystem::GetGuaranteedContentsForItem(int32 ItemId, TSet<int32>& OutContentsIds)
+{
+	if (ItemId <= 0 || !EnsureItemDataLoaded()) return;
+	for (const auto& Entry : LootContainerContentsById)
+	{
+		const auto& Contents = Entry.Value;
+		const bool bGuaranteed = Contents.ItemQuantities.IsEmpty()
+			? Contents.Items.ContainsByPredicate([ItemId](const auto& Stack) { return Stack.ItemId == ItemId && Stack.Quantity > 0; })
+			: Contents.ItemQuantities.ContainsByPredicate([ItemId](const auto& Stack) {
+				return Stack.ItemId == ItemId && Stack.QuantityMin > 0 && Stack.DropChance >= 1.f;
+			});
+		if (bGuaranteed) OutContentsIds.Add(Entry.Key);
+	}
+}

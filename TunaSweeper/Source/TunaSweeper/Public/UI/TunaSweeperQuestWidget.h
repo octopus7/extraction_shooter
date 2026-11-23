@@ -118,6 +118,9 @@ private:
 	UFUNCTION()
 	void HandleAcceptAllClicked();
 
+	UFUNCTION()
+	void HandleTrackQuestClicked();
+
 	TArray<int32> GetAcceptAllQuestIds() const;
 	void SelectQuestAfterAction(const UTunaSweeperQuestSubsystem& QuestSubsystem, int32 ActingQuestId, bool bRewardClaimed);
 	void EnsureAcceptAllButton();
@@ -227,6 +230,12 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> AcceptAllButtonText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> TrackQuestButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> TrackQuestButtonText;
 
 	EQuestListFilter ActiveFilter = EQuestListFilter::Available;
 	int32 QuestId = 0;

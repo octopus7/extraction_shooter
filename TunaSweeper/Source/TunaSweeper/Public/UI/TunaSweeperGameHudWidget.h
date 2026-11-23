@@ -10,6 +10,7 @@
 
 class AActor;
 class ATunaSweeperDeliveryDestinationActor;
+class UProceduralMeshComponent;
 class UTexture2D;
 class ATunaSweeperTopDownCharacter;
 struct FGeometry;
@@ -199,6 +200,27 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperHudTopReserveWidget> TopStatusReserveWidget;
+
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> TrackedQuestPanel;
+
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> TrackedQuestTitle;
+
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> TrackedQuestObjective;
+
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UButton> TrackedQuestMapButton;
+
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> TrackedQuestMapKey;
+
+	bool bHasTrackedQuest = false;
+	void RefreshTrackedQuest();
+
+	UFUNCTION()
+	void HandleTrackedQuestMapClicked();
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperHudBottomStatusWidget> BottomStatusWidget;
@@ -392,6 +414,15 @@ private:
 	float DeliveryIndicatorScanCountdown = 0.f;
 	UPROPERTY(Transient)
 	TMap<int32, TObjectPtr<UTexture2D>> DeliveryIndicatorIcons;
+	void RefreshQuestGuidance(float DeltaTime);
+	void ResetQuestGuidance();
+	TWeakObjectPtr<UProceduralMeshComponent> QuestGuidanceTrail;
+	TWeakObjectPtr<APawn> QuestGuidancePawn;
+	TOptional<FVector> QuestGuidanceTarget;
+	float QuestGuidanceScanCountdown = 0.0f;
+	bool bQuestGuidanceIconLoadAttempted = false;
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> QuestGuidanceIcon;
 	friend class FTunaSweeperPauseHudTransitionTest;
 	friend class FTunaSweeperHeadshotFeedbackTest;
 	friend class FTunaSweeperWardrobePanelTest;

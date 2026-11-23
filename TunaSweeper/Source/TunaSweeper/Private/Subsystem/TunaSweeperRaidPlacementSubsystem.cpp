@@ -632,3 +632,40 @@ void UTunaSweeperRaidPlacementSubsystem::HandlePostLoadMapWithWorld(UWorld* Load
 {
 	EnsureRaidPlacementActorsSpawnedForWorld(LoadedWorld);
 }
+
+void UTunaSweeperRaidPlacementSubsystem::GetQuestGuidanceAnchorIds(UWorld* World,
+	const FTunaSweeperObjectiveDefinition& Objective, const TSet<int32>& GuaranteedContents,
+	TSet<int32>& OutEnemies, TSet<int32>& OutLoot)
+{
+	if (!World || !TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*World->GetMapName())) || !LoadData()) return;
+
+	const bool bKill = Objective.Type == ETunaSweeperObjectiveType::EnemyKilled;
+	for (const FEnemyPlacementDefinition& Placement : EnemyPlacementDefinitions)
+	{
+		if (!DoesLevelIdMatchWorld(Placement.LevelId, World) ||
+			(!Placement.ConditionId.IsNone() && Placement.ConditionId != TEXT("always"))) continue;
+		const FEnemySpawnProfile* Profile = EnemyProfilesById.Find(Placement.ProfileId);
+		if (!Profile) continue;
+		if (bKill)
+		{
+			const FName EnemyId = Profile->EnemyId.IsNone() ? MakeRuntimeInstanceId(Placement.LevelId, Placement.PlacementId) : Profile->EnemyId;
+			if (ShouldSpawnAtPlacement(Placement.PlacementId, Placement.SpawnChance) &&
+				(Objective.EnemyId.IsNone() || Objective.EnemyId == EnemyId) &&
+				(Objective.EnemyClassPaths.IsEmpty() || Objective.EnemyClassPaths.Contains(FSoftClassPath(Profile->EnemyClass.ToSoftObjectPath().ToString()))))
+				OutEnemies.Add(Placement.PlacementId);
+		}
+		else if (Placement.SpawnChance >= 1.f && Profile->DropContainerDefinitionId > 0 && GuaranteedContents.Contains(Profile->DropContentsId))
+		{
+			OutEnemies.Add(Placement.PlacementId);
+		}
+	}
+	if (GuaranteedContents.IsEmpty()) return;
+	for (const FLootPlacementDefinition& Placement : LootPlacementDefinitions)
+	{
+		if (!DoesLevelIdMatchWorld(Placement.LevelId, World) || !GuaranteedContents.Contains(Placement.ContentsId)) continue;
+		const bool bAvailable = Placement.RequiredActiveQuestId > 0
+			? IsQuestLootActive(Placement.RequiredActiveQuestId)
+			: Placement.SpawnChance >= 1.f && (Placement.ConditionId.IsNone() || Placement.ConditionId == TEXT("always"));
+		if (bAvailable) OutLoot.Add(Placement.PlacementId);
+	}
+}

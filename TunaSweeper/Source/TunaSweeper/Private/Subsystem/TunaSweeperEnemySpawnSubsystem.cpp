@@ -451,3 +451,17 @@ bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, c
 	const FString WorldPackageName = TunaSweeperEnemySpawn::NormalizeLevelName(World->GetOutermost()->GetName());
 	return SpawnLevelName.Equals(WorldMapName, ESearchCase::IgnoreCase) || SpawnLevelName.Equals(WorldPackageName, ESearchCase::IgnoreCase);
 }
+
+void UTunaSweeperEnemySpawnSubsystem::GetGuaranteedLootLocations(const UWorld* World,
+	const TSet<int32>& ContentsIds, TArray<FVector>& OutLocations)
+{
+	if (!World || ContentsIds.IsEmpty() || !LoadLootContainerSpawnData()) return;
+	for (const FLootContainerSpawnDefinition& Placement : LootContainerSpawnDefinitions)
+	{
+		if (ContentsIds.Contains(Placement.ContentsId) && DoesLevelNameMatchWorld(Placement.LevelName, World) &&
+			(!Placement.bEditorOnly || TunaSweeperEnemySpawn::ShouldIncludeEditorOnlySpawn(World)))
+		{
+			OutLocations.AddUnique(Placement.Location);
+		}
+	}
+}

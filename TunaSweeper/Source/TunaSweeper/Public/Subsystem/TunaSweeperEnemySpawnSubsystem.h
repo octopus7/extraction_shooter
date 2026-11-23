@@ -36,6 +36,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Loot Spawn")
 	bool IsLootContainerSpawnDataLoaded() const { return bLootContainerSpawnDataLoaded; }
 
+	void GetGuaranteedLootLocations(const UWorld* World, const TSet<int32>& ContentsIds, TArray<FVector>& OutLocations);
+
 private:
 	struct FLootContainerSpawnDefinition
 	{

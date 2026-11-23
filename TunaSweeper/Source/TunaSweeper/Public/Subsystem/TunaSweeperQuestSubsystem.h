@@ -210,6 +210,7 @@ private:
 	void EnsureSaveStateLoaded() const;
 	void RequestSaveGameState() const;
 	bool IsQuestTrackable(int32 QuestId) const;
+	void ReconcileTrackedQuest();
 
 	TMap<int32, FTunaSweeperQuestDefinition> QuestDefinitions;
 	TMap<FName, FTunaSweeperQuestTextString> QuestTextStringsByKey;

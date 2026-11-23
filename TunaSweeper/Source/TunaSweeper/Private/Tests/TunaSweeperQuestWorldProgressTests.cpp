@@ -102,6 +102,9 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     Quests->QuestDefinitions.Add(PrerequisiteId, Prerequisite);
     TestTrue(TEXT("Accept unopened gate objective"), Quests->AcceptQuest(GateId));
     TestTrue(TEXT("Accept broken lift objective"), Quests->AcceptQuest(LiftId));
+    TestEqual(TEXT("Accepting another quest preserves the selection"), Quests->GetTrackedQuestId(), GateId);
+    TestTrue(TEXT("Select the other active quest"), Quests->SetTrackedQuest(LiftId));
+    TestTrue(TEXT("Select the gate again"), Quests->SetTrackedQuest(GateId));
     TArray<FTunaSweeperNumericQuestProgressSaveData> AcceptedSave;
     int32 Tracked = 0, Coins = 0;
     Quests->ExportQuestProgressForSave(AcceptedSave, Tracked, Coins);
@@ -112,6 +115,8 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
 
     Game->UpdateWorldProgressState(TEXT("test.passage.gate"), NAME_None, ETunaSweeperWorldProgressState::Completed, 1, 1, false);
     TestEqual(TEXT("World completion completes accepted gate objective"), Quests->GetQuestState(GateId), ETunaSweeperQuestState::RewardAvailable);
+    TestEqual(TEXT("Tracking switches to the remaining active quest"), Quests->GetTrackedQuestId(), LiftId);
+    TestFalse(TEXT("A reward-ready quest cannot be tracked"), Quests->SetTrackedQuest(GateId));
     TestEqual(TEXT("World completion does not auto-accept another quest"), Quests->GetQuestState(LateId), ETunaSweeperQuestState::Available);
     TestEqual(TEXT("Completion does not grant reward"), Quests->GetCoinBalance(), 0);
     TestTrue(TEXT("Late acceptance recognizes already completed world object"), Quests->AcceptQuest(LateId));
@@ -165,7 +170,7 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     for (auto& Progress : AcceptedSave) Progress.ObjectiveProgress.Reset();
     Quests->LoadQuestProgressFromSave(AcceptedSave, GateId, 0);
     TestEqual(TEXT("Old accepted save with missing objective count recovers from world state"), Quests->GetQuestState(GateId), ETunaSweeperQuestState::RewardAvailable);
-    TestEqual(TEXT("Recovery preserves tracking"), Quests->GetTrackedQuestId(), GateId);
+    TestEqual(TEXT("Recovery clears tracking when both quests are reward-ready"), Quests->GetTrackedQuestId(), 0);
     TestEqual(TEXT("Load recovery does not claim reward"), Quests->GetCoinBalance(), 0);
     TestEqual(TEXT("Load recovery also handles lift without an active actor"), Quests->GetQuestState(LiftId), ETunaSweeperQuestState::RewardAvailable);
 

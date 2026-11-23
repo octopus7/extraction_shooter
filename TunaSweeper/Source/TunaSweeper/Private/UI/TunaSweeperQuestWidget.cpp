@@ -323,6 +323,10 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 {
 	BuildQuestWidget();
 	EnsureAcceptAllButton();
+	if (UTextBlock* ListTitle = Cast<UTextBlock>(GetWidgetFromName(TEXT("QuestListTitleText"))))
+	{
+		ListTitle->SetText(GetQuestText(TEXT("quest.ui.list_title")));
+	}
 	NormalizeActiveFilter();
 	UpdateTabButtonStates();
 
@@ -411,6 +415,14 @@ void UTunaSweeperQuestWidget::NativeConstruct()
 		CompletedTabButton->OnClicked.AddDynamic(this, &UTunaSweeperQuestWidget::HandleCompletedTabClicked);
 	}
 
+	if (AcceptAllButton)
+	{
+		AcceptAllButton->OnClicked.AddUniqueDynamic(this, &UTunaSweeperQuestWidget::HandleAcceptAllClicked);
+	}
+	if (TrackQuestButton)
+	{
+		TrackQuestButton->OnClicked.AddUniqueDynamic(this, &UTunaSweeperQuestWidget::HandleTrackQuestClicked);
+	}
 	if (PrimaryButton)
 	{
 		PrimaryButton->OnClicked.RemoveDynamic(this, &UTunaSweeperQuestWidget::HandlePrimaryButtonClicked);
@@ -490,6 +502,17 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	}
 
 	RefreshQuestView();
+}
+
+void UTunaSweeperQuestWidget::HandleTrackQuestClicked()
+{
+	if (auto* Instance = GetGameInstance<UTunaSweeperGameInstance>(); Instance && Instance->GetActiveSaveSlotDifficultyStage() == 1)
+	{
+		if (auto* Quests = Instance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			Quests->SetTrackedQuest(QuestId);
+		}
+	}
 }
 
 void UTunaSweeperQuestWidget::SelectQuestAfterAction(
@@ -624,6 +647,10 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 	DetailEmptyText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailEmptyText")));
 	PrimaryButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestPrimaryButton")));
 	PrimaryButtonText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestPrimaryButtonText")));
+	TrackQuestButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestTrackButton")));
+	TrackQuestButtonText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestTrackButtonText")));
+	AcceptAllButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestAcceptAllButton")));
+	AcceptAllButtonText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestAcceptAllButtonText")));
 
 	return RootPanel &&
 		RootColumns &&
@@ -1243,6 +1270,15 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 		DetailRewardText->SetVisibility(DetailRewardText->GetText().IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::SelfHitTestInvisible);
 	}
 	UpdateRewardItemRows(bHasQuest ? QuestSubsystem : nullptr, QuestId);
+	if (TrackQuestButton && TrackQuestButtonText)
+	{
+		const auto* Instance = GetGameInstance<UTunaSweeperGameInstance>();
+		const bool bCanTrack = bHasQuest && Instance && Instance->GetActiveSaveSlotDifficultyStage() == 1 &&
+			QuestSubsystem->GetQuestState(QuestId) == ETunaSweeperQuestState::Accepted;
+		TrackQuestButton->SetVisibility(bCanTrack ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		TrackQuestButton->SetIsEnabled(bCanTrack && QuestSubsystem->GetTrackedQuestId() != QuestId);
+		TrackQuestButtonText->SetText(GetQuestText(TEXT("quest.ui.button.track")));
+	}
 	if (PrimaryButtonText)
 	{
 		PrimaryButtonText->SetText(bHasQuest ? GetPrimaryButtonText(QuestId) : FText::GetEmpty());

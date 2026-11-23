@@ -86,6 +86,12 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	if (TrackedQuestMapButton)
+	{
+		TrackedQuestMapButton->OnClicked.AddUniqueDynamic(this, &UTunaSweeperGameHudWidget::HandleTrackedQuestMapClicked);
+	}
+	RefreshTrackedQuest();
+
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
@@ -169,6 +175,7 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 	DeliveryIndicatorTargets.Reset();
 	DeliveryIndicatorIcons.Reset();
 	DeliveryIndicatorScanCountdown = 0.f;
+	ResetQuestGuidance();
 	Super::NativeDestruct();
 }
 

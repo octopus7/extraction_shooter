@@ -423,7 +423,7 @@ Each `FTunaSweeperQuestProgressSaveData` preserves:
 - `State`: `Available`, `Accepted`, `RewardAvailable`, or `RewardCompleted`.
 - `ObjectiveProgress`: per-objective `ObjectiveId` and `CurrentCount`.
 
-`TrackedQuestId` stores the HUD-tracked quest for the active save slot. `QuestCoinBalance` stores the player coin currency balance separately from item instances; the field name is legacy and is kept for save compatibility. New save slots initialize with no quest progress, no tracked quest, and zero coins.
+`NumericTrackedQuestId` stores the single HUD-tracked quest for the active save slot. Accepting a quest preserves an existing active selection. If that quest leaves the accepted state, tracking switches to the lowest-numbered accepted quest, or clears when none remain. Loading repairs an obsolete selection after reconciling quest progress. `QuestCoinBalance` stores the player coin currency balance separately from item instances; the field name is legacy and is kept for save compatibility. New save slots initialize with no quest progress, no tracked quest, and zero coins.
 
 ### Experience Progress
 
