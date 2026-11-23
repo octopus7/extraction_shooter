@@ -72,11 +72,6 @@ void AHopperArmModule::EndPlay(const EEndPlayReason::Type Reason)
     Super::EndPlay(Reason);
 }
 
-bool AHopperArmModule::IsReady() const
-{
-    return !IsActorBeingDestroyed() && GetWorld() && GetWorld()->GetTimeSeconds() >= NextFireTime;
-}
-
 void AHopperArmModule::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -84,23 +79,15 @@ void AHopperArmModule::Tick(float DeltaSeconds)
         RootComponent->SetRelativeRotation(FMath::QInterpTo(RootComponent->GetRelativeRotation().Quaternion(), FQuat::Identity, DeltaSeconds, 5.f));
 }
 
-bool AHopperArmModule::TryFireAt(AActor* TargetActor)
+bool AHopperArmModule::FireBurstRound(const FVector& AimPoint)
 {
-    ATunaSweeperHopperEnemyCharacter* Hopper = Cast<ATunaSweeperHopperEnemyCharacter>(GetOwner());
-    if (!IsReady() || !IsValid(TargetActor) || !Hopper || Hopper->GetCombatPhase() != EHopperCombatPhase::Mech
-        || !Hopper->CanAttackHopperTarget(TargetActor)) return false;
-    const FVector AimPoint = TargetActor->GetActorLocation();
+    const auto* Hopper = Cast<ATunaSweeperHopperEnemyCharacter>(GetOwner());
+    if (!Hopper || Hopper->GetCombatPhase() != EHopperCombatPhase::Mech || Hopper->IsStandardCombatSuppressed()) return false;
     const USceneComponent* Parent = RootComponent->GetAttachParent();
     const FVector Direction = (AimPoint - GetActorLocation()).GetSafeNormal();
     const FVector LocalDirection = Parent ? Parent->GetComponentTransform().InverseTransformVectorNoScale(Direction) : Direction;
     RootComponent->SetRelativeRotation(FQuat::FindBetweenNormals(-FVector::UpVector, LocalDirection));
-    FHitResult Hit;
-    FCollisionQueryParams Query(SCENE_QUERY_STAT(HopperArmFire), true, Hopper);
-    Query.AddIgnoredActor(this);
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Muzzle->GetComponentLocation(), AimPoint, ECC_Visibility, Query)
-        && Hit.GetActor() != TargetActor) return false;
-    if (!FireWeapon(TargetActor, AimPoint)) return false;
-    NextFireTime = GetWorld()->GetTimeSeconds() + FMath::Max(0.f, CooldownSeconds);
+    if (!FireWeapon(nullptr, AimPoint)) return false;
     RestorePoseTime = GetWorld()->GetTimeSeconds() + .4;
     return true;
 }

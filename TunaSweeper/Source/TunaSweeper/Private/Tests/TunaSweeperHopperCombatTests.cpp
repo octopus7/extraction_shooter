@@ -85,7 +85,7 @@ bool FHopperCombatOwnershipTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Replacement is a different actor"), OldArm != Hopper->GetArmModule(true));
     TestEqual(TEXT("Equipped mech reports loaded readiness through base API"), BaseView->GetEnemyWeaponRuntimeStatus().LoadedAmmo, 1);
     Hopper->Phase = EHopperCombatPhase::Disembarking;
-    TestFalse(TEXT("Arm cannot bypass its owner's transition gate"), Hopper->GetArmModule(true)->TryFireAt(Target));
+    TestFalse(TEXT("Arm cannot bypass its owner's transition gate"), Hopper->GetArmModule(true)->FireBurstRound(Target->GetActorLocation()));
     Hopper->Phase = EHopperCombatPhase::Mech;
     TestTrue(TEXT("Arm can be removed"), Hopper->SetArmModule(true, nullptr));
     TestNull(TEXT("Removed slot is empty"), Hopper->GetArmModule(true));

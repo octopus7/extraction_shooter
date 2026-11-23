@@ -570,8 +570,7 @@ bool ATrailerGameMode::PlayShot(float Dt)
 			Player->GetCharacterMovement()->MaxWalkSpeed = 240.f;
 			Player->AddMovementInput(Side, Strafe * .7f, true);
 			Boss->AddMovementInput(-Side, FMath::Cos(MechCombatTime * .55f), true);
-			const bool bBossFired = Boss->AttackTarget(Player.Get());
-			if (bBossFired) UE_LOG(LogTemp, Display, TEXT("Trailer: mech fired at speed %.1f"), Boss->GetVelocity().Size2D());
+			Boss->AttackTarget(Player.Get());
 			if (MechCombatTime > 1.5f && FMath::Fmod(MechCombatTime, 1.8f) < 1.f)
 				Shoot(Boss);
 			else Player->SetAimWorldPoint(Boss->GetActorLocation());

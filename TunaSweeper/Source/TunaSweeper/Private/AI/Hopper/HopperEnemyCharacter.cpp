@@ -1,4 +1,5 @@
 #include "AI/Hopper/HopperEnemyCharacter.h"
+#include "AI/TunaSweeperAttackTelegraph.h"
 #include "Engine/DamageEvents.h"
 #include "Combat/TunaSweeperCombatValue.h"
 #include "TunaSweeperCollisionChannels.h"
@@ -185,6 +186,7 @@ void ATunaSweeperHopperEnemyCharacter::EnterMountedCombat()
 void ATunaSweeperHopperEnemyCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (BurstRoundsRemaining > 0) UpdateMechBurst();
     if (IsDead()) return;
     const float AngularRate = DeltaSeconds > UE_SMALL_NUMBER ? FMath::Abs(FMath::FindDeltaAngleDegrees(PreviousGaitYaw,GetActorRotation().Yaw))/DeltaSeconds : 0.f;
     TurningFootSpeed = FMath::DegreesToRadians(AngularRate)*45.f;
@@ -294,16 +296,29 @@ ETunaSweeperEnemyFireResult ATunaSweeperHopperEnemyCharacter::TryFireProjectileA
     if (GetWorld() && IsValid(Target))
         if (const UTunaSweeperFactionSubsystem* Factions = GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>();
             Factions && Factions->AreActorsFriendly(this, Target)) return ETunaSweeperEnemyFireResult::FriendlyTarget;
+    if (Phase == EHopperCombatPhase::Mech && bBurstFiredSinceRequest)
+    {
+        bBurstFiredSinceRequest = false;
+        return ETunaSweeperEnemyFireResult::Fired;
+    }
     if (!CanAttackHopperTarget(Target)) return ETunaSweeperEnemyFireResult::Blocked;
     if (Phase == EHopperCombatPhase::Mech)
     {
-        AHopperArmModule* First = GetArmModule(bNextArmLeft);
-        AHopperArmModule* Second = GetArmModule(!bNextArmLeft);
-        if (!IsValid(First) && !IsValid(Second)) return ETunaSweeperEnemyFireResult::OutOfAmmo;
-        if ((IsValid(First) && First->TryFireAt(Target)) || (IsValid(Second) && Second->TryFireAt(Target)))
+        if (!IsValid(LeftArm) && !IsValid(RightArm)) return ETunaSweeperEnemyFireResult::OutOfAmmo;
+        const double Now = GetWorld()->GetTimeSeconds();
+        if (BurstRoundsRemaining == 0 && Now >= NextBurstActionTime)
         {
-            bNextArmLeft = !bNextArmLeft;
-            return ETunaSweeperEnemyFireResult::Fired;
+            FHitResult Ground;
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(HopperBurstGround), false, Target);
+            const FVector Start = Target->GetActorLocation();
+            if (!GetWorld()->LineTraceSingleByChannel(Ground, Start, Start - FVector(0,0,2000), ECC_Visibility, Query))
+                return ETunaSweeperEnemyFireResult::Blocked;
+            BurstMarker = GetWorld()->SpawnActor<ATunaSweeperAttackTelegraph>();
+            if (!BurstMarker.IsValid()) return ETunaSweeperEnemyFireResult::Blocked;
+            BurstMarker->InitCircle(Ground.ImpactPoint, 75.f, BurstWarningSeconds);
+            BurstRoundsRemaining = 3;
+            NextBurstActionTime = Now + BurstWarningSeconds;
+            UE_LOG(LogTemp, Verbose, TEXT("Hopper burst marked at %s"), *Ground.ImpactPoint.ToString());
         }
         return ETunaSweeperEnemyFireResult::Cooldown;
     }
@@ -320,6 +335,43 @@ ETunaSweeperEnemyFireResult ATunaSweeperHopperEnemyCharacter::TryFireProjectileA
     Presentation->PlayPilotFire();
     UpdatePilotAmmoPhase();
     return ETunaSweeperEnemyFireResult::Fired;
+}
+
+void ATunaSweeperHopperEnemyCharacter::ClearMechBurst()
+{
+    if (BurstMarker.IsValid()) BurstMarker->Destroy();
+    BurstMarker = nullptr;
+    BurstRoundsRemaining = 0;
+}
+
+void ATunaSweeperHopperEnemyCharacter::UpdateMechBurst()
+{
+    if (Phase != EHopperCombatPhase::Mech || IsStandardCombatSuppressed() || !BurstMarker.IsValid())
+    {
+        ClearMechBurst();
+        return;
+    }
+    const double Now = GetWorld()->GetTimeSeconds();
+    if (BurstRoundsRemaining == 3)
+        BurstMarker->SetProgress(FMath::Clamp(1.f - float(NextBurstActionTime - Now) / BurstWarningSeconds, 0.f, 1.f));
+    if (Now < NextBurstActionTime) return;
+
+    const FVector AimPoint = BurstMarker->GetActorLocation();
+    AHopperArmModule* Arm = GetArmModule(bNextArmLeft);
+    if (!IsValid(Arm)) Arm = GetArmModule(!bNextArmLeft);
+    if (IsValid(Arm) && Arm->FireBurstRound(AimPoint))
+    {
+        bBurstFiredSinceRequest = true;
+        bNextArmLeft = Arm != LeftArm;
+        UE_LOG(LogTemp, Verbose, TEXT("Hopper burst round %d at %s"), 4 - BurstRoundsRemaining, *AimPoint.ToString());
+        if (--BurstRoundsRemaining > 0)
+        {
+            NextBurstActionTime = Now + BurstRoundInterval;
+            return;
+        }
+    }
+    ClearMechBurst();
+    NextBurstActionTime = Now + FMath::Max(BurstRestSeconds, IsValid(Arm) ? Arm->CooldownSeconds : 0.f);
 }
 
 bool ATunaSweeperHopperEnemyCharacter::FirePilotProjectile(AActor* Target)
@@ -411,6 +463,7 @@ bool ATunaSweeperHopperEnemyCharacter::SetArmModule(bool bLeft, TSubclassOf<AHop
 
 void ATunaSweeperHopperEnemyCharacter::BeginMechDestruction(const FVector& ImpactTravel)
 {
+    ClearMechBurst();
     Phase = EHopperCombatPhase::Disembarking;
     Presentation->DisableMechHitBoxes();
     ApplyPhaseMovementSpeed();
@@ -585,6 +638,7 @@ void ATunaSweeperHopperEnemyCharacter::OnDeathPresentationStarted()
 
 void ATunaSweeperHopperEnemyCharacter::EndPlay(EEndPlayReason::Type Reason)
 {
+    ClearMechBurst();
     if (IsValid(LeftArm))
     {
         if (VisionSubjectComponent) VisionSubjectComponent->RemoveLinkedActor(LeftArm);

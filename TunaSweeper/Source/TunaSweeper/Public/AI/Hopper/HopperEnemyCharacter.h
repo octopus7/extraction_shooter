@@ -5,6 +5,7 @@
 #include "HopperEnemyCharacter.generated.h"
 
 class AHopperArmModule;
+class ATunaSweeperAttackTelegraph;
 class ATunaSweeperPlayerController;
 class UHopperPresentationComponent;
 class UHopperVisualData;
@@ -97,6 +98,15 @@ private:
     void EnterPilotCombat();
     bool FirePilotProjectile(AActor* TargetActor);
     void UpdatePilotAmmoPhase();
+    void UpdateMechBurst();
+    void ClearMechBurst();
+    TWeakObjectPtr<ATunaSweeperAttackTelegraph> BurstMarker;
+    bool bBurstFiredSinceRequest = false;
+    int32 BurstRoundsRemaining = 0;
+    double NextBurstActionTime = 0;
+    static constexpr float BurstWarningSeconds = 1.f;
+    static constexpr float BurstRoundInterval = .22f;
+    static constexpr float BurstRestSeconds = 1.8f;
     void ApplyPhaseMovementSpeed();
     UPROPERTY(Transient) TObjectPtr<UHopperVisualData> LoadedVisualData;
     UPROPERTY(Transient) TObjectPtr<AHopperArmModule> LeftArm;

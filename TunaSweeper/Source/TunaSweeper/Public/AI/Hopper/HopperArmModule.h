@@ -19,13 +19,13 @@ public:
     AHopperArmModule();
     virtual void Tick(float DeltaSeconds) override;
     void ConfigureVisual(UHopperVisualData* Data, bool bLeft);
-    bool TryFireAt(AActor* TargetActor);
-    bool IsReady() const;
+    bool FireBurstRound(const FVector& AimPoint);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hopper|Weapon")
     TSubclassOf<ATunaSweeperProjectile> ProjectileClass;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hopper|Weapon", meta=(ClampMin="0"))
     float Damage = 12.f;
+    // Minimum recovery after a completed burst using this module.
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hopper|Weapon", meta=(ClampMin="0"))
     float CooldownSeconds = .75f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hopper|Weapon")
@@ -47,6 +47,5 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> HitBoxes;
     UPROPERTY(Transient) TObjectPtr<UHopperVisualData> VisualData;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> CannonNozzle;
-    double NextFireTime = 0;
     double RestorePoseTime = 0;
 };
