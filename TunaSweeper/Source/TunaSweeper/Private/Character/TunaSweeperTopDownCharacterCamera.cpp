@@ -68,6 +68,7 @@ void ATunaSweeperTopDownCharacter::CyclePlayerCameraMode()
 
 float ATunaSweeperTopDownCharacter::ResolveCameraCursorLeadRatio() const
 {
+	if (bExternalAimControl) return 0.f;
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController)
 	{

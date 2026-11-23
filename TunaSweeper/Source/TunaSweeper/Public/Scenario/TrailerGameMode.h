@@ -43,4 +43,6 @@ private:
 	float FadeRemaining = 0;
 	bool bReady = false;
 	bool bLeaving = false;
+	bool bWaitingForRail = false;
+	float MechCombatTime = 0.f;
 };

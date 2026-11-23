@@ -81,9 +81,13 @@ void ATrailerGameMode::PlacePlayer(FVector Feet)
 void ATrailerGameMode::WalkTo(FVector Destination)
 {
 	FVector Offset = Destination - Player->GetActorLocation();
-	if (Offset.SizeSquared2D() < FMath::Square(20.f)) return;
+	if (Offset.SizeSquared2D() < FMath::Square(35.f))
+	{
+		Player->GetCharacterMovement()->StopMovementImmediately();
+		return;
+	}
 	Player->AddMovementInput(Offset.GetSafeNormal2D(), 1.f, true);
-	Player->SetAimWorldPoint(Destination);
+	Player->SetAimWorldPoint(Player->GetActorLocation() + Offset.GetSafeNormal2D() * 1500.f);
 }
 
 void ATrailerGameMode::Shoot(AActor* Actor)
@@ -234,7 +238,9 @@ bool ATrailerGameMode::SetUpShot()
 			if (It->StationId == TEXT("village_02")) Station = *It;
 		Train = Cast<ALoopRailTrain>(UGameplayStatics::GetActorOfClass(this, ALoopRailTrain::StaticClass()));
 		if (!Station.IsValid() || !Train.IsValid() || !Train->HasUsableTrack()) return false;
-		Train->StartDistance = Station->GetStopDistance() - 2200;
+		Train->StartDistance = Station->GetStopDistance() - 1050;
+		Train->Acceleration = 420.f;
+		Train->BrakingDeceleration = 420.f;
 		Train->ResetTrain();
 		// Stand on the platform beside the first passenger car door.
 		PlacePlayer(Station->GetActorTransform().TransformPosition(FVector(-624, (Station->bPlatformOnRight ? 1 : -1) * 185, 60)));
@@ -248,6 +254,7 @@ bool ATrailerGameMode::SetUpShot()
 		Train->ResetTrain();
 		Player->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		Player->SetActorEnableCollision(false);
+		Player->SetActorLocation(Floor->GetComponentLocation() + FVector(0, 0, 10 + Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
 		return true;
 	}
 	case EShot::Beach:
@@ -308,7 +315,7 @@ bool ATrailerGameMode::PlayShot(float Dt)
 			if (Distance > Length && Index < 2) { Distance -= Length; continue; }
 			const FVector Feet = Points[Index] + Segment.GetSafeNormal()*FMath::Min(Length, Distance);
 			Player->SetActorLocation(Feet + FVector(0,0,10 + Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
-			Player->SetAimWorldPoint(Feet + Segment);
+			Player->SetAimWorldPoint(Feet + Segment.GetSafeNormal2D() * 1500.f);
 			Player->AddMovementInput(Segment.GetSafeNormal2D(), .7f, true);
 			break;
 		}
@@ -357,9 +364,29 @@ bool ATrailerGameMode::PlayShot(float Dt)
 			Player->GetCharacterMovement()->MaxWalkSpeed = 500.f;
 			const float Range = FVector::Dist2D(Player->GetActorLocation(), Boss->GetActorLocation());
 			if (Range > 580.f) WalkTo(Boss->GetActorLocation());
-			if (Elapsed >= 2.f && Range <= 600.f) Boss->BeginEncounterBoarding(Cast<ATunaSweeperPlayerController>(Player->GetController()));
+			if (Elapsed >= 2.f && Range <= 600.f)
+			{
+				Boss->BeginEncounterBoarding(Cast<ATunaSweeperPlayerController>(Player->GetController()));
+				Player->bHideTrailerLaser = Boss->GetCombatPhase() == EHopperCombatPhase::Boarding;
+				Player->UpdateEquippedWeaponLaserSightBeam();
+			}
 		}
-		if (Phase == EHopperCombatPhase::Mech) Shoot(Boss);
+		if (Phase == EHopperCombatPhase::Mech && !CastChecked<ATunaSweeperPlayerController>(Player->GetController())->IsHopperShotActive())
+		{
+			Player->bHideTrailerLaser = false;
+			MechCombatTime += Dt;
+			const FVector ToBoss = (Boss->GetActorLocation() - Player->GetActorLocation()).GetSafeNormal2D();
+			const FVector Side = FVector::CrossProduct(FVector::UpVector, ToBoss);
+			const float Strafe = FMath::Cos(MechCombatTime * 1.6f);
+			Player->GetCharacterMovement()->MaxWalkSpeed = 240.f;
+			Player->AddMovementInput(Side, Strafe * .7f, true);
+			Boss->AddMovementInput(-Side, FMath::Cos(MechCombatTime * .55f), true);
+			const bool bBossFired = Boss->AttackTarget(Player.Get());
+			if (bBossFired) UE_LOG(LogTemp, Display, TEXT("Trailer: mech fired at speed %.1f"), Boss->GetVelocity().Size2D());
+			if (MechCombatTime > 1.5f && FMath::Fmod(MechCombatTime, 1.8f) < 1.f)
+				Shoot(Boss);
+			else Player->SetAimWorldPoint(Boss->GetActorLocation());
+		}
 		return false;
 	}
 	default: return true;
@@ -373,7 +400,6 @@ void ATrailerGameMode::Tick(float Dt)
 	if (bLeaving || !PC || !PC->PlayerCameraManager) return;
 	Player = Cast<ATunaSweeperTopDownCharacter>(PC->GetPawn());
 	if (!Player.IsValid()) return;
-	if (PC->WasInputKeyJustPressed(EKeys::Escape)) { ReturnToTitle(); return; }
 	if (auto* Hud = PC->GetGameHudWidget()) Hud->SetVisibility(ESlateVisibility::Collapsed);
 	PC->bShowMouseCursor = false;
 	if (FadeRemaining > 0)
@@ -403,10 +429,38 @@ void ATrailerGameMode::Tick(float Dt)
 		PC->SetViewTarget(Player.Get());
 		GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
 		IStreamingManager::Get().AddViewLocation(Player->GetActorLocation(), 1.f, false, 1.f);
+		if (Shot == EShot::Platform || Shot == EShot::Carriage)
+		{
+			for (int32 Car : {1, 2})
+			{
+				const auto* Floor = Train->GetVehicleFloor(Car);
+				if (!IsValid(Floor) || !Floor->IsRegistered()) { ReturnToTitle(); return; }
+				IStreamingManager::Get().AddViewLocation(Floor->GetComponentLocation(), 1.f, false, 2.f);
+			}
+			Train->SetRunning(false);
+			bWaitingForRail = true;
+			bReady = true;
+			return;
+		}
 		IStreamingManager::Get().StreamAllResources(1.f);
 		PC->PlayerCameraManager->StartCameraFade(1,0,FadeSeconds,FLinearColor::Black,false);
 		bReady = true;
 		UE_LOG(LogTemp, Display, TEXT("Trailer: begin shot %d"), int32(Shot));
+	}
+	if (bWaitingForRail)
+	{
+		// Let the viewport submit the new camera before checking the rail view requests.
+		HoldTime += Dt;
+		if (IStreamingManager::Get().StreamAllResources(.05f) != 0 || IsAsyncLoading())
+		{
+			if (HoldTime > 20.f) { UE_LOG(LogTemp, Error, TEXT("Trailer: rail streaming timed out")); ReturnToTitle(); }
+			return;
+		}
+		Train->SetRunning(true);
+		bWaitingForRail = false;
+		HoldTime = 0;
+		PC->PlayerCameraManager->StartCameraFade(1,0,FadeSeconds,FLinearColor::Black,false);
+		UE_LOG(LogTemp, Display, TEXT("Trailer: rail ready for shot %d"), int32(Shot));
 	}
 	Elapsed += Dt;
 	if (PlayShot(Dt))

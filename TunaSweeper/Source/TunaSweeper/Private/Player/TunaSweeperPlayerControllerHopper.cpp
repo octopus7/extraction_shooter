@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "InputKeyEventArgs.h"
+#include "Scenario/TrailerGameMode.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 
 namespace
@@ -23,8 +24,15 @@ namespace
 	}
 }
 
+void ATunaSweeperPlayerController::ProcessPlayerInput(float DeltaTime, bool bGamePaused)
+{
+	if (GetWorld() && GetWorld()->GetAuthGameMode<ATrailerGameMode>()) return;
+	Super::ProcessPlayerInput(DeltaTime, bGamePaused);
+}
+
 bool ATunaSweeperPlayerController::InputKey(const FInputKeyEventArgs& Params)
 {
+	if (GetWorld() && GetWorld()->GetAuthGameMode<ATrailerGameMode>()) return true;
 	const FKey& Key = Params.Key;
 	const bool bAnalog = Key.IsAnalog();
 	// Mouse deltas and wheel pulses have no held state. Gamepad axes return to neutral.

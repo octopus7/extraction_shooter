@@ -90,7 +90,7 @@ void ATunaSweeperTopDownCharacter::UpdateEquippedWeaponLaserSightBeam()
 		return;
 	}
 
-	const bool bShouldEnableLaserSight = !bHousingModeVisualHidden && IsSelectedWeaponLaserSightEquipped();
+	const bool bShouldEnableLaserSight = !bHideTrailerLaser && !bHousingModeVisualHidden && IsSelectedWeaponLaserSightEquipped();
 	if (EquippedWeapon->IsLaserSightEnabled() != bShouldEnableLaserSight)
 	{
 		EquippedWeapon->SetLaserSightEnabled(bShouldEnableLaserSight);
@@ -98,7 +98,10 @@ void ATunaSweeperTopDownCharacter::UpdateEquippedWeaponLaserSightBeam()
 
 	if (bShouldEnableLaserSight)
 	{
-		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimWorldPoint, bHasAimWorldPoint, AimIntentActor.Get());
+		// A scripted movement waypoint can pass between the character and the muzzle.
+		const bool bUseWorldPoint = bHasAimWorldPoint && (!bExternalAimControl ||
+			FVector::DotProduct(AimWorldPoint - EquippedWeapon->GetMuzzleWorldLocation(), AimDirection) > 30.f);
+		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimWorldPoint, bUseWorldPoint, AimIntentActor.Get());
 	}
 }
 

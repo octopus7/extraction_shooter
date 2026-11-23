@@ -46,6 +46,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual bool InputKey(const FInputKeyEventArgs& Params) override;
+	virtual void ProcessPlayerInput(float DeltaTime, bool bGamePaused) override;
 	virtual void FlushPressedKeys() override;
 	virtual void BuildInputStack(TArray<UInputComponent*>& InputStack) override;
 	bool StartHopperShot(ATunaSweeperHopperEnemyCharacter* Hopper, bool bEjection, float Duration);

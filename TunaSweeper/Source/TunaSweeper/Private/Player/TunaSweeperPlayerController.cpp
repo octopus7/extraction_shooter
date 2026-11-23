@@ -679,6 +679,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 		UpdateHopperShot(DeltaTime);
 		return;
 	}
+	if (GetWorld()->GetAuthGameMode<ATrailerGameMode>()) return;
 	if (EncyclopediaPanel) return;
 	UpdateIconEditorInteraction();
 	if (IconEditorPanel) return;

@@ -547,6 +547,7 @@ private:
 	friend class FTunaSweeperCameraRelativeMovementTest;
 	#endif
 	bool bExternalAimControl = false;
+	bool bHideTrailerLaser = false;
 	friend class UTunaSweeperVehicleMountComponent;
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperVehicleMountComponent> VehicleMount;
