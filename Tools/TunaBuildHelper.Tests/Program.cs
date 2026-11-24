@@ -89,6 +89,14 @@ internal static class Program
                 throw new Exception("Expected separate build and packaging cancellation buttons");
 
             var launch = (Button)window.FindName("RunSteamFullButton");
+            var build = (Button)window.FindName("BuildSteamFullButton");
+            var available = new Size(400, double.PositiveInfinity);
+            launch.Measure(available);
+            build.Measure(available);
+            static double ButtonHeight(Button button) =>
+                button.DesiredSize.Height - button.Margin.Top - button.Margin.Bottom;
+            if (ButtonHeight(launch) != 1.5 * ButtonHeight(build))
+                throw new Exception("Expected Steam launch button to measure 1.5 times the build button height");
             var presets = (ComboBox)window.FindName("DisplayPresetBox");
             if (FindTab(presets) != packagingTab || !presets.Items.OfType<ComboBoxItem>().Any(item =>
                 Equals(item.Tag, nameof(DisplayPreset.WindowedHd)) && item.Content?.ToString()?.Contains("1280×720") == true))
