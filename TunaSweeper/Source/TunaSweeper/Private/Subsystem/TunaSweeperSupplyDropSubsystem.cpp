@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperSupplyDropSubsystem.h"
+#include "Scenario/TrailerGameMode.h"
 
 #include "Dom/JsonObject.h"
 #include "Engine/StaticMesh.h"
@@ -221,7 +222,7 @@ bool UTunaSweeperSupplyDropSubsystem::DoesSupportWorldType(const EWorldType::Typ
 void UTunaSweeperSupplyDropSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
-	if (bRolledForWorld || InWorld.GetNetMode() == NM_Client ||
+	if (bRolledForWorld || InWorld.GetAuthGameMode<ATrailerGameMode>() || InWorld.GetNetMode() == NM_Client ||
 		!TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*InWorld.GetMapName())))
 	{
 		return;

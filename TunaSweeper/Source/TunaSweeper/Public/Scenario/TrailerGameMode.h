@@ -5,12 +5,13 @@
 
 class ATunaSweeperTopDownCharacter;
 class ALoopRailStation;
+class ATunaSweeperSupplyDropActor;
 class ATunaSweeperWheeledEnemyCharacter;
 class ALoopRailTrain;
 class ATunaSweeperBreakableAppleCrateActor;
 class ATunaSweeperExplosiveBarrelActor;
 
-/** Runs the title-menu trailer in disposable copies of the two raid worlds. */
+/** Runs the title-menu trailer in disposable copies of the base and raid worlds. */
 UCLASS()
 class TUNASWEEPER_API ATrailerGameMode : public ATunaSweeperGameMode
 {
@@ -23,10 +24,14 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-	enum class EShot : uint8 { ExitGarage, EnterGarage, GrayRobot, BlueRobot, Barrel, Apples, Shop, Trikes, Platform, Carriage, Breakwater, Beach, Captain, End };
+	enum class EShot : uint8 { TeaRoom, ExitGarage, GrayRobot, SupplyLanding, BlueRobot, Barrel, Apples, EnterGarage, Shop, Trikes, Platform, Carriage, Breakwater, Beach, Captain, End };
 	bool SetUpShot();
 	bool PlayShot(float DeltaSeconds);
 	bool SetUpTrikes();
+	bool ReleaseSupplyDrop();
+	TWeakObjectPtr<ATunaSweeperSupplyDropActor> SupplyDrop;
+	FVector SupplyLandingPoint;
+	FVector SupplyTravelDirection;
 	bool PlayTrikes(float DeltaSeconds);
 
 	struct FTrikeRoute

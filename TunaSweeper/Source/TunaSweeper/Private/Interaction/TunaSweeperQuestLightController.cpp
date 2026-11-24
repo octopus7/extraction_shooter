@@ -4,6 +4,7 @@
 #include "Components/SceneComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "Scenario/TrailerGameMode.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 ATunaSweeperQuestLightController::ATunaSweeperQuestLightController()
@@ -40,7 +41,8 @@ void ATunaSweeperQuestLightController::RefreshQuestLights()
 		const bool bComplete = Quests && Group.CompletedQuestId > 0 &&
 			Quests->FindQuestDefinition(Group.CompletedQuestId) &&
 			Quests->GetQuestState(Group.CompletedQuestId) == ETunaSweeperQuestState::RewardCompleted;
-		const bool bVisible = bComplete ? Group.bVisibleAfterCompletion : Group.bVisibleBeforeCompletion;
+		const bool bVisible = GetWorld()->GetAuthGameMode<ATrailerGameMode>() ||
+			(bComplete ? Group.bVisibleAfterCompletion : Group.bVisibleBeforeCompletion);
 		for (AActor* Actor : Group.LightActors)
 		{
 			if (!IsValid(Actor) || Actor->GetWorld() != GetWorld()) continue;

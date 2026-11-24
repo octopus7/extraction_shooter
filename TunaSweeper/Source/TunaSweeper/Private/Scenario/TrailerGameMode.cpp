@@ -3,6 +3,10 @@
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/TunaSweeperWheeledEnemyCharacter.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Raid/TunaSweeperSupplyDropActor.h"
+#include "Raid/TunaSweeperSupplyDropDataAsset.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -52,7 +56,8 @@ void ATrailerGameMode::InitGame(const FString& Map, const FString& Options, FStr
 		GI->SetTextLanguageOverride(ETunaSweeperItemTextLanguage::English);
 		GI->BeginCombatTestSession();
 	}
-	if (Map.EndsWith(TEXT("RaidVillage"))) Shot = EShot::Shop;
+	if (Map.EndsWith(TEXT("BunkerMap"))) Shot = EShot::TeaRoom;
+	else if (Map.EndsWith(TEXT("RaidVillage"))) Shot = EShot::Shop;
 }
 
 void ATrailerGameMode::EndPlay(EEndPlayReason::Type Reason)
@@ -203,6 +208,39 @@ bool ATrailerGameMode::PlayTrikes(float Dt)
 	return HoldTime >= 3.f;
 }
 
+bool ATrailerGameMode::ReleaseSupplyDrop()
+{
+	auto* PC = Cast<APlayerController>(Player->GetController());
+	const auto* Assets = LoadObject<UTunaSweeperSupplyDropDataAsset>(nullptr, TEXT("/Game/Interaction/SupplyDrop/DA_SupplyDrop.DA_SupplyDrop"));
+	if (!PC || !Assets || !Assets->ContainerMesh || !Assets->ParachuteMesh) return false;
+
+	// Start inside the frame, then drift in camera-right world space throughout the descent.
+	int32 Width = 0, Height = 0;
+	PC->GetViewportSize(Width, Height);
+	FVector Origin, Ray;
+	if (Width <= 0 || Height <= 0 || !PC->DeprojectScreenPositionToWorld(Width * .77f, Height * .55f, Origin, Ray))
+	{
+		// Offscreen benchmarks can run without a viewport. Use the same camera projection.
+		const FMinimalViewInfo& View = PC->PlayerCameraManager->GetCameraCacheView();
+		const float HalfWidth = FMath::Tan(FMath::DegreesToRadians(View.FOV * .5f));
+		Origin = View.Location;
+		Ray = View.Rotation.RotateVector(FVector(1.f, .54f * HalfWidth, -.1f * HalfWidth / FMath::Max(.1f, View.AspectRatio)));
+	}
+	if (Ray.Z >= -KINDA_SMALL_NUMBER) return false;
+	const float FloorZ = Player->GetCharacterMovement()->GetActorFeetLocation().Z;
+	const auto AtHeight = [&](float Z) { return Origin + Ray * ((Z - Origin.Z) / Ray.Z); };
+	SupplyTravelDirection = PC->PlayerCameraManager->GetCameraRotation().RotateVector(FVector::RightVector).GetSafeNormal2D();
+	const FTransform Release(FRotator::ZeroRotator, AtHeight(FloorZ + 230.f));
+	SupplyLandingPoint = GroundAt(AtHeight(FloorZ) + SupplyTravelDirection * 1250.f);
+	auto* Drop = GetWorld()->SpawnActorDeferred<ATunaSweeperSupplyDropActor>(
+		ATunaSweeperSupplyDropActor::StaticClass(), Release, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (!Drop) return false;
+	Drop->ConfigureDrop(*Assets, 7011, 8027, SupplyLandingPoint);
+	Drop->FinishSpawning(Release);
+	SupplyDrop = Drop;
+	return true;
+}
+
 bool ATrailerGameMode::SetUpShot()
 {
 	UWorld* World = GetWorld();
@@ -223,6 +261,51 @@ bool ATrailerGameMode::SetUpShot()
 	};
 	switch (Shot)
 	{
+	case EShot::TeaRoom:
+	{
+		const UStaticMesh* TeaTable = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Environment/Bunker/Agit/TeaProps/SM_TeaTable.SM_TeaTable"));
+		if (!TeaTable) return false;
+		for (TActorIterator<AActor> It(World); It; ++It)
+		{
+			TInlineComponentArray<UStaticMeshComponent*> Meshes(*It);
+			for (const auto* Mesh : Meshes)
+			{
+				if (Mesh->GetStaticMesh() != TeaTable) continue;
+				const FBox Bounds = Mesh->Bounds.GetBox();
+				const FVector Center(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+				const FVector Along = Mesh->GetForwardVector().GetSafeNormal2D();
+				const FVector Across = Mesh->GetRightVector().GetSafeNormal2D();
+				const auto* Capsule = Player->GetCapsuleComponent();
+				const FCollisionShape Clearance = FCollisionShape::MakeCapsule(
+					Capsule->GetScaledCapsuleRadius() + 3.f, Capsule->GetScaledCapsuleHalfHeight());
+				const FVector Lift(0,0,Clearance.GetCapsuleHalfHeight() + 4.f);
+				FCollisionQueryParams Query(SCENE_QUERY_STAT(TrailerTeaAisle), false, Player.Get());
+				for (float HalfLength : {145.f, 115.f, 85.f})
+				{
+					for (float Offset : {-115.f, 115.f, -150.f, 150.f})
+					{
+						const FVector Middle = Center + Across * Offset;
+						const FVector Start = GroundAt(Middle - Along * HalfLength);
+						const FVector End = GroundAt(Middle + Along * HalfLength);
+						if (FMath::Abs(Start.Z - Center.Z) > 20 || FMath::Abs(End.Z - Center.Z) > 20 ||
+							World->SweepTestByChannel(Start + Lift, End + Lift, FQuat::Identity, ECC_Pawn, Clearance, Query))
+							continue;
+						PlacePlayer(Start);
+						Goal = End;
+						Player->SetAimWorldPoint(Goal);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	case EShot::SupplyLanding:
+		if (!SupplyDrop.IsValid()) return false;
+		PlacePlayer(SupplyLandingPoint - SupplyTravelDirection * 1190.f);
+		Goal = SupplyLandingPoint - SupplyTravelDirection * 240.f;
+		Player->SetAimWorldPoint(SupplyLandingPoint);
+		return true;
 	case EShot::ExitGarage:
 	case EShot::EnterGarage:
 	{
@@ -233,13 +316,10 @@ bool ATrailerGameMode::SetUpShot()
 		const FVector Through = Door->GetActorRightVector().GetSafeNormal2D();
 		Door->SetDoorEnabled(true);
 		Door->SetOpenAlpha(bExit ? 1.f : 0.f);
-		if (bExit)
-		{
-			Player->SetActorLocation(Door->GetActorLocation() + Through*165 + FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+2));
-			// The raid entrance transitions beneath the landscape on its interior side.
-			Player->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-			Player->SetActorEnableCollision(false);
-		}
+		Player->SetActorLocation(Door->GetActorLocation() + Through*(bExit ? 165.f : -340.f) + FVector(0,0,Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+2));
+		// The raid entrance transitions beneath the landscape on its interior side.
+		Player->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		Player->SetActorEnableCollision(false);
 		Goal = Door->GetActorLocation() + Through*(bExit ? -340 : 165);
 		Player->SetAimWorldPoint(Goal);
 		return true;
@@ -429,6 +509,32 @@ bool ATrailerGameMode::PlayShot(float Dt)
 {
 	switch (Shot)
 	{
+	case EShot::TeaRoom:
+		if (Elapsed < .6f) return false;
+		WalkTo(Goal);
+		if (FVector::Dist2D(Player->GetActorLocation(), Goal) < 36.f) HoldTime += Dt;
+		return HoldTime > .6f;
+	case EShot::SupplyLanding:
+	{
+		if (!SupplyDrop.IsValid()) { ReturnToTitle(); return false; }
+		const FVector ToGoal = Goal - Player->GetActorLocation();
+		Player->bSprintInputHeld = ToGoal.SizeSquared2D() > FMath::Square(25.f);
+		Player->CurrentMoveInput = Player->bSprintInputHeld ? FVector2D(1,0) : FVector2D::ZeroVector;
+		if (Player->bSprintInputHeld)
+		{
+			const float MaxSpeed = Player->GetCharacterMovement()->MaxWalkSpeed;
+			Player->AddMovementInput(ToGoal.GetSafeNormal2D(), FMath::Clamp(305.f / FMath::Max(1.f, MaxSpeed), 0.f, 1.f), true);
+		}
+		else
+		{
+			Player->GetCharacterMovement()->StopMovementImmediately();
+			if (HoldTime == 0.f)
+				UE_LOG(LogTemp, Display, TEXT("Trailer: supply approach stopped %.0f cm from crate, landed %d"),
+					FVector::Dist2D(Player->GetActorLocation(), SupplyLandingPoint), !SupplyDrop->IsDescending());
+			HoldTime += Dt;
+		}
+		return !SupplyDrop->IsDescending() && HoldTime > .35f;
+	}
 	case EShot::ExitGarage:
 	case EShot::EnterGarage:
 	{
@@ -497,6 +603,11 @@ bool ATrailerGameMode::PlayShot(float Dt)
 	}
 	case EShot::GrayRobot:
 	case EShot::BlueRobot:
+		if (Shot == EShot::GrayRobot && Elapsed >= .5f && !SupplyDrop.IsValid() && !ReleaseSupplyDrop())
+		{
+			ReturnToTitle();
+			return false;
+		}
 		if (Elapsed > .6f && !Robots.IsEmpty())
 		{
 			const int32 First = FMath::FloorToInt((Elapsed - .6f) / 1.05f) % Robots.Num();
@@ -603,7 +714,19 @@ void ATrailerGameMode::Tick(float Dt)
 		for (auto Barrel : Barrels)
 			if (Barrel.IsValid()) Barrel->Destroy();
 		Barrels.Reset();
-		if (Shot == EShot::Apples)
+		if (Shot == EShot::SupplyLanding)
+		{
+			Player->bSprintInputHeld = false;
+			Player->CurrentMoveInput = FVector2D::ZeroVector;
+			if (SupplyDrop.IsValid()) SupplyDrop->Destroy();
+		}
+		if (Shot == EShot::TeaRoom)
+		{
+			bLeaving = true;
+			UGameplayStatics::OpenLevel(this, TEXT("/Game/MainRaid/RaidForest"), true, TravelOptions);
+			return;
+		}
+		if (Shot == EShot::EnterGarage)
 		{
 			bLeaving = true;
 			UGameplayStatics::OpenLevel(this, TEXT("/Game/MainRaid/RaidVillage"), true, TravelOptions);

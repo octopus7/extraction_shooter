@@ -8,7 +8,7 @@
 
 void UTunaSweeperIntroMenuWidget::HandleTrailerClicked()
 {
-	BeginTravelToLevel(TEXT("/Game/MainRaid/RaidForest"), ATrailerGameMode::TravelOptions);
+	BeginTravelToLevel(TEXT("/Game/Maps/BunkerMap"), ATrailerGameMode::TravelOptions);
 }
 
 // 연구실과 온라인 협동 버튼은 쓰지 않는다.
