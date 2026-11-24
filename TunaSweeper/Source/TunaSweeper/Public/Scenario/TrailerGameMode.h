@@ -24,7 +24,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-	enum class EShot : uint8 { TeaRoom, ExitGarage, GrayRobot, SupplyLanding, BlueRobot, Barrel, Apples, EnterGarage, Shop, Trikes, Platform, Carriage, Breakwater, Beach, Captain, End };
+	enum class EShot : uint8 { TeaRoom, ExitGarage, GrayRobot, SupplyLanding, BlueRobot, Barrel, Apples, EnterGarage, Shop, Trikes, Platform, Carriage, Breakwater, Beach, Captain, ShipApproach, ExhaustPass, End };
 	bool SetUpShot();
 	bool PlayShot(float DeltaSeconds);
 	bool SetUpTrikes();

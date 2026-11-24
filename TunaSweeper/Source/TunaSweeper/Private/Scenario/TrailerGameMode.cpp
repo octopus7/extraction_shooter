@@ -58,6 +58,7 @@ void ATrailerGameMode::InitGame(const FString& Map, const FString& Options, FStr
 	}
 	if (Map.EndsWith(TEXT("BunkerMap"))) Shot = EShot::TeaRoom;
 	else if (Map.EndsWith(TEXT("RaidVillage"))) Shot = EShot::Shop;
+	else if (Map.EndsWith(TEXT("RaidPlains"))) Shot = EShot::ShipApproach;
 }
 
 void ATrailerGameMode::EndPlay(EEndPlayReason::Type Reason)
@@ -467,6 +468,26 @@ bool ATrailerGameMode::SetUpShot()
 		Player->SetActorLocation(Floor->GetComponentLocation() + FVector(0, 0, 10 + Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
 		return true;
 	}
+	case EShot::ShipApproach:
+	case EShot::ExhaustPass:
+	{
+		auto* Ship = FindPlaced(World, TEXT("/Game/MainRaid/SSTO/BP_SSTOLander.BP_SSTOLander_C"), FVector::ZeroVector);
+		if (!Ship) return false;
+		const bool bApproach = Shot == EShot::ShipApproach;
+		const FTransform Frame(FRotator(0, Ship->GetActorRotation().Yaw, 0), Ship->GetActorLocation(), Ship->GetActorScale3D());
+		// The two aft nozzle lips sit at hull-local X=-1145 cm. Keep the runner outside the bells.
+		const FVector Start = bApproach ? FVector(-3120,-1020,0) : FVector(-1510,-720,0);
+		const FVector End = bApproach ? FVector(-1510,-720,0) : FVector(-1510,820,0);
+		if (bApproach) PlacePlayer(Frame.TransformPosition(Start));
+		Goal = Frame.TransformPosition(End);
+		Player->CurrentCameraMode = ETunaSweeperPlayerCameraMode::Default;
+		Player->DefaultCameraBoomRotation = FRotator(bApproach ? -42.f : -48.f, Ship->GetActorRotation().Yaw, 0);
+		Player->DefaultCameraArmLength = bApproach ? 3400.f : 1850.f;
+		Player->DefaultCameraTargetOffset = Frame.GetRotation().RotateVector(FVector(bApproach ? 850.f : 310.f,0,0));
+		Player->bHideTrailerLaser = true;
+		Player->SetAimWorldPoint(Goal);
+		return true;
+	}
 	case EShot::Breakwater:
 	{
 		AActor* Beacon = FindPlaced(World, TEXT("/Game/Environment/FactionHarbor/Beacon/BP_HarborLighthouse.BP_HarborLighthouse_C"), FVector(-13322,-756,142));
@@ -509,6 +530,17 @@ bool ATrailerGameMode::PlayShot(float Dt)
 {
 	switch (Shot)
 	{
+	case EShot::ShipApproach:
+	case EShot::ExhaustPass:
+	{
+		const FVector Delta = (Goal - Player->GetActorLocation()).GetSafeNormal2D();
+		const bool bRunning = FVector::Dist2D(Player->GetActorLocation(), Goal) > 36.f;
+		Player->bSprintInputHeld = bRunning;
+		Player->CurrentMoveInput = bRunning ? FVector2D(Delta.Y, Delta.X) : FVector2D::ZeroVector;
+		WalkTo(Goal);
+		if (!bRunning) HoldTime += Dt;
+		return HoldTime > (Shot == EShot::ShipApproach ? 0.f : .35f);
+	}
 	case EShot::TeaRoom:
 		if (Elapsed < .6f) return false;
 		WalkTo(Goal);
@@ -732,7 +764,13 @@ void ATrailerGameMode::Tick(float Dt)
 			UGameplayStatics::OpenLevel(this, TEXT("/Game/MainRaid/RaidVillage"), true, TravelOptions);
 			return;
 		}
-		if (Shot == EShot::Captain) { ReturnToTitle(); return; }
+		if (Shot == EShot::Captain)
+		{
+			bLeaving = true;
+			UGameplayStatics::OpenLevel(this, TEXT("/Game/MainRaid/RaidPlains"), true, TravelOptions);
+			return;
+		}
+		if (Shot == EShot::ExhaustPass) { ReturnToTitle(); return; }
 		Shot = static_cast<EShot>(static_cast<uint8>(Shot) + 1);
 		bReady = false;
 	}
