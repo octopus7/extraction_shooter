@@ -213,6 +213,8 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 			EnemyStatusBubbleWidgetComponent->SetWidgetClass(LoadedBubbleClass);
 		}
 		EnemyStatusBubbleWidgetComponent->InitWidget();
+		// Possession can raise the alert before BeginPlay installs the designer widget.
+		if (EnemyStatusBubble != ETunaSweeperEnemyStatusBubble::None) ApplyEnemyStatusBubbleText();
 	}
 	if (!UsesMeleeAttack())
 	{
@@ -713,6 +715,16 @@ void ATunaSweeperEnemyCharacter::UpdateEnemyStatusSpeechBubble()
 	EnemyStatusBubbleWidgetComponent->SetHiddenInGame(!bShouldShow);
 }
 
+void ATunaSweeperEnemyCharacter::ApplyEnemyStatusBubbleText()
+{
+	EnemyStatusBubbleWidgetComponent->InitWidget();
+	if (UTunaSweeperSpeechBubbleWidget* BubbleWidget =
+		Cast<UTunaSweeperSpeechBubbleWidget>(EnemyStatusBubbleWidgetComponent->GetUserWidgetObject()))
+	{
+		BubbleWidget->SetBubbleText(EnemyStatusBubbleText);
+	}
+}
+
 void ATunaSweeperEnemyCharacter::SetEnemyStatusSpeechBubble(
 	ETunaSweeperEnemyStatusBubble InStatus,
 	const FText& InText,
@@ -730,12 +742,8 @@ void ATunaSweeperEnemyCharacter::SetEnemyStatusSpeechBubble(
 	GetWorldTimerManager().ClearTimer(EnemyStatusBubbleTimerHandle);
 	EnemyStatusBubble = InStatus;
 	const uint32 Revision = ++EnemyStatusBubbleRevision;
-	EnemyStatusBubbleWidgetComponent->InitWidget();
-	if (UTunaSweeperSpeechBubbleWidget* BubbleWidget =
-		Cast<UTunaSweeperSpeechBubbleWidget>(EnemyStatusBubbleWidgetComponent->GetUserWidgetObject()))
-	{
-		BubbleWidget->SetBubbleText(InText);
-	}
+	EnemyStatusBubbleText = InText;
+	ApplyEnemyStatusBubbleText();
 	UpdateEnemyStatusSpeechBubble();
 
 	if (DisplaySeconds > 0.0f)

@@ -329,6 +329,7 @@ private:
 	void CompleteEnemyReloadIfReady();
 	void UpdateEnemyReloadWidget();
 	void UpdateEnemyStatusSpeechBubble();
+	void ApplyEnemyStatusBubbleText();
 	void SetEnemyStatusSpeechBubble(ETunaSweeperEnemyStatusBubble InStatus, const FText& InText, float DisplaySeconds);
 	void ClearEnemyStatusSpeechBubble(uint32 ExpectedRevision, ETunaSweeperEnemyStatusBubble ExpectedStatus);
 	FText ResolveEnemyStatusText(FName TextKey, const FText& FallbackText) const;
@@ -383,6 +384,7 @@ private:
 	bool bEnemyWeaponRuntimeInitialized = false;
 	float FootstepNoiseElapsedSeconds = 0.0f;
 	ETunaSweeperEnemyStatusBubble EnemyStatusBubble = ETunaSweeperEnemyStatusBubble::None;
+	FText EnemyStatusBubbleText;
 	uint32 EnemyStatusBubbleRevision = 0;
 	FTimerHandle EnemyStatusBubbleTimerHandle;
 };
