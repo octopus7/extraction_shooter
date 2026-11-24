@@ -11,7 +11,7 @@ namespace
 	constexpr int32 FlameSection = 0;
 	constexpr int32 SparkSection = 1;
 	constexpr int32 FlameSides = 10;
-	constexpr float CandleLightIntensity = 0.9f;
+
 	const FVector EmberGravity(0, 0, -24);
 
 	struct FFlameProfileRing
@@ -139,20 +139,12 @@ void UCandlestickFlameComponent::BeginPlay()
 
 	auto* Glow = UMaterialInstanceDynamic::Create(GlowMaterial, this);
 	Glow->SetFlags(RF_Transient | RF_DuplicateTransient);
-	Glow->SetScalarParameterValue(TEXT("Intensity"), 2.2f);
+	Glow->SetScalarParameterValue(TEXT("Intensity"), 1.25f);
 	SetMaterial(FlameSection, Glow);
 	SetMaterial(SparkSection, Glow);
 
-	CandleLight = NewObject<UPointLightComponent>(GetOwner(), NAME_None, RF_Transient);
-	CandleLight->SetupAttachment(this);
-	CandleLight->SetRelativeLocation(FVector(0, 0, 2.8));
-	CandleLight->SetMobility(EComponentMobility::Movable);
-	CandleLight->SetAttenuationRadius(130.0f);
-	CandleLight->SetIntensityUnits(ELightUnits::Candelas);
-	CandleLight->SetLightColor(FLinearColor(1.0f, 0.50f, 0.20f));
-	CandleLight->SetCastShadows(false);
-	CandleLight->SetIntensity(CandleLightIntensity);
-	CandleLight->RegisterComponent();
+	CandleLight = GetOwner()->FindComponentByClass<UPointLightComponent>();
+	if (CandleLight) BaseLightIntensity = CandleLight->Intensity;
 
 	Random.GenerateNewSeed();
 	AnimationTime = 0.0f;
@@ -165,11 +157,7 @@ void UCandlestickFlameComponent::BeginPlay()
 void UCandlestickFlameComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	SetComponentTickEnabled(false);
-	if (CandleLight)
-	{
-		CandleLight->DestroyComponent();
-		CandleLight = nullptr;
-	}
+	CandleLight = nullptr;
 	Sparks.Reset();
 	ClearAllMeshSections();
 	Super::EndPlay(EndPlayReason);
@@ -232,6 +220,6 @@ void UCandlestickFlameComponent::UpdateVisuals()
 	Embers.Submit(*this, SparkSection);
 	if (CandleLight)
 	{
-		CandleLight->SetIntensity(CandleLightIntensity * (1.0f + 1.5f * Flicker + Crackle * 0.18f));
+		CandleLight->SetIntensity(BaseLightIntensity * (1.0f + 0.5f * Flicker + Crackle * 0.05f));
 	}
 }

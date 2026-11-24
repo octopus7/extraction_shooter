@@ -42,6 +42,7 @@ private:
 
 	TArray<FSpark> Sparks;
 	FRandomStream Random;
+	float BaseLightIntensity = 0.0f;
 	float AnimationTime = 0.0f;
 	float NextSparkBurstTime = 0.0f;
 	float LastSparkBurstTime = -1.0f;

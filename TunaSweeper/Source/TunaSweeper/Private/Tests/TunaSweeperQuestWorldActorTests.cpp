@@ -14,6 +14,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperQuestFacilityActor.h"
+#include "Interaction/DifficultyCandlestickActor.h"
 #include "Interaction/TunaSweeperQuestLightController.h"
 #include "Misc/ScopeExit.h"
 #include "PhysicsEngine/BodySetup.h"
@@ -94,7 +95,18 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	auto* Untouched = World->SpawnActor<APointLight>(); Untouched->GetLightComponent()->SetVisibility(true);
 	auto* Controller = World->SpawnActor<ATunaSweeperQuestLightController>();
 	FTunaSweeperQuestLightGroup Group; Group.CompletedQuestId = 910001; Group.LightActors = {Point, Spot, nullptr};
+	auto* Candle = World->SpawnActor<ADifficultyCandlestickActor>();
+	auto* Wick = Candle->FindComponentByClass<UPointLightComponent>();
+	if (!TestNotNull(TEXT("Candle light exists before BeginPlay"), Wick)) return false;
+	FTunaSweeperQuestLightGroup Outage;
+	Outage.CompletedQuestId = Group.CompletedQuestId;
+	Outage.LightActors = { Candle };
+	Outage.bVisibleBeforeCompletion = true;
+	Outage.bVisibleAfterCompletion = false;
+	Controller->LightGroups.Add(Outage);
 	Controller->LightGroups.Add(Group); Controller->DispatchBeginPlay();
+	Candle->DispatchBeginPlay();
+	TestTrue(TEXT("Outage lights the candle"), Wick->IsVisible());
 	TestFalse(TEXT("Before completion point light is off"), Point->GetLightComponent()->IsVisible());
 	TestFalse(TEXT("Before completion spot light is off"), Spot->GetLightComponent()->IsVisible());
 	TestTrue(TEXT("Unlisted light is preserved"), Untouched->GetLightComponent()->IsVisible());
@@ -106,6 +118,7 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	Pot->SetBoiling(true);
 	TestFalse(TEXT("Direct boiling request cannot bypass kitchen lock"), Pot->IsBoiling());
 	Quests->ClaimQuestReward(910001);
+	TestFalse(TEXT("Restored power extinguishes the candle light"), Wick->IsVisible());
 	TestTrue(TEXT("Kitchen reward starts boiling immediately"), Pot->IsBoiling());
 	TestTrue(TEXT("Kitchen reward reveals steam"), Steam->IsVisible());
 	TestTrue(TEXT("Reward event immediately unlocks facility"), Facility->IsFacilityUnlocked());
@@ -143,6 +156,7 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	TArray<FTunaSweeperNumericQuestProgressSaveData> Saved; int32 Tracked = 0, Coins = 0;
 	Quests->ExportQuestProgressForSave(Saved, Tracked, Coins);
 	Quests->ResetQuestProgressForNewGame();
+	TestTrue(TEXT("New game restores the candle light"), Wick->IsVisible());
 	TestFalse(TEXT("New game stops boiling"), Pot->IsBoiling());
 	TestFalse(TEXT("New game hides residual steam"), Steam->IsVisible());
 	TestFalse(TEXT("New game immediately relocks facility"), Facility->IsFacilityUnlocked());
@@ -156,6 +170,7 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	Pot->Destroy(); Pot = World->SpawnActor<ATunaSweeperBoilingPotActor>();
 	Pot->RequiredCompletedQuestId = 910001; Pot->DispatchBeginPlay();
 	TestTrue(TEXT("Pot created after save load restores boiling"), Pot->IsBoiling());
+	TestFalse(TEXT("Loading restored power disables the candle light"), Wick->IsVisible());
 	TestTrue(TEXT("Loading save restores facility prompt"), Interaction->GetInteractionType() == ETunaSweeperInteractionType::QuestFacilityUse);
 	TestTrue(TEXT("Loading save restores lights without another completion event"), Point->GetLightComponent()->IsVisible());
 	Controller->Destroy(); Controller = World->SpawnActor<ATunaSweeperQuestLightController>();
