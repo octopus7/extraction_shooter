@@ -3,6 +3,8 @@
 #include "AI/Hopper/HopperEnemyCharacter.h"
 #include "AI/TunaSweeperWheeledEnemyCharacter.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Component/TunaSweeperVerticalOcclusionRevealComponent.h"
+#include "UI/TunaSweeperScreenFadeWidget.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Raid/TunaSweeperSupplyDropActor.h"
@@ -63,12 +65,22 @@ void ATrailerGameMode::InitGame(const FString& Map, const FString& Options, FStr
 
 void ATrailerGameMode::EndPlay(EEndPlayReason::Type Reason)
 {
+	if (FadePanel) FadePanel->RemoveFromParent();
 	if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		GI->SetTextLanguageOverride({});
 		GI->EndCombatTestSession();
 	}
 	Super::EndPlay(Reason);
+}
+
+void ATrailerGameMode::SetTrailerFadeOpacity(float Opacity)
+{
+	FadePanel->SetRenderOpacity(Opacity);
+	// DumpMovie captures the scene before Slate draws the viewport panel.
+	if (GIsDumpingMovie)
+		if (auto* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0))
+			Camera->SetManualCameraFade(Opacity, FLinearColor::Black, false);
 }
 
 void ATrailerGameMode::ReturnToTitle()
@@ -474,6 +486,12 @@ bool ATrailerGameMode::SetUpShot()
 		auto* Ship = FindPlaced(World, TEXT("/Game/MainRaid/SSTO/BP_SSTOLander.BP_SSTOLander_C"), FVector::ZeroVector);
 		if (!Ship) return false;
 		const bool bApproach = Shot == EShot::ShipApproach;
+		if (bApproach)
+		{
+			TArray<UTunaSweeperVerticalOcclusionRevealComponent*> ShellReveal;
+			Ship->GetComponents(ShellReveal, /*bIncludeFromChildActors=*/true);
+			for (auto* Reveal : ShellReveal) Reveal->KeepExteriorVisible();
+		}
 		const FTransform Frame(FRotator(0, Ship->GetActorRotation().Yaw, 0), Ship->GetActorLocation(), Ship->GetActorScale3D());
 		// The two aft nozzle lips sit at hull-local X=-1145 cm. Keep the runner outside the bells.
 		const FVector Start = bApproach ? FVector(-3120,-1020,0) : FVector(-1510,-720,0);
@@ -733,10 +751,23 @@ void ATrailerGameMode::Tick(float Dt)
 	if (!Player.IsValid()) return;
 	if (auto* Hud = PC->GetGameHudWidget()) Hud->SetVisibility(ESlateVisibility::Collapsed);
 	PC->bShowMouseCursor = false;
+	if (!FadePanel)
+	{
+		FadePanel = CreateWidget<UTunaSweeperScreenFadeWidget>(PC, UTunaSweeperScreenFadeWidget::StaticClass());
+		if (!FadePanel) { ReturnToTitle(); return; }
+		FadePanel->SetVisibility(ESlateVisibility::HitTestInvisible);
+		FadePanel->AddToViewport(20000); // Above screen-space interaction markers and gameplay transitions.
+	}
 	if (FadeRemaining > 0)
 	{
-		FadeRemaining -= Dt;
-		if (FadeRemaining > 0) return;
+		FadeRemaining = FMath::Max(0.f, FadeRemaining - Dt);
+		SetTrailerFadeOpacity(1.f - FadeRemaining / FadeSeconds);
+		bAtBlack = FadeRemaining <= 0.f;
+		return; // Present the fully black frame before moving the player or changing maps.
+	}
+	if (bAtBlack)
+	{
+		bAtBlack = false;
 		if (Shot == EShot::Trikes)
 			for (auto& Route : Trikes)
 				if (Route.Bike.IsValid()) Route.Bike->Destroy();
@@ -776,7 +807,7 @@ void ATrailerGameMode::Tick(float Dt)
 	}
 	if (!bReady)
 	{
-		PC->PlayerCameraManager->SetManualCameraFade(1, FLinearColor::Black, false);
+		SetTrailerFadeOpacity(1.f);
 		if (!SetUpShot())
 		{
 			UE_LOG(LogTemp, Error, TEXT("Trailer: missing subject for shot %d"), int32(Shot));
@@ -800,7 +831,6 @@ void ATrailerGameMode::Tick(float Dt)
 			return;
 		}
 		IStreamingManager::Get().StreamAllResources(1.f);
-		PC->PlayerCameraManager->StartCameraFade(1,0,FadeSeconds,FLinearColor::Black,false);
 		bReady = true;
 		UE_LOG(LogTemp, Display, TEXT("Trailer: begin shot %d"), int32(Shot));
 	}
@@ -816,15 +846,14 @@ void ATrailerGameMode::Tick(float Dt)
 		Train->SetRunning(true);
 		bWaitingForRail = false;
 		HoldTime = 0;
-		PC->PlayerCameraManager->StartCameraFade(1,0,FadeSeconds,FLinearColor::Black,false);
 		UE_LOG(LogTemp, Display, TEXT("Trailer: rail ready for shot %d"), int32(Shot));
 	}
+	SetTrailerFadeOpacity(FMath::Clamp(1.f - Elapsed / FadeSeconds, 0.f, 1.f));
 	Elapsed += Dt;
 	if (PlayShot(Dt))
 	{
 		UE_LOG(LogTemp, Display, TEXT("Trailer: completed shot %d, pawn %s, base %s"), int32(Shot), *Player->GetActorLocation().ToString(), *GetNameSafe(Player->GetMovementBase()));
 		FadeRemaining = FadeSeconds;
-		PC->PlayerCameraManager->StartCameraFade(0,1,FadeSeconds,FLinearColor::Black,false,true);
 	}
 	else if (Elapsed > 40.f)
 	{

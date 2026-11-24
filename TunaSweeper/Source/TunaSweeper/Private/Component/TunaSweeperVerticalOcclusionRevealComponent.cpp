@@ -125,6 +125,14 @@ void UTunaSweeperVerticalOcclusionRevealComponent::ApplyVerticalRevealMaterial()
 	}
 }
 
+void UTunaSweeperVerticalOcclusionRevealComponent::KeepExteriorVisible()
+{
+	SetComponentTickEnabled(false);
+	for (const auto& State : MaterialStates)
+		for (UMaterialInstanceDynamic* Material : State.DynamicMaterials)
+			if (Material) Material->SetScalarParameterValue(TunaSweeperVerticalOcclusionReveal::RevealActiveName, 0.f);
+}
+
 void UTunaSweeperVerticalOcclusionRevealComponent::RestoreOriginalMaterials()
 {
 	for (const FVerticalOcclusionRevealMaterialState& State : MaterialStates)

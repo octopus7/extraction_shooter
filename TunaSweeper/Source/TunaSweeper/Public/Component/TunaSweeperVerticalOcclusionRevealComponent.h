@@ -71,6 +71,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vertical Occlusion Reveal")
 	void RestoreOriginalMaterials();
 
+	/** Keep this instance opaque for the rest of its lifetime. */
+	void KeepExteriorVisible();
+
 private:
 	void CollectRevealMeshes(TArray<UMeshComponent*>& OutMeshes) const;
 	bool ResolveCursorWorldPoint(class APlayerController* PlayerController, float PlaneZ, FVector& OutCursorWorldPoint) const;

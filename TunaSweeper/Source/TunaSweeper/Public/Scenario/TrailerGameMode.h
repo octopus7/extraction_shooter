@@ -5,6 +5,7 @@
 
 class ATunaSweeperTopDownCharacter;
 class ALoopRailStation;
+class UTunaSweeperScreenFadeWidget;
 class ATunaSweeperSupplyDropActor;
 class ATunaSweeperWheeledEnemyCharacter;
 class ALoopRailTrain;
@@ -48,6 +49,7 @@ private:
 	FVector GroundAt(FVector Point) const;
 	void PlacePlayer(FVector Feet);
 	void ReturnToTitle();
+	void SetTrailerFadeOpacity(float Opacity);
 
 	EShot Shot = EShot::ExitGarage;
 	TWeakObjectPtr<ATunaSweeperTopDownCharacter> Player;
@@ -62,6 +64,9 @@ private:
 	float NextShot = 0;
 	float HoldTime = 0;
 	float FadeRemaining = 0;
+	bool bAtBlack = false;
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperScreenFadeWidget> FadePanel;
 	bool bReady = false;
 	bool bLeaving = false;
 	bool bWaitingForRail = false;
