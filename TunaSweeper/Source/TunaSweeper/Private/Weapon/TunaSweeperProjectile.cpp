@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Effect/TunaSweeperProjectileHitBurstActor.h"
+#include "Scenario/TrailerGameMode.h"
 #include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/DamageType.h"
@@ -524,6 +525,12 @@ void ATunaSweeperProjectile::HandleHit(
 	if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(OtherActor);
 		TunaCharacter && TunaCharacter->IsDamageInvulnerable())
 	{
+		if (GetWorld()->GetAuthGameMode<ATrailerGameMode>())
+		{
+			SpawnHitEffect(Hit, OtherActor, OtherComp);
+			Destroy();
+			return;
+		}
 		if (HitComponent)
 		{
 			HitComponent->IgnoreActorWhenMoving(OtherActor, true);
