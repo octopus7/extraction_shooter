@@ -40,7 +40,7 @@
 
 ## 길 위에 고인 빗물
 
-아웃라이너의 `Environment/Forest/Water/RainPuddles`에 길목 일곱 곳의 빗물이 있다. 여울로 내려가는 길에서는 `Puddle_FordApproach_01`을 선택해 확인할 수 있다. 각각 지면에 직접 투영하는 **Decal Actor**다. 옮기거나 복제할 때 투영 화살표를 바닥 쪽으로 향하게 하고 **Decal Size**의 Y와 Z로 너비와 길이를 정한다. X는 투영 깊이로, 숲길에서는 반깊이 9cm를 사용한다. 랜드스케이프나 **Receives Decals**를 켠 평평한 메시 위에 쓸 수 있다. 경사진 바닥에는 화살표를 그 면에 수직으로 맞춘다.
+아웃라이너의 `Environment/Forest/Water/RainPuddles`에 지면에 투영한 빗물 웅덩이 25개가 있다. 기존 7개와 같은 크기로 구부러진 물자국(BentRill)과 두 덩이가 이어진 모양(TwinLobe)을 각각 7개 배치했다. 부채꼴(FloodFan)과 긴 물받이 모양(LongBasin)은 대형으로 각각 2개다. 여울로 내려가는 길에서는 `Puddle_FordApproach_01`을 선택해 확인할 수 있다. 각각 지면에 직접 투영하는 **Decal Actor**다. 옮기거나 복제할 때 투영 화살표를 바닥 쪽으로 향하게 하고 **Decal Size**의 Y와 Z로 너비와 길이를 정한다. X는 투영 깊이로, 숲길에서는 반깊이 9cm를 사용한다. 랜드스케이프나 **Receives Decals**를 켠 평평한 메시 위에 쓸 수 있다. 경사진 바닥에는 화살표를 그 면에 수직으로 맞춘다.
 
 `/Game/Environment/ForestWater/Materials`의 `MI_ForestGroundPuddle_Pool`은 넓게 고인 모양, `MI_ForestGroundPuddle_Runoff`는 길을 따라 가늘게 이어진 모양이다. 인스턴스를 복제한 뒤 **FootprintMask**에 선형 흑백 마스크를 지정하면 윤곽을 바꿀 수 있다. 흰색은 고인 물, 회색은 젖은 흙으로 이어지는 가장자리, 검은색은 마른 지면이다. **WetOpacity**와 **WetGroundTint**로 바닥의 비침과 색을 조절한다.
 
