@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "page": { "width": 3508, "height": 2480 },
+  "maps": [
+    {
+      "id": "Region1",
+      "title": "1지역 · 숲",
+      "sourceMap": "RaidForest",
+      "extent": { "minX": -10000, "maxX": 10000, "minY": -10000, "maxY": 10000 },
+      "notes": [
+        { "title": "퀘스트 · 도전과제", "lines": ["Q04 새끼 멧돼지 합류 · 도전과제 03", "A01 숲 진입(맵 판정) · A11/A12 추출 · A13 호수", "F01 주 전력 시설 · F02 마을 터널 낙석", "T01 기지 복귀 · T02 마을 연결"] },
+        { "title": "확정 드랍", "lines": ["D1 캔참치 1개", "D2 망치 1개 · D7 시설 복구 자재", "D3 모터·전기 재료", "D4–D6 고구마·개/고양이 사료"] },
+        { "title": "적 배치", "lines": ["E1–E3 전력 시설 인근 스폰 앵커"] },
+        { "title": "위치 미확인", "lines": ["도전과제 06 보스 액터 좌표 없음"] }
+      ],
+      "markers": [
+        { "id": "Q04", "category": "quest", "x": -6923, "y": -1954, "label": "새끼 멧돼지" },
+        { "id": "F01", "category": "quest", "x": -8380.16, "y": -1534.13, "label": "주 전력 시설" },
+        { "id": "F02", "category": "quest", "x": 6742.86, "y": 1388.89, "label": "마을 터널" },
+        { "id": "A11", "category": "achievement", "x": -3968.25, "y": 1984.13, "label": "추출" },
+        { "id": "A12", "category": "achievement", "x": -6056, "y": -322, "label": "추출" },
+        { "id": "A13", "category": "achievement", "x": -4580.56, "y": 6200, "label": "호수 진입 트리거" },
+        { "id": "T01", "category": "travel", "x": -9080.16, "y": -2334.13, "label": "기지 복귀" },
+        { "id": "T02", "category": "travel", "x": 7142.86, "y": 1388.89, "label": "마을 연결" },
+        { "id": "E1", "category": "enemy", "x": -5701, "y": 1051, "label": "적 앵커" },
+        { "id": "E2", "category": "enemy", "x": -3618, "y": 148, "label": "적 앵커" },
+        { "id": "E3", "category": "enemy", "x": -3818, "y": -452, "label": "적 앵커" },
+        { "id": "D1", "category": "drop", "x": -5849.16, "y": -1497.13, "label": "캔참치" },
+        { "id": "D2", "category": "drop", "x": -8130.16, "y": -1534.13, "label": "공구" },
+        { "id": "D3", "category": "drop", "x": -7358.16, "y": -1824.13, "label": "전기 재료" },
+        { "id": "D4–D6", "category": "drop", "x": -6649.16, "y": -1277.13, "points": [[-6499.16, -1277.13], [-6649.16, -1277.13], [-6799.16, -1277.13]], "label": "식량 3상자" },
+        { "id": "D7", "category": "drop", "x": -8130.16, "y": -1384.13, "label": "복구 자재" }
+      ]
+    },
+    {
+      "id": "Region2",
+      "title": "2지역 · 마을",
+      "sourceMap": "RaidVillage",
+      "extent": { "minX": -9000, "maxX": 16000, "minY": -14000, "maxY": 14000 },
+      "notes": [
+        { "title": "퀘스트 위치", "lines": ["Q30 두꺼비 유리병 · Q41 모형배: 물품과 전달 지점", "F1 현장 자판기 · F2 에탄올 · F3 ATV 전력 · F4 ATV 수리", "D1 정비 공구 상자: 정비 공구 세트 1개 확정"] },
+        { "title": "도전과제 위치", "lines": ["A07 마을 진입(맵 판정) · A09 순환철도 이용", "S1 서역 · S2 북역 · S3 동역", "A10 북역 북쪽 호퍼 보스 · A11/A12 추출"] },
+        { "title": "적 배치", "lines": ["E1–E2 해병 배달 로봇 · E3–E4 해적 배달 로봇", "E5–E6 토끼 삼륜차"] }
+      ],
+      "routes": [
+        { "id": "Q30", "from": [-2780, -530], "to": [-700, 3200] },
+        { "id": "Q41", "from": [-2780, -1630], "to": [-650, -2900] }
+      ],
+      "paths": [
+        { "kind": "rail", "closed": true, "smooth": true, "points": [[-4949.29, -6176.18], [4949.29, -6176.18], [7149.29, -3976.18], [7149.29, 3976.18], [4949.29, 6176.18], [-4949.29, 6176.18], [-7149.29, 3976.18], [-7149.29, -3976.18]] }
+      ],
+      "markers": [
+        { "id": "Q30", "category": "quest", "x": -2780, "y": -530, "label": "두꺼비병 물품" },
+        { "id": "Q30→", "category": "quest", "x": -700, "y": 3200, "label": "두꺼비병 전달" },
+        { "id": "Q41", "category": "quest", "x": -2780, "y": -1630, "label": "모형배 물품" },
+        { "id": "Q41→", "category": "quest", "x": -650, "y": -2900, "label": "모형배 전달" },
+        { "id": "F1", "category": "quest", "x": -2300, "y": -900, "label": "현장 자판기" },
+        { "id": "F2", "category": "quest", "x": -2600, "y": 0, "label": "에탄올 시설" },
+        { "id": "F3", "category": "quest", "x": -1800, "y": -2372, "label": "ATV 전력" },
+        { "id": "F4", "category": "quest", "x": -1480, "y": -730, "label": "ATV 수리" },
+        { "id": "S1", "category": "achievement", "x": 1684.41, "y": -6176.18, "label": "서역 · 도전 09" },
+        { "id": "S2", "category": "achievement", "x": 7149.29, "y": 1787.32, "label": "북역 · 도전 09" },
+        { "id": "S3", "category": "achievement", "x": -1684.41, "y": 6176.18, "label": "동역 · 도전 09" },
+        { "id": "A10", "category": "achievement", "x": 8149.29, "y": 337.32, "label": "호퍼 보스" },
+        { "id": "A11", "category": "achievement", "x": -4200, "y": -1500, "label": "추출" },
+        { "id": "A12", "category": "achievement", "x": 4000, "y": 2300, "label": "추출" },
+        { "id": "E1", "category": "enemy", "x": 500, "y": -3600, "label": "해병 배달봇" },
+        { "id": "E2", "category": "enemy", "x": 500, "y": -2700, "label": "해병 배달봇" },
+        { "id": "E3", "category": "enemy", "x": 3700, "y": -600, "label": "해적 배달봇" },
+        { "id": "E4", "category": "enemy", "x": 3700, "y": 300, "label": "해적 배달봇" },
+        { "id": "E5", "category": "enemy", "x": 500, "y": 3300, "label": "토끼 삼륜차" },
+        { "id": "E6", "category": "enemy", "x": 500, "y": 4200, "label": "토끼 삼륜차" },
+        { "id": "D1", "category": "drop", "x": -2580, "y": -1080, "label": "정비 공구 세트" },
+        { "id": "T3", "category": "travel", "x": 14149.29, "y": 1787.32, "label": "평원 방면" }
+      ]
+    },
+    {
+      "id": "Region3",
+      "title": "3지역 · 평원",
+      "sourceMap": "RaidPlains",
+      "extent": { "minX": -10000, "maxX": 10000, "minY": -10000, "maxY": 10000 },
+      "notes": [
+        { "title": "퀘스트 · 도전과제", "lines": ["Q26 신호 관제 도착 지점", "A19 평원 진입(맵 판정)", "A11/A12 추출 지점"] },
+        { "title": "주요 지점", "lines": ["수송선 착륙·탑승 구역"] },
+        { "title": "확정 드랍", "lines": ["현재 배치 조사에서 확인된 고정 드랍 없음"] }
+      ],
+      "markers": [
+        { "id": "Q26", "category": "quest", "x": -1240, "y": 1940, "label": "신호 관제 도착" },
+        { "id": "11/12", "category": "achievement", "x": 992.06, "y": 1785.71, "label": "추출" },
+        { "id": "T", "category": "travel", "x": 0, "y": 0, "label": "수송선" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 3508 2480" font-family="Malgun Gothic">
+<rect width="3508" height="2480" fill="#ffffff"/>
+<text x="150" y="150" font-family="Malgun Gothic" font-size="112" fill="#1c2730" font-weight="700" text-anchor="start">2지역 · 마을</text>
+<text x="152" y="220" font-family="Malgun Gothic" font-size="34" fill="#58636d" font-weight="400" text-anchor="start">현장 좌표도  ·  위쪽이 +X  ·  오른쪽이 +Y  ·  Unreal cm</text>
+<rect x="150" y="343.57142857142867" width="2120" height="1892.8571428571427" fill="#fff" stroke="#8b969d" stroke-width="4"/>
+<path d="M 452.85714285714283 343.57142857142867 V 2236.4285714285716" stroke="#e9edef" stroke-width="2"/>
+<text x="452.85714285714283" y="2266.4285714285716" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="middle">-10k</text>
+<path d="M 831.4285714285714 343.57142857142867 V 2236.4285714285716" stroke="#e9edef" stroke-width="2"/>
+<text x="831.4285714285714" y="2266.4285714285716" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="middle">-5k</text>
+<path d="M 1210 343.57142857142867 V 2236.4285714285716" stroke="#e9edef" stroke-width="2"/>
+<text x="1210" y="2266.4285714285716" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="middle">0k</text>
+<path d="M 1588.5714285714287 343.57142857142867 V 2236.4285714285716" stroke="#e9edef" stroke-width="2"/>
+<text x="1588.5714285714287" y="2266.4285714285716" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="middle">5k</text>
+<path d="M 1967.142857142857 343.57142857142867 V 2236.4285714285716" stroke="#e9edef" stroke-width="2"/>
+<text x="1967.142857142857" y="2266.4285714285716" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="middle">10k</text>
+<path d="M 150 1933.5714285714284 H 2270" stroke="#e9edef" stroke-width="2"/>
+<text x="128" y="1941.5714285714284" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="end">-5k</text>
+<path d="M 150 1555 H 2270" stroke="#e9edef" stroke-width="2"/>
+<text x="128" y="1563" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="end">0k</text>
+<path d="M 150 1176.4285714285716 H 2270" stroke="#e9edef" stroke-width="2"/>
+<text x="128" y="1184.4285714285716" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="end">5k</text>
+<path d="M 150 797.8571428571429 H 2270" stroke="#e9edef" stroke-width="2"/>
+<text x="128" y="805.8571428571429" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="end">10k</text>
+<path d="M 150 419.2857142857144 H 2270" stroke="#e9edef" stroke-width="2"/>
+<text x="128" y="427.2857142857144" font-family="Malgun Gothic" font-size="25" fill="#869098" font-weight="400" text-anchor="end">15k</text>
+<path d="M 192 2191.4285714285716 h 378.57142857142856" stroke="#27343d" stroke-width="8"/><path d="M 192 2177.4285714285716 v 28 M 570.5714285714286 2177.4285714285716 v 28" stroke="#27343d" stroke-width="5"/>
+<text x="381.2857142857143" y="2173.4285714285716" font-family="Malgun Gothic" font-size="26" fill="#27343d" font-weight="600" text-anchor="middle">5 km</text>
+<path d="M 2198 515.5714285714287 V 443.57142857142867 l -18 30 M 2198 443.57142857142867 l 18 30" fill="none" stroke="#27343d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="2198" y="425.57142857142867" font-family="Malgun Gothic" font-size="30" fill="#27343d" font-weight="700" text-anchor="middle">N</text>
+<path d="M 742.3749428571429 1929.7319571428573 C 714.6130380952382 1777.0594, 714.6130380952382 1332.9406000000001, 742.3749428571429 1180.268042857143 C 770.1368476190476 1027.5954857142858, 780.8332571428571 1041.4585190476191, 908.9463714285714 1013.6966142857143 C 1037.0594857142858 985.9347095238095, 1382.9405142857142 985.9347095238095, 1511.0536285714286 1013.6966142857143 C 1639.166742857143 1041.4585190476191, 1649.8631523809524 1027.5954857142858, 1677.6250571428573 1180.268042857143 C 1705.386961904762 1332.9406000000001, 1705.386961904762 1777.0594, 1677.6250571428573 1929.7319571428573 C 1649.8631523809524 2082.4045142857144, 1639.166742857143 2068.541480952381, 1511.0536285714286 2096.3033857142855 C 1382.9405142857142 2124.06529047619, 1037.0594857142858 2124.06529047619, 908.9463714285714 2096.3033857142855 C 780.8332571428571 2068.541480952381, 770.1368476190476 2082.4045142857144, 742.3749428571429 1929.7319571428573 Z" fill="none" stroke="#d6dde1" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 1169.8714285714286 1765.4857142857143 L 1452.2857142857144 1608" fill="none" stroke="#c8874a" stroke-width="6" stroke-dasharray="17 14" opacity="0.65"/>
+<path d="M 1086.5857142857144 1765.4857142857143 L 990.4285714285713 1604.2142857142858" fill="none" stroke="#c8874a" stroke-width="6" stroke-dasharray="17 14" opacity="0.65"/>
+<path d="M 1141.857142857143 1729.142857142857 L 1187.857142857143 1689.142857142857" stroke="#78838b" stroke-width="3"/>
+<circle cx="1141.857142857143" cy="1729.142857142857" r="7" fill="#4d5a63"/>
+<path d="M 1210 1751.857142857143 L 1256 1711.857142857143" stroke="#78838b" stroke-width="3"/>
+<circle cx="1210" cy="1751.857142857143" r="7" fill="#4d5a63"/>
+<path d="M 1154.7285714285713 1667.057142857143 L 1108.7285714285713 1627.057142857143" stroke="#78838b" stroke-width="3"/>
+<circle cx="1154.7285714285713" cy="1667.057142857143" r="7" fill="#4d5a63"/>
+<path d="M 1128.2285714285713 1750.342857142857 L 1248.2285714285713 1642.342857142857" stroke="#78838b" stroke-width="3"/>
+<circle cx="1128.2285714285713" cy="1750.342857142857" r="7" fill="#4d5a63"/>
+<g><title>Q30 · 두꺼비병 물품</title>
+<circle cx="1169.8714285714286" cy="1765.4857142857143" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1169.8714285714286" y="1774.4857142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#7d3718">Q30</text></g>
+<g><title>Q30→ · 두꺼비병 전달</title>
+<circle cx="1452.2857142857144" cy="1608" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1452.2857142857144" y="1617" font-family="Malgun Gothic" text-anchor="middle" font-size="19" font-weight="700" fill="#7d3718">Q30→</text></g>
+<g><title>Q41 · 모형배 물품</title>
+<circle cx="1086.5857142857144" cy="1765.4857142857143" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1086.5857142857144" y="1774.4857142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#7d3718">Q41</text></g>
+<g><title>Q41→ · 모형배 전달</title>
+<circle cx="990.4285714285713" cy="1604.2142857142858" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="990.4285714285713" y="1613.2142857142858" font-family="Malgun Gothic" text-anchor="middle" font-size="19" font-weight="700" fill="#7d3718">Q41→</text></g>
+<g><title>F1 · 현장 자판기</title>
+<circle cx="1187.857142857143" cy="1689.142857142857" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1187.857142857143" y="1698.142857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#7d3718">F1</text></g>
+<g><title>F2 · 에탄올 시설</title>
+<circle cx="1256" cy="1711.857142857143" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1256" y="1720.857142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#7d3718">F2</text></g>
+<g><title>F3 · ATV 전력</title>
+<circle cx="1030.405714285714" cy="1691.2857142857142" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1030.405714285714" y="1700.2857142857142" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#7d3718">F3</text></g>
+<g><title>F4 · ATV 수리</title>
+<circle cx="1108.7285714285713" cy="1627.057142857143" r="30" fill="#fff2e8" stroke="#b85e2e" stroke-width="6"/>
+<text x="1108.7285714285713" y="1636.057142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#7d3718">F4</text></g>
+<g><title>S1 · 서역 · 도전 09</title>
+<path d="M 742.3749428571429 1397.4661 L 772.3749428571429 1427.4661 L 742.3749428571429 1457.4661 L 712.3749428571429 1427.4661 Z" fill="#edf4fb" stroke="#34658e" stroke-width="6"/>
+<text x="742.3749428571429" y="1436.4661" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#234966">S1</text></g>
+<g><title>S2 · 북역 · 도전 09</title>
+<path d="M 1345.3256571428572 983.6966142857143 L 1375.3256571428572 1013.6966142857143 L 1345.3256571428572 1043.6966142857143 L 1315.3256571428572 1013.6966142857143 Z" fill="#edf4fb" stroke="#34658e" stroke-width="6"/>
+<text x="1345.3256571428572" y="1022.6966142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#234966">S2</text></g>
+<g><title>S3 · 동역 · 도전 09</title>
+<path d="M 1677.6250571428573 1652.5339 L 1707.6250571428573 1682.5339 L 1677.6250571428573 1712.5339 L 1647.6250571428573 1682.5339 Z" fill="#edf4fb" stroke="#34658e" stroke-width="6"/>
+<text x="1677.6250571428573" y="1691.5339" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#234966">S3</text></g>
+<g><title>A10 · 호퍼 보스</title>
+<path d="M 1235.5399428571427 907.9823285714285 L 1265.5399428571427 937.9823285714285 L 1235.5399428571427 967.9823285714285 L 1205.5399428571427 937.9823285714285 Z" fill="#edf4fb" stroke="#34658e" stroke-width="6"/>
+<text x="1235.5399428571427" y="946.9823285714285" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#234966">A10</text></g>
+<g><title>A11 · 추출</title>
+<path d="M 1096.4285714285716 1843 L 1126.4285714285716 1873 L 1096.4285714285716 1903 L 1066.4285714285716 1873 Z" fill="#edf4fb" stroke="#34658e" stroke-width="6"/>
+<text x="1096.4285714285716" y="1882" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#234966">A11</text></g>
+<g><title>A12 · 추출</title>
+<path d="M 1384.1428571428573 1222.142857142857 L 1414.1428571428573 1252.142857142857 L 1384.1428571428573 1282.142857142857 L 1354.1428571428573 1252.142857142857 Z" fill="#edf4fb" stroke="#34658e" stroke-width="6"/>
+<text x="1384.1428571428573" y="1261.142857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#234966">A12</text></g>
+<g><title>E1 · 해병 배달봇</title>
+<path d="M 937.4285714285714 1487.142857142857 L 967.4285714285714 1547.142857142857 L 907.4285714285714 1547.142857142857 Z" fill="#fff0f0" stroke="#a34848" stroke-width="6"/>
+<text x="937.4285714285714" y="1526.142857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#782f2f">E1</text></g>
+<g><title>E2 · 해병 배달봇</title>
+<path d="M 1005.5714285714286 1487.142857142857 L 1035.5714285714284 1547.142857142857 L 975.5714285714286 1547.142857142857 Z" fill="#fff0f0" stroke="#a34848" stroke-width="6"/>
+<text x="1005.5714285714286" y="1526.142857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#782f2f">E2</text></g>
+<g><title>E3 · 해적 배달봇</title>
+<path d="M 1164.5714285714287 1244.857142857143 L 1194.5714285714287 1304.857142857143 L 1134.5714285714287 1304.857142857143 Z" fill="#fff0f0" stroke="#a34848" stroke-width="6"/>
+<text x="1164.5714285714287" y="1283.857142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#782f2f">E3</text></g>
+<g><title>E4 · 해적 배달봇</title>
+<path d="M 1232.7142857142856 1244.857142857143 L 1262.7142857142856 1304.857142857143 L 1202.7142857142856 1304.857142857143 Z" fill="#fff0f0" stroke="#a34848" stroke-width="6"/>
+<text x="1232.7142857142856" y="1283.857142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#782f2f">E4</text></g>
+<g><title>E5 · 토끼 삼륜차</title>
+<path d="M 1459.857142857143 1487.142857142857 L 1489.857142857143 1547.142857142857 L 1429.857142857143 1547.142857142857 Z" fill="#fff0f0" stroke="#a34848" stroke-width="6"/>
+<text x="1459.857142857143" y="1526.142857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#782f2f">E5</text></g>
+<g><title>E6 · 토끼 삼륜차</title>
+<path d="M 1528 1487.142857142857 L 1558 1547.142857142857 L 1498 1547.142857142857 Z" fill="#fff0f0" stroke="#a34848" stroke-width="6"/>
+<text x="1528" y="1526.142857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#782f2f">E6</text></g>
+<g><title>D1 · 정비 공구 세트</title>
+<rect x="1218.2285714285713" y="1612.342857142857" width="60" height="60" rx="4" fill="#eaf6f2" stroke="#267562" stroke-width="6"/>
+<text x="1248.2285714285713" y="1651.342857142857" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#185647">D1</text></g>
+<g><title>T3 · 평원 방면</title>
+<path d="M 1315.3256571428572 483.6966142857143 H 1371.3256571428572 M 1353.3256571428572 465.6966142857143 L 1375.3256571428572 483.6966142857143 L 1353.3256571428572 501.6966142857143" fill="none" stroke="#58616a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1345.3256571428572" y="492.6966142857143" font-family="Malgun Gothic" text-anchor="middle" font-size="23" font-weight="700" fill="#343b41">T3</text></g>
+<path d="M 2335 280 V 2300" stroke="#d8dee2" stroke-width="3"/>
+<text x="2420" y="360" font-family="Malgun Gothic" font-size="44" fill="#26333b" font-weight="700" text-anchor="start">기호</text>
+<circle cx="2440" cy="430" r="18" fill="#fff2e8" stroke="#b85e2e" stroke-width="5"/>
+<text x="2480" y="441" font-family="Malgun Gothic" font-size="37" fill="#36424a" font-weight="400" text-anchor="start">퀘스트 목표·액터</text>
+<path d="M 2440 478 l 22 22 -22 22 -22 -22 z" fill="#edf4fb" stroke="#34658e" stroke-width="5"/>
+<text x="2480" y="511" font-family="Malgun Gothic" font-size="37" fill="#36424a" font-weight="400" text-anchor="start">도전과제 관련 지점</text>
+<path d="M 2440 548 l 22 40 h -44 z" fill="#fff0f0" stroke="#a34848" stroke-width="5"/>
+<text x="2480" y="581" font-family="Malgun Gothic" font-size="37" fill="#36424a" font-weight="400" text-anchor="start">적 출현 위치</text>
+<rect x="2422" y="622" width="36" height="36" fill="#eaf6f2" stroke="#267562" stroke-width="5"/>
+<text x="2480" y="651" font-family="Malgun Gothic" font-size="37" fill="#36424a" font-weight="400" text-anchor="start">확정 드랍 위치</text>
+<path d="M 2418 710 h 42 m -18 -16 l 18 16 -18 16" fill="none" stroke="#58616a" stroke-width="6"/>
+<text x="2480" y="721" font-family="Malgun Gothic" font-size="37" fill="#36424a" font-weight="400" text-anchor="start">지역 이동 지점</text>
+<text x="2420" y="812" font-family="Malgun Gothic" font-size="43" fill="#26333b" font-weight="700" text-anchor="start">퀘스트 위치</text>
+<text x="2420" y="870" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">Q30 두꺼비 유리병 · Q41 모형배: 물품과 전달 지점</text>
+<text x="2420" y="918" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">F1 현장 자판기 · F2 에탄올 · F3 ATV 전력 · F4 ATV 수리</text>
+<text x="2420" y="966" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">D1 정비 공구 상자: 정비 공구 세트 1개 확정</text>
+<text x="2420" y="1040" font-family="Malgun Gothic" font-size="43" fill="#26333b" font-weight="700" text-anchor="start">도전과제 위치</text>
+<text x="2420" y="1098" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">A07 마을 진입(맵 판정) · A09 순환철도 이용</text>
+<text x="2420" y="1146" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">S1 서역 · S2 북역 · S3 동역</text>
+<text x="2420" y="1194" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">A10 북역 북쪽 호퍼 보스 · A11/A12 추출</text>
+<text x="2420" y="1268" font-family="Malgun Gothic" font-size="43" fill="#26333b" font-weight="700" text-anchor="start">적 배치</text>
+<text x="2420" y="1326" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">E1–E2 해병 배달 로봇 · E3–E4 해적 배달 로봇</text>
+<text x="2420" y="1374" font-family="Malgun Gothic" font-size="36" fill="#44515a" font-weight="400" text-anchor="start">E5–E6 토끼 삼륜차</text>
+<path d="M 150 2350 H 3358" stroke="#d8dee2" stroke-width="3"/>
+<text x="150" y="2415" font-family="Malgun Gothic" font-size="25" fill="#707b83" font-weight="400" text-anchor="start">배치 조사와 100% 드랍 설정에서 확인된 위치만 표시</text>
+<text x="3358" y="2415" font-family="Malgun Gothic" font-size="25" fill="#707b83" font-weight="400" text-anchor="end">RaidVillage</text>
+</svg>
