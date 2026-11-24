@@ -7,7 +7,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$messages = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'QuestValidationStrings.psd1')
+# Import-PowerShellDataFile is a module function and may be unavailable in launcher
+# environments. The built-in localization cmdlet reads this restricted data file
+# without relying on that function or on a PowerShell 7 installation.
+Import-LocalizedData -BindingVariable messages -BaseDirectory $PSScriptRoot -FileName 'QuestValidationStrings.psd1'
 try {
     if ([string]::IsNullOrWhiteSpace($ProjectDirectory)) { $ProjectDirectory = Join-Path $PSScriptRoot '..' }
     $paths = @((Join-Path $ProjectDirectory 'Content/Data/QuestTextStrings.csv'))

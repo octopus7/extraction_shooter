@@ -7,19 +7,34 @@ function Write-Fixture([string]$RelativePath, [string]$Content) {
     [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($path)) | Out-Null
     [IO.File]::WriteAllText($path, $Content, $utf8)
 }
-function Assert-Validation([string]$Flavor, [bool]$Success, [string[]]$Expected = @()) {
-    $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $validator -Flavor $Flavor -ProjectDirectory $fixture 2>&1 | Out-String
+function Assert-Validation([string]$Flavor, [bool]$Success, [string[]]$Expected = @(), [switch]$WithoutDataFileImport) {
+    if ($WithoutDataFileImport) {
+        $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $fixture 'RunWithoutDataFileImport.ps1') -Validator $validator -Flavor $Flavor -ProjectDirectory $fixture 2>&1 | Out-String
+    } else {
+        $output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $validator -Flavor $Flavor -ProjectDirectory $fixture 2>&1 | Out-String
+    }
     if (($LASTEXITCODE -eq 0) -ne $Success) { throw "Unexpected validator result: $output" }
     foreach ($text in $Expected) { if (-not $output.Contains($text)) { throw "Missing diagnostic '$text': $output" } }
 }
 try {
+    Write-Fixture 'RunWithoutDataFileImport.ps1' @'
+param([string]$Validator, [string]$Flavor, [string]$ProjectDirectory)
+Import-Module Microsoft.PowerShell.Utility
+Remove-Item Function:\Import-PowerShellDataFile
+$PSModuleAutoLoadingPreference = 'None'
+if (Get-Command Import-PowerShellDataFile -ErrorAction SilentlyContinue) { throw 'Regression fixture must remove the function' }
+& $Validator -Flavor $Flavor -ProjectDirectory $ProjectDirectory
+exit $LASTEXITCODE
+'@
     Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,EN,JA,SC,TC,RU`n"
     Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nmain.title,KO,,,SC,TC,RU`nmain.description,KO,EN,,SC,TC,RU`n"
     Write-Fixture 'Authoring/QuestStudio/QuestStudioNotes.ko.csv' "string_key,ko`nnotes,KO`n"
     Assert-Validation Demo $true
     Assert-Validation Full $false @('main.title', 'main.description', 'en', 'ja', 'QuestTextStrings.csv')
+    Assert-Validation Full $false @('main.title', 'main.description') -WithoutDataFileImport
     Write-Fixture 'External/MainPayload/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nmain.title,KO,EN,JA,SC,TC,RU`n"
     Assert-Validation Full $true
+    Assert-Validation Full $true @('Quest translation validation passed') -WithoutDataFileImport
     Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`nquoted.title,`"KO, text`nsecond line`",EN,JA,SC,TC,RU`n"
     Assert-Validation Demo $true
     Write-Fixture 'Content/Data/QuestTextStrings.csv' "string_key,ko,en,ja,zh-Hans,zh-Hant,ru`npublic.title,KO,`"  `",JA,SC,TC,RU`n"
@@ -54,7 +69,7 @@ try {
             }
         }
     } finally { $env:UE_5_7_ROOT = $oldEngine }
-    Write-Output 'PASS: translation validation and all four BAT preflight guards.'
+    Write-Output 'PASS: translation validation, missing Import-PowerShellDataFile compatibility, and all four BAT preflight guards.'
 } finally {
     $resolved = [IO.Path]::GetFullPath($fixture)
     $tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
