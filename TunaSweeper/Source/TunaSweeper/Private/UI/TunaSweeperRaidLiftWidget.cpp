@@ -108,3 +108,8 @@ void UTunaSweeperRaidLiftWidget::VillageEast() { if (Lift.IsValid()) Lift->Selec
 void UTunaSweeperRaidLiftWidget::VillageWest() { if (Lift.IsValid()) Lift->SelectArrival(ETunaSweeperRaidArrivalGroup::VillageWest); }
 void UTunaSweeperRaidLiftWidget::Plains() { if (Lift.IsValid()) Lift->SelectArrival(ETunaSweeperRaidArrivalGroup::Plains); }
 void UTunaSweeperRaidLiftWidget::Cancel() { if (Lift.IsValid()) Lift->ClosePicker(); }
+
+void UTunaSweeperRaidLiftWidget::InitializeLift(ATunaSweeperRaidLiftActor* InLift)
+{
+    Lift = InLift;
+}

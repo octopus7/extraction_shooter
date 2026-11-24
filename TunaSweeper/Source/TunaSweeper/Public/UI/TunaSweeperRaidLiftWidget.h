@@ -8,7 +8,7 @@ class TUNASWEEPER_API UTunaSweeperRaidLiftWidget : public UUserWidget
 {
     GENERATED_BODY()
 public:
-    void InitializeLift(ATunaSweeperRaidLiftActor* InLift) { Lift = InLift; }
+    void InitializeLift(ATunaSweeperRaidLiftActor* InLift);
 protected:
     virtual TSharedRef<SWidget> RebuildWidget() override;
     virtual void NativeConstruct() override;
