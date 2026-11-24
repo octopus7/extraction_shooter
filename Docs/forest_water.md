@@ -30,13 +30,19 @@
 
 수면의 UV0은 구역 전체에 이어지는 미터 단위 평면 좌표다. UV1의 U에는 수면에서 실제 바닥까지의 수직 거리(미터)가 들어 있다. 지형을 다시 조각해 강바닥 높이나 강폭을 바꾸면 해당 수면의 UV1과 물가 윤곽도 함께 갱신한다. 편집 원본과 메시별 FBX는 `TunaSweeper/SourceArt/Environment/ForestWater`에 있다.
 
-코끼리 호수는 수면 높이 −15cm, 면적 약 98.5㎡다. 코끼리가 서 있는 쪽에는 약 30cm 깊이의 얕은 턱이 있고 맞은편 바닥은 최대 약 3.06m까지 내려간다. 수면·하상·물가 메시와 같은 윤곽으로 식생 배치도 `TunaSweeper/SourceArt/Environment/ForestScatter/T_Layout_Forest_Draft.png`에 물을 표시한다. 호수 크기를 바꿀 때는 이 원본을 수정한 뒤 같은 이름의 UE 텍스처를 재임포트한다.
+코끼리 호수는 수면 높이 −15cm, 면적 약 887㎡이며 외접 범위는 약 31×43m다. 코끼리가 서 있는 쪽에는 약 30cm 깊이의 얕은 턱이 있고 맞은편 바닥은 최대 약 3.06m까지 내려간다. 수면·하상·물가 메시와 같은 윤곽으로 식생 배치도 `TunaSweeper/SourceArt/Environment/ForestScatter/T_Layout_Forest_Draft.png`에 물을 표시한다. 호수 크기를 바꿀 때는 이 원본을 수정한 뒤 같은 이름의 UE 텍스처를 재임포트한다.
 
 `Riverbed`는 실제 강바닥의 굴곡을 따르며 수심 약 2–8cm 사이에서 마른 지면과 섞인다. 하상과 수중 소품은 배치도 데칼을 받지 않는다. 숲의 `MI_Layout_Forest`는 외곽 5.6m에서 배치도를 서서히 흐리게 표시한다. 이 인스턴스에서 **Reveal painted shores**를 켜면 파란 수계 주변의 배치도 색이 옅어져 칠해 둔 흙이 드러난다. 노란 길은 원래 투영 농도로 표시하며, 식생 분류는 원본 `T_Layout_Forest_Draft`를 읽는다.
 
 `M_ForestShoreFoam`은 물가 리본을 따라 긴 물결, 짧은 포말, 옅게 풀어지는 물자국 텍스처를 겹친다. 리본의 UV0은 강둑을 따라 누적한 거리(U)와 물가에서 물 안쪽으로 들어가는 비율(V)이다. 닫힌 호수의 UV1 U에는 전체 둘레가 들어가서 시작점과 끝점의 무늬가 이어진다. **Foam Opacity**, **Repeat Metres**, **Motion Speed**로 강도와 무늬의 길이, 속도를 조절한다. 하구 본체와 연장 수면이 만나는 단면은 그대로 이어져 물가 리본을 생략한다.
 
 원래의 `Forest_ShallowPuddle_TestWater`는 웅덩이 발소리와 발걸음 파문을 처리한다. 수면과 물가의 표시는 `Water_07_ShallowPuddle`에서 편집한다. 코끼리 호수의 도전과제는 기존 `Forest_ElephantLake_Achievement13` 트리거가 담당한다.
+
+## 코끼리 호수의 별하늘과 근거리 반사
+
+숲 호수의 수면 슬롯은 전용 머터리얼 M_ElephantLakeStarWater를 사용한다. 새로 생성한 T_ElephantLakeNightSky가 바닥 깊이(UV1 U)에 따라 나타난다. Star Depth Start Metres(0.45)보다 얕은 곳은 기존 물색과 투명도를 쓰고, Star Depth Full Metres(1.6)부터 밤하늘이 완전히 드러난다. 텍스처는 호수의 UV0에 고정되고 물결에 따라 조금 움직인다.
+
+ElephantLake_NearbyReflection 액터의 Water Actor와 Surface Name이 반사할 수면을 지정한다. 수평 수면의 높이와 플레이 카메라 투영을 기준으로 가까운 스태틱·스켈레탈 메시만 별도 렌더 타깃에 그린다. 기본 설정은 물가 탐색 여유 5.5m, 수면 위 높이 4.5m, 뷰 거리 45m, 렌더 타깃 가로 640픽셀이다. 인스턴스 식생과 반폭 10m 초과 메시는 생략한다. 다른 수면에서 쓸 때는 해당 머터리얼에도 NearbyReflection 텍스처와 NearbyReflectionEnabled 스칼라 입력, 화면 좌표의 세로 반전 및 역알파 합성이 필요하다.
 
 ## 길 위에 고인 빗물
 

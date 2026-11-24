@@ -1,7 +1,7 @@
 # 숲 호수와 미지와 조우
 
 - 레벨: `/Game/MainRaid/RaidForest`.
-- 호수 중심: `(-4580.562, 6200, 0)` cm. 사용자 지정 코끼리 위치 `(-5630.562, 6200, 0)`에 맞춰 세 요소를 X축으로 `-9980.562` cm 평행 이동했다. 기존 62개 액터의 위치는 유지했다.
+- 확장 전 호수 중심: `(-4580.562, 6200, 0)` cm. 사용자 지정 코끼리 위치 `(-5630.562, 6200, 0)`에 맞춰 세 요소를 X축으로 `-9980.562` cm 평행 이동했다. 이후 코끼리 쪽 기슭을 기준으로 호수의 X 길이를 2배, Y 길이를 4.5배 넓혔다. 코끼리와 도전과제 트리거는 원래 위치에 있다.
 - 숲맵의 호수는 `Water_06_ElephantLake`가 표시한다. 수면 아래 지형까지의 깊이가 색과 투과율을 결정하며 물가 메시가 흰 물결을 그린다. 기존 15×10m 이미지 데칼 `Forest_ElephantLake_Decal`은 이 레벨에서 숨겼다. 편집 방법은 [숲맵 수역](forest_water.md)에 정리했다.
 - `Forest_LakeElephant`: `SkeletalMeshActor`로 배치한 StarPondElephant. `SkeletalMeshComponent`가 `/Game/Astra/Characters/StarPond/Guardian/SK_SP_UnicornElephant`와 8초 반복 대기 애니메이션 `A_SP_UnicornElephant_Idle`을 사용한다. 달성 판정은 외형과 분리돼 있다.
 - `Forest_ElephantLake_Achievement13`: 기존 `TunaSweeperAchievementLocationTrigger`. 중심 `(-4580.562, 6200, 200)`, 반크기 `(1300, 850, 300)` cm의 호숫가 영역. `LocationId=location.forest.elephant_lake`.
