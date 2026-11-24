@@ -233,6 +233,7 @@
                                 <ComboBox x:Name="DisplayPresetBox" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8"
                                           SelectedIndex="0" VerticalContentAlignment="Center">
                                     <ComboBoxItem Tag="WindowedFhd">창모드 FHD · DLSS 유지</ComboBoxItem>
+                                    <ComboBoxItem Tag="WindowedHd">창모드 HD (1280×720) · DLSS 유지</ComboBoxItem>
                                     <ComboBoxItem Tag="FullscreenFhd">전체화면 FHD · DLSS 끔</ComboBoxItem>
                                     <ComboBoxItem Tag="FullscreenUhd">전체화면 UHD · DLSS 켬 (성능)</ComboBoxItem>
                                 </ComboBox>

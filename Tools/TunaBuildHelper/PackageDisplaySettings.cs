@@ -2,7 +2,7 @@ using System.IO;
 
 namespace TunaBuildHelper;
 
-internal enum DisplayPreset { WindowedFhd, FullscreenFhd, FullscreenUhd }
+internal enum DisplayPreset { WindowedFhd, FullscreenFhd, FullscreenUhd, WindowedHd }
 
 internal static class PackageDisplaySettings
 {
@@ -14,9 +14,14 @@ internal static class PackageDisplaySettings
     {
         const string section = "[/Script/TunaSweeper.TunaSweeperGameUserSettings]";
         bool uhd = preset == DisplayPreset.FullscreenUhd;
-        string width = uhd ? "3840" : "1920";
-        string height = uhd ? "2160" : "1080";
-        string mode = preset == DisplayPreset.WindowedFhd ? "2" : "0";
+        var (width, height) = preset switch
+        {
+            DisplayPreset.WindowedHd => ("1280", "720"),
+            DisplayPreset.FullscreenUhd => ("3840", "2160"),
+            _ => ("1920", "1080")
+        };
+        bool windowed = preset is DisplayPreset.WindowedFhd or DisplayPreset.WindowedHd;
+        string mode = windowed ? "2" : "0";
         bool exists = File.Exists(path);
         var lines = exists ? File.ReadAllLines(path).ToList() : new List<string>();
         var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -25,7 +30,7 @@ internal static class PackageDisplaySettings
             ["LastUserConfirmedResolutionSizeX"] = width, ["LastUserConfirmedResolutionSizeY"] = height,
             ["FullscreenMode"] = mode, ["LastConfirmedFullscreenMode"] = mode, ["Version"] = "5"
         };
-        if (preset != DisplayPreset.WindowedFhd)
+        if (!windowed)
         {
             values["PreferredFullscreenMode"] = "0";
             values["PreferredDLSSMode"] = uhd ? "Performance" : "Off";

@@ -42,6 +42,12 @@ internal static class Program
                 "LastUserConfirmedResolutionSizeY=2160", "FullscreenMode=0", "PreferredDLSSMode=Performance" })
                 if (!File.ReadAllLines(path).Contains(key)) throw new Exception(key);
             File.AppendAllText(path, "[TunaSweeper.GraphicsSettings]\nDLSSMode=3\n[Other]\nFullscreenMode=99\n");
+            PackageDisplaySettings.Apply(path, DisplayPreset.WindowedHd);
+            var hdSettings = File.ReadAllLines(path);
+            foreach (string key in new[] { "ResolutionSizeX=1280", "ResolutionSizeY=720",
+                "LastUserConfirmedResolutionSizeX=1280", "LastUserConfirmedResolutionSizeY=720",
+                "FullscreenMode=2", "LastConfirmedFullscreenMode=2", "PreferredDLSSMode=Performance", "DLSSMode=3" })
+                if (!hdSettings.Contains(key)) throw new Exception(key);
             PackageDisplaySettings.Apply(path, DisplayPreset.FullscreenFhd);
             PackageDisplaySettings.Apply(path, DisplayPreset.WindowedFhd);
             foreach (string key in new[] { "ResolutionSizeX=1920", "ResolutionSizeY=1080", "LastConfirmedFullscreenMode=2",
@@ -83,6 +89,10 @@ internal static class Program
                 throw new Exception("Expected separate build and packaging cancellation buttons");
 
             var launch = (Button)window.FindName("RunSteamFullButton");
+            var presets = (ComboBox)window.FindName("DisplayPresetBox");
+            if (FindTab(presets) != packagingTab || !presets.Items.OfType<ComboBoxItem>().Any(item =>
+                Equals(item.Tag, nameof(DisplayPreset.WindowedHd)) && item.Content?.ToString()?.Contains("1280×720") == true))
+                throw new Exception("Expected the 720p windowed preset in the Packaging dropdown");
             var uploadFolder = (Button)window.FindName("OpenSteamUploadScriptsFolderButton");
             var upload = (Button)window.FindName("RunSteamUploadButton");
             if (upload.Parent != uploadFolder.Parent || Grid.GetColumn(upload) <= Grid.GetColumn(uploadFolder) ||
