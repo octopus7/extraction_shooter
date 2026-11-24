@@ -26,8 +26,29 @@ internal static class Program
         window.Close();
         Console.WriteLine("Item grant helper tests passed (catalog, layout, selection, defaults, context guard, localization).");
         CheckSteamFullPackage();
+        CheckDisplayPresets();
         CheckSteamButtonLayout();
         return 0;
+    }
+
+    private static void CheckDisplayPresets()
+    {
+        var directory = Directory.CreateTempSubdirectory();
+        string path = Path.Combine(directory.FullName, "GameUserSettings.ini");
+        try
+        {
+            PackageDisplaySettings.Apply(path, DisplayPreset.FullscreenUhd);
+            foreach (string key in new[] { "Version=5", "GraphicsSettingsSchemaVersion=1", "ResolutionSizeX=3840",
+                "LastUserConfirmedResolutionSizeY=2160", "FullscreenMode=0", "PreferredDLSSMode=Performance" })
+                if (!File.ReadAllLines(path).Contains(key)) throw new Exception(key);
+            File.AppendAllText(path, "[TunaSweeper.GraphicsSettings]\nDLSSMode=3\n[Other]\nFullscreenMode=99\n");
+            PackageDisplaySettings.Apply(path, DisplayPreset.FullscreenFhd);
+            PackageDisplaySettings.Apply(path, DisplayPreset.WindowedFhd);
+            foreach (string key in new[] { "ResolutionSizeX=1920", "ResolutionSizeY=1080", "LastConfirmedFullscreenMode=2",
+                "FullscreenMode=2", "PreferredDLSSMode=Off", "DLSSMode=0", "FullscreenMode=99" })
+                if (File.ReadAllLines(path).Count(line => line == key) != 1) throw new Exception(key);
+        }
+        finally { directory.Delete(true); }
     }
 
     private static void CheckSteamButtonLayout()

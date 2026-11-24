@@ -221,6 +221,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -229,23 +230,31 @@
                                 </Grid.ColumnDefinitions>
                                 <Button x:Name="RunSteamFullButton" Grid.ColumnSpan="3" Margin="0,0,0,8"
                                         Click="RunSteamFullButton_Click" />
-                                <TextBlock x:Name="SteamAppIdFileName" Grid.Row="1" Margin="8,0,0,0"
+                                <ComboBox x:Name="DisplayPresetBox" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8"
+                                          SelectedIndex="0" VerticalContentAlignment="Center">
+                                    <ComboBoxItem Tag="WindowedFhd">창모드 FHD · DLSS 유지</ComboBoxItem>
+                                    <ComboBoxItem Tag="FullscreenFhd">전체화면 FHD · DLSS 끔</ComboBoxItem>
+                                    <ComboBoxItem Tag="FullscreenUhd">전체화면 UHD · DLSS 켬 (성능)</ComboBoxItem>
+                                </ComboBox>
+                                <Button Grid.Row="1" Grid.Column="2" Margin="8,0,0,8" MinWidth="80"
+                                        Content="적용" Click="ApplyDisplayPreset_Click" />
+                                <TextBlock x:Name="SteamAppIdFileName" Grid.Row="2" Margin="8,0,0,0"
                                            Foreground="#F4F7FB" FontSize="15" VerticalAlignment="Center" />
-                                <Border Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" MinWidth="42"
+                                <Border Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" MinWidth="42"
                                         Background="#202833" BorderBrush="#3C4C61" BorderThickness="1" CornerRadius="4">
                                     <TextBlock x:Name="SteamAppIdIndicator" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="19" FontWeight="Bold" />
                                 </Border>
-                                <Button x:Name="SteamAppIdActionButton" Grid.Row="1" Grid.Column="2" Margin="8,0,0,0" MinWidth="80"
+                                <Button x:Name="SteamAppIdActionButton" Grid.Row="2" Grid.Column="2" Margin="8,0,0,0" MinWidth="80"
                                         Click="SteamAppIdActionButton_Click" />
-                                <TextBlock x:Name="TrailerModeFileName" Grid.Row="2" Margin="8,6,0,0"
+                                <TextBlock x:Name="TrailerModeFileName" Grid.Row="3" Margin="8,6,0,0"
                                            Foreground="#F4F7FB" FontSize="15" VerticalAlignment="Center" />
-                                <Border Grid.Row="2" Grid.Column="1" Margin="8,6,0,0" MinWidth="42"
+                                <Border Grid.Row="3" Grid.Column="1" Margin="8,6,0,0" MinWidth="42"
                                         Background="#202833" BorderBrush="#3C4C61" BorderThickness="1" CornerRadius="4">
                                     <TextBlock x:Name="TrailerModeIndicator" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="19" FontWeight="Bold" />
                                 </Border>
-                                <Button x:Name="TrailerModeActionButton" Grid.Row="2" Grid.Column="2" Margin="8,6,0,0" MinWidth="80"
+                                <Button x:Name="TrailerModeActionButton" Grid.Row="3" Grid.Column="2" Margin="8,6,0,0" MinWidth="80"
                                         Click="TrailerModeActionButton_Click" />
                             </Grid>
                             <Grid Margin="0,0,0,10">

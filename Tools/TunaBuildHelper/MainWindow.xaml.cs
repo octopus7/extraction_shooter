@@ -467,6 +467,28 @@ public partial class MainWindow : Window
         RunBatchScript("PackageTunaSweeperStoveFullWin64.bat", statusResourceKey: "PackageBuildStartedStatus");
     }
 
+    private void ApplyDisplayPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (DisplayPresetBox.SelectedItem is not System.Windows.Controls.ComboBoxItem { Tag: string tag } ||
+            !Enum.TryParse<DisplayPreset>(tag, out var preset)) return;
+        try
+        {
+            var processes = Process.GetProcessesByName("TunaSweeper-Win64-Shipping");
+            foreach (var process in processes) process.Dispose();
+            if (processes.Length > 0)
+            {
+                StatusTextBlock.Text = "게임을 종료한 후 적용하세요.";
+                return;
+            }
+            PackageDisplaySettings.Apply(PackageDisplaySettings.SettingsPath, preset);
+            StatusTextBlock.Text = "화면 설정을 저장했습니다. 다음 게임 실행부터 적용됩니다.";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            StatusTextBlock.Text = $"화면 설정 저장 실패 · {ex.Message}";
+        }
+    }
+
     private void RunSteamFullButton_Click(object sender, RoutedEventArgs e)
     {
         RefreshSteamAppIdStatus();
