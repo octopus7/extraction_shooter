@@ -68,9 +68,9 @@ This section is a review aid, not an allocation registry. The maps and runtime d
 
 See `Docs/raid_placement_anchors.md` for the anchor/runtime contract and JSON schema examples.
 
-For logical level `RaidForest` (`/Game/MainRaid/RaidForest`), Enemy IDs `1` (gray robot), `2` (blue robot), and `3` (red robot) are allocated near the primary power facility. Each has one anchor and a guaranteed spawn row in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`; the corresponding profiles are in `EnemySpawnProfiles.json`. These public Main defaults apply when no dataset-specific placement override exists.
+For logical level `RaidForest` (`/Game/MainRaid/RaidForest`), Enemy IDs `1` (gray robot), `2` (blue robot), and `3` (red robot) have guaranteed spawn rows in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`; the corresponding profiles are in `EnemySpawnProfiles.json`. The gray pair remains near the power facility. The two blue anchors are on the plain before the northwest uphill trail, and the red anchor is on the plateau. Both gray and both blue anchors allow duplicate IDs. These public Main defaults apply when no dataset-specific placement override exists.
 
-RaidForest Enemy ID `4` is a single guaranteed XHigh quadbot. Its anchor is 10 m to the right of `Forest_StartLightTruck`, measured horizontally from the truck's origin.
+RaidForest Enemy ID `4` is a single guaranteed XHigh quadbot. Its anchor is on the dry bank of the widening EastFan river section.
 
 For logical level `RaidVillage` (`/Game/MainRaid/RaidVillage`), Enemy IDs `1–2` are marine delivery robots, `3–4` are pirate delivery robots, and `5–6` are rabbit trikes. Each has one anchor in the `Region2/EnemyAnchors` folder and a guaranteed spawn row in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`. The map owns their transforms; matching profiles are in `EnemySpawnProfiles.json`. These IDs are independent of the same numbers in other logical levels.
 
