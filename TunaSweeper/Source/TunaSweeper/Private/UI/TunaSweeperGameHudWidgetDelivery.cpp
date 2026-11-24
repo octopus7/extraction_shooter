@@ -1,6 +1,7 @@
 #include "TunaSweeperGameHudWidgetShared.h"
 #include "TunaSweeperDeliveryIndicator.h"
 
+#include "Algo/BinarySearch.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "EngineUtils.h"
@@ -30,10 +31,9 @@ namespace
     constexpr float QuestGuidanceRefreshSeconds = 0.25f;
     constexpr double TrailDotSpacing = 65.0;
     constexpr double TrailFirstDotDistance = 115.0;
-    constexpr double TrailDotRadius = 8.0;
-    constexpr int32 MaxTrailDots = 32;
-    constexpr double MaxTrailDistance = TrailFirstDotDistance + (MaxTrailDots - 1) * TrailDotSpacing;
-    constexpr int32 TrailDotSides = 12;
+    constexpr int32 TrailWindowStep = 8;
+    constexpr int32 TrailWindowCount = 48;
+    constexpr double MaxTrailDistance = 2150.0;
 
     TOptional<FVector> FindClosestQuestGuidanceLocation(const FVector& Origin, TConstArrayView<FVector> Locations)
     {
@@ -58,74 +58,65 @@ namespace
             NearLocation - FVector(0, 0, 85), ECC_Pawn, Query) && Floor.ImpactNormal.Z >= WalkableFloorZ;
     }
 
-    void BuildQuestTrail(APawn& Pawn, const FVector& Target, TArray<FHitResult>& OutDots)
+    void AppendRoutePoint(TArray<FVector>& Points, TArray<double>& Distances, const FVector& Point)
     {
-        UWorld& World = *Pawn.GetWorld();
+        const double Length = Points.IsEmpty() ? 0.0 : FVector::Distance(Points.Last(), Point);
+        if (!Points.IsEmpty() && Length < 1.0) return;
+        Distances.Add(Points.IsEmpty() ? 0.0 : Distances.Last() + Length);
+        Points.Add(Point);
+    }
+
+    // Extend only the straight section that the character capsule can actually traverse.
+    void ExtendFallback(APawn& Pawn, const FVector& Target, TArray<FVector>& Points, TArray<double>& Distances)
+    {
         const auto* Character = Cast<ACharacter>(&Pawn);
-        const auto* Movement = Character ? Character->GetCharacterMovement() : nullptr;
-        const float WalkableFloorZ = Movement ? Movement->GetWalkableFloorZ() : 0.7f;
-        const FVector Start = Pawn.GetNavAgentLocation();
-        const FCollisionQueryParams Query(SCENE_QUERY_STAT(QuestGuidanceTrail), false, &Pawn);
-
-        auto* Navigation = UNavigationSystemV1::GetCurrent(&World);
-        FNavLocation NavStart;
-        const auto& Agent = Pawn.GetNavAgentPropertiesRef();
-        if (Navigation && Navigation->ProjectPointToNavigation(Start, NavStart, FVector(75, 75, 135), &Agent))
+        if (!Character || Points.IsEmpty()) return;
+        const auto* Capsule = Character->GetCapsuleComponent();
+        const auto* Movement = Character->GetCharacterMovement();
+        const double Radius = Capsule->GetScaledCapsuleRadius();
+        const double HalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+        const auto Shape = FCollisionShape::MakeCapsule(Radius, FMath::Max(Radius, HalfHeight - 2.0));
+        const FVector Height(0, 0, HalfHeight + 3.0);
+        const FCollisionQueryParams Query(SCENE_QUERY_STAT(QuestTrailFallback), false, &Pawn);
+        for (double Length = 0; Length < MaxTrailDistance; Length += TrailDotSpacing)
         {
-            FNavLocation NavEnd;
-            if (!Navigation->ProjectPointToNavigation(Target, NavEnd, FVector(200, 200, 250), &Agent)) return;
-            const auto* Path = UNavigationSystemV1::FindPathToLocationSynchronously(
-                &World, NavStart.Location, NavEnd.Location, &Pawn);
-            if (!Path || !Path->IsValid() || Path->IsPartial()) return;
-
-            double SegmentStartDistance = 0.0;
-            double DotDistance = TrailFirstDotDistance;
-            for (int32 Index = 1; Index < Path->PathPoints.Num() && DotDistance <= MaxTrailDistance; ++Index)
-            {
-                const FVector& From = Path->PathPoints[Index - 1];
-                const FVector& To = Path->PathPoints[Index];
-                const double Length = FVector::Dist2D(From, To);
-                if (Length <= UE_KINDA_SMALL_NUMBER) continue;
-                while (DotDistance <= FMath::Min(SegmentStartDistance + Length, MaxTrailDistance))
-                {
-                    const FVector Sample = FMath::Lerp(From, To, (DotDistance - SegmentStartDistance) / Length);
-                    FHitResult Floor;
-                    if (TraceTrailGround(World, Sample, WalkableFloorZ, Query, Floor)) OutDots.Add(Floor);
-                    DotDistance += TrailDotSpacing;
-                }
-                SegmentStartDistance += Length;
-            }
-            return;
-        }
-
-        // Maps without a navmesh can show the straight portion proven walkable by the player capsule.
-        const UCapsuleComponent* Capsule = Character ? Character->GetCapsuleComponent() : nullptr;
-        FHitResult PreviousFloor;
-        if (!Capsule || !Movement || !TraceTrailGround(World, Start, WalkableFloorZ, Query, PreviousFloor)) return;
-        const float Radius = Capsule->GetScaledCapsuleRadius();
-        const float HalfHeight = Capsule->GetScaledCapsuleHalfHeight();
-        const FCollisionShape Clearance = FCollisionShape::MakeCapsule(Radius, FMath::Max(Radius, HalfHeight - 2.0f));
-        const FVector Height(0, 0, HalfHeight + 3.0f);
-        const FVector Direction = (Target - Start).GetSafeNormal2D();
-        const double MaxDistance = FMath::Min(FVector::Dist2D(Start, Target), MaxTrailDistance);
-        for (double Distance = TrailDotSpacing; Distance <= MaxDistance; Distance += TrailDotSpacing)
-        {
-            FVector Sample = Start + Direction * Distance;
-            Sample.Z = PreviousFloor.ImpactPoint.Z;
+            const FVector From = Points.Last();
+            const double Remaining = FVector::Dist2D(From, Target);
+            if (Remaining < 2.0) break;
+            const FVector Sample = From + (Target - From).GetSafeNormal2D() * FMath::Min(Remaining, TrailDotSpacing);
             FHitResult Floor;
-            if (!TraceTrailGround(World, Sample, WalkableFloorZ, Query, Floor) ||
-                FMath::Abs(Floor.ImpactPoint.Z - PreviousFloor.ImpactPoint.Z) > Movement->MaxStepHeight ||
-                World.SweepTestByChannel(PreviousFloor.ImpactPoint + Height, Floor.ImpactPoint + Height,
-                    FQuat::Identity, ECC_Pawn, Clearance, Query))
-            {
-                break;
-            }
-            if (Distance >= TrailFirstDotDistance) OutDots.Add(Floor);
-            PreviousFloor = Floor;
+            if (!TraceTrailGround(*Pawn.GetWorld(), Sample, Movement->GetWalkableFloorZ(), Query, Floor) ||
+                FMath::Abs(Floor.ImpactPoint.Z - From.Z) > Movement->MaxStepHeight ||
+                Pawn.GetWorld()->SweepTestByChannel(From + Height, Floor.ImpactPoint + Height,
+                    FQuat::Identity, ECC_Pawn, Shape, Query)) break;
+            AppendRoutePoint(Points, Distances, Floor.ImpactPoint);
         }
     }
 
-    UProceduralMeshComponent* CreateQuestTrail(APawn& Pawn)
+    double ProjectTrailProgress(const TArray<FVector>& Points, const TArray<double>& Distances,
+        const FVector& Feet, int32& Segment, double& Error)
+    {
+        // Follow adjacent segments, including when backtracking. Do not jump across a hairpin.
+        double Progress = 0.0;
+        Error = TNumericLimits<double>::Max();
+        auto Consider = [&](int32 Index)
+        {
+            const FVector Closest = FMath::ClosestPointOnSegment(Feet, Points[Index], Points[Index + 1]);
+            const double Candidate = FVector::DistSquared(Feet, Closest);
+            if (Candidate >= Error) return false;
+            Error = Candidate;
+            Segment = Index;
+            Progress = Distances[Index] + FVector::Distance(Points[Index], Closest);
+            return true;
+        };
+        Consider(Segment);
+        while (Segment + 2 < Points.Num() && Consider(Segment + 1)) {}
+        while (Segment > 0 && Consider(Segment - 1)) {}
+        Error = FMath::Sqrt(Error);
+        return Progress;
+    }
+
+    UProceduralMeshComponent* CreateQuestTrail(APawn& Pawn, UMaterialInstanceDynamic* Material)
     {
         auto* Trail = NewObject<UProceduralMeshComponent>(&Pawn, NAME_None, RF_Transient);
         Trail->SetMobility(EComponentMobility::Movable);
@@ -135,57 +126,52 @@ namespace
         Trail->SetCastShadow(false);
         Trail->SetOnlyOwnerSee(true);
         Trail->SetHiddenInSceneCapture(true);
-        if (auto* Surface = LoadObject<UMaterialInterface>(nullptr,
-            TEXT("/Game/UI/WorldQuestMarker/M_QuestMarkerSurface.M_QuestMarkerSurface")))
-        {
-            auto* Material = UMaterialInstanceDynamic::Create(Surface, Trail);
-            Material->SetVectorParameterValue(TEXT("MarkerColor"), FLinearColor(1.0f, 0.76f, 0.22f));
-            Material->SetScalarParameterValue(TEXT("Metallic"), 0.0f);
-            Material->SetScalarParameterValue(TEXT("Roughness"), 0.5f);
-            Material->SetScalarParameterValue(TEXT("EmissiveStrength"), 0.75f);
-            Trail->SetMaterial(0, Material);
-        }
+        Trail->SetMaterial(0, Material);
         Trail->RegisterComponent();
         return Trail;
     }
 
-    void BuildQuestTrailMesh(const FVector& Origin, TConstArrayView<FHitResult> Dots,
-        TArray<FVector>& Vertices, TArray<FVector>& Normals, TArray<int32>& Triangles)
+    void BuildTrailWindow(APawn& Pawn, UProceduralMeshComponent& Trail, int32 First,
+        const TArray<FVector>& Points, const TArray<double>& Distances, TMap<int32,FHitResult>& Ground)
     {
-        Vertices.Reserve(Dots.Num() * (TrailDotSides + 1));
-        Normals.Reserve(Vertices.Max());
-        Triangles.Reserve(Dots.Num() * TrailDotSides * 3);
-
-        for (const FHitResult& Dot : Dots)
+        TArray<FVector> Verts, Normals;
+        TArray<int32> Indices;
+        TArray<FVector2D> UV, RouteUV;
+        const FVector Origin = Points[0];
+        const auto* Character = Cast<ACharacter>(&Pawn);
+        const float FloorZ = Character ? Character->GetCharacterMovement()->GetWalkableFloorZ() : 0.7f;
+        const FCollisionQueryParams Query(SCENE_QUERY_STAT(QuestTrailFloor), false, &Pawn);
+        for (int32 Index = First; Index < First + TrailWindowCount; ++Index)
         {
-            const FVector Normal = Dot.ImpactNormal.GetSafeNormal();
-            const FVector Center = Dot.ImpactPoint + Normal * 2.0 - Origin;
-            const FQuat Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Normal);
-            const int32 Base = Vertices.Add(Center);
-            Normals.Add(Normal);
-            for (int32 Side = 0; Side < TrailDotSides; ++Side)
+            const double At = TrailFirstDotDistance + Index * TrailDotSpacing;
+            if (At > Distances.Last()) break;
+            const int32 Segment = FMath::Min(Algo::LowerBound(Distances, At), Points.Num() - 1) - 1;
+            const FVector Direction = (Points[Segment + 1] - Points[Segment]).GetSafeNormal();
+            if (!Ground.Contains(Index))
             {
-                const double Angle = UE_DOUBLE_TWO_PI * Side / TrailDotSides;
-                const FVector Radius(TrailDotRadius * FMath::Cos(Angle), TrailDotRadius * FMath::Sin(Angle), 0.0);
-                Vertices.Add(Center + Rotation.RotateVector(Radius));
-                Normals.Add(Normal);
-                // Unreal's front-face order gives an outward normal from Edge2 cross Edge1.
-                Triangles.Add(Base);
-                Triangles.Add(Base + (Side + 1) % TrailDotSides + 1);
-                Triangles.Add(Base + Side + 1);
+                FHitResult Floor;
+                if (!TraceTrailGround(*Pawn.GetWorld(), Points[Segment] + Direction * (At - Distances[Segment]),
+                    FloorZ, Query, Floor)) Floor = FHitResult();
+                Ground.Add(Index, Floor);
             }
+            const auto& Floor = Ground.FindChecked(Index);
+            if (!Floor.bBlockingHit) continue;
+            const FVector N = Floor.ImpactNormal;
+            const FVector F = FVector::VectorPlaneProject(Direction, N).GetSafeNormal();
+            const FVector R = FVector::CrossProduct(N, F);
+            const FVector Center = Floor.ImpactPoint - Origin + N * 2.0;
+            const int32 Base = Verts.Num();
+            for (const FVector2D Corner : {FVector2D(0,0), FVector2D(1,0), FVector2D(1,1), FVector2D(0,1)})
+            {
+                Verts.Add(Center + R * ((Corner.X - .5) * 40.) + F * ((Corner.Y - .5) * 24.));
+                Normals.Add(N);
+                UV.Add(Corner);
+                RouteUV.Emplace(At, 0);
+            }
+            Indices.Append({Base,Base+1,Base+2,Base,Base+2,Base+3});
         }
-    }
-
-    void DrawQuestTrail(UProceduralMeshComponent& Trail, const FVector& Origin, const TArray<FHitResult>& Dots)
-    {
-        TArray<FVector> Vertices;
-        TArray<FVector> Normals;
-        TArray<int32> Triangles;
-        BuildQuestTrailMesh(Origin, Dots, Vertices, Normals, Triangles);
         Trail.SetWorldLocation(Origin);
-        Trail.CreateMeshSection(0, Vertices, Triangles, Normals, {}, {}, {}, false);
-        Trail.SetVisibility(true);
+        Trail.CreateMeshSection(0, Verts, Indices, Normals, UV, RouteUV, {}, {}, {}, {}, false);
     }
 
     void DrawSupplyTicker(const FGeometry& Geometry, FSlateWindowElementList& Elements,
@@ -262,8 +248,23 @@ void UTunaSweeperGameHudWidget::RefreshDeliveryIndicators(float DeltaTime)
     }
 }
 
+void UTunaSweeperGameHudWidget::ClearQuestTrailRoute()
+{
+    QuestTrailNavPath = nullptr;
+    QuestTrailPoints.Reset();
+    QuestTrailDistances.Reset();
+    QuestTrailGround.Reset();
+    QuestTrailSegment = 0;
+    QuestTrailWindow = INDEX_NONE;
+    QuestTrailRetryAt = 0;
+    bQuestTrailFallback = false;
+    if (auto* Trail = QuestGuidanceTrail.Get()) Trail->SetVisibility(false);
+}
+
 void UTunaSweeperGameHudWidget::ResetQuestGuidance()
 {
+    ClearQuestTrailRoute();
+    QuestTrailMaterial = nullptr;
     QuestGuidanceTarget.Reset();
     QuestGuidancePawn.Reset();
     QuestGuidanceScanCountdown = 0.0f;
@@ -285,31 +286,86 @@ void UTunaSweeperGameHudWidget::RefreshQuestGuidance(float DeltaTime)
     }
     QuestGuidancePawn = Pawn;
     QuestGuidanceScanCountdown -= FMath::Max(0.0f, DeltaTime);
-    if (QuestGuidanceScanCountdown > 0.0f) return;
-    QuestGuidanceScanCountdown = QuestGuidanceRefreshSeconds;
-
-    TArray<FVector> Locations;
-    QuestGuidanceLocations::Get(Pawn->GetWorld(), Locations);
-    const FVector Origin = Pawn->GetActorLocation();
-    QuestGuidanceTarget = FindClosestQuestGuidanceLocation(Origin, Locations);
-
-    TArray<FHitResult> Dots;
-    if (QuestGuidanceTarget.IsSet())
+    if (QuestGuidanceScanCountdown <= 0.0f)
     {
-        if (!bQuestGuidanceIconLoadAttempted)
+        QuestGuidanceScanCountdown = QuestGuidanceRefreshSeconds;
+        TArray<FVector> Locations;
+        QuestGuidanceLocations::Get(Pawn->GetWorld(), Locations);
+        auto Target = FindClosestQuestGuidanceLocation(Pawn->GetActorLocation(), Locations);
+        if (Target != QuestGuidanceTarget) ClearQuestTrailRoute();
+        QuestGuidanceTarget = Target;
+    }
+    if (!QuestGuidanceTarget.IsSet()) return;
+    if (!bQuestGuidanceIconLoadAttempted)
+    {
+        bQuestGuidanceIconLoadAttempted = true;
+        QuestGuidanceIcon = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Quest/T_QuestGuidanceQ.T_QuestGuidanceQ"));
+    }
+
+    const FVector Feet = Pawn->GetNavAgentLocation();
+    const FVector Target = QuestGuidanceTarget.GetValue();
+    const double Now = Pawn->GetWorld()->GetTimeSeconds();
+    if (QuestTrailNavPath && !QuestTrailNavPath->IsValid()) ClearQuestTrailRoute();
+    double Error = 0.0;
+    double Progress = 0.0;
+    if (QuestTrailPoints.Num() >= 2)
+    {
+        Progress = ProjectTrailProgress(QuestTrailPoints, QuestTrailDistances, Feet, QuestTrailSegment, Error);
+        if (Error > 95.0 && FVector::DistSquared(Feet, QuestTrailLastQuery) > FMath::Square(35.0))
+            ClearQuestTrailRoute();
+    }
+    if (QuestTrailPoints.Num() < 2)
+    {
+        if (Now < QuestTrailRetryAt && FVector::DistSquared(Feet, QuestTrailLastQuery) < FMath::Square(95.0)) return;
+        ClearQuestTrailRoute();
+        QuestTrailRetryAt = Now + 2.0;
+        QuestTrailLastQuery = Feet;
+        Progress = 0;
+        auto* Nav = UNavigationSystemV1::GetCurrent(Pawn->GetWorld());
+        const auto& Agent = Pawn->GetNavAgentPropertiesRef();
+        FNavLocation Start, End;
+        if (Nav && Nav->ProjectPointToNavigation(Feet, Start, FVector(75,75,135), &Agent))
         {
-            bQuestGuidanceIconLoadAttempted = true;
-            QuestGuidanceIcon = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Quest/T_QuestGuidanceQ.T_QuestGuidanceQ"));
+            if (!Nav->ProjectPointToNavigation(Target, End, FVector(200,200,250), &Agent)) return;
+            auto* Path = UNavigationSystemV1::FindPathToLocationSynchronously(Pawn->GetWorld(), Start.Location, End.Location, Pawn);
+            if (!Path || !Path->IsValid() || Path->IsPartial()) return;
+            Path->EnableRecalculationOnInvalidation(ENavigationOptionFlag::Disable);
+            QuestTrailNavPath = Path;
+            for (const FVector& Point : Path->PathPoints) AppendRoutePoint(QuestTrailPoints, QuestTrailDistances, Point);
         }
-        BuildQuestTrail(*Pawn, QuestGuidanceTarget.GetValue(), Dots);
+        else
+        {
+            bQuestTrailFallback = true;
+            AppendRoutePoint(QuestTrailPoints, QuestTrailDistances, Feet);
+            ExtendFallback(*Pawn, Target, QuestTrailPoints, QuestTrailDistances);
+        }
+        if (QuestTrailPoints.Num() < 2) return;
     }
-    if (Dots.IsEmpty())
+
+    if (bQuestTrailFallback && Now >= QuestTrailRetryAt &&
+        QuestTrailDistances.Last() - Progress < 1300 && FVector::Dist2D(QuestTrailPoints.Last(), Target) > 2)
     {
-        if (auto* Trail = QuestGuidanceTrail.Get()) Trail->SetVisibility(false);
-        return;
+        const int32 PreviousCount = QuestTrailPoints.Num();
+        ExtendFallback(*Pawn, Target, QuestTrailPoints, QuestTrailDistances);
+        if (PreviousCount != QuestTrailPoints.Num()) QuestTrailWindow = INDEX_NONE;
+        QuestTrailRetryAt = Now + 2.0;
     }
-    if (!QuestGuidanceTrail.IsValid()) QuestGuidanceTrail = CreateQuestTrail(*Pawn);
-    DrawQuestTrail(*QuestGuidanceTrail.Get(), Origin, Dots);
+    if (!QuestGuidanceTrail.IsValid())
+    {
+        auto* Surface = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/UI/Quest/M_QuestTrailChevron.M_QuestTrailChevron"));
+        if (!Surface) return;
+        QuestTrailMaterial = UMaterialInstanceDynamic::Create(Surface, this);
+        QuestGuidanceTrail = CreateQuestTrail(*Pawn, QuestTrailMaterial);
+    }
+    // Overlap successive windows so the shader fades both ends before geometry is replaced.
+    const int32 Window = FMath::Max(0, FMath::FloorToInt(Progress / (TrailDotSpacing * TrailWindowStep)) - 1) * TrailWindowStep;
+    if (Window != QuestTrailWindow)
+    {
+        BuildTrailWindow(*Pawn, *QuestGuidanceTrail.Get(), Window, QuestTrailPoints, QuestTrailDistances, QuestTrailGround);
+        QuestTrailWindow = Window;
+        QuestGuidanceTrail->SetVisibility(true);
+    }
+    QuestTrailMaterial->SetScalarParameterValue(TEXT("Progress"), Progress);
 }
 
 void UTunaSweeperGameHudWidget::DrawDeliveryIndicators(
@@ -423,41 +479,19 @@ bool FTunaSweeperQuestGuidancePresentationTest::RunTest(const FString& Parameter
     TestFalse(TEXT("No destinations yields no guidance"),
         FindClosestQuestGuidanceLocation(FVector::ZeroVector, {}).IsSet());
 
-    TArray<FHitResult> Dots;
-    FHitResult& Flat = Dots.AddDefaulted_GetRef();
-    Flat.ImpactPoint = FVector(300, 400, 500);
-    Flat.ImpactNormal = FVector::UpVector;
-    FHitResult& Slope = Dots.AddDefaulted_GetRef();
-    Slope.ImpactPoint = FVector(550, 600, 650);
-    Slope.ImpactNormal = FVector(0.3, -0.2, 1).GetSafeNormal();
-    const FVector Origin(150, 200, 300);
-    TArray<FVector> Vertices;
-    TArray<FVector> Normals;
-    TArray<int32> Triangles;
-    BuildQuestTrailMesh(Origin, Dots, Vertices, Normals, Triangles);
-    if (!TestEqual(TEXT("Both dots have a center and a complete rim"), Vertices.Num(), Dots.Num() * (TrailDotSides + 1)) ||
-        !TestEqual(TEXT("Each vertex has a normal"), Normals.Num(), Vertices.Num()) ||
-        !TestEqual(TEXT("Both dots have a complete triangle fan"), Triangles.Num(), Dots.Num() * TrailDotSides * 3))
-    {
-        return false;
-    }
-    for (int32 DotIndex = 0; DotIndex < Dots.Num(); ++DotIndex)
-    {
-        const FHitResult& Dot = Dots[DotIndex];
-        const FVector ExpectedCenter = Dot.ImpactPoint + 2.0 * Dot.ImpactNormal - Origin;
-        TestEqual(TEXT("Dot center follows the normal just above the ground"),
-            Vertices[DotIndex * (TrailDotSides + 1)], ExpectedCenter);
-        bool bAllFacesPointUp = true;
-        for (int32 Side = 0; Side < TrailDotSides; ++Side)
-        {
-            const int32 Index = (DotIndex * TrailDotSides + Side) * 3;
-            const FVector& A = Vertices[Triangles[Index]];
-            const FVector& B = Vertices[Triangles[Index + 1]];
-            const FVector& C = Vertices[Triangles[Index + 2]];
-            bAllFacesPointUp &= FVector::DotProduct(FVector::CrossProduct(C - A, B - A), Dot.ImpactNormal) > 0.0;
-        }
-        TestTrue(TEXT("Every face winds toward the ground normal"), bAllFacesPointUp);
-    }
+    TArray<FVector> Points;
+    TArray<double> Distances;
+    for (auto Point : {FVector(0,0,0), FVector(200,0,0), FVector(200,300,0)})
+        AppendRoutePoint(Points, Distances, Point);
+    int32 Segment = 0;
+    double Error = 0;
+    TestEqual(TEXT("Progress follows a turn without replanning"),
+        ProjectTrailProgress(Points, Distances, FVector(195,100,0), Segment, Error), 300.0);
+    TestEqual(TEXT("Lateral deviation"), Error, 5.0);
+    TestEqual(TEXT("Backtracking follows the same stored route"),
+        ProjectTrailProgress(Points, Distances, FVector(80,0,0), Segment, Error), 80.0);
+    TestNotNull(TEXT("Ground chevron material exists"), LoadObject<UMaterialInterface>(nullptr,
+        TEXT("/Game/UI/Quest/M_QuestTrailChevron.M_QuestTrailChevron")));
     return true;
 }
 #endif

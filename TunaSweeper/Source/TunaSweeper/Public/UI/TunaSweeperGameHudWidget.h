@@ -417,6 +417,19 @@ private:
 	void RefreshQuestGuidance(float DeltaTime);
 	void ResetQuestGuidance();
 	TWeakObjectPtr<UProceduralMeshComponent> QuestGuidanceTrail;
+	UPROPERTY(Transient)
+	TObjectPtr<class UNavigationPath> QuestTrailNavPath;
+	UPROPERTY(Transient)
+	TObjectPtr<class UMaterialInstanceDynamic> QuestTrailMaterial;
+	TArray<FVector> QuestTrailPoints;
+	TArray<double> QuestTrailDistances;
+	TMap<int32, FHitResult> QuestTrailGround;
+	int32 QuestTrailSegment = 0;
+	int32 QuestTrailWindow = INDEX_NONE;
+	double QuestTrailRetryAt = 0.0;
+	FVector QuestTrailLastQuery = FVector::ZeroVector;
+	bool bQuestTrailFallback = false;
+	void ClearQuestTrailRoute();
 	TWeakObjectPtr<APawn> QuestGuidancePawn;
 	TOptional<FVector> QuestGuidanceTarget;
 	float QuestGuidanceScanCountdown = 0.0f;
