@@ -205,7 +205,7 @@ RaidVillage	event	None	memo	805.49	-944.69	151.20
 RaidVillage	event	None	memo	806.87	-815.48	151.20
 RaidVillage	event	None	memo	816.86	-1240.09	151.20
 RaidVillage	event	None	quest	-9402.81	9531.11	153.31
-RaidVillage	event	None	quest	-9411.59	-9479.40	141.16
+RaidVillage	event	None	quest	-9411.59	-9479.40	217.54
 RaidVillage	event	None	quest	42.70	-9684.44	128.56
 RaidVillage	event	None	shop_open	42.70	-9684.44	128.56
 RaidVillage	event	None	world_progress	14149.29	1787.32	147.20
@@ -224,7 +224,7 @@ RaidVillage	progress	rail.lubrication.village_02		7015.88	6045.32	165.00
 RaidVillage	progress	rail.lubrication.village_03		-540.41	8746.25	165.00
 RaidVillage	progress	region.forest.plains.lift		14149.29	1787.32	147.20
 RaidVillage	provider	provider.marine_cat		-9402.81	9531.11	153.31
-RaidVillage	provider	provider.pirate_cat		-9411.59	-9479.40	141.16
+RaidVillage	provider	provider.pirate_cat		-9411.59	-9479.40	217.54
 RaidVillage	provider	provider.vending_machine		42.70	-9684.44	128.56
 RaidVillage	travel	RaidPlains		14149.29	1787.32	147.20
 RaidVillage	vehicle_arrival	village.vehicle.north		5856.79	337.32	566.62
