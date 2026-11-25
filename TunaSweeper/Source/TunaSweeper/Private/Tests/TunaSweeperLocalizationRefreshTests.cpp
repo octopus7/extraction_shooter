@@ -33,6 +33,7 @@
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperOptionRowWidget.h"
+#include "UI/TunaSweeperWorkbenchPanelWidget.h"
 #include "UObject/StrongObjectPtr.h"
 
 namespace TunaSweeperLocalizationRefreshTests
@@ -238,6 +239,29 @@ bool FTunaSweeperLocalizationRefreshTest::RunTest(const FString& Parameters)
 	UTextBlock* TextureLabel = Cast<UTextBlock>(TextureRow->WidgetTree->FindWidget(TEXT("OptionLabelText")));
 	if (!TestNotNull(TEXT("Texture quality label exists"), TextureLabel)) return false;
 	TestEqual(TEXT("Graphics quality label refreshes after a language change"), TextureLabel->GetText().ToString(), FString(TEXT("Texture")));
+
+	UClass* WorkbenchClass = LoadClass<UTunaSweeperWorkbenchPanelWidget>(
+		nullptr, TEXT("/Game/UI/WBP_WorkbenchPanel.WBP_WorkbenchPanel_C"));
+	if (!TestNotNull(TEXT("Authored workbench panel class loads"), WorkbenchClass)) return false;
+	TStrongObjectPtr<UTunaSweeperWorkbenchPanelWidget> Workbench(
+		CreateWidget<UTunaSweeperWorkbenchPanelWidget>(Controller, WorkbenchClass));
+	if (!TestNotNull(TEXT("Authored workbench panel is created"), Workbench.Get())) return false;
+	TSharedPtr<SWidget> WorkbenchSlate = Workbench->TakeWidget();
+	const UTextBlock* CraftLabel = Cast<UTextBlock>(FindNestedWidget(Workbench.Get(), TEXT("CraftButtonText")));
+	const UTextBlock* MaterialsLabel = Cast<UTextBlock>(FindNestedWidget(Workbench.Get(), TEXT("CraftMaterialsTitleText")));
+	if (!TestNotNull(TEXT("Craft button label exists"), CraftLabel) ||
+		!TestNotNull(TEXT("Craft materials heading exists"), MaterialsLabel)) return false;
+	TestEqual(TEXT("Craft button opens in English"), CraftLabel->GetText().ToString(), FString(TEXT("Craft")));
+	TestEqual(TEXT("Materials heading opens in English"), MaterialsLabel->GetText().ToString(), FString(TEXT("Materials")));
+	for (const ETunaSweeperItemTextLanguage Language : TunaSweeperLanguage::SupportedLanguages)
+	{
+		Instance->SetCurrentTextLanguage(Language, false);
+		TestEqual(TEXT("Craft button follows the selected language"), CraftLabel->GetText().ToString(),
+			Instance->ResolveLocalizedText(TEXT("ui.workbench.craft"), FText::GetEmpty()).ToString());
+		TestEqual(TEXT("Materials heading follows the selected language"), MaterialsLabel->GetText().ToString(),
+			Instance->ResolveLocalizedText(TEXT("ui.workbench.materials"), FText::GetEmpty()).ToString());
+	}
+	WorkbenchSlate.Reset();
 
 	GraphicsSlate.Reset();
 	IntroSlate.Reset();

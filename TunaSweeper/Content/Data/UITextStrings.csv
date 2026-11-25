@@ -234,6 +234,7 @@ ui.storage.filter.other,기타,Other,その他,其他,其他,Прочее
 ui.workbench.craft,제조,Craft,製造,制作,製作,Создать
 ui.workbench.dismantle,분해,Dismantle,分解,拆解,拆解,Разобрать
 ui.workbench.blueprint_register,설계도 등록,Register Blueprint,設計図登録,登记蓝图,登記藍圖,Зарегистрировать чертёж
+ui.workbench.materials,재료,Materials,素材,材料,材料,Материалы
 ui.workbench.no_ingredients,필요 재료 없음,No materials required,必要素材なし,无需材料,無需材料,Материалы не нужны
 ui.workbench.no_dismantle_results,분해 결과 없음,No dismantle results,分解結果なし,无拆解产物,無拆解產物,Разборка ничего не даст
 ui.workbench.blueprint_already_known,이미 등록됨,Already registered,登録済み,已登记,已登記,Уже зарегистрировано

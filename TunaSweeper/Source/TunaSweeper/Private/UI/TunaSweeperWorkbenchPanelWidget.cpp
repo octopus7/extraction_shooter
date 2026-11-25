@@ -1094,6 +1094,21 @@ void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftOutputImage, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftOutputText, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftButton, bCraftMode);
+	if (bCraftMode)
+	{
+		const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+		if (UTextBlock* CraftButtonText = Cast<UTextBlock>(CraftButton ? CraftButton->GetContent() : nullptr))
+		{
+			CraftButtonText->SetText(TunaSweeperWorkbenchPanel::ResolveUiText(
+				TunaGameInstance, TEXT("ui.workbench.craft"), nullptr));
+		}
+		if (UTextBlock* MaterialsTitle = TunaSweeperWorkbenchPanel::FindNamedWidget<UTextBlock>(
+			WidgetTree, TEXT("CraftMaterialsTitleText")))
+		{
+			MaterialsTitle->SetText(TunaSweeperWorkbenchPanel::ResolveUiText(
+				TunaGameInstance, TEXT("ui.workbench.materials"), nullptr));
+		}
+	}
 
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(LeftPanelBackground, bCraftMode);
 
