@@ -16,8 +16,10 @@
 #include "Interaction/TunaSweeperQuestFacilityActor.h"
 #include "Interaction/DifficultyCandlestickActor.h"
 #include "Interaction/TunaSweeperQuestLightController.h"
+#include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Misc/ScopeExit.h"
 #include "PhysicsEngine/BodySetup.h"
+#include "Settings/TunaSweeperBuildTargetSettings.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
@@ -45,7 +47,8 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 		static void Attach(UGameInstance* Game, FWorldContext* Context)
 		{ auto Member = &FContextAccess::WorldContext; Game->*Member = Context; }
 	};
-	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, TEXT("QuestWorldActorsTestBunkerMap"),
+		CreatePackage(TEXT("/Temp/QuestWorldActorsTestBunkerMap")));
 	FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
 	Context.SetCurrentWorld(World);
 	auto* Game = NewObject<UTunaSweeperGameInstance>(GEngine);
@@ -79,6 +82,41 @@ bool FTunaSweeperQuestWorldActorsTest::RunTest(const FString& Parameters)
 	auto* PawnRoot = NewObject<USceneComponent>(Pawn); Pawn->SetRootComponent(PawnRoot); PawnRoot->RegisterComponent();
 	auto* Interaction = Facility->GetInteractableComponent();
 	auto* Interactions = World->GetSubsystem<UTunaSweeperInteractionSubsystem>();
+	{
+		TGuardValue<ETunaSweeperBuildTarget> FullBuild(GetMutableDefault<UTunaSweeperBuildTargetSettings>()->BuildTarget,
+			ETunaSweeperBuildTarget::NoStoreFull);
+		FTunaSweeperQuestDefinition RestoreWorkshop;
+		RestoreWorkshop.QuestId = 10;
+		RestoreWorkshop.bCompleteOnAccept = true;
+		Quests->QuestDefinitions.Add(10, RestoreWorkshop);
+		auto* Workbench = World->SpawnActor<ATunaSweeperWorkbenchActor>();
+		auto* Craft = Workbench->GetCraftInteractableComponent();
+		TestFalse(TEXT("Unrestored workshop hides the craft interaction"), Interactions->CanOfferInteraction(Craft));
+		Game->SetActiveWorkbench(1, ETunaSweeperWorkbenchMode::Craft);
+		TestFalse(TEXT("Unrestored workshop rejects direct activation"), Game->HasActiveWorkbench());
+		TestTrue(TEXT("Fixture delivers wood and awaits the workshop reward"), Quests->AcceptQuest(10));
+		TestEqual(TEXT("Workshop reward can be claimed"), Quests->GetQuestState(10), ETunaSweeperQuestState::RewardAvailable);
+		TestFalse(TEXT("Pending reward keeps crafting locked"), Interactions->CanOfferInteraction(Craft));
+
+		Game->ResetPlayerSlotArrays();
+		TestTrue(TEXT("Crafting ingredients are available"), Game->AddItemToFirstAvailableInventorySlot(6028, 1));
+		TestTrue(TEXT("Second ingredient is available"), Game->AddItemToFirstAvailableInventorySlot(6032, 1));
+		Game->ActiveWorkbenchId = 1;
+		Game->bHasActiveWorkbench = true;
+		TestFalse(TEXT("A stale open workbench cannot craft while locked"), Game->TryCraftActiveWorkbenchRecipe(0, false));
+		TestEqual(TEXT("Locked crafting preserves ingredients"), Game->CountInventoryItemById(6028), 1);
+		Game->ClearActiveWorkbench();
+
+		// Keep the unlocked check independent of a failure in the locked path.
+		if (Game->CountInventoryItemById(6028) == 0) Game->AddItemToFirstAvailableInventorySlot(6028, 1);
+		if (Game->CountInventoryItemById(6032) == 0) Game->AddItemToFirstAvailableInventorySlot(6032, 1);
+		TestTrue(TEXT("Restore workshop reward"), Quests->ClaimQuestReward(10));
+		TestTrue(TEXT("Restored workshop offers the craft interaction"), Interactions->CanOfferInteraction(Craft));
+		Game->SetActiveWorkbench(1, ETunaSweeperWorkbenchMode::Craft);
+		TestTrue(TEXT("Restored workshop can craft"), Game->TryCraftActiveWorkbenchRecipe(0, false));
+		TestTrue(TEXT("Restored crafting gives the output"), Game->CountInventoryItemById(6031) > 0);
+		Game->ClearActiveWorkbench();
+	}
 	Facility->DispatchBeginPlay();
 	TestFalse(TEXT("Unconfigured facility is locked"), Facility->IsFacilityUnlocked());
 	FTunaSweeperFacilityQuestCondition Condition; Condition.QuestId = 910001;

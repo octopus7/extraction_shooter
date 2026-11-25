@@ -525,11 +525,6 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
 
-	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchOpen)
-	{
-		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
-	}
-
 	if (!TunaSweeperWorkbenchFeatures::bEnableWorkbenchExtraModes &&
 		(Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchDismantle ||
 		 Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchBlueprintRegister))
@@ -537,11 +532,14 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return false;
 	}
 
-	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchCraft ||
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchOpen ||
+		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchCraft ||
 		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchDismantle ||
 		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchBlueprintRegister)
 	{
-		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
+		const UWorld* World = GetWorld();
+		const auto* Game = World ? World->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
+		return Game && TunaSweeperInteractionQuestEvents::IsBunkerMap(World) && Game->CanAccessWorkbench();
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::MoleDialogue)

@@ -831,10 +831,12 @@ public:
 	bool TrySellItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, int32& OutSalePrice);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
-	bool HasActiveWorkbench() const { return bHasActiveWorkbench; }
+	bool HasActiveWorkbench() const { return bHasActiveWorkbench && CanAccessWorkbench(); }
+
+	bool CanAccessWorkbench() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
-	int32 GetActiveWorkbenchId() const { return bHasActiveWorkbench ? ActiveWorkbenchId : INDEX_NONE; }
+	int32 GetActiveWorkbenchId() const { return HasActiveWorkbench() ? ActiveWorkbenchId : INDEX_NONE; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
 	ETunaSweeperWorkbenchMode GetActiveWorkbenchMode() const { return ActiveWorkbenchMode; }

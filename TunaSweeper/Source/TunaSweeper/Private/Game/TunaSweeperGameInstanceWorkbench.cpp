@@ -1,5 +1,18 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Settings/TunaSweeperWorkbenchFeatures.h"
+
+bool UTunaSweeperGameInstance::CanAccessWorkbench() const
+{
+	if (!IsCurrentWorldBunkerMap() || TunaSweeperBuildFlavor::IsDemo())
+	{
+		return true;
+	}
+
+	constexpr int32 RestoreWorkshopQuestId = 10;
+	const auto* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>();
+	return Quests && Quests->GetQuestState(RestoreWorkshopQuestId) == ETunaSweeperQuestState::RewardCompleted;
+}
 
 void UTunaSweeperGameInstance::SetActiveWorkbench(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
 {
@@ -10,7 +23,7 @@ void UTunaSweeperGameInstance::SetActiveWorkbench(int32 WorkbenchId, ETunaSweepe
 
 	EnsureInventoryStateInitialized();
 
-	if (WorkbenchId <= 0)
+	if (WorkbenchId <= 0 || !CanAccessWorkbench())
 	{
 		ClearActiveWorkbench();
 		return;
@@ -31,7 +44,7 @@ void UTunaSweeperGameInstance::SetActiveWorkbenchMode(ETunaSweeperWorkbenchMode 
 		return;
 	}
 
-	if (!bHasActiveWorkbench)
+	if (!HasActiveWorkbench())
 	{
 		return;
 	}
@@ -58,7 +71,7 @@ bool UTunaSweeperGameInstance::GetActiveWorkbenchRecipes(TArray<FTunaSweeperWork
 	EnsureInventoryStateInitialized();
 	OutRecipeViews.Reset();
 
-	if (!bHasActiveWorkbench || ActiveWorkbenchId == INDEX_NONE)
+	if (!HasActiveWorkbench() || ActiveWorkbenchId == INDEX_NONE)
 	{
 		return false;
 	}
@@ -89,7 +102,7 @@ bool UTunaSweeperGameInstance::TryGetActiveWorkbenchRecipeView(
 	EnsureInventoryStateInitialized();
 	OutRecipeView = FTunaSweeperWorkbenchRecipeView();
 
-	if (!bHasActiveWorkbench || ActiveWorkbenchId == INDEX_NONE || RecipeSlotIndex == INDEX_NONE)
+	if (!HasActiveWorkbench() || ActiveWorkbenchId == INDEX_NONE || RecipeSlotIndex == INDEX_NONE)
 	{
 		return false;
 	}
@@ -131,7 +144,7 @@ bool UTunaSweeperGameInstance::TryCraftActiveWorkbenchRecipe(int32 RecipeSlotInd
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	TArray<FTunaSweeperWorkbenchRecipeDefinition> RecipeDefinitions;
-	if (!bHasActiveWorkbench ||
+	if (!HasActiveWorkbench() ||
 		ActiveWorkbenchId == INDEX_NONE ||
 		RecipeSlotIndex == INDEX_NONE ||
 		!ItemDataSubsystem ||
