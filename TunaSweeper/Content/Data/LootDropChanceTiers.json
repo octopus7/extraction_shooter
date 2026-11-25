@@ -4,6 +4,11 @@
     "normal_hard": 2500,
     "quest_protected": true
   },
+  "rabbit_parts": {
+    "story": 2000,
+    "normal_hard": 1000,
+    "quest_protected": true
+  },
   "snack": {
     "story": 1000,
     "normal_hard": 1000

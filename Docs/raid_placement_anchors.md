@@ -91,4 +91,6 @@ Memo collection persistence remains keyed by `memo_id` through `AcquiredMemoIds`
 
 Each quest supply chest uses a dedicated contents row in `LootContainerContents.json`. Set the item's `drop_chance_tier` to `"quest"`. Edit `Content/Data/LootDropChanceTiers.json` to tune its `story` and shared `normal_hard` values. Values are in basis points (10000 = 100%, 2500 = 25%). For a fixed chance across all difficulties, supply a numeric `drop_chance` alone. An item row with neither field is guaranteed.
 
+Set `quest_protected` to `true` on a tier to apply active-quest loot protection to its items. Rabbit bike parts use the protected `rabbit_parts` tier with their own lower base chances. The `snack` tier uses its fixed 10% chance.
+
 Place crafting inputs in supply chests and leave the finished item to its recipe. After moving supply actors or changing facility costs, regenerate `QuestGuidanceLocations.tsv` with `Tools/QuestGuidance/bake.py` so the map, screen-edge indicator and ground route use the saved level positions.

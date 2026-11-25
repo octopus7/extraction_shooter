@@ -1996,6 +1996,17 @@ bool FLootDropChanceTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Quest drop is possible and below thirty percent on both higher stages"), Chance.NormalHard > 0.f && Chance.NormalHard < .3f);
 	TestTrue(TEXT("Quest tier retains protection"), Chance.bQuestProtected);
 
+	FTunaSweeperLootContainerContents RabbitContents;
+	if (!TestTrue(TEXT("Rabbit bike loot exists"), Items->TryGetLootContainerContents(8023, RabbitContents))) return false;
+	for (const int32 PartId : {6033, 6015, 6018})
+	{
+		const auto* Part = RabbitContents.ItemQuantities.FindByPredicate([PartId](const auto& Entry) { return Entry.ItemId == PartId; });
+		if (!TestNotNull(TEXT("Rabbit bike part exists"), Part)) return false;
+		TestEqual(TEXT("Rabbit part baseline on Story"), Part->DropChance.Story, .2f);
+		TestEqual(TEXT("Rabbit part baseline on Normal and Hard"), Part->DropChance.NormalHard, .1f);
+		TestTrue(TEXT("Rabbit part retains quest protection"), Part->DropChance.bQuestProtected);
+	}
+
 	for (const int32 SnackContentsId : {8023, 8052})
 	{
 		FTunaSweeperLootContainerContents SnackContents;
