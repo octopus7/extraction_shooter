@@ -367,5 +367,13 @@
       { "item_id": 2003, "quantity": 16 },
       { "item_id": 4001, "quantity": 2 }
     ]
+  },
+  {
+    "id": 8051,
+    "memo_ko": "숲 기지 입구 서류 상자",
+    "items": [
+      { "item_id": 1001, "quantity": 1 },
+      { "item_id": 2001, "quantity": 120 }
+    ]
   }
 ]
