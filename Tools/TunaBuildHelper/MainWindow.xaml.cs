@@ -497,6 +497,12 @@ public partial class MainWindow : Window
             StatusTextBlock.Text = ItemGrantCatalog.Text("ui.helper_steam.build_missing");
             return;
         }
+        if (!steamFullPackage.HasAppIdFile)
+        {
+            StatusTextBlock.Text = (string)FindResource("SteamAppIdRequired");
+            SteamAppIdActionButton.Focus();
+            return;
+        }
 
         try
         {

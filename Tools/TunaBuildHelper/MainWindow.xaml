@@ -12,6 +12,7 @@
         Background="#171B22">
     <Window.Resources>
         <sys:String x:Key="ReadyStatus">준비됨</sys:String>
+        <sys:String x:Key="SteamAppIdRequired">Steam 계정 세이브를 사용하려면 steam_appid.txt 옆의 ‘생성’을 누른 뒤 다시 실행하세요.</sys:String>
         <sys:String x:Key="MainTabLabel">Main</sys:String>
         <sys:String x:Key="CheatTabLabel">Cheat</sys:String>
         <sys:String x:Key="TunaFillButton">진엔딩 테스트 · 참치 꽉 채우기…</sys:String>

@@ -195,6 +195,16 @@ internal static class Program
         Check(package.LauncherPath == launcher, "Launches the outer package executable");
         Check(package.AppIdDirectory == binaries, "The folder button targets the inner executable directory");
         Check(!package.HasAppIdFile, "Root App ID does not count");
+        var window = new MainWindow();
+        try
+        {
+            typeof(MainWindow).GetField("steamFullPackage",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.SetValue(window, package);
+            ((Button)window.FindName("RunSteamFullButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Check(((TextBlock)window.FindName("StatusTextBlock")).Text == (string)window.FindResource("SteamAppIdRequired"),
+                "Clicking Run without the inner App ID must stop and explain how to create it");
+        }
+        finally { window.Close(); }
         package.CreateAppIdFile();
         Check(package.HasAppIdFile && File.ReadAllText(innerAppId).Trim() == "1234567", "Creates the App ID beside the internal executable using the Full ID");
         File.WriteAllText(innerAppId, "7654321");
