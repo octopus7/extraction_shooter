@@ -153,12 +153,12 @@ RaidPlains	event	None	memo	-909.10	6130.44	92.70
 RaidPlains	event	None	memo	4419.53	-5469.44	121.12
 RaidPlains	event	None	wave_defense	4400.00	0.00	82.19
 RaidPlains	extract	BunkerMap		992.06	1785.71	51.63
-RaidVillage	anchor	1	ENEMY	-9581.79	-7560.70	229.63
+RaidVillage	anchor	1	ENEMY	-9581.79	-7560.70	360.64
 RaidVillage	anchor	1002	LOOT_CONTAINER	1884.41	-5476.18	152.20
 RaidVillage	anchor	1003	LOOT_CONTAINER	-1484.41	5476.18	152.20
-RaidVillage	anchor	2	ENEMY	-9981.07	-7072.26	218.88
+RaidVillage	anchor	2	ENEMY	-9981.07	-7072.26	409.38
 RaidVillage	anchor	3	ENEMY	-8616.74	6602.24	213.63
-RaidVillage	anchor	4	ENEMY	-1985.62	-6541.01	182.23
+RaidVillage	anchor	4	ENEMY	-1985.62	-6541.01	212.20
 RaidVillage	anchor	5	ENEMY	2490.64	3300.00	227.02
 RaidVillage	anchor	6	ENEMY	1764.78	4200.00	228.34
 RaidVillage	anchor	7	ENEMY	8149.29	337.32	257.20
@@ -210,7 +210,7 @@ RaidVillage	event	None	quest	42.70	-9684.44	128.56
 RaidVillage	event	None	shop_open	42.70	-9684.44	128.56
 RaidVillage	event	None	world_progress	14149.29	1787.32	147.20
 RaidVillage	event	quest.atv_warehouse.repair	world_progress	-3638.49	2450.06	124.21
-RaidVillage	event	quest.ethanol.repair	world_progress	8534.13	13599.61	-457.90
+RaidVillage	event	quest.ethanol.repair	world_progress	8534.13	13599.61	150.20
 RaidVillage	event	vehicle.atv.repair	world_progress	-1480.00	-730.00	185.20
 RaidVillage	extract	BunkerMap		-973.00	-7188.00	158.37
 RaidVillage	extract	BunkerMap		5781.00	13549.00	-438.04
@@ -218,7 +218,7 @@ RaidVillage	parcel	30	deliver_parcel	-2780.00	-530.00	152.20
 RaidVillage	parcel	41	deliver_parcel	-2780.00	-1630.00	152.20
 RaidVillage	progress	facility.village.atv_repair		-1480.00	-730.00	185.20
 RaidVillage	progress	facility.village.atv_warehouse		-3638.49	2450.06	124.21
-RaidVillage	progress	facility.village.ethanol		8534.13	13599.61	-457.90
+RaidVillage	progress	facility.village.ethanol		8534.13	13599.61	150.20
 RaidVillage	progress	rail.lubrication.village_01		1727.16	-6859.58	165.00
 RaidVillage	progress	rail.lubrication.village_02		7015.88	6045.32	165.00
 RaidVillage	progress	rail.lubrication.village_03		-540.41	8746.25	165.00
