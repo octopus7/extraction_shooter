@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Tuna Helper"
+        Icon="/TunaBuildHelper;component/BabyBoar.ico"
         Width="520"
         Height="760"
         MinWidth="440"
