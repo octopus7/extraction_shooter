@@ -72,7 +72,7 @@ For logical level `RaidForest` (`/Game/MainRaid/RaidForest`), Enemy IDs `1` (gra
 
 RaidForest Enemy ID `4` is a single guaranteed XHigh quadbot. Its anchor is on the dry bank of the widening EastFan river section.
 
-For logical level `RaidVillage` (`/Game/MainRaid/RaidVillage`), Enemy IDs `1–2` are marine delivery robots, `3–4` are pirate delivery robots, and `5–6` are rabbit trikes. Each has one anchor in the `Region2/EnemyAnchors` folder and a guaranteed spawn row in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`. The map owns their transforms; matching profiles are in `EnemySpawnProfiles.json`. These IDs are independent of the same numbers in other logical levels.
+For logical level `RaidVillage` (`/Game/MainRaid/RaidVillage`), Enemy IDs `1–2` are marine delivery robots, `3–4` are pirate delivery robots, and `5–6` and `8–15` are rabbit trikes. Each has one anchor in the `Region2/EnemyAnchors` folder and a guaranteed spawn row in `Content/Data/MainRuntimeDefaults/EnemySpawns.json`. The map owns their transforms. Matching profiles are in `EnemySpawnProfiles.json`. These IDs are independent of the same numbers in other logical levels.
 
 RaidVillage Loot Container IDs `1000` and `1001` are retired after converting their parcel boxes to directly placed dedicated pickup Blueprints. Do not reuse those IDs. Parcel pickup Blueprints do not use raid placement IDs or loot-container spawn rows.
 

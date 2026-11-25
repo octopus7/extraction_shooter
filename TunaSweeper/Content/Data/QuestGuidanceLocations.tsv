@@ -180,14 +180,22 @@ RaidPlains	event	None	memo	4419.53	-5469.44	121.12
 RaidPlains	event	None	wave_defense	4400.00	0.00	82.19
 RaidPlains	extract	BunkerMap		992.06	1785.71	51.63
 RaidVillage	anchor	1	ENEMY	-9581.79	-7560.70	360.64
+RaidVillage	anchor	10	ENEMY	-3300.00	-2800.00	230.20
 RaidVillage	anchor	1002	LOOT_CONTAINER	1884.41	-5476.18	152.20
 RaidVillage	anchor	1003	LOOT_CONTAINER	-1484.41	5476.18	152.20
+RaidVillage	anchor	11	ENEMY	-3100.00	2700.00	230.20
+RaidVillage	anchor	12	ENEMY	1100.00	-2550.00	230.20
+RaidVillage	anchor	13	ENEMY	1250.00	2750.00	230.20
+RaidVillage	anchor	14	ENEMY	5300.00	-3300.00	230.20
+RaidVillage	anchor	15	ENEMY	5700.00	3350.00	230.20
 RaidVillage	anchor	2	ENEMY	-9981.07	-7072.26	409.38
 RaidVillage	anchor	3	ENEMY	-8616.74	6602.24	213.63
 RaidVillage	anchor	4	ENEMY	-1985.62	-6541.01	212.20
 RaidVillage	anchor	5	ENEMY	2490.64	3300.00	227.02
 RaidVillage	anchor	6	ENEMY	1764.78	4200.00	228.34
 RaidVillage	anchor	7	ENEMY	8149.29	337.32	257.20
+RaidVillage	anchor	8	ENEMY	-6350.00	-3700.00	230.20
+RaidVillage	anchor	9	ENEMY	-6400.00	3450.00	230.20
 RaidVillage	arrival	village.station.east		577.12	9674.79	415.00
 RaidVillage	arrival	village.station.north		6950.77	4593.83	415.00
 RaidVillage	arrival	village.station.west		377.89	-7398.58	415.00

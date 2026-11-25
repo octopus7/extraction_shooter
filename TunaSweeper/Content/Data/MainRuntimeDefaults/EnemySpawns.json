@@ -75,5 +75,61 @@
     "spawn_chance": 10000,
     "level_name": "RaidVillage",
     "condition_id": "always"
+  },
+  {
+    "placement_id": 8,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 9,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 10,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 11,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 12,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 13,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 14,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
+  },
+  {
+    "placement_id": 15,
+    "profile_id": "enemy.rabbit_trike",
+    "spawn_chance": 10000,
+    "level_name": "RaidVillage",
+    "condition_id": "always"
   }
 ]
