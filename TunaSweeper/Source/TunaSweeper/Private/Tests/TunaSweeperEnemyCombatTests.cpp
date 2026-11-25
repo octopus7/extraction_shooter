@@ -384,15 +384,16 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 	{
 		int32 ItemId;
 		ETunaSweeperWeaponFireMode FireMode;
+		const TCHAR* Blueprint;
 	};
 	const FExpectedWeaponMode ExpectedWeaponModes[] =
 	{
-		{ 1001, ETunaSweeperWeaponFireMode::SemiAutomatic },
-		{ 1002, ETunaSweeperWeaponFireMode::Automatic },
-		{ 1003, ETunaSweeperWeaponFireMode::SemiAutomatic },
-		{ 1006, ETunaSweeperWeaponFireMode::Automatic },
-		{ 1007, ETunaSweeperWeaponFireMode::Automatic },
-		{ 1008, ETunaSweeperWeaponFireMode::Automatic }
+		{ 1001, ETunaSweeperWeaponFireMode::SemiAutomatic, TEXT("BP_SimplePistol") },
+		{ 1002, ETunaSweeperWeaponFireMode::Automatic, TEXT("BP_StandardRifle") },
+		{ 1003, ETunaSweeperWeaponFireMode::SemiAutomatic, TEXT("BP_SimpleShotgun") },
+		{ 1006, ETunaSweeperWeaponFireMode::Automatic, TEXT("BP_StandardSMG") },
+		{ 1007, ETunaSweeperWeaponFireMode::Automatic, TEXT("BP_AdvancedRifle") },
+		{ 1008, ETunaSweeperWeaponFireMode::Automatic, TEXT("BP_AdvancedSMG") }
 	};
 	for (const FExpectedWeaponMode& Expected : ExpectedWeaponModes)
 	{
@@ -417,9 +418,9 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 		if (bFoundWeaponClassMapping)
 		{
 			TestEqual(
-				*FString::Printf(TEXT("Weapon item %d uses BP_SimpleSMG"), Expected.ItemId),
+				*FString::Printf(TEXT("Weapon item %d uses its expected Blueprint"), Expected.ItemId),
 				WeaponClassPath.ToString(),
-				FString(TEXT("/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C")));
+				FString::Printf(TEXT("/Game/Weapons/%s.%s_C"), Expected.Blueprint, Expected.Blueprint));
 
 			const TSoftClassPtr<ATunaSweeperWeapon> WeaponClass(WeaponClassPath);
 			const UClass* LoadedWeaponClass = WeaponClass.LoadSynchronous();

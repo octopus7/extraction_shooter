@@ -1,26 +1,26 @@
 [
   {
     "item_id": 1001,
-    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+    "weapon_class": "/Game/Weapons/BP_SimplePistol.BP_SimplePistol_C"
   },
   {
     "item_id": 1002,
-    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+    "weapon_class": "/Game/Weapons/BP_StandardRifle.BP_StandardRifle_C"
   },
   {
     "item_id": 1003,
-    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+    "weapon_class": "/Game/Weapons/BP_SimpleShotgun.BP_SimpleShotgun_C"
   },
   {
     "item_id": 1006,
-    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+    "weapon_class": "/Game/Weapons/BP_StandardSMG.BP_StandardSMG_C"
   },
   {
     "item_id": 1007,
-    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+    "weapon_class": "/Game/Weapons/BP_AdvancedRifle.BP_AdvancedRifle_C"
   },
   {
     "item_id": 1008,
-    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+    "weapon_class": "/Game/Weapons/BP_AdvancedSMG.BP_AdvancedSMG_C"
   }
 ]
