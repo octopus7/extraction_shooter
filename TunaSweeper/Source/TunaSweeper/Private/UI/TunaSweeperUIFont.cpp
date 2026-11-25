@@ -4,62 +4,21 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
-#include "Fonts/CompositeFont.h"
-#include "Misc/Paths.h"
+#include "Engine/Font.h"
 
 namespace
 {
 	const FName RegularTypefaceName(TEXT("Regular"));
 	const FName BoldTypefaceName(TEXT("Bold"));
-	const TCHAR* RegularFontRelativePath = TEXT("Slate/Fonts/NanumSquareRoundR.ttf");
-	const TCHAR* BoldFontRelativePath = TEXT("Slate/Fonts/NanumSquareRoundB.ttf");
 
-	TSharedPtr<const FCompositeFont> GetDefaultCompositeFont()
+	UFont* GetDefaultUIFont()
 	{
-		static TSharedPtr<FStandaloneCompositeFont> DefaultCompositeFont;
-
-		if (!DefaultCompositeFont.IsValid())
+		static TWeakObjectPtr<UFont> DefaultFont;
+		if (!DefaultFont.IsValid())
 		{
-			const FString RegularFontPath = FPaths::ProjectContentDir() / RegularFontRelativePath;
-			const FString BoldFontPath = FPaths::ProjectContentDir() / BoldFontRelativePath;
-
-			if (FPaths::FileExists(RegularFontPath) && FPaths::FileExists(BoldFontPath))
-			{
-				TSharedRef<FStandaloneCompositeFont> CompositeFont = MakeShared<FStandaloneCompositeFont>();
-				CompositeFont->DefaultTypeface.Fonts.Emplace(
-					RegularTypefaceName,
-					RegularFontPath,
-					EFontHinting::Default,
-					EFontLoadingPolicy::LazyLoad);
-				CompositeFont->DefaultTypeface.Fonts.Emplace(
-					BoldTypefaceName,
-					BoldFontPath,
-					EFontHinting::Default,
-					EFontLoadingPolicy::LazyLoad);
-				// NanumSquareRound does not cover all Japanese glyphs. Reuse the engine's
-				// packaged CJK fallback while retaining the project's primary typeface.
-				const FString FallbackFontPath = FPaths::EngineContentDir() / TEXT("Slate/Fonts/DroidSansFallback.ttf");
-				if (FPaths::FileExists(FallbackFontPath))
-				{
-					CompositeFont->FallbackTypeface.Typeface.Fonts.Emplace(
-						RegularTypefaceName, FallbackFontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
-					CompositeFont->FallbackTypeface.Typeface.Fonts.Emplace(
-						BoldTypefaceName, FallbackFontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
-				}
-				// Nanum and the CJK fallback omit some accented Latin glyphs.
-				FCompositeSubFont& LatinFont = CompositeFont->SubTypefaces.AddDefaulted_GetRef();
-				LatinFont.CharacterRanges.Add(FInt32Range::Inclusive(0x00C0, 0x024F));
-				LatinFont.Typeface.Fonts.Emplace(RegularTypefaceName,
-					FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Regular.ttf"),
-					EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
-				LatinFont.Typeface.Fonts.Emplace(BoldTypefaceName,
-					FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"),
-					EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
-				DefaultCompositeFont = CompositeFont;
-			}
+			DefaultFont = LoadObject<UFont>(nullptr, TEXT("/Game/UI/Fonts/F_TunaSweeperUI.F_TunaSweeperUI"));
 		}
-
-		return DefaultCompositeFont;
+		return DefaultFont.Get();
 	}
 
 	FName ResolveTypefaceName(const FSlateFontInfo& FontInfo, ETunaSweeperUIFontWeight Weight)
@@ -89,10 +48,10 @@ FSlateFontInfo TunaSweeperUIFont::MakeFont(
 {
 	FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
 
-	if (const TSharedPtr<const FCompositeFont> CompositeFont = GetDefaultCompositeFont())
+	if (UFont* DefaultFont = GetDefaultUIFont())
 	{
-		FontInfo.FontObject = nullptr;
-		FontInfo.CompositeFont = CompositeFont;
+		FontInfo.FontObject = DefaultFont;
+		FontInfo.CompositeFont.Reset();
 		FontInfo.TypefaceFontName = ResolveTypefaceName(FontInfo, Weight);
 	}
 

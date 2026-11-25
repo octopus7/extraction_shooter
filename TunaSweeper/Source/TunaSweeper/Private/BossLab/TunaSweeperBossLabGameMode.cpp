@@ -352,14 +352,19 @@ void ATunaSweeperBossLabHUD::DrawHUD()
 	const auto* Mode = GetWorld()->GetAuthGameMode<ATunaSweeperBossLabGameMode>();
 	if (!Canvas || !Mode || !Mode->IsBattleActive()) return;
 	FSlateFontInfo FontInfo = TunaSweeperUIFont::MakeFont(nullptr, 14);
-	if (!CanvasFont)
+	if (!FontInfo.FontObject)
 	{
-		// Canvas requires a UFont even when Slate supplies the project's composite font.
-		CanvasFont = NewObject<UFont>(this);
-		CanvasFont->FontCacheType = EFontCacheType::Runtime;
-		if (FontInfo.CompositeFont.IsValid()) CanvasFont->GetMutableInternalCompositeFont() = *FontInfo.CompositeFont;
+		if (!CanvasFont)
+		{
+			CanvasFont = NewObject<UFont>(this);
+			CanvasFont->FontCacheType = EFontCacheType::Runtime;
+			if (const FCompositeFont* Composite = FontInfo.GetCompositeFont())
+			{
+				CanvasFont->GetMutableInternalCompositeFont() = *Composite;
+			}
+		}
+		FontInfo.FontObject = CanvasFont;
 	}
-	FontInfo.FontObject = CanvasFont;
 	const float Width = FMath::Min(760.f, Canvas->ClipX - 32.f), Left = (Canvas->ClipX - Width) * 0.5f;
 	DrawRect(FLinearColor(0.012f, 0.025f, 0.04f, 0.92f), Left, 14.f, Width, 91.f);
 	auto Line = [this, Left, Width, &FontInfo](const FText& Text, float Y, FLinearColor Color)

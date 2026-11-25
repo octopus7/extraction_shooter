@@ -3,7 +3,7 @@
 - WBP: `/Game/UI/SpeechBubble/WBP_CharacterSpeechBubble`
 - 배경 스타일: `/Game/UI/SpeechBubble/MI_CharacterSpeechBubble`
 - 배경 원본 머티리얼: `/Game/UI/SpeechBubble/M_CharacterSpeechBubble`
-- 기본 폰트: `/Game/UI/Fonts/F_TunaSweeperUI` (나눔스퀘어라운드 Regular/Bold 및 기존 CJK·라틴 폴백을 저장된 Font Face로 참조)
+- 기본 폰트: `/Game/UI/Fonts/F_TunaSweeperUI`. 선택한 언어에 맞는 Font Face와 대체 글꼴을 사용한다. 언어별 목록은 [현지화 문서](localization.md)에 있다.
 
 WBP 디자이너에서 `BubbleText`의 폰트·크기·색상·줄바꿈, `TextPadding` 안의 텍스트 슬롯 여백, `BodyBox`의 본체 최소/최대 크기를 편집한다. `TailBox`는 실제 이미지를 포함하지 않는 꼬리 크기 가이드이며 Width/Height Override로 꼬리 폭과 길이를 정한다. 런타임은 디자이너의 폰트와 브러시를 덮어쓰거나 위젯 트리를 재생성하지 않는다.
 

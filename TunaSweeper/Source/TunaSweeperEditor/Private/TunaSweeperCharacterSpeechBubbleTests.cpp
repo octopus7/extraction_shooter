@@ -22,7 +22,10 @@
 #include "Fonts/FontCache.h"
 #include "Engine/Font.h"
 #include "Engine/GameInstance.h"
+#include "Internationalization/Culture.h"
+#include "Internationalization/Internationalization.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Misc/ScopeExit.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaCharacterSpeechBubbleDesignerTest,
@@ -182,6 +185,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaCharacterSpeechBubbleLocalizedPreviewTest,
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaCharacterSpeechBubbleLocalizedPreviewTest::RunTest(const FString& Parameters)
 {
+    FInternationalization& Internationalization = FInternationalization::Get();
+    const FString PreviousCulture = Internationalization.GetCurrentCulture()->GetName();
+    ON_SCOPE_EXIT { Internationalization.SetCurrentCulture(PreviousCulture); };
+    Internationalization.SetCurrentCulture(TEXT("ko"));
     auto* Class = LoadClass<UTunaSweeperScreenSpaceSpeechBubbleWidget>(nullptr,
         TEXT("/Game/UI/SpeechBubble/WBP_CharacterSpeechBubble.WBP_CharacterSpeechBubble_C"));
     if (!TestNotNull(TEXT("Saved bubble class"), Class)) return false;
@@ -210,8 +217,8 @@ bool FTunaCharacterSpeechBubbleLocalizedPreviewTest::RunTest(const FString& Para
             const auto& Glyph = Characters.GetCharacter(Character, EFontFallback::FF_NoFallback);
             TestTrue(TEXT("Korean glyph is available without last-resort substitution"), Glyph.GlyphIndex != 0
                 && Glyph.FallbackLevel == EFontFallback::FF_NoFallback);
-            TestTrue(TEXT("Korean glyph comes from the project's Nanum font"), Glyph.FontData
-                && Glyph.FontData->GetFontFilename().Contains(TEXT("NanumSquareRound")));
+            const UObject* Face = Glyph.FontData ? Glyph.FontData->GetFontFaceAsset() : nullptr;
+            TestTrue(TEXT("Korean glyph uses Jua"), Face && Face->GetFName() == FName(TEXT("FF_Jua_Regular")));
         }
         const FVector2D Size = Widget->GetDesiredSize();
         // No runtime tick or subsystem anchor update: this is the Designer path.
