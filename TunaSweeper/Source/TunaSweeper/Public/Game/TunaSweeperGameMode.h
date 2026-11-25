@@ -16,6 +16,7 @@ public:
 	virtual void FinishRestartPlayer(AController* NewPlayer, const FRotator& StartRotation) override;
 
 private:
+	TWeakObjectPtr<class AVillageTunnelPlayerStart> PendingTunnelStart;
 	bool bLiftArrivalMissingStart = false;
 	TWeakObjectPtr<AController> PendingLiftAchievementPlayer;
 };

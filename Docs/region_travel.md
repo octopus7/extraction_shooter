@@ -98,3 +98,9 @@
 입구는 액터 로컬 +X 방향이다. 문 메시의 정렬을 유지한 채 부모 `LeftDoorSlide`와 `RightDoorSlide`가 `LeftDoorOpenOffset`/`RightDoorOpenOffset`만큼 이동한다. `DoorOpenSeconds`로 개폐 시간을, `PreviewDoorsOpen`으로 에디터 표시를 조정한다. `TravelInterior` 박스는 실내 판정 범위, `RepairInteractionPoint`와 `InteriorInteractionPoint`는 각각 수리·이동 상호작용의 위치다.
 
 수리 전에는 입구에서 기존 재료 수리 상호작용을 제공한다. 수리 완료 알림을 받으면 문이 자동으로 좌우로 열리고, 완전히 열린 후 실내에 들어간 플레이어에게만 평원행 F 상호작용을 제공한다. 실내 진입 자체로 이동하지 않는다. 저장된 수리 완료 상태에서는 처음부터 문을 열어 두고, 월드 진행 초기화 시 다시 닫는다. 일반 지역 통로는 `UseSlidingDoors=false`를 유지한다.
+
+### 마을 서쪽 터널과 리프트 도착
+
+숲의 `Forest_VillagePassage`를 통과하면 마을 자판기 서쪽 절벽길의 `Village_WestTunnel_PlayerStart`에서 시작한다. 도착 카메라는 무너진 계단을 비스듬히 바라보며, 캐릭터가 걸어 나와 뛰어내린 뒤 일반 카메라와 조작으로 돌아간다. 구조물과 시작 지점은 마을 아웃라이너의 `Environment/WestTunnel`에 있다.
+
+기지 리프트에서 마을 동쪽이나 서쪽을 고르면 선택한 쪽의 다섯 지점 중 한 곳에 도착한다. `Gameplay/LiftArrivals/East`와 `West`에서 위치를 조정할 수 있다. 각 그룹의 5번이 해변 쪽이다.

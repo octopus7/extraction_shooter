@@ -1,4 +1,5 @@
 #include "Game/TunaSweeperGameMode.h"
+#include "Game/VillageTunnelPlayerStart.h"
 
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Player/TunaSweeperPlayerController.h"
@@ -16,6 +17,7 @@ ATunaSweeperGameMode::ATunaSweeperGameMode()
 
 AActor* ATunaSweeperGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
+	PendingTunnelStart.Reset();
 	PendingLiftAchievementPlayer.Reset();
 	if (UGameInstance* Instance = GetGameInstance())
 	{
@@ -29,7 +31,8 @@ AActor* ATunaSweeperGameMode::ChoosePlayerStart_Implementation(AController* Play
 				FRandomStream Random(FMath::Rand());
 				APlayerStart* Start = Arrival->SelectRandomStart(Starts, Group, Random);
 				bLiftArrivalMissingStart = Start == nullptr;
-				if (Start) PendingLiftAchievementPlayer = Player;
+				if (Group == ETunaSweeperRaidArrivalGroup::VillageTunnel) PendingTunnelStart = Cast<AVillageTunnelPlayerStart>(Start);
+				else if (Start) PendingLiftAchievementPlayer = Player;
 				if (!Start) UE_LOG(LogTemp, Warning, TEXT("Lift arrival has no PlayerStart for group %d in %s"), static_cast<int32>(Group), *GetWorld()->GetMapName());
 				return Start;
 			}
@@ -69,6 +72,9 @@ void ATunaSweeperGameMode::FinishRestartPlayer(AController* NewPlayer, const FRo
 	const bool bLiftArrival = NewPlayer && PendingLiftAchievementPlayer.Get() == NewPlayer;
 	PendingLiftAchievementPlayer.Reset();
 	Super::FinishRestartPlayer(NewPlayer, StartRotation);
+	if (PendingTunnelStart.IsValid() && NewPlayer && NewPlayer->IsLocalPlayerController())
+		PendingTunnelStart->BeginArrival(Cast<ATunaSweeperPlayerController>(NewPlayer));
+	PendingTunnelStart.Reset();
 	// Destination selection and map loading alone do not prove a usable arrival.
 	if (bLiftArrival && NewPlayer->IsLocalPlayerController() && NewPlayer->GetPawn())
 		if (auto* Instance = GetGameInstance())

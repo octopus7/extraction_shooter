@@ -11,7 +11,8 @@ enum class ETunaSweeperRaidArrivalGroup : uint8
     Forest,
     VillageEast,
     VillageWest,
-    Plains
+    Plains,
+    VillageTunnel
 };
 
 /** Place multiple starts per group to randomize lift arrivals within that group. */
