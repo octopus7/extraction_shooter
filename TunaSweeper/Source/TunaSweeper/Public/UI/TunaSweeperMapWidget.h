@@ -10,6 +10,7 @@ class UBackgroundBlur;
 class UButton;
 class UCanvasPanel;
 class UImage;
+class UMaterialInterface;
 class UTunaSweeperMapDefinition;
 class UOverlay;
 class USlider;
@@ -21,9 +22,7 @@ struct FTunaSweeperMapOverlayDefinition
 {
 	FVector WorldLocation = FVector::ZeroVector;
 	FName TextStringKey = NAME_None;
-	FName IconId = NAME_None;
-	FVector2D TextOffset = FVector2D::ZeroVector;
-	FVector2D IconOffset = FVector2D::ZeroVector;
+	bool bIsExtractionPoint = false;
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -84,8 +83,6 @@ private:
 	FVector2D ProjectWorldLocationToMapPosition(const FVector& WorldLocation) const;
 	void HandleMapMarkersChanged();
 	FText ResolveMapOverlayText(const FTunaSweeperMapOverlayDefinition& MapOverlay) const;
-	FText GetMapOverlayIconGlyph(FName IconId) const;
-	FLinearColor GetMapOverlayIconColor(FName IconId) const;
 	FText GetMarkerGlyph(int32 MarkerIconIndex) const;
 	FLinearColor GetMarkerColor(int32 MarkerColorIndex) const;
 	void ConfigureChoiceButton(UButton* Button, const FLinearColor& FillColor, const FLinearColor& OutlineColor);
@@ -146,6 +143,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> PlayerIconTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInterface> ExtractionIconMaterial;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UButton> CircleMarkerIconButton;
