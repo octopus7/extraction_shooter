@@ -2,6 +2,8 @@
 #include "Raid/RaidLevelIdentity.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "AI/Hopper/HopperEnemyCharacter.h"
+#include "Scenario/TrailerGameMode.h"
 #include "Dom/JsonObject.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
@@ -234,6 +236,11 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 		if (!EnemyClass)
 		{
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy ProfileId '%s' cannot load its enemy class."), *Profile->ProfileId.ToString());
+			continue;
+		}
+		// The trailer stages its own captain at the approach mark.
+		if (World->GetAuthGameMode<ATrailerGameMode>() && EnemyClass->IsChildOf(ATunaSweeperHopperEnemyCharacter::StaticClass()))
+		{
 			continue;
 		}
 		for (ATunaSweeperRaidPlacementAnchor* EnemyAnchor : EnemyAnchors)
