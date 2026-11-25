@@ -23,6 +23,7 @@ public:
     virtual void Tick(float DeltaSeconds) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     bool SelectArrival(ETunaSweeperRaidArrivalGroup Group);
+    bool HasVisitedDestination(ETunaSweeperRaidArrivalGroup Group) const;
     void ClosePicker();
     bool IsPawnOnPlatform(const APawn* Pawn) const;
     UTexture2D* GetDestinationImage(int32 Index) const;

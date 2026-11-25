@@ -1,5 +1,7 @@
 #include "Interaction/TunaSweeperRaidLiftActor.h"
 #include "UI/TunaSweeperRaidLiftWidget.h"
+#include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -102,9 +104,23 @@ bool ATunaSweeperRaidLiftActor::TravelToTargetLevel(APawn* Pawn)
     Picker->SetKeyboardFocus();
     return true;
 }
+bool ATunaSweeperRaidLiftActor::HasVisitedDestination(ETunaSweeperRaidArrivalGroup Group) const
+{
+    const auto* History = UGameInstance::GetSubsystem<UTunaSweeperAchievementSubsystem>(GetGameInstance());
+    if (!History) return false;
+    switch (Group)
+    {
+    case ETunaSweeperRaidArrivalGroup::Forest: return History->HasReachedLocation(TEXT("region.forest"));
+    case ETunaSweeperRaidArrivalGroup::VillageWest:
+    case ETunaSweeperRaidArrivalGroup::VillageEast: return History->HasReachedLocation(TEXT("region.village"));
+    case ETunaSweeperRaidArrivalGroup::Plains: return History->HasReachedLocation(TEXT("region.plains"));
+    default: return false;
+    }
+}
+
 bool ATunaSweeperRaidLiftActor::SelectArrival(ETunaSweeperRaidArrivalGroup Group)
 {
-    if (!Picker || !IsPassageUnlocked() || !IsPawnOnPlatform(Passenger.Get())
+    if (!Picker || !HasVisitedDestination(Group) || !IsPassageUnlocked() || !IsPawnOnPlatform(Passenger.Get())
         || Passenger->GetController() != Picker->GetOwningPlayer()) return false;
     switch (Group)
     {

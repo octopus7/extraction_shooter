@@ -41,8 +41,12 @@ TSharedRef<SWidget> UTunaSweeperRaidLiftWidget::RebuildWidget()
         auto* Row = WidgetTree->ConstructWidget<UHorizontalBox>();
         Column->AddChildToVerticalBox(Row);
         const TCHAR* Keys[] = {TEXT("ui.lift.forest"), TEXT("ui.lift.village_east"), TEXT("ui.lift.village_west"), TEXT("ui.lift.plains")};
-        for (int32 Index = 0; Index < 4; ++Index)
+        using EArrival = ETunaSweeperRaidArrivalGroup;
+        for (const EArrival Group : {EArrival::Forest, EArrival::VillageWest, EArrival::VillageEast, EArrival::Plains})
         {
+            if (!Lift.IsValid() || !Lift->HasVisitedDestination(Group)) continue;
+            // Saved lift images and label keys use the original destination indices.
+            const int32 Index = static_cast<int32>(Group) - 1;
             auto* Button = WidgetTree->ConstructWidget<UButton>();
             TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Secondary);
             Row->AddChildToHorizontalBox(Button)->SetPadding(FMargin(8));
