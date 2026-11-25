@@ -9,6 +9,7 @@ class ATunaSweeperLootContainerActor;
 class ATunaSweeperDoorActor;
 class ATunaSweeperPersistentDoorActor;
 class AActor;
+class UTunaSweeperQuestSubsystem;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperInteractionSubsystem : public UTickableWorldSubsystem
@@ -36,6 +37,7 @@ public:
 	bool RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	bool CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const;
+	void AddAvailableQuestGiverLocations(const UTunaSweeperQuestSubsystem& Quests, TArray<FVector>& Locations) const;
 	bool ShouldDisplayMarkerForInteractable(const UTunaSweeperInteractableComponent* Interactable) const;
 	bool IsFocusedInteractionGroupMarker(const UTunaSweeperInteractableComponent* Interactable) const;
 	void GetMarkerInteractionOptions(

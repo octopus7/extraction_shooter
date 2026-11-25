@@ -53,6 +53,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool CanAcceptQuest(int32 QuestId) const;
+	void GetAvailableQuestGivers(TSet<FName>& OutProviderIds) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool AcceptQuest(int32 QuestId);

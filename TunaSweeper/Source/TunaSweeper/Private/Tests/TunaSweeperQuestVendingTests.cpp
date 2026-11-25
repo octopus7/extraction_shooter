@@ -4,6 +4,7 @@
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperQuestVendingActor.h"
+#include "Quest/QuestGuidanceLocations.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/ScopeExit.h"
@@ -99,6 +100,11 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	Base->PresenceRole = ETunaSweeperQuestVendingRole::BaseResident;
 	Field->DispatchBeginPlay();
 	Base->DispatchBeginPlay();
+	Field->SetActorLocation(FVector(720, 180, 0));
+	TArray<FVector> GuideLocations;
+	QuestGuidanceLocations::Get(World, GuideLocations);
+	TestTrue(TEXT("Without a tracked quest only the visible field offer is marked"),
+		GuideLocations.Num() == 1 && GuideLocations.Contains(Field->GetActorLocation()));
 	TestFalse(TEXT("First meeting exposes field vending"), Field->IsHidden());
 	TestTrue(TEXT("Base vending waits for relocation"), Base->IsHidden());
 	TestFalse(TEXT("Field vending never exposes a shop even on base map"), Interactions->CanOfferInteraction(Field->GetInteractableComponent()));
@@ -107,6 +113,8 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Provider resolves configurable first quest"), Field->ResolveQuestId(), First.QuestId);
 	TestFalse(TEXT("Relocation requires claimed first reward"), Quests->CanAcceptQuest(Relocation.QuestId));
 	TestTrue(TEXT("First meeting accepts normally"), Quests->AcceptQuest(First.QuestId));
+	QuestGuidanceLocations::Get(World, GuideLocations);
+	TestFalse(TEXT("An accepted offer no longer guides to its giver"), GuideLocations.Contains(Field->GetActorLocation()));
 	TestFalse(TEXT("Accepted first meeting keeps vending reachable"), Field->IsHidden());
 	int32 Submitted = 0;
 	TestFalse(TEXT("Missing coin cannot complete first meeting"), Quests->TrySubmitItemsToProvider(First.ProviderId, Submitted, false));
@@ -114,6 +122,13 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Explicit submission consumes required coin"), Quests->TrySubmitItemsToProvider(First.ProviderId, Submitted, false));
 	TestEqual(TEXT("Exactly one coin consumed"), Game->CountInventoryItemById(Coin.ItemId), 1);
 	TestEqual(TEXT("Submission awaits explicit claim"), Quests->GetQuestState(First.QuestId), ETunaSweeperQuestState::RewardAvailable);
+	FTunaSweeperQuestDefinition ParallelOffer = First;
+	ParallelOffer.QuestId = 923003;
+	Quests->QuestDefinitions.Add(ParallelOffer.QuestId, ParallelOffer);
+	QuestGuidanceLocations::Get(World, GuideLocations);
+	TestTrue(TEXT("Another available offer keeps the reward NPC on the map"),
+		GuideLocations.Num() == 1 && GuideLocations.Contains(Field->GetActorLocation()));
+	Quests->QuestDefinitions.Remove(ParallelOffer.QuestId);
 	TestEqual(TEXT("Submission does not grant reward"), Quests->GetCoinBalance(), 0);
 	TestTrue(TEXT("Retry can reopen pending reward"), Quests->TrySubmitItemsToProvider(First.ProviderId, Submitted, false));
 	TestEqual(TEXT("Retry does not consume another coin"), Game->CountInventoryItemById(Coin.ItemId), 1);

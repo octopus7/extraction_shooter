@@ -11,6 +11,7 @@
 #include "Misc/Paths.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
+#include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperRaidPlacementSubsystem.h"
@@ -262,8 +263,17 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 	auto* Game = World ? Cast<UTunaSweeperGameInstance>(World->GetGameInstance()) : nullptr;
 	if (!Game || Game->GetActiveSaveSlotDifficultyStage() != 1 || Game->IsCombatTestSession()) return;
 	auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>();
-	const int32 QuestId = Quests ? Quests->GetTrackedQuestId() : 0;
-	if (QuestId <= 0 || Quests->GetQuestState(QuestId) != ETunaSweeperQuestState::Accepted) return;
+	if (!Quests) return;
+	const auto AddLocalOffers = [&] {
+		if (auto* Interactions = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+			Interactions->AddAvailableQuestGiverLocations(*Quests, OutLocations);
+	};
+	const int32 QuestId = Quests->GetTrackedQuestId();
+	if (QuestId <= 0 || Quests->GetQuestState(QuestId) != ETunaSweeperQuestState::Accepted)
+	{
+		AddLocalOffers();
+		return;
+	}
 	const auto* Quest = Quests->FindQuestDefinition(QuestId);
 	if (!Quest) return;
 
@@ -375,6 +385,7 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 			for (const auto& Row : *Rows)
 				if (Match.Matches(Row)) OutLocations.AddUnique(Row.Location);
 	}
+	if (OutLocations.IsEmpty()) AddLocalOffers();
 }
 
 #if WITH_DEV_AUTOMATION_TESTS

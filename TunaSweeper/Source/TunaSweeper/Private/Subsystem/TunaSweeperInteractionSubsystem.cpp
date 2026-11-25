@@ -437,6 +437,24 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	return bHandled;
 }
 
+void UTunaSweeperInteractionSubsystem::AddAvailableQuestGiverLocations(const UTunaSweeperQuestSubsystem& Quests, TArray<FVector>& Locations) const
+{
+	TSet<FName> AvailableProviders;
+	Quests.GetAvailableQuestGivers(AvailableProviders);
+	for (const auto& Entry : RegisteredInteractables)
+	{
+		const auto* Interaction = Entry.Get();
+		if (!Interaction || Interaction->GetInteractionType() != ETunaSweeperInteractionType::Quest || !Interaction->IsVisible()) continue;
+		const AActor* Owner = Interaction->GetOwner();
+		if (!IsValid(Owner) || Owner->IsHidden() || Owner->IsActorBeingDestroyed()) continue;
+		const FName Provider = TunaSweeperInteractionQuestEvents::ResolveQuestProviderIdForActor(Owner);
+		if (Provider.IsNone() || !AvailableProviders.Contains(Provider)) continue;
+		// The NPC panel can offer another quest even when it initially selects a reward.
+		if (TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Owner) <= 0) continue;
+		Locations.AddUnique(Owner->GetActorLocation());
+	}
+}
+
 bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const
 {
 	const auto* Player = Cast<ATunaSweeperTopDownCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));

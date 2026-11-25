@@ -574,6 +574,19 @@ bool UTunaSweeperQuestSubsystem::CanAcceptQuest(int32 QuestId) const
 		AreDefinitionPrerequisitesMet(*Definition);
 }
 
+void UTunaSweeperQuestSubsystem::GetAvailableQuestGivers(TSet<FName>& OutProviderIds) const
+{
+	OutProviderIds.Reset();
+	if (!EnsureQuestDataLoaded()) return;
+	EnsureSaveStateLoaded();
+	for (const auto& Pair : QuestDefinitions)
+	{
+		const FName Provider = Pair.Value.ProviderId;
+		if (!Provider.IsNone() && !OutProviderIds.Contains(Provider) && CanAcceptQuest(Pair.Key))
+			OutProviderIds.Add(Provider);
+	}
+}
+
 bool UTunaSweeperQuestSubsystem::AreQuestPrerequisitesMet(int32 QuestId) const
 {
 	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
