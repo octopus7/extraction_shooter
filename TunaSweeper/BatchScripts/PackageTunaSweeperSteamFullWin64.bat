@@ -61,6 +61,7 @@ call "%RUN_UAT%" BuildCookRun ^
     -noP4 ^
     -target=%TARGET_NAME% ^
     -customconfig=%CUSTOM_CONFIG% ^
+    -AdditionalCookerOptions=-CustomConfig=%CUSTOM_CONFIG% ^
     -platform=Win64 ^
     -clientconfig=%CONFIGURATION% ^
     -serverconfig=%CONFIGURATION% ^
@@ -79,6 +80,10 @@ call "%RUN_UAT%" BuildCookRun ^
 set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%BUILD_FLAVOR_DATA%" -Mode Clean
 if not "%ERRORLEVEL%"=="0" if "%PACKAGE_EXIT_CODE%"=="0" set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
+if "%PACKAGE_EXIT_CODE%"=="0" (
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\ValidateSteamFullLootClasses.ps1" -PackageRoot "%ARCHIVE_PLATFORM_DIR%" -UnrealPak "%UE_ROOT%\Engine\Binaries\Win64\UnrealPak.exe"
+    if errorlevel 1 set "PACKAGE_EXIT_CODE=1"
+)
 if "%PACKAGE_EXIT_CODE%"=="0" (
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\ValidateMovementCheatPackage.ps1" -PackageRoot "%ARCHIVE_PLATFORM_DIR%"
     if errorlevel 1 set "PACKAGE_EXIT_CODE=1"
