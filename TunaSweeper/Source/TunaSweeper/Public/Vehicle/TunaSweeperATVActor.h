@@ -28,6 +28,8 @@ public:
 	bool bRequiresFuel = true;
 	UFUNCTION(BlueprintPure, Category="ATV|Fuel") bool HasFuel() const { return !bRequiresFuel || FuelSeconds > 0.f; }
 	bool Refuel(APawn* InstigatorPawn);
+	static constexpr int32 EthanolItemId = 6009;
+	bool CanReceiveFuel() const;
 	void ConsumeFuel(float DeltaSeconds, bool bEngineOn, bool bMoving);
 	void RefreshFuelInteraction();
 	void InitializeSessionFuel();

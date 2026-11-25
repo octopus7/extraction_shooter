@@ -28,17 +28,21 @@ void ATunaSweeperATVActor::StoreSessionFuel()
         Game->StoreVehicleFuel(FuelSessionKey, FuelSeconds, FuelSession);
 }
 
+bool ATunaSweeperATVActor::CanReceiveFuel() const
+{
+    return !HasFuel() && !bVehicleDestroyed && !bRefueling && !MountComponent->GetRider();
+}
+
 bool ATunaSweeperATVActor::Refuel(APawn* InstigatorPawn)
 {
-    if (!bRequiresFuel) return false;
+    if (!CanReceiveFuel()) return false;
     auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
     const auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn);
     if (!Game || !IsValid(Character) || Character->IsDead() || Character->IsMountedInVehicle() ||
-        bVehicleDestroyed || HasFuel() || bRefueling || MountComponent->GetRider() ||
         !MountComponent->IsWithinInteractionDistance(InstigatorPawn) ||
         FMath::Abs(Character->GetActorLocation().Z - MountComponent->GetComponentLocation().Z) > MountComponent->GetInteractionDistance()) return false;
     TGuardValue<bool> Guard(bRefueling, true);
-    FTunaSweeperItemStack Fuel; Fuel.ItemId = 6009; Fuel.Quantity = 1;
+    FTunaSweeperItemStack Fuel; Fuel.ItemId = EthanolItemId; Fuel.Quantity = 1;
     const bool bConsumed = Game->TryConsumeInventoryItems({Fuel}, [this, Game]()
     {
         FuelSeconds = 60.f;

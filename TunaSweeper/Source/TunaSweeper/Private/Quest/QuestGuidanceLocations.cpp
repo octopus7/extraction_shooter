@@ -1,6 +1,8 @@
 #include "Quest/QuestGuidanceLocations.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "EngineUtils.h"
+#include "Vehicle/TunaSweeperATVActor.h"
+#include "Interaction/TunaSweeperEthanolFacilityActor.h"
 
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -26,6 +28,21 @@ namespace
 	};
 
 	using FBakedMaps = TMap<FName, TArray<FBakedLocation>>;
+
+	void AddRefuelLocations(UWorld* World, FName EventId, bool bCarryingEthanol, TArray<FVector>& Locations)
+	{
+		if (bCarryingEthanol)
+		{
+			for (TActorIterator<ATunaSweeperATVActor> Vehicle(World); Vehicle; ++Vehicle)
+				if (Vehicle->RefuelObjectiveEventId == EventId && Vehicle->CanReceiveFuel())
+					Locations.AddUnique(Vehicle->GetActorLocation());
+		}
+		else
+		{
+			for (TActorIterator<ATunaSweeperEthanolFacilityActor> Facility(World); Facility; ++Facility)
+				if (Facility->IsRepaired()) Locations.AddUnique(Facility->GetActorLocation());
+		}
+	}
 
 	void AddLivingEnemyLocations(UWorld* World, const FTunaSweeperObjectiveDefinition& Objective, TArray<FVector>& Locations)
 	{
@@ -151,6 +168,13 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 			AddLivingEnemyLocations(World, Objective, OutLocations);
 			continue;
 		}
+		if (Level == TEXT("RaidVillage") && Objective.Type == EType::InteractionCompleted &&
+			Objective.InteractionEventId == TEXT("vehicle.atv.refuel"))
+		{
+			AddRefuelLocations(World, Objective.InteractionEventId,
+				Game->CountInventoryItemById(ATunaSweeperATVActor::EthanolItemId) > 0, OutLocations);
+			continue;
+		}
 		const bool bDelivery = Objective.Type == EType::ItemSubmitted &&
 			Game->CountQuestSubmissionItemById(Objective.ItemId) >= State.RequiredCount - State.CurrentCount;
 		int32 WorkbenchId = INDEX_NONE;
@@ -181,6 +205,31 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FATVRefuelGuidanceTest, "TunaSweeper.Quest.Guidance.VillageRefuel",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FATVRefuelGuidanceTest::RunTest(const FString& Parameters)
+{
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	ON_SCOPE_EXIT { World->DestroyWorld(false); };
+	UClass* Class = LoadClass<ATunaSweeperATVActor>(nullptr, TEXT("/Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA.BP_ATV_TypeA_C"));
+	if (!TestNotNull(TEXT("Village repaired vehicle class"), Class)) return false;
+	auto* Vehicle = World->SpawnActor<ATunaSweeperATVActor>(Class);
+	if (!TestNotNull(TEXT("Spawned replacement ATV"), Vehicle)) return false;
+	const FName Event = TEXT("vehicle.atv.refuel");
+	Vehicle->SetActorLocation(FVector(1200, 700, 160));
+	TArray<FVector> Locations;
+	AddRefuelLocations(World, Event, false, Locations);
+	TestTrue(TEXT("Without ethanol the empty ATV is not a target"), Locations.IsEmpty());
+	AddRefuelLocations(World, Event, true, Locations);
+	TestTrue(TEXT("Carried ethanol points at the spawned vehicle"), Locations.Num() == 1 && Locations[0] == Vehicle->GetActorLocation());
+	Vehicle->FuelSeconds = 60.f;
+	Locations.Reset();
+	AddRefuelLocations(World, Event, true, Locations);
+	TestTrue(TEXT("A fueled ATV cannot satisfy refueling"), Locations.IsEmpty());
+	return true;
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDeliveryRobotGuidanceTest, "TunaSweeper.Quest.Guidance.MovingDeliveryRobots",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
