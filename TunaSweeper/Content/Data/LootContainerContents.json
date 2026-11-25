@@ -190,7 +190,7 @@
   },
   {
     "id": 8023,
-    "memo_ko": "토끼 삼륜 로봇 전리품: 빈 발사관, 토큰, 망가진 점화 플러그, 타이어, 상위 AR/SMG, 2등급 머리/몸 방어구",
+    "memo_ko": "토끼 삼륜 로봇 전리품: 빈 발사관, 토큰, 망가진 점화 플러그, 타이어, 상위 AR/SMG, 2등급 머리/몸 방어구, 토끼 젤리",
     "items": [
       { "item_id": 6033, "quantity": 1, "drop_chance_tier": "quest" },
       { "item_id": 7004, "quantity_min": 1, "quantity_max": 3, "drop_chance_tier": "quest" },
@@ -199,7 +199,8 @@
       { "item_id": 1007, "quantity": 1, "drop_chance_tier": "quest" },
       { "item_id": 1008, "quantity": 1, "drop_chance_tier": "quest" },
       { "item_id": 5006, "quantity": 1, "drop_chance_tier": "quest" },
-      { "item_id": 5001, "quantity": 1, "drop_chance_tier": "quest" }
+      { "item_id": 5001, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 3008, "quantity": 1, "drop_chance_tier": "snack" }
     ]
   },
   {
@@ -361,5 +362,10 @@
       { "item_id": 1001, "quantity": 1 },
       { "item_id": 2001, "quantity": 120 }
     ]
+  },
+  {
+    "id": 8052,
+    "memo_ko": "마을 상자 공통 추가 전리품: 토끼 젤리",
+    "items": [ { "item_id": 3008, "quantity": 1, "drop_chance_tier": "snack" } ]
   }
 ]

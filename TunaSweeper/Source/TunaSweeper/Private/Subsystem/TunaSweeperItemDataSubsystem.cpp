@@ -1973,6 +1973,16 @@ bool FLootDropChanceTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Authored quest probability on Story"), Chance.Story, 1.f);
 	TestTrue(TEXT("Quest drop is possible and below thirty percent on both higher stages"), Chance.NormalHard > 0.f && Chance.NormalHard < .3f);
 
+	for (const int32 SnackContentsId : {8023, 8052})
+	{
+		FTunaSweeperLootContainerContents SnackContents;
+		if (!TestTrue(TEXT("Snack loot table exists"), Items->TryGetLootContainerContents(SnackContentsId, SnackContents))) return false;
+		const auto* Jelly = SnackContents.ItemQuantities.FindByPredicate([](const auto& Entry) { return Entry.ItemId == 3008; });
+		if (!TestNotNull(TEXT("Snack table includes rabbit jelly"), Jelly)) return false;
+		TestEqual(TEXT("Rabbit jelly chance on Story"), Jelly->DropChance.Story, .1f);
+		TestEqual(TEXT("Rabbit jelly chance on Normal and Hard"), Jelly->DropChance.NormalHard, .1f);
+	}
+
 	// Opposite deterministic chances exercise the real roll and guarantee query without probabilistic assertions.
 	constexpr int32 ContentsId = 990001;
 	constexpr int32 ItemId = 3001;

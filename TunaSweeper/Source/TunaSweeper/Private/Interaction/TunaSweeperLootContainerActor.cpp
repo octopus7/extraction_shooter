@@ -227,6 +227,20 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 		return false;
 	}
 
+	const UWorld* World = GetWorld();
+	if (World && UWorld::RemovePIEPrefix(World->GetOutermost()->GetName()) == TEXT("/Game/MainRaid/RaidVillage"))
+	{
+		constexpr int32 VillageSnackContentsId = 8052;
+		FTunaSweeperLootContainerInstance SnackRoll;
+		if (UTunaSweeperItemDataSubsystem* ItemData = GetItemDataSubsystem();
+			ItemData && ItemData->TryBuildLootContainerInstance(
+				ContainerDefinitionId, VillageSnackContentsId, TunaGameInstance->GetCurrentTextLanguage(), SnackRoll))
+		{
+			OutInstance.Items.Append(MoveTemp(SnackRoll.Items));
+			OutInstance.Capacity = FMath::Max(OutInstance.Capacity, OutInstance.Items.Num());
+		}
+	}
+
 	TunaGameInstance->SetActiveLootContainerInstance(OutInstance, this);
 	RuntimeContainerDefinitionId = OutInstance.ContainerDefinitionId;
 	RuntimeContentsId = OutInstance.ContentsId;
@@ -365,7 +379,6 @@ void ATunaSweeperLootContainerActor::HandleLanguageChanged()
 		if (BuildContainerInstance(UpdatedInstance))
 		{
 			RuntimeDisplayName = UpdatedInstance.DisplayName;
-			RuntimeCapacity = FMath::Max(0, UpdatedInstance.Capacity);
 			if (UTunaSweeperGameInstance* TunaGameInstance = RuntimeGameInstance.Get())
 			{
 				if (TunaGameInstance->HasActiveLootContainer() &&

@@ -2,5 +2,9 @@
   "quest": {
     "story": 10000,
     "normal_hard": 2500
+  },
+  "snack": {
+    "story": 1000,
+    "normal_hard": 1000
   }
 }

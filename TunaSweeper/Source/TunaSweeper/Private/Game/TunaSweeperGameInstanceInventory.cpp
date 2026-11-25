@@ -9,6 +9,7 @@
 namespace
 {
 	constexpr int32 EnergyBarItemId = 3003;
+	constexpr int32 RabbitJellyItemId = 3008;
 }
 
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
@@ -366,11 +367,15 @@ bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotRefere
 		DebuffComponent->RemoveDebuffs(ItemDefinition.ClearsDebuffIds);
 	}
 
-	if (ItemInstance->ItemId == EnergyBarItemId)
+	if (auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn))
 	{
-		if (auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn))
+		if (ItemInstance->ItemId == EnergyBarItemId)
 		{
 			Character->ApplyEnergyBarSprintBuff();
+		}
+		else if (ItemInstance->ItemId == RabbitJellyItemId)
+		{
+			Character->ApplyRabbitJellySpeedBuff();
 		}
 	}
 

@@ -4,6 +4,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
@@ -117,6 +118,29 @@ bool FTunaSweeperDemoStaminaTuningTest::RunTest(const FString& Parameters)
 	Character->bSprintInputHeld = true;
 	Character->UpdateSprintAndStamina(4.0f);
 	TestEqual(TEXT("Normal sprint drain returns when the buff expires"), Character->CurrentStamina, 75.0f);
+
+	Item.ItemId = 3008;
+	Game->ItemInstancesByUid.Add(Item.Uid, Item);
+	Game->PlayerInventorySlots[0].ItemUid = Item.Uid;
+	Character->bIsSprinting = false;
+	Character->UpdateMovementSpeed();
+	const float WalkSpeed = Character->GetCharacterMovement()->MaxWalkSpeed;
+	TestTrue(TEXT("Rabbit jelly consumed through inventory"), Game->TryUseItemInSlot(Slot, Character));
+	TestEqual(TEXT("Rabbit jelly increases walking speed"), Character->GetCharacterMovement()->MaxWalkSpeed, WalkSpeed * 1.1f);
+	Character->bIsSprinting = true;
+	Character->UpdateMovementSpeed();
+	TestEqual(TEXT("Rabbit jelly increases sprinting speed"), Character->GetCharacterMovement()->MaxWalkSpeed,
+		WalkSpeed * Character->SprintSpeedMultiplier * 1.1f);
+	Character->RabbitJellySpeedBuffEndTime = World->GetTimeSeconds() + 1.0;
+	TestTrue(TEXT("Second rabbit jelly consumed"), Game->TryUseItemInSlot(Slot, Character));
+	TestEqual(TEXT("Second jelly refreshes for 30 seconds"), Character->RabbitJellySpeedBuffEndTime,
+		static_cast<double>(World->GetTimeSeconds()) + 30.0);
+	TestEqual(TEXT("Jelly speed bonuses do not stack"), Character->GetCharacterMovement()->MaxWalkSpeed,
+		WalkSpeed * Character->SprintSpeedMultiplier * 1.1f);
+	Character->RabbitJellySpeedBuffEndTime = World->GetTimeSeconds();
+	Character->UpdateMovementSpeed();
+	TestEqual(TEXT("Jelly expiry restores normal sprint speed"), Character->GetCharacterMovement()->MaxWalkSpeed,
+		WalkSpeed * Character->SprintSpeedMultiplier);
 
 	return true;
 }

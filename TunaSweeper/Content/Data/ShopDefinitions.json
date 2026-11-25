@@ -42,6 +42,10 @@
         "item_id": 7003,
         "stock_quantity": 5,
         "price": 10
+      },
+      {
+        "item_id": 3008,
+        "stock_quantity": 6
       }
     ]
   }

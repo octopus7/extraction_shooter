@@ -20,9 +20,24 @@ namespace TunaSweeperEnergyBar
 	constexpr float SprintDrainReduction = 0.20f;
 }
 
+namespace TunaSweeperRabbitJelly
+{
+	constexpr float SpeedMultiplier = 1.10f;
+	constexpr float DurationSeconds = 30.0f;
+}
+
 void ATunaSweeperTopDownCharacter::ApplyEnergyBarSprintBuff()
 {
 	EnergyBarSprintBuffRemainingSeconds = TunaSweeperEnergyBar::SprintBuffDurationSeconds;
+}
+
+void ATunaSweeperTopDownCharacter::ApplyRabbitJellySpeedBuff()
+{
+	if (const UWorld* World = GetWorld())
+	{
+		RabbitJellySpeedBuffEndTime = World->GetTimeSeconds() + TunaSweeperRabbitJelly::DurationSeconds;
+		UpdateMovementSpeed();
+	}
 }
 
 void ATunaSweeperTopDownCharacter::UpdateRoll(float DeltaSeconds)
@@ -108,12 +123,16 @@ void ATunaSweeperTopDownCharacter::UpdateMovementSpeed()
 	const float ActionSpeedMultiplier = bIsRolling
 		? FMath::Max(0.0f, RollDistance) / FMath::Max(0.01f, RollDurationSeconds) / FMath::Max(1.0f, BaseWalkSpeed)
 		: (bIsSprinting ? FMath::Max(1.0f, SprintSpeedMultiplier) : 1.0f);
+	const UWorld* World = GetWorld();
+	const float SnackSpeedMultiplier = !bIsRolling && World && World->GetTimeSeconds() < RabbitJellySpeedBuffEndTime
+		? TunaSweeperRabbitJelly::SpeedMultiplier
+		: 1.0f;
 
 	const auto* MovementCheats = GetGameInstance() ? GetGameInstance()->GetSubsystem<UTunaSweeperMovementCheatSubsystem>() : nullptr;
 	MovementComponent->MaxWalkSpeed =
 		BaseWalkSpeed *
 		FMath::Clamp(CarryWeightSpeedMultiplier, 0.0f, 1.0f) *
-		ActionSpeedMultiplier * (MovementCheats ? MovementCheats->GetSpeedMultiplier() : 1.0f);
+		ActionSpeedMultiplier * SnackSpeedMultiplier * (MovementCheats ? MovementCheats->GetSpeedMultiplier() : 1.0f);
 }
 
 void ATunaSweeperTopDownCharacter::UpdatePlayerFootsteps(float DeltaSeconds)
