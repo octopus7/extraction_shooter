@@ -12,6 +12,9 @@ namespace
 {
 	constexpr float DescentSeconds = 7.5f;
 	constexpr float CollapseSeconds = 0.85f;
+	constexpr float DissolveStartScale = 0.60f;
+	constexpr float DissolveEndScale = 0.30f;
+	constexpr int32 ParachuteDissolveDataIndex = 0;
 	constexpr float TransportPassSeconds = 3.0f;
 }
 
@@ -78,7 +81,11 @@ void ATunaSweeperSupplyDropActor::Tick(float DeltaSeconds)
 	}
 
 	const float Collapse = FMath::Clamp((Elapsed - DescentSeconds) / CollapseSeconds, 0.0f, 1.0f);
-	Parachute->SetRelativeScale3D(FVector(1.0 - 0.66 * Collapse, 1.0 - 0.66 * Collapse, 1.0 - 0.79 * Collapse));
+	const float Scale = FMath::Lerp(1.0f, DissolveEndScale, Collapse);
+	Parachute->SetRelativeScale3D(FVector(Scale));
+	const float Dissolve = FMath::GetMappedRangeValueClamped(
+		FVector2D(DissolveEndScale, DissolveStartScale), FVector2D(1, 0), Scale);
+	Parachute->SetCustomPrimitiveDataFloat(ParachuteDissolveDataIndex, Dissolve);
 	if (Collapse < 1.0f)
 	{
 		return;
