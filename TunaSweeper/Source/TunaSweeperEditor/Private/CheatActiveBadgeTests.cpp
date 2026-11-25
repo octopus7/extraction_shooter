@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 #include "Components/OverlaySlot.h"
 #include "Debug/TunaSweeperMovementCheatSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
@@ -69,6 +70,17 @@ bool FCheatActiveBadgeTest::RunTest(const FString&)
     auto* Badge = Cast<UImage>(Bottom->GetWidgetFromName(TEXT("CheatActiveBadge")));
     auto* Gauge = Cast<UProgressBar>(Bottom->GetWidgetFromName(TEXT("HealthGauge")));
     if (!TestNotNull(TEXT("Saved image badge"), Badge) || !TestNotNull(TEXT("Health gauge"), Gauge)) return false;
+    auto* HealthText = Cast<UTextBlock>(Bottom->GetWidgetFromName(TEXT("HealthText")));
+    if (!TestNotNull(TEXT("Health label"), HealthText)) return false;
+    FTunaSweeperPlayerHudState Leveled;
+    Leveled.MaxHealth = 112;
+    for (int32 Health : {112, 34})
+    {
+        Leveled.Health = Health;
+        Bottom->SetHudState(Leveled);
+        TestEqual(TEXT("Health label uses the leveled maximum"), HealthText->GetText().ToString(), FString::Printf(TEXT("%d / 112"), Health));
+        TestTrue(TEXT("Health gauge matches the label"), FMath::IsNearlyEqual(Gauge->GetPercent(), Health / 112.f));
+    }
     TestTrue(TEXT("Serialized badge size survives reload"), FVector2D(Badge->GetBrush().ImageSize).Equals(FVector2D(150, 40), 0.01));
     TestEqual(TEXT("Anchored to health overlay"), Badge->GetParent(), Gauge->GetParent());
     auto* Texture = Cast<UTexture2D>(Badge->GetBrush().GetResourceObject());
