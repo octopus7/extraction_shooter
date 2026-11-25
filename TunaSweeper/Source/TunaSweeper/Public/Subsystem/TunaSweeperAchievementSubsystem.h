@@ -57,6 +57,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	int64 GetTotalEnemyKills() const { return ProgressState.TotalEnemyKills; }
+	bool TrySaveHelperKillCount(int64 NewCount);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Achievement")
 	bool HasKilledEnemy(FName EnemyId) const { return ProgressState.KilledEnemyIds.Contains(EnemyId); }

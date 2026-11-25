@@ -112,10 +112,21 @@ public partial class MainWindow : Window
         popup.Show();
     }
 
+    private void OpenKillCount_Click(object sender, RoutedEventArgs e)
+    {
+        if (MovementCheatTargets.SelectedItem is not MovementCheatTarget target)
+        {
+            StatusTextBlock.Text = (string)FindResource("MovementCheatSelectTarget");
+            return;
+        }
+        new KillCountWindow(target) { Owner = this }.ShowDialog();
+    }
+
     public MainWindow()
     {
         InitializeComponent();
         Resources["ui.item_grant.title"] = ItemGrantCatalog.Text("ui.item_grant.title");
+        Resources["ui.helper_kills.title"] = ItemGrantCatalog.Text("ui.helper_kills.title");
         foreach (string key in new[]
         {
             "ui.helper_packaging.tab", "ui.helper_packaging.stop_build", "ui.helper_packaging.stop_build_tooltip",

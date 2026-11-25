@@ -169,6 +169,8 @@ Unlock writes use the existing CRC envelope and candidate/previous fail-closed c
 
 Achievements use `UTunaSweeperAchievementSaveGame` version `2` (with version `1` read/upgrade support) instead of `UTunaSweeperSaveGame`. The file is stored as `Achievements_<DistributionNamespace>.sav` in the active save root described above, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
 
+The helper can read the account's total enemy kills from an active cheat-enabled game. Its edit action compares the displayed count with the current count on the game thread and saves only the new total through the achievement save path. Closing the popup discards edits. Raid kills and existing unlocks are independent of this edit.
+
 The achievement container persists independently of gameplay slots:
 
 - total player-attributed enemy kills;

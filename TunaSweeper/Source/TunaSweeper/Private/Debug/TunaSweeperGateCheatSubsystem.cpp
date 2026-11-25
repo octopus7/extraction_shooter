@@ -9,12 +9,13 @@
 #include "HAL/PlatformMisc.h"
 #include "Interaction/TunaSweeperChainLinkGate.h"
 #include "Misc/DateTime.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 
 FTunaSweeperGateCheatControl TunaSweeperGateCheatControl;
 static_assert(sizeof(FTunaSweeperGateCheatRequest) == 64);
 static_assert(sizeof(FTunaSweeperGateCheatRow) == 400);
-static_assert(sizeof(FTunaSweeperGateCheatSnapshot) == 25776);
-static_assert(sizeof(FTunaSweeperGateCheatControl) == 25864);
+static_assert(STRUCT_OFFSET(FTunaSweeperGateCheatSnapshot, TotalEnemyKills) == 25776);
+static_assert(sizeof(FTunaSweeperGateCheatControl) == 25872);
 static_assert(STRUCT_OFFSET(FTunaSweeperGateCheatControl, Request) == 24);
 static_assert(STRUCT_OFFSET(FTunaSweeperGateCheatControl, Snapshot) == 88);
 static_assert(STRUCT_OFFSET(FTunaSweeperGateCheatSnapshot, Rows) == 176);
@@ -96,7 +97,7 @@ void UTunaSweeperGateCheatSubsystem::Tick(float DeltaTime)
  check(IsInGameThread());
  auto& Control = TunaSweeperGateCheatControl;
  // A modified/unsupported header must never result in a game mutation.
- if (Control.Magic != 0x5453474154454348ULL || Control.Version != 3 || Control.Size != sizeof(Control)
+ if (Control.Magic != 0x5453474154454348ULL || Control.Version != 4 || Control.Size != sizeof(Control)
   || Control.ProcessId != FPlatformProcess::GetCurrentProcessId() || Control.Reserved != 0) return;
  UWorld* World = nullptr;
  UTunaSweeperGameInstance* Game = nullptr;
@@ -168,6 +169,7 @@ void UTunaSweeperGateCheatSubsystem::Tick(float DeltaTime)
    Snapshot.Count = 0; // Never present a silently truncated selectable list.
   }
  }
+ auto* Achievements = State == 0 ? Game->GetSubsystem<UTunaSweeperAchievementSubsystem>() : nullptr;
  FTunaSweeperGateCheatRequest Request;
  if (ReadRequest(Request))
  {
@@ -178,11 +180,19 @@ void UTunaSweeperGateCheatSubsystem::Tick(float DeltaTime)
   {
    HighSequence = Request.Sequence;
    const int64 Now = UtcMs();
-   if (Request.ProcessId != Control.ProcessId || Request.Reserved[0] || Request.Reserved[1] || Request.Reserved[2] || Request.Operation < 1 || Request.Operation > 4 || (Request.Operation == 3 && Request.RowKey != 0)) Result = EResult::InvalidRequest;
+   if (Request.ProcessId != Control.ProcessId || Request.Reserved[0] || Request.Reserved[1] || (Request.Operation != 5 && Request.ExpectedKillCount) || Request.Operation < 1 || Request.Operation > 5 || (Request.Operation == 3 && Request.RowKey != 0)) Result = EResult::InvalidRequest;
    else if (Request.DeadlineUtcMs <= Now || Request.DeadlineUtcMs > Now + 5000) Result = EResult::Expired;
    else if (State != 0) Result = static_cast<EResult>(State);
    else if (Request.ContextEpoch != ContextEpoch) Result = EResult::StaleContext;
    else if (Request.Operation == 1) Result = EResult::Refreshed;
+   else if (Request.Operation == 5)
+   {
+    if (!Achievements) Result = EResult::NoContext;
+    else if (Request.RowKey > MAX_int64) Result = EResult::InvalidRequest;
+    else if (Request.ExpectedKillCount != uint64(Achievements->GetTotalEnemyKills())) Result = EResult::StaleContext;
+    else if (Control.Request.Sequence != Request.Sequence || Control.Request.DeadlineUtcMs <= UtcMs()) Result = EResult::Expired;
+    else Result = Achievements->TrySaveHelperKillCount(int64(Request.RowKey)) ? EResult::KillCountSaved : EResult::SaveFailed;
+   }
    else if (Request.Operation == 4)
    {
     if (Control.Request.Sequence != Request.Sequence || Control.Request.DeadlineUtcMs <= UtcMs()) Result = EResult::Expired;
@@ -213,6 +223,7 @@ void UTunaSweeperGateCheatSubsystem::Tick(float DeltaTime)
   Snapshot.AckSequence = HighSequence; // Replayed sequence numbers never move the acknowledged watermark backward.
   Snapshot.Result = uint32(Result);
  }
+ Snapshot.TotalEnemyKills = Achievements ? Achievements->GetTotalEnemyKills() : -1;
  Snapshot.PublishedUtcMs = UtcMs();
  Publish(Snapshot);
 }

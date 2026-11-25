@@ -306,6 +306,7 @@
                         <Button MinHeight="40" Margin="0,8,0,0" Click="OpenWorldProgress_Click" Content="{DynamicResource WorldProgressOpen}" />
                         <Button MinHeight="40" x:Name="TunaFillButton" Margin="0,8,0,0" Click="FillTuna_Click" Content="{DynamicResource TunaFillButton}" />
                         <Button MinHeight="40" Margin="0,8,0,0" Click="OpenItemGrant_Click" Content="{DynamicResource ui.item_grant.title}" />
+                        <Button MinHeight="40" Margin="0,8,0,0" Click="OpenKillCount_Click" Content="{DynamicResource ui.helper_kills.title}" />
                         <Border Margin="0,8,0,0" Padding="10" Background="#202833" CornerRadius="4">
                             <StackPanel>
                                 <TextBlock Margin="0,0,0,6" Foreground="#DCE5F0" FontWeight="SemiBold" TextWrapping="Wrap" Text="{DynamicResource MovementCheatKeysTitle}" />

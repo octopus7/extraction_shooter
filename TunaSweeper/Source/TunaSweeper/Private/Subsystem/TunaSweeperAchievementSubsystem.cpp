@@ -373,6 +373,16 @@ bool UTunaSweeperAchievementSubsystem::LoadProgressState()
 	return true;
 }
 
+bool UTunaSweeperAchievementSubsystem::TrySaveHelperKillCount(int64 NewCount)
+{
+	if (!bProgressStateLoaded || NewCount < 0) return false;
+	const int64 Previous = ProgressState.TotalEnemyKills;
+	ProgressState.TotalEnemyKills = NewCount;
+	if (SaveProgressState()) return true;
+	ProgressState.TotalEnemyKills = Previous;
+	return false;
+}
+
 bool UTunaSweeperAchievementSubsystem::SaveProgressState() const
 {
 	UTunaSweeperAchievementSaveGame* SaveGame = NewObject<UTunaSweeperAchievementSaveGame>();

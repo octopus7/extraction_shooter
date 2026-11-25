@@ -24,6 +24,14 @@ internal static class Program
         Check(!((Button)window.FindName("GrantButton")).IsEnabled, "No grant without live context");
         Check(window.Title == ItemGrantCatalog.Text("ui.item_grant.title"), "Localized window title");
         window.Close();
+        var kills = new KillCountWindow(new(123, DateTime.Now, "synthetic test target"));
+        Check(kills.Title == ItemGrantCatalog.Text("ui.helper_kills.title"), "Kill count window title");
+        Check(!((Button)kills.FindName("SaveButton")).IsEnabled, "Cannot save before reading the kill count");
+        Check(((Button)kills.FindName("CloseButton")).IsCancel, "Close dismisses without saving");
+        Check(KillCountWindow.TryParseCount("0", out _) && KillCountWindow.TryParseCount("9223372036854775807", out _), "Valid kill count bounds");
+        foreach (string invalid in new[] { "", "-1", "1.5", "9223372036854775808" })
+            Check(!KillCountWindow.TryParseCount(invalid, out _), "Invalid kill count: " + invalid);
+        kills.Close();
         Console.WriteLine("Item grant helper tests passed (catalog, layout, selection, defaults, context guard, localization).");
         CheckSteamFullPackage();
         CheckDisplayPresets();

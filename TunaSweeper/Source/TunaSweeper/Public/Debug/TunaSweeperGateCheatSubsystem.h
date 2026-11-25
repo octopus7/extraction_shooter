@@ -4,11 +4,11 @@
 #include "Tickable.h"
 #include "TunaSweeperGateCheatSubsystem.generated.h"
 
-// Process-memory ABI v3. All strings are zero-terminated UTF-8. No reflected/save/config state.
+// Process-memory ABI v4. All strings are zero-terminated UTF-8. No reflected/save/config state.
 enum class ETunaSweeperGateCheatResult : uint32
 {
  None, Refreshed, Reset, Disabled, NoContext, AmbiguousContext, Expired,
- StaleContext, MissingGate, DuplicateId, SaveFailed, InvalidRequest, Replay, Overflow, TunaFilled, ItemGranted, InventoryFull
+ StaleContext, MissingGate, DuplicateId, SaveFailed, InvalidRequest, Replay, Overflow, TunaFilled, ItemGranted, InventoryFull, KillCountSaved
 };
 struct alignas(8) FTunaSweeperGateCheatRequest
 {
@@ -18,7 +18,8 @@ struct alignas(8) FTunaSweeperGateCheatRequest
  uint64 RowKey = 0;
  uint32 Operation = 0; // 1 refresh; 2 reset gate; 3 fill tuna; 4 grant item (RowKey low32 ID, high32 quantity).
  uint32 ProcessId = 0;
- uint64 Reserved[3] = {};
+ uint64 ExpectedKillCount = 0; // Operation 5 compares this value before setting the total to RowKey.
+ uint64 Reserved[2] = {};
 };
 struct alignas(8) FTunaSweeperGateCheatRow
 {
@@ -40,12 +41,13 @@ struct alignas(8) FTunaSweeperGateCheatSnapshot
  uint32 Count = 0;
  char Map[128] = {};
  FTunaSweeperGateCheatRow Rows[64];
+ int64 TotalEnemyKills = 0;
 };
 struct alignas(8) FTunaSweeperGateCheatControl
 {
  uint64 Magic = 0x5453474154454348ULL;
- uint32 Version = 3;
- uint32 Size = 25864;
+ uint32 Version = 4;
+ uint32 Size = 25872;
  uint32 ProcessId = 0;
  uint32 Reserved = 0;
  FTunaSweeperGateCheatRequest Request;

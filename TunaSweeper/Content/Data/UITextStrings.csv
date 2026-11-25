@@ -946,3 +946,7 @@ ui.helper_steam.trailer_mode_failed,trailer_mode.txt를 변경하지 못했습�
 ui.helper_steam.run_upload,본편 업로드 실행,Upload full game,製品版をアップロード,上传正式版,上傳正式版,Загрузить полную версию
 ui.helper_steam.upload_started,Steam 본편 업로드 배치를 실행했습니다.,Started the Steam full game upload script.,Steam製品版アップロードスクリプトを起動しました。,已启动 Steam 正式版上传脚本。,已啟動 Steam 正式版上傳指令碼。,Скрипт загрузки полной версии в Steam запущен.
 ui.helper_steam.upload_scripts_folder_opening,Steam 업로드 배치 폴더를 여는 중입니다.,Opening the Steam upload scripts folder.,Steamアップロードスクリプトのフォルダーを開いています。,正在打开 Steam 上传脚本文件夹。,正在開啟 Steam 上傳指令碼資料夾。,Открывается папка скриптов загрузки Steam.
+ui.helper_kills.title,도전과제 누적 처치 수,Achievement kill count,実績の累計撃破数,成就累计击杀数,成就累計擊殺數,Счётчик убийств для достижений
+ui.helper_kills.label,계정 누적 적 처치 수,Total enemies defeated on this account,アカウントの累計撃破数,账号累计击杀敌人数,帳號累計擊殺敵人數,Всего врагов побеждено на аккаунте
+ui.helper_kills.unavailable,누적 처치 수를 조회하지 못했습니다. 선택한 게임과 빌드 버전을 확인하세요.,Cannot read the kill count. Check the selected game and build version.,撃破数を取得できません。ゲームとビルドを確認してください。,无法读取击杀数。请检查游戏及版本。,無法讀取擊殺數。請檢查遊戲及版本。,Не удалось прочитать счётчик. Проверьте игру и версию сборки.
+ui.helper_kills.retry,저장을 확인하지 못했습니다. 현재 값을 다시 조회합니다.,Save could not be confirmed. Reloading the current value.,保存を確認できませんでした。現在値を再取得します。,无法确认保存。正在重新读取当前值。,無法確認儲存。正在重新讀取目前值。,Не удалось подтвердить сохранение. Считываем текущее значение.

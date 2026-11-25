@@ -7,21 +7,22 @@ internal sealed record GateProgressRow(ulong Key, uint Flags, string GateId, str
 {
     public bool CanReset => Key != 0 && (Flags & ~1u) == 0;
 }
-internal sealed record GateProgressSnapshot(ulong Ack, ulong Context, long Published, uint Result, uint State, int Slot, string Map, IReadOnlyList<GateProgressRow> Rows)
+internal sealed record GateProgressSnapshot(ulong Ack, ulong Context, long Published, uint Result, uint State, int Slot, string Map, IReadOnlyList<GateProgressRow> Rows, long TotalKills = -1)
 {
     public bool Ready => State == 0 && Context != 0 && Slot is >= 1 and <= 3 && !string.IsNullOrEmpty(Map) && Math.Abs(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Published) < 2500;
 }
 internal static class GateProgressProcess
 {
     internal const int Size = 25864;
-    private static nint Locate(System.Diagnostics.Process process, SafeProcessHandle handle, bool requireTuna = false, bool requireItem = false)
+    private static nint Locate(System.Diagnostics.Process process, SafeProcessHandle handle, bool requireTuna = false, bool requireItem = false, bool requireKills = false)
     {
-        nint address = MovementCheatProcess.FindInterface(process, handle, "TunaSweeperGateCheatControl", Size);
+        nint address = MovementCheatProcess.FindInterface(process, handle, "TunaSweeperGateCheatControl", requireKills ? Size + 8 : Size);
         byte[] h = MovementCheatProcess.Read(handle, address, 24);
         uint version = BitConverter.ToUInt32(h, 8);
-        if (BitConverter.ToUInt64(h) != 0x5453474154454348 || version is not (1 or 2 or 3) ||
-            BitConverter.ToUInt32(h, 12) != Size || BitConverter.ToUInt32(h, 16) != process.Id || BitConverter.ToUInt32(h, 20) != 0)
+        if (BitConverter.ToUInt64(h) != 0x5453474154454348 || version is < 1 or > 4 ||
+            BitConverter.ToUInt32(h, 12) != (version == 4 ? Size + 8 : Size) || BitConverter.ToUInt32(h, 16) != process.Id || BitConverter.ToUInt32(h, 20) != 0)
             throw new InvalidOperationException("GateUnsupported");
+        if (requireKills && version < 4) throw new InvalidOperationException("GateUnsupported");
         if (requireTuna && version < 2) throw new InvalidOperationException("TunaUnsupported");
         if (requireItem && version < 3) throw new InvalidOperationException("ui.helper_item_grant.unsupported");
         return address;
@@ -47,11 +48,18 @@ internal static class GateProgressProcess
         using var handle = MovementCheatProcess.Open(process.Id, false);
         return ReadSnapshot(handle, Locate(process, handle, requireItem: true));
     }
-    private static GateProgressSnapshot ReadSnapshot(SafeProcessHandle handle, nint address)
+    public static GateProgressSnapshot ReadKills(MovementCheatTarget target)
+    {
+        using var process = MovementCheatProcess.GetSelectedProcess(target);
+        using var handle = MovementCheatProcess.Open(process.Id, false);
+        return ReadSnapshot(handle, Locate(process, handle, requireKills: true), true);
+    }
+
+    private static GateProgressSnapshot ReadSnapshot(SafeProcessHandle handle, nint address, bool readKills = false)
     {
         for (int attempt = 0; attempt < 8; attempt++)
         {
-            byte[] b = MovementCheatProcess.Read(handle, address + 88, Size - 88);
+            byte[] b = MovementCheatProcess.Read(handle, address + 88, Size - 88 + (readKills ? 8 : 0));
             ulong revision = BitConverter.ToUInt64(b);
             if (revision == 0 || (revision & 1) != 0 || revision != BitConverter.ToUInt64(MovementCheatProcess.Read(handle, address + 88, 8))) continue;
             uint count = BitConverter.ToUInt32(b, 44);
@@ -69,7 +77,8 @@ internal static class GateProgressProcess
                 rows.Add(new(BitConverter.ToUInt64(b, o), BitConverter.ToUInt32(b, o + 8), Text(o + 16, 128), Text(o + 144, 256)));
             }
             return new(BitConverter.ToUInt64(b, 8), BitConverter.ToUInt64(b, 16), BitConverter.ToInt64(b, 24),
-                BitConverter.ToUInt32(b, 32), BitConverter.ToUInt32(b, 36), BitConverter.ToInt32(b, 40), Text(48, 128), rows);
+                BitConverter.ToUInt32(b, 32), BitConverter.ToUInt32(b, 36), BitConverter.ToInt32(b, 40), Text(48, 128), rows,
+                readKills ? BitConverter.ToInt64(b, Size - 88) : -1);
         }
         throw new InvalidOperationException("GateUnavailable");
     }
@@ -87,7 +96,10 @@ internal static class GateProgressProcess
         return Publish(target, expected, null, 4, token, ((ulong)(uint)quantity << 32) | (uint)itemId);
     }
 
-    private static uint Publish(MovementCheatTarget target, GateProgressSnapshot expected, GateProgressRow? row, uint operation, CancellationToken token, ulong itemPayload = 0)
+    public static uint SaveKills(MovementCheatTarget target, GateProgressSnapshot expected, long count)
+        => Publish(target, expected, null, 5, CancellationToken.None, checked((ulong)count));
+
+    private static uint Publish(MovementCheatTarget target, GateProgressSnapshot expected, GateProgressRow? row, uint operation, CancellationToken token, ulong payload = 0)
     {
         using var mutex = new Mutex(false, $@"Local\TunaGateReset_{target.ProcessId}_{target.StartTime.ToUniversalTime().Ticks}");
         bool acquired = false;
@@ -98,7 +110,7 @@ internal static class GateProgressProcess
             token.ThrowIfCancellationRequested();
             using var process = MovementCheatProcess.GetSelectedProcess(target);
             using var handle = MovementCheatProcess.Open(process.Id, true);
-            nint address = Locate(process, handle, requireTuna: operation == 3, requireItem: operation == 4);
+            nint address = Locate(process, handle, requireTuna: operation == 3, requireItem: operation == 4, requireKills: operation == 5);
             var current = ReadSnapshot(handle, address);
             if (operation == 3 && current.State == 3) throw new InvalidOperationException("TunaDisabled");
             if (!current.Ready || current.Context != expected.Context || current.Map != expected.Map || current.Slot != expected.Slot ||
@@ -112,9 +124,10 @@ internal static class GateProgressProcess
             byte[] body = new byte[56];
             BitConverter.GetBytes(deadline).CopyTo(body, 0);
             BitConverter.GetBytes(expected.Context).CopyTo(body, 8);
-            BitConverter.GetBytes(operation == 4 ? itemPayload : row?.Key ?? 0UL).CopyTo(body, 16);
+            BitConverter.GetBytes(operation is 4 or 5 ? payload : row?.Key ?? 0UL).CopyTo(body, 16);
             BitConverter.GetBytes(operation).CopyTo(body, 24);
             BitConverter.GetBytes(target.ProcessId).CopyTo(body, 28);
+            if (operation == 5) BitConverter.GetBytes(expected.TotalKills).CopyTo(body, 32);
             token.ThrowIfCancellationRequested();
             try
             {
