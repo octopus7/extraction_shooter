@@ -81,10 +81,10 @@ bool FTunaAchievementExtractionBoundaries::RunTest(const FString& Parameters)
 		TunaSweeperAchievementModel::EvaluateDefinitions(Definitions, State, Unlocked, Snapshot);
 		TestTrue(TEXT("No duplicate unlock notifications"), Unlocked.IsEmpty());
 	};
-	Check(true, 10, 100, 5, 295, true, true);
-	Check(true, 10, 100, 5, 305, true, true);
-	Check(true, 9.99f, 100, 5, 294.999, true, false);
-	Check(true, 10.01f, 100, 5, 305.001, false, false);
+	Check(true, 10, 100, 5, 285, true, true);
+	Check(true, 10, 100, 5, 315, true, true);
+	Check(true, 9.99f, 100, 5, 284.999, true, false);
+	Check(true, 10.01f, 100, 5, 315.001, false, false);
 	Check(true, 80, 100, 4, 300, false, false); // healed before extraction, insufficient kills
 	Check(false, 1, 100, 5, 300, false, false); // request/failure never qualifies
 	Check(true, 0, 100, 0, 0, false, false);

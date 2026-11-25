@@ -120,6 +120,13 @@ void UTunaSweeperAchievementSubsystem::HandleGameplayWorldReady(UWorld* World)
 	RefreshGameplaySnapshot();
 }
 
+TOptional<double> UTunaSweeperAchievementSubsystem::GetActiveRaidSeconds() const
+{
+	if (RaidState.bActive && GetWorld())
+		return GetWorld()->GetTimeSeconds() - RaidState.StartedAt;
+	return {};
+}
+
 void UTunaSweeperAchievementSubsystem::CaptureCompletedExtraction(APawn* Player, FName Destination)
 {
 	if (!IsGameplayReportingAllowed() || !RaidState.bActive || !Player || !Player->IsLocallyControlled() ||
@@ -130,7 +137,7 @@ void UTunaSweeperAchievementSubsystem::CaptureCompletedExtraction(APawn* Player,
 	if (!FMath::IsFinite(State.Health) || !FMath::IsFinite(State.MaxHealth) || State.Health <= 0 || State.MaxHealth <= 0) return;
 	PendingExtraction = {};
 	PendingExtraction.RaidKills = RaidState.Kills;
-	PendingExtraction.RaidSeconds = GetWorld()->GetTimeSeconds() - RaidState.StartedAt;
+	PendingExtraction.RaidSeconds = GetActiveRaidSeconds().GetValue();
 	PendingExtraction.Health = State.Health;
 	PendingExtraction.MaxHealth = State.MaxHealth;
 	PendingExtractionDestination = FName(*FPackageName::GetShortName(Destination.ToString()));

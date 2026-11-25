@@ -5,6 +5,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "UI/TunaSweeperDebugDisplaySettings.h"
 #include "EngineUtils.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperGameHud);
 
@@ -266,6 +267,31 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 	if (!FSlateApplication::IsInitialized() || IsPauseMenuOpen())
 	{
 		return CurrentLayerId;
+	}
+
+	constexpr bool bShowInventoryRaidClock = false;
+	if (bShowInventoryRaidClock && IsInventoryUiOpen())
+	{
+		const auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+		const auto* Achievements = Game ? Game->GetSubsystem<UTunaSweeperAchievementSubsystem>() : nullptr;
+		const TOptional<double> Elapsed = Achievements ? Achievements->GetActiveRaidSeconds() : TOptional<double>();
+		if (Elapsed.IsSet())
+		{
+			const int32 Seconds = FMath::FloorToInt(Elapsed.GetValue());
+			FNumberFormattingOptions Digits;
+			Digits.MinimumIntegralDigits = 2;
+			Digits.UseGrouping = false;
+			FFormatNamedArguments Parts;
+			Parts.Add(TEXT("Minutes"), FText::AsNumber(Seconds / 60, &Digits));
+			Parts.Add(TEXT("Seconds"), FText::AsNumber(Seconds % 60, &Digits));
+			const FText Clock = FText::Format(Game->ResolveLocalizedText(TEXT("ui.rail.arrival_time_format"), FText::GetEmpty()), Parts);
+			FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 22);
+			Font.OutlineSettings.OutlineSize = 2;
+			const FVector2D Position(AllottedGeometry.GetLocalSize().X * 0.5 - 32.0, 12.0);
+			FSlateDrawElement::MakeText(OutDrawElements, ++CurrentLayerId,
+				MakeHudLocalBoxGeometry(AllottedGeometry, Position, FVector2D(120, 40)),
+				Clock, Font, ESlateDrawEffect::None, FLinearColor::White);
+		}
 	}
 
 	if (bShowHeadphoneDebugIdleRing)

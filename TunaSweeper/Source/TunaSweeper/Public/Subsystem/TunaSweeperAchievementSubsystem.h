@@ -42,6 +42,7 @@ public:
 
 	// Called by the local controller once its gameplay world is ready (also supports PIE).
 	void HandleGameplayWorldReady(UWorld* World);
+	TOptional<double> GetActiveRaidSeconds() const;
 	void CaptureCompletedExtraction(APawn* Player, FName Destination);
 	void CancelRaid();
 	// Non-extraction travel must discard any previous completed-hold evidence.

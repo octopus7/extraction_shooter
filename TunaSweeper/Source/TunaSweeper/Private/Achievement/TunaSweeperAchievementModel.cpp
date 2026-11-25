@@ -42,7 +42,7 @@ namespace TunaSweeperAchievementModel
 					static_cast<double>(Snapshot.Health) / Snapshot.MaxHealth <= 0.10;
 			case ETunaSweeperAchievementConditionType::TimedExtraction:
 				return Snapshot.bSuccessfulExtraction && Snapshot.RaidKills >= Definition.RequiredCount &&
-					FMath::IsFinite(Snapshot.RaidSeconds) && Snapshot.RaidSeconds >= 295.0 && Snapshot.RaidSeconds <= 305.0;
+					FMath::IsFinite(Snapshot.RaidSeconds) && Snapshot.RaidSeconds >= 285.0 && Snapshot.RaidSeconds <= 315.0;
 			default:
 				return false;
 			}
