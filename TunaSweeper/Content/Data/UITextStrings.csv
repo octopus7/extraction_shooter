@@ -30,7 +30,7 @@ achievement.08.description,AI 자판기를 기지로 옮겼다.,Moved the AI ven
 achievement.09.description,순환철도로 빠른 이동을 이용했다.,Used the loop railway to fast travel.,環状鉄道でファストトラベルした。,通过环线铁路进行了快速旅行。,透過環線鐵路進行了快速旅行。,Вы воспользовались быстрым перемещением по кольцевой железной дороге.
 achievement.10.description,토끼대장을 처치했다.,Defeated the rabbit captain.,ウサギ隊長を倒した。,击败了兔子队长。,擊敗了兔子隊長。,Вы победили кроличьего капитана.
 achievement.11.description,체력이 10% 이하인 상태로 탈출에 성공했다.,Successfully extracted with 10% health or less.,体力10％以下で脱出に成功した。,在生命值不超过10%的状态下成功撤离。,在生命值不超過10%的狀態下成功撤離。,Вы успешно эвакуировались с запасом здоровья не более 10%.
-achievement.12.description,"한 번의 레이드에서 적을 5명 이상 처치하고, 진입 후 약 5분에 맞춰 탈출했다.",Defeated at least 5 enemies in a single raid and extracted around 5 minutes after entering.,1回のレイドで敵を5体以上倒し、開始から約5分で脱出した。,在一次突袭中击败至少5名敌人，并在进入约5分钟后撤离。,在一次突襲中擊敗至少5名敵人，並在進入約5分鐘後撤離。,Вы победили не менее 5 врагов за один рейд и эвакуировались примерно через 5 минут после входа.
+achievement.12.description,"적을 다섯 이상 처치하고, 약 5분에 맞춰 탈출했다.",Defeated at least 5 enemies and extracted around the 5-minute mark.,敵の撃破数を5以上にし、5分前後で脱出した。,击败至少5个敌人，并在5分钟左右撤离。,擊敗至少5個敵人，並在5分鐘左右撤離。,Вы победили не менее 5 врагов и эвакуировались примерно на отметке в 5 минут.
 achievement.13.description,호수의 미지의 구역을 발견했다.,Discovered an uncharted area of the lake.,湖の未知のエリアを発見した。,发现了湖泊的未知区域。,發現了湖泊的未知區域。,Вы обнаружили неизведанную область озера.
 achievement.14.description,일반 엔딩을 확인했다.,Reached the normal ending.,通常エンディングを迎えた。,达成了普通结局。,達成了普通結局。,Вы увидели обычную концовку.
 achievement.15.description,진엔딩을 확인했다.,Reached the true ending.,真のエンディングを迎えた。,达成了真结局。,達成了真結局。,Вы увидели истинную концовку.
