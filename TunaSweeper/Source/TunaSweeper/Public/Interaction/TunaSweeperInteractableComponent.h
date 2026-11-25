@@ -163,6 +163,7 @@ protected:
 	float LabelFadeInterpSpeed = 10.0f;
 
 private:
+	friend class FTunaSweeperRaidLiftRepairTest;
 	void RegisterWithInteractionSubsystem();
 	void UnregisterFromInteractionSubsystem();
 	void EnsureMarkerWidgetComponent();

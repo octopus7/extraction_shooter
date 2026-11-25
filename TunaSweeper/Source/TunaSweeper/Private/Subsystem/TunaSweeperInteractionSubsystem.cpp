@@ -911,7 +911,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 	if (auto* ATV = Cast<ATunaSweeperATVActor>(ProgressOwner)) return ATV->Refuel(InstigatorPawn);
 	if (auto* Parcel = Cast<ATunaSweeperParcelContainerActor>(ProgressOwner)) return Parcel->PickUp(InstigatorPawn);
 	if (auto* Delivery = Cast<ATunaSweeperDeliveryDestinationActor>(ProgressOwner)) return Delivery->Deliver(InstigatorPawn);
-	if (auto* Passage = Cast<ATunaSweeperRegionLinkActor>(ProgressOwner)) return Passage->RepairPassage(true);
+	if (auto* Passage = Cast<ATunaSweeperRegionLinkActor>(ProgressOwner)) return Passage->RepairPassageFromInteraction(InstigatorPawn);
 	if (auto* EthanolFacility = Cast<ATunaSweeperEthanolFacilityActor>(ProgressOwner); EthanolFacility && EthanolFacility->IsRepaired())
 		return EthanolFacility->Produce(InstigatorPawn, true);
 	if (auto* PowerFacility = Cast<ATunaSweeperPowerFacilityActor>(ProgressOwner)) return PowerFacility->Repair(true);

@@ -629,6 +629,7 @@ ui.quest_reward_locker.unnamed_item,아이템,Item,アイテム,物品,物品,П
 ui.quest.submit,가져다 주기,Bring items,持っていく,交付,交付,Принести
 ui.lift.title,목적지 선택,Choose destination,行き先を選択,选择目的地,選擇目的地,Выберите пункт назначения
 ui.lift.choose,리프트 이용,Use lift,リフトを使う,使用升降机,使用升降機,Использовать подъёмник
+ui.lift.missing_repair_parts,리프트를 고치려면 이게 더 필요해. {0},I still need {0} to fix the lift.,リフトを直すには、あと{0}が必要だ。,修升降机还缺{0}。,修升降機還缺{0}。,Для ремонта подъёмника ещё кое-что нужно. {0}
 ui.lift.forest,숲,Forest,森,森林,森林,Лес
 ui.lift.village_east,마을 동쪽,Village East,村の東,村庄东侧,村莊東側,Восток деревни
 ui.lift.village_west,마을 서쪽,Village West,村の西,村庄西侧,村莊西側,Запад деревни

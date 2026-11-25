@@ -1,12 +1,33 @@
 #include "Interaction/TunaSweeperRegionLinkActor.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "Engine/World.h"
+#include "Engine/Texture2D.h"
 #include "UObject/ConstructorHelpers.h"
+
+namespace
+{
+    FText FormatRepairParts(UTunaSweeperGameInstance& Game, const TArray<FTunaSweeperItemStack>& Parts)
+    {
+        auto* Items = Game.GetSubsystem<UTunaSweeperItemDataSubsystem>();
+        const FText Format = Game.ResolveLocalizedText(TEXT("ui.passage.part"), FText::GetEmpty());
+        TArray<FText> Labels;
+        for (const auto& Part : Parts)
+        {
+            FText Name;
+            if (Items && Items->TryGetItemNameText(Part.ItemId, Game.GetCurrentTextLanguage(), Name))
+            {
+                Labels.Add(FText::Format(Format, Name, FText::AsNumber(Part.Quantity)));
+            }
+        }
+        return FText::Join(Game.ResolveLocalizedText(TEXT("ui.passage.separator"), FText::GetEmpty()), Labels);
+    }
+}
 
 ATunaSweeperRegionLinkActor::ATunaSweeperRegionLinkActor()
 {
@@ -127,6 +148,37 @@ bool ATunaSweeperRegionLinkActor::RepairPassage(bool bSaveImmediately)
     RefreshPassage();
     return bRepaired;
 }
+
+bool ATunaSweeperRegionLinkActor::RepairPassageFromInteraction(APawn* InstigatorPawn)
+{
+    if (RepairPassage(true)) return true;
+    auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+    if (!Game || !InstigatorPawn || !ShowsLiftRepairFeedback() || IsPassageUnlocked()) return false;
+
+    TArray<FTunaSweeperItemStack> MissingParts;
+    TMap<int32, int32> AvailableQuantities;
+    for (const auto& Part : RepairParts)
+    {
+        if (Part.ItemId <= 0 || Part.Quantity <= 0) continue;
+        int32* Available = AvailableQuantities.Find(Part.ItemId);
+        if (!Available) Available = &AvailableQuantities.Add(Part.ItemId, Game->CountInventoryItemById(Part.ItemId));
+        const int32 Matched = FMath::Min(Part.Quantity, *Available);
+        *Available -= Matched;
+        if (Matched < Part.Quantity)
+        {
+            auto& Missing = MissingParts.Add_GetRef(Part);
+            Missing.Quantity -= Matched;
+        }
+    }
+    const FText Parts = FormatRepairParts(*Game, MissingParts);
+    if (auto* Speech = Game->GetSubsystem<UTunaSweeperSpeechBubbleSubsystem>(); Speech && !Parts.IsEmpty())
+    {
+        Speech->ShowForActor(FText::Format(Game->ResolveLocalizedText(TEXT("ui.lift.missing_repair_parts"), FText::GetEmpty()), Parts),
+            InstigatorPawn, FVector(0, 0, 110), ETunaSweeperSpeechBubbleTailDirection::Down, 2.5f);
+    }
+    return false;
+}
+
 void ATunaSweeperRegionLinkActor::RefreshPassage()
 {
     if (!InteractableComponent) return;
@@ -140,27 +192,37 @@ void ATunaSweeperRegionLinkActor::RefreshPassage()
     FText Label;
     FName Key = TravelStringKey;
     auto Type = ETunaSweeperInteractionType::LevelTravel;
+    TArray<FTunaSweeperRequirementPreview> Previews;
     if (!bUnlocked)
     {
         Type = RepairParts.IsEmpty() ? ETunaSweeperInteractionType::None : ETunaSweeperInteractionType::WorldProgress;
         Key = TEXT("ui.interaction.repair");
         if (Game && !RepairParts.IsEmpty())
         {
-            TArray<FText> PartLabels;
-            auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
-            for (const auto& Part : RepairParts)
+            if (ShowsLiftRepairFeedback())
             {
-                FText Name;
-                if (Items) Items->TryGetItemNameText(Part.ItemId, Game->GetCurrentTextLanguage(), Name);
-                PartLabels.Add(FText::Format(Game->ResolveLocalizedText(TEXT("ui.passage.part"), FText::GetEmpty()), Name, FText::AsNumber(Part.Quantity)));
+                auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+                for (const auto& Part : RepairParts)
+                {
+                    FTunaSweeperItemDefinition Item;
+                    if (!Items || Part.Quantity <= 0 || !Items->TryGetItemDefinition(Part.ItemId, Item)) continue;
+                    const FString Path = Items->BuildItemIconObjectPath(Item);
+                    if (auto* Icon = Path.IsEmpty() ? nullptr : LoadObject<UTexture2D>(nullptr, *Path))
+                        Previews.Add({Icon, Part.Quantity});
+                }
             }
-            Label = FText::Format(Game->ResolveLocalizedText(TEXT("ui.passage.repair"), FText::GetEmpty()), FText::Join(Game->ResolveLocalizedText(TEXT("ui.passage.separator"), FText::GetEmpty()), PartLabels));
-            Key = NAME_None; // Already localized, with item names and quantities formatted above.
+            if (Previews.Num() != RepairParts.Num())
+            {
+                Label = FText::Format(Game->ResolveLocalizedText(TEXT("ui.passage.repair"), FText::GetEmpty()),
+                    FormatRepairParts(*Game, RepairParts));
+                Key = NAME_None;
+            }
         }
     }
     if (Game && Label.IsEmpty()) Label = Game->ResolveLocalizedText(Key, FText::GetEmpty());
     if (bUseSlidingDoors && bUnlocked && !bInteriorTravelAvailable) Type = ETunaSweeperInteractionType::None;
     InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(Type, Label, Key);
+    InteractableComponent->SetInteractionRequirementPreviews(Previews, !Previews.IsEmpty());
     InteractableComponent->SetMarkerCompleted(false);
 }
 bool ATunaSweeperRegionLinkActor::TravelToTargetLevel(APawn* Pawn)

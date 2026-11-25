@@ -1,5 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Interaction/TunaSweeperRaidLiftActor.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
@@ -75,8 +77,19 @@ bool FTunaSweeperRaidLiftRepairTest::RunTest(const FString& Parameters)
     Game->WorldProgressStatesById.Reset();
     auto* Lift = World->SpawnActor<ATunaSweeperRaidLiftActor>();
     if (!TestNotNull(TEXT("Lift spawns"), Lift)) return false;
+    Lift->RefreshPassage();
+    auto* RepairMarker = Lift->FindComponentByClass<UTunaSweeperInteractableComponent>();
+    if (!TestNotNull(TEXT("Lift interaction marker"), RepairMarker)) return false;
+    TestTrue(TEXT("An unrepaired lift shows the repair requirement"), RepairMarker->bShowRequirementPreview);
+    if (TestEqual(TEXT("There is one required part"), RepairMarker->RequirementPreviews.Num(), 1))
+    {
+        const auto& Preview = RepairMarker->RequirementPreviews[0];
+        TestEqual(TEXT("The repair icon reports one part"), Preview.Quantity, 1);
+        TestTrue(TEXT("The preview uses the High Capacity Capacitor icon"),
+            Preview.Icon && Preview.Icon->GetFName() == FName(TEXT("T_UIIcon_HighCapacityCapacitor")));
+    }
     TestTrue(TEXT("Unrelated part added"), Game->AddItemToFirstAvailableInventorySlot(6010, 1));
-    TestFalse(TEXT("Wrong part cannot repair lift"), Lift->RepairPassage(false));
+    TestFalse(TEXT("Interaction with the wrong part cannot repair lift"), Lift->RepairPassageFromInteraction(nullptr));
     TestEqual(TEXT("Rejected repair preserves unrelated part"), Game->CountInventoryItemById(6010), 1);
     TestFalse(TEXT("Rejected repair does not unlock lift"), Lift->IsPassageUnlocked());
     Game->ResetPlayerSlotArrays();
@@ -86,6 +99,7 @@ bool FTunaSweeperRaidLiftRepairTest::RunTest(const FString& Parameters)
     Game->ResetPlayerSlotArrays();
     TestTrue(TEXT("Capacitors restored"), Game->AddItemToFirstAvailableInventorySlot(6025, 2));
     TestTrue(TEXT("Capacitor alone repairs lift without electromagnets"), Lift->RepairPassage(false));
+    TestFalse(TEXT("Repaired lift clears the repair requirement"), RepairMarker->bShowRequirementPreview);
     TestEqual(TEXT("Exactly one capacitor is consumed"), Game->CountInventoryItemById(6025), 1);
     TestTrue(TEXT("Electromagnets remain available as items"), Game->AddItemToFirstAvailableInventorySlot(6026, 3));
     TestFalse(TEXT("Duplicate repair is rejected"), Lift->RepairPassage(false));

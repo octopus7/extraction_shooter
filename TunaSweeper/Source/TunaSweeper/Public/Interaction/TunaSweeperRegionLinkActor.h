@@ -25,6 +25,7 @@ public:
     ETunaSweeperRaidArrivalGroup ArrivalGroup = ETunaSweeperRaidArrivalGroup::None;
     UFUNCTION(BlueprintPure) bool IsPassageUnlocked() const;
     UFUNCTION(BlueprintCallable) bool RepairPassage(bool bSaveImmediately = true);
+    bool RepairPassageFromInteraction(APawn* InstigatorPawn);
     UFUNCTION(BlueprintCallable) void RefreshPassage();
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Passage") FName RequiredProgressId;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Passage") TArray<FTunaSweeperItemStack> RepairParts;
@@ -46,6 +47,7 @@ public:
     UFUNCTION(BlueprintPure, Category="Lift") float GetDoorOpenAlpha() const { return DoorOpenAlpha; }
 protected:
     virtual void ApplyPassagePresentation(bool bUnlocked) {}
+    virtual bool ShowsLiftRepairFeedback() const { return bUseSlidingDoors; }
 private:
     friend class FTunaSweeperLiftDoorsTest;
     void ApplyDoorPresentation();

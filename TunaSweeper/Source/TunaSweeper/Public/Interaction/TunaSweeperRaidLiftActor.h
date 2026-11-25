@@ -35,6 +35,7 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Lift|Chair") TSoftObjectPtr<UNiagaraSystem> RailContactSpark{FSoftObjectPath(TEXT("/Game/Characters/Hopper/Mk2/FX/NS_HopperMk2SeatLockSparks.NS_HopperMk2SeatLockSparks"))};
 protected:
     virtual void ApplyPassagePresentation(bool bUnlocked) override;
+    virtual bool ShowsLiftRepairFeedback() const override { return true; }
     virtual ETunaSweeperRaidArrivalGroup GetArrivalGroup() const override { return SelectedArrival; }
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Lift") TObjectPtr<UStaticMeshComponent> LeftRail;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Lift") TObjectPtr<UStaticMeshComponent> RightRail;
