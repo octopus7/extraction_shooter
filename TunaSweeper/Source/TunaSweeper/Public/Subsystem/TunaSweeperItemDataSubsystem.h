@@ -190,6 +190,14 @@ struct TUNASWEEPER_API FTunaSweeperItemStack
 	int32 Quantity = 1;
 };
 
+struct FTunaSweeperLootDropChance
+{
+	float Story = 1.0f;
+	float NormalHard = 1.0f;
+
+	float ForStage(int32 DifficultyStage) const { return DifficultyStage == 1 ? Story : NormalHard; }
+};
+
 struct TUNASWEEPER_API FTunaSweeperLootContainerItemQuantity
 {
 	int32 ItemId = INDEX_NONE;
@@ -198,7 +206,7 @@ struct TUNASWEEPER_API FTunaSweeperLootContainerItemQuantity
 
 	int32 QuantityMax = 1;
 
-	float DropChance = 1.0f;
+	FTunaSweeperLootDropChance DropChance;
 };
 
 USTRUCT(BlueprintType)
@@ -509,6 +517,7 @@ public:
 	bool GetAllLootContainerContents(TArray<FTunaSweeperLootContainerContents>& OutContents);
 
 	void GetGuaranteedContentsForItem(int32 ItemId, TSet<int32>& OutContentsIds);
+	bool TryGetLootDropChanceForTier(FName TierId, float& OutProbability);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TryGetShopDefinition(int32 ShopId, FTunaSweeperShopDefinition& OutDefinition);
@@ -537,6 +546,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	bool GetAllWorkbenchRecipeDefinitions(TArray<FTunaSweeperWorkbenchRecipeDefinition>& OutDefinitions);
 
+	void GetBlueprintItemsForRecipe(FName RecipeId, TArray<int32>& OutItemIds);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	bool TryGetWorkbenchDismantleDefinition(
 		int32 SourceItemId,
@@ -551,6 +562,7 @@ public:
 private:
 	friend class FTunaSweeperWeaponConfigurationDataTest;
 	friend class FTunaSweeperQuestCraftTest;
+	friend class FLootDropChanceTest;
 	friend class FTunaSweeperQuestLockerTest;
 	friend class FTunaSweeperShopQuestUnlockTest;
 	friend class FTunaSweeperWeaponDefinitionsTest;
@@ -569,6 +581,7 @@ private:
 	bool LoadItemNameStringsCsv();
 	bool LoadLootContainerTableJson();
 	bool LoadLootContainerContentsJson();
+	TMap<FName, FTunaSweeperLootDropChance> LootDropChanceTiers;
 	bool LoadShopDefinitionsJson();
 	bool LoadWorkbenchRecipesJson();
 	bool LoadWorkbenchDismantleRecipesJson();

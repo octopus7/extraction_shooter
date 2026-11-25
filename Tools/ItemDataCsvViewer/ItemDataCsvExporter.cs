@@ -341,6 +341,7 @@ internal static class ItemDataCsvExporter
 				string quantity = FirstNonEmpty(ReadString(itemObject, "quantity"), ReadString(itemObject, "count"));
 				string quantityMin = FirstNonEmpty(ReadString(itemObject, "quantity_min"), ReadString(itemObject, "min_quantity"), quantity, "1");
 				string quantityMax = FirstNonEmpty(ReadString(itemObject, "quantity_max"), ReadString(itemObject, "max_quantity"), quantityMin);
+				string dropChanceTier = ReadString(itemObject, "drop_chance_tier");
 				itemRows.Add(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
 				{
 					["contents_id"] = contentsId,
@@ -349,13 +350,14 @@ internal static class ItemDataCsvExporter
 					["quantity"] = quantity,
 					["quantity_min"] = quantityMin,
 					["quantity_max"] = quantityMax,
-					["drop_chance"] = FirstNonEmpty(ReadString(itemObject, "drop_chance"), ReadString(itemObject, "chance"), ReadString(itemObject, "probability"), ReadString(itemObject, "drop_chance_ratio"), "1")
+					["drop_chance"] = FirstNonEmpty(ReadString(itemObject, "drop_chance"), ReadString(itemObject, "chance"), ReadString(itemObject, "probability"), ReadString(itemObject, "drop_chance_ratio"), string.IsNullOrEmpty(dropChanceTier) ? "10000" : ""),
+					["drop_chance_tier"] = dropChanceTier
 				});
 			}
 		}
 
 		WriteTable(exportDirectory, "loot_container_contents.csv", ["source_row_index", "contents_id", "memo_ko"], contentRows, writtenFiles);
-		WriteTable(exportDirectory, "loot_container_items.csv", ["contents_id", "slot_index", "item_id", "quantity", "quantity_min", "quantity_max", "drop_chance"], itemRows, writtenFiles);
+		WriteTable(exportDirectory, "loot_container_items.csv", ["contents_id", "slot_index", "item_id", "quantity", "quantity_min", "quantity_max", "drop_chance", "drop_chance_tier"], itemRows, writtenFiles);
 	}
 
 	private static void ExportShops(JsonArray shopRows, IReadOnlyDictionary<int, Dictionary<string, string>> itemsById, string exportDirectory, List<string> writtenFiles)

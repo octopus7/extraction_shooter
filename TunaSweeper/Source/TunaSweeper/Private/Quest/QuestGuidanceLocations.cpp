@@ -28,6 +28,51 @@ namespace
 	};
 
 	using FBakedMaps = TMap<FName, TArray<FBakedLocation>>;
+	struct FRepairCost
+	{
+		FName Kind;
+		int32 ItemId;
+		int32 Quantity;
+	};
+	using FRepairCosts = TMultiMap<FName, FRepairCost>;
+	struct FProductionSource
+	{
+		FName Level;
+		FVector Location;
+		int32 InputId;
+		int32 InputQuantity;
+		int32 OutputQuantity;
+	};
+
+	TMultiMap<int32, FProductionSource> IndexProduction(const FBakedMaps& Maps)
+	{
+		TMultiMap<int32, FProductionSource> Sources;
+		for (const auto& Map : Maps)
+			for (const auto& Row : Map.Value)
+			{
+				if (Row.Kind != TEXT("production")) continue;
+				TArray<FString> Parts;
+				Row.Detail.ToString().ParseIntoArray(Parts, TEXT(":"));
+				if (Parts.Num() == 3 && FCString::Atoi(*Parts[2]) > 0)
+					Sources.Add(Row.NumericKey, {Map.Key, Row.Location, FCString::Atoi(*Parts[0]),
+						FCString::Atoi(*Parts[1]), FCString::Atoi(*Parts[2])});
+			}
+		return Sources;
+	}
+
+	FRepairCosts IndexRepairCosts(const FBakedMaps& Maps)
+	{
+		FRepairCosts Costs;
+		for (const auto& Map : Maps)
+			for (const auto& Row : Map.Value)
+			{
+				if (Row.Kind != TEXT("repair_cost") && Row.Kind != TEXT("repair_tool") && Row.Kind != TEXT("repair_deposit")) continue;
+				FString Id, Count;
+				if (Row.Detail.ToString().Split(TEXT(":"), &Id, &Count))
+					Costs.Add(Row.Key, {Row.Kind, FCString::Atoi(*Id), FCString::Atoi(*Count)});
+			}
+		return Costs;
+	}
 
 	void AddRefuelLocations(UWorld* World, FName EventId, bool bCarryingEthanol, TArray<FVector>& Locations)
 	{
@@ -138,6 +183,77 @@ namespace
 			}
 		}
 	};
+
+	// Workbench stock includes the auxiliary bag and accessible storage, just like crafting.
+	struct FCraftingGuidance
+	{
+		UTunaSweeperGameInstance& Game;
+		UTunaSweeperItemDataSubsystem& Items;
+		const TArray<FTunaSweeperWorkbenchRecipeDefinition>& Recipes;
+		TSet<int32> MissingItems;
+		TSet<int32> Workbenches;
+		TMap<int32, int32> Reserved;
+		TSet<FName> Visiting;
+
+		const FTunaSweeperWorkbenchRecipeDefinition* FindRecipe(int32 OutputId) const
+		{
+			return Recipes.FindByPredicate([OutputId](const auto& Recipe) { return Recipe.OutputItemId == OutputId; });
+		}
+
+		void NeedItem(int32 ItemId, int32 Quantity)
+		{
+			if (const auto* Recipe = FindRecipe(ItemId))
+				NeedRecipe(*Recipe, FMath::DivideAndRoundUp(Quantity, Recipe->OutputQuantity));
+			else
+				MissingItems.Add(ItemId);
+		}
+
+		void NeedRecipe(const FTunaSweeperWorkbenchRecipeDefinition& Recipe, int32 Batches)
+		{
+			if (Visiting.Contains(Recipe.RecipeId)) return;
+			Visiting.Add(Recipe.RecipeId);
+			bool bReady = true;
+			for (const auto& Ingredient : Recipe.Ingredients)
+			{
+				const int32 Required = IntCastChecked<int32>(FMath::Min<int64>(int64(Ingredient.Quantity) * Batches, MAX_int32));
+				int32& Used = Reserved.FindOrAdd(Ingredient.ItemId);
+				const int32 Available = FMath::Max(0, Game.CountWorkbenchIngredientItemById(Ingredient.ItemId) - Used);
+				Used += FMath::Min(Required, Available);
+				if (Available < Required)
+				{
+					bReady = false;
+					NeedItem(Ingredient.ItemId, Required - Available);
+				}
+			}
+			if (!Recipe.bAutoUnlocked && !Game.IsWorkbenchRecipeUnlocked(Recipe.RecipeId))
+			{
+				TArray<int32> Blueprints;
+				Items.GetBlueprintItemsForRecipe(Recipe.RecipeId, Blueprints);
+				const bool bCanRegister = Blueprints.ContainsByPredicate([this](int32 Id)
+				{ return Game.CountWorkbenchIngredientItemById(Id) > 0; });
+				if (!bCanRegister)
+				{
+					bReady = false;
+					for (int32 Id : Blueprints) MissingItems.Add(Id);
+				}
+			}
+			if (bReady) Workbenches.Add(Recipe.WorkbenchId);
+			Visiting.Remove(Recipe.RecipeId);
+		}
+	};
+
+	void AddItemSources(UWorld* World, UTunaSweeperItemDataSubsystem& Items, FObjectiveLocations& Match,
+		const TArray<FBakedLocation>* Rows, TArray<FVector>& Locations)
+	{
+		Items.GetGuaranteedContentsForItem(Match.Objective.ItemId, Match.Contents);
+		if (auto* Spawns = World->GetGameInstance()->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>())
+			Spawns->GetGuaranteedLootLocations(World, Match.Contents, Locations);
+		if (auto* Raid = World->GetGameInstance()->GetSubsystem<UTunaSweeperRaidPlacementSubsystem>())
+			Raid->GetItemGuidanceAnchorIds(World, Match.Contents, Match.EnemyAnchors, Match.LootAnchors);
+		if (Rows)
+			for (const auto& Row : *Rows)
+				if (Match.Matches(Row)) Locations.AddUnique(Row.Location);
+	}
 }
 
 void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
@@ -152,8 +268,14 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 	if (!Quest) return;
 
 	static const FBakedMaps Maps = LoadBakedMaps();
+	static const FRepairCosts RepairCosts = IndexRepairCosts(Maps);
+	static const auto Production = IndexProduction(Maps);
 	const FName Level = ShortLevel(FName(*World->GetMapName()));
 	const auto* Rows = Maps.Find(Level);
+	auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (!Items) return;
+	TArray<FTunaSweeperWorkbenchRecipeDefinition> Recipes;
+	Items->GetAllWorkbenchRecipeDefinitions(Recipes);
 	TArray<FTunaSweeperObjectiveProgressView> Progress;
 	if (!Quests->GetQuestObjectiveProgress(QuestId, Progress)) return;
 	for (int32 Index = 0; Index < Quest->Objectives.Num(); ++Index)
@@ -177,24 +299,77 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 		}
 		const bool bDelivery = Objective.Type == EType::ItemSubmitted &&
 			Game->CountQuestSubmissionItemById(Objective.ItemId) >= State.RequiredCount - State.CurrentCount;
-		int32 WorkbenchId = INDEX_NONE;
+		FCraftingGuidance Craft{*Game, *Items, Recipes};
+		bool bGuideSupplies = false;
 		if (Objective.Type == EType::WorkbenchRecipeCrafted)
 		{
 			FTunaSweeperWorkbenchRecipeDefinition Recipe;
-			auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
-			if (Items && Items->TryGetWorkbenchRecipeDefinition(Objective.RecipeId, Recipe)) WorkbenchId = Recipe.WorkbenchId;
+			if (Items->TryGetWorkbenchRecipeDefinition(Objective.RecipeId, Recipe))
+				Craft.NeedRecipe(Recipe, State.RequiredCount - State.CurrentCount);
+			bGuideSupplies = true;
 		}
-		FObjectiveLocations Match{ Objective, QuestId, *Quests, WorkbenchId, bDelivery, {}, {}, {} };
+		if (Objective.Type == EType::WorldProgressCompleted)
+		{
+			FTunaSweeperWorldProgressSaveData SavedProgress;
+			Game->TryGetWorldProgressState(Objective.WorldProgressId, SavedProgress);
+			// The materials and the repair site can belong to different maps.
+			for (auto Cost = RepairCosts.CreateConstKeyIterator(Objective.WorldProgressId); Cost; ++Cost)
+			{
+				const FRepairCost& Requirement = Cost.Value();
+				const int32 Owned = Requirement.Kind == TEXT("repair_tool") ? Game->CountCarriedItemById(Requirement.ItemId)
+					: Game->CountInventoryItemById(Requirement.ItemId);
+				const int32 Deposited = Requirement.Kind == TEXT("repair_deposit") ? SavedProgress.ProgressQuantity : 0;
+				const int32 Missing = Requirement.Quantity - Owned - Deposited;
+				if (Missing > 0)
+				{
+					bGuideSupplies = true;
+					Craft.NeedItem(Requirement.ItemId, Missing);
+				}
+			}
+		}
+		FObjectiveLocations Match{ Objective, QuestId, *Quests, INDEX_NONE, bDelivery, {}, {}, {} };
 		const bool bFindItems = Objective.Type == EType::ItemAcquired || Objective.Type == EType::ItemPossessed ||
 			(Objective.Type == EType::ItemSubmitted && !bDelivery);
 		if (bFindItems)
 		{
-			if (auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>())
-				Items->GetGuaranteedContentsForItem(Objective.ItemId, Match.Contents);
-			if (auto* Spawns = Game->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>())
-				Spawns->GetGuaranteedLootLocations(World, Match.Contents, OutLocations);
-			if (auto* Raid = Game->GetSubsystem<UTunaSweeperRaidPlacementSubsystem>())
-				Raid->GetItemGuidanceAnchorIds(World, Match.Contents, Match.EnemyAnchors, Match.LootAnchors);
+			const int32 Remaining = Objective.Type == EType::ItemSubmitted ?
+				State.RequiredCount - State.CurrentCount - Game->CountQuestSubmissionItemById(Objective.ItemId) :
+				State.RequiredCount - State.CurrentCount;
+			if (Production.Contains(Objective.ItemId))
+			{
+				for (auto It = Production.CreateConstKeyIterator(Objective.ItemId); It; ++It)
+				{
+					const auto& Source = It.Value();
+					const int32 Batches = FMath::DivideAndRoundUp(Remaining, Source.OutputQuantity);
+					const int32 Missing = Batches * Source.InputQuantity - Game->CountInventoryItemById(Source.InputId);
+					if (Missing > 0) Craft.NeedItem(Source.InputId, Missing);
+					else if (Level == Source.Level) OutLocations.AddUnique(Source.Location);
+				}
+			}
+			else if (Craft.FindRecipe(Objective.ItemId))
+				Craft.NeedItem(Objective.ItemId, Remaining);
+			else
+			{
+				AddItemSources(World, *Items, Match, Rows, OutLocations);
+				continue;
+			}
+			bGuideSupplies = true;
+		}
+		if (bGuideSupplies)
+		{
+			for (int32 ItemId : Craft.MissingItems)
+			{
+				FTunaSweeperObjectiveDefinition Ingredient;
+				Ingredient.Type = EType::ItemPossessed;
+				Ingredient.ItemId = ItemId;
+				FObjectiveLocations Source{ Ingredient, QuestId, *Quests, INDEX_NONE, false, {}, {}, {} };
+				AddItemSources(World, *Items, Source, Rows, OutLocations);
+			}
+			if (Rows)
+				for (const auto& Row : *Rows)
+					if (Row.Kind == TEXT("workbench") && Craft.Workbenches.Contains(Row.NumericKey))
+						OutLocations.AddUnique(Row.Location);
+			continue;
 		}
 		if (Rows)
 			for (const auto& Row : *Rows)
@@ -270,6 +445,19 @@ bool FQuestGuidanceBakeTest::RunTest(const FString& Parameters)
 	const auto* Forest = Maps.Find(TEXT("RaidForest"));
 	if (!TestNotNull(TEXT("Forest map is baked"), Forest)) return false;
 	auto* Items = NewObject<UTunaSweeperItemDataSubsystem>(NewObject<UGameInstance>());
+	TArray<FTunaSweeperWorkbenchRecipeDefinition> Recipes;
+	if (!TestTrue(TEXT("Load workbench recipes"), Items->GetAllWorkbenchRecipeDefinitions(Recipes))) return false;
+	auto* EmptyInventory = NewObject<UTunaSweeperGameInstance>();
+	FCraftingGuidance Craft{*EmptyInventory, *Items, Recipes};
+	Craft.NeedItem(6031, 1);
+	TestTrue(TEXT("Explosive guidance points to both raw materials"),
+		Craft.MissingItems.Contains(6028) && Craft.MissingItems.Contains(6032));
+	TestFalse(TEXT("Crafted explosive is not a loot marker"), Craft.MissingItems.Contains(6031));
+	TestTrue(TEXT("Missing materials do not point to a workbench"), Craft.Workbenches.IsEmpty());
+	const auto Costs = IndexRepairCosts(Maps);
+	const FRepairCost* Rockfall = Costs.Find(TEXT("region.forest.village.obstacle"));
+	if (!TestNotNull(TEXT("Rockfall recipe requirement baked from the actual actor"), Rockfall)) return false;
+	TestEqual(TEXT("Rockfall requires the crafted explosive"), Rockfall->ItemId, 6031);
 	FTunaSweeperObjectiveDefinition Objective;
 	Objective.Type = ETunaSweeperObjectiveType::ItemPossessed;
 	Objective.ItemId = 3007;

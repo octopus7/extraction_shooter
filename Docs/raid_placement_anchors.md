@@ -86,3 +86,9 @@ Enemy class/loadout data stays in `EnemySpawnProfiles.json`, combat behavior sta
 Enemy chance uses a deterministic hash of `(RaidSeed, PlacementId)`. Placement ordering therefore cannot change another placement's result. Only empty `condition_id` and `always` currently evaluate true; unknown conditions fail closed.
 
 Memo collection persistence remains keyed by `memo_id` through `AcquiredMemoIds`; there is no secondary placement identity. Enemy and loot placement decisions are also not persisted.
+
+## Quest loot and guidance
+
+Each quest supply chest uses a dedicated contents row in `LootContainerContents.json`. Set the item's `drop_chance_tier` to `"quest"`. Edit `Content/Data/LootDropChanceTiers.json` to tune its `story` and shared `normal_hard` values. Values are in basis points (10000 = 100%, 2500 = 25%). For a fixed chance across all difficulties, supply a numeric `drop_chance` alone. An item row with neither field is guaranteed.
+
+Place crafting inputs in supply chests and leave the finished item to its recipe. After moving supply actors or changing facility costs, regenerate `QuestGuidanceLocations.tsv` with `Tools/QuestGuidance/bake.py` so the map, screen-edge indicator and ground route use the saved level positions.

@@ -3,6 +3,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Quest/TunaSweeperQuestTypes.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 ATunaSweeperFoodWarehouseActor::ATunaSweeperFoodWarehouseActor()
@@ -22,6 +23,14 @@ void ATunaSweeperFoodWarehouseActor::BeginPlay()
 
     if (UTunaSweeperGameInstance* GameInstance = GetGameInstance<UTunaSweeperGameInstance>())
     {
+        if (bRequireQuest)
+        {
+            GameInstance->GetInventorySlots();
+            auto* Items = GameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+            float Chance = 0;
+            bQuestStockAvailable = Items && Items->TryGetLootDropChanceForTier(DropChanceTier, Chance) &&
+                (Chance >= 1.f || FMath::FRand() < Chance);
+        }
         if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
         {
             QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
@@ -53,7 +62,7 @@ bool ATunaSweeperFoodWarehouseActor::CanTakeFood() const
         : nullptr;
     const bool bRequiredQuestActive = !bRequireQuest ||
         (RequiredQuestId > 0 && QuestSubsystem && QuestSubsystem->GetQuestState(RequiredQuestId) == ETunaSweeperQuestState::Accepted);
-    return !bCollected && FoodQuantity > 0 && bRequiredQuestActive;
+    return !bCollected && FoodQuantity > 0 && bRequiredQuestActive && (!bRequireQuest || bQuestStockAvailable);
 }
 
 bool ATunaSweeperFoodWarehouseActor::TakeFood()

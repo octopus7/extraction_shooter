@@ -5,11 +5,16 @@
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperDataValueTypes.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+
+#if WITH_DEV_AUTOMATION_TESTS
+#include "Misc/AutomationTest.h"
+#endif
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperItemData, Log, All);
 
@@ -43,6 +48,7 @@ namespace TunaSweeperItemDataFiles
 	const TCHAR* ItemNameStringsCsvRelativePath = TEXT("Data/ItemNameStrings.csv");
 	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
 	const TCHAR* LootContainerContentsJsonRelativePath = TEXT("Data/LootContainerContents.json");
+	const TCHAR* LootDropChanceTiersJsonRelativePath = TEXT("Data/LootDropChanceTiers.json");
 	const TCHAR* WorkbenchRecipesJsonRelativePath = TEXT("Data/WorkbenchRecipes.json");
 	const TCHAR* WorkbenchDismantleRecipesJsonRelativePath = TEXT("Data/WorkbenchDismantleRecipes.json");
 
@@ -57,18 +63,84 @@ namespace TunaSweeperItemDataFiles
 		int32 ItemId,
 		int32 QuantityMin,
 		int32 QuantityMax,
-		float DropChance,
+		FTunaSweeperLootDropChance DropChance,
 		FTunaSweeperLootContainerItemQuantity& OutEntry)
 	{
 		OutEntry.ItemId = ItemId;
 		OutEntry.QuantityMin = FMath::Max(1, FMath::Min(QuantityMin, QuantityMax));
 		OutEntry.QuantityMax = FMath::Max(OutEntry.QuantityMin, FMath::Max(QuantityMin, QuantityMax));
-		OutEntry.DropChance = FMath::Clamp(DropChance, 0.0f, 1.0f);
+		OutEntry.DropChance = DropChance;
 	}
 
-	float NormalizeDropChanceValue(float RawChance)
+	int32 GetLootDifficultyStage(const UGameInstance* Instance)
 	{
-		return TunaSweeperDataValues::NormalizeProbabilityValue(FMath::RoundToInt(RawChance));
+		const auto* Game = Cast<UTunaSweeperGameInstance>(Instance);
+		return Game ? Game->GetActiveSaveSlotDifficultyStage() : 1;
+	}
+
+	using FLootDropChanceTiers = TMap<FName, FTunaSweeperLootDropChance>;
+
+	bool ReadTierChance(const FJsonObject& Json, const TCHAR* Field, float& OutChance)
+	{
+		double Value = 0;
+		if (!Json.HasTypedField<EJson::Number>(Field) || !Json.TryGetNumberField(Field, Value) ||
+			!FMath::IsFinite(Value) || Value < 0 || Value > TunaSweeperDataValues::ProbabilityMax ||
+			FMath::FloorToDouble(Value) != Value) return false;
+		OutChance = TunaSweeperDataValues::NormalizeProbabilityValue(static_cast<int32>(Value));
+		return true;
+	}
+
+	bool LoadLootDropChanceTiers(FLootDropChanceTiers& OutTiers)
+	{
+		const FString Path = FPaths::ProjectContentDir() / LootDropChanceTiersJsonRelativePath;
+		FString Source;
+		TSharedPtr<FJsonObject> Table;
+		if (!FFileHelper::LoadFileToString(Source, *Path) ||
+			!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Source), Table) || !Table)
+		{
+			UE_LOG(LogTunaSweeperItemData, Error, TEXT("Cannot read loot chance tiers from %s"), *Path);
+			return false;
+		}
+		for (const auto& Row : Table->Values)
+		{
+			const TSharedPtr<FJsonObject>* Data = nullptr;
+			const FName TierId(*Row.Key);
+			FTunaSweeperLootDropChance Tier;
+			if (TierId.IsNone() || OutTiers.Contains(TierId) || !Row.Value->TryGetObject(Data) ||
+				!ReadTierChance(**Data, TEXT("story"), Tier.Story) || !ReadTierChance(**Data, TEXT("normal_hard"), Tier.NormalHard))
+			{
+				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid loot chance tier '%s' in %s"), *Row.Key, *Path);
+				return false;
+			}
+			OutTiers.Add(TierId, Tier);
+		}
+		return true;
+	}
+
+	bool ReadDropChance(const FJsonObject& Item, const FLootDropChanceTiers& Tiers, FTunaSweeperLootDropChance& OutChance)
+	{
+		const bool bHasTier = Item.HasField(TEXT("drop_chance_tier"));
+		for (const TCHAR* Field : {TEXT("drop_chance"), TEXT("chance"), TEXT("probability")})
+		{
+			if (!Item.HasField(Field)) continue;
+			double Raw = 0;
+			if (bHasTier || !Item.TryGetNumberField(Field, Raw) || !FMath::IsFinite(Raw)) return false;
+			const int32 Fixed = FMath::RoundToInt(FMath::Clamp(Raw, 0.0, static_cast<double>(TunaSweeperDataValues::ProbabilityMax)));
+			const float Direct = TunaSweeperDataValues::NormalizeProbabilityValue(Fixed);
+			OutChance = {Direct, Direct};
+			return true;
+		}
+		if (!bHasTier)
+		{
+			OutChance = {};
+			return true;
+		}
+		FString Id;
+		if (!Item.HasTypedField<EJson::String>(TEXT("drop_chance_tier")) || !Item.TryGetStringField(TEXT("drop_chance_tier"), Id)) return false;
+		const auto* Tier = Tiers.Find(FName(*Id));
+		if (!Tier) return false;
+		OutChance = *Tier;
+		return true;
 	}
 
 	ETunaSweeperItemGrade ResolveItemGradeFromString(const FString& GradeString)
@@ -125,7 +197,7 @@ namespace TunaSweeperItemDataFiles
 		return NAME_None;
 	}
 
-	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents)
+	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents, int32 DifficultyStage)
 	{
 		TArray<FTunaSweeperItemStack> ResolvedItems;
 		if (Contents.ItemQuantities.Num() > 0)
@@ -137,8 +209,8 @@ namespace TunaSweeperItemDataFiles
 				{
 					continue;
 				}
-				if (ItemQuantity.DropChance <= 0.0f ||
-					(ItemQuantity.DropChance < 1.0f && FMath::FRand() > ItemQuantity.DropChance))
+				const float Chance = ItemQuantity.DropChance.ForStage(DifficultyStage);
+				if (Chance <= 0.0f || (Chance < 1.0f && FMath::FRand() > Chance))
 				{
 					continue;
 				}
@@ -380,7 +452,8 @@ bool UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance(
 		return false;
 	}
 
-	TArray<FTunaSweeperItemStack> ResolvedItems = TunaSweeperItemDataFiles::ResolveLootContainerItems(Contents);
+	TArray<FTunaSweeperItemStack> ResolvedItems = TunaSweeperItemDataFiles::ResolveLootContainerItems(
+		Contents, TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance()));
 	if (ResolvedItems.Num() > ContainerDefinition.Capacity)
 	{
 		UE_LOG(
@@ -594,6 +667,14 @@ bool UTunaSweeperItemDataSubsystem::GetWorkbenchRecipeDefinitions(
 	}
 
 	return OutDefinitions.Num() > 0;
+}
+
+void UTunaSweeperItemDataSubsystem::GetBlueprintItemsForRecipe(FName RecipeId, TArray<int32>& OutItemIds)
+{
+	OutItemIds.Reset();
+	if (!EnsureItemDataLoaded() || RecipeId.IsNone()) return;
+	for (const auto& Entry : ItemDefinitionsById)
+		if (Entry.Value.BlueprintRecipeId == RecipeId) OutItemIds.Add(Entry.Key);
 }
 
 bool UTunaSweeperItemDataSubsystem::GetAllWorkbenchRecipeDefinitions(
@@ -1251,6 +1332,7 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()
 
 bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 {
+	if (!TunaSweeperItemDataFiles::LoadLootDropChanceTiers(LootDropChanceTiers)) return false;
 	FString JsonContent;
 	const FString LootContainerContentsJsonPath = GetLootContainerContentsJsonPath();
 	if (!FFileHelper::LoadFileToString(JsonContent, *LootContainerContentsJsonPath))
@@ -1302,7 +1384,6 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 			double NumericQuantity = 0.0;
 			double NumericQuantityMin = 0.0;
 			double NumericQuantityMax = 0.0;
-			double NumericDropChance = TunaSweeperDataValues::ProbabilityMax;
 			const bool bHasFixedQuantity = (*ItemObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity);
 			const bool bHasQuantityMin =
 				(*ItemObject)->TryGetNumberField(TEXT("quantity_min"), NumericQuantityMin) ||
@@ -1310,9 +1391,6 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 			const bool bHasQuantityMax =
 				(*ItemObject)->TryGetNumberField(TEXT("quantity_max"), NumericQuantityMax) ||
 				(*ItemObject)->TryGetNumberField(TEXT("max_quantity"), NumericQuantityMax);
-			(*ItemObject)->TryGetNumberField(TEXT("drop_chance"), NumericDropChance) ||
-				(*ItemObject)->TryGetNumberField(TEXT("chance"), NumericDropChance) ||
-				(*ItemObject)->TryGetNumberField(TEXT("probability"), NumericDropChance);
 			if (!(*ItemObject)->TryGetNumberField(TEXT("item_id"), NumericItemId) ||
 				(!bHasFixedQuantity && (!bHasQuantityMin || !bHasQuantityMax)))
 			{
@@ -1334,11 +1412,17 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 				: static_cast<int32>(NumericQuantityMax);
 
 			FTunaSweeperLootContainerItemQuantity QuantityEntry;
+			FTunaSweeperLootDropChance Chance;
+			if (!TunaSweeperItemDataFiles::ReadDropChance(**ItemObject, LootDropChanceTiers, Chance))
+			{
+				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid drop chance for item %d in loot contents %d"), ItemId, Contents.Id);
+				return false;
+			}
 			TunaSweeperItemDataFiles::BuildLootItemQuantityEntry(
 				ItemId,
 				QuantityMin,
 				QuantityMax,
-				TunaSweeperItemDataFiles::NormalizeDropChanceValue(static_cast<float>(NumericDropChance)),
+				Chance,
 				QuantityEntry);
 			Contents.ItemQuantities.Add(QuantityEntry);
 
@@ -1777,6 +1861,7 @@ void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 	ItemNameStringsByKey.Reset();
 	LootContainerDefinitionsById.Reset();
 	LootContainerContentsById.Reset();
+	LootDropChanceTiers.Reset();
 	ShopDefinitionsById.Reset();
 	WorkbenchRecipeDefinitionsById.Reset();
 	WorkbenchRecipeIdsInLoadOrder.Reset();
@@ -1830,17 +1915,86 @@ FString UTunaSweeperItemDataSubsystem::GetWorkbenchDismantleRecipesJsonPath() co
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::WorkbenchDismantleRecipesJsonRelativePath);
 }
 
+bool UTunaSweeperItemDataSubsystem::TryGetLootDropChanceForTier(FName TierId, float& OutProbability)
+{
+	OutProbability = 0.0f;
+	const auto* Tier = EnsureItemDataLoaded() ? LootDropChanceTiers.Find(TierId) : nullptr;
+	if (!Tier) return false;
+	OutProbability = Tier->ForStage(TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance()));
+	return true;
+}
+
 void UTunaSweeperItemDataSubsystem::GetGuaranteedContentsForItem(int32 ItemId, TSet<int32>& OutContentsIds)
 {
 	if (ItemId <= 0 || !EnsureItemDataLoaded()) return;
+	const int32 DifficultyStage = TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance());
 	for (const auto& Entry : LootContainerContentsById)
 	{
 		const auto& Contents = Entry.Value;
 		const bool bGuaranteed = Contents.ItemQuantities.IsEmpty()
 			? Contents.Items.ContainsByPredicate([ItemId](const auto& Stack) { return Stack.ItemId == ItemId && Stack.Quantity > 0; })
-			: Contents.ItemQuantities.ContainsByPredicate([ItemId](const auto& Stack) {
-				return Stack.ItemId == ItemId && Stack.QuantityMin > 0 && Stack.DropChance >= 1.f;
+			: Contents.ItemQuantities.ContainsByPredicate([ItemId, DifficultyStage](const auto& Stack) {
+				return Stack.ItemId == ItemId && Stack.QuantityMin > 0 && Stack.DropChance.ForStage(DifficultyStage) >= 1.f;
 			});
 		if (bGuaranteed) OutContentsIds.Add(Entry.Key);
 	}
 }
+
+#if WITH_DEV_AUTOMATION_TESTS
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLootDropChanceTest, "TunaSweeper.Loot.ChanceTiers",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FLootDropChanceTest::RunTest(const FString& Parameters)
+{
+	using namespace TunaSweeperItemDataFiles;
+	auto* Game = NewObject<UTunaSweeperGameInstance>();
+	Game->bInventoryStateInitialized = true;
+	auto* Items = NewObject<UTunaSweeperItemDataSubsystem>(Game);
+	if (!TestTrue(TEXT("Item data and authored tiers load"), Items->LoadItemData())) return false;
+	FJsonObject Row;
+	FTunaSweeperLootDropChance Chance;
+	TestTrue(TEXT("Omitted chance is supported"), ReadDropChance(Row, Items->LootDropChanceTiers, Chance));
+	TestEqual(TEXT("Omitted chance stays guaranteed"), Chance.NormalHard, 1.f);
+	for (const TCHAR* Field : {TEXT("drop_chance"), TEXT("chance"), TEXT("probability")})
+	{
+		Row.SetNumberField(Field, 3750);
+		TestTrue(Field, ReadDropChance(Row, Items->LootDropChanceTiers, Chance));
+		TestEqual(TEXT("Explicit probability on Story"), Chance.Story, .375f);
+		TestEqual(TEXT("Explicit probability on the higher stages"), Chance.NormalHard, .375f);
+		Row.RemoveField(Field);
+	}
+	Row.SetStringField(TEXT("drop_chance_tier"), TEXT("missing"));
+	TestFalse(TEXT("Unknown tier fails"), ReadDropChance(Row, Items->LootDropChanceTiers, Chance));
+	Row.SetStringField(TEXT("drop_chance_tier"), TEXT("quest"));
+	Row.SetNumberField(TEXT("drop_chance"), 10000);
+	TestFalse(TEXT("Tier and direct chance conflict"), ReadDropChance(Row, Items->LootDropChanceTiers, Chance));
+	Row.RemoveField(TEXT("drop_chance"));
+	if (!TestTrue(TEXT("Quest tier resolves"), ReadDropChance(Row, Items->LootDropChanceTiers, Chance))) return false;
+	TestEqual(TEXT("Authored quest probability on Story"), Chance.Story, 1.f);
+	TestTrue(TEXT("Quest drop is possible and below thirty percent on both higher stages"), Chance.NormalHard > 0.f && Chance.NormalHard < .3f);
+
+	// Opposite deterministic chances exercise the real roll and guarantee query without probabilistic assertions.
+	constexpr int32 ContentsId = 990001;
+	constexpr int32 ItemId = 3001;
+	auto& Contents = Items->LootContainerContentsById.Add(ContentsId);
+	Contents.Id = ContentsId;
+	auto& Stack = Contents.ItemQuantities.AddDefaulted_GetRef();
+	Stack.ItemId = ItemId;
+	Stack.DropChance = {1.f, 0.f};
+	for (const int32 Stage : {1, 2, 3, 1})
+	{
+		Game->SetActiveSaveSlotDifficultyStage(Stage, false);
+		float Current = 0.f;
+		TestTrue(TEXT("Standalone pickup can resolve the tier"), Items->TryGetLootDropChanceForTier(TEXT("quest"), Current));
+		TestEqual(TEXT("Tier resolves against current slot without reloading data"), Current, Chance.ForStage(Stage));
+		TSet<int32> Guaranteed;
+		Items->GetGuaranteedContentsForItem(ItemId, Guaranteed);
+		TestEqual(TEXT("Guidance uses active stage"), Guaranteed.Contains(ContentsId), Stage == 1);
+		FTunaSweeperLootContainerInstance Instance;
+		TestTrue(TEXT("Rolling a container succeeds"), Items->TryBuildLootContainerInstance(
+			7001, ContentsId, ETunaSweeperItemTextLanguage::Korean, Instance));
+		TestEqual(TEXT("Rolled contents match guaranteed lookup"), Instance.Items.Num(), Stage == 1 ? 1 : 0);
+	}
+	return !HasAnyErrors();
+}
+#endif

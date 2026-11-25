@@ -29,6 +29,8 @@ public:
     int32 RequiredQuestId = 0;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Quest")
     bool bRequireQuest = true;
+    UPROPERTY(EditAnywhere, Category="Food Warehouse|Quest", meta=(EditCondition="bRequireQuest"))
+    FName DropChanceTier = TEXT("quest");
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Interaction")
     FText InteractionDisplayName = FText::FromString(TEXT("참치캔 획득"));
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Food Warehouse|Interaction")
@@ -36,5 +38,6 @@ public:
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="Food Warehouse")
     bool bCollected = false;
 private:
+    bool bQuestStockAvailable = false;
     void RefreshInteractionState();
 };

@@ -24,6 +24,8 @@ public:
     int32 QuestId = 0;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Delivery")
     FName ObjectiveId;
+    UPROPERTY(EditAnywhere, Category = "Delivery|Loot")
+    FName DropChanceTier = TEXT("quest");
     // Replace the mesh/material in the BP; quest data never overwrites its appearance.
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Delivery")
     TObjectPtr<UStaticMeshComponent> VisualMesh;
@@ -34,5 +36,6 @@ private:
     void RefreshPresence();
     // World-lifetime only: a new raid visit permits retry after volatile items are lost.
     bool bCollected = false;
+    bool bAvailableThisVisit = false;
     bool bCollecting = false;
 };

@@ -131,205 +131,86 @@
   },
   {
     "id": 8012,
-    "memo_ko": "북쪽 상자 확정 획득: 교체용 밸브 손잡이",
+    "memo_ko": "전용 보급 상자: 교체용 밸브 손잡이",
     "items": [
-      { "item_id": 6004, "quantity": 1 }
+      { "item_id": 6004, "quantity": 1, "drop_chance_tier": "quest" }
     ]
   },
   {
     "id": 8013,
-    "memo_ko": "북쪽 상자 확정 획득: 방수 테이프",
+    "memo_ko": "전용 보급 상자: 방수 테이프",
     "items": [
-      { "item_id": 6005, "quantity": 1 }
+      { "item_id": 6005, "quantity": 1, "drop_chance_tier": "quest" }
     ]
   },
   {
     "id": 8014,
     "memo_ko": "택배 상자: 두꺼비 유리병 1개",
-    "items": [ { "item_id": 6011, "quantity": 1 } ]
+    "items": [ { "item_id": 6011, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8015,
     "memo_ko": "택배 상자: 모형배 1개",
-    "items": [ { "item_id": 6017, "quantity": 1 } ]
+    "items": [ { "item_id": 6017, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8016,
-    "memo_ko": "캔참치 1개 확정 보급",
-    "items": [
-      {
-        "item_id": 3004,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 캔참치 1개",
+    "items": [ { "item_id": 3004, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8017,
-    "memo_ko": "망치 1개 확정 보급",
-    "items": [
-      {
-        "item_id": 6020,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 망치 1개",
+    "items": [ { "item_id": 6020, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8018,
-    "memo_ko": "모터 및 전기 관련 재료 확정 보급",
-    "items": [
-      {
-        "item_id": 6024,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6012,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6015,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6016,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6023,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6025,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6026,
-        "quantity": 2,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6029,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      { "item_id": 6030, "quantity": 1, "drop_chance": 10000 }
-    ]
+    "memo_ko": "전용 보급 상자: 고출력 전력 변환 모듈 1개",
+    "items": [ { "item_id": 6029, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8019,
-    "memo_ko": "고구마 2개씩 2묶음 확정 보급 (총 4개)",
-    "items": [
-      {
-        "item_id": 3007,
-        "quantity": 2,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 3007,
-        "quantity": 2,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 고구마 4개",
+    "items": [ { "item_id": 3007, "quantity": 4, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8020,
-    "memo_ko": "개 사료 1개 확정 보급",
-    "items": [
-      {
-        "item_id": 6007,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 개 사료 1개",
+    "items": [ { "item_id": 6007, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8021,
-    "memo_ko": "고양이 사료 1개 확정 보급",
-    "items": [
-      {
-        "item_id": 6008,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 고양이 사료 1개",
+    "items": [ { "item_id": 6008, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8022,
-    "memo_ko": "시설 복구 자재 확정 보급: 목재 2개, 전열코일/깃털/수도 밸브/탁상시계 각 1개",
-    "items": [
-      { "item_id": 6002, "quantity": 2, "drop_chance": 10000 },
-      { "item_id": 6023, "quantity": 1, "drop_chance": 10000 },
-      { "item_id": 6022, "quantity": 1, "drop_chance": 10000 },
-      { "item_id": 6021, "quantity": 1, "drop_chance": 10000 },
-      { "item_id": 6032, "quantity": 1, "drop_chance": 10000 }
-    ]
+    "memo_ko": "전용 보급 상자: 전열코일 1개",
+    "items": [ { "item_id": 6023, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8023,
-    "memo_ko": "토끼 삼륜 로봇 확정 전리품: 빈 발사관, 망가진 점화 플러그, 타이어, 상위 AR/SMG, 2등급 머리/몸 방어구 각 1개",
+    "memo_ko": "토끼 삼륜 로봇 전리품: 빈 발사관, 토큰, 망가진 점화 플러그, 타이어, 상위 AR/SMG, 2등급 머리/몸 방어구",
     "items": [
-      { "item_id": 6033, "quantity": 1, "drop_chance": 10000 },
-      { "item_id": 7004, "quantity_min": 1, "quantity_max": 3, "drop_chance": 10000 },
-      {
-        "item_id": 6015,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 6018,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 1007,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 1008,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 5006,
-        "quantity": 1,
-        "drop_chance": 10000
-      },
-      {
-        "item_id": 5001,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
+      { "item_id": 6033, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 7004, "quantity_min": 1, "quantity_max": 3, "drop_chance_tier": "quest" },
+      { "item_id": 6015, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 6018, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 1007, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 1008, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 5006, "quantity": 1, "drop_chance_tier": "quest" },
+      { "item_id": 5001, "quantity": 1, "drop_chance_tier": "quest" }
     ]
   },
   {
     "id": 8024,
-    "memo_ko": "정비 공구 세트 1개 확정 보급",
-    "items": [
-      {
-        "item_id": 6013,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 정비 공구 세트 1개",
+    "items": [ { "item_id": 6013, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8025,
-    "memo_ko": "미식 참치 통조림 1개 확정 보급",
-    "items": [
-      {
-        "item_id": 6035,
-        "quantity": 1,
-        "drop_chance": 10000
-      }
-    ]
+    "memo_ko": "전용 보급 상자: 미식 참치 통조림 1개",
+    "items": [ { "item_id": 6035, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8026,
@@ -367,6 +248,111 @@
       { "item_id": 2003, "quantity": 16 },
       { "item_id": 4001, "quantity": 2 }
     ]
+  },
+  {
+    "id": 8030,
+    "memo_ko": "전용 보급 상자: 모터 2개",
+    "items": [ { "item_id": 6024, "quantity": 2, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8031,
+    "memo_ko": "전용 보급 상자: 토끼 배터리 1개",
+    "items": [ { "item_id": 6012, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8032,
+    "memo_ko": "전용 보급 상자: 망가진 점화 플러그 2개",
+    "items": [ { "item_id": 6015, "quantity": 2, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8033,
+    "memo_ko": "전용 보급 상자: 고용량 콘덴서 1개",
+    "items": [ { "item_id": 6025, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8034,
+    "memo_ko": "전용 보급 상자: 초강력 전자석 2개",
+    "items": [ { "item_id": 6026, "quantity": 2, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8035,
+    "memo_ko": "전용 보급 상자: 전력 제어 서버 1개",
+    "items": [ { "item_id": 6030, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8036,
+    "memo_ko": "전용 보급 상자: 목재 2개",
+    "items": [ { "item_id": 6002, "quantity": 2, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8037,
+    "memo_ko": "전용 보급 상자: 깃털 1개",
+    "items": [ { "item_id": 6022, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8038,
+    "memo_ko": "전용 보급 상자: 수도 밸브 1개",
+    "items": [ { "item_id": 6021, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8039,
+    "memo_ko": "전용 보급 상자: 탁상시계 1개",
+    "items": [ { "item_id": 6032, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8040,
+    "memo_ko": "전용 보급 상자: 노란 뿡뿡 3개",
+    "items": [ { "item_id": 6027, "quantity": 3, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8041,
+    "memo_ko": "전용 보급 상자: 분홍 뿡뿡 2개",
+    "items": [ { "item_id": 6028, "quantity": 2, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8042,
+    "memo_ko": "전용 보급 상자: 토끼코인 1개",
+    "items": [ { "item_id": 7004, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8043,
+    "memo_ko": "전용 보급 상자: 타이어 1개",
+    "items": [ { "item_id": 6018, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8044,
+    "memo_ko": "전용 보급 상자: 강화형 돌격소총 1개",
+    "items": [ { "item_id": 1007, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8045,
+    "memo_ko": "전용 보급 상자: 강화형 기관단총 1개",
+    "items": [ { "item_id": 1008, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8046,
+    "memo_ko": "전용 보급 상자: 방탄헬멧 1개",
+    "items": [ { "item_id": 5006, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8047,
+    "memo_ko": "전용 보급 상자: 방탄조끼 1개",
+    "items": [ { "item_id": 5001, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8048,
+    "memo_ko": "전용 보급 상자: 윤활오일 1개",
+    "items": [ { "item_id": 6014, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8049,
+    "memo_ko": "전용 보급 상자: 빈 발사관 1개",
+    "items": [ { "item_id": 6033, "quantity": 1, "drop_chance_tier": "quest" } ]
+  },
+  {
+    "id": 8050,
+    "memo_ko": "전용 보급 상자: 고장력 강선 케이블 1개",
+    "items": [ { "item_id": 6010, "quantity": 1, "drop_chance_tier": "quest" } ]
   },
   {
     "id": 8051,

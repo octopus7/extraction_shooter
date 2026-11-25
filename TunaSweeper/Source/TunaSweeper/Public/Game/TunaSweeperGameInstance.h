@@ -266,6 +266,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	GENERATED_BODY()
 	friend class FTunaSaveWriteGuardTest;
 	friend class FDifficultyCandlestickAdjustmentTest;
+	friend class FLootDropChanceTest;
 	friend class FEncyclopediaRuntimeTest;
 	friend class FTunaSweeperPauseExitSaveFailureTest;
 	friend class FTunaSweeperCarriedToolTest;
@@ -849,6 +850,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	bool GetActiveWorkbenchRecipes(TArray<FTunaSweeperWorkbenchRecipeView>& OutRecipeViews);
 
+	int32 CountWorkbenchIngredientItemById(int32 ItemId) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	bool TryGetActiveWorkbenchRecipeView(int32 RecipeSlotIndex, FTunaSweeperWorkbenchRecipeView& OutRecipeView);
 
@@ -1078,7 +1081,6 @@ private:
 		int32 ItemId,
 		int32 Quantity,
 		TArray<FTunaSweeperItemStack>& InOutOverflowItems);
-	int32 CountWorkbenchIngredientItemById(int32 ItemId) const;
 	int32 ConsumeWorkbenchIngredientItemById(int32 ItemId, int32 RequestedAmount);
 	bool IsSellableItemSlotSource(ETunaSweeperItemSlotSource Source) const;
 	TArray<FTunaSweeperInventorySlot>* GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source);

@@ -66,7 +66,7 @@ internal sealed class CsvRelationDataStore
 			nodes.Add(new RelationGraphNode(
 				nodeId,
 				$"Loot {Get(lootItem, "contents_id")}",
-				$"x{QuantitySummary(lootItem)} chance {Get(lootItem, "drop_chance")}",
+				$"x{QuantitySummary(lootItem)} chance {LootChanceSummary(lootItem)}",
 				"Loot"));
 			edges.Add(new RelationGraphEdge(nodeId, centerId, "contains"));
 		}
@@ -295,7 +295,7 @@ internal sealed class CsvRelationDataStore
 				.Select(shopItem => $"shop {Get(shopItem, "shop_id")} slot {Get(shopItem, "slot_index")} stock {Get(shopItem, "stock_quantity")} price {Get(shopItem, "resolved_buy_price")}"));
 			row["loot_entries"] = string.Join("; ", Rows("loot_container_items")
 				.Where(lootItem => Same(lootItem, "item_id", itemId))
-				.Select(lootItem => $"contents {Get(lootItem, "contents_id")} x{QuantitySummary(lootItem)} chance {Get(lootItem, "drop_chance")}"));
+				.Select(lootItem => $"contents {Get(lootItem, "contents_id")} x{QuantitySummary(lootItem)} chance {LootChanceSummary(lootItem)}"));
 			row["crafted_by"] = string.Join("; ", Rows("workbench_recipes")
 				.Where(recipe => Same(recipe, "output_item_id", itemId))
 				.Select(recipe => $"{Get(recipe, "recipe_id")} x{Get(recipe, "output_quantity")}"));
@@ -342,7 +342,7 @@ internal sealed class CsvRelationDataStore
 		{
 			string contentsId = Get(lootItem, "contents_id");
 			Dictionary<string, string>? contents = Rows("loot_container_contents").FirstOrDefault(row => Same(row, "contents_id", contentsId));
-			Dictionary<string, string> row = CopySelected(lootItem, "contents_id", "slot_index", "item_id", "quantity", "quantity_min", "quantity_max", "drop_chance");
+			Dictionary<string, string> row = CopySelected(lootItem, "contents_id", "slot_index", "item_id", "quantity", "quantity_min", "quantity_max", "drop_chance", "drop_chance_tier");
 			row["item"] = ItemLabel(Get(lootItem, "item_id"));
 			row["item_name_en"] = ItemText(Get(lootItem, "item_id"), "name_string_key", "en");
 			row["item_category"] = ItemField(Get(lootItem, "item_id"), "category_tag");
@@ -532,7 +532,20 @@ internal sealed class CsvRelationDataStore
 		{
 			errors.Add("quantity_min is greater than quantity_max.");
 		}
-		ValidateRatio(lootItem, "drop_chance", errors);
+		string dropChance = Get(lootItem, "drop_chance");
+		string dropChanceTier = Get(lootItem, "drop_chance_tier");
+		if (string.IsNullOrWhiteSpace(dropChanceTier))
+		{
+			if (!double.TryParse(dropChance, NumberStyles.Float, CultureInfo.InvariantCulture, out double value) ||
+				value is not (>= 0.0 and <= 10_000.0))
+			{
+				errors.Add("drop_chance must be between 0 and 10000.");
+			}
+		}
+		else if (!string.IsNullOrWhiteSpace(dropChance))
+		{
+			errors.Add("Loot rows must use either drop_chance or drop_chance_tier.");
+		}
 
 		SetValidation(row, errors, warnings);
 	}
@@ -696,14 +709,10 @@ internal sealed class CsvRelationDataStore
 		}
 	}
 
-	private static void ValidateRatio(IReadOnlyDictionary<string, string> row, string column, List<string> errors)
+	private static string LootChanceSummary(IReadOnlyDictionary<string, string> row)
 	{
-		if (!double.TryParse(Get(row, column), NumberStyles.Float, CultureInfo.InvariantCulture, out double value) ||
-			value < 0.0 ||
-			value > 1.0)
-		{
-			errors.Add($"{column} must be between 0 and 1.");
-		}
+		string tier = Get(row, "drop_chance_tier");
+		return string.IsNullOrWhiteSpace(tier) ? Get(row, "drop_chance") : tier;
 	}
 
 	private static void RequireNonEmpty(string value, string fieldName, List<string> errors)

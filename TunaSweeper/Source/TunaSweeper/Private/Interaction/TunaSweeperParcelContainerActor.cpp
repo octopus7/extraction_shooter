@@ -30,6 +30,10 @@ void ATunaSweeperParcelContainerActor::BeginPlay()
     if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
     {
         Game->GetInventorySlots(); // Restore the selected save before evaluating quest presence.
+        auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+        float Chance = 0;
+        bAvailableThisVisit = Items && Items->TryGetLootDropChanceForTier(DropChanceTier, Chance) &&
+            (Chance >= 1.f || FMath::FRand() < Chance);
         if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
             Quests->OnQuestProgressChanged.AddUObject(this, &ThisClass::RefreshPresence);
     }
@@ -67,7 +71,7 @@ int32 ATunaSweeperParcelContainerActor::ResolvePickupItemId() const
 
 bool ATunaSweeperParcelContainerActor::CanPickUp() const
 {
-    return !bCollected && !bCollecting && ResolvePickupItemId() > 0;
+    return bAvailableThisVisit && !bCollected && !bCollecting && ResolvePickupItemId() > 0;
 }
 
 bool ATunaSweeperParcelContainerActor::PickUp(APawn* Player)
@@ -94,7 +98,7 @@ bool ATunaSweeperParcelContainerActor::PickUp(APawn* Player)
 
 void ATunaSweeperParcelContainerActor::RefreshPresence()
 {
-    const bool bAvailable = !bCollected && ResolvePickupItemId() > 0;
+    const bool bAvailable = bAvailableThisVisit && !bCollected && ResolvePickupItemId() > 0;
     SetActorHiddenInGame(!bAvailable);
     SetActorEnableCollision(bAvailable);
     Interactable->SetInteractionTypeDisplayNameAndStringKey(

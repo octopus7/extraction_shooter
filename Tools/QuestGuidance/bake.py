@@ -65,14 +65,44 @@ def bake_actor(actor, rows, level):
     if is_a("WorkbenchActor"):
         put("workbench", prop(actor, "workbench_id"))
     if isinstance(actor, unreal.LoopRailStation):
-        put("progress", "rail.lubrication." + str(prop(actor, "station_id")))
+        station_progress = "rail.lubrication." + str(prop(actor, "station_id"))
+        put("progress", station_progress)
+        oil = unreal.get_default_object(unreal.TunaSweeperRailInteractionComponent)
+        put("repair_cost", station_progress, f'{prop(oil, "oil_item_id")}:1')
     if is_a("RegionLinkActor"):
-        put("progress", prop(actor, "required_progress_id"))
+        progress_id = prop(actor, "required_progress_id")
+        put("progress", progress_id)
+        parts = {}
+        for stack in prop(actor, "repair_parts"):
+            item = prop(stack, "item_id")
+            parts[item] = parts.get(item, 0) + prop(stack, "quantity")
+        for item, quantity in parts.items():
+            if item > 0 and quantity > 0:
+                put("repair_cost", progress_id, f"{item}:{quantity}")
     if any(is_a(t) for t in ("WorldProgressActor", "PowerFacilityActor", "RockfallBarrierActor", "BlockedIntakeScreenActor")):
         put("progress", prop(actor, "progress_object_id"))
     events = []
     if is_a("PowerFacilityActor"):
         events.append(("repair_objective_event_id", "world_progress"))
+        if prop(actor, "requires_item"):
+            costs = {}
+            for stack in prop(actor, "required_items"):
+                item = prop(stack, "item_id")
+                costs[item] = costs.get(item, 0) + prop(stack, "quantity")
+            if not costs:
+                costs[prop(actor, "required_item_id")] = prop(actor, "required_item_quantity")
+            kind = "repair_cost" if prop(actor, "consume_required_item") else "repair_tool"
+            for item, quantity in costs.items():
+                if item > 0 and quantity > 0:
+                    put(kind, prop(actor, "progress_object_id"), f"{item}:{quantity}")
+    if is_a("WorldProgressActor") and str(prop(actor, "progress_object_id")) != "None" and actor.get_required_item_id() > 0:
+        put("repair_deposit", prop(actor, "progress_object_id"),
+            f"{actor.get_required_item_id()}:{actor.get_required_quantity()}")
+    if is_a("RockfallBarrierActor"):
+        put("repair_cost", prop(actor, "progress_object_id"), f'{prop(actor, "required_item_id")}:1')
+    if is_a("EthanolFacilityActor"):
+        put("production", prop(actor, "production_output_item_id"),
+            f'{prop(actor, "production_input_item_id")}:{prop(actor, "production_input_quantity")}:{prop(actor, "production_output_quantity")}')
     if is_a("QuestFacilityActor"):
         events.append(("interaction_objective_event_id", "quest_facility_use"))
     if is_a("BlockedIntakeScreenActor"):
