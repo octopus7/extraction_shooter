@@ -100,6 +100,7 @@ public:
 	void NotifyItemAcquired(int32 ItemId, int32 Quantity, bool bSaveImmediately = true);
 
 	void NotifyRaidLootOpened(FName LevelName);
+	bool HasActiveWorldProgressObjective(FName WorldProgressId) const;
 	float GetProtectedQuestLootChance(int32 ItemId, float BaseChance, int32 DifficultyStage,
 		int32 RequiredQuestId = 0) const;
 

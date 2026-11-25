@@ -120,6 +120,18 @@ namespace TunaSweeperItemDataFiles
 				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid quest protection for loot tier '%s' in %s"), *Row.Key, *Path);
 				return false;
 			}
+			if ((*Data)->HasField(TEXT("story_guaranteed_world_progress_id")))
+			{
+				FString ProgressId;
+				if (!(*Data)->HasTypedField<EJson::String>(TEXT("story_guaranteed_world_progress_id")) ||
+					!(*Data)->TryGetStringField(TEXT("story_guaranteed_world_progress_id"), ProgressId) ||
+					Tier.Story >= 1.f || FName(*ProgressId.TrimStartAndEnd()).IsNone())
+				{
+					UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid Story quest guarantee for loot tier '%s' in %s"), *Row.Key, *Path);
+					return false;
+				}
+				Tier.StoryGuaranteedWorldProgressId = FName(*ProgressId.TrimStartAndEnd());
+			}
 			OutTiers.Add(TierId, Tier);
 		}
 		return true;
@@ -205,6 +217,17 @@ namespace TunaSweeperItemDataFiles
 		return NAME_None;
 	}
 
+	float ResolveBaseLootChance(const FTunaSweeperLootDropChance& DropChance, int32 DifficultyStage,
+		const UTunaSweeperQuestSubsystem* Quests)
+	{
+		if (DifficultyStage == 1 && Quests && !DropChance.StoryGuaranteedWorldProgressId.IsNone() &&
+			Quests->HasActiveWorldProgressObjective(DropChance.StoryGuaranteedWorldProgressId))
+		{
+			return 1.f;
+		}
+		return DropChance.ForStage(DifficultyStage);
+	}
+
 	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents,
 		int32 DifficultyStage, const UTunaSweeperQuestSubsystem* Quests)
 	{
@@ -218,7 +241,7 @@ namespace TunaSweeperItemDataFiles
 				{
 					continue;
 				}
-				float Chance = ItemQuantity.DropChance.ForStage(DifficultyStage);
+				float Chance = ResolveBaseLootChance(ItemQuantity.DropChance, DifficultyStage, Quests);
 				if (Quests && ItemQuantity.DropChance.bQuestProtected)
 				{
 					Chance = Quests->GetProtectedQuestLootChance(ItemQuantity.ItemId, Chance, DifficultyStage);
@@ -1937,7 +1960,7 @@ bool UTunaSweeperItemDataSubsystem::TryGetLootDropChanceForTier(
 	if (!Tier) return false;
 	const int32 DifficultyStage = TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance());
 	const auto* Quests = GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>();
-	OutProbability = Tier->ForStage(DifficultyStage);
+	OutProbability = TunaSweeperItemDataFiles::ResolveBaseLootChance(*Tier, DifficultyStage, Quests);
 	if (Quests && Tier->bQuestProtected && QuestItemId > 0)
 	{
 		OutProbability = Quests->GetProtectedQuestLootChance(
@@ -1950,13 +1973,15 @@ void UTunaSweeperItemDataSubsystem::GetGuaranteedContentsForItem(int32 ItemId, T
 {
 	if (ItemId <= 0 || !EnsureItemDataLoaded()) return;
 	const int32 DifficultyStage = TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance());
+	const auto* Quests = GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>();
 	for (const auto& Entry : LootContainerContentsById)
 	{
 		const auto& Contents = Entry.Value;
 		const bool bGuaranteed = Contents.ItemQuantities.IsEmpty()
 			? Contents.Items.ContainsByPredicate([ItemId](const auto& Stack) { return Stack.ItemId == ItemId && Stack.Quantity > 0; })
-			: Contents.ItemQuantities.ContainsByPredicate([ItemId, DifficultyStage](const auto& Stack) {
-				return Stack.ItemId == ItemId && Stack.QuantityMin > 0 && Stack.DropChance.ForStage(DifficultyStage) >= 1.f;
+			: Contents.ItemQuantities.ContainsByPredicate([ItemId, DifficultyStage, Quests](const auto& Stack) {
+				return Stack.ItemId == ItemId && Stack.QuantityMin > 0 &&
+					TunaSweeperItemDataFiles::ResolveBaseLootChance(Stack.DropChance, DifficultyStage, Quests) >= 1.f;
 			});
 		if (bGuaranteed) OutContentsIds.Add(Entry.Key);
 	}

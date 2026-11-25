@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperRegionLinkActor.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 
@@ -78,6 +79,8 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     };
     auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>();
     if (!TestNotNull(TEXT("Real initialized quest subsystem"), Quests)) return false;
+    auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+    if (!TestNotNull(TEXT("Real initialized item subsystem"), Items)) return false;
     Quests->QuestDefinitions.Reset(); Quests->QuestProgressById.Reset(); Quests->bQuestDataLoaded = true;
     Quests->CoinBalance = 0; Game->WorldProgressStatesById.Reset(); Game->ResetPlayerSlotArrays();
 
@@ -92,7 +95,8 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     };
     constexpr int32 GateId = 900201, LiftId = 900202, MixedId = 900203, LateId = 900204, LockedId = 900205, PrerequisiteId = 900206;
     AddQuest(GateId, TEXT("test.passage.gate"));
-    AddQuest(LiftId, TEXT("test.passage.lift"));
+    const FName LiftProgressId(TEXT("region.forest.plains.lift"));
+    AddQuest(LiftId, LiftProgressId);
     AddQuest(LateId, TEXT("test.passage.gate"));
     AddQuest(LockedId, TEXT("test.passage.gate"));
     Quests->QuestDefinitions[GateId].Rewards.Coins = 5;
@@ -100,8 +104,30 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
     FTunaSweeperQuestDefinition Prerequisite;
     Prerequisite.QuestId = PrerequisiteId; Prerequisite.bCompleteOnAccept = true;
     Quests->QuestDefinitions.Add(PrerequisiteId, Prerequisite);
+    auto IsCableGuaranteed = [&] {
+        TSet<int32> ContentsIds;
+        Items->GetGuaranteedContentsForItem(6010, ContentsIds);
+        return ContentsIds.Contains(8050);
+    };
+    Game->SetActiveSaveSlotDifficultyStage(1, false);
+    TestFalse(TEXT("Story cable is not guaranteed before accepting the lift quest"), IsCableGuaranteed());
     TestTrue(TEXT("Accept unopened gate objective"), Quests->AcceptQuest(GateId));
+    TestFalse(TEXT("An unrelated active quest does not guarantee the cable"), IsCableGuaranteed());
     TestTrue(TEXT("Accept broken lift objective"), Quests->AcceptQuest(LiftId));
+    TestTrue(TEXT("Story cable is guaranteed while repair is active"), IsCableGuaranteed());
+    for (const int32 Stage : {2, 3})
+    {
+        Game->SetActiveSaveSlotDifficultyStage(Stage, false);
+        TestFalse(TEXT("Higher difficulties have no lift quest guarantee"), IsCableGuaranteed());
+    }
+    Game->SetActiveSaveSlotDifficultyStage(1, false);
+    FTunaSweeperLootContainerInstance CableChest;
+    if (TestTrue(TEXT("Cable chest rolls during the active Story quest"),
+        Items->TryBuildLootContainerInstance(7001, 8050, ETunaSweeperItemTextLanguage::Korean, CableChest)))
+    {
+        TestTrue(TEXT("The rolled chest contains exactly one cable"),
+            CableChest.Items.Num() == 1 && CableChest.Items[0].ItemId == 6010 && CableChest.Items[0].Quantity == 1);
+    }
     TestEqual(TEXT("Accepting another quest preserves the selection"), Quests->GetTrackedQuestId(), GateId);
     TestTrue(TEXT("Select the other active quest"), Quests->SetTrackedQuest(LiftId));
     TestTrue(TEXT("Select the gate again"), Quests->SetTrackedQuest(GateId));
@@ -134,7 +160,7 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
 
     auto* Lift = World->SpawnActor<ATunaSweeperRegionLinkActor>();
     Lift->bUseSlidingDoors = true;
-    Lift->RequiredProgressId = TEXT("test.passage.lift");
+    Lift->RequiredProgressId = LiftProgressId;
     FTunaSweeperItemStack Cable; Cable.ItemId = 6010; Cable.Quantity = 1;
     FTunaSweeperItemStack Other; Other.ItemId = 6006; Other.Quantity = 1;
     Lift->RepairParts = {Cable, Other};
@@ -149,6 +175,7 @@ bool FTunaSweeperQuestWorldProgressTest::RunTest(const FString& Parameters)
                 Game->CountInventoryItemById(Cable.ItemId) == 0 && Game->CountInventoryItemById(Other.ItemId) == 0;
     });
     TestTrue(TEXT("Actual two-part repair succeeds"), Lift->RepairPassage(false));
+    TestFalse(TEXT("Story cable is no longer guaranteed after repair"), IsCableGuaranteed());
     TestEqual(TEXT("Repair begins with closed sliding doors"), Lift->GetDoorOpenAlpha(), 0.f);
     Lift->Tick(Lift->DoorOpenSeconds);
     TestEqual(TEXT("Actual repair automatically opens the doors"), Lift->GetDoorOpenAlpha(), 1.f);

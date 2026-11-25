@@ -353,7 +353,7 @@
   {
     "id": 8050,
     "memo_ko": "전용 보급 상자: 고장력 강선 케이블 1개",
-    "items": [ { "item_id": 6010, "quantity": 1, "drop_chance_tier": "quest" } ]
+    "items": [ { "item_id": 6010, "quantity": 1, "drop_chance_tier": "lift_cable" } ]
   },
   {
     "id": 8051,

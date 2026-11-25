@@ -1,6 +1,25 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Game/TunaSweeperGameInstance.h"
 
+bool UTunaSweeperQuestSubsystem::HasActiveWorldProgressObjective(FName WorldProgressId) const
+{
+    for (const auto& Pair : QuestProgressById)
+    {
+        if (Pair.Value.State != ETunaSweeperQuestState::Accepted) continue;
+        const auto* Definition = FindQuestDefinition(Pair.Key);
+        if (Definition && Definition->Objectives.ContainsByPredicate([&](const auto& Objective)
+        {
+            return Objective.Type == ETunaSweeperObjectiveType::WorldProgressCompleted &&
+                Objective.WorldProgressId == WorldProgressId &&
+                GetObjectiveProgressCount(Pair.Key, Objective.ObjectiveId) < Objective.RequiredCount;
+        }))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UTunaSweeperQuestSubsystem::HandleWorldProgressChanged()
 {
     if (ReconcileWorldProgressObjectives(true))

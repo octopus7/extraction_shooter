@@ -4,6 +4,12 @@
     "normal_hard": 2500,
     "quest_protected": true
   },
+  "lift_cable": {
+    "story": 2500,
+    "normal_hard": 2500,
+    "quest_protected": true,
+    "story_guaranteed_world_progress_id": "region.forest.plains.lift"
+  },
   "rabbit_parts": {
     "story": 2000,
     "normal_hard": 1000,

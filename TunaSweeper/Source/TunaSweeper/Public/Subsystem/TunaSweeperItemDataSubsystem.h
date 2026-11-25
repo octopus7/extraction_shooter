@@ -195,6 +195,7 @@ struct FTunaSweeperLootDropChance
 	float Story = 1.0f;
 	float NormalHard = 1.0f;
 	bool bQuestProtected = false;
+	FName StoryGuaranteedWorldProgressId = NAME_None;
 
 	float ForStage(int32 DifficultyStage) const { return DifficultyStage == 1 ? Story : NormalHard; }
 };
