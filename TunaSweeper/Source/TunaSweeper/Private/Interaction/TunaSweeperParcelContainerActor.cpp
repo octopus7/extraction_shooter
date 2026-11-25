@@ -3,6 +3,7 @@
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
@@ -32,7 +33,7 @@ void ATunaSweeperParcelContainerActor::BeginPlay()
         Game->GetInventorySlots(); // Restore the selected save before evaluating quest presence.
         auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>();
         float Chance = 0;
-        bAvailableThisVisit = Items && Items->TryGetLootDropChanceForTier(DropChanceTier, Chance) &&
+        bAvailableThisVisit = Items && Items->TryGetLootDropChanceForTier(DropChanceTier, Chance, ResolvePickupItemId(), QuestId) &&
             (Chance >= 1.f || FMath::FRand() < Chance);
         if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
             Quests->OnQuestProgressChanged.AddUObject(this, &ThisClass::RefreshPresence);
@@ -92,6 +93,8 @@ bool ATunaSweeperParcelContainerActor::PickUp(APawn* Player)
         RefreshPresence();
         return false;
     }
+    if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
+        Quests->NotifyRaidLootOpened(FName(*GetWorld()->GetMapName()));
     Game->SaveGameState();
     return true;
 }

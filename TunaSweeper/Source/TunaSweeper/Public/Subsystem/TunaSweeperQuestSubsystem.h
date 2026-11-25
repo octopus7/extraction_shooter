@@ -99,6 +99,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyItemAcquired(int32 ItemId, int32 Quantity, bool bSaveImmediately = true);
 
+	void NotifyRaidLootOpened(FName LevelName);
+	float GetProtectedQuestLootChance(int32 ItemId, float BaseChance, int32 DifficultyStage,
+		int32 RequiredQuestId = 0) const;
+
 	// Workbench calls this only after committing ingredients and output; its transaction saves both states.
 	void NotifyWorkbenchRecipeCrafted(FName RecipeId);
 

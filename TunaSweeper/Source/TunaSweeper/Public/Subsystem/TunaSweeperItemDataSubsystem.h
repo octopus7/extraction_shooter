@@ -194,6 +194,7 @@ struct FTunaSweeperLootDropChance
 {
 	float Story = 1.0f;
 	float NormalHard = 1.0f;
+	bool bQuestProtected = false;
 
 	float ForStage(int32 DifficultyStage) const { return DifficultyStage == 1 ? Story : NormalHard; }
 };
@@ -517,7 +518,8 @@ public:
 	bool GetAllLootContainerContents(TArray<FTunaSweeperLootContainerContents>& OutContents);
 
 	void GetGuaranteedContentsForItem(int32 ItemId, TSet<int32>& OutContentsIds);
-	bool TryGetLootDropChanceForTier(FName TierId, float& OutProbability);
+	bool TryGetLootDropChanceForTier(FName TierId, float& OutProbability,
+		int32 QuestItemId = INDEX_NONE, int32 RequiredQuestId = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TryGetShopDefinition(int32 ShopId, FTunaSweeperShopDefinition& OutDefinition);

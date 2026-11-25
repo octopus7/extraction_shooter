@@ -1,7 +1,8 @@
 {
   "quest": {
     "story": 10000,
-    "normal_hard": 2500
+    "normal_hard": 2500,
+    "quest_protected": true
   },
   "snack": {
     "story": 1000,

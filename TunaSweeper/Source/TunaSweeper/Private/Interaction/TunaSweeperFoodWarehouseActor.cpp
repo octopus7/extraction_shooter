@@ -1,5 +1,6 @@
 #include "Interaction/TunaSweeperFoodWarehouseActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Quest/TunaSweeperQuestTypes.h"
@@ -28,7 +29,7 @@ void ATunaSweeperFoodWarehouseActor::BeginPlay()
             GameInstance->GetInventorySlots();
             auto* Items = GameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>();
             float Chance = 0;
-            bQuestStockAvailable = Items && Items->TryGetLootDropChanceForTier(DropChanceTier, Chance) &&
+            bQuestStockAvailable = Items && Items->TryGetLootDropChanceForTier(DropChanceTier, Chance, FoodItemId, RequiredQuestId) &&
                 (Chance >= 1.f || FMath::FRand() < Chance);
         }
         if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
@@ -72,6 +73,8 @@ bool ATunaSweeperFoodWarehouseActor::TakeFood()
         return false;
     bCollected = true;
     RefreshInteractionState();
+    if (auto* Quests = GI->GetSubsystem<UTunaSweeperQuestSubsystem>(); Quests && GetWorld())
+        Quests->NotifyRaidLootOpened(FName(*GetWorld()->GetMapName()));
     // Restock on a new raid so dying or eating the quest food cannot deadlock the demo.
     GI->SaveGameState();
     return true;

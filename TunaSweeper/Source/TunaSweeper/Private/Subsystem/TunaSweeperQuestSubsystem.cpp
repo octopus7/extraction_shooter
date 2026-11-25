@@ -30,6 +30,29 @@ namespace TunaSweeperQuestProviders
 	const FName Mole(TEXT("provider.mole"));
 }
 
+namespace TunaSweeperQuestLootProtection
+{
+	constexpr int32 NormalLootsBeforeGuarantee = 24;
+	constexpr int32 HardLootsBeforeGuarantee = 29;
+
+	bool NeedsRecipeIngredient(int32 ItemId, const FTunaSweeperWorkbenchRecipeDefinition& Recipe,
+		const TArray<FTunaSweeperWorkbenchRecipeDefinition>& Recipes, TSet<FName>& VisitedRecipes)
+	{
+		if (VisitedRecipes.Contains(Recipe.RecipeId)) return false;
+		VisitedRecipes.Add(Recipe.RecipeId);
+		for (const auto& Ingredient : Recipe.Ingredients)
+		{
+			if (Ingredient.ItemId == ItemId) return true;
+			const auto* Subrecipe = Recipes.FindByPredicate([&Ingredient](const auto& Candidate)
+			{
+				return Candidate.OutputItemId == Ingredient.ItemId;
+			});
+			if (Subrecipe && NeedsRecipeIngredient(ItemId, *Subrecipe, Recipes, VisitedRecipes)) return true;
+		}
+		return false;
+	}
+}
+
 namespace TunaSweeperQuestData
 {
 	void NormalizeNpcDeliveryObjectives(FTunaSweeperQuestDefinition& Definition)
@@ -1114,6 +1137,105 @@ bool UTunaSweeperQuestSubsystem::TrySpendCoins(int32 Amount, bool bSaveImmediate
 	return true;
 }
 
+void UTunaSweeperQuestSubsystem::NotifyRaidLootOpened(FName LevelName)
+{
+	const auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (!Game || Game->IsCombatTestSession() || Game->GetActiveSaveSlotDifficultyStage() == 1 ||
+		!TunaSweeperBuildFlavor::IsRaidGameplayLevelName(LevelName))
+	{
+		return;
+	}
+
+	for (auto& Entry : QuestProgressById)
+	{
+		auto& Progress = Entry.Value;
+		if (Progress.State == ETunaSweeperQuestState::Accepted &&
+			Progress.RaidLootOpens < TunaSweeperQuestLootProtection::HardLootsBeforeGuarantee)
+		{
+			++Progress.RaidLootOpens;
+		}
+	}
+}
+
+float UTunaSweeperQuestSubsystem::GetProtectedQuestLootChance(
+	int32 ItemId, float BaseChance, int32 DifficultyStage, int32 RequiredQuestId) const
+{
+	auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (!Game || Game->IsCombatTestSession() || DifficultyStage <= 1 || ItemId <= 0 ||
+		BaseChance <= 0.0f || BaseChance >= 1.0f)
+	{
+		return BaseChance;
+	}
+
+	int32 LootOpens = 0;
+	if (RequiredQuestId > 0)
+	{
+		const auto* Progress = QuestProgressById.Find(RequiredQuestId);
+		if (Progress && Progress->State == ETunaSweeperQuestState::Accepted)
+		{
+			LootOpens = Progress->RaidLootOpens;
+		}
+	}
+	else
+	{
+		TArray<FTunaSweeperWorkbenchRecipeDefinition> Recipes;
+		bool bLoadedRecipes = false;
+		for (const auto& Entry : QuestProgressById)
+		{
+			const auto& Progress = Entry.Value;
+			if (Progress.State != ETunaSweeperQuestState::Accepted || Progress.RaidLootOpens <= LootOpens) continue;
+			const auto* Definition = FindQuestDefinition(Entry.Key);
+			if (!Definition) continue;
+
+			for (const auto& Objective : Definition->Objectives)
+			{
+				using EType = ETunaSweeperObjectiveType;
+				const bool bItemObjective = Objective.Type == EType::ItemAcquired ||
+					Objective.Type == EType::ItemPossessed || Objective.Type == EType::ItemSubmitted;
+				const bool bCraftObjective = Objective.Type == EType::WorkbenchRecipeCrafted;
+				if ((!bItemObjective && !bCraftObjective) ||
+					GetObjectiveProgressCount(Entry.Key, Objective.ObjectiveId) >= Objective.RequiredCount)
+				{
+					continue;
+				}
+				if (bItemObjective && Objective.ItemId == ItemId)
+				{
+					if (Objective.Type != EType::ItemSubmitted || Game->CountQuestSubmissionItemById(ItemId) < Objective.RequiredCount)
+					{
+						LootOpens = Progress.RaidLootOpens;
+						break;
+					}
+					continue;
+				}
+
+				if (!bLoadedRecipes)
+				{
+					bLoadedRecipes = true;
+					if (auto* Items = Game->GetSubsystem<UTunaSweeperItemDataSubsystem>())
+					{
+						Items->GetAllWorkbenchRecipeDefinitions(Recipes);
+					}
+				}
+				const auto* Recipe = Recipes.FindByPredicate([&Objective, bCraftObjective](const auto& Candidate)
+				{
+					return bCraftObjective ? Candidate.RecipeId == Objective.RecipeId : Candidate.OutputItemId == Objective.ItemId;
+				});
+				TSet<FName> VisitedRecipes;
+				if (Recipe && TunaSweeperQuestLootProtection::NeedsRecipeIngredient(ItemId, *Recipe, Recipes, VisitedRecipes))
+				{
+					LootOpens = Progress.RaidLootOpens;
+					break;
+				}
+			}
+		}
+	}
+
+	const int32 LootsBeforeGuarantee = DifficultyStage == 2 ? TunaSweeperQuestLootProtection::NormalLootsBeforeGuarantee
+		: TunaSweeperQuestLootProtection::HardLootsBeforeGuarantee;
+	const float Progress = FMath::Clamp(static_cast<float>(LootOpens) / LootsBeforeGuarantee, 0.0f, 1.0f);
+	return FMath::Lerp(BaseChance, 1.0f, Progress);
+}
+
 void UTunaSweeperQuestSubsystem::ExportQuestProgressForSave(
 	TArray<FTunaSweeperNumericQuestProgressSaveData>& OutQuestProgress,
 	int32& OutTrackedQuestId,
@@ -1155,6 +1277,8 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 		LoadedProgress.QuestId = SavedProgress.QuestId;
 		LoadedProgress.State = SavedProgress.State;
 		LoadedProgress.bOwnershipReadinessRecorded = true;
+		LoadedProgress.RaidLootOpens = FMath::Clamp(SavedProgress.RaidLootOpens, 0,
+			TunaSweeperQuestLootProtection::HardLootsBeforeGuarantee);
 
 		for (const FTunaSweeperObjectiveDefinition& Objective : Definition->Objectives)
 		{

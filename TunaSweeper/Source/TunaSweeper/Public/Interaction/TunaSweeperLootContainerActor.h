@@ -150,6 +150,7 @@ private:
 	void HandleLanguageChanged();
 	void ResetRuntimeContainerState();
 	void ApplyOpenedMarkerState();
+	void NotifyFirstLootOpen(UTunaSweeperGameInstance& GameInstance);
 	void CaptureRuntimeContentsFromActiveContainer();
 	void HandleActiveLootContainerUiClosed();
 	bool IsRuntimeContainerStateValid(const UTunaSweeperGameInstance* TunaGameInstance) const;
@@ -203,4 +204,6 @@ private:
 
 	UPROPERTY(Transient)
 	bool bHasRuntimeContainerState = false;
+
+	bool bCountedQuestLootOpen = false;
 };

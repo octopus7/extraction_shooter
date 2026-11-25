@@ -315,6 +315,9 @@ struct TUNASWEEPER_API FTunaSweeperNumericQuestProgressSaveData
 	UPROPERTY()
 	bool bOwnershipReadinessRecorded = false;
 
+	UPROPERTY()
+	int32 RaidLootOpens = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	ETunaSweeperQuestState State = ETunaSweeperQuestState::Available;
 

@@ -7,6 +7,7 @@
 #include "Misc/AutomationTest.h"
 #include "Misc/ScopeExit.h"
 #include "Serialization/JsonSerializer.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/StrongObjectPtr.h"
 
@@ -117,6 +118,47 @@ bool FTunaSweeperQuestCraftTest::RunTest(const FString& Parameters)
 		Quests->QuestDefinitions.Add(Id, Definition);
 	}
 	TestTrue(TEXT("Accept craft quest"), Quests->AcceptQuest(QuestId));
+	const FName RaidMap = TunaSweeperBuildFlavor::IsDemo() ? TunaSweeperBuildFlavor::GetRaidGameplayLevelName()
+		: FName(TEXT("RaidVillage"));
+	Game->SetActiveSaveSlotDifficultyStage(2, false);
+	TestEqual(TEXT("First quest loot roll uses the base chance"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 2), .25f);
+	Quests->NotifyRaidLootOpened(TEXT("BunkerMap"));
+	for (int32 LootIndex = 0; LootIndex < 24; ++LootIndex)
+	{
+		Quests->NotifyRaidLootOpened(RaidMap);
+	}
+	TestEqual(TEXT("Normal guarantees the required craft ingredient on the 25th roll"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 2), 1.0f);
+	TestTrue(TEXT("Hard chance increases before its later guarantee"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3) > .25f &&
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3) < 1.0f);
+	for (int32 LootIndex = 24; LootIndex < 29; ++LootIndex)
+	{
+		Quests->NotifyRaidLootOpened(RaidMap);
+	}
+	TestEqual(TEXT("Hard guarantees the required craft ingredient on the 30th roll"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3), 1.0f);
+	FTunaSweeperLootContainerDefinition Container;
+	Container.Id = 990705;
+	Container.Capacity = 1;
+	Items->LootContainerDefinitionsById.Add(Container.Id, Container);
+	FTunaSweeperLootContainerContents Contents;
+	Contents.Id = 990706;
+	auto& Part = Contents.ItemQuantities.AddDefaulted_GetRef();
+	Part.ItemId = IngredientId;
+	Part.DropChance = {.2f, .1f, true};
+	Items->LootContainerContentsById.Add(Contents.Id, Contents);
+	Game->SetActiveSaveSlotDifficultyStage(3, false);
+	FTunaSweeperLootContainerInstance Loot;
+	TestTrue(TEXT("Protected container roll succeeds"), Items->TryBuildLootContainerInstance(
+		Container.Id, Contents.Id, ETunaSweeperItemTextLanguage::Korean, Loot));
+	TestTrue(TEXT("A low-base protected tier guarantees a needed ingredient at the hard limit"),
+		Loot.Items.ContainsByPredicate([](const auto& Item) { return Item.ItemId == IngredientId; }));
+	TestEqual(TEXT("Story ignores the correction"), Quests->GetProtectedQuestLootChance(IngredientId, .5f, 1), .5f);
+	TestEqual(TEXT("Unrelated loot keeps its authored chance"), Quests->GetProtectedQuestLootChance(3008, .1f, 3), .1f);
+	TestEqual(TEXT("An unavailable quest cannot apply protection"), Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3, LateQuestId), .25f);
+
 	Game->ResetPlayerSlotArrays();
 	Game->SetActiveWorkbench(Recipe.WorkbenchId, ETunaSweeperWorkbenchMode::Craft);
 	auto Count = [&]() { return Quests->GetObjectiveProgressCount(QuestId, TEXT("craft")); };
@@ -160,10 +202,16 @@ bool FTunaSweeperQuestCraftTest::RunTest(const FString& Parameters)
 	Quests->QuestProgressById.Reset();
 	Quests->LoadQuestProgressFromSave(Saved, Tracked, Coins);
 	TestEqual(TEXT("Existing objective save round trip preserves craft count"), Count(), 1);
+	TestEqual(TEXT("Save round trip preserves loot protection"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3), 1.0f);
+	TestEqual(TEXT("Newly accepted quest has no prior loot credit"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3, LateQuestId), .25f);
 	ResetItems();
 	AddIngredient();
 	TestTrue(TEXT("Second successful transaction"), Game->TryCraftActiveWorkbenchRecipe(0, false));
 	TestEqual(TEXT("Required crafts complete quest"), Quests->GetQuestState(QuestId), ETunaSweeperQuestState::RewardAvailable);
+	TestEqual(TEXT("Ready-to-claim quest no longer boosts drops"),
+		Quests->GetProtectedQuestLootChance(IngredientId, .25f, 3), .25f);
 	TestEqual(TEXT("Only post-accept craft advances late quest"), Quests->GetObjectiveProgressCount(LateQuestId, TEXT("craft")), 1);
 	return true;
 }

@@ -11,6 +11,7 @@
 #include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
@@ -112,6 +113,13 @@ namespace TunaSweeperItemDataFiles
 				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid loot chance tier '%s' in %s"), *Row.Key, *Path);
 				return false;
 			}
+			Tier.bQuestProtected = TierId == TEXT("quest");
+			if ((*Data)->HasField(TEXT("quest_protected")) &&
+				!(*Data)->TryGetBoolField(TEXT("quest_protected"), Tier.bQuestProtected))
+			{
+				UE_LOG(LogTunaSweeperItemData, Error, TEXT("Invalid quest protection for loot tier '%s' in %s"), *Row.Key, *Path);
+				return false;
+			}
 			OutTiers.Add(TierId, Tier);
 		}
 		return true;
@@ -197,7 +205,8 @@ namespace TunaSweeperItemDataFiles
 		return NAME_None;
 	}
 
-	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents, int32 DifficultyStage)
+	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents,
+		int32 DifficultyStage, const UTunaSweeperQuestSubsystem* Quests)
 	{
 		TArray<FTunaSweeperItemStack> ResolvedItems;
 		if (Contents.ItemQuantities.Num() > 0)
@@ -209,7 +218,11 @@ namespace TunaSweeperItemDataFiles
 				{
 					continue;
 				}
-				const float Chance = ItemQuantity.DropChance.ForStage(DifficultyStage);
+				float Chance = ItemQuantity.DropChance.ForStage(DifficultyStage);
+				if (Quests && ItemQuantity.DropChance.bQuestProtected)
+				{
+					Chance = Quests->GetProtectedQuestLootChance(ItemQuantity.ItemId, Chance, DifficultyStage);
+				}
 				if (Chance <= 0.0f || (Chance < 1.0f && FMath::FRand() > Chance))
 				{
 					continue;
@@ -453,7 +466,8 @@ bool UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance(
 	}
 
 	TArray<FTunaSweeperItemStack> ResolvedItems = TunaSweeperItemDataFiles::ResolveLootContainerItems(
-		Contents, TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance()));
+		Contents, TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance()),
+		GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>());
 	if (ResolvedItems.Num() > ContainerDefinition.Capacity)
 	{
 		UE_LOG(
@@ -1915,12 +1929,20 @@ FString UTunaSweeperItemDataSubsystem::GetWorkbenchDismantleRecipesJsonPath() co
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::WorkbenchDismantleRecipesJsonRelativePath);
 }
 
-bool UTunaSweeperItemDataSubsystem::TryGetLootDropChanceForTier(FName TierId, float& OutProbability)
+bool UTunaSweeperItemDataSubsystem::TryGetLootDropChanceForTier(
+	FName TierId, float& OutProbability, int32 QuestItemId, int32 RequiredQuestId)
 {
 	OutProbability = 0.0f;
 	const auto* Tier = EnsureItemDataLoaded() ? LootDropChanceTiers.Find(TierId) : nullptr;
 	if (!Tier) return false;
-	OutProbability = Tier->ForStage(TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance()));
+	const int32 DifficultyStage = TunaSweeperItemDataFiles::GetLootDifficultyStage(GetGameInstance());
+	const auto* Quests = GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>();
+	OutProbability = Tier->ForStage(DifficultyStage);
+	if (Quests && Tier->bQuestProtected && QuestItemId > 0)
+	{
+		OutProbability = Quests->GetProtectedQuestLootChance(
+			QuestItemId, OutProbability, DifficultyStage, RequiredQuestId);
+	}
 	return true;
 }
 
@@ -1972,6 +1994,7 @@ bool FLootDropChanceTest::RunTest(const FString& Parameters)
 	if (!TestTrue(TEXT("Quest tier resolves"), ReadDropChance(Row, Items->LootDropChanceTiers, Chance))) return false;
 	TestEqual(TEXT("Authored quest probability on Story"), Chance.Story, 1.f);
 	TestTrue(TEXT("Quest drop is possible and below thirty percent on both higher stages"), Chance.NormalHard > 0.f && Chance.NormalHard < .3f);
+	TestTrue(TEXT("Quest tier retains protection"), Chance.bQuestProtected);
 
 	for (const int32 SnackContentsId : {8023, 8052})
 	{
@@ -1981,6 +2004,7 @@ bool FLootDropChanceTest::RunTest(const FString& Parameters)
 		if (!TestNotNull(TEXT("Snack table includes rabbit jelly"), Jelly)) return false;
 		TestEqual(TEXT("Rabbit jelly chance on Story"), Jelly->DropChance.Story, .1f);
 		TestEqual(TEXT("Rabbit jelly chance on Normal and Hard"), Jelly->DropChance.NormalHard, .1f);
+		TestFalse(TEXT("Snack tier does not use quest protection"), Jelly->DropChance.bQuestProtected);
 	}
 
 	// Opposite deterministic chances exercise the real roll and guarantee query without probabilistic assertions.

@@ -9,6 +9,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
@@ -219,6 +220,7 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 		TunaGameInstance->SetActiveLootContainerRuntimeSlots(OutInstance, RuntimeSlots, this);
 		CaptureRuntimeContentsFromActiveContainer();
 		ApplyOpenedMarkerState();
+		NotifyFirstLootOpen(*TunaGameInstance);
 		return true;
 	}
 
@@ -249,7 +251,18 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 	RuntimeSlots = TunaGameInstance->GetActiveLootContainerSlots();
 	bHasRuntimeContainerState = true;
 	ApplyOpenedMarkerState();
+	NotifyFirstLootOpen(*TunaGameInstance);
 	return true;
+}
+
+void ATunaSweeperLootContainerActor::NotifyFirstLootOpen(UTunaSweeperGameInstance& GameInstance)
+{
+	if (bCountedQuestLootOpen || !GetWorld()) return;
+	bCountedQuestLootOpen = true;
+	if (auto* Quests = GameInstance.GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		Quests->NotifyRaidLootOpened(FName(*GetWorld()->GetMapName()));
+	}
 }
 
 void ATunaSweeperLootContainerActor::ConfigureLootContainerDefaults(int32 InContainerDefinitionId, int32 InContentsId)

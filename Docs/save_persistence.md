@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Quest loot protection
+
+The additive `RaidLootOpens` field in `NumericQuestProgressStates` stores up to 29 eligible raid loot interactions per accepted quest in its gameplay slot. A container contributes once when first opened, including enemy loot. Successful parcel and warehouse pickups can also contribute. Reopening a container in the same map visit does not count. Story and combat-lab sessions do not advance the counter.
+
+The counter follows the existing quest save, load, and new-game flow. Older saves start at zero without a save version change. The normal save checkpoints write progress without adding an immediate disk write to every opened chest. The per-container guard is transient. Normal guarantees the authored quest-tier drop on the 25th roll and Hard on the 30th, provided the item is still required and present in that loot source.
+
 ## Steam achievement mapping
 
 Full Steam builds map internal achievement IDs 01–20 to `ACH_01`–`ACH_20`. Existing local unlocks are retained and queued for publication after the Steam query; successful publication uses the existing platform confirmation keys. All 20 achievements, including 05, are configured. `bEnableSteamSync` defaults to false and is enabled only by the Full config. No save fields or version changes are required.
