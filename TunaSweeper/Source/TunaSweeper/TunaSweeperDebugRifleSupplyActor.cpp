@@ -3,6 +3,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Debug/TunaSweeperMovementCheatSubsystem.h"
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
 
@@ -17,6 +18,8 @@ namespace TunaSweeperDebugRifleSupplyVisual
 
 ATunaSweeperDebugRifleSupplyActor::ATunaSweeperDebugRifleSupplyActor()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 	ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::ItemSpawn,
 		FText::FromString(TEXT("디버그 소총 보급")),
@@ -47,9 +50,39 @@ void ATunaSweeperDebugRifleSupplyActor::OnConstruction(const FTransform& Transfo
 	ApplyVisualMaterials();
 }
 
+void ATunaSweeperDebugRifleSupplyActor::BeginPlay()
+{
+	Super::BeginPlay();
+	if (bRequiresActiveCheats)
+	{
+		RefreshCheatVisibility();
+		SetActorTickEnabled(true);
+	}
+}
+
+bool ATunaSweeperDebugRifleSupplyActor::CanUseSupply() const
+{
+	if (!bRequiresActiveCheats) return true;
+	const auto* Cheats = UGameInstance::GetSubsystem<UTunaSweeperMovementCheatSubsystem>(GetGameInstance());
+	return Cheats && Cheats->IsEnabled();
+}
+
+void ATunaSweeperDebugRifleSupplyActor::RefreshCheatVisibility()
+{
+	const bool bAvailable = CanUseSupply();
+	if (IsHidden() == bAvailable) SetActorHiddenInGame(!bAvailable);
+	if (GetActorEnableCollision() != bAvailable) SetActorEnableCollision(bAvailable);
+}
+
+void ATunaSweeperDebugRifleSupplyActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (bRequiresActiveCheats) RefreshCheatVisibility();
+}
+
 bool ATunaSweeperDebugRifleSupplyActor::SupplyRifleAndAmmo(APawn* InstigatorPawn)
 {
-	if (!InstigatorPawn || !GetWorld())
+	if (!InstigatorPawn || !GetWorld() || !CanUseSupply())
 	{
 		return false;
 	}

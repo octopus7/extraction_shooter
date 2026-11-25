@@ -14,6 +14,8 @@ class TUNASWEEPER_API ATunaSweeperDebugRifleSupplyActor : public ATunaSweeperInt
 public:
 	ATunaSweeperDebugRifleSupplyActor();
 
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debug Supply")
@@ -33,6 +35,10 @@ protected:
 	int32 MinimumReserveAmmo = 60;
 
 private:
+	UPROPERTY(EditInstanceOnly, Category = "TunaSweeper|Debug Supply")
+	bool bRequiresActiveCheats = false;
+	bool CanUseSupply() const;
+	void RefreshCheatVisibility();
 	void BuildHeartMesh();
 	void ApplyVisualMaterials();
 };
