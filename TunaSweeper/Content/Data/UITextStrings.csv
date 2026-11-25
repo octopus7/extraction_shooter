@@ -271,6 +271,7 @@ ui.interaction.self_destruct,자폭,Self Destruct,自爆,自毁,自毀,Само�
 ui.interaction.housing_management,시설관리,Facility Management,施設管理,设施管理,設施管理,Управление объектами
 ui.interaction.storage_open,창고 열기,Open Storage,倉庫を開く,打开仓库,打開倉庫,Открыть хранилище
 ui.interaction.shop_open,상점,Shop,ショップ,商店,商店,Магазин
+ui.vending.rabbit_token_purchase,토끼코인을 매입함!,Buying Rabbit Tokens!,ウサギコイン買取中！,收购兔子代币！,收購兔子代幣！,Покупаем кроличьи жетоны!
 ui.interaction.difficulty_adjustment,난이도 조정,Adjust Difficulty,難易度調整,调整难度,調整難度,Изменить сложность
 ui.interaction.workbench_open,작업대,Workbench,作業台,工作台,工作臺,Верстак
 ui.interaction.workbench_craft,제조,Craft,製造,制作,製作,Создать

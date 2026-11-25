@@ -66,6 +66,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	TObjectPtr<UTunaSweeperInteractableComponent> QuestInteractableComponent;
@@ -75,6 +76,7 @@ protected:
 
 private:
 	bool IsQuestPresent() const;
+	bool bWasPlayerNearby = false;
 	// Visit-local only: an already visible field machine leaves when this actor is unloaded.
 	// Never save this flag; a newly loaded field actor uses completed quest progress immediately.
 	bool bFieldPresentThisVisit = false;

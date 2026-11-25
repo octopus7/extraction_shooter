@@ -5,12 +5,16 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/Pawn.h"
+#include "Kismet/GameplayStatics.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
 
 ATunaSweeperQuestVendingActor::ATunaSweeperQuestVendingActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.TickInterval = 0.1f;
 	const TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerClass(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C")));
 	ConfigureInteractionDefaults(ETunaSweeperInteractionType::ShopOpen, FText::GetEmpty(),
@@ -56,6 +60,31 @@ void ATunaSweeperQuestVendingActor::EndPlay(const EEndPlayReason::Type EndPlayRe
 			Quests->OnQuestProgressChanged.RemoveAll(this);
 	}
 	Super::EndPlay(EndPlayReason);
+}
+
+void ATunaSweeperQuestVendingActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	const bool bNearby = PlayerPawn && PlayerPawn->IsLocallyControlled() &&
+		InteractableComponent->IsWithinInteractionDistance(PlayerPawn);
+	const bool bJustApproached = bNearby && !bWasPlayerNearby;
+	bWasPlayerNearby = bNearby;
+	if (!bJustApproached) return;
+
+	auto* Game = GetGameInstance<UTunaSweeperGameInstance>();
+	const auto* Quests = Game ? Game->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
+	if (!Quests || Quests->GetCoinBalance() != 0) return;
+
+	if (auto* Speech = Game->GetSubsystem<UTunaSweeperSpeechBubbleSubsystem>())
+	{
+		const FText Text = Game->ResolveLocalizedText(TEXT("ui.vending.rabbit_token_purchase"), FText::GetEmpty());
+		if (!Text.IsEmpty())
+		{
+			Speech->ShowForActor(Text, this, FVector(0, 0, 175), ETunaSweeperSpeechBubbleTailDirection::Down, 3.0f);
+		}
+	}
 }
 
 bool ATunaSweeperQuestVendingActor::IsQuestPresent() const
@@ -119,6 +148,8 @@ void ATunaSweeperQuestVendingActor::RefreshQuestPresence()
 	const bool bPresent = IsQuestPresent();
 	if (bPresent && PresenceRole == ETunaSweeperQuestVendingRole::FieldOffer) bFieldPresentThisVisit = true;
 	const bool bShopAvailable = IsShopAvailable();
+	SetActorTickEnabled(bShopAvailable);
+	if (!bShopAvailable) bWasPlayerNearby = false;
 	const FName InteractionKey = IsAwaitingDeparture() ? FName(TEXT("ui.interaction.mole_dialogue"))
 		: FName(TEXT("ui.quest.interaction_name"));
 	const auto* LocalGame = GetGameInstance<UTunaSweeperGameInstance>();
