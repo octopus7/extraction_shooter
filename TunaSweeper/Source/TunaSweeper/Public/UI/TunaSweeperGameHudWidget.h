@@ -432,6 +432,7 @@ private:
 	void ClearQuestTrailRoute();
 	TWeakObjectPtr<APawn> QuestGuidancePawn;
 	TOptional<FVector> QuestGuidanceTarget;
+	FVector QuestTrailTarget = FVector::ZeroVector;
 	float QuestGuidanceScanCountdown = 0.0f;
 	bool bQuestGuidanceIconLoadAttempted = false;
 	UPROPERTY(Transient)

@@ -1575,9 +1575,7 @@ bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchEnemyKilled(
 {
 	return Objective.Type == ETunaSweeperObjectiveType::EnemyKilled &&
 		(!Objective.bRequiresVehicleCollision || bByVehicleCollision) &&
-		(Objective.EnemyId.IsNone() || Objective.EnemyId == EnemyId) &&
-		(Objective.EnemyClassPaths.IsEmpty() ||
-			(EnemyClass && Objective.EnemyClassPaths.Contains(FSoftClassPath(EnemyClass))));
+		Objective.MatchesEnemyTarget(EnemyId, EnemyClass);
 }
 
 bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchInteractionCompleted(

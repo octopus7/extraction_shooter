@@ -150,6 +150,12 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FSoftClassPath> EnemyClassPaths;
 
+	bool MatchesEnemyTarget(FName Id, const UClass* Class) const
+	{
+		return (EnemyId.IsNone() || EnemyId == Id) &&
+			(EnemyClassPaths.IsEmpty() || (Class && EnemyClassPaths.Contains(FSoftClassPath(Class))));
+	}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	bool bRequiresVehicleCollision = false;
 

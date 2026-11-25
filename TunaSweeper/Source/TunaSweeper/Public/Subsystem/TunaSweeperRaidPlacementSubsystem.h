@@ -38,8 +38,8 @@ public:
 	/** Order-independent deterministic roll in [0, 1) for a placement. */
 	static float GetDeterministicPlacementRoll(int32 InRaidSeed, int32 PlacementId);
 
-	/** Returns authored anchor IDs eligible for a kill or guaranteed item source in this raid. */
-	void GetQuestGuidanceAnchorIds(UWorld* World, const FTunaSweeperObjectiveDefinition& Objective,
+	/** Returns authored anchor IDs for guaranteed item sources in this raid. */
+	void GetItemGuidanceAnchorIds(UWorld* World,
 		const TSet<int32>& GuaranteedContents, TSet<int32>& OutEnemies, TSet<int32>& OutLoot);
 
 private:

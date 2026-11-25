@@ -1,4 +1,6 @@
 #include "Quest/QuestGuidanceLocations.h"
+#include "AI/TunaSweeperEnemyCharacter.h"
+#include "EngineUtils.h"
 
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -24,6 +26,15 @@ namespace
 	};
 
 	using FBakedMaps = TMap<FName, TArray<FBakedLocation>>;
+
+	void AddLivingEnemyLocations(UWorld* World, const FTunaSweeperObjectiveDefinition& Objective, TArray<FVector>& Locations)
+	{
+		for (TActorIterator<ATunaSweeperEnemyCharacter> Enemy(World); Enemy; ++Enemy)
+		{
+			if (!Enemy->IsDead() && Objective.MatchesEnemyTarget(Enemy->GetEnemyId(), Enemy->GetClass()))
+				Locations.AddUnique(Enemy->GetActorLocation());
+		}
+	}
 
 	FBakedMaps LoadBakedMaps()
 	{
@@ -77,10 +88,6 @@ namespace
 
 			switch (Objective.Type)
 			{
-			case EType::EnemyKilled:
-				return Row.Kind == TEXT("enemy") && (Objective.EnemyId.IsNone() || Objective.EnemyId == Row.Key) &&
-					(Objective.EnemyClassPaths.IsEmpty() ||
-					 Objective.EnemyClassPaths.ContainsByPredicate([&Row](const FSoftClassPath& Class) { return FName(*Class.ToString()) == Row.Detail; }));
 			case EType::ItemSubmitted:
 				if (bReadyToDeliver)
 					return (Row.Kind == TEXT("delivery") && Row.NumericKey == QuestId && Row.Detail == Objective.ObjectiveId) ||
@@ -139,6 +146,11 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 		if (State.bCompleted || !MatchesLevel(Objective.SourceLevelName, Level)) continue;
 
 		using EType = ETunaSweeperObjectiveType;
+		if (Objective.Type == EType::EnemyKilled)
+		{
+			AddLivingEnemyLocations(World, Objective, OutLocations);
+			continue;
+		}
 		const bool bDelivery = Objective.Type == EType::ItemSubmitted &&
 			Game->CountQuestSubmissionItemById(Objective.ItemId) >= State.RequiredCount - State.CurrentCount;
 		int32 WorkbenchId = INDEX_NONE;
@@ -157,11 +169,8 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 				Items->GetGuaranteedContentsForItem(Objective.ItemId, Match.Contents);
 			if (auto* Spawns = Game->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>())
 				Spawns->GetGuaranteedLootLocations(World, Match.Contents, OutLocations);
-		}
-		if (bFindItems || Objective.Type == EType::EnemyKilled)
-		{
 			if (auto* Raid = Game->GetSubsystem<UTunaSweeperRaidPlacementSubsystem>())
-				Raid->GetQuestGuidanceAnchorIds(World, Objective, Match.Contents, Match.EnemyAnchors, Match.LootAnchors);
+				Raid->GetItemGuidanceAnchorIds(World, Match.Contents, Match.EnemyAnchors, Match.LootAnchors);
 		}
 		if (Rows)
 			for (const auto& Row : *Rows)
@@ -171,6 +180,37 @@ void QuestGuidanceLocations::Get(UWorld* World, TArray<FVector>& OutLocations)
 
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
+#include "Misc/ScopeExit.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDeliveryRobotGuidanceTest, "TunaSweeper.Quest.Guidance.MovingDeliveryRobots",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FDeliveryRobotGuidanceTest::RunTest(const FString& Parameters)
+{
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	ON_SCOPE_EXIT { World->DestroyWorld(false); };
+	FTunaSweeperObjectiveDefinition Objective;
+	for (const TCHAR* Side : {TEXT("Marine"), TEXT("Pirate")})
+	{
+		const FString Name = FString(TEXT("BP_DeliveryRobot_")) + Side;
+		const FString Path = TEXT("/Game/Characters/Region2Robots/") + Name + TEXT(".") + Name + TEXT("_C");
+		UClass* Class = LoadClass<ATunaSweeperEnemyCharacter>(nullptr, *Path);
+		if (!TestNotNull(TEXT("Delivery robot class"), Class)) return false;
+		ATunaSweeperEnemyCharacter* Robot = World->SpawnActor<ATunaSweeperEnemyCharacter>(Class);
+		if (!TestNotNull(TEXT("Delivery robot"), Robot)) return false;
+		Objective.EnemyClassPaths = {FSoftClassPath(Class)};
+		Robot->SetActorLocation(FVector(530, -720, 220));
+		TArray<FVector> Locations;
+		AddLivingEnemyLocations(World, Objective, Locations);
+		TestTrue(TEXT("Marker follows this faction to its current position"),
+			Locations.Num() == 1 && Locations[0] == Robot->GetActorLocation());
+		Robot->Destroy();
+		Locations.Reset();
+		AddLivingEnemyLocations(World, Objective, Locations);
+		TestTrue(TEXT("Removed robot leaves no marker"), Locations.IsEmpty());
+	}
+	return true;
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FQuestGuidanceBakeTest, "TunaSweeper.Quest.Guidance.BakedLocations",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)

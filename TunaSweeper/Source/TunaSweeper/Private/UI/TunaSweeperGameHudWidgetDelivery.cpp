@@ -292,7 +292,12 @@ void UTunaSweeperGameHudWidget::RefreshQuestGuidance(float DeltaTime)
         TArray<FVector> Locations;
         QuestGuidanceLocations::Get(Pawn->GetWorld(), Locations);
         auto Target = FindClosestQuestGuidanceLocation(Pawn->GetActorLocation(), Locations);
-        if (Target != QuestGuidanceTarget) ClearQuestTrailRoute();
+        if (Target.IsSet() != QuestGuidanceTarget.IsSet() ||
+            (Target.IsSet() && FVector::DistSquared(Target.GetValue(), QuestTrailTarget) > FMath::Square(75.0)))
+        {
+            ClearQuestTrailRoute();
+            if (Target.IsSet()) QuestTrailTarget = Target.GetValue();
+        }
         QuestGuidanceTarget = Target;
     }
     if (!QuestGuidanceTarget.IsSet()) return;

@@ -107,6 +107,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
 	bool IsDead() const { return bIsDead; }
+	FName GetEnemyId() const { return EnemyId; }
 	float GetHealth() const { return CurrentHealth; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat|Burn")
