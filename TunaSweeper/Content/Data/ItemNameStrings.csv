@@ -67,7 +67,7 @@ item.laser_sight.desc,소총의 전술 장비 슬롯에 장착하는 레이저 �
 item.canned_food.desc,오래 보관할 수 있는 평범한 식량 통조림이다,A plain canned meal with a long shelf life,長期保存できる普通の缶詰食品,可以长期保存的普通罐头食品。,可以長期保存的普通罐頭食品。,Обычные консервы с длительным сроком хранения.
 item.water_bottle.desc,갈증을 줄이는 깨끗한 생수다,Clean bottled water that eases thirst,渇きを抑えるきれいな飲料水,能解渴的干净瓶装水。,能解渴的乾淨瓶裝水。,"Чистая питьевая вода, утоляющая жажду."
 item.large_water_bottle.desc,생수 두 병을 합친 큰 생수다,Two bottles worth of clean water,2本分のきれいな飲料水,相当于两瓶水的大瓶装水。,相當於兩瓶水的大瓶裝水。,Большая бутылка чистой воды объёмом в две обычные.
-item.energy_bar.desc,빠르게 허기를 채우는 작은 에너지바다,A small energy bar that quickly eases hunger,素早く空腹を満たす小さなエナジーバー,能迅速缓解饥饿的小型能量棒。,能迅速緩解飢餓的小型能量棒。,"Небольшой батончик, который быстро утоляет голод."
+item.energy_bar.desc,포만감을 채우고 60초 동안 전력 질주 시 스태미나 소모를 20% 줄인다.,Restores satiety and reduces sprint stamina consumption by 20% for 60 seconds.,満腹度を回復し、60秒間ダッシュ時のスタミナ消費を20％軽減する。,恢复饱食度，并在60秒内使冲刺时的耐力消耗降低20%。,恢復飽食度，並在60秒內使衝刺時的耐力消耗降低20%。,Восстанавливает сытость и на 60 сек. снижает расход выносливости при спринте на 20%.
 item.canned_tuna.desc,노란 라벨의 참치 통조림이다,A yellow labeled can of tuna,黄色いラベルのツナ缶,贴着黄色标签的金枪鱼罐头。,貼着黃色標籤的鮪魚罐頭。,Банка тунца с жёлтой этикеткой.
 item.bandage.desc,가벼운 상처를 응급 처치하는 붕대다,A bandage for simple first aid,軽い傷を応急処置する包帯,用于处理轻伤的绷带。,用於處理輕傷的繃帶。,Бинт для оказания первой помощи при лёгких ранениях.
 item.first_aid_kit.desc,기본 치료 도구가 들어 있는 응급키트다,A first aid kit with basic treatment tools,基本的な治療道具が入った救急キット,装有基础医疗用品的急救包。,裝有基礎醫療用品的急救包。,Аптечка с основными средствами первой помощи.

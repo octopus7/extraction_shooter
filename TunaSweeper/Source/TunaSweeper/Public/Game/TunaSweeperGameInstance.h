@@ -294,6 +294,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 	friend class FTunaSweeperQuestVendingTest;
 	friend class FTunaQuestRewardAchievementsTest;
 	friend class FTunaRocketItemUseTest;
+	friend class FTunaSweeperDemoStaminaTuningTest;
 	friend class FTunaSweeperSpecialVehicleWorldProgressTest;
 	friend class FTunaSweeperParcelCollectionTest;
 	friend class FTunaSweeperVolatileArrivalTest;

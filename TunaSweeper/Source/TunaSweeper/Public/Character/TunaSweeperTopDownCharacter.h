@@ -186,6 +186,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
 	float GetStaminaPercent() const;
 
+	void ApplyEnergyBarSprintBuff();
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
 	bool IsSprinting() const { return bIsSprinting; }
 
@@ -693,6 +695,7 @@ private:
 	float CurrentCameraBaseFOV = 0.0f;
 	float CurrentStamina = 100.0f;
 	double StaminaRemainder = 0.0;
+	float EnergyBarSprintBuffRemainingSeconds = 0.0f;
 	float BaseMaxHealth = 100.0f;
 	float BaseMaxFood = 100.0f;
 	float BaseMaxHydration = 100.0f;

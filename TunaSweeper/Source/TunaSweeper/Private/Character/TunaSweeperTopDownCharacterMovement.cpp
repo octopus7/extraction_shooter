@@ -14,6 +14,17 @@ namespace TunaSweeperPlayerFootsteps
 	constexpr float MinimumIntervalSeconds = 0.05f;
 }
 
+namespace TunaSweeperEnergyBar
+{
+	constexpr float SprintBuffDurationSeconds = 60.0f;
+	constexpr float SprintDrainReduction = 0.20f;
+}
+
+void ATunaSweeperTopDownCharacter::ApplyEnergyBarSprintBuff()
+{
+	EnergyBarSprintBuffRemainingSeconds = TunaSweeperEnergyBar::SprintBuffDurationSeconds;
+}
+
 void ATunaSweeperTopDownCharacter::UpdateRoll(float DeltaSeconds)
 {
 	if (!bIsRolling)
@@ -36,6 +47,8 @@ void ATunaSweeperTopDownCharacter::UpdateRoll(float DeltaSeconds)
 void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 {
 	const float ClampedDeltaSeconds = FMath::Max(0.0f, DeltaSeconds);
+	const float BuffedDeltaSeconds = FMath::Min(ClampedDeltaSeconds, EnergyBarSprintBuffRemainingSeconds);
+	EnergyBarSprintBuffRemainingSeconds -= BuffedDeltaSeconds;
 	MaxStamina = TunaSweeperCombatValue::Round(MaxStamina);
 	const float EffectiveMaxStamina = MaxStamina;
 	if (EffectiveMaxStamina <= 0.0f)
@@ -63,8 +76,9 @@ void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 
 	if (bIsSprinting)
 	{
+		const float EffectiveDrainSeconds = ClampedDeltaSeconds - BuffedDeltaSeconds * TunaSweeperEnergyBar::SprintDrainReduction;
 		CurrentStamina = TunaSweeperCombatValue::Accumulate(CurrentStamina, EffectiveMaxStamina,
-			-FMath::Max(0.0f, SprintStaminaDrainPerSecond) * ClampedDeltaSeconds, StaminaRemainder);
+			-FMath::Max(0.0f, SprintStaminaDrainPerSecond) * EffectiveDrainSeconds, StaminaRemainder);
 		if (CurrentStamina <= KINDA_SMALL_NUMBER)
 		{
 			CurrentStamina = 0.0f;

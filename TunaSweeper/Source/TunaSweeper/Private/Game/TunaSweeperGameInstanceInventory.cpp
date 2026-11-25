@@ -6,6 +6,11 @@
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
+namespace
+{
+	constexpr int32 EnergyBarItemId = 3003;
+}
+
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
 {
 	EnsureInventoryStateInitialized();
@@ -359,6 +364,14 @@ bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotRefere
 	if (DebuffComponent)
 	{
 		DebuffComponent->RemoveDebuffs(ItemDefinition.ClearsDebuffIds);
+	}
+
+	if (ItemInstance->ItemId == EnergyBarItemId)
+	{
+		if (auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn))
+		{
+			Character->ApplyEnergyBarSprintBuff();
+		}
 	}
 
 	ItemInstance->Quantity -= 1;
