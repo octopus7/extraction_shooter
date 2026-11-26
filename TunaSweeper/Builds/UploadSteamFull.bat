@@ -41,6 +41,8 @@ if errorlevel 1 (
 set "POWERSHELL=powershell.exe"
 where pwsh.exe >nul 2>nul
 if not errorlevel 1 set "POWERSHELL=pwsh.exe"
+"%POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\SetSteamFullDepotExclusions.ps1" -DepotVdf "%DEPOT_VDF%"
+if errorlevel 1 exit /b 1
 "%POWERSHELL%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\BuildScripts\ValidateMovementCheatPackage.ps1" -PackageRoot "%PACKAGE_ROOT%"
 if errorlevel 1 exit /b 1
 
