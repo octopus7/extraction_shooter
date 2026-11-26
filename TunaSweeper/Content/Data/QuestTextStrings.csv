@@ -2,8 +2,8 @@ string_key,ko,en,ja,zh-Hans,zh-Hant,ru
 quest.ui.title,퀘스트,Quests,クエスト,任务,任務,Задания
 quest.ui.list_title,퀘스트 목록,Quest List,クエスト一覧,任务列表,任務列表,Список заданий
 quest.ui.tab.available,수락가능,Available,受注可能,可接取,可接取,Доступные
-quest.ui.tab.in_progress,진행중,In Progress,進行中,进行中,進行中,Выполняются
-quest.ui.tab.completed,보상완료,Rewards Claimed,報酬受取済み,奖励已领取,獎勵已領取,Награды получены
+quest.ui.tab.in_progress,진행중,Active,進行中,进行中,進行中,Выполняются
+quest.ui.tab.completed,보상완료,Claimed,報酬受取済み,奖励已领取,獎勵已領取,Награды получены
 quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select a quest from the list on the right.,右の一覧からクエストを選択してください,请从右侧列表选择任务。,請從右側列表選擇任務。,Выберите задание в списке справа.
 quest.ui.empty.available,수락 가능한 퀘스트가 없습니다.,No available quests.,受注可能なクエストはありません,没有可接取的任务。,沒有可接取的任務。,Нет доступных заданий.
 quest.ui.empty.in_progress,진행 중인 퀘스트가 없습니다.,No active quests.,進行中のクエストはありません,没有进行中的任务。,沒有進行中的任務。,Нет активных заданий.

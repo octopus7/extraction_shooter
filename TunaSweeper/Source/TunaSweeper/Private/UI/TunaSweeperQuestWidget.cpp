@@ -35,9 +35,11 @@ namespace
 	constexpr float QuestListPanelPadding = 12.0f;
 	constexpr float QuestListEntryWidth = QuestListWidth - QuestListPanelPadding * 2.0f;
 	constexpr float QuestListEntrySpacing = 6.0f;
+	constexpr float QuestTabButtonHorizontalPadding = 6.0f;
+	constexpr float QuestTabWidthMin = 78.0f;
 	constexpr float QuestTabCountBadgeMinWidth = 22.0f;
 	constexpr float QuestTabCountBadgeHorizontalPadding = 5.0f;
-	constexpr float QuestTabCountBadgeGap = 2.0f;
+	constexpr float QuestTabCountBadgeGap = 4.0f;
 
 	FSlateBrush MakeQuestBoxBrush(
 		const FVector2D& ImageSize,
@@ -1182,7 +1184,7 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 		}
 
 		const bool bActive = ActiveFilter == Tab.Filter;
-		const FText TabLabel = GetQuestText(Tab.TextKey);
+		float TabWidth = QuestTabButtonHorizontalPadding * 2.0f;
 		if (Tab.Button)
 		{
 			Tab.Button->SetVisibility(ESlateVisibility::Visible);
@@ -1190,11 +1192,26 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 				Tab.Button,
 				TunaSweeperUIStyle::EButtonRole::Tab,
 				bActive);
+			FButtonStyle Style = Tab.Button->GetStyle();
+			FMargin NormalPadding = Style.NormalPadding;
+			FMargin PressedPadding = Style.PressedPadding;
+			NormalPadding.Left = NormalPadding.Right = QuestTabButtonHorizontalPadding;
+			PressedPadding.Left = PressedPadding.Right = QuestTabButtonHorizontalPadding;
+			Style.SetNormalPadding(NormalPadding);
+			Style.SetPressedPadding(PressedPadding);
+			Tab.Button->SetStyle(Style);
 		}
 		if (Tab.Text)
 		{
-			Tab.Text->SetText(TabLabel);
+			Tab.Text->SetText(GetQuestText(Tab.TextKey));
 			TunaSweeperUIStyle::ApplyLabel(Tab.Text, 13);
+			Tab.Text->SetClipping(EWidgetClipping::ClipToBounds);
+			Tab.Text->SetTextOverflowPolicy(ETextOverflowPolicy::Ellipsis);
+			TabWidth += MeasureQuestTextWidth(Tab.Text->GetText(), Tab.Text->GetFont());
+			if (UOverlaySlot* TextSlot = Cast<UOverlaySlot>(Tab.Text->Slot))
+			{
+				TextSlot->SetHorizontalAlignment(HAlign_Fill);
+			}
 		}
 		if (Tab.CountBadge && Tab.CountText)
 		{
@@ -1202,15 +1219,28 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 			Tab.CountText->SetText(CountLabel);
 			Tab.CountBadge->SetVisibility(ESlateVisibility::HitTestInvisible);
 			Tab.CountText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
-			const float TextWidth = Tab.Text
-				? MeasureQuestTextWidth(TabLabel, Tab.Text->GetFont())
-				: 0.0f;
 			const float CountTextWidth = MeasureQuestTextWidth(CountLabel, Tab.CountText->GetFont());
+			const FMargin BadgePadding = Tab.CountBadge->GetPadding();
 			const float BadgeWidth = FMath::Max(
 				QuestTabCountBadgeMinWidth,
-				CountTextWidth + QuestTabCountBadgeHorizontalPadding * 2.0f);
-			const float BadgeOffsetX = TextWidth * 0.5f + QuestTabCountBadgeGap + BadgeWidth * 0.5f;
-			Tab.CountBadge->SetRenderTranslation(FVector2D(BadgeOffsetX, 0.0f));
+				CountTextWidth + BadgePadding.Left + BadgePadding.Right);
+			TabWidth += BadgeWidth + QuestTabCountBadgeGap;
+			if (UOverlaySlot* BadgeSlot = Cast<UOverlaySlot>(Tab.CountBadge->Slot))
+			{
+				BadgeSlot->SetHorizontalAlignment(HAlign_Right);
+			}
+			Tab.CountBadge->SetRenderTranslation(FVector2D::ZeroVector);
+			if (UOverlaySlot* TextSlot = Tab.Text ? Cast<UOverlaySlot>(Tab.Text->Slot) : nullptr)
+			{
+				FMargin TextPadding = TextSlot->GetPadding();
+				TextPadding.Right = BadgeWidth + QuestTabCountBadgeGap;
+				TextSlot->SetPadding(TextPadding);
+			}
+		}
+		if (UHorizontalBoxSlot* ButtonSlot = Tab.Button ? Cast<UHorizontalBoxSlot>(Tab.Button->Slot) : nullptr)
+		{
+			ButtonSlot->SetSize(MakeQuestSlateChildSize(
+				ESlateSizeRule::Fill, FMath::Max(QuestTabWidthMin, TabWidth)));
 		}
 	}
 }

@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
+#include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "WidgetBlueprint.h"
@@ -37,6 +38,28 @@ bool FTrackedQuestWidgetLayoutTest::RunTest(const FString& Parameters)
 		if (!TestNotNull(TEXT("Compiled quest button"), AuthoredTrack)) return false;
 		Instance->RefreshQuestView();
 		TestTrue(TEXT("Refreshing retains authored layout"), Instance->GetWidgetFromName(TEXT("QuestTrackButton")) == AuthoredTrack);
+		for (const TCHAR* TabName : {TEXT("QuestAvailableTab"), TEXT("QuestInProgressTab")})
+		{
+			UWidget* Label = Instance->GetWidgetFromName(FName(*(FString(TabName) + TEXT("Text"))));
+			if (!Label && FString(Name) == TEXT("WBP_QuestMenu") && FString(TabName) == TEXT("QuestAvailableTab"))
+			{
+				continue;
+			}
+			UWidget* Badge = Instance->GetWidgetFromName(FName(*(FString(TabName) + TEXT("CountBadge"))));
+			if (!TestNotNull(TEXT("Quest tab label"), Label) || !TestNotNull(TEXT("Quest tab count"), Badge))
+			{
+				return false;
+			}
+			const auto* LabelSlot = Cast<UOverlaySlot>(Label->Slot);
+			const auto* BadgeSlot = Cast<UOverlaySlot>(Badge->Slot);
+			if (!TestNotNull(TEXT("Quest tab label slot"), LabelSlot) || !TestNotNull(TEXT("Quest tab count slot"), BadgeSlot))
+			{
+				return false;
+			}
+			TestTrue(TEXT("Quest tab reserves label space for its badge"), LabelSlot->GetPadding().Right >= 22.0f);
+			TestTrue(TEXT("Quest tab count stays on the right"), BadgeSlot->GetHorizontalAlignment() == HAlign_Right);
+			TestTrue(TEXT("Quest tab count has no paint offset"), Badge->GetRenderTransform().Translation.IsNearlyZero());
+		}
 	}
 	const auto* Hud = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/WBP_GameHud.WBP_GameHud"));
 	if (!TestNotNull(TEXT("HUD"), Hud)) return false;
