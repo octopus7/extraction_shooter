@@ -41,6 +41,10 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 		if (auto* Achievements = GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
 		{
 			Achievements->DiscardPendingExtraction(GetWorld());
+			if (Destination == ETunaSweeperLevelTravelDestination::Bunker)
+			{
+				Achievements->CaptureCompletedExtraction(InstigatorPawn, TargetLevelName, /*bCaptureTimedExtraction=*/false);
+			}
 			Achievements->PrepareRegionTravel(GetWorld(), TargetLevelName);
 		}
 		TunaGameInstance->HandleLevelTravelPersistence(SourceLevelName, TargetLevelName);

@@ -88,8 +88,7 @@ void UTunaSweeperAchievementSubsystem::HandleGameplayWorldReady(UWorld* World)
 	const FName Level(*UGameplayStatics::GetCurrentLevelName(World, true));
 	if (!IsGameplayReportingAllowed()) { CancelRaid(); return; }
 
-	// Capture was made only after the extraction hold completed. A request, failed
-	// load, death, or arrival at a different destination cannot commit the unlock.
+	// Commit the departure snapshot only on arrival at the intended destination.
 	if (!PendingExtractionDestination.IsNone() && Level == PendingExtractionDestination)
 	{
 		GameplaySnapshot.bSuccessfulExtraction = true;
@@ -127,7 +126,7 @@ TOptional<double> UTunaSweeperAchievementSubsystem::GetActiveRaidSeconds() const
 	return {};
 }
 
-void UTunaSweeperAchievementSubsystem::CaptureCompletedExtraction(APawn* Player, FName Destination)
+void UTunaSweeperAchievementSubsystem::CaptureCompletedExtraction(APawn* Player, FName Destination, bool bCaptureTimedExtraction)
 {
 	if (!IsGameplayReportingAllowed() || !RaidState.bActive || !Player || !Player->IsLocallyControlled() ||
 		Player->GetWorld() != GetWorld() || Destination.IsNone()) return;
@@ -136,8 +135,11 @@ void UTunaSweeperAchievementSubsystem::CaptureCompletedExtraction(APawn* Player,
 	const auto& State = Vitals->GetVitalsState();
 	if (!FMath::IsFinite(State.Health) || !FMath::IsFinite(State.MaxHealth) || State.Health <= 0 || State.MaxHealth <= 0) return;
 	PendingExtraction = {};
-	PendingExtraction.RaidKills = RaidState.Kills;
-	PendingExtraction.RaidSeconds = GetActiveRaidSeconds().GetValue();
+	if (bCaptureTimedExtraction)
+	{
+		PendingExtraction.RaidKills = RaidState.Kills;
+		PendingExtraction.RaidSeconds = GetActiveRaidSeconds().GetValue();
+	}
 	PendingExtraction.Health = State.Health;
 	PendingExtraction.MaxHealth = State.MaxHealth;
 	PendingExtractionDestination = FName(*FPackageName::GetShortName(Destination.ToString()));
