@@ -39,6 +39,7 @@
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "Scenario/TrailerGameMode.h"
 #include "UI/TunaSweeperStartupLogoWidget.h"
+#include "UI/Sol62/StartupLanguageGPT62Sol.h"
 #include "UI/TunaSweeperStartupLogoFlow.h"
 #include "UI/TunaSweeperPauseMenuWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
@@ -501,6 +502,17 @@ void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayRea
 		StartupLogoWidget->RemoveFromParent();
 		StartupLogoWidget = nullptr;
 	}
+	if (StartupLanguageWidget)
+	{
+		StartupLanguageWidget->OnLanguageSelected.Unbind();
+		StartupLanguageWidget->RemoveFromParent();
+		StartupLanguageWidget = nullptr;
+		if (ScreenFadeWidget)
+		{
+			ScreenFadeWidget->RemoveFromParent();
+			ScreenFadeWidget = nullptr;
+		}
+	}
 	ActiveWardrobeActor.Reset();
 	ActiveQuestRewardLockerActor.Reset();
 	ActiveDebugArmoryActor.Reset();
@@ -782,7 +794,11 @@ void ATunaSweeperPlayerController::EnsureGameHudWidget()
 
 void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 {
-	if (IntroMenuWidget || StartupLogoWidget || !IsLocalController())
+	if (IntroMenuWidget || StartupLogoWidget || StartupLanguageWidget || !IsLocalController())
+	{
+		return;
+	}
+	if (TryShowStartupLanguage())
 	{
 		return;
 	}

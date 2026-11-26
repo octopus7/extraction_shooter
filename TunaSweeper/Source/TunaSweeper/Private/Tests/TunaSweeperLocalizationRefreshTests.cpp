@@ -331,6 +331,18 @@ bool FTunaSweeperLanguageCodesTest::RunTest(const FString& Parameters)
 	TGuardValue<FString> IniGuard(GGameUserSettingsIni, TestIni);
 	ON_SCOPE_EXIT { GConfig->UnloadFile(TestIni); IFileManager::Get().Delete(*TestIni); };
 	TStrongObjectPtr<UTunaSweeperGameInstance> Instance(NewObject<UTunaSweeperGameInstance>());
+	Instance->InitializeGlobalLanguageSetting();
+	auto InitialSavedLanguage = ETunaSweeperItemTextLanguage::Korean;
+	TestFalse(TEXT("Starting without a preference does not save the suggestion"), Instance->LoadGlobalLanguageSetting(InitialSavedLanguage));
+	TestTrue(TEXT("The initial suggestion is English"), Instance->GetCurrentTextLanguage() == ETunaSweeperItemTextLanguage::English);
+	TestFalse(TEXT("The English suggestion still requires confirmation"), Instance->HasConfirmedTextLanguage());
+	TestTrue(TEXT("Explicitly confirming the suggested English saves it"), Instance->ConfirmInitialTextLanguage(ETunaSweeperItemTextLanguage::English));
+	TestTrue(TEXT("A confirmed language can skip the picker"), Instance->HasConfirmedTextLanguage());
+	TestTrue(TEXT("Selecting a different startup language succeeds"), Instance->ConfirmInitialTextLanguage(ETunaSweeperItemTextLanguage::Korean));
+	UTunaSweeperGameInstance* ReopenedInstance = NewObject<UTunaSweeperGameInstance>();
+	ReopenedInstance->InitializeGlobalLanguageSetting();
+	TestTrue(TEXT("A later launch restores Korean"), ReopenedInstance->GetCurrentTextLanguage() == ETunaSweeperItemTextLanguage::Korean);
+	TestTrue(TEXT("A later launch can skip the picker"), ReopenedInstance->HasConfirmedTextLanguage());
 	for (const auto Language : SupportedLanguages)
 	{
 		TestTrue(TEXT("Engine culture is available"), FInternationalization::Get().GetCulture(ToLanguageCode(Language)).IsValid());

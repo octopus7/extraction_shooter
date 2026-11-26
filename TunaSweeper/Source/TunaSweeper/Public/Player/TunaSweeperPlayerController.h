@@ -15,6 +15,7 @@ class ATunaSweeperHopperEnemyCharacter;
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperStartupLogoWidget;
+class UStartupLanguageGPT62Sol;
 class UTunaSweeperPauseMenuWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperScenarioPresentationWidget;
@@ -248,6 +249,9 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperStartupLogoWidget> StartupLogoWidget;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UStartupLanguageGPT62Sol> StartupLanguageWidget;
+
 	UPROPERTY(BlueprintReadOnly, Category = "HUD")
 	TObjectPtr<UTunaSweeperIntroMenuWidget> DifficultyAdjustmentWidget;
 
@@ -319,6 +323,9 @@ private:
 	bool TryStartDeveloperLogo();
 	bool bDeveloperLogoSkippedByDailyLimit = false;
 	void HandleDeveloperLogoFinished(bool bVideoCompleted);
+	bool TryShowStartupLanguage();
+	void HandleStartupLanguageSelected(ETunaSweeperItemTextLanguage Language);
+	void CompleteStartupLanguageTransition();
 	void EnsureScenarioPresentationWidget();
 	void BindHousingStateChanged();
 	void HandleHousingStateChanged();

@@ -1,7 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
 
-#include "Settings/TunaSweeperBuildTargetSettings.h"
-
 void UTunaSweeperGameInstance::SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately)
 {
 	const auto PreviousLanguage = GetCurrentTextLanguage();
@@ -10,13 +8,29 @@ void UTunaSweeperGameInstance::SetCurrentTextLanguage(ETunaSweeperItemTextLangua
 
 	if (bSaveImmediately)
 	{
-		SaveGlobalLanguageSetting();
+		SaveGlobalLanguageSetting(Language);
 	}
 
 	if (PreviousLanguage != GetCurrentTextLanguage())
 	{
 		OnLanguageChanged.Broadcast();
 	}
+}
+
+bool UTunaSweeperGameInstance::HasConfirmedTextLanguage() const
+{
+	ETunaSweeperItemTextLanguage SavedLanguage = ETunaSweeperItemTextLanguage::English;
+	return LoadGlobalLanguageSetting(SavedLanguage);
+}
+
+bool UTunaSweeperGameInstance::ConfirmInitialTextLanguage(ETunaSweeperItemTextLanguage Language)
+{
+	if (!SaveGlobalLanguageSetting(Language))
+	{
+		return false;
+	}
+	SetCurrentTextLanguage(Language, false);
+	return true;
 }
 
 void UTunaSweeperGameInstance::SetTextLanguageOverride(TOptional<ETunaSweeperItemTextLanguage> Language)
@@ -55,28 +69,9 @@ void UTunaSweeperGameInstance::InitializeGlobalLanguageSetting()
 		return;
 	}
 
-	FString DistributionChannel(TEXT("Steam"));
-	if (GConfig)
-	{
-		GConfig->GetString(TEXT("TunaSweeper.Distribution"), TEXT("DistributionChannel"), DistributionChannel, GGameIni);
-	}
-	DistributionChannel.TrimStartAndEndInline();
-	if (DistributionChannel.IsEmpty())
-	{
-		DistributionChannel = TEXT("Steam");
-	}
-#if WITH_EDITOR
-	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
-	{
-		DistributionChannel = BuildTargetSettings->GetDistributionChannel();
-	}
-#endif
-
-	CurrentTextLanguage = DistributionChannel.Equals(TEXT("Steam"), ESearchCase::IgnoreCase)
-		? ETunaSweeperItemTextLanguage::English
-		: DetectDefaultLanguageFromOS();
+	// Keep OS detection available; the first-launch flow currently suggests English.
+	CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;
 	ApplyCurrentLanguageCulture();
-	SaveGlobalLanguageSetting();
 }
 
 bool UTunaSweeperGameInstance::LoadGlobalLanguageSetting(ETunaSweeperItemTextLanguage& OutLanguage) const
@@ -99,19 +94,39 @@ bool UTunaSweeperGameInstance::LoadGlobalLanguageSetting(ETunaSweeperItemTextLan
 	return TunaSweeperLanguage::TryParseLanguageCode(SavedLanguageCode, OutLanguage);
 }
 
-void UTunaSweeperGameInstance::SaveGlobalLanguageSetting() const
+bool UTunaSweeperGameInstance::SaveGlobalLanguageSetting(ETunaSweeperItemTextLanguage Language) const
 {
-	if (!GConfig)
+	const FConfigBranch* Settings = GConfig
+		? GConfig->FindBranch(FName(*GGameUserSettingsIni), GGameUserSettingsIni)
+		: nullptr;
+	if (!Settings || Settings->IniPath.IsEmpty())
 	{
-		return;
+		return false;
 	}
 
-	GConfig->SetString(
-		TunaSweeperLanguage::SectionName,
-		TunaSweeperLanguage::LanguageKey,
-		TunaSweeperLanguage::ToLanguageCode(CurrentTextLanguage),
-		GGameUserSettingsIni);
+	using namespace TunaSweeperLanguage;
+	const TCHAR* Code = ToLanguageCode(Language);
+	FString PreviousCode;
+	const bool bHadPreviousCode = GConfig->GetString(SectionName, LanguageKey, PreviousCode, GGameUserSettingsIni);
+	GConfig->SetString(SectionName, LanguageKey, Code, GGameUserSettingsIni);
 	GConfig->Flush(false, GGameUserSettingsIni);
+	FConfigFile SavedConfig;
+	// The cache accepts a named branch such as GameUserSettings. Read requires its disk path.
+	SavedConfig.Read(Settings->IniPath);
+	FString SavedCode;
+	if (SavedConfig.GetString(SectionName, LanguageKey, SavedCode) && SavedCode == Code)
+	{
+		return true;
+	}
+	if (bHadPreviousCode)
+	{
+		GConfig->SetString(SectionName, LanguageKey, *PreviousCode, GGameUserSettingsIni);
+	}
+	else
+	{
+		GConfig->RemoveKey(SectionName, LanguageKey, GGameUserSettingsIni);
+	}
+	return false;
 }
 
 ETunaSweeperItemTextLanguage UTunaSweeperGameInstance::DetectDefaultLanguageFromOS() const

@@ -435,6 +435,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interface")
 	void SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately = true);
 
+	bool HasConfirmedTextLanguage() const;
+	bool ConfirmInitialTextLanguage(ETunaSweeperItemTextLanguage Language);
+
 	void SetTextLanguageOverride(TOptional<ETunaSweeperItemTextLanguage> Language);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interface")
@@ -1157,9 +1160,10 @@ private:
 	void TrimSaveGameBackups() const;
 	bool LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const;
 	bool SaveActiveSaveSlotSelection() const;
+	friend class FTunaSweeperLanguageCodesTest;
 	void InitializeGlobalLanguageSetting();
 	bool LoadGlobalLanguageSetting(ETunaSweeperItemTextLanguage& OutLanguage) const;
-	void SaveGlobalLanguageSetting() const;
+	bool SaveGlobalLanguageSetting(ETunaSweeperItemTextLanguage Language) const;
 	ETunaSweeperItemTextLanguage DetectDefaultLanguageFromOS() const;
 	void ApplyCurrentLanguageCulture() const;
 	int32 FindFirstExistingSaveSlotIndex() const;
