@@ -1390,6 +1390,11 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		double SortOrder = 0.0;
 		QuestObject->TryGetNumberField(TEXT("sort_order"), SortOrder);
 		Definition.SortOrder = FMath::RoundToInt(SortOrder);
+		if (QuestObject->HasField(TEXT("required_completed_world_progress_id")))
+		{
+			Definition.RequiredCompletedWorldProgressId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("required_completed_world_progress_id"));
+			if (Definition.RequiredCompletedWorldProgressId.IsNone()) return false;
+		}
 		const TArray<TSharedPtr<FJsonValue>>* Prerequisites = nullptr;
 		if (QuestObject->HasField(TEXT("required_completed_quest_ids")))
 		{
@@ -1855,6 +1860,13 @@ void UTunaSweeperQuestSubsystem::ShowQuestCompletedToast(int32 QuestId) const
 
 bool UTunaSweeperQuestSubsystem::AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const
 {
+	if (!Definition.RequiredCompletedWorldProgressId.IsNone())
+	{
+		const auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+		FTunaSweeperWorldProgressSaveData Progress;
+		if (!Game || !Game->TryGetWorldProgressState(Definition.RequiredCompletedWorldProgressId, Progress) ||
+			Progress.State != ETunaSweeperWorldProgressState::Completed) return false;
+	}
 	for (const int32 RequiredQuestId : Definition.RequiredCompletedQuestIds)
 	{
 		if (RequiredQuestId <= 0 || GetQuestState(RequiredQuestId) != ETunaSweeperQuestState::RewardCompleted)

@@ -258,6 +258,9 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	TArray<int32> RequiredCompletedQuestIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName RequiredCompletedWorldProgressId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperObjectiveDefinition> Objectives;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")

@@ -42,7 +42,10 @@ void ATunaSweeperQuestVendingActor::BeginPlay()
 {
 	Super::BeginPlay();
 	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
+	{
 		Game->OnLanguageChanged.AddUObject(this, &ATunaSweeperQuestVendingActor::RefreshQuestPresence);
+		Game->OnWorldProgressChanged.AddUObject(this, &ATunaSweeperQuestVendingActor::RefreshQuestPresence);
+	}
 	if (UGameInstance* Game = GetGameInstance())
 	{
 		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())
@@ -53,7 +56,11 @@ void ATunaSweeperQuestVendingActor::BeginPlay()
 
 void ATunaSweeperQuestVendingActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>()) Game->OnLanguageChanged.RemoveAll(this);
+	if (auto* Game = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		Game->OnLanguageChanged.RemoveAll(this);
+		Game->OnWorldProgressChanged.RemoveAll(this);
+	}
 	if (UGameInstance* Game = GetGameInstance())
 	{
 		if (auto* Quests = Game->GetSubsystem<UTunaSweeperQuestSubsystem>())

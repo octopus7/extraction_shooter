@@ -60,6 +60,7 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	First.QuestId = 923001;
 	First.ProviderId = TEXT("provider.vending_test");
 	First.Rewards.Coins = 7;
+	First.RequiredCompletedWorldProgressId = TEXT("test.vending.passage");
 	FTunaSweeperObjectiveDefinition Coin;
 	Coin.ObjectiveId = TEXT("submit_coin");
 	Coin.Type = ETunaSweeperObjectiveType::ItemSubmitted;
@@ -100,6 +101,11 @@ bool FTunaSweeperQuestVendingTest::RunTest(const FString& Parameters)
 	Base->PresenceRole = ETunaSweeperQuestVendingRole::BaseResident;
 	Field->DispatchBeginPlay();
 	Base->DispatchBeginPlay();
+	TestTrue(TEXT("Field offer waits for passage"), Field->IsHidden());
+	TestFalse(TEXT("First meeting waits for passage"), Quests->CanAcceptQuest(First.QuestId));
+	Game->UpdateWorldProgressState(First.RequiredCompletedWorldProgressId, NAME_None, ETunaSweeperWorldProgressState::InProgress, 1, 1, false);
+	TestTrue(TEXT("Armed passage keeps field offer hidden"), Field->IsHidden());
+	Game->UpdateWorldProgressState(First.RequiredCompletedWorldProgressId, NAME_None, ETunaSweeperWorldProgressState::Completed, 1, 1, false);
 	Field->SetActorLocation(FVector(720, 180, 0));
 	TArray<FVector> GuideLocations;
 	QuestGuidanceLocations::Get(World, GuideLocations);
