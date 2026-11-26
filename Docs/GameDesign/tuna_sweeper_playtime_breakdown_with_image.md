@@ -1,5 +1,10 @@
 # Tuna Sweeper 플레이타임 배분
 
+> [!WARNING]
+> **초기 기획 자료** — 현재 게임과 차이가 있으며, 이 문서는 더 이상 갱신하지 않습니다.
+>
+> **본문 마지막 갱신일** 2026-06-08
+
 ![Tuna Sweeper 플레이타임 배분 차트](playtime_breakdown_chart.png)
 
 ## 이미지 요약
