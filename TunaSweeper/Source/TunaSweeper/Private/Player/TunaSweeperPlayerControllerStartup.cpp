@@ -1,5 +1,6 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 #include "UI/Sol62/StartupLanguageGPT62Sol.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "UI/TunaSweeperStartupLogoWidget.h"
@@ -63,6 +64,7 @@ bool ATunaSweeperPlayerController::TryShowStartupLanguage()
 	}
 	StartupLanguageWidget->OnLanguageSelected.BindUObject(this, &ThisClass::HandleStartupLanguageSelected);
 	StartupLanguageWidget->AddToViewport(50);
+	UTunaSweeperProgressTelemetrySubsystem::Observe(GetGameInstance(), ETunaSweeperStartupCheckpoint::LanguagePicker);
 	StartupLanguageWidget->ForceLayoutPrepass();
 
 	FInputModeUIOnly InputMode;

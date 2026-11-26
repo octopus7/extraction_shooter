@@ -20,6 +20,7 @@
 #include "EngineUtils.h"
 #include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/Pawn.h"
 #include "Housing/TunaSweeperHousingAreaActor.h"
@@ -814,6 +815,7 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 	{
 		IntroMenuWidget->PrepareForInitialViewport();
 		IntroMenuWidget->AddToViewport(50);
+		UTunaSweeperProgressTelemetrySubsystem::Observe(GetGameInstance(), ETunaSweeperStartupCheckpoint::TitleScreen);
 		IntroMenuWidget->ForceLayoutPrepass();
 		ScreenFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(
 			this,

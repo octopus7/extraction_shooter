@@ -1,4 +1,5 @@
 #include "UI/TunaSweeperStartupLogoWidget.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Image.h"
@@ -183,9 +184,14 @@ void UTunaSweeperStartupLogoWidget::NativeTick(const FGeometry& Geometry, float 
 	Super::NativeTick(Geometry, DeltaTime);
 	if (!bStarted || bFinished) return;
 	const auto PreviousPhase = Flow.Phase;
+	const float PreviousBlackOpacity = Flow.BlackOpacity;
 	Flow.Tick(DeltaTime);
 	BlackImage->SetRenderOpacity(Flow.BlackOpacity);
 	VideoImage->SetRenderOpacity(1.0f - Flow.StillOpacity);
+	if (PreviousBlackOpacity >= 1.0f && Flow.BlackOpacity < 1.0f)
+	{
+		UTunaSweeperProgressTelemetrySubsystem::Observe(GetGameInstance(), ETunaSweeperStartupCheckpoint::DeveloperLogo);
+	}
 	if (PreviousPhase != Flow.Phase)
 	{
 		UE_LOG(LogTemp, Display, TEXT("StartupLogo: phase %d"), static_cast<int32>(Flow.Phase));

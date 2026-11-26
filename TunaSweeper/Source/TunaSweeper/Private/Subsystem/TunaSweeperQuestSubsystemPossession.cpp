@@ -13,7 +13,7 @@ void UTunaSweeperQuestSubsystem::HandleQuestInventoryChanged()
     if (ReconcilePossessionObjectives(true)) BroadcastQuestProgressChanged(false);
 }
 
-bool UTunaSweeperQuestSubsystem::ReconcilePossessionObjectives(bool bShowCompletionToast)
+bool UTunaSweeperQuestSubsystem::ReconcilePossessionObjectives(bool bShowCompletionToast, bool bTrackMilestone)
 {
     auto* Game = Cast<UTunaSweeperGameInstance>(GetGameInstance());
     if (!Game || Game->IsCombatTestSession() || bReconcilingPossession || bQuestRewardClaimInProgress || !EnsureQuestDataLoaded()) return false;
@@ -49,7 +49,7 @@ bool UTunaSweeperQuestSubsystem::ReconcilePossessionObjectives(bool bShowComplet
         const auto NewState = AreAllObjectivesComplete(Pair.Key) ? ETunaSweeperQuestState::RewardAvailable : ETunaSweeperQuestState::Accepted;
         if (OldState != NewState)
         {
-            SetQuestState(Pair.Key, NewState);
+            SetQuestState(Pair.Key, NewState, bTrackMilestone);
             bChanged = true;
             if (NewState == ETunaSweeperQuestState::RewardAvailable) NewlyReady.Add(Pair.Key);
         }

@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 #include "Quest/TunaSweeperQuestId.h"
 #include "Settings/TunaSweeperLanguage.h"
 
@@ -1806,11 +1807,24 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 	}
 }
 
-void UTunaSweeperQuestSubsystem::SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState)
+void UTunaSweeperQuestSubsystem::SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState, bool bTrackMilestone)
 {
 	if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
 	{
-		GetOrCreateQuestProgress(QuestId).State = NewState;
+		auto& Progress = GetOrCreateQuestProgress(QuestId);
+		const ETunaSweeperQuestState PreviousState = Progress.State;
+		Progress.State = NewState;
+		if (bTrackMilestone)
+		{
+			if (const TCHAR* Milestone = TunaSweeperProgressTelemetry::QuestMilestone(
+				PreviousState, NewState, !Definition->Objectives.IsEmpty()))
+			{
+				if (auto* Telemetry = UGameInstance::GetSubsystem<UTunaSweeperProgressTelemetrySubsystem>(GetGameInstance()))
+				{
+					Telemetry->QueueQuestMilestone(QuestId, Milestone);
+				}
+			}
+		}
 		if (QuestId == TrackedQuestId)
 		{
 			ReconcileTrackedQuest();

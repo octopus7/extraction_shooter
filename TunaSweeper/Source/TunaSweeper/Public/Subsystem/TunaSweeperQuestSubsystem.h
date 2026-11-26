@@ -144,7 +144,7 @@ public:
 		int32 SavedTrackedQuestId,
 		int32 SavedQuestCoinBalance);
 	void ResetQuestProgressForNewGame();
-    bool ReconcilePossessionObjectives(bool bShowCompletionToast);
+    bool ReconcilePossessionObjectives(bool bShowCompletionToast, bool bTrackMilestone = true);
     bool HasPossessionObjectives(int32 QuestId) const;
 
 private:
@@ -205,7 +205,7 @@ private:
 		TFunctionRef<bool(const FTunaSweeperObjectiveDefinition&)> Predicate,
 		int32 Amount,
 		bool bSaveImmediately = true);
-	void SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState);
+	void SetQuestState(int32 QuestId, ETunaSweeperQuestState NewState, bool bTrackMilestone = true);
 	void ShowQuestCompletedToast(int32 QuestId) const;
 	bool AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const;
 	bool IsQuestForProvider(const FTunaSweeperQuestDefinition& Definition, FName ProviderId) const;

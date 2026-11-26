@@ -1,4 +1,5 @@
 #include "UI/TunaSweeperScenarioPresentationWidget.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
@@ -148,6 +149,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 		{
 			Phase = ETunaSweeperScenarioPresentationPhase::DisplayLine;
 			PhaseElapsedSeconds = 0.0f;
+			UTunaSweeperProgressTelemetrySubsystem::Observe(GetGameInstance(), ETunaSweeperStartupCheckpoint::PrologueMonologue);
 			StartOpeningScenarioBgm();
 		}
 		return;
@@ -274,6 +276,7 @@ void UTunaSweeperScenarioPresentationWidget::AdvanceOrFillLine()
 		Phase = ETunaSweeperScenarioPresentationPhase::DisplayLine;
 		PhaseElapsedSeconds = 0.0f;
 		SetFadeOverlayOpacity(0.0f);
+		UTunaSweeperProgressTelemetrySubsystem::Observe(GetGameInstance(), ETunaSweeperStartupCheckpoint::PrologueMonologue);
 		StartOpeningScenarioBgm();
 		return;
 	}
@@ -676,7 +679,9 @@ void UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpened(FString)
 	if (!IntroVideoMediaPlayer->Play())
 	{
 		FinishIntroVideo();
+		return;
 	}
+	UTunaSweeperProgressTelemetrySubsystem::Observe(GetGameInstance(), ETunaSweeperStartupCheckpoint::PrologueVideo);
 }
 
 void UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpenFailed(FString)

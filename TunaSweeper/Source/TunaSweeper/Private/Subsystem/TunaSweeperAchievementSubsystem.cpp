@@ -17,6 +17,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "Subsystem/TunaSweeperToastSubsystem.h"
 
@@ -288,7 +289,15 @@ void UTunaSweeperAchievementSubsystem::ReportLocationReached(FName LocationId)
 {
 	// Practice events must never reach the separate achievement save or platform publisher.
 	if (!IsGameplayReportingAllowed()) return;
-	ProcessProgressChanged(TunaSweeperAchievementModel::RecordLocationReached(ProgressState, LocationId));
+	const bool bNewLocation = TunaSweeperAchievementModel::RecordLocationReached(ProgressState, LocationId);
+	ProcessProgressChanged(bNewLocation);
+	if (bNewLocation)
+	{
+		if (auto* Telemetry = UGameInstance::GetSubsystem<UTunaSweeperProgressTelemetrySubsystem>(GetGameInstance()))
+		{
+			Telemetry->ReportFirstRegion(LocationId);
+		}
+	}
 }
 
 void UTunaSweeperAchievementSubsystem::ReportQuestRewardClaimed(int32 QuestId)

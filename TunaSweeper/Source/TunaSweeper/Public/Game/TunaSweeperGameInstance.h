@@ -1174,6 +1174,7 @@ private:
 	FString GetSaveGameFilePath(const FString& SaveSlotName) const;
 	FString GetSaveGameBackupDirectory() const;
 	FString CreateSaveGameBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const;
+	friend class UTunaSweeperProgressTelemetrySubsystem;
 	float GetCurrentActiveSlotTotalPlaySeconds() const;
 	bool IsCurrentWorldBunkerMap() const;
 	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;

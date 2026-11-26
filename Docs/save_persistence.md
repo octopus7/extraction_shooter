@@ -1,5 +1,11 @@
 # Save/Load Persistence Contract
 
+## Progress telemetry
+
+Gameplay slot saves retain `ProgressTelemetryRunId` and `ProgressTelemetryQuestMilestones`. Older saves read with empty defaults and receive a run ID on the first save with reporting enabled. Slot selection or deletion clears the previous slot's runtime telemetry state. A successful slot write records newly observed quest milestones for one best-effort dispatch. Failed slot writes keep the observations pending for a later successful write in the same slot. Loading a slot does not replay reported quest milestones.
+
+Startup checkpoints use a transient session ID and never write a gameplay save. Region first entry uses the existing lift destination visit records, and ending completion uses the existing per-slot ending flags. The installation ID lives in user settings. These additions do not require a save-version change.
+
 ## Quest loot protection
 
 The additive `RaidLootOpens` field in `NumericQuestProgressStates` stores up to 29 eligible raid loot interactions per accepted quest in its gameplay slot. A container contributes once when first opened, including enemy loot. Successful parcel and warehouse pickups can also contribute. Reopening a container in the same map visit does not count. Story and combat-lab sessions do not advance the counter.

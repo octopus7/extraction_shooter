@@ -1,5 +1,6 @@
 #include "TunaSweeperGameInstanceShared.h"
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 
 bool UTunaSweeperGameInstance::IsRaidStorageReadyForTrueEnding()
 {
@@ -44,6 +45,13 @@ bool UTunaSweeperGameInstance::SaveFreePlayEnding(bool bTrueEnding)
     if (auto* Achievements = GetSubsystem<UTunaSweeperAchievementSubsystem>())
     {
         Achievements->ReportGameplayEvent(ETunaSweeperAchievementEvent::EndingReached, Flag);
+    }
+    if (!bAlreadySeen)
+    {
+        if (auto* Telemetry = GetSubsystem<UTunaSweeperProgressTelemetrySubsystem>())
+        {
+            Telemetry->ReportEnding(bTrueEnding);
+        }
     }
     return true;
 }

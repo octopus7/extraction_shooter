@@ -5,6 +5,7 @@
 #include "Character/TunaSweeperOutfitCatalog.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperAchievementSubsystem.h"
+#include "Subsystem/TunaSweeperProgressTelemetrySubsystem.h"
 
 namespace TunaSweeperSave
 {
@@ -533,7 +534,7 @@ void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
 	// Reconcile only after all saved state has been restored, so acceptance cannot save a partial load.
 	if (UTunaSweeperQuestSubsystem* Quests = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
-		if (Quests->ReconcilePossessionObjectives(false)) Quests->OnQuestProgressChanged.Broadcast();
+		if (Quests->ReconcilePossessionObjectives(false, false)) Quests->OnQuestProgressChanged.Broadcast();
         Quests->ReconcileStoryQuestAcceptance(CompletedScenarioFlags);
 	}
 	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
@@ -571,6 +572,10 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	}
 
 	WaveDefenseProgress = SaveGame->WaveDefenseProgress;
+	if (auto* Progress = GetSubsystem<UTunaSweeperProgressTelemetrySubsystem>())
+	{
+		Progress->RestoreGameplayTracking(*SaveGame);
+	}
 	for (auto& Pair : WaveDefenseProgress)
 	{
 		if (Pair.Value.RunId.IsValid() && Pair.Value.Outcome == EWaveDefenseOutcome::None)
@@ -942,6 +947,11 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->BuildFlavor = TunaSweeperBuildFlavor::GetName();
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
+	UTunaSweeperProgressTelemetrySubsystem* ProgressTelemetry = GetSubsystem<UTunaSweeperProgressTelemetrySubsystem>();
+	if (ProgressTelemetry)
+	{
+		ProgressTelemetry->PrepareGameplaySave(*SaveGame);
+	}
 	SaveGame->DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(ActiveSaveSlotDifficultyStage);
 	SaveGame->bDifficultySelected = bActiveSaveSlotDifficultySelected;
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
@@ -1111,6 +1121,10 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 		return false;
 	}
 
+	if (ProgressTelemetry)
+	{
+		ProgressTelemetry->OnGameplaySaveCommitted(*SaveGame);
+	}
 	// Reconcile the committed snapshot, including rewards from an earlier failed save.
 	if (UTunaSweeperAchievementSubsystem* Achievements = GetSubsystem<UTunaSweeperAchievementSubsystem>())
 	{
@@ -1127,6 +1141,10 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	if (auto* Progress = GetSubsystem<UTunaSweeperProgressTelemetrySubsystem>())
+	{
+		Progress->ResetGameplayTracking();
+	}
 	++GateCheatSaveEpoch;
 	WaveDefenseProgress.Reset();
 	bWaveDefenseInterruptedNeedsSave = false;

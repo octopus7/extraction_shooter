@@ -94,6 +94,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	float TotalPlaySeconds = 0.0f;
 
+	UPROPERTY()
+	FGuid ProgressTelemetryRunId;
+
+	UPROPERTY()
+	TSet<FName> ProgressTelemetryQuestMilestones;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save", meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"))
 	int32 DifficultyStage = 1;
 
